@@ -4,6 +4,7 @@ import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {loadSafeConfiguration,resolveExpectedDatabaseUrl} from '../../../scripts/p05-e2e/environment.mjs';
+import {completedAdminAcceptanceStatus,finalizeAdminAcceptance} from '../../../scripts/p05-e2e/admin-acceptance-result.mjs';
 import {totp} from '../../../scripts/p05-e2e/totp.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../../..');
 const require=createRequire(resolve(root,'package.json'));
@@ -20,7 +21,7 @@ const users=[],organizations=[];const provenance={harnessSha256:createHash('sha2
 let browser;
 let stage="setup";let activePage;
 function check(value,code){if(!value)throw new Error(code)}
-async function actor(label){const email=`final-${label}-${id}@example.invalid`;const created=await admin.auth.admin.createUser({email,email_confirm:true,app_metadata:{final_acceptance_fixture:id}});check(!created.error&&created.data.user,'FIXTURE_USER_CREATION_FAILED');const userId=created.data.user.id;users.push(userId);const link=await admin.auth.admin.generateLink({type:'magiclink',email});check(!link.error,'FIXTURE_NATIVE_LINK_FAILED');const client=createClient(config.supabaseUrl,config.publishableKey,{auth:{persistSession:false,autoRefreshToken:false}});const login=await client.auth.verifyOtp({type:'magiclink',token_hash:link.data.properties.hashed_token});check(!login.error,'FIXTURE_NATIVE_LOGIN_FAILED');const enrolled=await client.auth.mfa.enroll({factorType:'totp',friendlyName:'Final local acceptance'});check(!enrolled.error,'FIXTURE_NATIVE_MFA_ENROLL_FAILED');let valid=false;for(const offset of[0,-30000,30000]){const verification=await client.auth.mfa.challengeAndVerify({factorId:enrolled.data.id,code:totp(enrolled.data.totp.secret,Date.now()+offset)});if(!verification.error){valid=true;break}}check(valid,'FIXTURE_NATIVE_MFA_FAILED');const identity=await client.auth.getUser(),aal=await client.auth.mfa.getAuthenticatorAssuranceLevel();check(identity.data.user?.id===userId&&aal.data?.currentLevel==='aal2','FIXTURE_NATIVE_IDENTITY_NOT_AAL2');return{client,userId,email};}
+async function actor(label){const email=`final-${label}-${id}@example.invalid`;const created=await admin.auth.admin.createUser({email,email_confirm:true,app_metadata:{final_acceptance_fixture:id}});check(!created.error&&created.data.user,'FIXTURE_USER_CREATION_FAILED');const userId=created.data.user.id;users.push(userId);const link=await admin.auth.admin.generateLink({type:'magiclink',email});check(!link.error,'FIXTURE_NATIVE_LINK_FAILED');const client=createClient(config.supabaseUrl,config.publishableKey,{auth:{persistSession:false,autoRefreshToken:false}});const login=await client.auth.verifyOtp({type:'magiclink',token_hash:link.data.properties.hashed_token});check(!login.error,'FIXTURE_NATIVE_LOGIN_FAILED');const enrolled=await client.auth.mfa.enroll({factorType:'totp',friendlyName:'Final local acceptance'});if(enrolled.error)proof.setupError={stage:'MFA_ENROLL',code:enrolled.error.code??'UNKNOWN',status:enrolled.error.status??null};check(!enrolled.error,'FIXTURE_NATIVE_MFA_ENROLL_FAILED');let valid=false;for(const offset of[0,-30000,30000]){const verification=await client.auth.mfa.challengeAndVerify({factorId:enrolled.data.id,code:totp(enrolled.data.totp.secret,Date.now()+offset)});if(!verification.error){valid=true;break}}check(valid,'FIXTURE_NATIVE_MFA_FAILED');const identity=await client.auth.getUser(),aal=await client.auth.mfa.getAuthenticatorAssuranceLevel();check(identity.data.user?.id===userId&&aal.data?.currentLevel==='aal2','FIXTURE_NATIVE_IDENTITY_NOT_AAL2');return{client,userId,email};}
 try{
  const privileged=await actor('admin'),ordinary=await actor('owner');
  // Bootstrap is fixture setup only, with real sessions and all SQL guards intact.
@@ -43,18 +44,28 @@ try{
    stage=`select-${locale}-${width}`;const table=page.locator('.client-table-wrap').first();check((await table.boundingBox()).width<=width,'ADMIN_TABLE_VIEWPORT_NOT_BOUNDED');check(await table.getAttribute('tabindex')==='0','ADMIN_TABLE_NOT_KEYBOARD_REACHABLE');const link=page.locator(`a[href*="/administration/entreprises/${organizations[0]}"]`).first();check(await link.count()>0,'OWN_ORGANIZATION_SEARCH_RESULT_MISSING');await link.locator('xpath=ancestor::tr').locator('summary').click();await link.click();await page.waitForURL(`**/administration/entreprises/${organizations[0]}**`);await page.getByRole('heading',{level:1}).filter({hasText:displayName}).waitFor({state:'visible',timeout:15000});proof.browser.push({locale,width,realSearchAndSelection:true,ownOrganizationHeadingVerified:true});await context.close();
   }
  }
- proof.status='PASSED';
+ proof.status=completedAdminAcceptanceStatus({probeOnly:process.argv.includes('--probe'),rpc:proof.rpc,browser:proof.browser});
 }catch(error){proof.status='FAILED';proof.failureStage=stage;if(activePage){await activePage.screenshot({path:resolve(directory,'failure.private.png'),fullPage:true}).catch(()=>{});await writeFile(resolve(directory,'failure.private.log'),String(error.message));}proof.failure=String(error.message).replace(/[^A-Z0-9_:-]/g,'').slice(0,120);process.exitCode=1;}
 finally{
- if(browser)await browser.close();
- try{
+ const steps=[{code:'BROWSER_CLOSE_FAILED',run:async()=>{if(browser)await browser.close();}},
+ {code:'FIXTURE_DATA_NEUTRALIZATION_FAILED',run:async()=>{
+  // Discover creations whose HTTP receipt might have been lost before tracking.
+  if(users.length){const linked=await db`select distinct organization_id from public.organization_memberships where user_id=any(${users}::uuid[])`;for(const row of linked)if(!organizations.includes(row.organization_id))organizations.push(row.organization_id);}
   await db.begin(async tx=>{
    if(organizations.length){await tx`update public.event_outbox set dead_lettered_at=coalesce(dead_lettered_at,clock_timestamp()),last_error_code='FINAL_FIXTURE_NEUTRALIZED',locked_at=null,locked_by=null where organization_id=any(${organizations}::uuid[]) and published_at is null`;await tx`update public.organization_member_roles r set revoked_at=coalesce(r.revoked_at,clock_timestamp()) from public.organization_memberships m where r.membership_id=m.id and m.organization_id=any(${organizations}::uuid[])`;await tx`update public.organization_memberships set status='REVOKED',updated_at=clock_timestamp(),row_version=row_version+1 where organization_id=any(${organizations}::uuid[])`;await tx`update public.organizations set status='ARCHIVED',updated_at=clock_timestamp(),row_version=row_version+1 where id=any(${organizations}::uuid[])`;}
    if(users.length)await tx`delete from public.platform_user_roles where user_id=any(${users}::uuid[]) and role_code='COMPLIANCE_MANAGER'`;
   });
-  for(const user of users){const factors=await admin.auth.admin.mfa.listFactors({userId:user});check(!factors.error,'FIXTURE_FACTOR_LIST_CLEANUP_FAILED');for(const factor of factors.data.factors){const removed=await admin.auth.admin.mfa.deleteFactor({userId:user,id:factor.id});check(!removed.error,'FIXTURE_FACTOR_CLEANUP_FAILED')}const removed=await admin.auth.admin.deleteUser(user,true);check(!removed.error,'FIXTURE_USER_CLEANUP_FAILED')}
+ }}];
+ for(const user of users){
+  steps.push({code:'FIXTURE_FACTOR_CLEANUP_FAILED',run:async()=>{const factors=await admin.auth.admin.mfa.listFactors({userId:user});check(!factors.error,'FIXTURE_FACTOR_LIST_CLEANUP_FAILED');let failed=false;for(const factor of factors.data.factors){const removed=await admin.auth.admin.mfa.deleteFactor({userId:user,id:factor.id});if(removed.error)failed=true;}check(!failed,'FIXTURE_FACTOR_CLEANUP_FAILED');}});
+  steps.push({code:'FIXTURE_USER_CLEANUP_FAILED',run:async()=>{const removed=await admin.auth.admin.deleteUser(user,true);check(!removed.error,'FIXTURE_USER_CLEANUP_FAILED');}});
+ }
+ steps.push({code:'FIXTURE_CLEANUP_VERIFICATION_FAILED',run:async()=>{
   const [remaining]=await db`select (select count(*) from public.platform_user_roles where user_id=any(${users}::uuid[]))::int as roles,(select count(*) from public.organizations where id=any(${organizations}::uuid[])and status<>'ARCHIVED')::int as organizations,(select count(*) from auth.sessions where user_id=any(${users}::uuid[]))::int as sessions`;
   check(Object.values(remaining).every(x=>x===0),'FIXTURE_CLEANUP_INCOMPLETE');proof.cleanup={verified:true,actors:users.length,organizations:organizations.length,immutableEvidenceRetained:true};
- }catch{proof.cleanup={verified:false};proof.status='FAILED';proof.cleanupFailure='FIXTURE_CLEANUP_FAILED';process.exitCode=1;}
- await db.end();await writeFile(resolve(directory,'summary.json'),JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify({status:proof.status,summary:resolve(directory,'summary.json'),rpc:proof.rpc,cleanup:proof.cleanup,failure:proof.failure??null}));
+ }});
+ steps.push({code:'FIXTURE_DATABASE_CLOSE_FAILED',run:async()=>{await db.end();}});
+ const passed=await finalizeAdminAcceptance({proof,steps,persist:async result=>{await writeFile(resolve(directory,'summary.json'),JSON.stringify(result,null,2)+'\n');}});
+ if(!passed)process.exitCode=1;
+ console.log(JSON.stringify({status:proof.status,summary:resolve(directory,'summary.json'),rpc:proof.rpc,cleanup:proof.cleanup,failure:proof.failure??null}));
 }

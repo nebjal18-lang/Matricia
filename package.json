@@ -43,7 +43,8 @@
     "server-actions:validate": "node scripts/release/server-action-exports.mjs",
     "test:e2e:admin-organizations": "node --experimental-strip-types tests/e2e/helpers/final-admin-acceptance.mjs",
     "test:e2e:audit30-native": "node --experimental-strip-types tests/e2e/helpers/audit30-native-acceptance.mjs",
-    "test:e2e:audit30-public": "playwright test --config=playwright.audit30.config.ts tests/e2e/public/diagnostic-need-integrity.spec.ts --workers=1"
+    "test:e2e:audit30-public": "playwright test --config=playwright.audit30.config.ts tests/e2e/public/diagnostic-need-integrity.spec.ts --workers=1",
+    "test:e2e:admin-native": "node --experimental-strip-types tests/e2e/helpers/admin-lot3-native-acceptance.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
