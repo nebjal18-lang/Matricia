@@ -18,7 +18,7 @@ export function searchAdminLoadedContent(locale: Locale, query: string, organiza
     return [{ ...page, kind: "page" as const }];
   });
   const dossiers = (dashboard?.workItems ?? []).filter(item => matches(`${item.titleFr} ${item.titleAr} ${item.resourceId} ${item.resourceType}`)).map(item => ({
-    href: `${dossierHref(locale, item)}${organizationQuery}`,
+    href: dossierHref(locale, item, organizationQuery),
     label: locale === "ar" ? item.titleAr : item.titleFr,
     kind: "dossier" as const,
   }));

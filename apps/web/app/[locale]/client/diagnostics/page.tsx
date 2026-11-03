@@ -13,6 +13,7 @@ import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { CompleteForm } from "@/modules/client/screens/diagnostics/complete-form";
 import { DiagnosticTools } from "@/modules/client/screens/diagnostics/diagnostic-tools";
 import { IndicativeIntakes } from "@/modules/client/screens/diagnostics/indicative-intakes";
+import type { PublicPromotion } from "@/modules/client/screens/diagnostics/public-diagnostic-panel";
 import { MesDiagnosticsHub } from "@/modules/client/screens/diagnostics/mes-diagnostics-hub";
 import { messages } from "@/modules/client/screens/diagnostics/messages";
 import { diagnosticToolMessages } from "@/modules/client/screens/diagnostics/tool-messages";
@@ -41,6 +42,17 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
   const historyHref = (kind: string, pageNumber = 1) => `/${locale}/client/diagnostics?${new URLSearchParams({ organizationId: space.selectedOrganizationId, kind, page: String(pageNumber) })}`;
   const client = await getSupabaseServerClient();
   const intakeResult = await client.from("public_diagnostic_intakes").select("id,organization_id,priorities,created_at").eq("organization_id", space.selectedOrganizationId).order("created_at", { ascending: false }).order("id").range((page - 1) * 20, page * 20);
+  const intakeIds = (intakeResult.data ?? []).map((intake) => intake.id);
+  const promotionResult = intakeIds.length ? await client.from("public_diagnostic_promotions").select("id,intake_id,overall_score,rating").in("intake_id", intakeIds) : { data: [], error: null };
+  const promotionIds = (promotionResult.data ?? []).map((promotion) => promotion.id);
+  const findingResult = promotionIds.length ? await client.from("public_diagnostic_findings").select("id,promotion_id,finding_kind,title_fr,title_ar,client_text_fr,client_text_ar").in("promotion_id", promotionIds) : { data: [], error: null };
+  const opportunityResult = promotionIds.length ? await client.from("public_diagnostic_opportunities").select("id,promotion_id,finding_id,priority,status,row_version,need_intake_id,service_code").in("promotion_id", promotionIds) : { data: [], error: null };
+  const promotions = new Map<string, PublicPromotion>();
+  for (const promotion of promotionResult.data ?? []) {
+    const findings = (findingResult.data ?? []).filter((finding) => finding.promotion_id === promotion.id).map((finding) => ({ id: finding.id, kind: finding.finding_kind as PublicPromotion["findings"][number]["kind"], title: locale === "fr" ? finding.title_fr : finding.title_ar, text: locale === "fr" ? finding.client_text_fr : finding.client_text_ar }));
+    const opportunities = (opportunityResult.data ?? []).filter((opportunity) => opportunity.promotion_id === promotion.id).map((opportunity) => ({ id: opportunity.id, findingId: opportunity.finding_id, priority: opportunity.priority, status: opportunity.status, rowVersion: opportunity.row_version, needIntakeId: opportunity.need_intake_id, serviceCode: opportunity.service_code }));
+    promotions.set(promotion.intake_id, { id: promotion.id, score: String(promotion.overall_score), rating: promotion.rating, findings, opportunities });
+  }
   const organizationIds = [...new Set([...result.value.sessions.map((session) => session.organizationId), ...(intakeResult.data ?? []).map((intake) => intake.organization_id)])];
   const organizationResult = organizationIds.length ? await client.from("organizations").select("id,display_name").in("id", organizationIds) : { data: [], error: null };
   if (organizationResult.error) {
@@ -156,7 +168,7 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
         historyFilter={historyFilter}
         filterHrefs={{ all: historyHref("all"), complete: historyHref("complete"), indicative: historyHref("indicative") }}
         historyFailed={historyResult.status === "error"}
-        indicativeHistory={<IndicativeIntakes locale={locale} failed={Boolean(intakeResult.error)} rows={(intakeResult.data ?? []).slice(0, 20).map((intake) => ({ id: intake.id, organizationId: intake.organization_id, organizationName: names.get(intake.organization_id) ?? space.organizationName ?? (locale === "fr" ? "Organisation" : "المؤسسة"), priorities: intake.priorities, createdAt: intake.created_at }))} />}
+        indicativeHistory={<IndicativeIntakes locale={locale} failed={Boolean(intakeResult.error || promotionResult.error || findingResult.error || opportunityResult.error)} rows={(intakeResult.data ?? []).slice(0, 20).map((intake) => ({ id: intake.id, organizationId: intake.organization_id, organizationName: names.get(intake.organization_id) ?? space.organizationName ?? (locale === "fr" ? "Organisation" : "المؤسسة"), priorities: intake.priorities, createdAt: intake.created_at, promotion: promotions.get(intake.id) ?? null, idempotencyKey: randomUUID(), organizationQuery: space.selectedQuery }))} />}
         cards={hubCards.length ? hubCards : [{
           id: "start",
           title: locale === "fr" ? "Commencer un diagnostic" : "بدء تشخيص",

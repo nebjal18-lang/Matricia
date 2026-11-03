@@ -29,8 +29,8 @@ language sql stable security definer set search_path=pg_catalog as $$
  join public.organization_member_roles r on r.membership_id=m.id and r.revoked_at is null and r.role_code in('FRANCHISE_OWNER','FRANCHISE_MANAGER','FRANCHISE_ACCOUNTING','FRANCHISE_VIEWER')
  where b.id=p_book and(r.franchise_id=f.id or(r.franchise_id is null and(select count(*)from public.franchises other where other.operator_organization_id=f.operator_organization_id and other.status='ACTIVE')=1)))
 $$;
-alter table public.franchise_crm_prospects add column linked_organization_id uuid references public.organizations(id)on delete restrict;
-create index franchise_crm_linked_provider_idx on public.franchise_crm_prospects(franchise_id,linked_organization_id)where linked_organization_id is not null;
+alter table public.franchise_crm_prospects add column if not exists linked_organization_id uuid references public.organizations(id)on delete restrict;
+create index if not exists franchise_crm_linked_provider_idx on public.franchise_crm_prospects(franchise_id,linked_organization_id)where linked_organization_id is not null;
 create function public.link_franchise_provider_organization(p_prospect_id uuid,p_provider_organization_id uuid,p_expected_row_version integer,p_reason text,p_idempotency_key text,p_correlation_id uuid default extensions.gen_random_uuid())returns jsonb
 language plpgsql security definer set search_path=pg_catalog as $$
 declare a uuid:=auth.uid();p public.franchise_crm_prospects%rowtype;f public.franchises%rowtype;h text;response jsonb;

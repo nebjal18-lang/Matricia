@@ -75,7 +75,7 @@ function Select({ id, label, name, values, locale, group, m }: { id: string; lab
   );
 }
 
-function WorkCard({ item, locale, m, keys, enrichment }: { item: AdminWorkItem; locale: Locale; m: CommandCenterMessages; keys: [string, string]; enrichment?: WorkEnrichment }) {
+function WorkCard({ item, locale, m, keys, enrichment, query }: { item: AdminWorkItem; locale: Locale; m: CommandCenterMessages; keys: [string, string]; enrichment?: WorkEnrichment; query: string }) {
   const p = useId();
   const [claim, claimAction, claiming] = useActionState(claimAdminWork, idle);
   const [resolve, resolveAction, resolving] = useActionState(resolveAdminWork, idle);
@@ -108,7 +108,7 @@ function WorkCard({ item, locale, m, keys, enrichment }: { item: AdminWorkItem; 
       </dl>
       <div className="mt-3 flex flex-wrap gap-2">
         <Link href={`/${locale}/administration/support/${item.id}`} className="admin-btn-outline !min-h-10 !px-3 !text-sm">{locale === "ar" ? "الوصول المؤقت" : "Accès support temporaire"}</Link>
-        <Link href={dossierHref(locale, item)} className="admin-btn-outline !min-h-10 !px-3 !text-sm">{locale === "ar" ? "فتح الملف" : "Ouvrir le dossier"}</Link>
+        <Link href={dossierHref(locale, item, query)} className="admin-btn-outline !min-h-10 !px-3 !text-sm">{locale === "ar" ? "فتح الملف" : "Ouvrir le dossier"}</Link>
         <span className="admin-badge" data-tone="default">{status}</span>
       </div>
       <div className="mt-4 grid gap-4 xl:grid-cols-2">
@@ -224,6 +224,7 @@ export function CommandCenterPanel({
   const [environment, setEnvironment] = useState("DEVELOPMENT");
   const [sweep, sweepAction, sweeping] = useActionState(sweepExceptionsFromCenter, idle);
   const summary = summarizeAdminWork(dashboard.workItems, currentTime);
+  const context = new URLSearchParams(query);
 
   return (
     <div className="space-y-7">
@@ -256,7 +257,7 @@ export function CommandCenterPanel({
           <p className="admin-panel text-muted-foreground">{m.emptyWork}</p>
         ) : (
           summary.ordered.map((item, index) => (
-            <WorkCard key={item.id} item={item} locale={locale} m={m} enrichment={enrichment} keys={[keys[index * 2]!, keys[index * 2 + 1]!]} />
+            <WorkCard key={item.id} item={item} locale={locale} m={m} enrichment={enrichment} query={query} keys={[keys[index * 2]!, keys[index * 2 + 1]!]} />
           ))
         )}
       </section>
@@ -265,7 +266,9 @@ export function CommandCenterPanel({
         <div className="admin-section-head">
           <h2 id={`${p}-approvals`}>{m.sensitive}</h2>
         </div>
-        <form method="get"className="flex flex-wrap gap-3"><label>{locale==="ar"?"حالة الطلب":"État de la demande"}<select name="actionStatus"defaultValue={dashboard.actionStatus??"ALL"}>{["ALL","PENDING_APPROVAL","AUTHORIZED","REQUEST_TRACKED","EXECUTED","FAILED","REJECTED","CANCELLED"].map((status)=><option key={status}value={status}>{status==="ALL"?(locale==="ar"?"الكل":"Tous"):getCommandCenterCodeLabel(locale,"status",status)}</option>)}</select></label><button>{locale==="ar"?"تصفية":"Filtrer"}</button></form>
+        <form method="get" action={`/${locale}/administration/command-center`} className="flex flex-wrap gap-3">
+          {["organizationId", "q"].map(name => context.get(name) ? <input key={name} type="hidden" name={name} value={context.get(name)!} /> : null)}
+          <label>{locale==="ar"?"حالة الطلب":"État de la demande"}<select name="actionStatus"defaultValue={dashboard.actionStatus??"ALL"}>{["ALL","PENDING_APPROVAL","AUTHORIZED","REQUEST_TRACKED","EXECUTED","FAILED","REJECTED","CANCELLED"].map((status)=><option key={status}value={status}>{status==="ALL"?(locale==="ar"?"الكل":"Tous"):getCommandCenterCodeLabel(locale,"status",status)}</option>)}</select></label><button>{locale==="ar"?"تصفية":"Filtrer"}</button></form>
         {dashboard.actions.length === 0 ? (
           <p className="admin-panel text-muted-foreground">{m.emptyActions}</p>
         ) : (

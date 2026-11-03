@@ -83,31 +83,48 @@ export const RESOLUTION_CODES = [
   { code: "FALSE_POSITIVE", fr: "Fausse alerte", ar: "إنذار كاذب" },
 ] as const;
 
-export function dossierHref(locale: "fr" | "ar", item: AdminWorkItem) {
-  const type = item.resourceType.toLowerCase();
-  const id = item.resourceId;
-  if (type === "franchise_governance_signal_review") return `/${locale}/administration/gouvernance-franchise/signalements/${id}`;
-  if (type === "franchise_control_plan_owner") return `/${locale}/administration/gouvernance-franchise/plans/${id}/responsable`;
-  if (type === "notification_template_review") return `/${locale}/administration/messagerie/preferences`;
-  if (type === "membership_capability_review") return `/${locale}/administration/revues-capacites`;
-  if (type === "privacy_retention_action") return `/${locale}/administration/confidentialite`;
-  if (type === "client_assistance_request") return `/${locale}/administration/assistance/${id}`;
-  if (type.includes("dispute") || item.sourceKind === "DISPUTE") return `/${locale}/administration/litiges/${id}`;
-  if (type.includes("compliance")) return `/${locale}/administration/conformite-clients`;
-  if (type.includes("provider") || type.includes("qualification")) return `/${locale}/administration/providers`;
-  if (type.includes("document")) return `/${locale}/administration/documents/${id}`;
-  if (type.includes("mission") || type.includes("deliverable") || type.includes("milestone")) {
-    return `/${locale}/administration/missions/${id}`;
-  }
-  if (type.includes("contract") || type.includes("amendment")) return `/${locale}/administration/contrats/${id}`;
-  if (type.includes("quote") || type.includes("rfq") || type.includes("request") || type.includes("matching")) {
-    return `/${locale}/administration/demandes/${id}`;
-  }
-  if (type.includes("diagnostic")) return `/${locale}/administration/diagnostics/${id}`;
-  if (type.includes("payment") || type.includes("finance") || type.includes("invoice") || item.sourceKind === "FINANCE") {
-    return `/${locale}/administration/finance`;
-  }
-  if (type.includes("pool") || item.sourceKind === "POOL") return `/${locale}/administration/achats-groupes`;
-  if (item.organizationId) return `/${locale}/administration/entreprises/${item.organizationId}`;
-  return `/${locale}/administration/command-center`;
+// A resource ID is not its parent's ID. Only routes backed by a projection
+// keyed by this exact resource type may receive it as a detail segment.
+const detailSpaces: Record<string, string> = {
+  dispute: "litiges", dispute_case: "litiges", mission_dispute: "litiges",
+  service_request: "demandes",
+  quote: "devis", matching_run: "matching",
+  milestone: "jalons", mission_milestone: "jalons",
+  amendment: "avenants", contract_amendment: "avenants",
+  mission: "missions", contract: "contrats",
+  diagnostic: "diagnostics", diagnostic_run: "diagnostics",
+  provider_document_version: "documents", client_compliance_document: "documents",
+};
+const queueSpaces: Record<string, string> = {
+  rfq: "matching", rfq_provider: "matching",
+  deliverable: "missions", mission_deliverable: "missions",
+  quote_version: "devis", contract_version: "contrats",
+  provider_document: "documents", document: "documents",
+};
+
+export function dossierHref(locale: "fr" | "ar", item: AdminWorkItem, query = "") {
+  const type = item.resourceType.trim().toLowerCase();
+  const id = encodeURIComponent(item.resourceId);
+  const base = `/${locale}/administration`;
+  let path: string;
+  if (["", ".", ".."].includes(item.resourceId)) path = `${base}/command-center`;
+  else if (type === "franchise_governance_signal_review") path = `${base}/gouvernance-franchise/signalements/${id}`;
+  else if (type === "franchise_control_plan_owner") path = `${base}/gouvernance-franchise/plans/${id}/responsable`;
+  else if (type === "notification_template_review") path = `${base}/messagerie/preferences`;
+  else if (type === "membership_capability_review") path = `${base}/revues-capacites`;
+  else if (type === "privacy_retention_action") path = `${base}/confidentialite`;
+  else if (type === "client_assistance_request") path = `${base}/assistance/${id}`;
+  else if (Object.hasOwn(detailSpaces, type)) path = `${base}/${detailSpaces[type]}/${id}`;
+  else if (Object.hasOwn(queueSpaces, type)) path = `${base}/${queueSpaces[type]}`;
+  else if (type.includes("compliance")) path = `${base}/conformite-clients`;
+  else if (type.includes("provider") || type.includes("qualification")) path = `${base}/providers`;
+  else if (type.includes("document")) path = `${base}/documents`;
+  else if (type.includes("payment") || type.includes("finance") || type.includes("invoice") || item.sourceKind === "FINANCE") path = `${base}/finance`;
+  else if (type.includes("pool") || item.sourceKind === "POOL") path = `${base}/achats-groupes`;
+  else if (item.organizationId) path = `${base}/entreprises/${encodeURIComponent(item.organizationId)}`;
+  else path = `${base}/command-center`;
+  // Search and approval pagination belong to the command center. Only the
+  // organization context follows a link into another business module.
+  const organizationId = new URLSearchParams(query).get("organizationId");
+  return organizationId ? `${path}?${new URLSearchParams({ organizationId })}` : path;
 }
