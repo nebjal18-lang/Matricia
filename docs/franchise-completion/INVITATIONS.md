@@ -16,7 +16,7 @@ L’invitation d’adhésion `OrganizationEmailInvitationRequestedV1` n’a pas 
 
 ## Fichiers et vérifications
 
-Migrations `20261103453000_franchise_network_invitations.sql` et `20261103453100_franchise_network_delivery_environment_guard.sql` ; test SQL `0363_franchise_network_invitations.test.sql` : 41 assertions prévues, sans désactivation de trigger/RLS, avec identités `example.invalid` et rollback final. **Son exécution est à effectuer dans le rejeu SQL isolé d’intégration ; elle n’est pas déclarée réussie à ce checkpoint.**
+Migrations `20261103453050_franchise_network_invitations.sql` et `20261103453150_franchise_network_delivery_environment_guard.sql` ; test SQL `0363_franchise_network_invitations.test.sql` : 41 assertions prévues, sans désactivation de trigger/RLS, avec identités `example.invalid` et rollback final. **Son exécution est à effectuer dans le rejeu SQL isolé d’intégration ; elle n’est pas déclarée réussie à ce checkpoint.**
 
 Vérifications exécutées sur le code du lot : Web **128 tests PASS** (8 fichiers, dont ancienne route d’outbox), puis **4 tests d’interface destinataire PASS** (groupe distinct), worker dispatcher **21 PASS**, types et lint ciblé réussis, garde des exports serveur **1 847 fichiers PASS**. [Journaux](evidence/invitations/).
 
