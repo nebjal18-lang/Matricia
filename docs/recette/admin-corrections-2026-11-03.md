@@ -17,13 +17,13 @@ Branche de correction : `codex/admin-corrections-20261103`.
 
 Les nouveaux tests couvrent FR/AR, identité inconnue/périmée, organisation multirôle, litige indépendant, diagnostic brouillon, tâche critique en retard, minuit à Casablanca, adhésions suspendues/révoquées, profil légal et liens filtrés. Un test de composition de page vérifie la file ouverte avant l’annuaire sans recherche.
 
-- Suite Admin : 94 fichiers, 567 tests.
-- TypeScript web et lint web : contrôle du code et des nouveaux tests.
+- Suite Admin : 94 fichiers, 567 tests PASS, aucun test ignoré.
+- TypeScript web et lint web : PASS, avec contrôle lint ciblé des derniers fichiers modifiés.
 - Validateur Server Actions : 1 951 fichiers source contrôlés.
 - Chromium : 8 scénarios du menu administrateur FR/AR à 375, 390, 768 et 1 440 px. Ce sont des tests de géométrie et de clavier synthétiques, sans session Admin native.
 - Revue indépendante en lecture seule : aucun défaut bloquant résiduel repéré dans le lot ; les deux remarques sur les liens membres et le volet fermé ont été corrigées puis revues.
 
-La compilation nécessite les variables publiques Supabase, absentes du nouveau checkout. La vérification locale emploie une URL loopback et une valeur de compilation synthétique ; elle ne valide aucune connexion Supabase ni aucun déploiement.
+Compilation Next complète : PASS, avec vérification TypeScript et génération des pages. Les variables publiques Supabase et l’URL HTTPS du site étant absentes du nouveau checkout, cette vérification emploie des adresses locales et une valeur de compilation synthétique ; elle ne valide aucune connexion Supabase ni aucun déploiement.
 
 ## Limites et suite
 
