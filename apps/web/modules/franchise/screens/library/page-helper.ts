@@ -11,10 +11,10 @@ import { loadFranchiseOperations } from "@/modules/franchise/data/operations/rep
 import { loadFranchiseCorrectivePlans } from "@/modules/franchise/data/quality/repository";
 import { resolveFranchiseSpace } from "@/modules/franchise/data/spaces/context";
 import { buildFranchiseSpaceBoard, emptyFranchiseSpaces } from "@/modules/franchise/data/spaces/live";
-import { loadFranchiseLibraryWorkspace, type FranchiseLibraryLoadResult } from "@/modules/franchise/data/library/workspace";
+import { loadFranchiseLibraryWorkspace, loadFranchiseMandate, type FranchiseLibraryLoadResult } from "@/modules/franchise/data/library/workspace";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string;franchiseId?:string;catalog?:CatalogPageInput;returnPath?:string;returnQuery?:Record<string,string|undefined> }) {
+async function openFranchiseSpace(input: { locale: Locale; organizationId?: string; franchiseId?: string; returnPath?: string; returnQuery?: Record<string, string | undefined> }) {
   const destination = new URL(safeReturnPath(input.returnPath, input.locale) ?? `/${input.locale}/franchise/accueil`, "https://matricia.invalid");
   for (const [key, value] of Object.entries(input.returnQuery ?? {})) if (typeof value === "string") destination.searchParams.set(key, value);
   if (input.organizationId) destination.searchParams.set("organizationId", input.organizationId);
@@ -23,12 +23,43 @@ export async function requireFranchiseLibrary(input: { locale: Locale; organizat
   const resolved = await resolveFranchiseSpace(input);
   if (resolved.status === "unauthenticated") redirect(connexionHref(input.locale, { next }));
   const space = { ...resolved, currentPath: next, mandates: [] as Array<{id:string;organizationId:string;libraryId:string;label:string}> };
-  if (space.errorReason) return { space, result: { status: "error" as const, reason: space.errorReason } };
+  if (space.errorReason) return { next, space, blocked: { status: "error" as const, reason: space.errorReason } };
   if (space.organizations.length > 1 && !space.selectedOrganizationId) {
-    return { space, result: { status: "error" as const, reason: "ORGANIZATION_REQUIRED" as const } };
+    return { next, space, blocked: { status: "error" as const, reason: "ORGANIZATION_REQUIRED" as const } };
   }
+  return { next, space, blocked: null };
+}
+
+export async function requireFranchiseMandate(input: { locale: Locale; organizationId?: string; franchiseId?: string; returnPath?: string; returnQuery?: Record<string, string | undefined> }) {
+  const opened = await openFranchiseSpace(input);
+  if (opened.blocked) return { space: opened.space, mandate: opened.blocked };
+  const mandate = await loadFranchiseMandate({ locale: input.locale, organizationId: opened.space.selectedOrganizationId ?? undefined, franchiseId: input.franchiseId });
+  if (mandate.status === "error" && mandate.reason === "UNAUTHENTICATED") redirect(connexionHref(input.locale, { next: opened.next }));
+  if (mandate.status === "error" && mandate.reason === "MANDATE_REQUIRED") return {
+    space: { ...opened.space, mandates: (mandate.availableMandates ?? []).filter((item) => item.organizationId === opened.space.selectedOrganizationId) },
+    mandate,
+  };
+  if (mandate.status === "success") {
+    const organizationId = mandate.mandate.operatorOrganizationId;
+    const mandates = mandate.availableMandates.filter((item) => item.organizationId === organizationId);
+    if (mandates.length > 1 && !input.franchiseId) return {
+      space: { ...opened.space, mandates },
+      mandate: { status: "error" as const, reason: "MANDATE_REQUIRED" as const, availableMandates: mandates },
+    };
+    const selected = new URLSearchParams();
+    if (organizationId) selected.set("organizationId", organizationId);
+    selected.set("franchiseId", mandate.mandate.franchiseId);
+    return { space: { ...opened.space, mandates, selectedOrganizationId: organizationId, selectedQuery: `?${selected}` }, mandate };
+  }
+  return { space: opened.space, mandate };
+}
+
+export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string;franchiseId?:string;catalog?:CatalogPageInput;returnPath?:string;returnQuery?:Record<string,string|undefined> }) {
+  const opened = await openFranchiseSpace(input);
+  if (opened.blocked) return { space: opened.space, result: opened.blocked };
+  const space = opened.space;
   const result = await loadFranchiseLibraryWorkspace({ locale: input.locale, organizationId: space.selectedOrganizationId ?? undefined,franchiseId:input.franchiseId,catalog:input.catalog });
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(input.locale, { next }));
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(input.locale, { next: opened.next }));
   if (result.status === "error" && result.reason === "MANDATE_REQUIRED") return {
     space: { ...space, mandates: (result.availableMandates ?? []).filter(item => item.organizationId === space.selectedOrganizationId) },
     result,

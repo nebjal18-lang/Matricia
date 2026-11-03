@@ -1,3 +1,4 @@
+import { openAdminWorkItems } from "@/modules/shared/lib/admin-work-items/open-items";
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { z } from "zod";
 import { commandCenterReadSchemas } from "./read-schemas";
@@ -36,7 +37,7 @@ export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<Admin
     return actionsQuery.order("requested_at", { ascending: false }).order("id").range((pageNumber - 1) * 100, pageNumber * 100 - 1);
   };
   const [workQuery, requestedActions] = await Promise.all([
-    client.from("admin_work_items").select("id,queue_version_id,organization_id,source_kind,resource_type,resource_id,title_fr,title_ar,priority,status,due_at,assigned_to,row_version").in("status", ["OPEN", "CLAIMED", "WAITING_INFORMATION"]).order("severity_rank", { ascending: false }).order("due_at").limit(100),
+    openAdminWorkItems(client, "id,queue_version_id,organization_id,source_kind,resource_type,resource_id,title_fr,title_ar,priority,status,due_at,assigned_to,row_version", 100),
     readActions(actionPage),
   ]);
   let actionQuery = requestedActions;

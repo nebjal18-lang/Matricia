@@ -1,3 +1,4 @@
+import { openAdminWorkItems } from "@/modules/shared/lib/admin-work-items/open-items";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { inboxPayload } from "../internal-messaging/model";
@@ -64,7 +65,7 @@ export async function loadUserActionCenter(locale: "fr" | "ar", now = new Date()
   const [notificationResults, inboxResult, workResult, approvalResult] = await Promise.all([
     Promise.all(memberRows.map((member) => client.rpc("list_notification_center", { p_organization_id: member.organization_id, p_limit: 40 }))),
     client.rpc("list_internal_message_inbox", { p_limit: 40 }),
-    client.from("admin_work_items").select("id,source_kind,title_fr,title_ar,priority,due_at,resource_type,resource_id").in("status", ["OPEN", "CLAIMED", "WAITING_INFORMATION"]).order("severity_rank", { ascending: false }).order("due_at").limit(40),
+    openAdminWorkItems(client, "id,source_kind,title_fr,title_ar,priority,due_at,resource_type,resource_id", 40),
     client.from("admin_operational_action_requests").select("id,action_type,reason,requested_at,target_environment").eq("status", "PENDING_APPROVAL").order("requested_at").limit(40),
   ]);
 

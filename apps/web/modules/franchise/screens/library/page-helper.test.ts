@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { requireFranchiseLibrary } from "./page-helper";
+import { requireFranchiseLibrary, requireFranchiseMandate } from "./page-helper";
 
-const mocks = vi.hoisted(() => ({ space: vi.fn(), library: vi.fn(), redirect: vi.fn((path: string): never => { throw new Error(`REDIRECT:${path}`); }) }));
+const mocks = vi.hoisted(() => ({ space: vi.fn(), library: vi.fn(), mandate: vi.fn(), redirect: vi.fn((path: string): never => { throw new Error(`REDIRECT:${path}`); }) }));
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 vi.mock("@/modules/franchise/data/spaces/context", () => ({ resolveFranchiseSpace: mocks.space }));
-vi.mock("@/modules/franchise/data/library/workspace", () => ({ loadFranchiseLibraryWorkspace: mocks.library }));
+vi.mock("@/modules/franchise/data/library/workspace", () => ({ loadFranchiseLibraryWorkspace: mocks.library, loadFranchiseMandate: mocks.mandate }));
 vi.mock("@/modules/franchise/data/crm/repository", () => ({ loadFranchiseCrm: vi.fn() }));
 vi.mock("@/modules/franchise/data/digest/repository", () => ({ loadFranchiseDigest: vi.fn() }));
 vi.mock("@/modules/franchise/data/followups/repository", () => ({ loadFranchiseFollowups: vi.fn() }));
@@ -87,5 +87,12 @@ describe("Franchise mandate selection", () => {
     expect(result.result).toEqual({ status: "error", reason: "FORBIDDEN" });
     expect(result.space.mandates).toEqual([]);
     expect(mocks.library).not.toHaveBeenCalled();
+  });
+  it("resolves finance from the mandate without loading the catalogue", async () => {
+    mocks.mandate.mockResolvedValue({ status: "success", availableMandates: [{ id: franchise, organizationId: org, libraryId: "44444444-4444-4444-8444-444444444444", label: "IT" }], mandate: { franchiseId: franchise, libraryId: "44444444-4444-4444-8444-444444444444", libraryCode: "IT", libraryName: "Informatique", operatorOrganizationId: org, operatorCode: "IT" } });
+    const result = await requireFranchiseMandate({ locale: "fr", organizationId: org, franchiseId: franchise, returnPath: "/fr/franchise/finance" });
+    expect(result.mandate.status).toBe("success");
+    expect(mocks.library).not.toHaveBeenCalled();
+    expect(mocks.mandate).toHaveBeenCalledWith({ locale: "fr", organizationId: org, franchiseId: franchise });
   });
 });
