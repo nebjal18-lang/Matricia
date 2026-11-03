@@ -1,3 +1,9 @@
+## 2026-11-03 — Boutons démo sur le déploiement principal Vercel
+
+- Activation explicite du déploiement Vercel Production via `MATRICIA_DEMO_ACCESS_ENABLED=true`, uniquement avec `APP_ENV=staging` ou `development` et une base de démonstration. Le même contrôle protège l’affichage et l’action serveur ; environnement applicatif de production ou non renseigné refusé.
+- Les quatre boutons FR/AR et la connexion native sont conservés. Douze tests ciblés PASS dans trois fichiers ; configuration distante et redéploiement non effectués depuis cet environnement. La visibilité ne crée pas les comptes démo.
+- Configuration : Vercel → Settings → Environment Variables, portée Production, puis Redeploy de la branche contenant le correctif. Les comptes Client/Sous-traitant/Franchisé/Admin doivent exister dans le projet Supabase de démonstration.
+
 ## 2026-11-03 — Réparation des validations CI des trois lots Administration
 
 - Tests temporels Maroc stabilisés sous Node 22.23.4 ; fixtures catalogue, Box, qualification, signature, mandat et Finance conformes aux préconditions natives. Frontières de requêtes explicites dans une unique transaction avec rollback ; contrôles TAP conservés.
