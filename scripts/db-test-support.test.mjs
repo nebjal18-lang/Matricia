@@ -24,3 +24,18 @@ test('a function body and a leading block comment remain unchanged', () => {
   assert.ok(prepared.startsWith('/* fixture */\nbegin;'));
   assert.ok(prepared.includes('do $$ begin perform 1; end $$;'));
 });
+
+import { prepareSqlTestBatches } from './db-test-support.mjs';
+test('explicit request boundaries preserve one rollback transaction and one framework grant', () => {
+  const source = 'begin;\nselect clock_timestamp();\n-- matricia:test-request-boundary\nselect statement_timestamp();\nrollback;';
+  const batches = prepareSqlTestBatches(source);
+  assert.equal(batches.length, 2);
+  assert.match(batches[0], /^begin;/);
+  assert.match(batches[0], /PGTAP_TEST_FRAMEWORK_MISSING/);
+  assert.doesNotMatch(batches[1], /grant execute|begin;/i);
+  assert.match(batches[1], /rollback;$/);
+  assert.equal(prepareSqlTestBatches('begin; select 1; rollback;').length, 1);
+});
+test('a boundary cannot authorize a commit or an unbounded test', () => {
+  for (const source of ['begin;\n-- matricia:test-request-boundary\ncommit;\nrollback;', 'select 1;\n-- matricia:test-request-boundary\nrollback;']) assert.throws(() => prepareSqlTestBatches(source), /SQL_TEST_REQUIRES_BEGIN/);
+});

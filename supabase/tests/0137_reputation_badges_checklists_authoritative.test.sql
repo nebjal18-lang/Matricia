@@ -36,7 +36,56 @@ insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_co
 ('13700000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','p137-provider@example.invalid','',now(),'{}','{}',now(),now()),
 ('13700000-0000-4000-8000-000000000002','00000000-0000-0000-0000-000000000000','authenticated','authenticated','p137-outsider@example.invalid','',now(),'{}','{}',now(),now()),
 ('13700000-0000-4000-8000-000000000003','00000000-0000-0000-0000-000000000000','authenticated','authenticated','p137-admin@example.invalid','',now(),'{}','{}',now(),now());
-insert into public.platform_user_roles(user_id,role_code)values('13700000-0000-4000-8000-000000000003','COMPLIANCE_MANAGER'),('13700000-0000-4000-8000-000000000003','LIBRARY_MANAGER');
+insert into public.platform_user_roles(user_id,role_code)values('13700000-0000-4000-8000-000000000003','COMPLIANCE_MANAGER'),('13700000-0000-4000-8000-000000000003','LIBRARY_MANAGER'),('13700000-0000-4000-8000-000000000003','FINANCE_MANAGER');
+
+-- Allocate the transaction-local namespace before defining its native adapters.
+create temporary table p137_native_adapter_context(created boolean)on commit drop;
+
+-- Fixture adapter: submit the actual typed declaration, obtain the Client's
+-- receipt confirmation, then execute the independent Finance review. It never
+-- inserts financial rows directly, and restores the caller's claims on failure.
+create function pg_temp.p137_record_reviewed_payable(p_mission uuid,p_event_type text,p_occurred_on date,p_currency char(3),p_gross bigint,p_reference text,p_proof text,p_key text,p_correlation uuid default extensions.gen_random_uuid())returns jsonb
+language plpgsql as $$
+declare original_claims text:=current_setting('request.jwt.claims',true);m public.missions%rowtype;declaration jsonb;reviewed jsonb;intent_key uuid:=md5('p137-payable:'||p_key)::uuid;client_actor uuid:='13700000-0000-4000-8000-000000000002';
+begin
+ select*into strict m from public.missions where id=p_mission;
+ perform public.save_my_provider_billing_intent(m.provider_organization_id,'PAYABLE',jsonb_build_object('missionId',p_mission,'eventType',p_event_type,'paymentMethod','BANK_TRANSFER','occurredOn',p_occurred_on::text,'currency',p_currency,'grossAmountMinor',p_gross::text,'clientReceiptReference',p_reference,'proofHash',p_proof),intent_key);
+ declaration:=public.record_provider_payable_event(p_mission,p_event_type,p_occurred_on,p_currency,p_gross,p_reference,p_proof,intent_key::text,p_correlation);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',client_actor,'role','authenticated','aal','aal2')::text,true);
+ perform public.confirm_provider_receipt_declaration_v1((declaration->>'declaration_id')::uuid,true,'TEST actual Client receipt independently confirmed');
+ perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
+ reviewed:=public.review_provider_financial_declaration_v1((declaration->>'declaration_id')::uuid,true,'TEST independent Finance review of the trusted receipt');
+ perform set_config('request.jwt.claims',original_claims,true);return reviewed;
+exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;
+end$$;
+create function pg_temp.p137_record_reviewed_payment(p_org uuid,p_reference text,p_paid_on date,p_method text,p_currency char(3),p_amount bigint,p_proof text,p_cash uuid,p_receivable uuid,p_key text,p_correlation uuid default extensions.gen_random_uuid())returns jsonb
+language plpgsql as $$
+declare original_claims text:=current_setting('request.jwt.claims',true);declaration jsonb;reviewed jsonb;
+begin
+ declaration:=public.record_provider_payment(p_org,p_reference,p_paid_on,p_method,p_currency,p_amount,p_proof,p_cash,p_receivable,p_key,p_correlation);
+ perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
+ reviewed:=public.review_provider_financial_declaration_v1((declaration->>'declaration_id')::uuid,true,'TEST independent Finance review of the trusted cash proof');
+ perform set_config('request.jwt.claims',original_claims,true);return reviewed;
+exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;
+end$$;
+create function pg_temp.p137_reconcile_reviewed_payment(p_payment uuid,p_allocations jsonb,p_key text)returns jsonb
+language plpgsql as $$
+declare original_claims text:=current_setting('request.jwt.claims',true);reconciled jsonb;
+begin
+ perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
+ reconciled:=public.reconcile_provider_payment(p_payment,p_allocations,p_key);
+ perform set_config('request.jwt.claims',original_claims,true);return reconciled;
+exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;
+end$$;
+
+-- Native document issuance uses an independent Finance actor and restores the caller.
+create function pg_temp.p137_finance_issue_provider_statement(p_provider_organization_id uuid,p_statement_number text,p_period_start date,p_period_end date,p_currency char(3),p_idempotency_key text,p_correlation_id uuid default extensions.gen_random_uuid())returns jsonb language plpgsql as $$declare original_claims text:=current_setting('request.jwt.claims',true);result jsonb;begin perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);result:=public.issue_provider_statement(p_provider_organization_id,p_statement_number,p_period_start,p_period_end,p_currency,p_idempotency_key,p_correlation_id);perform set_config('request.jwt.claims',original_claims,true);return result;exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;end$$;
+create function pg_temp.p137_finance_issue_provider_statement_pre_policy_v1(p_provider_organization_id uuid,p_statement_number text,p_period_start date,p_period_end date,p_currency char(3),p_idempotency_key text,p_correlation_id uuid default extensions.gen_random_uuid())returns jsonb language plpgsql as $$declare original_claims text:=current_setting('request.jwt.claims',true);result jsonb;begin perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);result:=public.issue_provider_statement_pre_policy_v1(p_provider_organization_id,p_statement_number,p_period_start,p_period_end,p_currency,p_idempotency_key,p_correlation_id);perform set_config('request.jwt.claims',original_claims,true);return result;exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;end$$;
+create function pg_temp.p137_finance_issue_provider_invoice(p_statement_id uuid,p_invoice_number text,p_issued_on date,p_due_on date,p_receivable_account_id uuid,p_revenue_account_id uuid,p_tax_liability_account_id uuid,p_idempotency_key text,p_correlation_id uuid default extensions.gen_random_uuid())returns jsonb language plpgsql as $$declare original_claims text:=current_setting('request.jwt.claims',true);result jsonb;begin perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);result:=public.issue_provider_invoice(p_statement_id,p_invoice_number,p_issued_on,p_due_on,p_receivable_account_id,p_revenue_account_id,p_tax_liability_account_id,p_idempotency_key,p_correlation_id);perform set_config('request.jwt.claims',original_claims,true);return result;exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;end$$;
+create function pg_temp.p137_finance_issue_provider_invoice_pre_policy_v1(p_statement_id uuid,p_invoice_number text,p_issued_on date,p_due_on date,p_receivable_account_id uuid,p_revenue_account_id uuid,p_tax_liability_account_id uuid,p_idempotency_key text,p_correlation_id uuid default extensions.gen_random_uuid())returns jsonb language plpgsql as $$declare original_claims text:=current_setting('request.jwt.claims',true);result jsonb;begin perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);result:=public.issue_provider_invoice_pre_policy_v1(p_statement_id,p_invoice_number,p_issued_on,p_due_on,p_receivable_account_id,p_revenue_account_id,p_tax_liability_account_id,p_idempotency_key,p_correlation_id);perform set_config('request.jwt.claims',original_claims,true);return result;exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;end$$;
+create function pg_temp.p137_finance_issue_provider_grouped_statements_v1(p_provider_organization_id uuid,p_number_prefix text,p_period_start date,p_period_end date,p_currency char(3),p_expected_source_hash text,p_idempotency_key uuid,p_correlation_id uuid default extensions.gen_random_uuid())returns jsonb language plpgsql as $$declare original_claims text:=current_setting('request.jwt.claims',true);result jsonb;begin perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);result:=public.issue_provider_grouped_statements_v1(p_provider_organization_id,p_number_prefix,p_period_start,p_period_end,p_currency,p_expected_source_hash,p_idempotency_key,p_correlation_id);perform set_config('request.jwt.claims',original_claims,true);return result;exception when others then perform set_config('request.jwt.claims',original_claims,true);raise;end$$;
+do $$begin execute format('grant usage on schema %I to authenticated',pg_my_temp_schema()::regnamespace);end$$;
+grant execute on function pg_temp.p137_record_reviewed_payable(uuid,text,date,char,bigint,text,text,text,uuid),pg_temp.p137_record_reviewed_payment(uuid,text,date,text,char,bigint,text,uuid,uuid,text,uuid),pg_temp.p137_reconcile_reviewed_payment(uuid,jsonb,text)to authenticated;
 insert into public.organizations(id,legal_name,display_name,status,created_by)values
 ('13710000-0000-4000-8000-000000000001','P137 Provider','P137 Provider','ACTIVE','13700000-0000-4000-8000-000000000001'),
 ('13710000-0000-4000-8000-000000000002','P137 Outsider','P137 Outsider','ACTIVE','13700000-0000-4000-8000-000000000002');
@@ -202,23 +251,23 @@ select is((select m.status from public.missions m join p137_ids i on i.mission_i
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p137_flow select'receipt-upload',public.begin_provider_receipt_proof_upload('13710000-0000-4000-8000-000000000001','p137-receipt.pdf','application/pdf',20,repeat('d',64),'p137-receipt-reserve');
 insert into storage.objects(bucket_id,name,owner_id,metadata)select'provider-qualification',value->>'storage_object_path','13700000-0000-4000-8000-000000000001','{"mimetype":"application/pdf","size":20}'from p137_flow where key='receipt-upload';
-select throws_ok($$select public.record_provider_payable_event(mission_id,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',120000,'P137-RECEIPT',repeat('d',64),'p137-flow-payable','13790000-0000-4000-8000-000000000008')from p137_ids$$,'55000','RECEIPT_PROOF_SCAN_NOT_CLEAN','a receipt hash does not record money before trusted CLEAN');
+select throws_ok($$select pg_temp.p137_record_reviewed_payable(mission_id,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',120000,'P137-RECEIPT',repeat('d',64),'p137-flow-payable','13790000-0000-4000-8000-000000000008')from p137_ids$$,'55000','CLEAN_DECLARATION_PROOF_REQUIRED','a receipt hash does not record money before trusted CLEAN');
 reset role;set local role service_role;select set_config('request.jwt.claims','{"role":"service_role"}',true);
 select public.record_provider_payment_proof_scan_result((value->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('d',64),'p137-receipt-clean')from p137_flow where key='receipt-upload';
 reset role;set local role authenticated;select set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
-insert into p137_flow select'payable',public.record_provider_payable_event(mission_id,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',120000,'P137-RECEIPT',repeat('d',64),'p137-flow-payable','13790000-0000-4000-8000-000000000008')from p137_ids;
+insert into p137_flow select'payable',pg_temp.p137_record_reviewed_payable(mission_id,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',120000,'P137-RECEIPT',repeat('d',64),'p137-flow-payable','13790000-0000-4000-8000-000000000008')from p137_ids;
 reset role;
 select is((select value->>'outcome'from p137_flow where key='payable'),'PROVIDER_PAYABLE_RECORDED','provider finance event is recorded through the governed exact-money command');
 select ok((select p.scan_result_id is not null and p.sha256=repeat('d',64)and p.payable_event_id=(f.value->>'payable_event_id')::uuid from public.provider_payable_event_proofs p join p137_flow f on f.key='payable'where p.id=(f.value->>'receipt_proof_id')::uuid),'actual receipt object and immutable CLEAN scan bind to the financial event');
 set local role authenticated;
-select is((select public.record_provider_payable_event(mission_id,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',120000,'P137-RECEIPT',repeat('d',64),'p137-flow-payable','13790000-0000-4000-8000-000000000008')from p137_ids),(select value from p137_flow where key='payable'),'receipt command replay returns the same financial event and same archived proof');
+select is((select pg_temp.p137_record_reviewed_payable(mission_id,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',120000,'P137-RECEIPT',repeat('d',64),'p137-flow-payable','13790000-0000-4000-8000-000000000008')from p137_ids),(select value from p137_flow where key='payable'),'receipt command replay returns the same financial event and same archived proof');
 reset role;
 
 
 -- Finance governance and actual Provider issuance share the approved issuer and numbering registry.
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('13700000-0000-4000-8000-000000000004','00000000-0000-4000-8000-000000000000','authenticated','authenticated','p137-finance-policy@example.invalid','',now(),'{}','{}',now(),now());
-insert into public.platform_user_roles(user_id,role_code)values('13700000-0000-4000-8000-000000000003','FINANCE_MANAGER'),('13700000-0000-4000-8000-000000000004','FINANCE_MANAGER');
-select throws_ok($$select public.issue_provider_statement('13710000-0000-4000-8000-000000000001','P137-STATEMENT',current_date,current_date,'MAD','p137-policy-statement')$$,'55000','BILLING_POLICY_REQUIRED','missing approved issuer blocks financial document issuance before irreversible source creation');
+insert into public.platform_user_roles(user_id,role_code)values('13700000-0000-4000-8000-000000000004','FINANCE_MANAGER');
+select throws_ok($$select pg_temp.p137_finance_issue_provider_statement('13710000-0000-4000-8000-000000000001','P137-STATEMENT',current_date,current_date,'MAD','p137-policy-statement')$$,'55000','BILLING_POLICY_REQUIRED','missing approved issuer blocks financial document issuance before irreversible source creation');
 select is((select count(*)from public.provider_statements where provider_organization_id='13710000-0000-4000-8000-000000000001'),0::bigint,'failed legal-policy gate leaves no issued statement');
 select set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);
 insert into p137_flow select'policy',public.create_client_billing_policy_v1(jsonb_build_object('series_key','TEST_PROVIDER_BILLING_137','version',1,'currency','MAD','tax_rate_bps',700,'tax_label_fr','Taxe abonnement test','tax_label_ar','ضريبة اشتراك اختبار','jurisdiction','MA-TEST','issuer',jsonb_build_object('legal_name','Émetteur test uniquement 137','legal_form','SARL','address','Adresse recette 137','ice','999000000000137','if_number','99900137','rc_number','TEST-RC-137','contact_email','fiscal137@example.invalid'),'invoice_prefix','PI137','credit_prefix','PC137','invoice_start_number','41','credit_start_number','501','valid_from',(current_date-1)::text,'service_label_fr','Abonnement test','service_label_ar','اشتراك اختبار','approval_reference','TEST-NO-REAL-APPROVAL-137'),'p137-policy-create');
@@ -243,16 +292,16 @@ do $$declare upload jsonb;doc jsonb;job uuid;review jsonb;begin
  perform public.decide_provider_billing_recipient_review_v1((review->>'review_id')::uuid,(select content_hash from public.provider_billing_contract_recipient_reviews where id=(review->>'review_id')::uuid),true,'Independent synthetic recipient approval');
  perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 end$$;
-insert into p137_flow select'statement',public.issue_provider_statement('13710000-0000-4000-8000-000000000001','P137-STATEMENT',current_date,current_date,'MAD','p137-policy-statement');
+insert into p137_flow select'statement',pg_temp.p137_finance_issue_provider_statement('13710000-0000-4000-8000-000000000001','P137-STATEMENT',current_date,current_date,'MAD','p137-policy-statement');
 select is((select value->>'document_status'from p137_flow where key='statement'),'EDITION_PENDING','recorded commission statement waits for actual archived translations');
 insert into public.financial_accounts(id,organization_id,code,name,account_type,currency)values
 ('137a0000-0000-4000-8000-000000000001','13710000-0000-4000-8000-000000000001','P137_AR','Test receivable','ASSET','MAD'),
 ('137a0000-0000-4000-8000-000000000002','13710000-0000-4000-8000-000000000001','P137_REV','Test revenue','REVENUE','MAD'),
 ('137a0000-0000-4000-8000-000000000003','13710000-0000-4000-8000-000000000001','P137_TAX','Test tax','LIABILITY','MAD');
-select throws_ok($$select public.issue_provider_invoice((select(value->>'statement_id')::uuid from p137_flow where key='statement'),'MANUAL-42',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-policy-invoice')$$,'22023','GOVERNED_INVOICE_NUMBER_REQUIRED','manual numbering cannot escape the approved issuer series');
-insert into p137_flow select'invoice',public.issue_provider_invoice((value->>'statement_id')::uuid,'AUTO',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-policy-invoice')from p137_flow where key='statement';
+select throws_ok($$select pg_temp.p137_finance_issue_provider_invoice((select(value->>'statement_id')::uuid from p137_flow where key='statement'),'MANUAL-42',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-policy-invoice')$$,'22023','GOVERNED_INVOICE_NUMBER_REQUIRED','manual numbering cannot escape the approved issuer series');
+insert into p137_flow select'invoice',pg_temp.p137_finance_issue_provider_invoice((value->>'statement_id')::uuid,'AUTO',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-policy-invoice')from p137_flow where key='statement';
 select is((select value->>'invoice_number'from p137_flow where key='invoice'),'PI137-'||extract(year from current_date)::text||'-00000041','actual commission invoice uses the approved shared counter');
-select is(public.issue_provider_invoice((select(value->>'statement_id')::uuid from p137_flow where key='statement'),'AUTO',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-policy-invoice'),(select value from p137_flow where key='invoice'),'invoice replay returns the same source without allocating another number');
+select is(pg_temp.p137_finance_issue_provider_invoice((select(value->>'statement_id')::uuid from p137_flow where key='statement'),'AUTO',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-policy-invoice'),(select value from p137_flow where key='invoice'),'invoice replay returns the same source without allocating another number');
 select is(private.allocate_billing_document_number_v1((select(value->>'policy_id')::uuid from p137_flow where key='policy'),'INVOICE',current_date),'PI137-'||extract(year from current_date)::text||'-00000042','the common issuer allocator advances across domains instead of restarting a Provider-only series');
 select ok((select tax_minor=2400 and total_minor=14400 from public.provider_invoices where id=(select(value->>'invoice_id')::uuid from p137_flow where key='invoice')),'commission retains its own authoritative 20 percent tax rather than the subscription policy 7 percent');
 select set_config('request.jwt.claims','{"role":"service_role"}',true);
@@ -319,9 +368,9 @@ do $$declare upload jsonb;event jsonb;statement jsonb;inv jsonb;policy jsonb;sou
  perform set_config('request.jwt.claims','{"role":"service_role"}',true);
  perform public.record_provider_payment_proof_scan_result((upload->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('9',64),'p137-correction-receipt-scan');
  perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
- event:=public.record_provider_payable_event((select mission_id from p137_ids),'ADJUSTMENT',current_date,'MAD',30000,'P137-HISTORICAL-RECEIPT',repeat('9',64),'p137-correction-payable');
- statement:=public.issue_provider_statement_pre_policy_v1('13710000-0000-4000-8000-000000000001','P137-HISTORICAL',current_date,current_date,'MAD','p137-historical-statement');
- inv:=public.issue_provider_invoice_pre_policy_v1((statement->>'statement_id')::uuid,'TEST-HISTORICAL-P137',current_date,current_date+45,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-historical-invoice');
+ event:=pg_temp.p137_record_reviewed_payable((select mission_id from p137_ids),'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',30000,'P137-HISTORICAL-RECEIPT',repeat('9',64),'p137-correction-payable');
+ statement:=pg_temp.p137_finance_issue_provider_statement_pre_policy_v1('13710000-0000-4000-8000-000000000001','P137-HISTORICAL',current_date,current_date,'MAD','p137-historical-statement');
+ inv:=pg_temp.p137_finance_issue_provider_invoice_pre_policy_v1((statement->>'statement_id')::uuid,'TEST-HISTORICAL-P137',current_date,current_date+45,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-historical-invoice');
  select*into source from public.provider_invoices where id=(inv->>'invoice_id')::uuid;
  policy:=private.approved_billing_policy_snapshot('MAD',current_date)||jsonb_build_object('recipient_snapshot','{"legal_name":"Wrong historical recipient TEST ONLY","country_code":"MA","identifiers":{"ICE":"999000000000139","IF":"99900139","RC":"TEST-RC-139"},"registered_address":"Wrong historical TEST address"}'::jsonb);
  insert into public.provider_billing_source_policy_bindings(provider_organization_id,kind,source_id,source_hash,policy_id,policy_snapshot,document_number,issued_on,bound_by)values(source.provider_organization_id,'invoice',source.id,source.document_hash,(policy->>'policy_id')::uuid,policy,source.invoice_number,current_date,auth.uid());
@@ -333,8 +382,8 @@ do $$declare upload jsonb;event jsonb;statement jsonb;inv jsonb;policy jsonb;sou
  perform set_config('request.jwt.claims','{"role":"service_role"}',true);
  perform public.record_provider_payment_proof_scan_result((upload->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('7',64),'p137-correction-payment-scan');
  perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
- payment:=public.record_provider_payment(source.provider_organization_id,'P137-CORRECTION-PAID',current_date,'BANK_TRANSFER','MAD',source.total_minor,repeat('7',64),'137a0000-0000-4000-8000-000000000004','137a0000-0000-4000-8000-000000000001','p137-correction-payment');
- perform public.reconcile_provider_payment((payment->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',source.id,'amount_minor',source.total_minor::text)),'p137-correction-allocation');
+ payment:=pg_temp.p137_record_reviewed_payment(source.provider_organization_id,'P137-CORRECTION-PAID',current_date,'BANK_TRANSFER','MAD',source.total_minor,repeat('7',64),'137a0000-0000-4000-8000-000000000004','137a0000-0000-4000-8000-000000000001','p137-correction-payment');
+ perform pg_temp.p137_reconcile_reviewed_payment((payment->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',source.id,'amount_minor',source.total_minor::text)),'p137-correction-allocation');
  perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);
  insert into p137_flow values('correction-source',private.provider_recipient_correction_source_v1(source.id));
  insert into p137_flow select'correction-request',public.request_provider_invoice_recipient_correction_v1(source.id,private.canonical_request_hash(value),current_date,current_date+45,true,'TEST correct historical recipient by cancellation and new issue','137f0000-0000-4000-8000-000000000002')from p137_flow where key='correction-source';
@@ -394,9 +443,9 @@ do $$declare i integer;upload jsonb;statement jsonb;recorded jsonb;doc jsonb;num
   perform set_config('request.jwt.claims','{"role":"service_role"}',true);
   perform public.record_provider_payment_proof_scan_result((upload->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('b',64),'p137-calendar-receipt-scan-'||i);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',actor,'role','authenticated','aal','aal2')::text,true);
-  recorded:=public.record_provider_payable_event(mission,'ADJUSTMENT',current_date,'MAD',30000,'P137-CALENDAR-'||i,repeat('b',64),'p137-calendar-payable-'||i);
-  statement:=public.issue_provider_statement(org,'P137-CALENDAR-STATEMENT-'||i,current_date,current_date,'MAD','p137-calendar-statement-'||i);
-  recorded:=public.issue_provider_invoice((statement->>'statement_id')::uuid,'AUTO',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-calendar-invoice-'||i);
+  recorded:=pg_temp.p137_record_reviewed_payable(mission,'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',30000,'P137-CALENDAR-'||i,repeat('b',64),'p137-calendar-payable-'||i);
+  statement:=pg_temp.p137_finance_issue_provider_statement(org,'P137-CALENDAR-STATEMENT-'||i,current_date,current_date,'MAD','p137-calendar-statement-'||i);
+  recorded:=pg_temp.p137_finance_issue_provider_invoice((statement->>'statement_id')::uuid,'AUTO',current_date,current_date+30,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-calendar-invoice-'||i);
  end loop;
  for i in 1..201 loop
   upload:=public.begin_provider_document_upload(org,'application/pdf',20);
@@ -457,27 +506,27 @@ do $$declare review jsonb;upload jsonb;doc uuid;entry jsonb;idx integer;begin
   perform set_config('request.jwt.claims','{"role":"service_role"}',true);
   perform public.record_provider_payment_proof_scan_result((upload->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('1',64),'p137-grouped-receipt-scan-'||idx);
   perform set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
-  entry:=public.record_provider_payable_event((select mission_id from p137_ids),'ADJUSTMENT',current_date+3,'MAD',30000,'P137-GROUPED-'||idx,repeat('1',64),'p137-grouped-payable-'||idx);
+  entry:=pg_temp.p137_record_reviewed_payable((select mission_id from p137_ids),'CLIENT_RECEIPT_CONFIRMED',current_date,'MAD',30000,'P137-GROUPED-'||idx,repeat('1',64),'p137-grouped-payable-'||idx);
  end loop;
 end$$;
 select set_config('request.jwt.claims','{"sub":"13700000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
-insert into p137_flow select'grouped-preview',public.preview_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001',current_date+3,current_date+3,'MAD');
+insert into p137_flow select'grouped-preview',public.preview_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001',current_date,current_date,'MAD');
 select is((select jsonb_array_length(value->'groups')from p137_flow where key='grouped-preview'),2,'same-day commissions retain two different immutable contractual recipient groups');
-select throws_ok($$select public.issue_provider_statement('13710000-0000-4000-8000-000000000001','P137-MUST-NOT-MIX',current_date+3,current_date+3,'MAD','p137-reject-mixed')$$,'55000','BILLING_MIXED_CONTRACT_RECIPIENTS','single-statement legacy command refuses to mix contractual identities');
+select throws_ok($$select pg_temp.p137_finance_issue_provider_statement('13710000-0000-4000-8000-000000000001','P137-MUST-NOT-MIX',current_date,current_date,'MAD','p137-reject-mixed')$$,'55000','BILLING_MIXED_CONTRACT_RECIPIENTS','single-statement legacy command refuses to mix contractual identities');
 select is((select count(*)from public.provider_statements where statement_number='P137-MUST-NOT-MIX'),0::bigint,'refused mixed issue leaves no statement behind');
-select throws_ok($$select public.issue_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001','P137-GROUPED',current_date+3,current_date+3,'MAD',repeat('0',64),'137f0000-0000-4000-8000-000000000011')$$,'40001','BILLING_GROUPED_STATEMENT_SOURCE_CHANGED','grouped publication requires the exact reviewed source checkpoint');
-insert into p137_flow select'grouped-issued',public.issue_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001','P137-GROUPED',current_date+3,current_date+3,'MAD',value->>'source_hash','137f0000-0000-4000-8000-000000000011')from p137_flow where key='grouped-preview';
+select throws_ok($$select pg_temp.p137_finance_issue_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001','P137-GROUPED',current_date,current_date,'MAD',repeat('0',64),'137f0000-0000-4000-8000-000000000011')$$,'40001','BILLING_GROUPED_STATEMENT_SOURCE_CHANGED','grouped publication requires the exact reviewed source checkpoint');
+insert into p137_flow select'grouped-issued',pg_temp.p137_finance_issue_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001','P137-GROUPED',current_date,current_date,'MAD',value->>'source_hash','137f0000-0000-4000-8000-000000000011')from p137_flow where key='grouped-preview';
 select is((select value->>'outcome'from p137_flow where key='grouped-issued'),'PROVIDER_GROUPED_STATEMENTS_ISSUED','reviewed recipient groups issue atomically');
 select is((select count(distinct b.policy_snapshot#>>'{recipient_snapshot,identifiers,ICE}')from public.provider_billing_source_policy_bindings b join public.provider_statements s on s.id=b.source_id where b.kind='statement'and s.statement_number like'P137-GROUPED-G%'),2::bigint,'each substatement binds its own historical ICE, not the current organization');
 select is((select count(*)from public.provider_statement_lines l join public.provider_statements s on s.id=l.statement_id where s.statement_number like'P137-GROUPED-G%'),2::bigint,'each source event is billed exactly once across groups');
 select is((select sum(total_minor)from public.provider_statements where statement_number like'P137-GROUPED-G%'),7200::numeric,'grouped totals preserve exact net and tax without invented allocation');
 select is((select count(*)from public.event_outbox where event_type='ProviderStatementIssuedV1'and aggregate_id in(select id::text from public.provider_statements where statement_number like'P137-GROUPED-G%')),2::bigint,'every substatement enters its own actual PDF issue pipeline');
-select is(public.issue_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001','P137-GROUPED',current_date+3,current_date+3,'MAD',(select value->>'source_hash'from p137_flow where key='grouped-preview'),'137f0000-0000-4000-8000-000000000011'),(select value from p137_flow where key='grouped-issued'),'grouped replay returns exact same substatements before mutable unbilled-source guard');
-select is(jsonb_array_length(public.preview_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001',current_date+3,current_date+3,'MAD')->'groups'),0,'published grouped events do not remain available for duplicate issue');
-select throws_ok($$select public.preview_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000002',current_date+3,current_date+3,'MAD')$$,'42501','PROVIDER_STATEMENT_DENIED','group preview does not cross organization scope');
+select is(pg_temp.p137_finance_issue_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001','P137-GROUPED',current_date,current_date,'MAD',(select value->>'source_hash'from p137_flow where key='grouped-preview'),'137f0000-0000-4000-8000-000000000011'),(select value from p137_flow where key='grouped-issued'),'grouped replay returns exact same substatements before mutable unbilled-source guard');
+select is(jsonb_array_length(public.preview_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000001',current_date,current_date,'MAD')->'groups'),0,'published grouped events do not remain available for duplicate issue');
+select throws_ok($$select public.preview_provider_grouped_statements_v1('13710000-0000-4000-8000-000000000002',current_date,current_date,'MAD')$$,'42501','PROVIDER_STATEMENT_DENIED','group preview does not cross organization scope');
 
 do $$declare item record;begin for item in select id from public.provider_statements where statement_number like'P137-GROUPED-G%'order by id loop
- perform public.issue_provider_invoice(item.id,'AUTO',current_date+3,current_date+60,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-grouped-invoice:'||item.id::text);
+ perform pg_temp.p137_finance_issue_provider_invoice(item.id,'AUTO',current_date,current_date+60,'137a0000-0000-4000-8000-000000000001','137a0000-0000-4000-8000-000000000002','137a0000-0000-4000-8000-000000000003','p137-grouped-invoice:'||item.id::text);
  end loop;end$$;
 select is((select count(distinct i.invoice_number)from public.provider_invoices i join public.provider_statements s on s.id=i.statement_id where s.statement_number like'P137-GROUPED-G%'),2::bigint,'each grouped substatement produces its own approved distinct invoice number');
 select is((select count(distinct b.policy_snapshot#>>'{recipient_snapshot,identifiers,ICE}')from public.provider_billing_source_policy_bindings b join public.provider_invoices i on i.id=b.source_id join public.provider_statements s on s.id=i.statement_id where b.kind='invoice'and s.statement_number like'P137-GROUPED-G%'),2::bigint,'grouped invoice snapshots preserve separate contractual recipients through final financial issuance');

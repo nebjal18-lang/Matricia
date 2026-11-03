@@ -75,11 +75,14 @@ select ok(not has_table_privilege('authenticated','public.franchise_activation_e
 select ok(not has_function_privilege('authenticated','private.accept_franchise_activation_v1(uuid,text,integer,uuid,text,text,boolean,text,uuid)','execute'),'private activation core is not callable by application');
 
 
+-- Native activation is observed by the subsequent editorial client request.
+-- matricia:test-request-boundary
 -- Only the initial library version is fixture data. All editorial objects below
 -- are created/submitted/decided/programmed through the real public commands.
 insert into public.catalog_library_versions(id,library_id,version,name_fr,name_ar,description_fr,description_ar,icon_key,sort_order,content_hash,change_reason,created_by)values('f2060000-0000-4000-8000-000000000001','f2040000-0000-4000-8000-000000000001',1,'Bibliothèque éditoriale','مكتبة المراجعة','Description complète','وصف كامل','library',1,repeat('a',64),'Source de recette','a2040000-0000-4000-8000-000000000001');
 update public.catalog_libraries set current_draft_version_id='f2060000-0000-4000-8000-000000000001'where id='f2040000-0000-4000-8000-000000000001';
-insert into public.catalog_library_mandates(library_id,organization_id,status,valid_from,policy_version,created_by)values('f2040000-0000-4000-8000-000000000001','b2040000-0000-4000-8000-000000000001','ACTIVE',now()-interval'1 day',1,'a2040000-0000-4000-8000-000000000001');
+-- The native activation above already issued this exact active library mandate.
+-- Do not fabricate a duplicate authorization alongside its immutable source.
 reset role;select set_config('request.jwt.claims','{"sub":"a2040000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
 insert into activation_results values('LIB_SUB',public.submit_catalog_change('LIBRARY','f2040000-0000-4000-8000-000000000001','f2060000-0000-4000-8000-000000000001',1,1,'editorial206-library-submit'));
 reset role;select set_config('request.jwt.claims','{"sub":"a2040000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
