@@ -8,8 +8,8 @@ type DemoAccessEnv = {
 };
 
 export function isPublicDemoAccessEnabled(env: DemoAccessEnv = process.env): boolean {
-  if (env.VERCEL_ENV === "production") return false;
   if (env.VERCEL_ENV === "preview") return true;
+  if (env.VERCEL_ENV === "production") return env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
   return env.MATRICIA_DEMO_ACCESS_ENABLED === "true" && env.APP_ENV !== "production";
 }
 

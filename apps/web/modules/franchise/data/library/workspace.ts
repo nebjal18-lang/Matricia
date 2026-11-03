@@ -150,7 +150,10 @@ const changeRow = z.object({ id,target_id:id,target_type:z.string(),target_versi
 
 const franchiseRoles = ["FRANCHISE_OWNER", "FRANCHISE_MANAGER", "FRANCHISE_EXPERT", "FRANCHISE_PROVIDER_MANAGER", "FRANCHISE_ACCOUNTING", "FRANCHISE_VIEWER"] as const;
 
-async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "ar"; organizationId?: string;franchiseId?:string;libraryId?:string;catalog?:CatalogPageInput }): Promise<FranchiseLibraryLoadResult> {
+type FranchiseMandateFailure = { status: "error"; reason: "UNAUTHENTICATED" | "QUERY_FAILED" | "INVALID_RESPONSE" | "NO_MANDATE" | "FORBIDDEN" | "MANDATE_REQUIRED"; availableMandates?: ReturnType<typeof mandateChoiceOptions> };
+type FranchiseMandateSelection = FranchiseMandateFailure | { status: "success"; client: Awaited<ReturnType<typeof getSupabaseServerClient>>; selected: z.infer<typeof franchiseRow>; availableMandates: ReturnType<typeof mandateChoiceOptions>; allowed: Array<z.infer<typeof franchiseRow>>; choice: z.infer<typeof mandateChoicesSchema>["items"][number] };
+
+async function selectFranchiseMandate(input: { locale: "fr" | "ar"; organizationId?: string; franchiseId?: string; libraryId?: string }): Promise<FranchiseMandateSelection> {
   const client = await getSupabaseServerClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   const authFailure = classifyAuthReadFailure(authError);
@@ -178,7 +181,33 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
   const candidates = allowed.filter((item)=>availableMandates.some(option=>option.id===item.id)).filter((item)=>(!input.organizationId||item.operator_organization_id===input.organizationId)&&(!input.franchiseId||item.id===input.franchiseId)&&(!input.libraryId||item.library_id===input.libraryId));
   if (candidates.length > 1 && !input.franchiseId) return { status: "error", reason: "MANDATE_REQUIRED", availableMandates: availableMandates.filter(option=>candidates.some(item=>item.id===option.id)) };
   const selected = candidates[0];
-  if (!selected) return { status: "error", reason: input.organizationId || input.franchiseId || input.libraryId ? "FORBIDDEN" : "NO_MANDATE" };
+  if (!selected) return { status: "error" as const, reason: input.organizationId || input.franchiseId || input.libraryId ? "FORBIDDEN" as const : "NO_MANDATE" as const };
+  const choice = choices.data.items.find((item) => item.id === selected.id);
+  if (!choice) return { status: "error" as const, reason: "INVALID_RESPONSE" as const };
+  return { status: "success" as const, client, selected, availableMandates, allowed, choice };
+}
+
+export async function loadFranchiseMandate(input: { locale: "fr" | "ar"; organizationId?: string; franchiseId?: string; libraryId?: string }): Promise<FranchiseMandateFailure | { status: "success"; availableMandates: ReturnType<typeof mandateChoiceOptions>; mandate: { franchiseId: string; libraryId: string; libraryCode: string; libraryName: string; operatorOrganizationId: string; operatorCode: string } }> {
+  const selection = await selectFranchiseMandate(input);
+  if (selection.status === "error") return selection;
+  return {
+    status: "success" as const,
+    availableMandates: selection.availableMandates,
+    mandate: {
+      franchiseId: selection.selected.id,
+      libraryId: selection.selected.library_id,
+      libraryCode: selection.choice.library_code,
+      libraryName: input.locale === "ar" ? selection.choice.library_ar : selection.choice.library_fr,
+      operatorOrganizationId: selection.selected.operator_organization_id,
+      operatorCode: selection.selected.operator_code,
+    },
+  };
+}
+
+async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "ar"; organizationId?: string;franchiseId?:string;libraryId?:string;catalog?:CatalogPageInput }): Promise<FranchiseLibraryLoadResult> {
+  const selection = await selectFranchiseMandate(input);
+  if (selection.status === "error") return selection;
+  const { client, selected, availableMandates, allowed } = selection;
   const libraryId = selected.library_id;
   const pageResponse=await client.rpc("franchise_catalog_page",catalogPageArguments(selected.id,input.catalog));
   if(pageResponse.error)return{status:"error",reason:pageResponse.error.code==="42501"?"FORBIDDEN":"QUERY_FAILED"};

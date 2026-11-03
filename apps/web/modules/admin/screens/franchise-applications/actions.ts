@@ -3,7 +3,7 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { decideGovernance } from "@/modules/franchise/screens/gouvernance/actions";
+import { decideFranchiseMandate } from "@/modules/franchise/data/candidature/mandate-decision";
 import { parseMoneyToMinor } from "@/modules/provider/screens/devis/money";
 import { moroccoRegions } from "@/modules/shared/lib/geo/morocco-regions";
 import { deliverNotification } from "@/modules/shared/lib/notification-delivery/adapter";
@@ -236,11 +236,8 @@ export async function decideFranchiseApplicationMandate(_: FranchiseApplicationR
     decision: formData.get("decision"),
   });
   if (!parsed.success) return { status: "error", reason: "VALIDATION" };
-  const decided = await decideGovernance({ status: "idle" }, formData);
-  if (decided.status === "error") {
-    const mapped = decided.reason === "FORBIDDEN" || decided.reason === "UNAUTHENTICATED" ? "DENIED" : decided.reason === "MFA_REQUIRED" || decided.reason === "AAL2_REQUIRED" ? "MFA_REQUIRED" : decided.reason === "CONFLICT" ? "CONFLICT" : decided.reason === "VALIDATION" ? "VALIDATION" : "UNAVAILABLE";
-    return { status: "error", reason: mapped };
-  }
+  const decided = await decideFranchiseMandate(formData);
+  if (decided.status === "error") return { status: "error", reason: decided.reason };
   refresh(parsed.data.locale);
   if (decided.status !== "success" || parsed.data.decision !== "APPROVE") return { status: "success" };
   const mailed = await mailInvitationCode({ applicationId: parsed.data.applicationId, invitationId: parsed.data.invitationId, code: "", reference: parsed.data.applicationId.slice(0, 8).toUpperCase(), kind: "APPROVED" });

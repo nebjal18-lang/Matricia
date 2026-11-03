@@ -21,33 +21,36 @@ async function accessContext() {
   return { status: "success", client: access.client, aal, canRollback: aal === "aal2" && [...access.roles].some((role) => rollbackRoles.has(role)) } as const;
 }
 
+async function readPublicationSnapshot(client: Extract<Awaited<ReturnType<typeof accessContext>>, { status: "success" }>["client"]) {
+  const librariesQuery = await client.from("catalog_libraries").select("id,code,status,row_version,current_release_id").order("code").limit(11);
+  if (librariesQuery.error) return { status: "error" as const, reason: librariesQuery.error.code === "42501" ? "FORBIDDEN" as const : "UNAVAILABLE" as const };
+  const libraries = z.array(libraryRow).max(11).safeParse(librariesQuery.data);
+  if (!libraries.success || libraries.data.length > 10) return { status: "error" as const, reason: "INVALID_RESPONSE" as const };
+  const libraryIds = libraries.data.map((library) => library.id);
+  const releasesQuery = libraryIds.length === 0 ? { data: [], error: null } : await client.from("catalog_releases")
+    .select("id,library_id,release_key,status,snapshot_hash,based_on_release_id,rollback_target_release_id,requires_central_approval,effective_from,created_at,approved_at,published_at,retired_at,row_version")
+    .in("library_id", libraryIds).order("created_at", { ascending: false }).limit(201);
+  if (releasesQuery.error) return { status: "error" as const, reason: releasesQuery.error.code === "42501" ? "FORBIDDEN" as const : "UNAVAILABLE" as const };
+  const releases = z.array(releaseRow).max(201).safeParse(releasesQuery.data);
+  if (!releases.success || releases.data.some((release) => !libraryIds.includes(release.library_id))) return { status: "error" as const, reason: "INVALID_RESPONSE" as const };
+  const visibleReleases = releases.data.slice(0, 200);
+  return { status: "success" as const, historyTruncated: releases.data.length > 200, libraries: libraries.data.map((library) => ({
+    id: library.id, code: library.code, status: library.status, rowVersion: library.row_version, currentReleaseId: library.current_release_id,
+    releases: visibleReleases.filter((release) => release.library_id === library.id).map((release) => ({
+      id: release.id, libraryId: release.library_id, releaseKey: release.release_key, status: release.status, snapshotHash: release.snapshot_hash,
+      basedOnReleaseId: release.based_on_release_id, rollbackTargetReleaseId: release.rollback_target_release_id,
+      requiresCentralApproval: release.requires_central_approval, effectiveFrom: release.effective_from, createdAt: release.created_at,
+      approvedAt: release.approved_at, publishedAt: release.published_at, retiredAt: release.retired_at, rowVersion: release.row_version,
+    })),
+  })) };
+}
+
 export async function loadPublicationDashboard(): Promise<PublicationResult<PublicationDashboard>> {
   const access = await accessContext();
   if (access.status === "error") return access;
-  const librariesQuery = await access.client.from("catalog_libraries").select("id,code,status,row_version,current_release_id").order("code").limit(11);
-  if (librariesQuery.error) return { status: "error", reason: librariesQuery.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
-  const libraries = z.array(libraryRow).max(11).safeParse(librariesQuery.data);
-  if (!libraries.success || libraries.data.length > 10) return { status: "error", reason: "INVALID_RESPONSE" };
-  const libraryIds = libraries.data.map((library) => library.id);
-  const releasesQuery = libraryIds.length === 0 ? { data: [], error: null } : await access.client.from("catalog_releases")
-    .select("id,library_id,release_key,status,snapshot_hash,based_on_release_id,rollback_target_release_id,requires_central_approval,effective_from,created_at,approved_at,published_at,retired_at,row_version")
-    .in("library_id", libraryIds).order("created_at", { ascending: false }).limit(201);
-  if (releasesQuery.error) return { status: "error", reason: releasesQuery.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
-  const releases = z.array(releaseRow).max(201).safeParse(releasesQuery.data);
-  if (!releases.success || releases.data.some((release) => !libraryIds.includes(release.library_id))) return { status: "error", reason: "INVALID_RESPONSE" };
-  const visibleReleases = releases.data.slice(0, 200);
-  return { status: "success", value: {
-    aal: access.aal, canRollback: access.canRollback, historyTruncated: releases.data.length > 200,
-    libraries: libraries.data.map((library) => ({
-      id: library.id, code: library.code, status: library.status, rowVersion: library.row_version, currentReleaseId: library.current_release_id,
-      releases: visibleReleases.filter((release) => release.library_id === library.id).map((release) => ({
-        id: release.id, libraryId: release.library_id, releaseKey: release.release_key, status: release.status, snapshotHash: release.snapshot_hash,
-        basedOnReleaseId: release.based_on_release_id, rollbackTargetReleaseId: release.rollback_target_release_id,
-        requiresCentralApproval: release.requires_central_approval, effectiveFrom: release.effective_from, createdAt: release.created_at,
-        approvedAt: release.approved_at, publishedAt: release.published_at, retiredAt: release.retired_at, rowVersion: release.row_version,
-      })),
-    })),
-  } };
+  const snapshot = await readPublicationSnapshot(access.client);
+  if (snapshot.status === "error") return snapshot;
+  return { status: "success", value: { aal: access.aal, canRollback: access.canRollback, historyTruncated: snapshot.historyTruncated, libraries: snapshot.libraries } };
 }
 
 export async function rollbackCatalogRelease(input: unknown): Promise<PublicationResult<{ releaseId: string }>> {

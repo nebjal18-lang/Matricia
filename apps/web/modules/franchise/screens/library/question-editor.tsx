@@ -2,7 +2,7 @@
 import { FranchiseDuplicateQuestionForm } from "./question-duplicate";
 import { editorialFailureMessage } from "./command-errors";
 import{useActionState,useState,useRef}from"react";
-import{getBuilderMessages}from"@/modules/admin/screens/catalogue/messages";
+import{getBuilderMessages}from"@/modules/shared/catalogue-builders/messages";
 import{getRuleValidationMessages}from"@/modules/admin/screens/catalogue/validation/messages";
 import type{FranchiseQuestionDetail}from"@/modules/franchise/data/library/question-detail";
 import{saveFranchiseQuestion,type QuestionEditorState}from"./question-editor-actions";
