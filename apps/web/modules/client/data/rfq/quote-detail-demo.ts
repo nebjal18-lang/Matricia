@@ -26,7 +26,6 @@ export function demoClientOfferDetail(input: {
     : `/${input.locale}/client/demandes/${input.requestId}${q}`;
   const documentsHref = `/${input.locale}/client/documents${q}`;
   const days = slot === "a" ? 42 : 56;
-  const start = "2026-10-06";
   return {
     quoteId: input.quoteId,
     quoteVersionId: `${input.quoteId}-version`,

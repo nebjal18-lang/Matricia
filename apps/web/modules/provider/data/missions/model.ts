@@ -1,3 +1,4 @@
+import{formatSignedMinorLocalized}from"@/modules/shared/lib/commercial-documents/money";
 import { z } from "zod";
 
 const uuid = z.string().uuid();
@@ -43,12 +44,14 @@ export const checklistCompletionSchema = z.object({
 });
 
 export type ProviderMissionDashboard = {
+  listPage?:number;
+  hasMoreMissions?:boolean;
   organizationId: string;
   organizationName: string;
   missions: Array<{
-    id: string; contractId: string; status: string; startedAt: string | null; completedAt: string | null;
+    id: string; title?:string;contractId: string; status: string; startedAt: string | null; completedAt: string | null;
     contract: { currentVersion: number; priceMinor: string; currency: string; contentHash: string } | null;
-    milestones: Array<{ id: string; key: string; title: string; status: string; dueAt: string | null; rowVersion: number }>;
+    milestones: Array<{ id: string; key: string; title: string; status: string; dueAt: string | null; dueAtLabel?:string|null;rowVersion: number }>;
     checklistItems: Array<{ id:string; key:string; label:string; instructions:string|null; proofRequired:boolean; allowedProofTypes:string[]; status:string; templateVersion:number|null; templateHash:string|null; proofOptions:Array<{id:string;type:string}> }>;
     deliverables: Array<{ id:string; key:string; label:string; proofRequired:boolean; status:string; currentVersion:number; versions:Array<{id:string;version:number;description:string;submittedAt:string;contentHash:string;proofCount:number;proofScanStatus:"NONE"|"PENDING"|"CLEAN"|"INFECTED"|"ERROR"}> }>;
   }>;
@@ -64,12 +67,7 @@ export const providerMissionRows = {
   checklist: z.object({ id:uuid, mission_id:uuid, item_key:z.string(), label_fr:z.string(), label_ar:z.string(), instructions_fr:z.string().nullable(), instructions_ar:z.string().nullable(), proof_required:z.boolean(), allowed_proof_types:z.array(z.string()), status:z.string(), checklist_snapshot_id:uuid.nullable() }),
   checklistSnapshot: z.object({ id:uuid, mission_id:uuid, template_version:z.number().int().positive(), template_content_hash:z.string().regex(/^[0-9a-f]{64}$/) }),
   contract: z.object({ id: uuid, current_version: z.number().int().positive() }),
-  contractVersion: z.object({ contract_id: uuid, version: z.number().int().positive(), price_minor: exactMinor, currency: z.string().regex(/^[A-Z]{3}$/), content_hash: z.string().regex(/^[0-9a-f]{64}$/) }),
+  contractVersion: z.object({ contract_id: uuid, version: z.number().int().positive(), price_minor: exactMinor, currency: z.string().regex(/^[A-Z]{3}$/), content_hash: z.string().regex(/^[0-9a-f]{64}$/),request_snapshot:z.record(z.string(),z.unknown()).optional() }),
 };
 
-export function formatExactMinor(value: string, currency: string, locale: "fr" | "ar") {
-  const amount = BigInt(value), hundred = BigInt(100), whole = amount / hundred, fraction = (amount % hundred).toString().padStart(2, "0");
-  const tag = locale === "ar" ? "ar-MA" : "fr-MA";
-  const integer = new Intl.NumberFormat(tag, { maximumFractionDigits: 0 }).format(whole);
-  return new Intl.NumberFormat(tag, { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).formatToParts(0).map((part) => part.type === "integer" ? integer : part.type === "fraction" ? fraction : part.value).join("");
-}
+export function formatExactMinor(value:string,currency:string,locale:"fr"|"ar"){return formatSignedMinorLocalized(value,currency,locale);}

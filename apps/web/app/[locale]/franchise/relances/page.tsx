@@ -4,26 +4,26 @@ import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { loadFranchiseFollowups } from "@/modules/franchise/data/followups/repository";
-import { buildFranchiseSpaceBoard } from "@/modules/franchise/data/spaces/live";
 import { FollowupsBoard } from "@/modules/franchise/screens/spaces/boards";
 import { FollowupPanel } from "@/modules/franchise/screens/relances/panel";
 import { getFollowupMessages } from "@/modules/franchise/screens/relances/messages";
-import { franchiseMandateName, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
+import { franchiseMandateName, loadFranchiseSpaceFromLibrary, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
-export default async function FranchiseFollowupsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+export default async function FranchiseFollowupsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result: library } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId });
+  const { space, result: library } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const m = getFollowupMessages(locale);
-  const r = await loadFranchiseFollowups();
+  const r = await loadFranchiseFollowups(library.status === "success" ? library.workspace.mandate.franchiseId : "00000000-0000-4000-8000-000000000000");
   if (r.status === "error" && r.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/franchise/relances` }));
   const c = franchiseCopy(locale);
   const mandateName = franchiseMandateName(library);
+  const board=await loadFranchiseSpaceFromLibrary({locale,query:space.selectedQuery,result:library});
   return (
     <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="followups" title={c.folTitle} lead={c.folLead} kicker={c.kicker} mandateName={mandateName}>
-      <FollowupsBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={r.status === "success" ? buildFranchiseSpaceBoard({ locale, query: space.selectedQuery, libraryName: mandateName, followups: r.dashboard }) : undefined} />
+      <FollowupsBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={board} />
       <details id="relances" className="client-ops" open>
         <summary>{c.opsFollow}</summary>
         {r.status === "error" ? (

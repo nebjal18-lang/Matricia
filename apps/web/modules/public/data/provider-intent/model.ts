@@ -2,6 +2,7 @@ import servicesSource from "@/modules/public/data/catalogue/services.json";
 import categoryMapSource from "./category-map.json";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getStaticPublicCatalogue } from "@/modules/public/data/catalogue/static-projection";
+import { publicCatalogueLabel } from "@/modules/public/data/catalogue/localized-label";
 
 export const PROVIDER_INTENT_KEY = "matricia.provider-intent.v2";
 export const PROVIDER_INTENT_LEGACY_KEY = "matricia.provider-intent";
@@ -42,8 +43,8 @@ export function getPublicProviderTaxonomy(locale: Locale) {
       for (const service of services.filter((candidate) => candidate.libraryCode === library.code)) {
         const category = (categoryMapSource as Record<string, { code: string; name: string }>)[service.code];
         if (!category) continue;
-        const group = categories.get(category.code) ?? { code: category.code, name: category.name, services: [] };
-        group.services.push(service);
+        const group = categories.get(category.code) ?? { code: category.code, name: publicCatalogueLabel(category.name, locale), services: [] };
+        group.services.push({ ...service, name: publicCatalogueLabel(service.name, locale) });
         categories.set(category.code, group);
       }
       return { code: library.code, name: library.name, categories: [...categories.values()] };
@@ -85,7 +86,7 @@ export function parseProviderIntentDraft(raw: string | null, now = new Date()): 
 }
 
 export function summarizeProviderIntent(draft: ProviderIntentDraft, locale: Locale): string {
-  const selected = draft.serviceCodes.map((code) => serviceByCode.get(code)?.name).filter((name): name is string => Boolean(name));
+  const selected = draft.serviceCodes.map((code) => serviceByCode.get(code)?.name).filter((name): name is string => Boolean(name)).map((name) => publicCatalogueLabel(name, locale));
   const lines = locale === "ar"
     ? [selected.length ? `الخدمات المختارة: ${selected.join("، ")}` : "", draft.otherService ? `خدمة غير مدرجة: ${draft.otherService}` : ""]
     : [selected.length ? `Services sélectionnés : ${selected.join(", ")}` : "", draft.otherService ? `Service non répertorié : ${draft.otherService}` : ""];

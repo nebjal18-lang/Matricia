@@ -1,3 +1,7 @@
+import {randomUUID} from "node:crypto";
+import {getSupabaseServerClient} from "@/modules/shared/lib/supabase/server";
+import {CanonicalOrganizationIdentityPanel} from "@/modules/admin/screens/organization-identity/panel";
+import {organizationIdentityContextSchema} from "@/modules/admin/screens/organization-identity/model";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
@@ -25,6 +29,8 @@ export default async function AdminEnterpriseEditPage({
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
   const org = result.status === "success" ? result.value.organization : null;
+  const identityResponse=org?await(await getSupabaseServerClient()).rpc("get_admin_organization_identity_edit_context_v1",{p_organization_id:org.id}):null;
+  const identityContext=organizationIdentityContextSchema.safeParse(identityResponse?.data);
 
   return (
     <AdminAppShell
@@ -50,7 +56,8 @@ export default async function AdminEnterpriseEditPage({
         </main>
       ) : (
         <main className="client-page">
-          <EditOrganizationForm
+          {identityContext.success&&!identityResponse?.error?<CanonicalOrganizationIdentityPanel locale={locale}data={identityContext.data}requestKey={randomUUID()}/>:<p>{locale === "ar" ? "مراجعة الهوية القانونية غير متاحة بهذه الصلاحيات؛ يلزم مسؤول مركزي ومصادقة ثنائية." : "Révision juridique indisponible avec ces habilitations : un responsable central avec MFA est requis."}</p>}
+          <EditOrganizationForm idempotencyKey={randomUUID()}
             locale={locale}
             query={space.selectedQuery}
             organizationId={org.id}
@@ -58,6 +65,8 @@ export default async function AdminEnterpriseEditPage({
             legalName={org.legal_name}
             status={org.status}
             country={org.country_code}
+            details={org.administration_details}
+            rowVersion={org.row_version}
             updatedAt={org.updated_at}
           />
         </main>

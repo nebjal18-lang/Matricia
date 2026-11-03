@@ -1,28 +1,30 @@
 import { randomUUID } from "node:crypto";
-import { notFound, redirect } from "next/navigation";
-import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { loadMoroccoTaxDashboard } from "@/modules/shared/lib/morocco-tax/repository";
 import { getMoroccoTaxMessages } from "@/modules/admin/screens/fiscalite-maroc/messages";
 import { TaxPanel } from "@/modules/admin/screens/fiscalite-maroc/tax-panel";
-import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { sensitivePageContext } from "@/modules/admin/ui/sensitive-page-context";
 
 export default async function MoroccoTaxPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const m = getMoroccoTaxMessages(locale);
+  const context = await sensitivePageContext({ locale, path: "fiscalite-maroc", active: "catalog", title: m.title, lead: m.subtitle, roles: ["SUPER_ADMIN", "FINANCE_MANAGER"] });
+  if (context.status === "blocked") return context.view;
   const result = await loadMoroccoTaxDashboard();
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/fiscalite-maroc` }));
   const keys: Record<string, string> = { proposal: randomUUID() };
   if (result.status === "success") result.dashboard.rules.forEach((rule) => { keys[rule.id] = randomUUID(); });
-  return (
-    <AdminModulePage locale={locale} active="catalog" path="fiscalite-maroc" title={m.title} lead={m.subtitle}>
+  return context.wrap(
+    <main className="client-page">
+      <Link href={`/${locale}/administration/classification-fiscale`} className="inline-flex min-h-11 items-center rounded border px-3 py-2">{locale === "ar" ? "ربط الخدمات بفئات ضريبية معتمدة" : "Associer les services aux catégories fiscales validées"}</Link>
       {result.status === "error" ? (
-        <Alert variant="destructive"><AlertTitle>{m.unavailable}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
+        <WorkspaceFailure locale={locale} reason={result.reason === "AAL2_REQUIRED" ? "MFA_REQUIRED" : result.reason} returnPath={context.selfPath} />
       ) : (
         <TaxPanel dashboard={result.dashboard} locale={locale} m={m} keys={keys} />
       )}
-    </AdminModulePage>
+    </main>
   );
 }

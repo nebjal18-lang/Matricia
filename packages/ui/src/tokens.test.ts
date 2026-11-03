@@ -38,9 +38,17 @@ describe("Design Authority A tokens", () => {
 
   it("garde les couleurs TypeScript et CSS synchronisées", () => {
     const css = readFileSync(new URL("./tokens.css", import.meta.url), "utf8").toLowerCase();
+    const declarations = new Map([...css.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((match) => [match[1]!, match[2]!.trim()]));
+    function resolveColor(name: string, seen = new Set<string>()): string | undefined {
+      if (seen.has(name)) throw new Error(`CSS_VARIABLE_CYCLE:${name}`);
+      seen.add(name);
+      const value = declarations.get(name);
+      const alias = value?.match(/^var\((--[\w-]+)\)$/)?.[1];
+      return alias ? resolveColor(alias, seen) : value;
+    }
     for (const [name, value] of Object.entries(designTokenCssVariables)) {
       if (!name.startsWith("--mat-color-")) continue;
-      expect(css).toContain(`${name}: ${value.toLowerCase()};`);
+      expect(resolveColor(name), name).toBe(value.toLowerCase());
     }
   });
 });

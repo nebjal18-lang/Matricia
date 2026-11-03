@@ -18,7 +18,7 @@ export default async function ProviderSettingsPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/parametres` }));
-  const [dash, notif] = await Promise.all([loadProviderDashboard(), loadNotificationCenter(locale)]);
+  const [dash, notif] = await Promise.all([loadProviderDashboard(query.organizationId), loadNotificationCenter(locale)]);
   if (dash.status === "error" && dash.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/parametres` }));
   const title = locale === "ar" ? "التفضيلات" : "Préférences";
   const lead = locale === "ar"
@@ -27,7 +27,7 @@ export default async function ProviderSettingsPage({
   return (
     <ProviderAppShell
       locale={locale}
-      selectedQuery={space.selectedQuery}
+      organizations={space.organizations} selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
       active="settings"

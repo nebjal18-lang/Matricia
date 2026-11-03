@@ -1,0 +1,46 @@
+begin;
+set local search_path=public,extensions;
+select no_plan();
+update public.notification_deliveries set next_attempt_at=clock_timestamp()+interval'1 day'where status in('PENDING','FAILED');
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('18500000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','p185@example.invalid','',now(),'{}','{}',now(),now());
+insert into public.organizations(id,legal_name,display_name,status,created_by)values('18510000-0000-4000-8000-000000000001','P185 SARL','P185','ACTIVE','18500000-0000-4000-8000-000000000001');
+insert into public.organization_memberships(id,organization_id,user_id,status,activated_at)values('18511000-0000-4000-8000-000000000001','18510000-0000-4000-8000-000000000001','18500000-0000-4000-8000-000000000001','ACTIVE',clock_timestamp());
+insert into public.organization_member_roles(membership_id,role_code)values('18511000-0000-4000-8000-000000000001','CLIENT_OWNER');
+insert into public.notification_preference_categories(code,label_fr,label_ar,mandatory)values('P185_RUNTIME','Runtime P185','تشغيل P185',true);
+insert into public.notification_mandatory_policy_versions(id,category_code,version,legal_basis,legal_basis_reference,status,effective_from,content_hash)values('18512000-0000-4000-8000-000000000001','P185_RUNTIME',1,'LEGAL_OBLIGATION','P185-LEGAL-BASIS','ACTIVE',clock_timestamp()-interval'1 minute',repeat('d',64));
+insert into public.notification_template_versions(id,template_code,version,event_type,category_code,locale,subject_template,body_template,priority,mandatory,channels,status,effective_from,content_hash)values('18520000-0000-4000-8000-000000000001','P185.RUNTIME',1,'P185RuntimeEvent','P185_RUNTIME','fr-MA','Sujet P185','Corps P185','CRITICAL',true,array['EMAIL'],'ACTIVE',clock_timestamp()-interval'1 minute',repeat('a',64));
+update public.notification_retry_policy_versions set status='RETIRED'where status='ACTIVE';
+insert into public.notification_retry_policy_versions(id,version,max_attempts,base_backoff_seconds,max_backoff_seconds,status,effective_from,content_hash)values('18530000-0000-4000-8000-000000000001',185,2,1,2,'ACTIVE',clock_timestamp()-interval'1 minute',repeat('b',64));
+insert into public.notification_instances(id,recipient_user_id,organization_id,template_version_id,category_code,event_type,locale,subject,body,priority,mandatory,mandatory_policy_version_id,legal_basis,deduplication_key,source_aggregate_type,source_aggregate_id,variables_snapshot,correlation_id)values('18540000-0000-4000-8000-000000000001','18500000-0000-4000-8000-000000000001','18510000-0000-4000-8000-000000000001','18520000-0000-4000-8000-000000000001','P185_RUNTIME','P185RuntimeEvent','fr-MA','Sujet P185','Corps P185','CRITICAL',true,'18512000-0000-4000-8000-000000000001','LEGAL_OBLIGATION','p185-runtime-dedup','test','185','{}','18550000-0000-4000-8000-000000000001');
+insert into public.notification_deliveries(id,notification_id,channel,delivery_mode,status,next_attempt_at)values('18560000-0000-4000-8000-000000000001','18540000-0000-4000-8000-000000000001','EMAIL','IMMEDIATE','PENDING',clock_timestamp()-interval'1 minute');
+
+create temporary table p185_claim(value jsonb);
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+insert into p185_claim select*from public.claim_notification_deliveries_v1('p185-worker',1,60);
+select is(public.authorize_notification_delivery_send_v1('18560000-0000-4000-8000-000000000001',(select(value->>'lease_token')::uuid from p185_claim),'p185-worker')->>'authorized','true','legal mandatory email is authorized before provider request');
+select is(public.record_notification_delivery_worker_result_v1('18560000-0000-4000-8000-000000000001',(select(value->>'lease_token')::uuid from p185_claim),'p185-worker','SENT','message-185',null,jsonb_build_object('adapter','EMAIL_RESEND','recipientHash',encode(digest('p185@example.invalid','sha256'),'hex')),'receipt-attempt-185')->>'status','SENT','provider acceptance is SENT, not delivered');
+select ok((select terminal_at is null and next_attempt_at is null from public.notification_deliveries where id='18560000-0000-4000-8000-000000000001'),'accepted email awaits asynchronous receipt without a retry');
+select is(public.record_resend_receipt_v1('svix-185-delivered','message-185','DELIVERED',repeat('a',64),clock_timestamp())->>'outcome','EMAIL_RECEIPT_RECORDED','verified delivered receipt accepted');
+select is((select status from public.notification_deliveries where id='18560000-0000-4000-8000-000000000001'),'DELIVERED','only the receipt confirms delivery');
+select is(public.record_resend_receipt_v1('svix-185-delivered','message-185','DELIVERED',repeat('a',64),clock_timestamp())->>'outcome','EMAIL_RECEIPT_REPLAYED','same signed receipt is idempotent');
+select throws_ok($$select public.record_resend_receipt_v1('svix-185-delivered','message-185','DELIVERED',repeat('b',64),clock_timestamp())$$,'22000','EMAIL_RECEIPT_REPLAY_MISMATCH','modified receipt replay rejected');
+select public.record_resend_receipt_v1('svix-185-bounced','message-185','BOUNCED',repeat('c',64),clock_timestamp());
+select is((select status from public.notification_deliveries where id='18560000-0000-4000-8000-000000000001'),'DEAD_LETTER','bounce is terminal and visible');
+select is((select count(*)from public.notification_email_suppressions where user_id='18500000-0000-4000-8000-000000000001'),1::bigint,'invalid mailbox is suppressed once');
+select public.record_resend_receipt_v1('svix-185-late-delivery','message-185','DELIVERED',repeat('d',64),clock_timestamp());
+select is((select status from public.notification_deliveries where id='18560000-0000-4000-8000-000000000001'),'DEAD_LETTER','late delivered receipt cannot undo an earlier bounce');
+select throws_ok($$update public.notification_provider_receipts set status='DELIVERED'where provider_event_id='svix-185-bounced'$$,'55000','IMMUTABLE_NOTIFICATION_RECEIPT','provider receipt inbox is immutable');
+-- A later notification shares the same verified recipient, not the original provider ID.
+insert into public.notification_instances(id,recipient_user_id,organization_id,template_version_id,category_code,event_type,locale,subject,body,priority,mandatory,mandatory_policy_version_id,legal_basis,deduplication_key,source_aggregate_type,source_aggregate_id,variables_snapshot,correlation_id)select '18540000-0000-4000-8000-000000000002',recipient_user_id,organization_id,template_version_id,category_code,event_type,locale,subject,body,priority,mandatory,mandatory_policy_version_id,legal_basis,'p185-later-email',source_aggregate_type,source_aggregate_id,variables_snapshot,correlation_id from public.notification_instances where id='18540000-0000-4000-8000-000000000001';
+insert into public.notification_deliveries(id,notification_id,channel,delivery_mode,status,next_attempt_at)values('18560000-0000-4000-8000-000000000002','18540000-0000-4000-8000-000000000002','EMAIL','IMMEDIATE','PENDING',clock_timestamp());
+delete from p185_claim;
+insert into p185_claim select*from public.claim_notification_deliveries_v1('p185-worker',1,60);
+select throws_ok($$select public.authorize_notification_delivery_send_v1('18560000-0000-4000-8000-000000000002','18550000-0000-4000-8000-000000000099','p185-worker')$$,'40001','NOTIFICATION_LEASE_INVALID','suppression cannot bypass lease validation');
+select is(public.authorize_notification_delivery_send_v1('18560000-0000-4000-8000-000000000002',(select(value->>'lease_token')::uuid from p185_claim),'p185-worker')->>'reason','EMAIL_RECIPIENT_SUPPRESSED','later sends to invalid mailbox are blocked before external effect');
+select is((select status from public.notification_deliveries where id='18560000-0000-4000-8000-000000000002'),'SKIPPED','suppression closes the claimed attempt without dispatch');
+select is((select count(*)from public.audit_events where action='notification.delivery.send_blocked'and resource_id='18560000-0000-4000-8000-000000000002'),1::bigint,'suppressed send is audited');
+-- A verified email address change does not inherit a bounce for the old mailbox.
+update auth.users set email='p185-new@example.invalid'where id='18500000-0000-4000-8000-000000000001';
+select ok(not exists(select 1 from public.notification_email_suppressions where user_id='18500000-0000-4000-8000-000000000001'and mailbox_hash=encode(digest('p185-new@example.invalid','sha256'),'hex')),'suppression is bound to exact hashed mailbox');
+select * from finish();
+rollback;

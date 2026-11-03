@@ -295,3 +295,8 @@ describe("client space boards", () => {
     expect(`${requests}${missions}${documents}${finances}`).not.toMatch(/exemple illustratif/i);
   });
 });
+
+describe("server-filtered message pages",()=>{
+ it("keeps a conversation matched by its private message body even when subject differs",()=>{const html=renderToStaticMarkup(<MessagesBoard locale="fr" query="?organizationId=own" search="texte dans le corps" serverFiltered threads={[{id:"old-thread",title:"Ancien dossier",meta:"Prestataire",href:"/fr/messagerie?fil=old-thread"}]}><p>Conversation disponible</p></MessagesBoard>);expect(html).toContain("Ancien dossier");expect(html).toContain("Conversation disponible");});
+ it("shows a failed inbox independently from its healthy open conversation",()=>{const html=renderToStaticMarkup(<MessagesBoard locale="fr" query="" serverFiltered inboxError threads={[]}><p>Conversation disponible</p></MessagesBoard>);expect(html).toContain('role="alert"');expect(html).toContain("Conversation disponible");expect(html).not.toContain("Aucun élément à afficher");});
+});

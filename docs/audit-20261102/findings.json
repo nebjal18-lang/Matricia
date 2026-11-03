@@ -1,0 +1,603 @@
+{
+  "auditDate": "2026-11-02",
+  "auditedUrl": "https://matricia-git-codex-consoli-b22c97-epitaphemarket-5584s-projects.vercel.app/fr/administration/entreprises/nouvelle",
+  "sourceDeploymentSha": null,
+  "sourceDeploymentShaReason": "Preview denied CONNECT403 by current network policy; user does not know deployment SHA.",
+  "workingBranch": "codex/audit-m01-m30-20261102",
+  "baseAvailable": "39552d7c4efdba6665c710de416cd06ea827690b",
+  "upstream": "1ebf3eab3e89a0043355e343df1f16cc8c6f9092",
+  "remoteProductionModified": false,
+  "findings": [
+    {
+      "id": "M01",
+      "status": "Déjà corrigé, confirmation locale",
+      "reproducedInCurrentCode": false,
+      "correction": "Refus et incident ne deviennent plus liste vide ; pagination et recherche propres au périmètre.",
+      "files": [
+        "admin/data/spaces/actors-repository.ts",
+        "admin/ui/admin-read-error.tsx"
+      ],
+      "verification": "Tests régression + GoTrue/AAL2, recherche et ouverture organisation native",
+      "remainingRisk": "Préversion distante inaccessible.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/data/spaces/actors-repository.ts",
+        "apps/web/modules/admin/ui/admin-read-error.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M02",
+      "status": "Corrigé ; recette métier partielle",
+      "reproducedInCurrentCode": true,
+      "correction": "Sources de files indépendantes, permissions et erreur/partiel explicites ; aucun tableau zéro après panne.",
+      "files": [
+        "admin/data/spaces/space-data.ts",
+        "admin/screens/spaces/render-admin-space.tsx"
+      ],
+      "verification": "Tests des sources et des neuf files ; guards serveur conservés",
+      "remainingRisk": "Chaîne navigateur diagnostic→mission avec dossiers métier natifs non certifiée.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/data/spaces/space-data.ts",
+        "apps/web/modules/admin/screens/spaces/render-admin-space.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M03",
+      "status": "Corrigé ; données métier partielles",
+      "reproducedInCurrentCode": true,
+      "correction": "Favoris demandait request_number inexistant ; contexte et services Auth ne masquent plus les incidents ; crédits respectent le tenant choisi et le refus financier.",
+      "files": [
+        "client/data/spaces/context.ts",
+        "provider/data/reputation/repository.ts",
+        "shared/lib/credits-wallet"
+      ],
+      "verification": "Tests positifs Favoris, tenant étranger, Auth503/401, crédits403/503 ; routes natives",
+      "remainingRisk": "Détails réels, paiements et documents liés ne sont pas certifiés par des listes vides autorisées.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/client/data/spaces/context.ts",
+        "apps/web/modules/provider/data/reputation/repository.ts",
+        "apps/web/modules/shared/lib/credits-wallet/repository.test.ts",
+        "apps/web/modules/shared/lib/credits-wallet/repository.ts",
+        "apps/web/modules/shared/lib/credits-wallet/server-repository.test.ts",
+        "apps/web/modules/shared/lib/credits-wallet/server-repository.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M04",
+      "status": "Corrigé ; recette métier à compléter",
+      "reproducedInCurrentCode": true,
+      "correction": "Relation UNIQUE provider_qualifications lue objet/null ; absence de membership distinguée d’une projection invalide ; coffre indépendant du catalogue et même tenant sur quatre pages.",
+      "files": [
+        "provider/data/qualification/repository.ts",
+        "provider/data/spaces/context.ts",
+        "provider/ui/provider-read-state.tsx"
+      ],
+      "verification": "227 tests Provider + régressions Auth ; readiness navigateur",
+      "remainingRisk": "Dossier qualifié, consultation avec devis et téléchargement d’un vrai document autorisé non certifiés.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/provider/data/qualification/repository.ts",
+        "apps/web/modules/provider/data/spaces/context.ts",
+        "apps/web/modules/provider/ui/provider-read-state.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M05",
+      "status": "Corrigé : absence de mandat explicite",
+      "reproducedInCurrentCode": true,
+      "correction": "NO_MANDATE distinct de FORBIDDEN/QUERY_FAILED ; sept pages expliquent candidature/rattachement/mandat signé au lieu d’une panne fictive.",
+      "files": [
+        "franchise/data/library/workspace.ts",
+        "franchise/ui/franchise-access-state.tsx"
+      ],
+      "verification": "51 tests contexte/pages/gouvernance/marketing ; readiness navigateur",
+      "remainingRisk": "Aucun mandat signé de test ni recette éditoriale complète créé.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/franchise/data/library/workspace.ts",
+        "apps/web/modules/franchise/ui/franchise-access-state.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M06",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Les files, planning et gouvernance ne concluent plus zéro/aucune échéance/mandat actif quand la source échoue.",
+      "files": [
+        "admin/screens/spaces/render-admin-space.tsx",
+        "app/[locale]/sous-traitant/planning/page.tsx",
+        "app/[locale]/franchise/gouvernance/page.tsx"
+      ],
+      "verification": "Tests FR/AR erreurs, partiel, refus et vide réussi",
+      "remainingRisk": "Absence de panne distante reproductible ; tests de panne injectée au niveau des contrats.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/franchise/gouvernance/page.tsx",
+        "apps/web/app/[locale]/sous-traitant/planning/page.tsx",
+        "apps/web/modules/admin/screens/spaces/render-admin-space.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M07",
+      "status": "Corrigé par clarification du workflow",
+      "reproducedInCurrentCode": true,
+      "correction": "Importer renommé Préparer un partage ; choix d’un document existant vers le consentement réel. Le propriétaire importe dans son coffre.",
+      "files": [
+        "admin/data/spaces/screen-catalog.ts",
+        "admin/screens/spaces/creation-preparation.tsx"
+      ],
+      "verification": "Tests CTA et préparation/consentement ; aucun upload prétendu",
+      "remainingRisk": "L’import propriétaire et l’antivirus n’ont pas été exécutés dans cette recette.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/data/spaces/screen-catalog.ts",
+        "apps/web/modules/admin/screens/spaces/creation-preparation.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M08",
+      "status": "Corrigé ; envoi non exécuté",
+      "reproducedInCurrentCode": true,
+      "correction": "Email, organisation et rôle prestataire canonique ; demande en revue distincte de l’invitation effective ; signaux Next conservés.",
+      "files": [
+        "admin/screens/spaces/provider-invitation.tsx",
+        "app/[locale]/invitations/actions.ts"
+      ],
+      "verification": "Tests destinataire/organisation/rôle, erreurs Auth et Next ; aucun destinataire réel contacté",
+      "remainingRisk": "Aucun envoi ni acceptation d’invitation native certifié.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/invitations/actions.ts",
+        "apps/web/modules/admin/screens/spaces/provider-invitation.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M09",
+      "status": "Corrigé par parcours métier explicite",
+      "reproducedInCurrentCode": true,
+      "correction": "Fausses créations génériques remplacées par préparation/revue avec sources réelles et liens vers les créations Client/Prestataire autorisées.",
+      "files": [
+        "admin/screens/spaces/creation-preparation.tsx",
+        "admin/data/spaces/screen-catalog.ts"
+      ],
+      "verification": "Tests SELECTED/ACTIVE, source et absence de mutation ; revue indépendante",
+      "remainingRisk": "Aucun constructeur Admin autonome ajouté ; chaîne métier complète non certifiée.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/data/spaces/screen-catalog.ts",
+        "apps/web/modules/admin/screens/spaces/creation-preparation.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M10",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Ancres, reprise et langue conservent library/service.",
+      "files": [
+        "app/[locale]/administration/catalogue/page.tsx"
+      ],
+      "verification": "Tests FR/AR de conservation des deux paramètres et sections",
+      "remainingRisk": "Changement interactif sur catalogue mandaté distant non certifié.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/administration/catalogue/page.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M11",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Recherche GET fonctionnelle, pages/dossiers déjà autorisés/actions, périmètre et borne explicités ; aucun moteur exhaustif prétendu.",
+      "files": [
+        "admin/screens/command-center/search.tsx",
+        "app/[locale]/administration/command-center/page.tsx"
+      ],
+      "verification": "Tests missions, absence de résultat, filtres et scope",
+      "remainingRisk": "Pas de recherche plein-texte globale ajoutée.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/administration/command-center/page.tsx",
+        "apps/web/modules/admin/screens/command-center/search.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M12",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "IDs stables et libellés réels pour huit questions, options et résumé.",
+      "files": [
+        "public/data/journey/diagnostic-contract.ts",
+        "public/ui/journey/prediagnostic-flow.tsx"
+      ],
+      "verification": "Tests des huit questions, stockage et scénario navigateur FR/AR",
+      "remainingRisk": "Préversion auditée non accessible.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/data/journey/diagnostic-contract.ts",
+        "apps/web/modules/public/ui/journey/prediagnostic-flow.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M13",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Le détail cite question et réponse saisies ; constat limité aux faits déclarés ; recommandations séparées.",
+      "files": [
+        "public/data/journey/diagnostic-priorities.ts",
+        "public/ui/journey/prediagnostic-phases.tsx"
+      ],
+      "verification": "Tests SSR unknown/absent/no/old FR/AR + scénario navigateur ; revue indépendante",
+      "remainingRisk": "Pas d’affirmation d’audit professionnel à partir d’un prédiagnostic.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/data/journey/diagnostic-priorities.ts",
+        "apps/web/modules/public/ui/journey/prediagnostic-phases.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M14",
+      "status": "Bloqué par contenu approuvé manquant",
+      "reproducedInCurrentCode": true,
+      "correction": "Repli français explicitement signalé en AR ; labels approuvés utilisables, recherche FR/AR ; texte libre inchangé.",
+      "files": [
+        "public/data/catalogue/localized-label.ts",
+        "public/data/provider-intent/model.ts"
+      ],
+      "verification": "Tests localisation/recherche/reprise FR→AR ; manifeste des contenus absents",
+      "remainingRisk": "200 services et 79 catégories nécessitent leurs noms arabes approuvés.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/data/catalogue/localized-label.ts",
+        "apps/web/modules/public/data/provider-intent/model.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M15",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Empilement du menu compte au-dessus du masthead et de ses actions.",
+      "files": [
+        "admin/ui/admin-experience.css"
+      ],
+      "verification": "Tests style + menu natif clavier/clic et contrôle elementFromPoint sur quatre largeurs FR/AR",
+      "remainingRisk": "Audit accessibilité complet non certifié.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/ui/admin-experience.css"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M16",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "next autorisé transmis en démo/OTP, rôle validé côté serveur ; returnPath complet avant MFA, secours explicite.",
+      "files": [
+        "app/[locale]/connexion",
+        "admin/data/spaces/context.ts",
+        "admin/screens/spaces/render-admin-space.tsx"
+      ],
+      "verification": "Tests auth, rôle interdit, next externe et AAL1 sur détail/filtres FR/AR",
+      "remainingRisk": "Le formulaire OTP réel en navigateur n’a pas été recetté dans ce lot.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/connexion/actions.test.ts",
+        "apps/web/app/[locale]/connexion/actions.ts",
+        "apps/web/app/[locale]/connexion/demo-access.test.tsx",
+        "apps/web/app/[locale]/connexion/demo-access.tsx",
+        "apps/web/app/[locale]/connexion/demo-actions.test.ts",
+        "apps/web/app/[locale]/connexion/demo-actions.ts",
+        "apps/web/app/[locale]/connexion/page.tsx",
+        "apps/web/modules/admin/data/spaces/context.ts",
+        "apps/web/modules/admin/screens/spaces/render-admin-space.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M17",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Shell issu des rôles et tenant couplés ; langue conserve le chemin ; styles sur navigation directe ; sécurité personnelle reste accessible si annuaire en panne.",
+      "files": [
+        "shared/ui/connected-app-shell.tsx",
+        "shared/lib/auth/workspace-navigation-server.ts",
+        "app/[locale]/securite"
+      ],
+      "verification": "Tests Client A/Provider B, refus A explicite, styles, session et panne ; défaut annuaire opt-in",
+      "remainingRisk": "Recette MFA personnelle multi-rôles complète non exécutée en navigateur.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/securite/compte/page.tsx",
+        "apps/web/app/[locale]/securite/sessions/page.tsx",
+        "apps/web/modules/shared/lib/auth/workspace-navigation-server.ts",
+        "apps/web/modules/shared/ui/connected-app-shell.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M18",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Précontrôle rôles/MFA avant RPC sensibles, réponses distinctes et CTA sûrs ; erreurs SQL sensibles non affichées.",
+      "files": [
+        "admin/ui/sensitive-page-context.tsx",
+        "shared/ui/workspace-failure.tsx",
+        "admin/ui/sensitive-page-context.tsx"
+      ],
+      "verification": "Tests AAL1/AAL2, rôle refusé, query503 et absence d’appel métier avant MFA",
+      "remainingRisk": "Opérations sensibles de mutation non exécutées.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/ui/sensitive-page-context.tsx",
+        "apps/web/modules/shared/ui/workspace-failure.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M19",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Catalogue des modèles réservé Admin ; membre voit ses notifications et préférences utiles, sans variables ni empreintes.",
+      "files": [
+        "app/[locale]/notifications/page.tsx",
+        "app/[locale]/notifications/notifications-panel.tsx"
+      ],
+      "verification": "Tests du rendu membre/admin et séparation des lectures serveur",
+      "remainingRisk": "Émission/réception d’une notification réelle non certifiée.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/notifications/notifications-panel.tsx",
+        "apps/web/app/[locale]/notifications/page.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M20",
+      "status": "Corrigé ; migration et recette facture requises",
+      "reproducedInCurrentCode": true,
+      "correction": "Sélecteurs métier, huit références natives préservées, fichier contrôlé et hash serveur ; lecture factures minimale et gardée ; source partielle annoncée.",
+      "files": [
+        "client/screens/portefeuille",
+        "client/data/portfolio",
+        "supabase/migrations/20261102010000_client_allocation_invoice_targets.sql"
+      ],
+      "verification": "Tests FR/AR, preuves fichier, typed targets, résultat RPC ; SQL0300 23/23 sur clone neuf",
+      "remainingRisk": "Migration non appliquée à Supabase partagé/distant ; facture positive/mixte et plafond natif non certifiés.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/client/data/portfolio/allocation-targets.test.ts",
+        "apps/web/modules/client/data/portfolio/allocation-targets.ts",
+        "apps/web/modules/client/data/portfolio/model.ts",
+        "apps/web/modules/client/data/portfolio/server-repository.test.ts",
+        "apps/web/modules/client/data/portfolio/server-repository.ts",
+        "apps/web/modules/client/screens/portefeuille/actions.test.ts",
+        "apps/web/modules/client/screens/portefeuille/actions.ts",
+        "apps/web/modules/client/screens/portefeuille/messages.ts",
+        "apps/web/modules/client/screens/portefeuille/portfolio-panel.test.tsx",
+        "apps/web/modules/client/screens/portefeuille/portfolio-panel.tsx",
+        "supabase/migrations/20261102010000_client_allocation_invoice_targets.sql"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M21",
+      "status": "Bloqué par données approuvées manquantes",
+      "reproducedInCurrentCode": true,
+      "correction": "Manques juridiques détaillés FR/AR ; pas d’identité ni d’hébergeur inventé ; consentements/version inchangés.",
+      "files": [
+        "public/data/legal/page-factory.tsx",
+        "public/data/legal/publication-copy.ts"
+      ],
+      "verification": "Tests configuration absente/fournie et confidentialité de la référence d’approbation",
+      "remainingRisk": "11 champs de publication publics/configurés à fournir et valider ; voir M21-M22-legal-offers.md.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/data/legal/page-factory.tsx",
+        "apps/web/modules/public/data/legal/publication-copy.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M22",
+      "status": "Corrigé ; conditions à compléter",
+      "reproducedInCurrentCode": true,
+      "correction": "Comparaison des seules formules publiées : prix exacts et crédits ; vide distinct d’une panne ; Box confirmée avant engagement/paiement.",
+      "files": [
+        "app/[locale]/(public)/abonnements/page.tsx"
+      ],
+      "verification": "Tests FR/AR prix/crédits/zero/absence/panne/FAQ ; revue indépendante",
+      "remainingRisk": "Quotas, privilèges et détail contractuel Box non publiés à fournir.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/(public)/abonnements/page.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M23",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Trois actions distinctes et liées à la priorité, chacune avec livrable, responsable proposé et critère.",
+      "files": [
+        "public/data/journey/diagnostic-plan-copy.ts"
+      ],
+      "verification": "Tests unités et détail navigateur ; revue indépendante",
+      "remainingRisk": "Responsable proposé ne constitue pas une affectation métier réelle.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/data/journey/diagnostic-plan-copy.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M24",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Source unique de cinq étapes, titre/rail/progress/retour/recap alignés ; brouillon conservé.",
+      "files": [
+        "public/data/journey/need-stages.ts",
+        "public/ui/journey/need-flow.tsx"
+      ],
+      "verification": "Tests reprise et navigation ; E2E aux quatre largeurs FR/AR",
+      "remainingRisk": "Le formulaire ne soumet aucun besoin réel dans ce test.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/data/journey/need-stages.ts",
+        "apps/web/modules/public/ui/journey/need-flow.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M25",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Organisation issue des rôles/mandat ; choix autorisé si plusieurs, marche à suivre si aucun contexte ; message dupliqué retiré.",
+      "files": [
+        "franchise/data/spaces/context.ts",
+        "app/[locale]/franchise/marketing/page.tsx"
+      ],
+      "verification": "Tests zéro/une/plusieurs organisations et foreign/revoked ; readiness navigateur",
+      "remainingRisk": "Marketing réel, mandat actif et automatisation externe non certifiés.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/franchise/marketing/page.tsx",
+        "apps/web/modules/franchise/data/spaces/context.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M26",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Destinataires réels décrits selon RLS et contrôleur de téléchargement, sans promesse d’accès public.",
+      "files": [
+        "provider/data/spaces/copy.ts"
+      ],
+      "verification": "Tests FR/AR + revue des politiques et de la route download",
+      "remainingRisk": "Aucun partage documentaire réel exécuté.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/provider/data/spaces/copy.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M27",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Candidature alignée catalogue de services professionnels, réseau, territoire et mandat ; copie commune FR/AR.",
+      "files": [
+        "public/data/franchise-presentation.ts",
+        "app/[locale]/franchise/candidature/page.tsx"
+      ],
+      "verification": "Tests de cohérence FR/AR ; aucun envoi",
+      "remainingRisk": "Aucune candidature réelle créée.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/app/[locale]/franchise/candidature/page.tsx",
+        "apps/web/modules/public/data/franchise-presentation.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M28",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "ICE nommé explicitement, aide 15 chiffres visible FR/AR et contraintes alignées au serveur.",
+      "files": [
+        "admin/screens/spaces/org-forms.tsx"
+      ],
+      "verification": "Tests labels, aide, pattern et min/max length ; création native par RPC dans harnais",
+      "remainingRisk": "Soumission du formulaire Admin de création en navigateur non exécutée.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/screens/spaces/org-forms.tsx"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M29",
+      "status": "Corrigé par libellés exacts",
+      "reproducedInCurrentCode": true,
+      "correction": "Icône Admin : Supervision des opérations ; diagnostic : en savoir plus sur Matricia, correspondant à À propos.",
+      "files": [
+        "admin/ui/admin-app-shell.tsx",
+        "public/data/journey/copy.ts"
+      ],
+      "verification": "Tests href/nom FR/AR ; revue indépendante",
+      "remainingRisk": "Pas de centre d’aide dédié annoncé ou créé.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/admin/ui/admin-app-shell.tsx",
+        "apps/web/modules/public/data/journey/copy.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    },
+    {
+      "id": "M30",
+      "status": "Corrigé",
+      "reproducedInCurrentCode": true,
+      "correction": "Vitrine utilise session et rôles serveur, propose Mon espace et changements limités aux rôles habilités.",
+      "files": [
+        "public/ui/site/public-navigation-server.tsx",
+        "public/ui/site/public-navigation.tsx",
+        "shared/lib/auth/select-workspace.ts"
+      ],
+      "verification": "Tests nav/session/roles ; transition native vitrine et refus Client→Admin",
+      "remainingRisk": "Les boutons démo restent conditionnés aux identités/configurations autorisées.",
+      "remotePreviewVerified": false,
+      "verificationResult": "PASS: 2712 tests, 1 signature storage opt-in skipped. Scope-specific native and SQL coverage in audit30-candidate-20261102.json; remainingRisk still applies.",
+      "modifiedFiles": [
+        "apps/web/modules/public/ui/site/public-navigation-server.tsx",
+        "apps/web/modules/public/ui/site/public-navigation.tsx",
+        "apps/web/modules/shared/lib/auth/select-workspace.ts"
+      ],
+      "verificationCommand": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2"
+    }
+  ]
+}

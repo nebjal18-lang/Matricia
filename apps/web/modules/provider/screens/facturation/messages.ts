@@ -1,17 +1,18 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 const fr = {
+  pendingScan: "La preuve est téléversée et en cours d’analyse. Aucun règlement n’est encore enregistré. Cliquez à nouveau pour vérifier et finaliser après le scan.",
   title: "Facturation et règlements", description: "Suivez les montants dus, relevés, factures, paiements et rapprochements issus des écritures immuables.",
   back: "Tableau de bord", language: "العربية", payables: "Montants dus", statements: "Relevés", invoices: "Factures et soldes", payments: "Règlements",
   allocations: "Historique des rapprochements", emptyAllocations: "Aucun rapprochement enregistré.", immutableAllocation: "Affectation comptable immuable",
   allocated: "Affecté", unallocated: "Non affecté", reconciliationHint: "Seuls les règlements avec un reliquat et les factures avec un solde sont proposés. Le serveur refuse toute suraffectation.",
   commands: "Opérations autorisées", empty: "Aucune donnée enregistrée.", number: "Numéro", period: "Période", amount: "Montant", status: "Statut", due: "Échéance", paid: "Payé", outstanding: "Solde",
-  date: "Date", mission: "Mission", reference: "Référence", currency: "Devise", proof: "Fichier justificatif pour calculer l’empreinte (non téléversé, PDF/JPEG/PNG, 10 Mo maximum)", minor: "Montant", amountInput:"Montant (MAD)", event: "Type d’événement", noMission:"Aucune mission active autorisée n’est disponible.",
+  date: "Date", mission: "Mission", reference: "Référence", currency: "Devise", proof: "Justificatif privé à téléverser et analyser (PDF/JPEG/PNG, 10 Mo maximum)", minor: "Montant", amountInput:"Montant (MAD)", event: "Type d’événement", noMission:"Aucune mission active autorisée n’est disponible.",
   receiptConfirmed:"Réception client confirmée",commission:"Commission à constater",penalty:"Pénalité à constater",adjustment:"Ajustement autorisé",bankTransfer:"Virement bancaire",card:"Carte",check:"Chèque",cash:"Espèces",other:"Autre",
   recordPayable: "Enregistrer un montant dû", issueStatement: "Émettre un relevé", issueInvoice: "Émettre une facture", recordPayment: "Enregistrer un règlement", reconcile: "Rapprocher un règlement",
   statement: "Relevé", invoice: "Facture", payment: "Règlement", issuedOn: "Date d’émission", periodStart: "Début", periodEnd: "Fin",
   accountReceivable: "Compte client", accountRevenue: "Compte produit", accountTax: "Compte TVA", accountCash: "Compte trésorerie", method: "Mode",
-  success: "Opération enregistrée. Actualisez pour afficher les nouveaux soldes.", validation: "Vérifiez les champs, le montant et le justificatif.", forbidden: "Votre rôle ne permet pas cette opération.",
+  policyRequired:"Une politique d’émission approuvée est requise : identité légale et numérotation à faire valider par la finance.", success: "Opération enregistrée. Actualisez pour afficher les nouveaux soldes.", validation: "Vérifiez les champs, le montant et le justificatif.", forbidden: "Votre rôle ne permet pas cette opération.",
   conflict: "L’opération entre en conflit avec un solde ou une commande existante.", failed: "Échec sans modification des écritures.", pending: "Traitement…",
   loadError: "Impossible de charger les données de facturation.", noOrg: "Aucune organisation Sous-traitant comptable active n’est associée à ce compte.",
   preReleve: "Pré-relevé Matricia", preReleveLead: "Événements exigibles constatés sur le ledger, avant émission du relevé.",
@@ -26,17 +27,18 @@ const fr = {
 } as const;
 
 const ar: { [K in keyof typeof fr]: string } = {
+  pendingScan: "تم رفع الإثبات وهو قيد الفحص. لم يُسجل أي دفع بعد. اضغطوا مجدداً للتحقق والإتمام بعد الفحص.",
   title: "الفوترة والتسويات", description: "تابع المستحقات والكشوف والفواتير والمدفوعات والمطابقات الناتجة عن قيود غير قابلة للتعديل.",
   back: "لوحة التحكم", language: "Français", payables: "المبالغ المستحقة", statements: "الكشوف", invoices: "الفواتير والأرصدة", payments: "المدفوعات",
   allocations: "سجل المطابقات", emptyAllocations: "لا توجد مطابقة مسجلة.", immutableAllocation: "تخصيص محاسبي غير قابل للتعديل",
   allocated: "المخصص", unallocated: "غير المخصص", reconciliationHint: "تظهر فقط المدفوعات ذات الرصيد المتبقي والفواتير ذات الرصيد المستحق. يرفض الخادم أي تخصيص زائد.",
   commands: "العمليات المصرح بها", empty: "لا توجد بيانات مسجلة.", number: "الرقم", period: "الفترة", amount: "المبلغ", status: "الحالة", due: "الاستحقاق", paid: "المدفوع", outstanding: "الرصيد",
-  date: "التاريخ", mission: "المهمة", reference: "المرجع", currency: "العملة", proof: "ملف لحساب البصمة فقط (لا يتم رفعه، PDF/JPEG/PNG، 10 ميغابايت كحد أقصى)", minor: "المبلغ", amountInput:"المبلغ (درهم مغربي)", event: "نوع الحدث", noMission:"لا توجد مهمة نشطة مصرح بها.",
+  date: "التاريخ", mission: "المهمة", reference: "المرجع", currency: "العملة", proof: "مستند خاص للرفع والفحص (PDF/JPEG/PNG، 10 ميغابايت كحد أقصى)", minor: "المبلغ", amountInput:"المبلغ (درهم مغربي)", event: "نوع الحدث", noMission:"لا توجد مهمة نشطة مصرح بها.",
   receiptConfirmed:"تأكيد استلام العميل",commission:"إثبات العمولة",penalty:"إثبات الغرامة",adjustment:"تعديل مصرح به",bankTransfer:"تحويل بنكي",card:"بطاقة",check:"شيك",cash:"نقداً",other:"أخرى",
   recordPayable: "تسجيل مبلغ مستحق", issueStatement: "إصدار كشف", issueInvoice: "إصدار فاتورة", recordPayment: "تسجيل دفعة", reconcile: "مطابقة دفعة",
   statement: "الكشف", invoice: "الفاتورة", payment: "الدفعة", issuedOn: "تاريخ الإصدار", periodStart: "البداية", periodEnd: "النهاية",
   accountReceivable: "حساب العميل", accountRevenue: "حساب الإيراد", accountTax: "حساب الضريبة", accountCash: "حساب الخزينة", method: "الطريقة",
-  success: "تم تسجيل العملية. حدّث الصفحة لعرض الأرصدة الجديدة.", validation: "راجع الحقول والمبلغ والمستند المؤيد.", forbidden: "دورك لا يسمح بهذه العملية.",
+  policyRequired:"تتطلب الوثيقة سياسة إصدار معتمدة بهوية قانونية وترقيم مصادق عليهما من المسؤول المالي.", success: "تم تسجيل العملية. حدّث الصفحة لعرض الأرصدة الجديدة.", validation: "راجع الحقول والمبلغ والمستند المؤيد.", forbidden: "دورك لا يسمح بهذه العملية.",
   conflict: "تتعارض العملية مع رصيد أو أمر موجود.", failed: "فشلت العملية دون تعديل القيود.", pending: "جارٍ التنفيذ…",
   loadError: "تعذر تحميل بيانات الفوترة.", noOrg: "لا توجد مؤسسة محاسبية لمقدم خدمة مرتبطة بهذا الحساب.",
   preReleve: "الكشف المسبق ماتريسيا", preReleveLead: "الأحداث المستحقة المثبتة في الدفتر قبل إصدار الكشف.",

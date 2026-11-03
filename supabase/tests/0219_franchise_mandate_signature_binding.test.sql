@@ -1,0 +1,13 @@
+begin;
+set local search_path=public,extensions;
+select plan(9);
+select ok(not has_function_privilege('authenticated','private.franchise_mandate_signature_effective_v1(uuid,uuid,text,uuid,uuid)','EXECUTE')and not has_function_privilege('service_role','private.franchise_mandate_signature_reference_v1(uuid,uuid,text,uuid,uuid)','EXECUTE'),'mandate proof lookup cannot accept an arbitrary actor through a public client RPC');
+select ok(not has_table_privilege('authenticated','private.franchise_mandate_signature_proofs_v1','INSERT')and not has_table_privilege('service_role','private.franchise_mandate_signature_proofs_v1','INSERT'),'neither browser nor service client can forge a verified mandate proof directly');
+select is(private.franchise_mandate_signature_reference_v1('f2190000-0000-4000-8000-000000000001','f2190000-0000-4000-8000-000000000002',repeat('a',64),'f2190000-0000-4000-8000-000000000003','f2190000-0000-4000-8000-000000000004'),null::jsonb,'unconfigured non-existent mandate never yields a legal proof reference');
+select is(private.franchise_mandate_signature_effective_v1('f2190000-0000-4000-8000-000000000001','f2190000-0000-4000-8000-000000000002',repeat('a',64),'f2190000-0000-4000-8000-000000000003',null),false,'missing actor cannot make mandate legally effective');
+select is(private.franchise_mandate_signature_effective_v1('f2190000-0000-4000-8000-000000000001','f2190000-0000-4000-8000-000000000002','unverified','f2190000-0000-4000-8000-000000000003','f2190000-0000-4000-8000-000000000004'),false,'unverified hash never makes mandate effective');
+select ok(not exists(select 1 from private.franchise_mandate_signature_policies_v1),'migration does not invent a legal issuer, provider, policy or signature level');
+select ok(not exists(select 1 from private.franchise_mandate_signature_proofs_v1),'migration does not seed completed native signature proof');
+select ok((select count(*)=3 from pg_trigger where not tgisinternal and tgname in('franchise_mandate_signature_policies_immutable','franchise_mandate_signature_proofs_immutable','franchise_mandate_signature_parties_immutable')),'mandate policy, proof and party attestations are immutable');
+select ok(not exists(select 1 from information_schema.columns where table_schema='private'and table_name='franchise_mandate_signature_proofs_v1'and column_name in('contract_id','contract_version_id')),'franchise legal document has its own source identity rather than a commercial contract ID');
+select*from finish();rollback;

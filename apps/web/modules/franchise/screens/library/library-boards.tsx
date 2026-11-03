@@ -89,6 +89,7 @@ export function FranchiseLibraryHomeBoard({ locale, query, workspace }: { locale
   ];
   return (
     <main className="client-page franchise-home-page">
+      {(workspace.mandates?.length??0)>1?<nav aria-label={locale==="ar"?"اختيار التفويض":"Choisir le mandat"} className="flex flex-wrap gap-3">{workspace.mandates?.map((mandate)=><Link key={mandate.id} aria-current={mandate.id===workspace.mandate.franchiseId?"page":undefined} className="franchise-tool" href={`/${locale}/franchise/accueil?organizationId=${mandate.organizationId}&franchiseId=${mandate.id}`}>{mandate.operatorCode} · {mandate.id.slice(0,8).toUpperCase()}</Link>)}</nav>:null}
       <p className="franchise-home-lead-mobile">{c.homeLeadMobile}</p>
       <section className="franchise-treat franchise-home-kpis">
         {kpis.map((item, index) => {
@@ -384,7 +385,7 @@ export function FranchiseLibraryStructureBoard({
   );
 }
 
-export function FranchiseQuestionsBoard({ locale, questions }: { locale: Locale; questions: FranchiseLibraryWorkspace["questions"] }) {
+export function FranchiseQuestionsBoard({ locale, questions,query="" }: { locale: Locale;query?:string; questions: FranchiseLibraryWorkspace["questions"] }) {
   const c = libraryCopy(locale);
   return (
     <article className="client-card">
@@ -394,7 +395,7 @@ export function FranchiseQuestionsBoard({ locale, questions }: { locale: Locale;
           {questions.map((item) => (
             <li key={item.id}>
               <span className="client-feed-icon" data-tone="mint"><Scale className="size-4" aria-hidden /></span>
-              <span><strong>{item.label}</strong><small dir="ltr">{item.key} · {catalogStatusLabel(item.status, locale)}</small></span>
+              <span><Link href={`/${locale}/franchise/questions/${item.id}${query}`}><strong>{item.label}</strong></Link><small dir="ltr">{item.key} · {catalogStatusLabel(item.status, locale)}</small></span>
             </li>
           ))}
         </ul>
@@ -574,8 +575,8 @@ export function FranchiseLibraryOverviewBoard({
   const c = libraryCopy(locale);
   const published = workspace.counts.published;
   const categoryCount = workspace.categories.reduce((sum, cat) => sum + 1 + cat.children.length, 0);
-  const totalElements = workspace.services.length + workspace.questionnaires.length + workspace.rules.length;
-  const coverage = totalElements === 0 ? 100 : Math.round((published / Math.max(totalElements, 1)) * 100);
+  const totalElements = workspace.serverPage?workspace.serverPage.groups.SERVICE.total+workspace.serverPage.groups.QUESTIONNAIRE.total+workspace.serverPage.groups.RULE.total:workspace.services.length + workspace.questionnaires.length + workspace.rules.length;
+  const coverage = totalElements === 0 ? 0 : Math.round((published / Math.max(totalElements, 1)) * 100);
   const versionLabel = `v${workspace.mandate.libraryRowVersion || 1}.0`;
   return (
     <main className="client-page">

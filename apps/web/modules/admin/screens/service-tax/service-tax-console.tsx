@@ -1,0 +1,65 @@
+"use client";
+
+import {useCallback,useEffect,useRef,useState,type FormEvent} from "react";
+import {z} from "zod";
+import type {Locale} from "@/modules/shared/lib/i18n/locale";
+import {getSupabaseBrowserClient} from "@/modules/shared/lib/supabase/client";
+
+const id=z.string().uuid(),hash=z.string().regex(/^[a-f0-9]{64}$/u);
+const sourcesSchema=z.object({items:z.array(z.object({id,code:z.string(),name_fr:z.string(),name_ar:z.string(),version:z.number()})),page:z.number(),has_next:z.boolean()});
+const contextSchema=z.object({source:z.object({service_version_id:id,content_hash:hash,name_fr:z.string(),name_ar:z.string(),version:z.number()}),environment:z.string(),country_code:z.string(),currency:z.string(),scope_hash:hash,categories:z.array(z.object({code:z.string(),name_fr:z.string(),name_ar:z.string()})),proposals:z.array(z.object({id,version:z.number(),category_code:z.string(),valid_from:z.string(),valid_until:z.string().nullable(),reason:z.string(),development_only:z.boolean(),content_hash:hash,decision:z.enum(["APPROVED","REJECTED"]).nullable(),approval_reference:z.string().nullable(),effective_period:z.string().nullable(),can_decide:z.boolean()})),page:z.number(),has_next:z.boolean()});
+type Context=z.infer<typeof contextSchema>;
+export function ServiceTaxConsole({locale}:{locale:Locale}){
+ const tr=useCallback((fr:string,ar:string)=>locale==="ar"?ar:fr,[locale]);
+ const [sources,setSources]=useState<z.infer<typeof sourcesSchema>|null>(null),[source,setSource]=useState(""),[search,setSearch]=useState(""),[sourcePage,setSourcePage]=useState(1),[page,setPage]=useState(1),[country,setCountry]=useState("MA"),[currency,setCurrency]=useState("MAD"),[context,setContext]=useState<Context|null>(null),[supersedes,setSupersedes]=useState<string[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const pending=useRef<{payload:string;key:string}|null>(null);
+ const readableError=useCallback((message:string)=>{
+  if(message.includes("FOUR_EYES_REQUIRED"))return tr("Une autre personne habilitée doit décider.","يجب أن يقرر شخص مخول آخر.");
+  if(/CHANGED/u.test(message))return tr("La source ou le périmètre a changé. Actualisez et examinez la nouvelle version.","تغير المصدر أو النطاق. حدّث وراجع النسخة الجديدة.");
+  if(message.includes("RULE_REQUIRED")||message.includes("RULE_VALIDATION_REQUIRED"))return tr("Une règle fiscale datée et validée doit être configurée dans le moteur fiscal avant publication.","يجب إعداد قاعدة ضريبية مؤرخة ومعتمدة قبل النشر.");
+  if(message.includes("SUPERSESSION_REVIEW_REQUIRED"))return tr("Examinez et sélectionnez toutes les associations publiées qui recouvrent la période.","راجع وحدد كل الارتباطات المنشورة المتداخلة مع الفترة.");
+  if(message.includes("AAL2_REQUIRED"))return tr("Accès réservé à la finance ou au super administrateur avec authentification renforcée.","الدخول للمالية أو المدير الأعلى مع تحقق معزز.");
+  return tr("La lecture ou l’enregistrement n’a pas pu aboutir. Actualisez cette page pour vérifier votre session et vos habilitations, ou contactez l’assistance.","تعذرت القراءة أو عملية الحفظ. حدّثوا الصفحة للتحقق من جلستكم وصلاحياتكم أو تواصلوا مع الدعم.");
+ },[tr]);
+ const load=useCallback(async(signal?:AbortSignal)=>{
+  if(!source)return;
+  const result=await getSupabaseBrowserClient().rpc("get_service_tax_category_mapping_context_v1",{p_service_version_id:source,p_country_code:country,p_currency:currency,p_page:page});if(result.error)throw new Error(result.error.message);if(!signal?.aborted)setContext(contextSchema.parse(result.data));
+ },[source,country,currency,page]);
+ useEffect(()=>{let active=true;void getSupabaseBrowserClient().rpc("list_service_tax_category_sources_v1",{p_search:search,p_page:sourcePage}).then((result:{data:unknown;error:{message:string}|null})=>{if(!active)return;if(result.error){setError(readableError(result.error.message));return;}try{setSources(sourcesSchema.parse(result.data));}catch{setError(tr("Réponse du registre invalide.","استجابة السجل غير صالحة."));}});return()=>{active=false;};},[search,sourcePage,readableError,tr]);
+ useEffect(()=>{const controller=new AbortController();void Promise.resolve().then(()=>load(controller.signal)).catch(e=>{if(!controller.signal.aborted)setError(readableError(e instanceof Error?e.message:String(e)));});return()=>controller.abort();},[load,readableError]);
+ async function submit(event:FormEvent<HTMLFormElement>,proposal?:Context["proposals"][number]){
+  event.preventDefault();if(!context||busy||context.source.service_version_id!==source||context.country_code!==country||context.currency!==currency)return;setBusy(true);setError("");setNotice("");const form=new FormData(event.currentTarget);
+  try{
+   const args=proposal?{p_proposal_id:proposal.id,p_expected_content_hash:proposal.content_hash,p_approve:form.get("decision")==="approve",p_approval_reference:String(form.get("reference")??""),p_reason:String(form.get("reason")??"")}:{p_service_version_id:context.source.service_version_id,p_expected_service_hash:context.source.content_hash,p_expected_scope_hash:context.scope_hash,p_country_code:context.country_code,p_currency:context.currency,p_category_code:String(form.get("category")??""),p_valid_from:String(form.get("from")??""),p_valid_until:form.get("until")||null,p_development_only:form.get("development")==="yes",p_supersedes_mapping_ids:[...supersedes].sort(),p_reason:String(form.get("reason")??"")};
+   const payload=JSON.stringify(args);if(!proposal&&pending.current?.payload!==payload)pending.current={payload,key:crypto.randomUUID()};
+   const result=await getSupabaseBrowserClient().rpc(proposal?"decide_service_tax_category_mapping_v1":"propose_service_tax_category_mapping_v1",proposal?args:{...args,p_idempotency_key:pending.current!.key});if(result.error)throw new Error(result.error.message);
+   const outcome=z.object({outcome:z.enum(["SERVICE_TAX_MAPPING_PROPOSED","SERVICE_TAX_MAPPING_PUBLISHED","SERVICE_TAX_MAPPING_REJECTED"])}).parse(result.data).outcome;
+   setNotice(outcome==="SERVICE_TAX_MAPPING_PROPOSED"?tr("Proposition enregistrée. Une décision indépendante reste requise.","سجل المقترح. يلزم قرار مستقل."):outcome==="SERVICE_TAX_MAPPING_PUBLISHED"?tr("Association fiscale publiée.","نشر الارتباط الضريبي."):tr("Proposition refusée.","رفض المقترح."));await load();
+  }catch(e){setError(readableError(e instanceof Error?e.message:String(e)));}finally{setBusy(false);}
+ }
+ const reason=<label>{tr("Motif détaillé","السبب المفصل")}<textarea name="reason" required minLength={10} maxLength={1000} className="block w-full rounded border p-2"/></label>;
+ return <section className="grid gap-4" aria-label={tr("Classification fiscale des services","التصنيف الضريبي للخدمات")} dir={locale==="ar"?"rtl":"ltr"}>
+  <h2 className="text-lg font-semibold">{tr("Association fiscale des services publiés","الربط الضريبي للخدمات المنشورة")}</h2>
+  <p>{tr("Chaque association vise une version précise du catalogue, un pays, une devise et une période. Elle ne remplace pas la validation des taux par la finance.","كل ارتباط يخص نسخة محددة من الكتالوج وبلدا وعملة وفترة. ولا يحل محل اعتماد النسب من المالية.")}</p>
+  {error?<div role="alert" className="grid gap-2 rounded border p-3"><p>{error}</p><div className="flex flex-wrap gap-3"><a href={`/${locale}/administration/classification-fiscale`} className="min-h-11 underline">{tr("Actualiser et vérifier mon accès","تحديث والتحقق من الوصول")}</a><a href={`/${locale}/contact`} className="min-h-11 underline">{tr("Contacter l’assistance","الاتصال بالدعم")}</a></div></div>:null}{notice?<p role="status">{notice}</p>:null}
+  <label>{tr("Rechercher un service publié","البحث عن خدمة منشورة")}<input className="block min-h-11 rounded border p-2" value={search} maxLength={200} onChange={e=>{setSearch(e.target.value);setSourcePage(1);}}/></label>
+  <label>{tr("Version du service","نسخة الخدمة")}<select className="block min-h-11 rounded border p-2" value={source} onChange={e=>{setSource(e.target.value);setPage(1);setSupersedes([]);pending.current=null;}}><option value="">{tr("Choisir une version publiée","اختر نسخة منشورة")}</option>{sources?.items.map(s=><option key={s.id} value={s.id}>{locale==="ar"?s.name_ar:s.name_fr} · v{s.version} · {s.code}</option>)}</select></label>
+  <nav className="flex gap-3" aria-label={tr("Pages des services","صفحات الخدمات")}><button type="button" disabled={sourcePage===1} onClick={()=>setSourcePage(p=>p-1)}>{tr("Précédente","السابق")}</button><span>{sourcePage}</span><button type="button" disabled={!sources?.has_next} onClick={()=>setSourcePage(p=>p+1)}>{tr("Suivante","التالي")}</button></nav>
+  <label>{tr("Pays fiscal (ISO)","البلد الضريبي (ISO)")}<input value={country} maxLength={2} className="block min-h-11 rounded border p-2" onChange={e=>{setCountry(e.target.value.toUpperCase());setPage(1);setSupersedes([]);}}/></label>
+  <label>{tr("Devise (ISO)","العملة (ISO)")}<input value={currency} maxLength={3} className="block min-h-11 rounded border p-2" onChange={e=>{setCurrency(e.target.value.toUpperCase());setPage(1);setSupersedes([]);}}/></label>
+  {context&&context.source.service_version_id===source&&context.country_code===country&&context.currency===currency?<><p>{tr("Environnement","البيئة")}: {context.environment} · {locale==="ar"?context.source.name_ar:context.source.name_fr} · v{context.source.version}</p>
+  <button type="button" disabled={busy} className="min-h-11 rounded border p-2" onClick={()=>void load().catch(e=>setError(readableError(String(e))))}>{tr("Actualiser le périmètre","تحديث النطاق")}</button>
+  <form className="grid gap-3 rounded border p-4" onSubmit={e=>void submit(e)}>
+   <label>{tr("Catégorie fiscale validée","الفئة الضريبية المعتمدة")}<select name="category" required defaultValue="" className="block min-h-11 rounded border p-2"><option value="" disabled>{tr("Choisir explicitement","اختر صراحة")}</option>{context.categories.map(c=><option key={c.code} value={c.code}>{locale==="ar"?c.name_ar:c.name_fr} · {c.code}</option>)}</select></label>
+   <label>{tr("Applicable à partir du","ساري من")}<input name="from" type="date" required className="block min-h-11 rounded border p-2"/></label><label>{tr("Dernier jour inclus (facultatif)","آخر يوم مشمول (اختياري)")}<input name="until" type="date" className="block min-h-11 rounded border p-2"/></label>
+   {context.environment!=="PRODUCTION"?<label><input name="development" type="checkbox" value="yes"/> {tr("Association de démonstration, interdite en production","ارتباط تجريبي ممنوع في الإنتاج")}</label>:null}
+   <p>{tr("Pour remplacer une association, sélectionnez sa version publiée dans l’historique. Les versions originales restent conservées.","لاستبدال ارتباط حدد نسخته المنشورة في السجل. تحفظ النسخ الأصلية.")}</p>{reason}<button disabled={busy} className="min-h-11 rounded border p-2">{tr("Soumettre à une décision indépendante","إرسال لقرار مستقل")}</button>
+  </form>
+  {context.proposals.map(p=><article key={p.id} className="grid gap-2 rounded border p-4"><h3>v{p.version} · {p.category_code} · {p.valid_from} → {p.valid_until??tr("Sans date de fin","بلا تاريخ نهاية")}</h3><p>{p.decision==="APPROVED"?tr("Publiée","منشور"):p.decision==="REJECTED"?tr("Refusée","مرفوض"):tr("En attente de décision indépendante","بانتظار قرار مستقل")}{p.development_only?` · ${tr("Démonstration","تجريبي")}`:""}</p><p>{p.reason}</p>{p.approval_reference?<p>{tr("Référence d’approbation","مرجع الاعتماد")}: {p.approval_reference}</p>:null}{p.effective_period?<p>{tr("Période effective [début, fin exclue)","الفترة الفعلية [البداية، النهاية غير مشمولة)")}: {p.effective_period}</p>:null}
+   {p.decision==="APPROVED"?<label><input type="checkbox" checked={supersedes.includes(p.id)} onChange={e=>setSupersedes(ids=>e.target.checked?[...ids,p.id]:ids.filter(i=>i!==p.id))}/> {tr("Remplacer cette association dans la nouvelle période","استبدال هذا الارتباط في الفترة الجديدة")}</label>:null}
+   {p.can_decide?<form className="grid gap-3" onSubmit={e=>void submit(e,p)}><label>{tr("Décision","القرار")}<select name="decision" required defaultValue="" className="block min-h-11 rounded border p-2"><option value="" disabled>{tr("Choisir","اختر")}</option><option value="approve">{tr("Approuver","اعتماد")}</option><option value="reject">{tr("Refuser","رفض")}</option></select></label><label>{tr("Référence de validation fiscale","مرجع الاعتماد الضريبي")}<input name="reference" required minLength={3} maxLength={200} className="block min-h-11 rounded border p-2"/></label>{reason}<button disabled={busy} className="min-h-11 rounded border p-2">{tr("Enregistrer la décision indépendante","تسجيل القرار المستقل")}</button></form>:null}
+  </article>)}
+  <nav className="flex gap-3" aria-label={tr("Historique fiscal","السجل الضريبي")}><button type="button" disabled={page===1} onClick={()=>setPage(p=>p-1)}>{tr("Précédente","السابق")}</button><span>{page}</span><button type="button" disabled={!context.has_next} onClick={()=>setPage(p=>p+1)}>{tr("Suivante","التالي")}</button></nav>
+  </>:null}
+ </section>;
+}

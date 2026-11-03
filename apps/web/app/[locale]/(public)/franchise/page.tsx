@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { localizedRouteMetadata } from "@/modules/shared/lib/seo/metadata";
 import { getPublicMessages } from "../messages";
+import { getFranchisePresentation } from "@/modules/public/data/franchise-presentation";
 import { PublicPhoto } from "@/modules/public/ui/site/public-photo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -18,6 +19,7 @@ export default async function PublicFranchisePage({ params }: { params: Promise<
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const copy = getPublicMessages(locale).franchise;
+  const presentation = getFranchisePresentation(locale);
   const apply = locale === "ar" ? "إيداع ترشيحي" : "Déposer ma candidature";
   const understand = locale === "ar" ? "فهم دور صاحب الامتياز" : "Comprendre le rôle du franchisé";
 
@@ -37,7 +39,8 @@ export default async function PublicFranchisePage({ params }: { params: Promise<
       </section>
       <section id="role-franchise" className="public-wrap">
         <h2 className="public-h2">{copy.roleTitle}</h2>
-        <p className="public-lead mt-3">{copy.roleDescription}</p>
+        <p className="public-lead mt-3">{presentation.definition}</p>
+        <p className="public-muted mt-3">{copy.roleDescription}</p>
         <ol className="journey-six-steps mt-8">
           {copy.framework.map((item, index) => (
             <li key={item}>

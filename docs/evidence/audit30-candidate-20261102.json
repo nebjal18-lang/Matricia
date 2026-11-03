@@ -1,0 +1,242 @@
+{
+  "classification": "M01_M30_REVIEW_CANDIDATE_NOT_COMMERCIAL_RELEASE",
+  "candidateCodeCommit": "97d60ca2569448c6310a98fea72ce54232fff10c",
+  "branch": "codex/audit-m01-m30-20261102",
+  "basePreserved": "39552d7c4efdba6665c710de416cd06ea827690b",
+  "upstreamObserved": "1ebf3eab3e89a0043355e343df1f16cc8c6f9092",
+  "auditedDeploymentCommit": null,
+  "sourceLimitation": "User confirms audit before merge, but exact deployment SHA is unknown. Preview host denied CONNECT403.",
+  "applicationTrees": {
+    "apps/web": "e185bc7329484d951fb8aa4d7f21eb58d798c40f",
+    "apps/worker": "3d1e60109b23daa439049983c01794c3cb89433d",
+    "packages": "7681a96616b2651f0ea236a2ba8c15e0b71310f4",
+    "supabase/migrations": "1b87f94a15f7ed9911f3df636411ce4b0e2b70bf"
+  },
+  "checks": [
+    {
+      "name": "types",
+      "command": "corepack pnpm typecheck",
+      "result": "PASS",
+      "logSha256": "dca9a37b83bbbd2309ef58bb3eb73355d7f50c1f30ff6913de6fc580ab10edc5",
+      "details": null
+    },
+    {
+      "name": "lint",
+      "command": "corepack pnpm lint",
+      "result": "PASS",
+      "logSha256": "55fc05af2d196661cb5c9974d0ab54a6c725dce651338725b3da61908f3b0fec",
+      "details": null
+    },
+    {
+      "name": "build",
+      "command": "NEXT_PUBLIC_APP_URL=https://matricia.test corepack pnpm build",
+      "result": "PASS",
+      "logSha256": "2e179b14dbe994f3ba58130cd8f236d727836c4636d0f8eb74fdf1f32f35d98a",
+      "details": null
+    },
+    {
+      "name": "unit",
+      "command": "corepack pnpm -r --workspace-concurrency=1 test --maxWorkers=2",
+      "result": "PASS",
+      "logSha256": "ef50bf31b9854491fbf0c8a5d5f68bcdd37f54d07401152c18da93bfdc03db69",
+      "details": {
+        "web": 2473,
+        "worker": 102,
+        "libraries": 137,
+        "total": 2712,
+        "skipped": 1,
+        "skipReason": "signature source PDF Storage opt-in"
+      }
+    },
+    {
+      "name": "integration",
+      "command": "corepack pnpm test:integration",
+      "result": "PASS",
+      "logSha256": "84522b3585a08d0ceae9483640590136fc96e7441562455701f964b148e102c9",
+      "details": {
+        "tests": 3
+      }
+    },
+    {
+      "name": "tooling",
+      "command": "corepack pnpm test:tooling",
+      "result": "PASS",
+      "logSha256": "2964840b2481d8fa5378ebca0e4cd5a2abea400c43c09bfe9990d323c359eb75",
+      "details": {
+        "tests": 31
+      }
+    },
+    {
+      "name": "foundation",
+      "command": "corepack pnpm verify:phase00",
+      "result": "PASS",
+      "logSha256": "fef677b07638279a53552d0308000a9af7105b6bac4ef1c89a98574731bc5abf",
+      "details": null
+    },
+    {
+      "name": "sql",
+      "command": "APP_ENV=development node scripts/validate-local-migration-replay.mjs --test=0300_client_allocation_invoice_targets.test.sql",
+      "result": "PASS",
+      "logSha256": "07e951e691611a0d1df056be2391a2f96cb632b703e8fa5af12171478127ff02",
+      "details": {
+        "migrations": 418,
+        "assertions": 23,
+        "cleanup": true
+      }
+    },
+    {
+      "name": "native-four-role",
+      "command": "E2E_LOCAL_ISOLATED=1 E2E_LOCAL_PROJECT_ID=Matricia APP_ENV=development NEXT_PUBLIC_APP_URL=http://localhost:5173 corepack pnpm test:e2e:audit30-native",
+      "result": "PASS_WITH_EXPECTED_PARTIAL_STATES",
+      "logSha256": "c6ae7aab6d9c098752881f5b498754294e49227caaca694d7894eea5db138ffa",
+      "details": {
+        "admin": 8,
+        "client": 56,
+        "readiness": 112,
+        "withoutTechnicalIncident": 168,
+        "expectedInvoiceProjectionPartial": 8,
+        "cleanup": true
+      }
+    },
+    {
+      "name": "public",
+      "command": "E2E_EXTERNAL_SERVER=1 E2E_BASE_URL=http://127.0.0.1:5173 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium PLAYWRIGHT_VIDEO=off corepack pnpm test:e2e:audit30-public",
+      "result": "PASS",
+      "logSha256": "798d3169c754481f8823396e1d60910bbef5a9e3cf1237e376fb0f3d6203848a",
+      "details": {
+        "tests": 8,
+        "widths": [
+          375,
+          390,
+          768,
+          1440
+        ],
+        "locales": [
+          "fr",
+          "ar"
+        ],
+        "businessPosts": 0
+      }
+    },
+    {
+      "name": "native-admin-final",
+      "command": "E2E_LOCAL_ISOLATED=1 E2E_LOCAL_PROJECT_ID=Matricia APP_ENV=development NEXT_PUBLIC_APP_URL=http://localhost:5173 corepack pnpm test:e2e:audit30-native --admin-only",
+      "result": "PASS",
+      "logSha256": "fa95a029b7cc31cb890ce192f5359730e122e2d98491a6154f06531c4f422ff9",
+      "details": {
+        "cases": 8,
+        "bounds": true,
+        "keyboard": true,
+        "nativeSignOut": true,
+        "publicAdminSession": true,
+        "cleanup": true
+      }
+    },
+    {
+      "name": "menu-synthetic",
+      "command": "E2E_EXTERNAL_SERVER=1 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium PLAYWRIGHT_VIDEO=off corepack pnpm exec playwright test tests/e2e/admin-account-menu-geometry.spec.ts --project=chromium-desktop --workers=1",
+      "result": "PASS",
+      "logSha256": "4ad39d5d6a894694f1c9b1cae78238cc5c85e49beb47cc2c9a95d3ea00347e48",
+      "details": {
+        "cases": 8,
+        "classification": "synthetic CSS geometry, not session authentication"
+      }
+    },
+    {
+      "name": "menu-targeted",
+      "command": "corepack pnpm --filter @matricia/web exec vitest run modules/shared/ui/workspace-account-menu.test.tsx modules/shared/shell/cockpit.test.tsx modules/admin/screens/admin-mockup-alignment.test.tsx --maxWorkers=2",
+      "result": "PASS",
+      "logSha256": "564f9eab34ea260c2a1016ed80cf3211f21b20092091ac7d7b484899f0513635",
+      "details": {
+        "tests": 17
+      }
+    },
+    {
+      "name": "release",
+      "command": "corepack pnpm release:validate",
+      "result": "REFUSED",
+      "logSha256": "0d9060b9de7a4a70ff2ed0d6dfc3da0468fe40860b62d899e90246eb3df520e8",
+      "details": {
+        "unmetConditionsAtSnapshot": 74,
+        "verifiedRequirements": 5,
+        "totalRequirements": 76,
+        "notAProductionVisa": true
+      }
+    },
+    {
+      "name": "pr",
+      "command": "gh pr create --draft --base codex/bootstrap-foundation --head codex/audit-m01-m30-20261102 --title 'Corriger les 30 constats de l’audit Matricia du 2 novembre 2026' --body-file docs/audit-20261102/PR.md",
+      "result": "BLOCKED",
+      "logSha256": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+      "details": {
+        "reason": "POST https://api.github.com/graphql: Forbidden",
+        "created": false
+      }
+    }
+  ],
+  "runtimeProvenance": {
+    "fullNativeBuild": "cq8xTYOaQeQHs-8zthv4q",
+    "fullNativeHarnessCommit": "6657f65",
+    "finalBuild": "WbMCesSFfKN1R2pa9hytw",
+    "applicationChangesAfterFullNative": [
+      "apps/web/app/[locale]/(public)/experience.css",
+      "apps/web/modules/admin/ui/admin-experience.css"
+    ],
+    "targetedRevalidation": "Public Need flow 8 E2E after its scoped CSS fix; Admin menu/list/native sign-out 8 E2E on the final build after its scoped CSS fix. No production TypeScript changed between these runs.",
+    "nativeAdminHarnessSha256": "fccc4aefa0752275e0b7bd46778e966dc1354977eee39bff451569559e390148"
+  },
+  "remoteConnections": {
+    "localSupabase": "VERIFIED_USING_REAL_GOTRUE_TOTP_AAL2",
+    "remoteSupabaseProject": "nbqtuybebrhkqmtonhsd",
+    "remoteSupabase": "NOT_AUTHENTICATED_OR_CERTIFIED",
+    "remoteSupabaseUnauthenticatedHttp": 401,
+    "vercel": "NOT_AUTHENTICATED_OR_CERTIFIED",
+    "vercelUnauthenticatedHttp": 403,
+    "vercelApiReason": "missing authentication token",
+    "previewNetwork": "CONNECT403",
+    "configuredRemoteSecretsInRuntime": 0,
+    "productionModified": false,
+    "remoteMigrationsApplied": false,
+    "sharedLocalSchemaModified": false
+  },
+  "nativeCleanup": {
+    "allFourCohortsVerified": true,
+    "actorsNeutralized": 16,
+    "organizationsArchived": 12,
+    "immutableEvidenceRetained": true,
+    "existingDemoFactorsChanged": false
+  },
+  "openLimitations": [
+    "M14: approved Arabic names missing for 200 services and 79 categories.",
+    "M21: approved legal publication fields are missing.",
+    "M22: versioned plan privileges, quotas and Box conditions remain to be supplied.",
+    "M02/M03/M04/M08/M09/M20: full linked business workflows are not certified by empty authorized list/readiness checks.",
+    "M05/M25: absence of mandate and context selection verified; signed mandate and editorial workflow not certified.",
+    "M20: new invoice reader migration tested on isolated clone only; real positive/mixed invoice and allocation ceiling execution remain unproved.",
+    "No actual PR created because GitHub GraphQL API is blocked; body and compare link prepared.",
+    "No production deployment, formal client acceptance, restore exercise or signature-provider certification."
+  ],
+  "priorFailuresRetained": [
+    {
+      "stage": "initial global unit",
+      "result": "2 failures: stale Admin directory assertion and missing mock for new async public navigation; fixed, full 2712-test rerun passed."
+    },
+    {
+      "stage": "initial build",
+      "result": "HTTP laboratory URL rejected by the production HTTPS metadata guard; rerun with https://matricia.test passed. Guard unchanged."
+    },
+    {
+      "stage": "SQL0300 first run",
+      "result": "10 assertions then pgTAP schema usage missing after SET ROLE; transaction-local test framework grant added; fresh replay23 passed."
+    },
+    {
+      "stage": "public first8",
+      "result": "4 passed,4 failed real mobile overflow; scoped CSS corrected; last8 passed.",
+      "logSha256": "04a9fa67bb47806a9066fdc0682d67dfefb0c60e62fdd473bffbeecb8d6cf40f"
+    },
+    {
+      "stage": "native menu screenshot review",
+      "result": "First hit-test missed negative left clipping. Added bounds and real Tab checks, corrected CSS and reran final native8 with real logout."
+    }
+  ]
+}

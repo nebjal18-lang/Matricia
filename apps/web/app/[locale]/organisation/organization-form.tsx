@@ -36,6 +36,7 @@ export function OrganizationForm({ locale, idempotencyKey, defaultRole = "CLIENT
           <p className="text-sm leading-6 text-muted-foreground">{created ? messages.createdDescription : messages.requestedDescription}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
+          {!created?<Button asChild><Link href={`/${locale}/organisation/rattachements`}>{locale==="fr"?"Suivre ma demande de rattachement":"متابعة طلب الانضمام"}</Link></Button>:null}
           {created && defaultRole === "CLIENT_OWNER" && returnTo ? (
             <Button asChild><Link href={returnTo}>{messages.resumeDiagnostic}</Link></Button>
           ) : created && defaultRole === "CLIENT_OWNER" ? (
@@ -54,7 +55,7 @@ export function OrganizationForm({ locale, idempotencyKey, defaultRole = "CLIENT
     ? state.reason === "UNAUTHENTICATED" ? messages.errors.unauthenticated
       : state.reason === "ALREADY_MEMBER" ? messages.errors.alreadyMember
         : state.reason === "IDEMPOTENCY_MISMATCH" ? messages.errors.idempotency
-          : messages.errors.generic
+          : state.reason === "FRANCHISE_MANDATE_REQUIRED" ? (locale==="fr"?"Le rattachement Franchisé exige un mandat approuvé avec son périmètre de bibliothèque. Contactez votre interlocuteur Matricia pour cette revue.":"يتطلب الانضمام بصفة صاحب امتياز تفويضاً معتمداً يحدد نطاق المكتبة. تواصلوا مع مسؤول Matricia لمراجعة الطلب.") : messages.errors.generic
     : null;
   const describedBy = (field: OrganizationField, hintId: string) => fieldErrors[field] ? `${hintId} ${field}-error` : hintId;
 

@@ -1,4 +1,5 @@
 "use client";
+import {commerceIdle}from"@/modules/admin/screens/finance/commerce-state";
 
 import { useActionState } from "react";
 import { Badge } from "@/modules/shared/ui/badge";
@@ -7,7 +8,7 @@ import { Input } from "@/modules/shared/ui/input";
 import type { AdminClosureDashboard } from "@/modules/admin/data/closure/model";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
-import { issueStatementAction, commerceIdle } from "./commerce-actions";
+import { issueStatementAction } from "./commerce-actions";
 import type { CommerceMessages } from "./commerce-messages";
 
 const control = "min-h-11 w-full rounded-md border bg-background px-3";

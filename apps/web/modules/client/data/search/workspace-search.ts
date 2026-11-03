@@ -1,3 +1,5 @@
+import { getClientOnboardingMessages } from "@/modules/client/screens/onboarding/messages";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { loadClientDocumentVault } from "@/modules/client/data/documents/server-repository";
 import { filterClientFacingActions } from "@/modules/client/data/home/view-model";
 import { createServerClientRfqRepository } from "@/modules/client/data/rfq/server-repository";
@@ -20,6 +22,7 @@ export type ClientSearchResult = {
   query: string;
   hits: ClientSearchHit[];
   unavailable: ClientSearchKind[];
+  moreResults?: Array<{kind:ClientSearchKind;href:string;total?:number}>;
 };
 
 const MIN_QUERY = 2;
@@ -54,15 +57,16 @@ export async function searchClientWorkspace(input: {
   const now = input.now ?? new Date().toISOString();
   const hits: ClientSearchHit[] = [];
   const unavailable: ClientSearchKind[] = [];
+  const moreResults:NonNullable<ClientSearchResult["moreResults"]>=[];
   const org = input.organizationId ?? undefined;
   const q = input.selectedQuery;
 
   const [actions, requests, missions, documents, messages] = await Promise.all([
     loadUserActionCenterWithinBudget(input.locale, now, org),
-    (await createServerClientRfqRepository()).list(),
+    (await createServerClientRfqRepository(org ? {organizationId:org,query} : undefined)).list(),
     loadContractMissions(input.locale, org),
-    loadClientDocumentVault(org),
-    (await createInternalMessagingRepository()).load(),
+    loadClientDocumentVault(org,1,{query}),
+    (await createInternalMessagingRepository()).search(query,org,1),
   ]);
 
   if (actions.status === "success") {
@@ -81,7 +85,8 @@ export async function searchClientWorkspace(input: {
   }
 
   if (requests.status === "success") {
-    for (const request of requests.value.requests) {
+    if(requests.value.requests.length>20)moreResults.push({kind:"request",href:`/${input.locale}/client/demandes?${new URLSearchParams({organizationId:org??"",q:query})}`});
+    for (const request of requests.value.requests.slice(0,20)) {
       if (org && request.organizationId !== org) continue;
       if (!matchesClientSearch(`${request.description} ${request.status} ${request.id}`, query)) continue;
       hits.push({
@@ -98,18 +103,18 @@ export async function searchClientWorkspace(input: {
 
   if (missions.status === "success") {
     for (const contract of missions.dashboard.contracts) {
-      if (!matchesClientSearch(`${contract.id} ${contract.status} ${contract.changeReason}`, query)) continue;
+      if (!matchesClientSearch(`${contract.id} ${contract.title??""} ${contract.providerOrganizationName??""} ${contract.status} ${workflowStatusLabel(contract.status,input.locale)} ${contract.changeReason}`, query)) continue;
       hits.push({
         id: `contract:${contract.id}`,
         kind: "contract",
-        title: `${contract.status} · v${contract.currentVersion}`,
-        detail: contract.changeReason,
+        title: contract.title || (input.locale==="fr"?"Contrat — objet à préciser":"عقد — موضوع يحتاج إلى توضيح"),
+        detail: `${workflowStatusLabel(contract.status,input.locale)} · ${contract.changeReason}`,
         href: `/${input.locale}/client/contrats${q}#contrat-${contract.id}`,
       });
     }
     for (const mission of missions.dashboard.missions) {
       const hay = [
-        mission.status,
+        mission.status, mission.title??"", workflowStatusLabel(mission.status,input.locale),
         ...mission.milestones.map((item) => item.title),
         ...mission.deliverables.map((item) => item.label),
       ].join(" ");
@@ -117,8 +122,8 @@ export async function searchClientWorkspace(input: {
       hits.push({
         id: `mission:${mission.id}`,
         kind: "mission",
-        title: mission.milestones[0]?.title ?? mission.status,
-        detail: mission.status,
+        title: mission.title || mission.milestones[0]?.title || (input.locale==="fr"?"Mission — objet à préciser":"مهمة — موضوع يحتاج إلى توضيح"),
+        detail: workflowStatusLabel(mission.status,input.locale),
         href: `/${input.locale}/client/missions/${mission.id}${q}`,
       });
     }
@@ -127,15 +132,17 @@ export async function searchClientWorkspace(input: {
   }
 
   if (documents.status === "success") {
+    if(documents.value.hasNext)moreResults.push({kind:"document",href:`/${input.locale}/client/documents?${new URLSearchParams({organizationId:org??"",q:query})}`});
+    const evidenceTypes=getClientOnboardingMessages(input.locale).evidenceTypes;
     for (const document of documents.value.documents) {
       if (org && document.organizationId !== org) continue;
-      if (!matchesClientSearch(`${document.fileName} ${document.type}`, query)) continue;
+      if (!matchesClientSearch(`${document.fileName} ${document.type} ${document.id}`, query)) continue;
       hits.push({
         id: `document:${document.id}`,
         kind: "document",
         title: document.fileName,
-        detail: document.type,
-        href: `/${input.locale}/client/documents${q}`,
+        detail: Object.hasOwn(evidenceTypes,document.type)?evidenceTypes[document.type as keyof typeof evidenceTypes]:(input.locale==="fr"?"Document de conformité":"وثيقة امتثال"),
+        href: `/api/client/documents/${document.id}`,
       });
     }
   } else {
@@ -143,13 +150,13 @@ export async function searchClientWorkspace(input: {
   }
 
   if (messages.status === "success") {
+    if(messages.value.total>messages.value.pageSize)moreResults.push({kind:"message",total:messages.value.total,href:`/${input.locale}/messagerie?${new URLSearchParams({organizationId:org??"",q:query})}`});
     for (const thread of messages.value.inbox) {
-      if (!matchesClientSearch(`${thread.subject} ${thread.status}`, query)) continue;
       hits.push({
         id: `message:${thread.id}`,
         kind: "message",
         title: thread.subject,
-        detail: thread.status,
+        detail: workflowStatusLabel(thread.status,input.locale),
         href: `/${input.locale}/messagerie?fil=${encodeURIComponent(thread.id)}${org ? `&organizationId=${encodeURIComponent(org)}` : ""}`,
       });
     }
@@ -157,5 +164,5 @@ export async function searchClientWorkspace(input: {
     unavailable.push("message");
   }
 
-  return { query, hits, unavailable };
+  return { query, hits, unavailable,moreResults };
 }

@@ -1,3 +1,4 @@
+import{workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 const labels = {
@@ -6,5 +7,5 @@ const labels = {
 } as const;
 
 export function quoteStatusLabel(status: string, locale: Locale): string {
-  return labels[locale][status as keyof typeof labels.fr] ?? status;
+  return labels[locale][status as keyof typeof labels.fr] ?? workflowStatusLabel(status,locale);
 }

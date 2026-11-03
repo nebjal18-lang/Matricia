@@ -1,3 +1,6 @@
+import{SelectedQuoteIdentity}from"@/modules/client/screens/missions/selected-quote-identity";
+import{SignatureReadinessNotice}from"@/modules/shared/ui/signature-readiness-notice";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -22,7 +25,7 @@ export default async function ClientContractsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string }>;
+  searchParams: Promise<{ organizationId?: string;identityQuote?:string;identityPage?:string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -32,8 +35,8 @@ export default async function ClientContractsPage({
   const spaceC = spaceCopy(locale);
   const messages = getMissionMessages(locale);
   const [result, amendments] = await Promise.all([
-    loadContractMissions(locale, query.organizationId),
-    loadClientAmendments(query.organizationId),
+    loadContractMissions(locale, space.selectedOrganizationId),
+    loadClientAmendments(space.selectedOrganizationId),
   ]);
   const contracts = result.status === "success" ? result.dashboard.contracts : [];
   const missionsByContract = result.status === "success"
@@ -41,6 +44,7 @@ export default async function ClientContractsPage({
     : {};
   return (
     <ClientAppShell
+      languagePath={`/${locale}/client/contrats${space.selectedQuery}`}
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
@@ -54,7 +58,7 @@ export default async function ClientContractsPage({
         {result.status === "error" ? (
           <Alert>
             <AlertTitle>{messages.noOrg}</AlertTitle>
-            <AlertDescription>{result.reason}</AlertDescription>
+            <AlertDescription>{messages.loadError}</AlertDescription>
           </Alert>
         ) : contracts.length === 0 ? (
           <p>{c.contractsEmpty}</p>
@@ -67,18 +71,20 @@ export default async function ClientContractsPage({
                   <header className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-mono text-xs text-muted-foreground" dir="ltr">{contract.id}</p>
-                      <h2 className="mt-1 text-lg font-semibold">{messages.version} {contract.currentVersion} · {contract.status}</h2>
+                      <h2 className="mt-1 text-lg font-semibold">{contract.title || (locale==="fr"?"Contrat — objet à préciser":"عقد — موضوع يحتاج إلى توضيح")}<span className="block text-sm font-normal">{messages.version} {contract.currentVersion} · {workflowStatusLabel(contract.status,locale)}</span></h2>
                       <p className="mt-1 text-sm text-muted-foreground">{c.contractsSign} {contract.signatureCount}/2</p>
                     </div>
                     <p className="font-semibold" dir="ltr">{formatExactMoney(contract.priceMinor, contract.currency, locale)}</p>
                   </header>
                   <ContractSnapshot contract={contract} locale={locale} messages={messages} />
+                  {result.status==="success"&&["DRAFT","PENDING_SIGNATURE"].includes(contract.status)?<SelectedQuoteIdentity navigationQuery={query} locale={locale} organizationId={result.dashboard.organizationId} quoteVersionId={contract.selectedQuoteVersionId} contract={{id:contract.id,versionId:contract.versionId,contentHash:contract.contentHash,status:contract.status}}/>:null}
                   {result.status === "success" && contract.status === "DRAFT" ? (
                     <SubmitContractForm contract={contract} locale={locale} messages={messages} />
                   ) : null}
                   {result.status === "success" && contract.status === "PENDING_SIGNATURE" ? (
                     <SignContractForm contract={contract} organizationId={result.dashboard.organizationId} locale={locale} messages={messages} />
                   ) : null}
+                  {contract.status!=="DRAFT"&&contract.status!=="PENDING_SIGNATURE"?<SignatureReadinessNotice locale={locale} readiness={contract.signatureReadiness}/>:null}
                   {missionId ? (
                     <Link href={`/${locale}/client/missions/${missionId}${space.selectedQuery}`} className="client-text-link">
                       {c.contractsOpenMission}
@@ -98,6 +104,7 @@ export default async function ClientContractsPage({
             <summary>{spaceC.opsMissions}</summary>
             <div className="space-y-6">
               <MissionPanel d={result.dashboard} locale={locale} m={messages} />
+              {amendments.status==="error"?<p role="alert">{locale==="fr"?"Les avenants sont momentanément indisponibles ou nécessitent une nouvelle vérification de vos droits. Les autres données restent consultables.":"ملاحق العقود غير متاحة مؤقتاً أو تتطلب التحقق مجدداً من الصلاحيات. ما تزال البيانات الأخرى متاحة."}</p>:null}
               {amendments.status === "success" && amendments.value.organizationId === result.dashboard.organizationId ? (
                 <AmendmentPanel
                   d={amendments.value}

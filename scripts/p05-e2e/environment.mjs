@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { verifyLocalDockerConfiguration } from "./local-environment.mjs";
 
 const SAFE_ENVIRONMENTS = new Set(["development", "staging"]);
 
@@ -56,6 +57,10 @@ export function assertSafeEnvironment(env, metadata) {
 
 export function resolveExpectedDatabaseUrl(config) {
   const database = new URL(config.databaseUrl);
+  if (config.runtimeMode === "isolated-local-docker") {
+    if (!config.localDockerVerified || !["localhost", "127.0.0.1", "[::1]"].includes(database.hostname) || database.port !== "54322" || database.protocol !== "postgresql:" || database.pathname !== "/postgres" || database.search || database.hash || !database.password || !["postgres", "supabase_admin"].includes(database.username)) throw new Error("Local database verification missing");
+    return database.toString();
+  }
   if (database.protocol !== "postgresql:" || database.port !== "5432" || database.pathname !== "/postgres"
       || database.hash !== "" || !database.password) throw new Error("DIRECT_URL must use the exact PostgreSQL endpoint shape");
   const queryKeys = [...new Set([...database.searchParams.keys()])];
@@ -79,11 +84,13 @@ export function resolveExpectedDatabaseUrl(config) {
 }
 
 export async function loadSafeConfiguration(root) {
-  const [envSource, metadataSource] = await Promise.all([
-    readFile(resolve(root, ".env.local"), "utf8"),
-    readFile(resolve(root, "supabase", "project-metadata.json"), "utf8"),
-  ]);
+  const envSource = await readFile(resolve(root, ".env.local"), "utf8");
   const env = { ...parseEnv(envSource), ...process.env };
-  const metadata = JSON.parse(metadataSource);
+  if (env.E2E_LOCAL_ISOLATED === "1") {
+    const source = await readFile(resolve(root, "supabase", "config.toml"), "utf8");
+    const projectId = /^project_id\s*=\s*"([A-Za-z0-9_-]+)"/m.exec(source)?.[1];
+    return verifyLocalDockerConfiguration(env, projectId);
+  }
+  const metadata = JSON.parse(await readFile(resolve(root, "supabase", "project-metadata.json"), "utf8"));
   return assertSafeEnvironment(env, metadata);
 }

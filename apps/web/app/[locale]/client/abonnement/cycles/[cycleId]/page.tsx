@@ -25,7 +25,7 @@ export default async function SubscriptionInvoicePage({
   if (result.status === "error") {
     return (
       <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="finance" title={c.latestInvoices} lead={c.subPageLead} kicker={c.kicker}>
-        <p role="alert" className="client-card">{locale === "ar" ? "تعذر عرض الفاتورة." : "La facture ne peut pas être affichée."}</p>
+        <p role="alert" className="client-card">{locale === "ar" ? "تعذر عرض تفاصيل الدورة." : "Le détail du cycle ne peut pas être affiché."}</p>
       </ClientAppShell>
     );
   }

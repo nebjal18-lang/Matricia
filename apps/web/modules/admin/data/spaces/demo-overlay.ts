@@ -17,10 +17,10 @@ export function canApplyAdminDemo() {
 }
 
 export const demoSupervisionOrganizations: AdminSupervisionDashboard["organizations"] = [
-  { id: "11111111-1111-4111-8111-111111111111", display_name: "Studio Atlas", legal_name: "Studio Atlas SARL", status: "ACTIVE", created_at: "2026-09-01T10:00:00.000Z", member_count: 3, open_requests: 1, open_disputes: 0 },
-  { id: "22222222-2222-4222-8222-222222222222", display_name: "Client · Communication", legal_name: "Client Communication SARL", status: "PENDING", created_at: "2026-09-04T10:00:00.000Z", member_count: 2, open_requests: 2, open_disputes: 0 },
-  { id: "33333333-3333-4333-8333-333333333333", display_name: "Franchisé · Casablanca-Settat", legal_name: "Franchise Casablanca-Settat SARL", status: "ACTIVE", created_at: "2026-08-12T10:00:00.000Z", member_count: 4, open_requests: 0, open_disputes: 1 },
-  { id: "44444444-4444-4444-8444-444444444444", display_name: "Conseil Anfa", legal_name: "Conseil Anfa SARL", status: "ACTIVE", created_at: "2026-07-20T10:00:00.000Z", member_count: 5, open_requests: 1, open_disputes: 0 },
+  { id: "11111111-1111-4111-8111-111111111111", role_codes: ["CLIENT"], display_name: "Studio Atlas", legal_name: "Studio Atlas SARL", status: "ACTIVE", created_at: "2026-09-01T10:00:00.000Z", member_count: 3, open_requests: 1, open_disputes: 0 },
+  { id: "22222222-2222-4222-8222-222222222222", role_codes: ["CLIENT"], display_name: "Client · Communication", legal_name: "Client Communication SARL", status: "PENDING", created_at: "2026-09-04T10:00:00.000Z", member_count: 2, open_requests: 2, open_disputes: 0 },
+  { id: "33333333-3333-4333-8333-333333333333", role_codes: ["FRANCHISE"], display_name: "Franchisé · Casablanca-Settat", legal_name: "Franchise Casablanca-Settat SARL", status: "ACTIVE", created_at: "2026-08-12T10:00:00.000Z", member_count: 4, open_requests: 0, open_disputes: 1 },
+  { id: "44444444-4444-4444-8444-444444444444", role_codes: ["PROVIDER"], display_name: "Conseil Anfa", legal_name: "Conseil Anfa SARL", status: "ACTIVE", created_at: "2026-07-20T10:00:00.000Z", member_count: 5, open_requests: 1, open_disputes: 0 },
 ];
 
 const demoStatuses = ["UNDER_REVIEW", "ACTIVE", "PENDING", "COMPLETED"] as const;
@@ -35,7 +35,7 @@ function cellFor(column: string, org: AdminSupervisionDashboard["organizations"]
   const status = demoStatuses[index % demoStatuses.length]!;
   if (/organisation|مؤسسة|prestataire|مقدم|client|عميل|franchis|امتياز/i.test(column)) return org.display_name;
   if (/état|statut|حالة|status/i.test(column)) return status;
-  if (/type|نوع/i.test(column)) return inferOrgType(org.display_name, locale);
+  if (/type|نوع/i.test(column)) return inferOrgType(org.display_name, locale, org.role_codes);
   if (/progression|تقدم/i.test(column)) return ["80 %", "45 %", "100 %", "30 %"][index] ?? "60 %";
   if (/priorit|أولوي/i.test(column)) return fr ? ["Élevée", "Moyenne", "Faible", "Élevée"][index] ?? "Moyenne" : ["مرتفعة", "متوسطة", "منخفضة", "مرتفعة"][index] ?? "متوسطة";
   if (/version|نسخة/i.test(column)) return `v${index + 1}`;
@@ -86,7 +86,7 @@ export function demoActorUsers(): ActorUserRow[] {
 }
 
 export function demoClientOrganizations(locale: Locale) {
-  return demoSupervisionOrganizations.filter((org) => inferOrgType(org.display_name, locale) === (locale === "ar" ? "عميل" : "Client"));
+  return demoSupervisionOrganizations.filter((org) => inferOrgType(org.display_name, locale, org.role_codes) === (locale === "ar" ? "عميل" : "Client"));
 }
 
 export function demoClientCases(): AdminClientCase[] {

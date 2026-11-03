@@ -1,48 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MARKETING_TOUCH_COOKIE, signMarketingTouch } from "./funnel-touch";
+import {beforeEach,expect,it,vi} from "vitest";
+import {MARKETING_TOUCH_COOKIE,signMarketingTouch} from "./funnel-touch";
+const mocks=vi.hoisted(()=>({rpc:vi.fn(),cookie:vi.fn(),user:vi.fn()}));
+vi.mock("next/headers",()=>({cookies:async()=>({get:mocks.cookie})}));
+vi.mock("@/modules/shared/lib/supabase/admin",()=>({getSupabaseAdminClient:()=>({rpc:mocks.rpc})}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mocks.user}})}));
+import {captureMarketingFunnelTouch,recordMarketingFunnelEvent} from "./funnel";
+const secret="f".repeat(32),subject="44444444-4444-4444-8444-444444444444",actor="55555555-5555-4555-8555-555555555555",touchId="66666666-6666-4666-8666-666666666666";
+const touch={organizationId:"11111111-1111-4111-8111-111111111111",campaignId:"22222222-2222-4222-8222-222222222222",contentId:"33333333-3333-4333-8333-333333333333",nonce:"b".repeat(32),source:"linkedin",medium:"social",expiresAt:Date.now()+60_000};
+beforeEach(()=>{vi.clearAllMocks();process.env.MARKETING_CTA_SIGNING_SECRET=secret;mocks.cookie.mockImplementation((name:string)=>name===MARKETING_TOUCH_COOKIE?{value:signMarketingTouch(touch,secret)}:undefined);mocks.user.mockResolvedValue({data:{user:{id:actor}}});mocks.rpc.mockImplementation((name:string)=>Promise.resolve({data:name==="register_verified_marketing_touch_v2"?{touch_id:touchId}:{outcome:"MARKETING_BUSINESS_ATTRIBUTED"},error:null}))});
+it("ignores absent or forged marketing touches",async()=>{mocks.cookie.mockReturnValue(undefined);expect(await captureMarketingFunnelTouch()).toBe(false);mocks.cookie.mockReturnValue({value:"forged.value"});expect(await recordMarketingFunnelEvent("RFQ_STARTED",subject)).toBe(false);expect(mocks.rpc).not.toHaveBeenCalled()});
+it("persists a signed touch under the authenticated server actor before business mutation",async()=>{expect(await captureMarketingFunnelTouch()).toBe(true);expect(mocks.rpc).toHaveBeenCalledWith("register_verified_marketing_touch_v2",expect.objectContaining({p_actor_user_id:actor,p_campaign_id:touch.campaignId,p_content_id:touch.contentId,p_expires_at:new Date(touch.expiresAt).toISOString()}))});
+it("records an exact source through SQL verification without browser-supplied money or metadata",async()=>{expect(await recordMarketingFunnelEvent("RFQ_STARTED",subject)).toBe(true);expect(mocks.rpc).toHaveBeenLastCalledWith("record_marketing_business_conversion_v2",{p_event_type:"RFQ_STARTED",p_source_id:subject,p_touch_id:touchId,p_idempotency_key:expect.stringMatching(/^business-funnel:[a-f0-9]{64}$/u)})});
+it("never attributes a signed contract from a browser command or cookie",async()=>{expect(await recordMarketingFunnelEvent("CONTRACT_SIGNED",subject)).toBe(false);expect(mocks.rpc).not.toHaveBeenCalled()});
+it("refuses an unauthenticated touch and a failed business source verification without blocking the business caller",async()=>{mocks.user.mockResolvedValueOnce({data:{user:null}});expect(await captureMarketingFunnelTouch()).toBe(false);mocks.rpc.mockResolvedValueOnce({data:{touch_id:touchId},error:null}).mockResolvedValueOnce({data:null,error:{code:"42501"}});expect(await recordMarketingFunnelEvent("OPPORTUNITY_CREATED",subject)).toBe(false);mocks.rpc.mockRejectedValueOnce(new Error("offline"));expect(await captureMarketingFunnelTouch()).toBe(false)});
 
-const mocks = vi.hoisted(() => ({ rpc: vi.fn(), cookie: vi.fn() }));
-vi.mock("next/headers", () => ({ cookies: async () => ({ get: mocks.cookie }) }));
-vi.mock("@/modules/shared/lib/supabase/admin", () => ({ getSupabaseAdminClient: () => ({ rpc: mocks.rpc }) }));
-
-import { recordMarketingFunnelEvent } from "./funnel";
-
-const secret = "f".repeat(32);
-const touch = { organizationId: "11111111-1111-4111-8111-111111111111", campaignId: "22222222-2222-4222-8222-222222222222", contentId: "33333333-3333-4333-8333-333333333333", nonce: "b".repeat(32), source: "linkedin", medium: "social", expiresAt: Date.now() + 60_000 };
-const subject = "44444444-4444-4444-8444-444444444444";
-
-describe("recordMarketingFunnelEvent", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    process.env.MARKETING_CTA_SIGNING_SECRET = secret;
-    mocks.rpc.mockResolvedValue({ data: { outcome: "MARKETING_ATTRIBUTION_INGESTED" }, error: null });
-  });
-
-  it("does nothing without a signed touch", async () => {
-    mocks.cookie.mockReturnValue(undefined);
-    expect(await recordMarketingFunnelEvent("RFQ_STARTED", subject)).toBe(false);
-    mocks.cookie.mockReturnValue({ value: "forged.value" });
-    expect(await recordMarketingFunnelEvent("RFQ_STARTED", subject)).toBe(false);
-    expect(mocks.rpc).not.toHaveBeenCalled();
-  });
-
-  it("ingests the step with the signed campaign and a deterministic idempotency key", async () => {
-    mocks.cookie.mockImplementation((name: string) => (name === MARKETING_TOUCH_COOKIE ? { value: signMarketingTouch(touch, secret) } : undefined));
-    expect(await recordMarketingFunnelEvent("CONTRACT_SIGNED", subject)).toBe(true);
-    expect(await recordMarketingFunnelEvent("CONTRACT_SIGNED", subject)).toBe(true);
-    expect(mocks.rpc).toHaveBeenCalledTimes(2);
-    const [first, second] = mocks.rpc.mock.calls.map((call) => call[1] as Record<string, unknown>);
-    expect(first).toMatchObject({ p_organization_id: touch.organizationId, p_campaign_id: touch.campaignId, p_content_id: touch.contentId, p_event_type: "CONTRACT_SIGNED", p_metadata: {}, p_economic_value_minor: null });
-    expect(first!.p_idempotency_key).toMatch(/^funnel:[0-9a-f]{64}$/);
-    expect(second!.p_idempotency_key).toBe(first!.p_idempotency_key);
-  });
-
-  it("never throws and reports a refused ingestion", async () => {
-    mocks.cookie.mockReturnValue({ value: signMarketingTouch(touch, secret) });
-    mocks.rpc.mockResolvedValueOnce({ data: null, error: { message: "CONSENT" } });
-    expect(await recordMarketingFunnelEvent("DIAGNOSTIC_STARTED", subject)).toBe(false);
-    mocks.rpc.mockRejectedValueOnce(new Error("network"));
-    expect(await recordMarketingFunnelEvent("DIAGNOSTIC_STARTED", subject)).toBe(false);
-    expect(await recordMarketingFunnelEvent("DIAGNOSTIC_STARTED", "not valid!")).toBe(false);
-  });
-});
+it("refuses browser supplied economic value",async()=>{expect(await recordMarketingFunnelEvent("RFQ_STARTED",subject,"999999")).toBe(false);expect(mocks.rpc).not.toHaveBeenCalled()});

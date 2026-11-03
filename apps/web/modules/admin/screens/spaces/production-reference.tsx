@@ -1,0 +1,2 @@
+import type{Locale}from"@/modules/shared/lib/i18n/locale";
+export function ProductionReference({locale}:{locale:Locale}){const ar=locale==="ar";return <details className="admin-note"><summary>{ar?"مرجع ترخيص الإنتاج إن كان مطلوباً":"Référence d’autorisation de production si requise"}</summary><label>{ar?"المرجع المعتمد لتغيير الإنتاج":"Référence approuvée du changement en production"}<input name="productionAuthorizationReference"minLength={8}maxLength={500}autoComplete="off"/></label></details>;}

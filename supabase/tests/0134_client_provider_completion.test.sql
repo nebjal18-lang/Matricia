@@ -1,5 +1,7 @@
 begin;
-select plan(61);
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='transactional-scan-fixture-0134',configured_at=clock_timestamp()where singleton;
+
+select plan(62);
 
 select has_function('private','protect_delivery_proof_content',array[]::text[],'proof content guard exists');
 select isnt_empty($$select 1 from pg_trigger where tgrelid='public.delivery_proofs'::regclass and tgname='delivery_proofs_immutable' and not tgisinternal$$,'proof immutability trigger remains installed');
@@ -21,7 +23,7 @@ select isnt_empty($$select 1 from pg_get_functiondef('public.submit_mission_mile
 select isnt_empty($$select 1 from pg_get_functiondef('public.decide_mission_milestone(uuid,integer,text,text,text,uuid)'::regprocedure) d where d like '%audit_events%' and d like '%event_outbox%' and d like '%MissionMilestoneAcceptedV1%'$$,'decision is audited and emits versioned Outbox event');
 
 select isnt_empty($$select 1 from storage.buckets where id='delivery-proofs' and not public and file_size_limit=10485760$$,'proof bucket is private and bounded');
-select isnt_empty($$select 1 from pg_policies where schemaname='storage' and tablename='objects' and policyname='delivery_proof_storage_insert' and with_check like '%auth.uid()%provider_organization_id%' and with_check like '%DELIVERY_SUBMITTED%'$$,'storage upload binds actor, provider organization and active mission');
+select isnt_empty($$select 1 from pg_policies where schemaname='storage' and tablename='objects' and policyname='delivery_proof_storage_insert' and with_check ~ 'uid[(][)]' and with_check like '%provider_organization_id%' and with_check like '%DELIVERY_SUBMITTED%'$$,'storage upload binds actor, provider organization and active mission');
 select isnt_empty($$select 1 from pg_policies where schemaname='storage' and tablename='objects' and policyname='delivery_proof_storage_party_read' and qual like '%scan_status = ''CLEAN''%mission_party_access%'$$,'only mission parties can read clean storage proofs');
 select has_function('private','bind_delivery_proof_storage',array[]::text[],'storage binding guard exists');
 select isnt_empty($$select 1 from pg_trigger where tgrelid='public.delivery_proofs'::regclass and tgname='delivery_proof_storage_binding' and not tgisinternal$$,'proof insertion verifies the real storage object');
@@ -72,13 +74,15 @@ insert into public.deliverables(id,mission_id,milestone_id,deliverable_key,label
 grant usage on schema extensions to authenticated,service_role;grant execute on all functions in schema extensions to authenticated,service_role;
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',true);
 select lives_ok($$insert into storage.objects(bucket_id,name,owner_id,metadata) values('delivery-proofs','fd100000-0000-4000-8000-000000000002/fd180000-0000-4000-8000-000000000001/upload.pdf','fd100000-0000-4000-8000-000000000002','{}')$$,'provider owner uploads against its active mission');
+select throws_ok($$insert into storage.objects(bucket_id,name,owner_id,metadata)values('delivery-proofs','fd100000-0000-4000-8000-000000000003/fd180000-0000-4000-8000-000000000001/forged-actor.pdf','fd100000-0000-4000-8000-000000000002','{}')$$,'42501'::char(5),'new row violates row-level security policy for table "objects"','provider cannot forge another actor storage prefix');
 select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}',true);
 select throws_ok($$insert into storage.objects(bucket_id,name,owner_id,metadata) values('delivery-proofs','fd100000-0000-4000-8000-000000000003/fd180000-0000-4000-8000-000000000001/foreign.pdf','fd100000-0000-4000-8000-000000000003','{}')$$,'42501'::char(5),'new row violates row-level security policy for table "objects"','foreign tenant cannot upload proof for provider mission');
 reset role;
 insert into public.delivery_versions(id,deliverable_id,version,description,content_hash,submitted_by) values('fd190000-0000-4000-8000-000000000001','fd180000-0000-4000-8000-000000000001',1,'Preuve P25',repeat('b',64),'fd100000-0000-4000-8000-000000000002');
-alter table public.delivery_proofs disable trigger delivery_proof_storage_binding;
+select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',true);
+insert into storage.objects(bucket_id,name,owner_id,metadata)values('delivery-proofs','fd100000-0000-4000-8000-000000000002/fd180000-0000-4000-8000-000000000001/proof.pdf','fd100000-0000-4000-8000-000000000002','{"mimetype":"application/pdf","size":20}');
 insert into public.delivery_proofs(id,delivery_version_id,proof_type,storage_path,evidence_hash,metadata,created_by) values('fd200000-0000-4000-8000-000000000001','fd190000-0000-4000-8000-000000000001','DOCUMENT','fd100000-0000-4000-8000-000000000002/fd180000-0000-4000-8000-000000000001/proof.pdf',repeat('b',64),'{"mime_type":"application/pdf"}','fd100000-0000-4000-8000-000000000002');
-alter table public.delivery_proofs enable trigger delivery_proof_storage_binding;
+
 insert into public.acceptance_checklists(mission_id,deliverable_id,criterion_key) values('fd160000-0000-4000-8000-000000000001','fd180000-0000-4000-8000-000000000001','QUALITY');
 
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',true);

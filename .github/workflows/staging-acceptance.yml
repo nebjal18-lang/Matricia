@@ -1,0 +1,64 @@
+name: Staging acceptance (protected)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    environment: staging-acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_ENV: staging
+      E2E_BASE_URL: http://localhost:5173
+      NEXT_PUBLIC_APP_URL: https://matricia.example
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.STAGING_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.STAGING_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+      DIRECT_URL: ${{ secrets.STAGING_DIRECT_URL }}
+      SUPABASE_PROJECT_REF: ${{ vars.STAGING_SUPABASE_PROJECT_REF }}
+      SUPABASE_REGION: ${{ vars.STAGING_SUPABASE_REGION }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Prepare verified non-production runtime configuration
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import { writeFile } from 'node:fs/promises';
+          const names = ['APP_ENV','NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY','DIRECT_URL','E2E_BASE_URL','NEXT_PUBLIC_APP_URL'];
+          for (const name of [...names, 'SUPABASE_PROJECT_REF', 'SUPABASE_REGION']) if (!process.env[name]) throw new Error('Missing staging binding: ' + name);
+          const ref = process.env.SUPABASE_PROJECT_REF;
+          if (!/^[a-z0-9]{10,40}$/.test(ref) || new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname !== ref + '.supabase.co') throw new Error('Staging identity mismatch');
+          if (names.some(name => /[\r\n]/.test(process.env[name]))) throw new Error('Multiline runtime binding refused');
+          await writeFile('.env.local', names.map(name => name + '=' + process.env[name]).join('\n') + '\n', { mode: 0o600 });
+          await writeFile('supabase/project-metadata.json', JSON.stringify({ environment:'staging', project_ref:ref, region:process.env.SUPABASE_REGION }));
+          JS
+      - name: Authenticated workflows with generated fixtures and mandatory cleanup
+        run: node tests/e2e/helpers/p24-p26-completion-run.mjs
+      - name: Remove local credentials and authentication artifacts
+        if: always()
+        shell: bash
+        run: |
+          rm -f .env.local
+          git restore -- supabase/project-metadata.json
+          rm -rf scripts/p05-e2e/.auth
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanitized-staging-acceptance
+          path: |
+            artifacts/test-results/authenticated-route-smoke-summary.json
+            docs/evidence/p05/authenticated-e2e-last-run.json
+          if-no-files-found: error

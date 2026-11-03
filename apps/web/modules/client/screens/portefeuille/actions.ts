@@ -1,8 +1,8 @@
 "use server";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { code, locale, moneyToMinor, sha256, uuid } from "@/modules/client/data/portfolio/model";
+import { code, locale, moneyToMinor, uuid } from "@/modules/client/data/portfolio/model";
 import { portfolioRpc } from "@/modules/client/data/portfolio/server-repository";
 
 export type State = { status: "idle" } | { status: "success" } | { status: "error"; reason: "VALIDATION" | "FORBIDDEN" | "UNAVAILABLE" };
@@ -50,8 +50,42 @@ export async function saveBudget(_:State,form:FormData):Promise<State>{const p=b
 const centerSchema=base.extend({organizationId:uuid,centerCode:code,nameFr:z.string().trim().min(2).max(160),nameAr:z.string().trim().min(2).max(160),changeReason:z.string().trim().min(3).max(500)});
 export async function createCostCenter(_:State,form:FormData):Promise<State>{const p=centerSchema.safeParse(Object.fromEntries([...form.keys()].map(key=>[key,field(form,key)])));if(!p.success)return{status:"error",reason:"VALIDATION"};return execute(p.data.locale,"create_client_cost_center",{p_organization_id:p.data.organizationId,p_code:p.data.centerCode,p_name_fr:p.data.nameFr,p_name_ar:p.data.nameAr,p_manager_user_id:null,p_allocation_policy_snapshot:{version:"1.0",source:"CLIENT_PORTFOLIO_V1"},p_change_reason:p.data.changeReason,p_idempotency_key:p.data.idempotencyKey,p_correlation_id:randomUUID()});}
 
-const allocationSchema=base.extend({organizationId:uuid,costCenterId:uuid,budgetId:uuid,projectId:optionalUuid,allocationType:z.enum(["COMMITMENT","ACTUAL","RELEASE"]),referenceType:z.enum(["PROJECT","PROJECT_TASK","CONTRACT","MISSION","MISSION_MILESTONE","INVOICE","DOCUMENT","RFQ","MANUAL"]),referenceId:optionalUuid,amount:z.string().trim().min(1).max(30),evidenceHash:sha256});
-export async function recordAllocation(_:State,form:FormData):Promise<State>{const p=allocationSchema.safeParse(Object.fromEntries([...form.keys()].map(key=>[key,field(form,key)])));if(!p.success||p.data.referenceType==="MANUAL"&&p.data.referenceId||p.data.referenceType!=="MANUAL"&&!p.data.referenceId)return{status:"error",reason:"VALIDATION"};const amount=moneyToMinor(p.data.amount);if(amount===null||BigInt(amount)<=BigInt(0))return{status:"error",reason:"VALIDATION"};return execute(p.data.locale,"record_client_typed_cost_allocation",{p_organization_id:p.data.organizationId,p_cost_center_id:p.data.costCenterId,p_budget_id:p.data.budgetId,p_project_id:nullable(p.data.projectId),p_allocation_type:p.data.allocationType,p_amount_minor:amount,p_reference_type:p.data.referenceType,p_reference_id:nullable(p.data.referenceId),p_evidence_hash:p.data.evidenceHash,p_idempotency_key:p.data.idempotencyKey,p_correlation_id:randomUUID()});}
+const allocationSchema = base.extend({
+  organizationId: uuid, costCenterId: uuid, budgetId: uuid, projectId: optionalUuid,
+  allocationType: z.enum(["COMMITMENT", "ACTUAL", "RELEASE"]),
+  referenceChoice: z.union([z.literal("MANUAL"), z.string().regex(/^(PROJECT|PROJECT_TASK|CONTRACT|MISSION|MISSION_MILESTONE|INVOICE|DOCUMENT|RFQ):[0-9a-f-]{36}$/iu)]),
+  amount: z.string().trim().min(1).max(30),
+});
+
+/** Evidence is hashed on the server; this action does not publish or archive the file. */
+async function evidenceFingerprint(entry: FormDataEntryValue | null): Promise<string | null> {
+  if (!(entry instanceof File) || entry.size < 1 || entry.size > 10 * 1024 * 1024) return null;
+  if (!["application/pdf", "image/png", "image/jpeg"].includes(entry.type)) return null;
+  const bytes = new Uint8Array(await entry.arrayBuffer());
+  const valid = entry.type === "application/pdf" ? new TextDecoder().decode(bytes.subarray(0, 5)) === "%PDF-"
+    : entry.type === "image/jpeg" ? bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255
+    : [137, 80, 78, 71, 13, 10, 26, 10].every((value, index) => bytes[index] === value);
+  return valid ? createHash("sha256").update(bytes).digest("hex") : null;
+}
+
+export async function recordAllocation(_: State, form: FormData): Promise<State> {
+  const p = allocationSchema.safeParse(Object.fromEntries([...form.keys()].map(key => [key, field(form, key)])));
+  if (!p.success) return { status: "error", reason: "VALIDATION" };
+  const [referenceType, referenceId = ""] = p.data.referenceChoice.split(":");
+  if (referenceType !== "MANUAL" && !uuid.safeParse(referenceId).success) return { status: "error", reason: "VALIDATION" };
+  const amount = moneyToMinor(p.data.amount);
+  if (amount === null || BigInt(amount) <= BigInt(0)) return { status: "error", reason: "VALIDATION" };
+  const evidenceHash = await evidenceFingerprint(form.get("evidenceFile"));
+  if (!evidenceHash) return { status: "error", reason: "VALIDATION" };
+  // The transactional RPC independently checks capabilities, organisation, and referenced object.
+  return execute(p.data.locale, "record_client_typed_cost_allocation", {
+    p_organization_id: p.data.organizationId, p_cost_center_id: p.data.costCenterId,
+    p_budget_id: p.data.budgetId, p_project_id: nullable(p.data.projectId),
+    p_allocation_type: p.data.allocationType, p_amount_minor: amount,
+    p_reference_type: referenceType, p_reference_id: nullable(referenceId),
+    p_evidence_hash: evidenceHash, p_idempotency_key: p.data.idempotencyKey, p_correlation_id: randomUUID(),
+  });
+}
 
 const eventSchema=base.extend({organizationId:uuid,projectId:optionalUuid,eventType:z.enum(["CUSTOM","PROJECT_DEADLINE","APPROVAL","DOCUMENT","INVOICE","MISSION","RFQ"]),titleFr:z.string().trim().min(2).max(240),titleAr:z.string().trim().min(2).max(240),startsAt:z.string().datetime({local:true}),endsAt:z.string()});
 export async function scheduleEvent(_:State,form:FormData):Promise<State>{const p=eventSchema.safeParse(Object.fromEntries([...form.keys()].map(key=>[key,field(form,key)])));if(!p.success||p.data.endsAt&&p.data.endsAt<p.data.startsAt)return{status:"error",reason:"VALIDATION"};return execute(p.data.locale,"schedule_client_calendar_event",{p_organization_id:p.data.organizationId,p_project_id:nullable(p.data.projectId),p_event_type:p.data.eventType,p_title_fr:p.data.titleFr,p_title_ar:p.data.titleAr,p_starts_at:new Date(p.data.startsAt).toISOString(),p_ends_at:p.data.endsAt?new Date(p.data.endsAt).toISOString():null,p_source_type:null,p_source_id:null,p_idempotency_key:p.data.idempotencyKey,p_correlation_id:randomUUID()});}

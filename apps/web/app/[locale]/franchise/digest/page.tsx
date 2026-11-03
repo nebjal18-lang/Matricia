@@ -7,16 +7,17 @@ import { loadFranchiseDigest } from "@/modules/franchise/data/digest/repository"
 import { FranchiseHomeBoard } from "@/modules/franchise/screens/spaces/boards";
 import { FranchiseDigestPanel } from "@/modules/franchise/screens/digest/digest-panel";
 import { getFranchiseDigestMessages } from "@/modules/franchise/screens/digest/messages";
-import { franchiseMandateName, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
+import { franchiseMandateName, loadFranchiseSpaceFromLibrary, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
-export default async function FranchiseDigestPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+export default async function FranchiseDigestPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result: library } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId });
+  const { space, result: library } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
+  const board=await loadFranchiseSpaceFromLibrary({locale,query:space.selectedQuery,result:library});
   const m = getFranchiseDigestMessages(locale);
-  const result = await loadFranchiseDigest();
+  const result = await loadFranchiseDigest(library.status === "success" ? library.workspace.mandate.franchiseId : "00000000-0000-4000-8000-000000000000");
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/franchise/digest` }));
   const c = franchiseCopy(locale);
   const mandateName = franchiseMandateName(library);
@@ -24,7 +25,7 @@ export default async function FranchiseDigestPage({ params, searchParams }: { pa
   if (result.status === "success") for (const franchise of result.dashboard.franchises) keys[franchise.id] = randomUUID();
   return (
     <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="home" title={c.homeTitle} lead={c.homeLead} kicker={c.kicker} mandateName={mandateName}>
-      <FranchiseHomeBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} />
+      <FranchiseHomeBoard board={board} locale={locale} query={space.selectedQuery} mandateName={mandateName} />
       <details className="client-ops">
         <summary>{c.opsDigest}</summary>
         {result.status === "error" ? (

@@ -1,0 +1,42 @@
+"use client";
+import Link from"next/link";
+import{Button}from"@/modules/shared/ui/button";
+import{useActionState,useEffect,useId,useRef,useState}from"react";
+import{manageBenefitFulfillment}from"./actions";
+import type{FulfillmentRow,FulfillmentState}from"./model";
+import type{Locale}from"@/modules/shared/lib/i18n/locale";
+const idle:FulfillmentState={status:"idle"};
+export function BenefitFulfillmentCard({row,locale,requestKey,admin=false}:{row:FulfillmentRow;locale:Locale;requestKey:string;admin?:boolean}){
+ const ar=locale==="ar",id=useId(),ref=useRef<HTMLParagraphElement>(null);
+ const[state,action,pending]=useActionState(manageBenefitFulfillment,idle);
+ const[reason,setReason]=useState(""),[summary,setSummary]=useState(""),[reference,setReference]=useState(""),[scheduled,setScheduled]=useState(row.default_schedule_local);
+ useEffect(()=>{if(state.status!=="idle")ref.current?.focus();},[state]);
+ const status={RESERVED:ar?"محجوز":"Réservé",SCHEDULED:ar?"مجدول":"Planifié",IN_PROGRESS:ar?"قيد التنفيذ":"En cours",DELIVERED:ar?"تم تأكيد الاستلام":"Réception confirmée",CONSUMED:ar?"تم احتساب الرصيد":"Crédits consommés",CANCELLED:ar?"ملغى":"Annulé",REFUNDED:ar?"مسترجع":"Remboursé",EXPIRED:ar?"منتهي":"Expiré"};
+ const success={BENEFIT_SCHEDULED:ar?"تم حفظ الموعد.":"Le rendez-vous est enregistré.",BENEFIT_STARTED:ar?"بدأ التنفيذ.":"L’exécution a commencé.",BENEFIT_DELIVERY_REVIEW_REQUIRED:ar?"تم تقديم التقرير إلى العميل للتأكيد.":"Le compte rendu est soumis à la réception du client.",BENEFIT_DELIVERY_ACCEPTED:ar?"تم تأكيد الاستلام وحفظ الإيصال.":"La réception et son accusé sont enregistrés.",BENEFIT_DELIVERY_REJECTED:ar?"تم حفظ الرفض؛ تبقى الخدمة قيد التنفيذ.":"Le refus est enregistré ; la prestation reste en cours.",BENEFIT_CONSUMED:ar?"تم احتساب الرصيد وفق الإيصال المقبول.":"Les crédits ont été consommés sur l’accusé accepté."};
+ const errors={VALIDATION:ar?"تحقق من الحقول والتأكيد. يجب أن يكون التوقيت المغربي صالحاً وواضحاً.":"Vérifiez les champs et la confirmation. L’heure marocaine doit être valide et non ambiguë.",FORBIDDEN:ar?"يلزم دور مخول وتحقق متعدد العوامل؛ لا يمكنك تأكيد تقريرك الخاص.":"Une habilitation et le MFA sont requis. Le déposant ne peut pas réceptionner son propre compte rendu.",STALE:ar?"تغير الملف. حدّث الصفحة قبل إعادة المحاولة.":"Le dossier a changé. Actualisez la page avant de réessayer.",FUNDING:ar?"التمويل أو الحجز غير متاح. اطلب مراجعة ماتريسيا.":"Le financement ou la réservation nécessite une revue Matricia.",PENDING:ar?"هذه الخطوة غير متاحة بعد؛ راجع الحالة الحالية.":"Cette étape n’est pas encore disponible ; vérifiez l’état courant.",FAILED:ar?"تعذر تنفيذ الإجراء. تحقق من الحالة قبل المحاولة.":"L’action a échoué. Vérifiez son état avant de réessayer."};
+ const maySchedule=admin&&row.can_operate&&row.funding_ready&&["RESERVED","SCHEDULED"].includes(row.status);
+ const mayReport=admin&&row.can_operate&&row.status==="IN_PROGRESS"&&(!row.proposal||row.receipt!==null);
+ const mayReceive=row.can_receive;
+ const mayConsume=admin&&row.status==="DELIVERED"&&row.delivery_proof_hash!==null;
+ const needsReason=maySchedule||mayReceive;
+ return <article className="grid gap-4 rounded-xl border bg-card p-6 text-card-foreground" aria-labelledby={`${id}-title`}>
+  <h2 id={`${id}-title`}>{ar?row.name_ar:row.name_fr}</h2><p>{row.organization_name} · {status[row.status]}</p>
+  <p>{ar?"الوحدات":"Unités"} : {row.units} · {ar?"الرصيد المحجوز":"Crédits réservés"} : {row.reserved_credits}</p>
+  {row.scheduled_for?<p>{ar?"الموعد":"Rendez-vous"} : {row.scheduled_label}</p>:null}
+  {row.execution_requires_native?<p role="status">{ar?"يجب أن تؤكد ماتريسيا التفعيل التلقائي لهذه الميزة.":"L’activation automatique de cet avantage doit être confirmée par Matricia."}</p>:null}
+  {row.execution_policy_required&&["RESERVED","SCHEDULED","IN_PROGRESS"].includes(row.status)?<p role="status">{ar?"يلزم اعتماد شروط تنفيذ هذه الخدمة من طرف مراجع مستقل قبل المتابعة.":"Les conditions d’exécution de cette prestation doivent être approuvées par un réviseur indépendant avant de poursuivre."}</p>:null}
+  {!row.funding_ready&&["RESERVED","SCHEDULED"].includes(row.status)?<p role="status">{errors.FUNDING}</p>:null}
+  {row.proposal?<section className="grid gap-2"><h3>{ar?"تقرير التنفيذ":"Compte rendu d’exécution"}</h3><p className="whitespace-pre-wrap break-words">{row.proposal.summary}</p><p>{ar?"مرجع الخدمة":"Référence de la prestation"} : {row.proposal.service_reference}</p><p>{ar?"تمت المعاينة في":"Constaté le"} {row.completed_label}</p>{row.receipt?<p>{row.receipt.accepted?(ar?"استلام مؤكد":"Réception confirmée"):(ar?"طلب استكمال":"Complément demandé")} · {row.receipt_label} · {row.receipt.reason}</p>:<p>{ar?"بانتظار مراجعة العميل المستقلة.":"En attente d’une réception indépendante du client."}</p>}</section>:null}
+  {row.receipt_requires_mfa?<p><Link href={`/${locale}/securite/compte`}>{ar?"فعّل أو تحقق من العامل الثاني لتأكيد الاستلام.":"Activez ou vérifiez votre second facteur pour réceptionner la prestation."}</Link></p>:null}
+  {state.status!=="idle"?<p ref={ref}tabIndex={-1}role={state.status==="error"?"alert":"status"}className="rounded-md border p-3">{state.status==="success"?success[state.outcome as keyof typeof success]??success.BENEFIT_SCHEDULED:errors[state.reason??"FAILED"]}</p>:null}
+  {maySchedule||mayReport||mayReceive||mayConsume?<form action={action}aria-busy={pending}className="grid gap-3">
+   <input type="hidden"name="locale"value={locale}/><input type="hidden"name="redemptionId"value={row.id}/><input type="hidden"name="organizationId"value={row.organization_id}/><input type="hidden"name="rowVersion"value={row.row_version}/><input type="hidden"name="idempotencyKey"value={requestKey}/>
+   {maySchedule?<><label htmlFor={`${id}-schedule`}>{ar?"الموعد بتوقيت المغرب":"Rendez-vous, heure du Maroc"}</label><input id={`${id}-schedule`}name="scheduledFor"type="datetime-local"className="w-full rounded-md border bg-background px-3 py-2"value={scheduled}onChange={event=>setScheduled(event.target.value)}/></>:null}
+   {mayReport?<><label htmlFor={`${id}-summary`}>{ar?"الخدمة المنجزة والنتائج المسلمة":"Prestation réalisée et résultats remis"}</label><textarea id={`${id}-summary`}name="summary"className="min-h-24 w-full rounded-md border bg-background px-3 py-2"minLength={20}maxLength={10000}required value={summary}onChange={event=>setSummary(event.target.value)}/><label htmlFor={`${id}-reference`}>{ar?"مرجع التنفيذ أو الحضور":"Référence d’exécution ou de présence"}</label><input id={`${id}-reference`}name="reference"className="w-full rounded-md border bg-background px-3 py-2"minLength={3}maxLength={2000}required value={reference}onChange={event=>setReference(event.target.value)}/></>:null}
+   {mayReceive&&row.proposal?<><input type="hidden"name="proposalId"value={row.proposal.id}/><input type="hidden"name="sourceHash"value={row.proposal.source_hash}/></>:null}
+   {needsReason?<><label htmlFor={`${id}-reason`}>{ar?"الملاحظة والسبب":"Observation et motif"}</label><textarea id={`${id}-reason`}name="reason"className="min-h-24 w-full rounded-md border bg-background px-3 py-2"minLength={10}maxLength={2000}required value={reason}onChange={event=>setReason(event.target.value)}/></>:null}
+   <label><input type="checkbox"name="confirmed"value="yes"required/>{ar?"راجعت الخدمة والوقائع المعروضة وأؤكد الإجراء.":"J’ai vérifié la prestation et les faits présentés ; je confirme l’action."}</label>
+   <div className="flex flex-wrap gap-3">{maySchedule?<><Button type="submit"name="intent"value="schedule"disabled={pending}variant="outline">{ar?"حفظ الموعد":"Enregistrer le rendez-vous"}</Button>{row.status==="SCHEDULED"?<Button type="submit"name="intent"value="start"disabled={pending}variant="outline">{ar?"بدء التنفيذ":"Commencer l’exécution"}</Button>:null}</>:null}{mayReport?<Button type="submit"name="intent"value="report"disabled={pending}variant="outline">{ar?"تقديم التقرير للعميل":"Soumettre le compte rendu au client"}</Button>:null}{mayReceive?<><Button type="submit"name="intent"value="accept"disabled={pending}variant="outline">{ar?"تأكيد الاستلام":"Confirmer la réception"}</Button><Button type="submit"name="intent"value="reject"disabled={pending}variant="outline">{ar?"طلب استكمال":"Demander un complément"}</Button></>:null}{mayConsume?<Button type="submit"name="intent"value="consume"disabled={pending}variant="outline">{ar?"احتساب الرصيد المقبول":"Consommer les crédits réceptionnés"}</Button>:null}</div>
+  </form>:null}
+ </article>;
+}

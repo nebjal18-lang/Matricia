@@ -32,22 +32,32 @@ function safeRunId(value) {
 
 function randomPassword() { return `${randomBytes(24).toString("base64url")}aA7!`; }
 
+function proofFailure(operation, results = []) {
+  const responses = results.map(result => {
+    const status = Number(result?.status ?? result?.error?.status ?? result?.error?.statusCode);
+    const code = result?.error?.code;
+    return { status: Number.isInteger(status) && status >= 0 && status <= 599 ? status : null,
+      code: typeof code === "string" && /^[A-Za-z0-9_.:-]{1,64}$/u.test(code) ? code : null };
+  });
+  return Object.assign(new Error("P05_PROOF_FAILED"), { code: "P05_PROOF_FAILED", proofDiagnostic: { operation, responses } });
+}
+
 export function combineProvisionAndCleanupErrors(stage, provisionError, cleanupError) {
   if (!cleanupError) {
     const failure = new Error(`P05 E2E setup stopped during ${stage}`, { cause: provisionError });
-    return failure;
+    return Object.assign(failure, { code: "P05_PROVISION_FAILED", provisionStage: stage });
   }
-  return new AggregateError(
+  return Object.assign(new AggregateError(
     [provisionError, cleanupError],
     `P05 E2E setup stopped during ${stage} and remote fixture neutralization also failed`,
     { cause: provisionError },
-  );
+  ), { code: "P05_PROVISION_FAILED", provisionStage: stage });
 }
 
 async function createTestUser(admin, email, password, displayName) {
   const result = await admin.auth.admin.createUser({ email, password, email_confirm: true,
     app_metadata: { p05_e2e_fixture: true }, user_metadata: { full_name: displayName, preferred_locale: "fr-MA" } });
-  if (result.error || !result.data.user) throw new Error("Unable to create an isolated P05 E2E identity");
+  if (result.error || !result.data.user) throw proofFailure("CREATE_IDENTITY", [result]);
   return result.data.user;
 }
 
@@ -65,10 +75,16 @@ function cookieStateClient(config) {
   return { client, cookies };
 }
 
-async function authenticate(config, email, password) {
+async function authenticate(config, email, password, admin) {
   const context = cookieStateClient(config);
-  const signedIn = await context.client.auth.signInWithPassword({ email, password });
-  if (signedIn.error || !signedIn.data.session) throw new Error("Unable to establish the P05 E2E session");
+  let signedIn;
+  if (config.runtimeMode === "isolated-local-docker") {
+    const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
+    const token = link.data?.properties?.hashed_token;
+    if (link.error || !token) throw proofFailure("AUTH_OTP_CHALLENGE", [link]);
+    signedIn = await context.client.auth.verifyOtp({ token_hash: token, type: "magiclink" });
+  } else signedIn = await context.client.auth.signInWithPassword({ email, password });
+  if (signedIn.error || !signedIn.data.session) throw proofFailure("AUTH_SESSION", [signedIn]);
   return context;
 }
 
@@ -76,14 +92,16 @@ async function elevateToAal2(context) {
   const enrollment = await context.client.auth.mfa.enroll({ factorType: "totp", friendlyName: `p05-e2e-${randomUUID()}` });
   const secret = enrollment.data?.totp?.secret;
   const factorId = enrollment.data?.id;
-  if (enrollment.error || !secret || !factorId) throw new Error("Unable to enroll the isolated P05 E2E MFA factor");
+  if (enrollment.error || !secret || !factorId) throw proofFailure("MFA_ENROLL", [enrollment]);
   let verified = false;
+  let verifiedCounter;
   for (const offset of [-30_000, 0, 30_000]) {
     const result = await context.client.auth.mfa.challengeAndVerify({ factorId, code: totp(secret, Date.now() + offset) });
-    if (!result.error) { verified = true; break; }
+    if (!result.error) { verified = true; verifiedCounter = Math.floor((Date.now() + offset) / 30_000); break; }
   }
   const assurance = await context.client.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (!verified || assurance.error || assurance.data.currentLevel !== "aal2") throw new Error("Unable to establish an AAL2 P05 E2E session");
+  if (!verified || assurance.error || assurance.data.currentLevel !== "aal2") throw proofFailure("MFA_VERIFY", [assurance]);
+  return { factorId, secret, verifiedCounter };
 }
 
 function toPlaywrightState(cookies, baseUrl) {
@@ -105,7 +123,7 @@ async function createOrganizationAndCase(client, runId, suffix) {
     p_legal_name: `Matricia ${organizationName}`, p_display_name: organizationName, p_ice: businessIdentifier,
     p_owner_role: "CLIENT_OWNER", p_idempotency_key: deterministicUuid(`${runId}:${suffix}:organization`), p_correlation_id: organizationCorrelation,
   });
-  if (organization.error || organization.data?.outcome !== "ORGANIZATION_CREATED") throw new Error("Unable to create an isolated P05 E2E organization");
+  if (organization.error || organization.data?.outcome !== "ORGANIZATION_CREATED") throw proofFailure("CREATE_ORGANIZATION", [organization]);
   const organizationId = organization.data.organization_id;
   const profile = await client.rpc("save_client_profile_draft", {
     p_organization_id: organizationId,
@@ -117,7 +135,7 @@ async function createOrganizationAndCase(client, runId, suffix) {
       declarations: { accuracy_confirmed: true, representation_authorized: true }, if_number: `IF${businessIdentifier}`, rc_number: `RC${businessIdentifier}` },
     p_idempotency_key: deterministicUuid(`${runId}:${suffix}:profile`), p_correlation_id: profileCorrelation,
   });
-  if (profile.error || profile.data?.outcome !== "CLIENT_PROFILE_VERSION_CREATED") throw new Error("Unable to create an isolated P05 E2E compliance case");
+  if (profile.error || profile.data?.outcome !== "CLIENT_PROFILE_VERSION_CREATED") throw proofFailure("CREATE_PROFILE", [profile]);
   return { organizationId, organizationName, complianceCaseId: profile.data.compliance_case_id, evidence: [
     { organizationId, correlationId: organizationCorrelation, action: "organization.created", eventType: "OrganizationCreatedV1" },
     { organizationId, correlationId: profileCorrelation, action: "client.profile.version.created", eventType: "ClientProfileVersionCreatedV1" },
@@ -134,11 +152,11 @@ async function createAndProveDocument(clientA, clientB, organizationA, organizat
     p_original_file_name: "preuve-e2e.pdf", p_mime_type: "application/pdf", p_size_bytes: PDF_BYTES.length,
     p_sha256: sha256, p_idempotency_key: deterministicUuid(`${runId}:document:reserve`), p_correlation_id: reserveCorrelation,
   });
-  if (reserved.error || reserved.data?.outcome !== "DOCUMENT_UPLOAD_RESERVED") throw new Error("Document reservation proof failed");
+  if (reserved.error || reserved.data?.outcome !== "DOCUMENT_UPLOAD_RESERVED") throw proofFailure("DOCUMENT_RESERVE", [reserved]);
   const expectedPath = `${organizationA.organizationId}/${organizationA.complianceCaseId}/${reserved.data.document_id}.pdf`;
   if (reserved.data.bucket !== "client-compliance" || reserved.data.object_path !== expectedPath || reserved.data.status !== "UPLOAD_PENDING") throw new Error("Document storage path proof failed");
   const upload = await clientA.storage.from("client-compliance").upload(expectedPath, PDF_BYTES, { contentType: "application/pdf", upsert: false });
-  if (upload.error) throw new Error("Exact document storage upload failed");
+  if (upload.error) throw proofFailure("DOCUMENT_UPLOAD", [upload]);
   resources.storagePaths.push(expectedPath);
   const forbiddenPath = `${organizationB.organizationId}/${organizationB.complianceCaseId}/${randomUUID()}.pdf`;
   const forbiddenUpload = await clientA.storage.from("client-compliance").upload(forbiddenPath, PDF_BYTES, { contentType: "application/pdf", upsert: false });
@@ -152,7 +170,7 @@ async function createAndProveDocument(clientA, clientB, organizationA, organizat
   const finalizeKey = deterministicUuid(`${runId}:document:finalize`);
   const finalized = await clientA.rpc("finalize_client_compliance_document_upload", { p_document_id: reserved.data.document_id, p_idempotency_key: finalizeKey, p_correlation_id: finalizeCorrelation });
   const retried = await clientA.rpc("finalize_client_compliance_document_upload", { p_document_id: reserved.data.document_id, p_idempotency_key: finalizeKey, p_correlation_id: finalizeCorrelation });
-  if (finalized.error || retried.error || finalized.data?.status !== "PENDING_REVIEW" || JSON.stringify(finalized.data) !== JSON.stringify(retried.data)) throw new Error("Document finalization/idempotence proof failed");
+  if (finalized.error || retried.error || finalized.data?.status !== "PENDING_REVIEW" || JSON.stringify(finalized.data) !== JSON.stringify(retried.data)) throw proofFailure("DOCUMENT_FINALIZE", [finalized, retried]);
   const overwrite = await clientA.storage.from("client-compliance").upload(expectedPath, PDF_BYTES, { contentType: "application/pdf", upsert: true });
   if (!overwrite.error) throw new Error("Finalized document overwrite was not denied");
   return { documentId: reserved.data.document_id, storagePath: expectedPath, evidence: [
@@ -165,18 +183,18 @@ async function proveAuthorization(contexts, organizations) {
   const ownA = await contexts.clientA.client.from("client_compliance_cases").select("organization_id");
   const ownB = await contexts.clientB.client.from("client_compliance_cases").select("organization_id");
   if (ownA.error || ownB.error || ownA.data.length !== 1 || ownA.data[0].organization_id !== organizations.a.organizationId
-      || ownB.data.length !== 1 || ownB.data[0].organization_id !== organizations.b.organizationId) throw new Error("Tenant-isolated compliance case proof failed");
+      || ownB.data.length !== 1 || ownB.data[0].organization_id !== organizations.b.organizationId) throw proofFailure("TENANT_READ", [ownA, ownB]);
   const aal2Requirement = await contexts.central.client.rpc("get_my_account_security_requirement");
   const centralCases = await contexts.central.client.from("client_compliance_cases").select("organization_id").in("organization_id", [organizations.a.organizationId, organizations.b.organizationId]);
   if (aal2Requirement.error || aal2Requirement.data?.[0]?.requirement_satisfied !== true || !aal2Requirement.data[0].matched_role_codes.includes("COMPLIANCE_MANAGER")
-      || centralCases.error || centralCases.data.length !== 2) throw new Error("Authorized AAL2 central proof failed");
+      || centralCases.error || centralCases.data.length !== 2) throw proofFailure("CENTRAL_AAL2_ALLOW", [aal2Requirement, centralCases]);
   const aal1Requirement = await contexts.centralAal1.client.rpc("get_my_account_security_requirement");
   const aal1Cases = await contexts.centralAal1.client.from("client_compliance_cases").select("id").in("organization_id", [organizations.a.organizationId, organizations.b.organizationId]);
   if (aal1Requirement.error || aal1Requirement.data?.[0]?.requirement_satisfied !== false || aal1Requirement.data[0].current_aal !== "aal1"
-      || aal1Cases.error || aal1Cases.data.length !== 0) throw new Error("AAL1 denial proof failed");
+      || aal1Cases.error || aal1Cases.data.length !== 0) throw proofFailure("CENTRAL_AAL1_DENY", [aal1Requirement, aal1Cases]);
   const noRoleRequirement = await contexts.noRole.client.rpc("get_my_account_security_requirement");
   const noRoleCases = await contexts.noRole.client.from("client_compliance_cases").select("id");
-  if (noRoleRequirement.error || noRoleRequirement.data?.[0]?.matched_role_codes.length !== 0 || noRoleCases.error || noRoleCases.data.length !== 0) throw new Error("Role-less denial proof failed");
+  if (noRoleRequirement.error || noRoleRequirement.data?.[0]?.matched_role_codes.length !== 0 || noRoleCases.error || noRoleCases.data.length !== 0) throw proofFailure("NO_ROLE_DENY", [noRoleRequirement, noRoleCases]);
 }
 
 function cleanupFailure(stage, cause) {
@@ -250,11 +268,11 @@ export async function cleanupFailedProvision(stage, provisionError, resources, d
     else failures.push(error);
   }
   if (failures.length === 1) return combineProvisionAndCleanupErrors(stage, provisionError);
-  return new AggregateError(
+  return Object.assign(new AggregateError(
     failures,
     `P05 E2E setup stopped during ${stage} and cleanup also failed`,
     { cause: provisionError },
-  );
+  ), { code: "P05_PROVISION_FAILED", provisionStage: stage });
 }
 
 async function neutralizeStaleFixtures(admin, database) {
@@ -309,12 +327,10 @@ export async function provision() {
       identities[key] = { email, password, userId: user.id };
     }
     stage = "authentication contexts";
-    const contexts = { clientA: await authenticate(config, identities.clientA.email, identities.clientA.password),
-      clientB: await authenticate(config, identities.clientB.email, identities.clientB.password),
-      central: await authenticate(config, identities.central.email, identities.central.password),
-      noRole: await authenticate(config, identities.noRole.email, identities.noRole.password) };
-    const centralAal1State = toPlaywrightState(contexts.central.cookies, config.baseUrl);
-    contexts.centralAal1 = await authenticate(config, identities.central.email, identities.central.password);
+    const contexts = { clientA: await authenticate(config, identities.clientA.email, identities.clientA.password, admin),
+      clientB: await authenticate(config, identities.clientB.email, identities.clientB.password, admin),
+      central: await authenticate(config, identities.central.email, identities.central.password, admin),
+      noRole: await authenticate(config, identities.noRole.email, identities.noRole.password, admin) };
     stage = "organization and compliance cases";
     const organizationA = await createOrganizationAndCase(contexts.clientA.client, runId, "a");
     resources.organizationIds.push(organizationA.organizationId);
@@ -324,7 +340,20 @@ export async function provision() {
     stage = "test-only central role bootstrap";
     await bootstrapComplianceRole(database, identities.central.userId);
     stage = "central AAL2 authentication";
-    await elevateToAal2(contexts.central);
+    const centralTotp = await elevateToAal2(contexts.central);
+    // GoTrue may invalidate earlier AAL1 sessions when a factor is verified.
+    // Obtain a new native session afterwards; a revoked JWT is not an AAL1 fixture.
+    stage = "fresh central AAL1 authentication";
+    contexts.centralAal1 = await authenticate(config, identities.central.email, identities.central.password, admin);
+    const freshAal1User = await contexts.centralAal1.client.auth.getUser();
+    const freshAal1Assurance = await contexts.centralAal1.client.auth.mfa.getAuthenticatorAssuranceLevel();
+    const retainedAal2User = await contexts.central.client.auth.getUser();
+    if (freshAal1User.error || freshAal1User.data.user?.id !== identities.central.userId
+      || freshAal1Assurance.error || freshAal1Assurance.data.currentLevel !== "aal1"
+      || retainedAal2User.error || retainedAal2User.data.user?.id !== identities.central.userId) {
+      throw proofFailure("CENTRAL_FRESH_NATIVE_SESSIONS", [freshAal1User, freshAal1Assurance, retainedAal2User]);
+    }
+    const centralAal1State = toPlaywrightState(contexts.centralAal1.cookies, config.baseUrl);
     stage = "authorization proofs";
     await proveAuthorization(contexts, organizations);
     stage = "storage and transition proofs";
@@ -349,13 +378,13 @@ export async function provision() {
       fixtures: { organizationA: { id: organizations.a.organizationId, name: organizations.a.organizationName, caseId: organizations.a.complianceCaseId },
         organizationB: { id: organizations.b.organizationId, name: organizations.b.organizationName, caseId: organizations.b.complianceCaseId },
         document: { id: document.documentId, status: "PENDING_REVIEW" } },
-      proof: { bootstrap: "PRIVILEGED_TEST_FIXTURE_WITHOUT_SYNTHETIC_AUDIT", realCommandAuditOutbox: true, tenantIsolation: true, storageIsolation: true, centralAal2: true } };
+      proof: { authentication: config.runtimeMode === "isolated-local-docker" ? "REAL_GOTRUE_OTP_AND_TOTP" : "REAL_GOTRUE_PASSWORD_AND_TOTP", runtimeMode: config.runtimeMode ?? "hosted-nonproduction", bootstrap: "PRIVILEGED_TEST_FIXTURE_WITHOUT_SYNTHETIC_AUDIT", realCommandAuditOutbox: true, tenantIsolation: true, storageIsolation: true, centralAal2: true } };
     await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600 });
     files.push(manifestPath);
     await secureLocalPaths(authDirectory, files);
     await validateFreshManifest(JSON.parse(await readFile(manifestPath, "utf8")), config);
     let cleanupPromise;
-    return { config, manifest, manifestPath, resources, cleanup: () => {
+    return { config, manifest, manifestPath, resources, sessions: contexts, authSecrets: { centralTotp }, cleanup: () => {
       cleanupPromise ??= cleanupRemote(resources);
       return cleanupPromise;
     } };

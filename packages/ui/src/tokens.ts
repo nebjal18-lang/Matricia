@@ -2,18 +2,18 @@ export const MATRICIA_BREAKPOINT_MIN_PX = 360;
 
 export const designTokens = Object.freeze({
   color: Object.freeze({
-    brand: "#0B1739",
-    brandStrong: "#07112C",
-    accent: "#1D4ED8",
-    accentMuted: "#EFF6FF",
-    canvas: "#F7F9FC",
+    brand: "#121D58",
+    brandStrong: "#0B1240",
+    accent: "#642BEF",
+    accentMuted: "#F1EBFE",
+    canvas: "#F9FAFB",
     surface: "#FFFFFF",
-    surfaceMuted: "#EFF6FF",
-    text: "#14213D",
-    textMuted: "#475569",
-    border: "#E2E8F0",
-    focus: "#1D4ED8",
-    success: "#17643A",
+    surfaceMuted: "#F1F3F8",
+    text: "#121D58",
+    textMuted: "#5E6A93",
+    border: "#E4E7F0",
+    focus: "#642BEF",
+    success: "#1E7A5C",
     warning: "#805400",
     danger: "#A12828",
   }),
@@ -38,13 +38,13 @@ export const designTokens = Object.freeze({
   }),
   radius: Object.freeze({ small: "0.5rem", medium: "0.75rem", large: "1rem", pill: "9999px" }),
   shadow: Object.freeze({
-    small: "0 1px 2px rgb(7 30 53 / 0.08)",
-    medium: "0 8px 24px rgb(7 30 53 / 0.12)",
-    overlay: "0 24px 64px rgb(7 30 53 / 0.18)",
+    small: "0 1px 2px rgb(18 29 88 / 8%)",
+    medium: "0 8px 24px rgb(18 29 88 / 12%)",
+    overlay: "0 24px 64px rgb(18 29 88 / 18%)",
   }),
   motion: Object.freeze({ fast: "120ms", standard: "200ms", deliberate: "320ms" }),
   breakpoint: Object.freeze({ compact: "360px", tablet: "768px", desktop: "1200px" }),
-  focusRing: "0 0 0 3px rgb(22 119 200 / 0.35)",
+  focusRing: "0 0 0 3px rgb(100 43 239 / 35%)",
 } as const);
 
 export const designTokenCssVariables = Object.freeze({

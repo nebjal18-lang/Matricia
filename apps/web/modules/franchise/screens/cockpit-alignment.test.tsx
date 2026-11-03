@@ -50,7 +50,8 @@ describe("alignement cockpit SIP de l’espace franchisé", () => {
     expect(await source(pages.validations)).toContain("FranchiseValidationsWorkbench");
     expect(await source(pages.validationBucket)).toContain("FranchiseValidationsWorkbench");
     expect(await source(pages.documents)).toContain("DocumentsBoard");
-    expect(await source(pages.messages)).toContain("MessagesBoard");
+    expect(await source(pages.messages)).toContain("loadFranchiseMessaging");
+    expect(await source(pages.messages)).toContain("SendFranchiseMessageForm");
     expect(await source(pages.requests)).toContain("mandateName");
     expect(await source(pages.network)).toContain("mandateName");
     expect(await source(pages.quality)).toContain("mandateName");

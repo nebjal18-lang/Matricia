@@ -1,19 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import type { EmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/modules/shared/lib/supabase/client";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getDictionary } from "@/modules/shared/lib/i18n/dictionaries";
-import { applyOtpDigits, emailOtpLength, normalizeEmail, normalizeOtp } from "@/modules/shared/lib/auth/otp";
+import { applyOtpDigits, normalizeEmail, normalizeOtp } from "@/modules/shared/lib/auth/otp";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
-import { requestOtp } from "./actions";
+import { legalConsent } from "@/modules/shared/lib/auth/legal-consent";
+import { requestOtp, confirmRegistrationConsent, postLoginDestination } from "./actions";
 import { getLoginMessages } from "./messages";
 
-export function OtpForm({ locale, nextPath, intent = "login" }: { locale: Locale; nextPath?: string; intent?: "login" | "registration" }) {
-  const messages = getDictionary(locale).auth;
+export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = false, otpLength = 6 }: { locale: Locale; nextPath?: string; intent?: "login" | "registration"; consentAccepted?: boolean; otpLength?: EmailOtpLength }) {
+  const authMessages = getDictionary(locale).auth;
+  const messages = { ...authMessages, codeLabel: authMessages.codeLabel.replace("{length}",String(otpLength)), invalidCode: authMessages.invalidCode.replace("{length}",String(otpLength)) };
   const local = getLoginMessages(locale);
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -31,13 +34,13 @@ export function OtpForm({ locale, nextPath, intent = "login" }: { locale: Locale
     setStatus("pending"); setMessage("");
     let result;
     try {
-      result = await requestOtp(normalizedEmail, locale, nextPath, intent);
+      result = await requestOtp(normalizedEmail, locale, nextPath, intent, consentAccepted ? legalConsent : undefined);
     } catch {
       setStatus("error"); setMessage(messages.genericError); return;
     }
     if (!result.accepted) {
       setStatus("error");
-      setMessage(result.reason === "RATE_LIMITED" ? messages.rateLimited : messages.invalidEmail);
+      setMessage(result.reason === "RATE_LIMITED" ? messages.rateLimited : result.reason === "INVALID_EMAIL" ? messages.invalidEmail : messages.genericError);
       return;
     }
     setEmail(normalizedEmail); setStep("code"); setStatus("idle"); setMessage(messages.sent);
@@ -45,19 +48,22 @@ export function OtpForm({ locale, nextPath, intent = "login" }: { locale: Locale
 
   async function verifyCode(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const normalizedToken = normalizeOtp(token);
+    const normalizedToken = normalizeOtp(token,otpLength);
     if (!normalizedToken) { setMessage(messages.invalidCode); return; }
     setStatus("pending"); setMessage("");
-    const { error } = await getSupabaseBrowserClient().auth.verifyOtp({ email, token: normalizedToken, type: "email" });
-    if (error) { setStatus("error"); setMessage(error.code === "otp_expired" ? messages.rejectedCode : messages.genericError); return; }
-    router.replace(nextPath ?? "/" + locale + "/tableau-de-bord");
-    router.refresh();
+    try {
+      const { error } = await getSupabaseBrowserClient().auth.verifyOtp({ email, token: normalizedToken, type: "email" });
+      if (error) { setStatus("error"); setMessage(error.code === "otp_expired" ? messages.rejectedCode : messages.genericError); return; }
+      if (intent === "registration" && !await confirmRegistrationConsent()) { setStatus("error"); setMessage(locale === "fr" ? "Votre acceptation doit être confirmée. Reprenez l’inscription." : "يجب تأكيد قبولكم. يرجى إعادة التسجيل."); return; }
+      router.replace(await postLoginDestination(locale, nextPath));
+      router.refresh();
+    } catch { setStatus("error"); setMessage(messages.genericError); }
   }
 
   async function resendCode() {
     setStatus("pending"); setMessage("");
     try {
-      const result = await requestOtp(email, locale, nextPath, intent);
+      const result = await requestOtp(email, locale, nextPath, intent, consentAccepted ? legalConsent : undefined);
       if (!result.accepted) {
         setStatus("error");
         setMessage(result.reason === "RATE_LIMITED" ? messages.rateLimited : messages.genericError);
@@ -80,7 +86,7 @@ export function OtpForm({ locale, nextPath, intent = "login" }: { locale: Locale
       password,
     });
     if (error) { setStatus("error"); setMessage(messages.genericError); return; }
-    router.replace(nextPath ?? "/" + locale + "/tableau-de-bord");
+    router.replace(await postLoginDestination(locale, nextPath));
     router.refresh();
   }
 
@@ -125,25 +131,25 @@ export function OtpForm({ locale, nextPath, intent = "login" }: { locale: Locale
     <form onSubmit={verifyCode} className="space-y-5" noValidate aria-busy={status === "pending"}>
       <div className="space-y-2">
         <Label className="text-sm font-semibold text-slate-700" htmlFor="otp">{messages.codeLabel}</Label>
-        <p className="text-sm text-slate-600">{locale === "ar" ? "تم إرسال رمز من 8 أرقام. أدخلوا هذه الأرقام فقط، دون فتح أي رابط في الرسالة." : "Un code à 8 chiffres a été envoyé. Saisissez ces chiffres uniquement, sans ouvrir de lien dans le courriel."}</p>
-        <input id="otp" name="otp" value={token} onChange={(event) => setToken(event.target.value.replace(/\D/g, "").slice(0, emailOtpLength))} autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{8}" maxLength={emailOtpLength} required aria-describedby="auth-status" aria-invalid={status === "error"} aria-errormessage={status === "error" ? "auth-status" : undefined} className="sr-only" />
+        <p className="text-sm text-slate-600">{locale === "ar" ? `تم إرسال رمز من ${otpLength} أرقام. أدخلوا هذه الأرقام فقط، دون فتح أي رابط في الرسالة.` : `Un code à ${otpLength} chiffres a été envoyé. Saisissez ces chiffres uniquement, sans ouvrir de lien dans le courriel.`}</p>
+        <input id="otp" name="otp" value={token} onChange={(event) => setToken(event.target.value.replace(/\D/g, "").slice(0, otpLength))} autoComplete="one-time-code" inputMode="numeric" pattern={`[0-9]{${otpLength}}`} maxLength={otpLength} required aria-describedby="auth-status" aria-invalid={status === "error"} aria-errormessage={status === "error" ? "auth-status" : undefined} className="sr-only" />
         <div className="public-otp-boxes" role="group" aria-label={messages.codeLabel}>
-          {Array.from({ length: emailOtpLength }, (_, index) => (
+          {Array.from({ length: otpLength }, (_, index) => (
             <input
               key={index}
               type="text"
               inputMode="numeric"
-              maxLength={emailOtpLength}
+              maxLength={otpLength}
               value={token[index] ?? ""}
               className={status === "error" ? "is-invalid" : undefined}
-              aria-label={`${index + 1} / ${emailOtpLength}`}
+              aria-label={`${index + 1} / ${otpLength}`}
               onChange={(event) => {
                 const digits = event.target.value.replace(/\D/g, "");
                 const incoming = digits.length > 1 && !(token[index] && digits.length === 2) ? digits : digits.slice(-1);
-                const next = applyOtpDigits(token, index, incoming);
+                const next = applyOtpDigits(token, index, incoming,otpLength);
                 setToken(next);
                 const boxes = event.currentTarget.parentElement?.querySelectorAll("input");
-                const focusAt = Math.min(index + Math.max(incoming.length, 1), emailOtpLength - 1);
+                const focusAt = Math.min(index + Math.max(incoming.length, 1), otpLength - 1);
                 if (incoming && boxes?.[focusAt] instanceof HTMLInputElement) boxes[focusAt].focus();
               }}
               onKeyDown={(event) => {
@@ -153,7 +159,7 @@ export function OtpForm({ locale, nextPath, intent = "login" }: { locale: Locale
                 }
               }}
               onPaste={(event) => {
-                const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, emailOtpLength);
+                const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, otpLength);
                 if (!pasted) return;
                 event.preventDefault();
                 setToken(pasted);

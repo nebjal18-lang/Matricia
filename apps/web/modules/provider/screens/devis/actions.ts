@@ -1,16 +1,17 @@
 "use server";
 
+import { businessLocalToInstant } from "./business-time";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { invitationDecisionInput, lines, quoteDraftInput, submitQuoteInput } from "@/modules/provider/data/quotes/model";
+import { invitationDecisionInput, lines, quoteDraftInput, submitQuoteIdentityInput } from "@/modules/provider/data/quotes/model";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { parseMoneyToMinor } from "./money";
 
 export type QuoteActionState =
   | { status: "idle" }
   | { status: "success"; outcome: string }
-  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "FAILED" };
+  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "IDENTITY_REQUIRED" | "FAILED" };
 
 const quoteLine = z.object({
   label: z.string().trim().min(2).max(500),
@@ -30,6 +31,7 @@ const text = (form: FormData, key: string) => String(form.get(key) ?? "");
 const texts = (form: FormData, key: string) => form.getAll(key).map((value) => String(value));
 
 function actionError(value: { code?: string; message?: string } | null): QuoteActionState {
+  if(value?.message&&["PROVIDER_CURRENT_IDENTITY_REVIEW_REQUIRED","QUOTE_IDENTITY_CONFIRMATION_REQUIRED","QUOTE_IDENTITY_REPUBLICATION_REQUIRED"].some(reason=>value.message!.includes(reason)))return{status:"error",reason:"IDENTITY_REQUIRED"};
   if (value?.code === "42501") return { status: "error", reason: "FORBIDDEN" };
   if (["40001", "55000", "22000"].includes(value?.code ?? "")) return { status: "error", reason: "CONFLICT" };
   return { status: "error", reason: "FAILED" };
@@ -48,7 +50,7 @@ export async function decideInvitation(_: QuoteActionState, form: FormData): Pro
 
 export async function saveQuoteRevision(_: QuoteActionState, form: FormData): Promise<QuoteActionState> {
   let validUntil = text(form, "validUntil");
-  try { validUntil = new Date(validUntil).toISOString(); } catch { return { status: "error", reason: "VALIDATION" }; }
+  try { validUntil = businessLocalToInstant(validUntil); } catch { return { status: "error", reason: "VALIDATION" }; }
   const locale = text(form, "locale"), currency = text(form, "currency").toUpperCase();
   const labels = texts(form, "lineLabel"), quantities = texts(form, "quantity"), units = texts(form, "unitCode"), prices = texts(form, "unitPrice"), taxes = texts(form, "taxRuleVersionId"), kinds = texts(form, "itemKind"), intervals = texts(form, "recurrenceInterval");
   if (!labels.length || labels.length > 50 || [quantities, units, prices, taxes, kinds, intervals].some((values) => values.length !== labels.length)) return { status: "error", reason: "VALIDATION" };
@@ -76,16 +78,24 @@ export async function saveQuoteRevision(_: QuoteActionState, form: FormData): Pr
     if (!taxRule.safeParse(taxResult.data).success) return { status: "error", reason: "VALIDATION" };
   }
   const payload = { currency: value.currency, solution_fr: value.solutionFr, solution_ar: value.solutionAr || null, deliverables: lines(value.deliverables), inclusions: lines(value.inclusions), exclusions: lines(value.exclusions), prerequisites: lines(value.prerequisites), warranty_fr: value.warrantyFr, warranty_ar: value.warrantyAr || null, correction_terms_fr: value.correctionTermsFr, correction_terms_ar: value.correctionTermsAr || null, sla: {}, proposed_start_date: value.proposedStartDate, duration_days: String(value.durationDays), valid_until: value.validUntil, items: lineValues.map((line, index) => ({ line_number: String(index + 1), item_kind: line.itemKind, label_fr: line.label, label_ar: locale === "ar" ? line.label : null, quantity: line.quantity, unit_code: line.unitCode, unit_price_minor: line.unitPriceMinor, tax_rule_version_id: line.taxRuleVersionId, ...(line.itemKind === "RECURRING" ? { recurrence_interval: line.recurrenceInterval } : {}) })), options: [] };
-  const result = await supabase.rpc("create_quote_revision", { p_rfq_provider_id: value.rfqProviderId, p_payload: payload, p_change_reason: value.changeReason, p_idempotency_key: value.idempotencyKey, p_correlation_id: value.correlationId });
+  const expectedVersion=z.string().uuid().nullable().safeParse(text(form,"expectedCurrentVersionId")||null);
+  if(!expectedVersion.success)return{status:"error",reason:"VALIDATION"};
+  const checkedPayload={...payload,expected_current_version_id:expectedVersion.data};
+  const result = await supabase.rpc("create_quote_revision", { p_rfq_provider_id: value.rfqProviderId, p_payload: checkedPayload, p_change_reason: value.changeReason, p_idempotency_key: value.idempotencyKey, p_correlation_id: value.correlationId });
   if (result.error) return actionError(result.error); refresh(value.locale);
   return { status: "success", outcome: "QUOTE_REVISION_CREATED" };
 }
 
 export async function submitQuote(_: QuoteActionState, form: FormData): Promise<QuoteActionState> {
-  const parsed = submitQuoteInput.safeParse({ locale: text(form, "locale"), quoteId: text(form, "quoteId"), quoteVersionId: text(form, "quoteVersionId"), idempotencyKey: text(form, "idempotencyKey"), correlationId: text(form, "correlationId") });
+  const parsed = submitQuoteIdentityInput.safeParse({expectedIdentityHash:text(form,"expectedIdentityHash"),registeredAddress:text(form,"registeredAddress"),confirmed:text(form,"confirmed"), locale: text(form, "locale"), quoteId: text(form, "quoteId"), quoteVersionId: text(form, "quoteVersionId"), idempotencyKey: text(form, "idempotencyKey"), correlationId: text(form, "correlationId") });
   if (!parsed.success) return { status: "error", reason: "VALIDATION" };
   const { supabase, user } = await client(); if (!user) return { status: "error", reason: "UNAUTHENTICATED" };
-  const result = await supabase.rpc("submit_quote", { p_quote_id: parsed.data.quoteId, p_expected_version_id: parsed.data.quoteVersionId, p_idempotency_key: parsed.data.idempotencyKey, p_correlation_id: parsed.data.correlationId ?? randomUUID() });
+  const result = await supabase.rpc("submit_provider_quote_with_identity_v1", {p_expected_identity_hash:parsed.data.expectedIdentityHash,p_registered_address:parsed.data.registeredAddress, p_quote_id: parsed.data.quoteId, p_expected_version_id: parsed.data.quoteVersionId, p_idempotency_key: parsed.data.idempotencyKey, p_correlation_id: parsed.data.correlationId ?? randomUUID() });
   if (result.error) return actionError(result.error); refresh(parsed.data.locale);
-  return { status: "success", outcome: "QUOTE_SUBMITTED" };
+  return z.object({outcome:z.literal("QUOTE_SUBMITTED")}).safeParse(result.data).success?{status:"success",outcome:"QUOTE_SUBMITTED"}:{status:"error",reason:"FAILED"};
+}
+
+export async function reopenQuoteIdentity(_:QuoteActionState,form:FormData):Promise<QuoteActionState>{
+ const parsed=z.object({locale:z.enum(["fr","ar"]),quoteId:z.string().uuid(),versionId:z.string().uuid(),reason:z.string().trim().min(10).max(1000),key:z.string().uuid()}).safeParse({locale:text(form,"locale"),quoteId:text(form,"quoteId"),versionId:text(form,"quoteVersionId"),reason:text(form,"reason"),key:text(form,"idempotencyKey")});if(!parsed.success)return{status:"error",reason:"VALIDATION"};
+ const{supabase,user}=await client();if(!user)return{status:"error",reason:"UNAUTHENTICATED"};const value=parsed.data,result=await supabase.rpc("reopen_provider_quote_for_identity_review_v1",{p_quote_id:value.quoteId,p_expected_version_id:value.versionId,p_reason:value.reason,p_idempotency_key:value.key});if(result.error)return actionError(result.error);if(!z.object({outcome:z.literal("QUOTE_IDENTITY_REPUBLICATION_REQUESTED")}).safeParse(result.data).success)return{status:"error",reason:"FAILED"};refresh(value.locale);return{status:"success",outcome:"QUOTE_IDENTITY_REPUBLICATION_REQUESTED"};
 }

@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { planChangeSchema, subscriptionCommandSchema } from "@/modules/shared/lib/subscriptions/model";
 
-export type SubscriptionActionState = { status: "idle" } | { status: "success" } | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "FAILED" };
+export type SubscriptionActionState = { status: "idle" } | { status: "success" } | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "CHECKOUT_REQUIRED" | "FUNDING_REQUIRED" | "FAILED" };
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
-function failure(error: { code?: string; message?: string } | null): SubscriptionActionState { if (error?.code === "42501") return { status:"error", reason:"FORBIDDEN" }; if (["23505","23514","40001","55000"].includes(error?.code??"")||error?.message?.includes("IDEMPOTENCY")) return { status:"error", reason:"CONFLICT" }; return { status:"error", reason:"FAILED" }; }
+function failure(error: { code?: string; message?: string } | null): SubscriptionActionState { if (error?.message?.includes("SUBSCRIPTION_CURRENT_FUNDING_REQUIRED")) return { status:"error", reason:"FUNDING_REQUIRED" }; if (error?.message?.includes("SUBSCRIPTION_UPGRADE_CHECKOUT_REQUIRED")) return { status:"error", reason:"CHECKOUT_REQUIRED" }; if (error?.code === "42501") return { status:"error", reason:"FORBIDDEN" }; if (["23505","23514","40001","55000"].includes(error?.code??"")||error?.message?.includes("IDEMPOTENCY")) return { status:"error", reason:"CONFLICT" }; return { status:"error", reason:"FAILED" }; }
 
 export async function ensureTrialAction(_: SubscriptionActionState, form: FormData): Promise<SubscriptionActionState> {
   const parsed = subscriptionCommandSchema.safeParse({

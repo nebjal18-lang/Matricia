@@ -46,6 +46,13 @@ const data: Portfolio = {
   libraries: [],
 };
 
+it.each(["fr", "ar"] as const)("uses business choices and a real evidence file (%s)", locale => {
+ const html=renderToStaticMarkup(<PortfolioPanel locale={locale} data={data} m={getMessages(locale)} keys={{site:"a",project:"b",task:"c",contract:"d",budget:"e",center:"f",allocation:"g",event:"h"}} />);
+ expect(html).toContain('name="referenceChoice"');expect(html).toContain(`value="PROJECT:${project}"`);
+ expect(html).toContain('name="evidenceFile"');expect(html).not.toContain('name="evidenceHash"');expect(html).not.toContain('name="referenceId"');
+ expect(html).not.toContain('>COMMITMENT<');expect(html).not.toContain('>PROJECT_TASK<');
+});
+
 describe("PortfolioPanel", () => {
   it("shows sites, integer progress and a consumption alert without placeholders", () => {
     const html = renderToStaticMarkup(
@@ -67,4 +74,10 @@ describe("PortfolioPanel", () => {
     expect(html).not.toMatch(/exemple illustratif/i);
     expect(html).not.toContain("placeholder=");
   });
+});
+
+it.each(["fr", "ar"] as const)("keeps native invoice targets and uses business history labels (%s)", locale => {
+ const invoice="99999999-9999-4999-8999-999999999999";
+ const html=renderToStaticMarkup(<PortfolioPanel locale={locale} data={{...data,allocationTargets:[{id:invoice,organizationId:org,type:"INVOICE",labelFr:"Facture liée au projet",labelAr:"فاتورة مرتبطة بالمشروع"}]}} m={getMessages(locale)} keys={{site:"a",project:"b",task:"c",contract:"d",budget:"e",center:"f",allocation:"g",event:"h"}} />);
+ expect(html).toContain(`value="INVOICE:${invoice}"`);expect(html).not.toContain("ACTUAL ·");expect(html).toContain(locale==="ar"?"نفقة فعلية":"Dépense réalisée");
 });

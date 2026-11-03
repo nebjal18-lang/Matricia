@@ -5,8 +5,8 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 type Locale = "fr" | "ar";
 type ProviderCase = { description: string; invitationId: string };
 const copy = {
-  fr: { heading: "Invitations et devis", organization: "Organisation Sous-traitant", choose: "Afficher", accept: "Accepter", save: "Enregistrer la révision", submit: "Soumettre ce devis", submitted: "Soumise" },
-  ar: { heading: "الدعوات وعروض الأسعار", organization: "منظمة مقدم الخدمات", choose: "عرض", accept: "قبول", save: "حفظ النسخة", submit: "إرسال العرض", submitted: "مرسل" },
+  fr: { heading: "Vos devis", organization: "Organisation prestataire", choose: "Afficher", accept: "Accepter", save: "Créer la nouvelle version", submit: "Soumettre ce devis", submitted: "Soumise" },
+  ar: { heading: "عروضكم", organization: "منظمة مقدم الخدمات", choose: "عرض", accept: "قبول", save: "إنشاء نسخة جديدة", submit: "إرسال العرض", submitted: "مرسل" },
 } as const;
 
 function configuration() {
@@ -47,7 +47,7 @@ async function tenantDeny(browser: Browser, state: string, locale: Locale, targe
 for (const locale of ["fr", "ar"] as const) {
   test(`${locale.toUpperCase()} Provider invitation, exact quote and submission are accessible and isolated`, async ({ browser }, testInfo) => {
     const config = configuration();
-    test.skip(!config || !existsSync(config.providerState) || !existsSync(config.foreignState), "P23 secured fixture is required");
+    if (!config || !existsSync(config.providerState) || !existsSync(config.foreignState)) throw new Error("P23 secured fixture is required");
     const mobile = testInfo.project.name.includes("mobile");
     const viewport = mobile ? { width: 360, height: 800 } : { width: 1280, height: 900 };
     const scenario = config!.cases[`${locale}-${mobile ? "mobile" : "desktop"}`];
@@ -62,9 +62,11 @@ for (const locale of ["fr", "ar"] as const) {
       await page.getByLabel(copy[locale].organization).selectOption(config!.targetId);
       await page.getByRole("button", { name: copy[locale].choose }).click();
       await expect(page).toHaveURL(new RegExp(`organizationId=${config!.targetId}`));
-      const scenarioLabel = page.getByText(scenario.description, { exact: true });
+      const operations = page.locator("#devis-operation");
+      if (await operations.count() && !await operations.evaluate(node => (node as HTMLDetailsElement).open)) await operations.locator("summary").click();
+      const scenarioLabel = operations.getByText(scenario.description, { exact: true });
       await expect(scenarioLabel).toBeVisible();
-      const card = page.locator('[data-slot="card"]').filter({ has: scenarioLabel });
+      const card = operations.locator('[data-slot="card"]').filter({ has: scenarioLabel });
       await expect(card).toBeVisible();
       const foreignName = process.env.E2E_P23_FOREIGN_ORGANIZATION_NAME;
       if (foreignName) await expect(page.locator("body")).not.toContainText(foreignName);
@@ -74,9 +76,9 @@ for (const locale of ["fr", "ar"] as const) {
       await card.locator('[name="deliverables"]').fill("Audit\nRapport signé");
       await card.locator('[name="warrantyFr"]').fill("Garantie douze mois");
       await card.locator('[name="correctionTermsFr"]').fill("Corrections incluses");
-      await card.locator('[name="proposedStartDate"]').fill("2026-10-15");
+      await card.locator('[name="proposedStartDate"]').fill(new Date(Date.now()+14*86400_000).toISOString().slice(0,10));
       await card.locator('[name="durationDays"]').fill("10");
-      await card.locator('[name="validUntil"]').fill("2027-01-15T12:00");
+      await card.locator('[name="validUntil"]').fill(new Date(Date.now()+30*86400_000).toISOString().slice(0,16));
       await card.locator('[name="lineLabelFr"]').fill("Forfait exact");
       await card.locator('[name="quantity"]').fill("1.2500");
       await card.locator('[name="unitCode"]').fill("FORFAIT");
@@ -85,6 +87,9 @@ for (const locale of ["fr", "ar"] as const) {
       await card.locator('[name="changeReason"]').fill("Première version contrôlée");
       await card.getByRole("button", { name: copy[locale].save }).click();
       await expect(card.getByRole("button", { name: copy[locale].submit })).toBeVisible();
+      const publication=card.locator('form').filter({has:page.locator('[name="registeredAddress"]')});
+      await publication.locator('[name="registeredAddress"]').fill('Adresse de recette locale du prestataire');
+      await publication.locator('[name="confirmed"]').check();
       await card.getByRole("button", { name: copy[locale].submit }).click();
       await expect(card).toContainText(copy[locale].submitted);
       await accessibility(page, locale);

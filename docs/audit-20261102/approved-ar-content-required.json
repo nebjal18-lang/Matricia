@@ -1,0 +1,1604 @@
+{
+  "status": "APPROVED_CONTENT_REQUIRED",
+  "sourceServices": "apps/web/modules/public/data/catalogue/services.json",
+  "sourceCategories": "apps/web/modules/public/data/provider-intent/category-map.json",
+  "services": [
+    {
+      "code": "IT-AUDIT-SI",
+      "library": "IT",
+      "name_fr": "Audit du système d’information et feuille de route",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-ARCHI",
+      "library": "IT",
+      "name_fr": "Architecture et urbanisation du système d’information",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-NETWORK",
+      "library": "IT",
+      "name_fr": "Conception et installation réseau LAN/Wi-Fi",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-FIREWALL",
+      "library": "IT",
+      "name_fr": "Déploiement de pare-feu et sécurisation réseau",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-VOIP",
+      "library": "IT",
+      "name_fr": "Téléphonie IP, centre d’appels et communications unifiées",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-CYBER-AUDIT",
+      "library": "IT",
+      "name_fr": "Audit de cybersécurité",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-PENTEST",
+      "library": "IT",
+      "name_fr": "Test d’intrusion Web, mobile ou infrastructure",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-SOC-MDR",
+      "library": "IT",
+      "name_fr": "Supervision SOC/MDR et réponse aux incidents",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-BACKUP",
+      "library": "IT",
+      "name_fr": "Sauvegarde, restauration et archivage",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-BCP-DRP",
+      "library": "IT",
+      "name_fr": "Plan de continuité et plan de reprise informatique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-CLOUD-MIG",
+      "library": "IT",
+      "name_fr": "Migration vers le cloud",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-M365",
+      "library": "IT",
+      "name_fr": "Déploiement Microsoft 365 ou Google Workspace",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-WEB-SHOWCASE",
+      "library": "IT",
+      "name_fr": "Création de site Web vitrine",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-ECOMMERCE",
+      "library": "IT",
+      "name_fr": "Création de boutique e-commerce",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-WEB-APP",
+      "library": "IT",
+      "name_fr": "Développement d’application Web métier",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-MOBILE-APP",
+      "library": "IT",
+      "name_fr": "Développement d’application mobile",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-ERP-CRM",
+      "library": "IT",
+      "name_fr": "Implémentation ou intégration ERP/CRM",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-BI",
+      "library": "IT",
+      "name_fr": "Data warehouse et tableaux de bord BI",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-AI-AUTO",
+      "library": "IT",
+      "name_fr": "Automatisation IA, assistants et chatbots",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-CCTV-IOT",
+      "library": "IT",
+      "name_fr": "Vidéosurveillance, contrôle d’accès et IoT",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-MKT-STRAT",
+      "library": "COM",
+      "name_fr": "Stratégie marketing globale",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-BRAND",
+      "library": "COM",
+      "name_fr": "Plateforme de marque et stratégie de branding",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-NAMING",
+      "library": "COM",
+      "name_fr": "Naming de marque, produit ou service",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-VISUAL-ID",
+      "library": "COM",
+      "name_fr": "Identité visuelle et charte graphique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-GRAPHIC",
+      "library": "COM",
+      "name_fr": "Création graphique et supports commerciaux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-COPY",
+      "library": "COM",
+      "name_fr": "Rédaction Web, commerciale et institutionnelle",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-CONTENT-PLAN",
+      "library": "COM",
+      "name_fr": "Stratégie éditoriale et calendrier de contenu",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-SOCIAL-STRAT",
+      "library": "COM",
+      "name_fr": "Stratégie réseaux sociaux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-COMMUNITY",
+      "library": "COM",
+      "name_fr": "Community management",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-SEO",
+      "library": "COM",
+      "name_fr": "Référencement naturel SEO",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-EMAIL",
+      "library": "COM",
+      "name_fr": "E-mail marketing et automatisation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-DIGITAL-ADS",
+      "library": "COM",
+      "name_fr": "Campagnes publicitaires digitales",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-MEDIA",
+      "library": "COM",
+      "name_fr": "Plan média et achat d’espace",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-PHOTO",
+      "library": "COM",
+      "name_fr": "Photographie corporate, produit ou immobilière",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-VIDEO",
+      "library": "COM",
+      "name_fr": "Production vidéo corporate ou publicitaire",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-MOTION",
+      "library": "COM",
+      "name_fr": "Motion design et animation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-PR",
+      "library": "COM",
+      "name_fr": "Relations presse et relations publiques",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-INFLUENCE",
+      "library": "COM",
+      "name_fr": "Marketing d’influence",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-EVENT",
+      "library": "COM",
+      "name_fr": "Conception et communication événementielle",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-PRINT-SIGN",
+      "library": "COM",
+      "name_fr": "Impression, PLV et signalétique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-BOOKKEEPING",
+      "library": "ACC",
+      "name_fr": "Tenue comptable externalisée",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-CLEANUP",
+      "library": "ACC",
+      "name_fr": "Rattrapage et régularisation comptable",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-CLOSE",
+      "library": "ACC",
+      "name_fr": "Clôture mensuelle et annuelle",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-FS",
+      "library": "ACC",
+      "name_fr": "Préparation des états financiers",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-VAT",
+      "library": "ACC",
+      "name_fr": "Déclarations de TVA",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-CORP-TAX",
+      "library": "ACC",
+      "name_fr": "Déclarations fiscales et impôt sur les sociétés",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-TAX-REVIEW",
+      "library": "ACC",
+      "name_fr": "Revue fiscale et diagnostic de conformité",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-TAX-AUDIT",
+      "library": "ACC",
+      "name_fr": "Assistance lors d’un contrôle fiscal",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-BUDGET",
+      "library": "ACC",
+      "name_fr": "Budget annuel et prévisions",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-MGMT-CONTROL",
+      "library": "ACC",
+      "name_fr": "Mise en place du contrôle de gestion",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-COSTING",
+      "library": "ACC",
+      "name_fr": "Calcul des coûts et rentabilité par produit",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-TREASURY",
+      "library": "ACC",
+      "name_fr": "Gestion et prévision de trésorerie",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-COLLECTION",
+      "library": "ACC",
+      "name_fr": "Optimisation du recouvrement client",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-INVOICING",
+      "library": "ACC",
+      "name_fr": "Mise en place de la facturation et des contrôles",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-FIN-MODEL",
+      "library": "ACC",
+      "name_fr": "Modèle financier et business plan",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-FUNDING",
+      "library": "ACC",
+      "name_fr": "Préparation d’un dossier de financement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-AUDIT-PREP",
+      "library": "ACC",
+      "name_fr": "Préparation à l’audit financier",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-DUE-DIL",
+      "library": "ACC",
+      "name_fr": "Due diligence financière",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-SOFTWARE",
+      "library": "ACC",
+      "name_fr": "Choix et déploiement d’un logiciel comptable",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-INVENTORY",
+      "library": "ACC",
+      "name_fr": "Inventaire physique et valorisation des stocks",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-CREATE",
+      "library": "LEGAL",
+      "name_fr": "Création et structuration de société",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-CORP-SECRETARY",
+      "library": "LEGAL",
+      "name_fr": "Secrétariat juridique annuel",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-GOV",
+      "library": "LEGAL",
+      "name_fr": "Mise en place de la gouvernance et délégations",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-CONTRACT-DRAFT",
+      "library": "LEGAL",
+      "name_fr": "Rédaction de contrat commercial",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-CONTRACT-REVIEW",
+      "library": "LEGAL",
+      "name_fr": "Revue et négociation de contrat",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-GTC",
+      "library": "LEGAL",
+      "name_fr": "Conditions générales de vente ou d’utilisation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-EMPLOYMENT",
+      "library": "LEGAL",
+      "name_fr": "Contrats de travail et documents RH",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-HR-DISPUTE",
+      "library": "LEGAL",
+      "name_fr": "Assistance en conflit ou procédure disciplinaire",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-TRADEMARK",
+      "library": "LEGAL",
+      "name_fr": "Dépôt et protection de marque",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-IP-CONTRACT",
+      "library": "LEGAL",
+      "name_fr": "Contrats de propriété intellectuelle et licences",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-PRIVACY",
+      "library": "LEGAL",
+      "name_fr": "Conformité données personnelles et politique de confidentialité",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-COMPLIANCE-AUDIT",
+      "library": "LEGAL",
+      "name_fr": "Audit de conformité réglementaire",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-ETHICS",
+      "library": "LEGAL",
+      "name_fr": "Code éthique, anticorruption et dispositif d’alerte",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-LICENSE",
+      "library": "LEGAL",
+      "name_fr": "Obtention ou renouvellement d’agrément/licence",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-DEBT-RECOVERY",
+      "library": "LEGAL",
+      "name_fr": "Recouvrement amiable et juridique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-PRE-LITIGATION",
+      "library": "LEGAL",
+      "name_fr": "Mise en demeure et stratégie précontentieuse",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-LITIGATION",
+      "library": "LEGAL",
+      "name_fr": "Coordination et suivi d’un contentieux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-LEASE",
+      "library": "LEGAL",
+      "name_fr": "Rédaction ou revue de bail commercial",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-SHA",
+      "library": "LEGAL",
+      "name_fr": "Pacte d’associés ou convention de partenariat",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-FRANCHISE",
+      "library": "LEGAL",
+      "name_fr": "Contrat et structuration de franchise",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-AUDIT",
+      "library": "HR",
+      "name_fr": "Audit RH et plan d’action",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-WORKFORCE",
+      "library": "HR",
+      "name_fr": "Planification des effectifs et emplois",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-JOB-DESC",
+      "library": "HR",
+      "name_fr": "Fiches de poste et référentiel métiers",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-RECRUIT",
+      "library": "HR",
+      "name_fr": "Recrutement de profils",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-EXEC-SEARCH",
+      "library": "HR",
+      "name_fr": "Chasse de cadres et dirigeants",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-ONBOARD",
+      "library": "HR",
+      "name_fr": "Parcours d’intégration des nouveaux salariés",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-PERFORMANCE",
+      "library": "HR",
+      "name_fr": "Système d’évaluation de la performance",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-COMPETENCY",
+      "library": "HR",
+      "name_fr": "Référentiel de compétences et gestion des carrières",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-SUCCESSION",
+      "library": "HR",
+      "name_fr": "Plans de succession et hauts potentiels",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-COMP-BEN",
+      "library": "HR",
+      "name_fr": "Politique de rémunération et avantages",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-PAYROLL",
+      "library": "HR",
+      "name_fr": "Externalisation ou sécurisation de la paie",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-ADMIN",
+      "library": "HR",
+      "name_fr": "Administration du personnel externalisée",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-TIME",
+      "library": "HR",
+      "name_fr": "Gestion du temps, absences et planning",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-TRAIN-NEEDS",
+      "library": "HR",
+      "name_fr": "Analyse des besoins de formation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-TRAIN-DELIVERY",
+      "library": "HR",
+      "name_fr": "Conception et animation de formation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-ENGAGEMENT",
+      "library": "HR",
+      "name_fr": "Enquête d’engagement et climat social",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-RELATIONS",
+      "library": "HR",
+      "name_fr": "Gestion des relations sociales",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-DISCIPLINE",
+      "library": "HR",
+      "name_fr": "Processus disciplinaire et gestion des dossiers sensibles",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-HRIS",
+      "library": "HR",
+      "name_fr": "Choix et déploiement d’un SIRH",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-OUTSOURCING",
+      "library": "HR",
+      "name_fr": "Direction RH externalisée",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-RISK-AUDIT",
+      "library": "INS",
+      "name_fr": "Audit global des risques assurables",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-MAP",
+      "library": "INS",
+      "name_fr": "Cartographie et plan de traitement des risques",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PROPERTY",
+      "library": "INS",
+      "name_fr": "Assurance multirisque des biens",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-BI",
+      "library": "INS",
+      "name_fr": "Assurance pertes d’exploitation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-GL",
+      "library": "INS",
+      "name_fr": "Responsabilité civile exploitation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PRO-LIAB",
+      "library": "INS",
+      "name_fr": "Responsabilité civile professionnelle",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PRODUCT",
+      "library": "INS",
+      "name_fr": "Responsabilité produits",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-DNO",
+      "library": "INS",
+      "name_fr": "Responsabilité des dirigeants",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-HEALTH",
+      "library": "INS",
+      "name_fr": "Assurance santé collective",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-LIFE",
+      "library": "INS",
+      "name_fr": "Décès, invalidité et prévoyance collective",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-WORK-ACC",
+      "library": "INS",
+      "name_fr": "Accidents du travail et risques professionnels",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-CYBER",
+      "library": "INS",
+      "name_fr": "Assurance cyber",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-CONSTRUCTION",
+      "library": "INS",
+      "name_fr": "Tous risques chantier et responsabilité décennale",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-CREDIT",
+      "library": "INS",
+      "name_fr": "Assurance-crédit clients",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-FLEET",
+      "library": "INS",
+      "name_fr": "Assurance flotte automobile",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-CARGO",
+      "library": "INS",
+      "name_fr": "Assurance transport de marchandises",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-CLAIMS",
+      "library": "INS",
+      "name_fr": "Gestion et optimisation des sinistres",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PREVENTION",
+      "library": "INS",
+      "name_fr": "Plan de prévention et réduction des sinistres",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-POLICY-AUDIT",
+      "library": "INS",
+      "name_fr": "Audit des polices et garanties existantes",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-TENDER",
+      "library": "INS",
+      "name_fr": "Appel d’offres assureurs et renouvellement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-PROC-AUDIT",
+      "library": "LOG",
+      "name_fr": "Audit de la fonction achats",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SOURCING-STRAT",
+      "library": "LOG",
+      "name_fr": "Stratégie de sourcing et catégories",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SUPPLIER-SEARCH",
+      "library": "LOG",
+      "name_fr": "Recherche et présélection de fournisseurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-TENDER",
+      "library": "LOG",
+      "name_fr": "Gestion d’appel d’offres fournisseurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SUP-QUAL",
+      "library": "LOG",
+      "name_fr": "Qualification et homologation fournisseurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SUP-PERF",
+      "library": "LOG",
+      "name_fr": "Évaluation et performance fournisseurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-CONTRACT-NEG",
+      "library": "LOG",
+      "name_fr": "Négociation et optimisation des contrats achats",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SPEND-ANALYSIS",
+      "library": "LOG",
+      "name_fr": "Analyse des dépenses et économies",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-E-PROC",
+      "library": "LOG",
+      "name_fr": "Mise en place d’un processus e-procurement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-INVENTORY-OPT",
+      "library": "LOG",
+      "name_fr": "Optimisation des niveaux de stock",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-FORECAST",
+      "library": "LOG",
+      "name_fr": "Prévision de la demande et S&OP",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-WH-DESIGN",
+      "library": "LOG",
+      "name_fr": "Conception ou optimisation d’entrepôt",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-WMS",
+      "library": "LOG",
+      "name_fr": "Choix et déploiement WMS",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-PICKING",
+      "library": "LOG",
+      "name_fr": "Optimisation préparation de commandes",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-TRANS-TENDER",
+      "library": "LOG",
+      "name_fr": "Appel d’offres transporteurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-ROUTE",
+      "library": "LOG",
+      "name_fr": "Optimisation des tournées et du dernier kilomètre",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-CUSTOMS",
+      "library": "LOG",
+      "name_fr": "Assistance douane et conformité import-export",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-IMPORT",
+      "library": "LOG",
+      "name_fr": "Organisation d’opérations import-export",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SC-DIGITAL",
+      "library": "LOG",
+      "name_fr": "Digitalisation et tableau de bord supply chain",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-BCP",
+      "library": "LOG",
+      "name_fr": "Plan de continuité supply chain",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-FEAS",
+      "library": "BTP",
+      "name_fr": "Étude de faisabilité immobilière ou chantier",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-ARCH",
+      "library": "BTP",
+      "name_fr": "Conception architecturale",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-STRUCT",
+      "library": "BTP",
+      "name_fr": "Étude de structure",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-GEO",
+      "library": "BTP",
+      "name_fr": "Étude géotechnique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-MEP-DESIGN",
+      "library": "BTP",
+      "name_fr": "Études électricité, plomberie et CVC",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-QS",
+      "library": "BTP",
+      "name_fr": "Métré, estimation et bordereau de prix",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-PM",
+      "library": "BTP",
+      "name_fr": "Maîtrise d’œuvre et gestion de projet chantier",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-GC",
+      "library": "BTP",
+      "name_fr": "Construction tous corps d’état",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-RENOV",
+      "library": "BTP",
+      "name_fr": "Rénovation de bâtiment ou local",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-FITOUT",
+      "library": "BTP",
+      "name_fr": "Aménagement intérieur et fit-out",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-ELEC",
+      "library": "BTP",
+      "name_fr": "Installation et mise à niveau électrique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-PLUMB",
+      "library": "BTP",
+      "name_fr": "Plomberie, sanitaires et réseaux d’eau",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-HVAC",
+      "library": "BTP",
+      "name_fr": "Climatisation, ventilation et traitement d’air",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-FIRE",
+      "library": "BTP",
+      "name_fr": "Détection et protection incendie",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-SECURITY",
+      "library": "BTP",
+      "name_fr": "Contrôle d’accès, alarme et sûreté bâtiment",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-SOLAR",
+      "library": "BTP",
+      "name_fr": "Installation solaire photovoltaïque",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-ENERGY-AUDIT",
+      "library": "BTP",
+      "name_fr": "Audit énergétique de bâtiment",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-MAINT",
+      "library": "BTP",
+      "name_fr": "Contrat de maintenance multi-technique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-INSPECTION",
+      "library": "BTP",
+      "name_fr": "Inspection technique et diagnostic bâtiment",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-LANDSCAPE",
+      "library": "BTP",
+      "name_fr": "Aménagement paysager, piscine et extérieurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ISO9001",
+      "library": "QHSE",
+      "name_fr": "Mise en place ISO 9001",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-PROCESS",
+      "library": "QHSE",
+      "name_fr": "Cartographie et optimisation des processus",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-SUPPLIER-QUALITY",
+      "library": "QHSE",
+      "name_fr": "Qualité fournisseurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ISO14001",
+      "library": "QHSE",
+      "name_fr": "Mise en place ISO 14001",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ENV-AUDIT",
+      "library": "QHSE",
+      "name_fr": "Audit environnemental",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-WASTE",
+      "library": "QHSE",
+      "name_fr": "Plan de gestion des déchets",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ISO45001",
+      "library": "QHSE",
+      "name_fr": "Mise en place ISO 45001",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-SAFETY-AUDIT",
+      "library": "QHSE",
+      "name_fr": "Audit santé et sécurité au travail",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-RISK-ASSESS",
+      "library": "QHSE",
+      "name_fr": "Évaluation des risques professionnels",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-HSE-PLAN",
+      "library": "QHSE",
+      "name_fr": "Plan HSE chantier ou site",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-HACCP",
+      "library": "QHSE",
+      "name_fr": "Mise en place HACCP",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ISO22000",
+      "library": "QHSE",
+      "name_fr": "Mise en place ISO 22000",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-FOOD-AUDIT",
+      "library": "QHSE",
+      "name_fr": "Audit hygiène et sécurité alimentaire",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ISO17025",
+      "library": "QHSE",
+      "name_fr": "Préparation ISO/IEC 17025 laboratoire",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-METROLOGY",
+      "library": "QHSE",
+      "name_fr": "Gestion de métrologie et étalonnage",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-INTERNAL-AUDIT",
+      "library": "QHSE",
+      "name_fr": "Audit interne de système de management",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-CAPA",
+      "library": "QHSE",
+      "name_fr": "Gestion des non-conformités et CAPA",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-DOC-MGMT",
+      "library": "QHSE",
+      "name_fr": "Système documentaire qualité/HSE",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-INTEGRATED",
+      "library": "QHSE",
+      "name_fr": "Système intégré Qualité-Environnement-Sécurité",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-CERT-PREP",
+      "library": "QHSE",
+      "name_fr": "Préparation et accompagnement à la certification",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-AUDIT",
+      "library": "SALES",
+      "name_fr": "Audit commercial",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-GTM",
+      "library": "SALES",
+      "name_fr": "Stratégie go-to-market",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-MARKET-RESEARCH",
+      "library": "SALES",
+      "name_fr": "Étude de marché et segmentation clients",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-PRICING",
+      "library": "SALES",
+      "name_fr": "Stratégie de prix et politique commerciale",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-PROCESS",
+      "library": "SALES",
+      "name_fr": "Conception du processus de vente",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-PIPELINE",
+      "library": "SALES",
+      "name_fr": "Mise en place du pipeline et prévisions commerciales",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-TENDER",
+      "library": "SALES",
+      "name_fr": "Réponse aux appels d’offres commerciaux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CRM-IMPL",
+      "library": "SALES",
+      "name_fr": "Choix et déploiement CRM",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-SALES-AUTO",
+      "library": "SALES",
+      "name_fr": "Automatisation commerciale et séquences",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-LEADGEN",
+      "library": "SALES",
+      "name_fr": "Génération de leads B2B/B2C",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-TELEMARKETING",
+      "library": "SALES",
+      "name_fr": "Téléprospection et prise de rendez-vous",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-SCRIPTS",
+      "library": "SALES",
+      "name_fr": "Scripts, argumentaires et outils d’aide à la vente",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-ORG",
+      "library": "SALES",
+      "name_fr": "Organisation et dimensionnement de la force de vente",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-TRAIN",
+      "library": "SALES",
+      "name_fr": "Formation et coaching commercial",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-KAM",
+      "library": "SALES",
+      "name_fr": "Programme grands comptes et key account management",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CHANNEL",
+      "library": "SALES",
+      "name_fr": "Réseau de distributeurs et partenaires",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-EXPORT",
+      "library": "SALES",
+      "name_fr": "Développement commercial à l’export",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CX-MAP",
+      "library": "SALES",
+      "name_fr": "Cartographie du parcours et expérience client",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-LOYALTY",
+      "library": "SALES",
+      "name_fr": "Programme de fidélité et rétention",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CUSTOMER-SERVICE",
+      "library": "SALES",
+      "name_fr": "Mise en place ou optimisation du service client",
+      "approved_name_ar_required": true
+    }
+  ],
+  "categories": [
+    {
+      "code": "ACC-AUDIT",
+      "name_fr": "Audit et due diligence",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-BOOK",
+      "name_fr": "Comptabilité et clôture",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-CASH",
+      "name_fr": "Trésorerie et recouvrement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-CTRL",
+      "name_fr": "Contrôle de gestion et performance",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-FIN",
+      "name_fr": "Financement et modélisation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-SPECIAL",
+      "name_fr": "Opérations comptables spécialisées",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-SYS",
+      "name_fr": "Systèmes et digitalisation finance",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "ACC-TAX",
+      "name_fr": "Fiscalité et déclarations",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-COST",
+      "name_fr": "Économie de la construction",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-ENERGY",
+      "name_fr": "Énergie et durabilité",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-FM",
+      "name_fr": "Facility management et maintenance",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-MEP",
+      "name_fr": "Lots techniques",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-REAL",
+      "name_fr": "Immobilier, inspection et aménagement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-SAFE",
+      "name_fr": "Sécurité et systèmes spéciaux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-STUDY",
+      "name_fr": "Études et conception",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "BTP-WORK",
+      "name_fr": "Construction et rénovation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-ADS",
+      "name_fr": "Publicité et acquisition",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-AV",
+      "name_fr": "Photo, vidéo et motion design",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-CONTENT",
+      "name_fr": "Contenus et rédaction",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-DESIGN",
+      "name_fr": "Identité visuelle et design",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-DIGITAL",
+      "name_fr": "Marketing digital et réseaux sociaux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-EVENT",
+      "name_fr": "Événementiel, impression et signalétique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-PR",
+      "name_fr": "Relations publiques et influence",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "COM-STRAT",
+      "name_fr": "Stratégie marketing et marque",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-ADMIN",
+      "name_fr": "Administration RH et paie",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-COMP",
+      "name_fr": "Rémunération et avantages",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-DIGI",
+      "name_fr": "SIRH et digitalisation RH",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-PERF",
+      "name_fr": "Performance, compétences et carrière",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-REC",
+      "name_fr": "Recrutement et intégration",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-REL",
+      "name_fr": "Relations sociales et engagement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-STRAT",
+      "name_fr": "Stratégie et organisation RH",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "HR-TRAIN",
+      "name_fr": "Formation et développement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-CLAIM",
+      "name_fr": "Sinistres et prévention",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-FLEET",
+      "name_fr": "Flotte, transport et logistique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-LIAB",
+      "name_fr": "Responsabilités",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PEOPLE",
+      "name_fr": "Protection des personnes",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PROGRAM",
+      "name_fr": "Programme d’assurance et appels d’offres",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-PROP",
+      "name_fr": "Biens et pertes d’exploitation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-RISK",
+      "name_fr": "Audit et cartographie des risques",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "INS-SPEC",
+      "name_fr": "Risques spécialisés",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-CLOUD",
+      "name_fr": "Cloud et collaboration",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-CYBER",
+      "name_fr": "Cybersécurité et continuité",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-DATA",
+      "name_fr": "Data, BI et intelligence artificielle",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-DEV",
+      "name_fr": "Développement Web, mobile et logiciels",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-GOV",
+      "name_fr": "Stratégie et gouvernance SI",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-INFRA",
+      "name_fr": "Infrastructure, réseau et télécom",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "IT-IOT",
+      "name_fr": "IoT, vidéosurveillance et systèmes connectés",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-COMP",
+      "name_fr": "Conformité réglementaire et éthique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-CONTRACT",
+      "name_fr": "Contrats commerciaux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-CORP",
+      "name_fr": "Droit des sociétés et gouvernance",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-DISPUTE",
+      "name_fr": "Précontentieux et contentieux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-IP",
+      "name_fr": "Propriété intellectuelle et numérique",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-LABOR",
+      "name_fr": "Droit du travail",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-REAL",
+      "name_fr": "Immobilier et baux",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LEGAL-TRANS",
+      "name_fr": "Transactions et partenariats",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-DIGI",
+      "name_fr": "Digitalisation et résilience supply chain",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-INV",
+      "name_fr": "Stocks et prévisions",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-PROC",
+      "name_fr": "Stratégie achats et sourcing",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SPEND",
+      "name_fr": "Dépenses et performance achats",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-SUP",
+      "name_fr": "Gestion des fournisseurs",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-TRADE",
+      "name_fr": "Import-export et douane",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-TRANS",
+      "name_fr": "Transport et distribution",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "LOG-WH",
+      "name_fr": "Entrepôts et opérations",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-AUDIT",
+      "name_fr": "Audits et amélioration",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-CERT",
+      "name_fr": "Préparation aux certifications",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-DOC",
+      "name_fr": "Documentation et digitalisation",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-ENV",
+      "name_fr": "Environnement",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-FOOD",
+      "name_fr": "Sécurité alimentaire",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-LAB",
+      "name_fr": "Laboratoires et métrologie",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-OHS",
+      "name_fr": "Santé et sécurité au travail",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "QHSE-QMS",
+      "name_fr": "Qualité et processus",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CHANNEL",
+      "name_fr": "Canaux, partenaires et export",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CRM",
+      "name_fr": "CRM et automatisation commerciale",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-CX",
+      "name_fr": "Expérience et fidélisation client",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-LEAD",
+      "name_fr": "Prospection et génération de leads",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-PROC",
+      "name_fr": "Processus et performance de vente",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-SERVICE",
+      "name_fr": "Service client et centres de contact",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-STRAT",
+      "name_fr": "Stratégie commerciale et marché",
+      "approved_name_ar_required": true
+    },
+    {
+      "code": "SALES-TEAM",
+      "name_fr": "Organisation et compétences commerciales",
+      "approved_name_ar_required": true
+    }
+  ]
+}

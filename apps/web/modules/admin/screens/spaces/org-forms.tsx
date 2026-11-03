@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, type ReactNode } from "react";
+import{ProductionReference}from"./production-reference";
+import { useActionState, useMemo, useId, type ReactNode } from "react";
 import Link from "next/link";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -40,13 +41,14 @@ function Feedback({ state, locale }: { state: AdminActionState; locale: Locale }
   return <p role="alert" className="admin-error">{state.reason}</p>;
 }
 
-export function CreateOrganizationForm({ locale, query }: { locale: Locale; query: string }) {
+export function CreateOrganizationForm({ locale, query, resourceId, idempotencyKey }: { locale: Locale; query: string; resourceId?: string; idempotencyKey?:string }) {
   const c = adminCopy(locale);
+  const formKey=useId();
   const [state, action, pending] = useActionState(requestOrganizationMutation, idle);
   return (
     <form action={action} className="admin-form-layout">
-      <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="intent" value="CREATE_ORGANIZATION" />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey??`admin-org-${formKey}`} /><input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
+      <input type="hidden" name="intent" value="CREATE_ORGANIZATION" /><input type="hidden" name="resourceId" value={resourceId??""} />
       <div className="client-stack">
         <article className="client-card">
           <header><h2>{c.general}</h2></header>
@@ -57,8 +59,9 @@ export function CreateOrganizationForm({ locale, query }: { locale: Locale; quer
             <Field id="create-legal" label={c.legal} required>
               <input id="create-legal" name="legalName" required minLength={2} />
             </Field>
-            <Field id="create-ice" label={c.iceLabel} required>
-              <input id="create-ice" name="ice" required minLength={8} dir="ltr" />
+            <Field id="create-ice" label={locale === "ar" ? "المعرّف الموحد للمقاولة (ICE)" : "ICE — Identifiant commun de l’entreprise"} required>
+              <input id="create-ice" name="ice" required minLength={15} maxLength={15} pattern="[0-9]{15}" inputMode="numeric" aria-describedby="create-ice-help" dir="ltr" />
+              <p id="create-ice-help">{locale === "ar" ? "أدخل 15 رقماً بالضبط دون مسافات، كما تظهر في الوثيقة الرسمية. هذا ليس رقم السجل التجاري (RC) ولا المعرّف الضريبي (IF)." : "Saisissez exactement 15 chiffres, sans espaces, tels qu’ils figurent sur le justificatif officiel. Il ne s’agit ni du RC ni de l’identifiant fiscal (IF)."}</p>
             </Field>
             <Field id="create-kind" label={c.ownerKind} required>
               <select id="create-kind" name="kind" required defaultValue="CLIENT">
@@ -95,6 +98,9 @@ export function EditOrganizationForm({
   status,
   country,
   updatedAt,
+  details = {},
+  rowVersion,
+  idempotencyKey,
 }: {
   locale: Locale;
   query: string;
@@ -104,18 +110,23 @@ export function EditOrganizationForm({
   status: string;
   country: string;
   updatedAt: string | null;
+  details?: Record<string, unknown>;
+  rowVersion?: number;
+  idempotencyKey?:string;
 }) {
   const c = adminCopy(locale);
+  const formKey=useId();
   const [state, action, pending] = useActionState(requestOrganizationMutation, idle);
   const conflict = state.status === "error" && state.reason === "CONFLICT";
   const errors = state.status === "error" && state.reason === "VALIDATION";
   const changed = useMemo(() => [c.name, c.address, c.email, c.state], [c.address, c.email, c.name, c.state]);
   return (
     <form action={action} className="admin-form-layout">
-      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey??`admin-org-${formKey}`} /><input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
       <input type="hidden" name="intent" value="CHANGE_CONFIGURATION" />
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="resourceId" value={organizationId} />
+      <input type="hidden" name="expectedRowVersion" value={rowVersion ?? ""} />
       <div className="client-stack">
         {conflict ? (
           <div className="admin-banner" data-tone="warn">
@@ -143,47 +154,47 @@ export function EditOrganizationForm({
               <input id="edit-name" name="displayName" required defaultValue={displayName} />
             </Field>
             <Field id="edit-acronym" label={c.acronym}>
-              <input id="edit-acronym" name="acronym" />
+              <input id="edit-acronym" name="acronym" defaultValue={String(details.acronym ?? "")} />
             </Field>
             <Field id="edit-desc" label={c.description}>
-              <input id="edit-desc" name="description" defaultValue={legalName} />
+              <input id="edit-desc" name="description" defaultValue={String(details.description ?? legalName)} />
             </Field>
           </div>
         </article>
         <article className="client-card">
-          <header><h2>{c.location}</h2></header>
+          <header><h2>{locale === "ar" ? "بيانات الاتصال الإدارية" : "Coordonnées administratives"}</h2><p>{locale === "ar" ? "تُستخدم هذه البيانات للتواصل الإداري. يراجع الملف القانوني في قسم الهوية أعلاه." : "Ces coordonnées servent au contact administratif. Le profil juridique se révise dans le volet identité ci-dessus."}</p></header>
           <div className="admin-form-grid" data-cols="3">
             <Field id="edit-address" label={c.address} required span>
-              <input id="edit-address" name="address" required />
+              <input id="edit-address" name="address" defaultValue={String(details.address ?? "")} required />
             </Field>
             <Field id="edit-city" label={c.city}>
-              <input id="edit-city" name="city" />
+              <input id="edit-city" name="city" defaultValue={String(details.city ?? "")} />
             </Field>
             <Field id="edit-zip" label={c.zip}>
-              <input id="edit-zip" name="postalCode" dir="ltr" />
+              <input id="edit-zip" name="postalCode" defaultValue={String(details.postalCode ?? "")} dir="ltr" />
             </Field>
             <Field id="edit-country" label={c.country}>
-              <input id="edit-country" name="country" defaultValue={country} />
+              <input id="edit-country" name="country" readOnly minLength={2} maxLength={2} pattern="[A-Za-z]{2}" defaultValue={country} />
             </Field>
             <Field id="edit-phone" label={c.phone}>
-              <input id="edit-phone" name="phone" dir="ltr" />
+              <input id="edit-phone" name="phone" defaultValue={String(details.phone ?? "")} dir="ltr" />
             </Field>
             <Field id="edit-email" label={c.email} required error={errors ? c.requiredField : undefined}>
-              <input id="edit-email" name="email" type="email" required />
+              <input id="edit-email" name="email" defaultValue={String(details.email ?? "")} type="email" required />
             </Field>
             <Field id="edit-web" label={c.web}>
-              <input id="edit-web" name="website" dir="ltr" />
+              <input id="edit-web" name="website" defaultValue={String(details.website ?? "")} dir="ltr" />
             </Field>
           </div>
         </article>
         <article className="client-card">
           <header><h2>{c.legalBlock}</h2></header>
           <div className="admin-form-grid" data-cols="3">
-            <Field id="edit-form" label={c.legalForm}>
-              <input id="edit-form" name="legalForm" />
+            <Field id="edit-form" label={locale === "ar" ? "ملاحظة إدارية حول الشكل القانوني" : "Note administrative sur la forme juridique"}>
+              <input id="edit-form" name="legalForm" defaultValue={String(details.legalForm ?? "")} />
             </Field>
             <Field id="edit-ice" label={c.ice}>
-              <input id="edit-ice" name="ice" dir="ltr" />
+              <input id="edit-ice" name="ice" readOnly defaultValue={String(details.ice ?? "")} dir="ltr" />
             </Field>
             <Field id="edit-tax" label={c.tax}>
               <input id="edit-tax" name="tax" disabled value={c.restrictedValue} aria-label={c.accessRestricted} />
@@ -198,10 +209,10 @@ export function EditOrganizationForm({
               <input id="edit-status" name="status" required defaultValue={status} />
             </Field>
             <Field id="edit-level" label={c.adminLevel}>
-              <input id="edit-level" name="adminLevel" />
+              <input id="edit-level" name="adminLevel" defaultValue={String(details.adminLevel ?? "")} />
             </Field>
             <Field id="edit-parent" label={c.parent}>
-              <input id="edit-parent" name="parent" />
+              <input id="edit-parent" name="parent" defaultValue={String(details.parent ?? "")} />
             </Field>
             <Field id="edit-reason" label={c.reason} required span>
               <textarea id="edit-reason" name="reason" required minLength={10} placeholder={c.reason} />
@@ -249,6 +260,7 @@ export function ArchiveOrganizationForm({
   displayName,
   status,
   mode,
+  idempotencyKey,
 }: {
   locale: Locale;
   query: string;
@@ -256,14 +268,16 @@ export function ArchiveOrganizationForm({
   displayName: string;
   status: string;
   mode: "archive" | "disable";
+  idempotencyKey?:string;
 }) {
   const c = adminCopy(locale);
+  const formKey=useId();
   const [state, action, pending] = useActionState(requestOrganizationMutation, idle);
   const archive = mode === "archive";
   return (
     <form action={action} className="admin-archive-layout">
-      <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="intent" value={archive ? "SUSPEND_ENTITY" : "RESTRICT_ENTITY"} />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey??`admin-org-${formKey}`} /><input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
+      <input type="hidden" name="intent" value={archive ? "RESTRICT_ENTITY" : "SUSPEND_ENTITY"} />
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="resourceId" value={organizationId} />
       <div className="client-stack">

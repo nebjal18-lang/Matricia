@@ -44,6 +44,6 @@ export type ProviderServiceEligibility = {
 };
 export type LocalizedLabel = { fr: string; ar: string };
 export type ProviderService = { id: string; serviceId: string; code: string; label: LocalizedLabel; libraryLabel: LocalizedLabel; categoryLabel: LocalizedLabel; requestStatus: string; qualificationId: string | null; qualificationStatus: string; capacityStatus: string; availableUnits: number | null; leadTimeDays: number | null; eligibility: ProviderServiceEligibility };
-export type ProviderDocument = { id: string; kind: string; code: string; version: number; status: string; expiresOn: string | null };
+export type ProviderDocument = { id: string; kind: string; code: string; version: number; status: string; expiresOn: string | null; scanStatus?: "PENDING" | "CLEAN" | "INFECTED" | "ERROR" };
 export type ProviderCatalogService = { id: string; code: string; label: LocalizedLabel; libraryLabel: LocalizedLabel; categoryLabel: LocalizedLabel };
-export type ProviderDashboard = { organizationId: string; organizationName: string; profile: ProviderProfile | null; services: ProviderService[]; documents: ProviderDocument[]; catalogServices: ProviderCatalogService[] };
+export type ProviderDashboard = { identityReview?:{verified:boolean;lastVerifiedAt:string|null}; organizationId: string; organizationName: string; profile: ProviderProfile | null; services: ProviderService[]; documents: ProviderDocument[]; regionCodes?: string[]; interventionModes?:import("./intervention-modes").InterventionMode[]; interventionModeVersion?:number; documentPage?:number; documentsHasMore?:boolean; catalogServices: ProviderCatalogService[] };

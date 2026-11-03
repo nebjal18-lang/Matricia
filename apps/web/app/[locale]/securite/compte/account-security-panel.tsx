@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useActionState, useId } from "react";
 import { Alert, AlertDescription } from "@/modules/shared/ui/alert";
 import { Badge } from "@/modules/shared/ui/badge";
@@ -60,9 +61,10 @@ function FactorRemoval({ factorId, locale, messages }: { factorId: string; local
   );
 }
 
-export function AccountSecurityPanel({ locale, security, messages }: { locale: Locale; security: Extract<AccountSecurityResult, { status: "success" }>; messages: AccountSecurityMessages }) {
+export function AccountSecurityPanel({ locale, security, messages, nextPath }: { nextPath?: string; locale: Locale; security: Extract<AccountSecurityResult, { status: "success" }>; messages: AccountSecurityMessages }) {
+  const router = useRouter();
   const [enrollment, beginAction, beginning] = useActionState(beginTotpEnrollment, enrollmentInitial);
-  const [verification, verifyAction, verifying] = useActionState(verifyTotpEnrollment, enrollmentInitial);
+  const [verification, verifyAction, verifying] = useActionState(async (previous: EnrollmentState, form: FormData) => { const result = await verifyTotpEnrollment(previous,form); if (result.status === "success") { if (result.nextPath) router.replace(result.nextPath); router.refresh(); } return result; }, enrollmentInitial);
   const [nonce, nonceAction, requestingNonce] = useActionState(requestPasswordNonce, passwordInitial);
   const [password, passwordAction, savingPassword] = useActionState(setOptionalPassword, passwordInitial);
   const enrollmentStatusId = useId();
@@ -116,25 +118,36 @@ export function AccountSecurityPanel({ locale, security, messages }: { locale: L
             <Button type="submit" className="min-h-11 w-full sm:w-auto" disabled={beginning}>{beginning ? messages.startingMfa : messages.startMfa}</Button>
           </form>
           {enrollmentError ? <p role="alert" className="text-sm text-destructive">{enrollmentError}</p> : null}
-          {enrollment.status === "enrollment" ? (
+          {enrollment.status === "enrollment" && verification.status !== "success" ? (
             <div className="grid gap-5 rounded-xl border bg-muted/30 p-4 md:grid-cols-[220px_1fr]">
               <div><p className="mb-3 text-sm font-medium">{messages.scanQr}</p><Image src={enrollment.qrCode} alt="QR TOTP" width={220} height={220} unoptimized className="rounded-lg bg-white p-2" /></div>
               <div className="space-y-4">
                 <div><p className="text-sm font-medium">{messages.manualSecret}</p><code dir="ltr" className="mt-2 block break-all rounded bg-background p-3 text-sm">{enrollment.secret}</code><p className="mt-2 text-xs text-muted-foreground">{messages.secretWarning}</p></div>
                 <form action={verifyAction} className="space-y-3" aria-describedby={enrollmentStatusId}>
-                  <input type="hidden" name="factorId" value={enrollment.factorId} /><input type="hidden" name="locale" value={locale} />
+                  <input type="hidden" name="next" value={nextPath ?? ""} /><input type="hidden" name="factorId" value={enrollment.factorId} /><input type="hidden" name="locale" value={locale} />
                   <Label htmlFor="totp-code">{messages.totpCode}</Label><Input id="totp-code" name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required dir="ltr" className="min-h-11" />
                   <Button type="submit" className="min-h-11 w-full sm:w-auto" disabled={verifying}>{verifying ? messages.verifyingMfa : messages.verifyMfa}</Button>
-                  <p id={enrollmentStatusId} role={verificationError ? "alert" : "status"} aria-live="polite" className={verificationError ? "text-sm text-destructive" : "text-sm text-primary"}>{verificationError ?? (verification.status === "success" ? messages.mfaVerified : "")}</p>
+                  <p id={enrollmentStatusId} role={verificationError ? "alert" : "status"} aria-live="polite" className={verificationError ? "text-sm text-destructive" : "text-sm text-primary"}>{verificationError ?? ""}</p>
                 </form>
               </div>
             </div>
           ) : null}
+          {verification.status === "success" ? <p role="status">{messages.mfaVerified}</p> : null}
           <section aria-labelledby="configured-factors"><h2 id="configured-factors" className="text-lg font-semibold">{messages.existingFactors}</h2>
-            {security.factors.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">{messages.noFactors}</p> : <ul className="mt-3 grid gap-4">{security.factors.map((factor) => <li key={factor.id} className="space-y-3 rounded-xl border p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-medium">{factor.friendlyName}</p><p className="text-sm text-muted-foreground">{messages.createdAt} {new Intl.DateTimeFormat(locale === "fr" ? "fr-MA" : "ar-MA", { dateStyle: "medium" }).format(new Date(factor.createdAt))}</p></div><Badge variant={factor.status === "verified" ? "default" : "secondary"}>{factor.status === "verified" ? messages.verified : messages.unverified}</Badge></div><FactorRemoval factorId={factor.id} locale={locale} messages={messages} /></li>)}</ul>}
+            {security.factors.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">{messages.noFactors}</p> : <ul className="mt-3 grid gap-4">{security.factors.map((factor) => <li key={factor.id} className="space-y-3 rounded-xl border p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-medium">{factor.friendlyName}</p><p className="text-sm text-muted-foreground">{messages.createdAt} {new Intl.DateTimeFormat(locale === "fr" ? "fr-MA" : "ar-MA", { dateStyle: "medium" }).format(new Date(factor.createdAt))}</p></div><Badge variant={factor.status === "verified" ? "default" : "secondary"}>{factor.status === "verified" ? messages.verified : messages.unverified}</Badge></div>{factor.status === "verified" ? <FactorChallenge factorId={factor.id} locale={locale} messages={messages} nextPath={nextPath} /> : null}<FactorRemoval factorId={factor.id} locale={locale} messages={messages} /></li>)}</ul>}
           </section>
         </CardContent>
       </Card>
     </div>
   );
+}
+
+function FactorChallenge({ factorId, locale, messages, nextPath }: { factorId: string; locale: Locale; messages: AccountSecurityMessages; nextPath?: string }) {
+  const router = useRouter();
+  const [state, action, pending] = useActionState(async (previous: EnrollmentState, form: FormData) => {
+    const result = await verifyTotpEnrollment(previous,form);
+    if (result.status === "success") { if (result.nextPath) router.replace(result.nextPath); router.refresh(); }
+    return result;
+  }, enrollmentInitial);
+  return <form action={action} className="grid gap-3"><input type="hidden" name="factorId" value={factorId}/><input type="hidden" name="locale" value={locale}/><input type="hidden" name="next" value={nextPath ?? ""}/><label htmlFor={`challenge-${factorId}`}>{messages.totpCode}</label><Input id={`challenge-${factorId}`} name="code" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required dir="ltr" className="min-h-11"/><Button disabled={pending}>{pending ? messages.verifyingMfa : messages.verifyMfa}</Button>{state.status === "error" ? <p role="alert">{errorMessage(state.reason,messages)}</p> : state.status === "success" ? <p role="status">{messages.mfaVerified}</p> : null}</form>;
 }

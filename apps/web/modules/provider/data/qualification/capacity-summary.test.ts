@@ -1,0 +1,2 @@
+import{describe,expect,it}from"vitest";import{capacitySummaryStatus}from"./capacity-summary";
+describe("provider capacity summary",()=>{it("does not present one available service as globally available",()=>{expect(capacitySummaryStatus([{capacityStatus:"AVAILABLE"},{capacityStatus:"FULL"}])).toBe("MIXED");});it("distinguishes undeclared capacity and a consistent portfolio",()=>{expect(capacitySummaryStatus([])).toBe("NOT_DECLARED");expect(capacitySummaryStatus([{capacityStatus:"PAUSED"},{capacityStatus:"PAUSED"}])).toBe("PAUSED");});});

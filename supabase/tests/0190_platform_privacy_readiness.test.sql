@@ -1,0 +1,16 @@
+begin;
+set local search_path=public,extensions;
+grant usage on schema extensions to service_role;
+select plan(5);
+update private.admin_execution_environment_v1 set environment='PRODUCTION'where singleton;
+set local role service_role;select set_config('request.jwt.claims','{"role":"service_role"}',true);
+select throws_ok($$select public.check_platform_privacy_readiness_v1('DEVELOPMENT')$$,'42501','ADMIN_DEPLOYMENT_ENVIRONMENT_MISMATCH','application environment cannot override the trusted database environment');
+select throws_ok($$select public.check_platform_privacy_readiness_v1('PRODUCTION')$$,'55000','PLATFORM_PRIVACY_PRODUCTION_NOT_READY','production fails closed without an approved platform controller');
+reset role;
+update private.admin_execution_environment_v1 set environment='STAGING'where singleton;
+set local role service_role;
+select is(public.check_platform_privacy_readiness_v1('STAGING')->>'required','false','staging does not impose a privacy register on every customer');
+select is(public.check_platform_privacy_readiness_v1('STAGING')->>'ready','false','staging never invents missing legal approval');
+reset role;
+select ok(not has_table_privilege('authenticated','private.platform_privacy_deployment_scope_v1','UPDATE'),'authenticated users cannot choose the legal controller or approval');
+select*from finish();rollback;

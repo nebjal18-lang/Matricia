@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Download, Plus } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, unstable_rethrow } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
+import { AdminReadError } from "@/modules/admin/ui/admin-read-error";
 import { loadAdminCommandCenter } from "@/modules/admin/data/command-center/repository";
 import { loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import { OrganizationsBoard } from "@/modules/admin/screens/spaces/boards";
@@ -21,10 +21,23 @@ export default async function AdminEntreprisesPage({
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
+  const returnParams = new URLSearchParams();
+  for (const key of ["organizationId", "q", "archives", "type", "status", "compliance", "plan"] as const) {
+    if (query[key]) returnParams.set(key, query[key]!);
+  }
+  const returnHref = `/${locale}/administration/entreprises${returnParams.size ? `?${returnParams}` : ""}`;
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
-  if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/administration/entreprises` }));
-  const [result, command] = await Promise.all([loadAdminSupervisionDashboard(100), loadAdminCommandCenter()]);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/entreprises` }));
+  if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: returnHref }));
+  const [result, command] = await Promise.all([
+    loadAdminSupervisionDashboard(100),
+    loadAdminCommandCenter().catch(error => { unstable_rethrow(error); return { status: "error", reason: "QUERY_FAILED" } as const; }),
+  ]);
+  const readError = result.status === "error" ? result.reason : null;
+  if (readError === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: returnHref }));
+  if (command.status === "error" && command.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: returnHref }));
+  const uiParams=new URLSearchParams(space.selectedQuery);
+  for(const key of ["q","archives","type","status","compliance","plan"]as const){if(query[key])uiParams.set(key,query[key]!);}
+  const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
   const rows = result.status === "success" ? mapAdminOrgRows(result.value.organizations, locale) : [];
@@ -54,34 +67,36 @@ export default async function AdminEntreprisesPage({
       actorCurrent="orgs"
       searchAction={`/${locale}/administration/entreprises`}
       searchPlaceholder={c.searchOrgs}
-      alternateHref={`/${alternate}/administration/entreprises${space.selectedQuery}`}
-      crumb={<AdminCrumb locale={locale} query={space.selectedQuery} />}
+      alternateHref={`/${alternate}/administration/entreprises${uiQuery}`}
+      crumb={<AdminCrumb locale={locale} query={uiQuery} />}
       title={c.orgs}
       lead={c.orgsLead}
       actions={
         <>
-          <a href={`/${locale}/administration/entreprises/export${space.selectedQuery}`} className="admin-dir-action" data-tone="white"><Download className="size-4" aria-hidden />{c.export}</a>
-          <Link href={`/${locale}/administration/entreprises/nouvelle${space.selectedQuery}`} className="admin-primary-cta"><Plus className="size-4" aria-hidden />{c.createOrg}</Link>
+          {result.status === "success" ? <a href={`/${locale}/administration/entreprises/export${uiQuery}`} className="admin-dir-action" data-tone="white"><Download className="size-4" aria-hidden />{c.export}</a> : null}
+          {result.status === "success" || result.reason !== "FORBIDDEN" ? <Link href={`/${locale}/administration/entreprises/nouvelle${space.selectedQuery}`} className="admin-primary-cta"><Plus className="size-4" aria-hidden />{c.createOrg}</Link> : null}
         </>
       }
     >
-      {result.status === "error" && result.reason !== "FORBIDDEN" ? (
+      {readError ? (
         <main className="client-page">
-          <Alert variant="destructive">
-            <AlertTitle>{locale === "ar" ? "تعذر التحميل" : "Chargement indisponible"}</AlertTitle>
-            <AlertDescription>{result.reason}</AlertDescription>
-          </Alert>
+          <AdminReadError locale={locale} reason={readError} retryHref={`/${locale}/administration/entreprises${uiQuery}`} />
         </main>
       ) : (
+        <>
+        {command.status === "error" ? <AdminReadError locale={locale}
+          area="workQueue" reason={command.reason === "MFA_REQUIRED" || command.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"}
+          retryHref={`/${locale}/administration/entreprises${uiQuery}`} /> : null}
         <OrganizationsBoard
           locale={locale}
-          query={space.selectedQuery}
+          query={uiQuery}
           rows={rows}
           treat={treat}
           search={query.q}
           archives={query.archives === "1"}
           filters={{ type: query.type, status: query.status, compliance: query.compliance, plan: query.plan }}
         />
+        </>
       )}
     </AdminAppShell>
   );

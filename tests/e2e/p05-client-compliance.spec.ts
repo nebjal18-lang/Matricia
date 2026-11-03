@@ -1,3 +1,4 @@
+import { validFixtureProject } from "./helpers/fixture-project.mjs";
 import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
@@ -30,6 +31,7 @@ const copy = {
 type StateKey = "clientA" | "clientB" | "centralAal1" | "centralAal2" | "noRole";
 type Manifest = {
   schemaVersion: number;
+  environment?: string;
   projectRef: string;
   runId: string;
   createdAt: string;
@@ -48,7 +50,7 @@ function loadManifest(): Manifest {
   if (!path) throw new Error("E2E_P05_MANIFEST is required; use scripts/p05-e2e/run.mjs");
   const manifest = JSON.parse(readFileSync(path, "utf8")) as Manifest;
   const now = Date.now();
-  if (manifest.schemaVersion !== 1 || !/^[a-z0-9]{10,40}$/.test(manifest.projectRef)
+  if (manifest.schemaVersion !== 1 || !validFixtureProject(manifest)
       || !/^[a-z0-9-]{8,64}$/.test(manifest.runId) || now - Date.parse(manifest.createdAt) > 120_000
       || Date.parse(manifest.expiresAt) <= now || manifest.proof.realCommandAuditOutbox !== true
       || manifest.proof.tenantIsolation !== true || manifest.proof.storageIsolation !== true || manifest.proof.centralAal2 !== true) {
@@ -105,7 +107,7 @@ for (const locale of ["fr", "ar"] as const) {
         await page.setViewportSize({ width: 360, height: 800 });
         await page.goto(`/${locale}/${route.path}`);
 
-        await expect(page).toHaveURL(new RegExp(`/${locale}/connexion/?$`));
+        await expect(page).toHaveURL(url=>url.pathname===`/${locale}/connexion`&&url.searchParams.get("next")===`/${locale}/${route.path}`);
         await expect(page.locator("html")).toHaveAttribute("lang", locale);
         await expect(page.locator("html")).toHaveAttribute("dir", direction);
         await expect(page.getByRole("heading", { level: 1, name: copy[locale].loginTitle })).toBeVisible();

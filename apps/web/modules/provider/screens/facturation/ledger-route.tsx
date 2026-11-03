@@ -17,13 +17,13 @@ export async function renderProviderLedgerPage(
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(`/${locale}/connexion`);
   const m = getBillingMessages(locale);
-  const result = await loadProviderBilling();
+  const result = await loadProviderBilling(query.organizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
   const title = kind === "pre-releve" ? m.preReleve : kind === "factures" ? m.facturesMatricia : kind === "echeancier" ? m.echeancier : m.commissionsTitle;
   const lead = kind === "pre-releve" ? m.preReleveLead : kind === "factures" ? m.facturesMatriciaLead : kind === "echeancier" ? m.echeancierLead : m.commissionsLead;
   if (result.status === "error") {
     return (
-      <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={title} lead={lead}>
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={title} lead={lead}>
         <Alert variant={result.reason === "NO_BILLING_ORGANIZATION" ? "default" : "destructive"}>
           <AlertTitle>{result.reason === "NO_BILLING_ORGANIZATION" ? m.noOrg : m.loadError}</AlertTitle>
           <AlertDescription>{result.reason}</AlertDescription>
@@ -34,13 +34,13 @@ export async function renderProviderLedgerPage(
   const commissions = kind === "commissions" ? await loadProviderCommissions(result.dashboard.organizationId) : null;
   if (commissions && commissions.status === "error") {
     return (
-      <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={title} lead={lead}>
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={title} lead={lead}>
         <Alert variant="destructive"><AlertTitle>{m.loadError}</AlertTitle><AlertDescription>{commissions.reason}</AlertDescription></Alert>
       </ProviderAppShell>
     );
   }
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={title} lead={lead}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={title} lead={lead}>
       <ProviderLedgerBoard locale={locale} query={space.selectedQuery} kind={kind} dashboard={result.dashboard} receipts={commissions?.status === "success" ? commissions.receipts : []} planKey={kind === "echeancier" ? crypto.randomUUID() : undefined} />
     </ProviderAppShell>
   );

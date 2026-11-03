@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { submitContactRequest, type ContactActionState } from "../contact/actions";
+import { getFranchisePresentation } from "@/modules/public/data/franchise-presentation";
 import { getPublicProviderTaxonomy } from "@/modules/public/data/provider-intent/model";
 import { moroccoRegionLabel, moroccoRegions } from "@/modules/franchise/data/territories/morocco-regions";
 
@@ -25,10 +26,8 @@ const copy = {
     email: "Adresse e-mail",
     city: "Territoire",
     profile: "Parcours professionnel",
-    domain: "Bibliothèque ou domaine souhaité",
     availability: "Disponibilité estimée",
     motivation: "Votre motivation",
-    motivationHint: "Expliquez en quelques lignes pourquoi vous souhaitez développer une bibliothèque Matricia dans votre territoire.",
     consent: "Je confirme l’exactitude des informations fournies et j’accepte d’être recontacté(e) par l’équipe Matricia dans le cadre de l’étude de ma candidature.",
     send: "Enregistrer et continuer par code sécurisé",
     pending: "Enregistrement…",
@@ -46,10 +45,8 @@ const copy = {
     email: "البريد الإلكتروني",
     city: "الإقليم",
     profile: "المسار المهني",
-    domain: "المكتبة أو المجال المرغوب",
     availability: "التوفر التقديري",
     motivation: "دافعكم",
-    motivationHint: "اشرحوا باختصار لماذا ترغبون في تطوير مكتبة ماتريسيا في إقليمكم.",
     consent: "أؤكد دقة المعلومات وأوافق على أن يتواصل فريق ماتريسيا في إطار دراسة الترشيح.",
     send: "التسجيل والمتابعة برمز آمن",
     pending: "جارٍ التسجيل…",
@@ -64,7 +61,8 @@ const copy = {
 
 export function FranchiseApplicationForm({ locale }: { locale: Locale }) {
   const [state, action, pending] = useActionState(submitContactRequest, initial);
-  const messages = copy[locale];
+  const presentation = getFranchisePresentation(locale);
+  const messages = { ...copy[locale], domain: presentation.domain, motivationHint: presentation.motivationHint };
   const domains = getPublicProviderTaxonomy(locale).libraries;
   const [motivation, setMotivation] = useState("");
 

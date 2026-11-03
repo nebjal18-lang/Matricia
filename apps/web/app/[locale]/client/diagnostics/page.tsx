@@ -1,3 +1,4 @@
+import {readAllPages}from"@/modules/shared/lib/data/read-pages";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -18,34 +19,37 @@ import { diagnosticToolMessages } from "@/modules/client/screens/diagnostics/too
 import { formatDimensionKey } from "@/modules/client/screens/diagnostics/journey";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 
-export default async function Diagnostics({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+export default async function Diagnostics({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; page?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/diagnostics` }));
-  const repository = await createServerDiagnosticsRepository();
+  const repository = await createServerDiagnosticsRepository(space.selectedOrganizationId);
   const result = await repository.list();
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/diagnostics` }));
   const m = messages(locale);
   const c = spaceCopy(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
         <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل التشخيصات." : "Impossible de charger les diagnostics."}</p></main>
       </ClientAppShell>
     );
   }
   const client = await getSupabaseServerClient();
-  const intakeResult = await client.from("public_diagnostic_intakes").select("id,organization_id,priorities,created_at").order("created_at", { ascending: false }).limit(100);
+  const intakeResult = await client.from("public_diagnostic_intakes").select("id,organization_id,priorities,created_at").eq("organization_id", space.selectedOrganizationId).order("created_at", { ascending: false }).limit(100);
   const organizationIds = [...new Set([...result.value.sessions.map((session) => session.organizationId), ...(intakeResult.data ?? []).map((intake) => intake.organization_id)])];
   const organizationResult = organizationIds.length ? await client.from("organizations").select("id,display_name").in("id", organizationIds) : { data: [], error: null };
   if (organizationResult.error) {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
         <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المؤسسات المرتبطة بالتشخيص." : "Impossible de charger les organisations liées au diagnostic."}</p></main>
       </ClientAppShell>
     );
   }
+  const latestSubmitted=result.value.sessions.find(session=>session.organizationId===space.selectedOrganizationId);
+  const scopeServices=latestSubmitted?await readAllPages((from,to)=>client.from("catalog_services").select("id").eq("library_id",latestSubmitted.libraryId).eq("status","PUBLISHED").not("current_published_version_id","is",null).order("code").order("id").range(from,to)):{data:[],error:null};
+  const serviceChoices=(scopeServices.data??[]).flatMap(row=>{const service=result.value.services.find(item=>item.id===row.id);return service?[{id:service.id,name:locale==="fr"?service.nameFr:service.nameAr}]:[];});
   const names = new Map((organizationResult.data ?? []).map((organization) => [organization.id, organization.display_name]));
   const organizations = organizationIds.flatMap((id) => {
     const latestSession = result.value.sessions.find((session) => session.organizationId === id);
@@ -65,7 +69,7 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
     ? await createServerQuestionnaireSessionsRepository().then((repository) => repository.load(undefined, organizationId))
     : { status: "error" as const, reason: "FORBIDDEN" as const };
   const selectedSession = questionnaireResult.status === "success" ? questionnaireResult.value.selected : null;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" });
+  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" });
   const hubCards = [
     ...(latest
       ? [{
@@ -82,7 +86,7 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
           })),
         }]
       : []),
-    ...(selectedSession
+    ...(selectedSession && !["SUBMITTED", "EXPIRED", "ABANDONED"].includes(selectedSession.status)
       ? [{
           id: selectedSession.id,
           title: locale === "fr" ? "Diagnostic en cours" : "تشخيص جارٍ",
@@ -90,11 +94,14 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
           status: "in_progress" as const,
           meta: locale === "fr" ? "Brouillon enregistré" : "مسودة محفوظة",
           progressLabel: locale === "fr" ? "Reprendre le questionnaire" : "استئناف الاستبيان",
-          progressPct: 65,
+          progressPct: selectedSession.questionCount ? Math.trunc(selectedSession.answeredCount * 100 / selectedSession.questionCount) : 0,
         }]
       : []),
   ];
-  const history = result.value.runs.slice(0, 8).map((run) => ({
+  const page = Math.min(100000,Math.max(1,Number.parseInt(query.page ?? "1",10)||1));
+  const historyResult = page === 1 ? result : await (await createServerDiagnosticsRepository(space.selectedOrganizationId,page)).list();
+  const historyRuns = historyResult.status === "success" ? historyResult.value.runs : [];
+  const history = historyRuns.slice(0, 20).map((run) => ({
     id: run.id,
     title: `${dateFmt.format(new Date(run.completedAt))} · ${formatExactScore(run.score)}/100`,
     meta: m.ratings[run.rating],
@@ -102,27 +109,27 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
     href: runHref(run.id),
   }));
   const todos = [
-    {
+    ...(selectedSession && selectedSession.answeredCount < selectedSession.questionCount ? [{
       id: "resume",
       title: locale === "fr" ? "Compléter une réponse manquante" : "إكمال إجابة ناقصة",
       description: locale === "fr" ? "Finalisez les points encore ouverts." : "أكملوا النقاط المفتوحة.",
       href: questionnaireHref,
       tone: "coral" as const,
-    },
-    {
+    }] : []),
+    ...(detail?.recommendations.length ? [{
       id: "reco",
       title: locale === "fr" ? "Consulter une recommandation" : "مراجعة توصية",
       description: locale === "fr" ? "Passez des constats aux actions." : "انتقلوا من الملاحظات إلى الإجراءات.",
       href: latest ? runHref(latest.id) : questionnaireHref,
       tone: "violet" as const,
-    },
-    {
+    }] : []),
+    ...(detail?.opportunities.some((item) => !item.serviceRequestId) ? [{
       id: "need",
       title: locale === "fr" ? "Transformer une priorité en besoin" : "تحويل أولوية إلى احتياج",
       description: locale === "fr" ? "Préparez une demande structurée." : "أعدوا طلباً منظماً.",
       href: `/${locale}/client/diagnostics/besoin${space.selectedQuery}`,
       tone: "lavender" as const,
-    },
+    }] : []),
   ];
   const resources = [
     { id: "evolution", title: locale === "fr" ? "Évolution" : "التطور", href: evolutionHref },
@@ -155,11 +162,12 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
         resources={resources}
         assistanceHref={assistanceHref}
       />
-      <details id="analyse" className="client-ops" open={organizations.length > 0 && !latest}>
-        <summary>{c.computeAnalysis}</summary>
-        <CompleteForm locale={locale} organizations={organizations} questionnaireHref={questionnaireHref} m={m} keyValue={randomUUID()} />
-        <DiagnosticTools locale={locale} m={diagnosticToolMessages[locale]} />
-      </details>
+      {historyResult.status === "error" ? <p role="alert">{locale === "fr" ? "Historique indisponible. Réessayez." : "السجل غير متاح. حاولوا مجدداً."}</p> : null}
+      <nav className="flex gap-4" aria-label={locale === "fr" ? "Pages de l’historique des diagnostics" : "صفحات سجل التشخيص"}>{page > 1 ? <Link href={`${space.selectedQuery}&page=${page-1}`}>{locale === "fr" ? "Précédent" : "السابق"}</Link> : null}{historyRuns.length > 20 ? <Link href={`${space.selectedQuery}&page=${page+1}`}>{locale === "fr" ? "Suivant" : "التالي"}</Link> : null}</nav>
+      <CompleteForm disclosure={{summary:c.computeAnalysis,initialOpen:organizations.length>0&&!latest}} serviceChoices={serviceChoices} locale={locale} organizations={organizations} questionnaireHref={questionnaireHref} m={m} keyValue={randomUUID()}>
+        {scopeServices.error?<p role="alert">{locale==="fr"?"Les périmètres de service sont momentanément indisponibles. L’analyse peut suivre les règles publiées ; réessayez pour choisir un contexte supplémentaire.":"نطاقات الخدمة غير متاحة مؤقتاً. يمكن للتحليل اتباع القواعد المنشورة؛ حاولوا مجدداً لاختيار سياق إضافي."}</p>:null}
+        <DiagnosticTools locale={locale} query={space.selectedQuery} m={diagnosticToolMessages[locale]} />
+      </CompleteForm>
       <IndicativeIntakes
         locale={locale}
         failed={Boolean(intakeResult.error)}

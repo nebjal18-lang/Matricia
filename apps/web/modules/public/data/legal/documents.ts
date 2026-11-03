@@ -113,7 +113,7 @@ const fr: Record<LegalDocumentId, LegalDocument> = {
       {
         heading: "Préférences de communication",
         paragraphs: [
-          "Vous pouvez indiquer si vous acceptez d’être recontacté pour des informations de service. Aucun suivi publicitaire n’est activé sur les pages publiques.",
+          "Les préférences de courriels et notifications sont enregistrées dans votre compte, depuis la page Notifications. Cette page ne recueille aucun consentement de communication. Aucun suivi publicitaire n’est activé sur les pages publiques.",
         ],
       },
       {
@@ -228,13 +228,13 @@ const ar: typeof fr = {
       {
         heading: "تفضيلات التواصل",
         paragraphs: [
-          "يمكنكم بيان ما إذا كنتم تقبلون إعادة الاتصال لمعلومات الخدمة. لا يُفعَّل تتبع إعلاني في الصفحات العامة.",
+          "تُحفظ تفضيلات البريد والإشعارات في حسابكم من صفحة الإشعارات. لا تجمع هذه الصفحة موافقة على التواصل. لا يُفعَّل تتبع إعلاني في الصفحات العامة.",
         ],
       },
       {
         heading: "المدة",
         paragraphs: [
-          "تبقى التفضيلات محفوظة على هذا الجهاز إلى أن تعدّلوها أو تمحوا بيانات التصفح.",
+          "ترتبط ملفات الجلسة واللغة بمدة الجلسة أو تفضيل اللغة. ترتبط خيارات الإشعارات بحسابكم.",
         ],
       },
     ],

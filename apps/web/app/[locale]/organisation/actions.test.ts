@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
-  rpc: vi.fn(),
+  rpc: vi.fn(),marketing:vi.fn(),capture:vi.fn(),
 }));
 
 vi.mock("@/modules/shared/lib/supabase/server", () => ({
   getSupabaseServerClient: async () => ({ auth: { getUser: mocks.getUser }, rpc: mocks.rpc }),
 }));
+vi.mock("@/modules/shared/lib/marketing-autopilot/funnel",()=>({recordMarketingFunnelEvent:mocks.marketing,captureMarketingFunnelTouch:mocks.capture}));
 vi.mock("node:crypto", () => ({ randomUUID: () => "11111111-1111-4111-8111-111111111111" }));
 
 import { createOrRequestOrganization, type OrganizationActionState } from "./actions";
@@ -32,7 +33,7 @@ function validForm(overrides: Record<string, string> = {}) {
 describe("createOrRequestOrganization", () => {
   beforeEach(() => {
     mocks.getUser.mockReset();
-    mocks.rpc.mockReset();
+    mocks.rpc.mockReset();mocks.marketing.mockReset();mocks.capture.mockReset();
     mocks.getUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
   });
 
@@ -59,8 +60,10 @@ describe("createOrRequestOrganization", () => {
   });
 
   it("normalise l’ICE et transmet la clé d’idempotence au RPC authentifié", async () => {
-    mocks.rpc.mockResolvedValue({ data: { outcome: "ORGANIZATION_CREATED", organization_id: "secret-org-id" }, error: null });
+    mocks.rpc.mockResolvedValue({ data: { outcome: "ORGANIZATION_CREATED",organization_id:"11111111-1111-4111-8111-111111111111" }, error: null });
     await expect(createOrRequestOrganization(idle, validForm())).resolves.toEqual({ status: "success", outcome: "ORGANIZATION_CREATED" });
+    expect(mocks.capture.mock.invocationCallOrder[0]).toBeLessThan(mocks.rpc.mock.invocationCallOrder[0]!);
+    expect(mocks.marketing).toHaveBeenCalledWith("REGISTRATION_STARTED","11111111-1111-4111-8111-111111111111");
     expect(mocks.rpc).toHaveBeenCalledWith("create_or_request_organization", {
       p_legal_name: "Société Exemple SARL",
       p_display_name: "Exemple",
@@ -76,6 +79,7 @@ describe("createOrRequestOrganization", () => {
     const result = await createOrRequestOrganization(idle, validForm());
     expect(result).toEqual({ status: "success", outcome: "ACCESS_REQUESTED" });
     expect(JSON.stringify(result)).not.toContain("secret");
+    expect(mocks.marketing).not.toHaveBeenCalled();
   });
 
   it.each([

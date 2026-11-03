@@ -1,10 +1,14 @@
 import { createHash, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { access, copyFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import postgres from "postgres";
+import { summarizeBrowserReport, validateBrowserReport } from "../../../scripts/release/browser-report.mjs";
+import { provisionLocalCatalogReference, neutralizeLocalCatalogReference } from "./local-catalog-reference.mjs";
+import { provisionLocalUiAuthFixture, verifyLocalUiAuthProof, neutralizeLocalUiAuthFixture } from "./local-ui-auth-fixture.mjs";
+import { provisionLocalSecondaryMandate } from "./local-secondary-mandate.mjs";
 import { loadSafeConfiguration, resolveExpectedDatabaseUrl } from "../../../scripts/p05-e2e/environment.mjs";
 import { cleanupRemote, provision } from "../../../scripts/p05-e2e/provision.mjs";
 import {
@@ -21,7 +25,9 @@ const runToken = randomUUID();
 const outputDirectory = resolve(root, "artifacts", "test-results", `p24-p26-completion-${runToken}`);
 const authDirectory = resolve(root, "artifacts", "test-results", `.p24-p26-auth-${runToken}`);
 const smokeOnly = process.argv.includes("--authenticated-route-smoke-only");
-const expectedTests = smokeOnly ? 16 : 64;
+const localAuthOnly = process.argv.includes("--local-auth-ui-only");
+const fixtureProofsOnly = process.argv.includes("--local-fixture-proofs-only");
+const expectedTests = fixtureProofsOnly ? 0 : localAuthOnly ? 4 : smokeOnly ? 16 : 64;
 const smokeEvidencePath = resolve(root, "artifacts", "test-results", "authenticated-route-smoke-summary.json");
 
 const hash = (value) => createHash("sha256").update(value).digest("hex");
@@ -31,7 +37,8 @@ function combineFailure(current, next, message) {
 }
 
 function sanitizedFailureCode(error) {
-  const sqlState = /^[0-9A-Z_-]{2,24}$/u.test(error?.code ?? "") ? error.code : "UNKNOWN";
+  const candidate = error?.code ?? error?.message;
+  const sqlState = /^[0-9A-Z_-]{2,80}$/u.test(candidate ?? "") ? candidate : "UNKNOWN";
   const constraint = /^[a-z0-9_]{1,120}$/u.test(error?.constraint_name ?? "") ? error.constraint_name : "UNAVAILABLE";
   return `${sqlState}:${constraint}`;
 }
@@ -44,7 +51,7 @@ function sanitizedPlaywrightDiagnostic(output, exitCode) {
     .replace(/(?:Bearer\s+)?[A-Za-z0-9_-]{40,}/gu, "[token-redacted]")
     .replace(/([?&](?:token|key|secret|code|session|state)=)[^\s&]+/giu, "$1[redacted]");
   const relevant = clean.split(/\r?\n/u).map((line) => line.trim()).filter((line) =>
-    /error|failed|cannot|timeout|timed out|no tests found|browsertype|webserver|enoent|eaddrinuse/iu.test(line),
+    /error:|failed|cannot|timeout|timed out|no tests found|browsertype|enoent|eaddrinuse/iu.test(line),
   ).slice(0, 8);
   return relevant.length > 0 ? `exit=${exitCode}; ${relevant.join(" | ").slice(0, 1_500)}` : `exit=${exitCode}; no diagnostic line emitted`;
 }
@@ -56,8 +63,9 @@ async function provisionProviderAndFranchise(fixture, onStage = () => {}) {
   if (!providerFranchiseUserId || !foreignUserId) throw new Error("P24-P26 fixture identities are incomplete");
 
   onStage("role-fixture-reference-data");
-  const [library] = await database`select id from public.catalog_libraries order by code limit 1`;
-  const [catalogSource]=await database`select s.id service_id,s.library_id,v.content_hash,v.name_fr from public.catalog_services s join public.catalog_service_versions v on v.id=s.current_published_version_id where s.status='PUBLISHED' order by s.created_at limit 1`;
+  const localCatalog = fixture.config.runtimeMode === "isolated-local-docker" ? await provisionLocalCatalogReference(fixture) : null;
+  const [library] = localCatalog ? [{ id: localCatalog.library }] : await database`select id from public.catalog_libraries order by code limit 1`;
+  const [catalogSource]=await database`select s.id service_id,s.library_id,v.content_hash,v.name_fr from public.catalog_services s join public.catalog_service_versions v on v.id=s.current_published_version_id where s.status='PUBLISHED' and (${localCatalog?.library ?? null}::uuid is null or s.library_id=${localCatalog?.library ?? null}::uuid) order by s.created_at limit 1`;
   const [activeTemplate]=await database`select t.id template_id,v.id template_version_id from public.marketing_templates t join public.marketing_template_versions v on v.id=t.current_version_id where t.template_key='PROBLEM_SOLUTION' and t.status='ACTIVE' limit 1`;
   const [economicRule] = await database`select id,entry_fee_minor,franchisee_share_bps,neoxa_share_bps,matricia_share_bps,distribution_basis
     from public.franchise_economic_rule_versions
@@ -112,6 +120,9 @@ async function provisionProviderAndFranchise(fixture, onStage = () => {}) {
       values
         (${membershipId}::uuid,'PROVIDER_OWNER',null,${providerFranchiseUserId}::uuid),
         (${membershipId}::uuid,'FRANCHISE_OWNER',${franchiseId}::uuid,${providerFranchiseUserId}::uuid)`;
+    if (localCatalog) {
+      await transaction`insert into public.catalog_library_mandates(library_id,organization_id,status,valid_from,policy_version,created_by) values(${library.id}::uuid,${organizationId}::uuid,'ACTIVE',clock_timestamp(),1,${providerFranchiseUserId}::uuid)`;
+    }
     onStage("role-fixture-workflows");
     await transaction.unsafe("set local session_replication_role='replica'");
     for(const [index,workflow] of workflows.entries()){
@@ -144,46 +155,41 @@ async function provisionProviderAndFranchise(fixture, onStage = () => {}) {
   return roleFixture;
 }
 
-async function proveRoleIsolation(database, roleFixture) {
-  const claims = (userId) => JSON.stringify({ sub: userId, role: "authenticated", aal: "aal1" });
-  await database.begin(async (transaction) => {
-    await transaction`select set_config('request.jwt.claims',${claims(roleFixture.providerFranchiseUserId)},true)`;
-    await transaction.unsafe("set local role authenticated");
-    const organizations = await transaction`select id from public.organizations where id=${roleFixture.organizationId}::uuid`;
-    const roles = await transaction`select role.role_code
-      from public.organization_member_roles role
-      join public.organization_memberships membership on membership.id=role.membership_id
-      where membership.organization_id=${roleFixture.organizationId}::uuid and role.revoked_at is null
-      order by role.role_code`;
-    const franchises = await transaction`select id from public.franchises where id=${roleFixture.franchiseId}::uuid`;
-    if (organizations.length !== 1 || franchises.length !== 1
-        || roles.map((row) => row.role_code).join(",") !== "FRANCHISE_OWNER,PROVIDER_OWNER") {
-      throw new Error("P24-P26 provider/franchise ALLOW proof failed");
-    }
-
-    await transaction`select set_config('request.jwt.claims',${claims(roleFixture.foreignUserId)},true)`;
-    const foreignOrganizations = await transaction`select id from public.organizations where id=${roleFixture.organizationId}::uuid`;
-    const foreignFranchises = await transaction`select id from public.franchises where id=${roleFixture.franchiseId}::uuid`;
-    if (foreignOrganizations.length !== 0 || foreignFranchises.length !== 0) {
-      throw new Error("P24-P26 cross-tenant DENY proof failed");
-    }
-  });
+async function proveRoleIsolation(fixture, roleFixture) {
+  const client = fixture.sessions.noRole.client, foreign = fixture.sessions.clientB.client;
+  const [organizations, franchises, membership] = await Promise.all([
+    client.from("organizations").select("id").eq("id",roleFixture.organizationId),
+    client.from("franchises").select("id").eq("id",roleFixture.franchiseId),
+    client.from("organization_memberships").select("id").eq("organization_id",roleFixture.organizationId).eq("user_id",roleFixture.providerFranchiseUserId),
+  ]);
+  if(organizations.error||franchises.error||membership.error||organizations.data?.length!==1||franchises.data?.length!==1||membership.data?.length!==1)throw new Error("P24-P26 real-session role ALLOW proof failed");
+  const roles=await client.from("organization_member_roles").select("role_code").eq("membership_id",membership.data[0].id).is("revoked_at",null).order("role_code");
+  if(roles.error||roles.data?.map(row=>row.role_code).join(",")!=="FRANCHISE_OWNER,PROVIDER_OWNER")throw new Error("P24-P26 real-session role projection failed");
+  const [deniedOrganizations,deniedFranchises]=await Promise.all([
+    foreign.from("organizations").select("id").eq("id",roleFixture.organizationId),
+    foreign.from("franchises").select("id").eq("id",roleFixture.franchiseId),
+  ]);
+  if(deniedOrganizations.error||deniedFranchises.error||deniedOrganizations.data?.length!==0||deniedFranchises.data?.length!==0)throw new Error("P24-P26 real-session cross-tenant DENY proof failed");
 }
 
-async function proveP25StorageIsolation(database,roleFixture){
-  const claims=(userId)=>JSON.stringify({sub:userId,role:"authenticated",aal:"aal1"}),deliverableIds=roleFixture.workflows.map(item=>item.deliverableId);
-  await database.begin(async transaction=>{
-    await transaction`select set_config('request.jwt.claims',${claims(roleFixture.foreignUserId)},true)`;await transaction.unsafe("set local role authenticated");
-    const denied=await transaction`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
-    if(denied.length!==0)throw new Error("P25 cross-tenant Storage DENY proof failed");
-    await transaction`select set_config('request.jwt.claims',${claims(roleFixture.providerFranchiseUserId)},true)`;
-    const allowed=await transaction`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
-    if(allowed.length!==deliverableIds.length)throw new Error("P25 provider Storage ALLOW proof failed");
-  });
+async function proveP25StorageIsolation(fixture,roleFixture){
+  const deliverableIds=roleFixture.workflows.map(item=>item.deliverableId);
+  const files=await fixture.resources.database`select name from storage.objects where bucket_id='delivery-proofs'and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
+  if(files.length!==deliverableIds.length)throw new Error("P25 persisted proof file count invalid");
+  for(const file of files){
+    const denied=await fixture.sessions.clientB.client.storage.from('delivery-proofs').download(file.name);
+    const allowed=await fixture.sessions.noRole.client.storage.from('delivery-proofs').download(file.name);
+    if(!denied.error||allowed.error||!allowed.data||allowed.data.size===0)throw new Error("P25 real-session Storage ALLOW/DENY proof failed");
+  }
 }
 
-async function neutralizeRoleFixture(database, roleFixture) {
+async function neutralizeRoleFixture(database, roleFixture, admin) {
   const deliverableIds=roleFixture.workflows.map(item=>item.deliverableId),milestoneIds=roleFixture.workflows.map(item=>item.milestoneId),missionIds=roleFixture.workflows.map(item=>item.missionId),contractVersionIds=roleFixture.workflows.map(item=>item.contractVersionId),contractIds=roleFixture.workflows.map(item=>item.contractId);
+  const storageObjects = await database`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
+  if (storageObjects.length) {
+    const removal = await admin.storage.from('delivery-proofs').remove(storageObjects.map(row => row.name));
+    if (removal.error) throw new Error('Unable to remove isolated delivery proof bytes');
+  }
   await database.begin(async(transaction)=>{
     await transaction.unsafe("set local session_replication_role='replica'");
     await transaction`delete from public.service_checklist_templates template using public.audit_events audit where audit.resource_type='service_checklist_template' and audit.resource_id=template.id::text and audit.metadata->>'change_reason' like ${`E2E ${runToken}%`}`;
@@ -215,9 +221,9 @@ async function neutralizeRoleFixture(database, roleFixture) {
   });
   await database`update public.franchises
     set status='TERMINATED',updated_at=clock_timestamp(),row_version=row_version+1
-    where id=${roleFixture.franchiseId}::uuid and status<>'TERMINATED'`;
+    where id=any(${[roleFixture.franchiseId, roleFixture.secondary?.franchiseId].filter(Boolean)}::uuid[]) and status<>'TERMINATED'`;
   const [remaining] = await database`select count(*)::integer as active
-    from public.franchises where id=${roleFixture.franchiseId}::uuid and status='ACTIVE'`;
+    from public.franchises where id=any(${[roleFixture.franchiseId, roleFixture.secondary?.franchiseId].filter(Boolean)}::uuid[]) and status='ACTIVE'`;
   if (remaining?.active !== 0) throw new Error("P24-P26 franchise fixture remains active");
 }
 
@@ -245,8 +251,12 @@ async function copyAndVerifyStates(fixture) {
 
 async function runPlaywright(config, fixture, roleFixture, statePaths) {
   await mkdir(outputDirectory, { recursive: false, mode: 0o700 });
+  const uiAuthManifest = localAuthOnly ? await provisionLocalUiAuthFixture(fixture, runToken, authDirectory) : null;
   const environment = buildChildEnvironment(process.env, {
+    ...(uiAuthManifest ? { E2E_LOCAL_UI_AUTH_MANIFEST: uiAuthManifest } : {}),
+    PLAYWRIGHT_JSON_OUTPUT_FILE: resolve(outputDirectory, "browser-report.json"),
     E2E_BASE_URL: config.baseUrl,
+    E2E_LOCAL_ISOLATED: config.runtimeMode === "isolated-local-docker" ? "1" : "0",
     E2E_CLIENT_STORAGE_STATE: statePaths.client,
     E2E_CLIENT_B_STORAGE_STATE: fixture.manifest.states.clientB.path,
     E2E_PROVIDER_STORAGE_STATE: statePaths.provider,
@@ -259,7 +269,7 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     E2E_DELIVERY_PROOF_SCANNER_MODE: "SANDBOX",
     E2E_MARKETING_CHAIN_FIXTURE: JSON.stringify({content:{organizationId:roleFixture.organizationId,campaignId:roleFixture.marketing.campaignId,serviceId:roleFixture.marketing.serviceId,libraryId:roleFixture.marketing.libraryId,language:"FR",serviceName:roleFixture.marketing.serviceName,valueProposition:"Une valeur structurée et vérifiable.",primaryCta:"Diagnostiquer",trackedUrl:"https://matricia.ma/diagnostic",approvedHashtags:["#Matricia"],templateKey:"PROBLEM_SOLUTION",sourceHash:roleFixture.marketing.sourceHash,idempotencyKey:randomUUID()},attribution:{organizationId:roleFixture.organizationId,campaignId:roleFixture.marketing.campaignId,contentId:null,eventType:"CTA_CLICKED",source:"linkedin",medium:"social",visitorHash:hash(`${runToken}:visitor`),economicValueMinor:null,occurredAt:new Date().toISOString(),metadata:{utm_campaign:"p24-e2e"},idempotencyKey:randomUUID()}}),
   });
-  const specifications = smokeOnly ? [
+  const specifications = localAuthOnly ? ["tests/e2e/local-auth-consent.spec.ts"] : smokeOnly ? [
     "tests/e2e/authenticated-route-smoke.spec.ts",
   ] : [
     "tests/e2e/p24-marketing-completion.spec.ts",
@@ -273,8 +283,10 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     resolve(root, "node_modules", "@playwright", "test", "cli.js"),
     "test",
     ...specifications,
+    ...(localAuthOnly ? ["--project=chromium-desktop"] : []),
     "--workers=1",
-    "--reporter=line",
+    "--retries=0",
+    "--reporter=line,json",
     "--output", outputDirectory,
   ], { cwd: root, env: environment, stdio: ["ignore", "pipe", "pipe"], shell: false });
   let playwrightOutput = "";
@@ -297,21 +309,20 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
       reject(error);
     });
   });
-  const progress = [...playwrightOutput.matchAll(/\[(\d+)\/(\d+)\]/g)];
-  const executed = new Set(progress.map((match) => Number(match[1])));
-  const totals = new Set(progress.map((match) => Number(match[2])));
-  const skipped = /\b\d+\s+skipped\b/i.test(playwrightOutput);
-  if (executed.size !== expectedTests || totals.size !== 1 || !totals.has(expectedTests) || skipped) {
-    const error = new Error("P24-P26 Playwright report contains missing or skipped tests");
-    error.playwrightDiagnostic = sanitizedPlaywrightDiagnostic(playwrightOutput, exitCode);
-    throw error;
-  }
-  if (exitCode !== 0 || /\b\d+\s+flaky\b/i.test(playwrightOutput)) {
+  let report;
+  try { report = JSON.parse(await readFile(resolve(outputDirectory, "browser-report.json"), "utf8")); }
+  catch { const error = new Error("P24-P26 Playwright report unavailable"); error.code = "BROWSER_REPORT_MISSING"; error.playwrightDiagnostic = sanitizedPlaywrightDiagnostic(playwrightOutput, exitCode); throw error; }
+  const summary = summarizeBrowserReport(report);
+  try {
+    if (exitCode !== 0 || validateBrowserReport(report) !== expectedTests || summary.executed !== expectedTests) throw new Error("Browser suite incomplete or failed");
+  } catch {
     const error = new Error("P24-P26 Playwright suite did not complete cleanly");
-    error.playwrightDiagnostic = sanitizedPlaywrightDiagnostic(playwrightOutput, exitCode);
+    error.code = "BROWSER_SUITE_FAILED";
+    error.browserSummary = summary;
+    error.playwrightDiagnostic = summary.failures.map(row => `${row.title} (${row.project}): ${row.error}`).join(" | ").slice(0, 2_000) || sanitizedPlaywrightDiagnostic(playwrightOutput, exitCode);
     throw error;
   }
-  return { executed: executed.size, total: [...totals][0], diagnostic: sanitizedPlaywrightDiagnostic(playwrightOutput, exitCode) };
+  return { executed: summary.executed, total: expectedTests, browserSummary: summary, diagnostic: sanitizedPlaywrightDiagnostic(playwrightOutput, exitCode) };
 }
 
 async function main() {
@@ -320,43 +331,62 @@ async function main() {
   let failure;
   let failureCode = "UNKNOWN:UNAVAILABLE";
   let playwrightResult;
+  let browserSummary;
   let failureDiagnostic = null;
   let remoteCleanupPassed = false;
   let localCleanupPassed = false;
   let sharedAuthCleanupPassed = false;
   let stage = "base-fixture";
   try {
-    fixture = await provision();
     stage = "configuration";
     const config = await loadSafeConfiguration(root);
+    if ((fixtureProofsOnly || localAuthOnly) && config.runtimeMode !== "isolated-local-docker") throw new Error("Local fixture proofs require verified local Docker");
+    stage = "base-fixture";
+    fixture = await provision();
     await validateFreshManifest(fixture.manifest, config);
     stage = "role-fixture";
     roleFixture = await provisionProviderAndFranchise(fixture, (value) => { stage = value; });
+    if (config.runtimeMode === "isolated-local-docker") {
+      stage = "local-secondary-mandate";
+      await provisionLocalSecondaryMandate(fixture, roleFixture);
+    }
     stage = "role-isolation";
-    await proveRoleIsolation(fixture.resources.database, roleFixture);
-    stage = "authentication-states";
-    const statePaths = await copyAndVerifyStates(fixture);
-    stage = "playwright";
-    playwrightResult = await runPlaywright(config, fixture, roleFixture, statePaths);
-    if (!smokeOnly) {
-      stage = "storage-isolation";
-      await proveP25StorageIsolation(fixture.resources.database, roleFixture);
+    await proveRoleIsolation(fixture, roleFixture);
+    if (!fixtureProofsOnly) {
+      stage = "authentication-states";
+      const statePaths = await copyAndVerifyStates(fixture);
+      stage = "playwright";
+      playwrightResult = await runPlaywright(config, fixture, roleFixture, statePaths);
+      if (localAuthOnly) {
+        stage = "local-ui-consent-proof";
+        roleFixture.localUiAuthProof = await verifyLocalUiAuthProof(fixture);
+      }
+      if (!smokeOnly && !localAuthOnly) {
+        stage = "storage-isolation";
+        await proveP25StorageIsolation(fixture, roleFixture);
+      }
     }
     stage = "complete";
-    console.log(`PASS P24-P26 authenticated E2E suite (${expectedTests} tests, zero skipped)`);
+    console.log(fixtureProofsOnly ? "PASS local fixture authentication/authorization proofs; browser suite not executed" : `PASS P24-P26 authenticated E2E suite (${expectedTests} tests, zero skipped)`);
   } catch (error) {
     failure = error;
+    if (/^[a-zA-Z0-9 -]{1,100}$/.test(error?.provisionStage ?? "")) stage = `base-fixture:${error.provisionStage}`;
     failureCode = sanitizedFailureCode(error);
+    browserSummary = error?.browserSummary ?? null;
     failureDiagnostic = typeof error?.playwrightDiagnostic === "string" ? error.playwrightDiagnostic : null;
   } finally {
     if (fixture && roleFixture) {
       try {
-        await neutralizeRoleFixture(fixture.resources.database, roleFixture);
+        await neutralizeRoleFixture(fixture.resources.database, roleFixture, fixture.resources.admin);
       } catch (error) {
         failure = combineFailure(failure, error, "P24-P26 run and role-fixture neutralization failed");
       }
     }
     if (fixture) {
+      try { await neutralizeLocalUiAuthFixture(fixture); }
+      catch (error) { failure = combineFailure(failure, error, "Local UI authentication cleanup failed"); }
+      try { await neutralizeLocalCatalogReference(fixture); }
+      catch (error) { failure = combineFailure(failure, error, "Local reference catalogue cleanup failed"); }
       try {
         await fixture.cleanup();
         if (fixture.resources.retainedEvidence <= 0) throw new Error("Immutable fixture evidence was not retained");
@@ -386,13 +416,18 @@ async function main() {
     }
     localCleanupPassed = !localCleanupError && sharedAuthCleanupPassed;
   }
+  await mkdir(dirname(smokeEvidencePath), { recursive: true });
   await writeFile(smokeEvidencePath, `${JSON.stringify({
     schemaVersion: 1,
-    environment: "SANDBOX",
-    mode: smokeOnly ? "AUTHENTICATED_ROUTE_SMOKE_ONLY" : "FULL_P24_P26",
+    completedAt: new Date().toISOString(),
+    environment: fixture?.config?.runtimeMode === "isolated-local-docker" ? "development-local-docker" : "SANDBOX",
+    localProof: roleFixture?.localProof ?? null,
+    localUiAuthProof: roleFixture?.localUiAuthProof ?? null,
+    mode: fixtureProofsOnly ? "LOCAL_FIXTURE_PROOFS_ONLY_NO_BROWSER_ACCEPTANCE" : localAuthOnly ? "LOCAL_UI_OTP_CONSENT_AND_MFA" : smokeOnly ? "AUTHENTICATED_ROUTE_SMOKE_ONLY" : "FULL_P24_P26",
     status: failure ? "FAILED" : "PASSED",
     expectedTests,
-    executedTests: playwrightResult?.executed ?? 0,
+    executedTests: playwrightResult?.executed ?? browserSummary?.executed ?? 0,
+    browser: playwrightResult?.browserSummary ?? browserSummary ?? null,
     stage,
     failureCode: failure ? failureCode : null,
     diagnostic: failureDiagnostic,
@@ -413,12 +448,13 @@ async function cleanupInterruptedRun(localRunToken) {
   const localAuth = resolve(root, "artifacts", "test-results", `.p24-p26-auth-${localRunToken}`);
   const localOutput = resolve(root, "artifacts", "test-results", `p24-p26-completion-${localRunToken}`);
   let cleanupFailure;
+  let database;
   let cleanupStage = "configuration";
   try {
     const config = await loadSafeConfiguration(root);
     cleanupStage = "database-connection";
     const admin = createClient(config.supabaseUrl, config.serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
-    const database = postgres(resolveExpectedDatabaseUrl(config), { max: 1, prepare: false, connect_timeout: 15 });
+    database = postgres(resolveExpectedDatabaseUrl(config), { max: 1, prepare: false, connect_timeout: 15 });
     cleanupStage = "fixture-discovery";
     const [roleOrganization] = await database`select organization.created_by,user_account.email
       from public.organizations organization
@@ -441,6 +477,12 @@ async function cleanupInterruptedRun(localRunToken) {
     const documents = organizationIds.length === 0 ? [] : await database`select storage_object_path from public.client_compliance_documents
       where organization_id=any(${organizationIds}::uuid[])`;
     const storagePaths = documents.map((row) => row.storage_object_path);
+    cleanupStage = "delivery-storage-neutralization";
+    const deliveryFiles = userIds.length === 0 ? [] : await database`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',1)=any(${userIds}::text[])`;
+    if (deliveryFiles.length) {
+      const removal = await admin.storage.from('delivery-proofs').remove(deliveryFiles.map(row => row.name));
+      if (removal.error) throw new Error('Interrupted delivery Storage cleanup failed');
+    }
     cleanupStage = "franchise-neutralization";
     if (organizationIds.length > 0) {
       await database`update public.franchises set status='TERMINATED',updated_at=clock_timestamp(),row_version=row_version+1
@@ -451,6 +493,8 @@ async function cleanupInterruptedRun(localRunToken) {
   } catch (error) {
     cleanupFailure = new Error(`P24-P26 interrupted cleanup stopped during ${cleanupStage}`, { cause: error });
   } finally {
+    try { await database?.end({ timeout: 2 }); }
+    catch (error) { cleanupFailure = combineFailure(cleanupFailure, error, "Interrupted cleanup database close failed"); }
     for (const path of [localAuth, localOutput, sharedAuth]) {
       try {
         await rm(path, { recursive: true, force: true });
@@ -506,7 +550,12 @@ async function verifyNoActiveCompletionFixtures(localRunToken) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (process.argv[2] === "--cleanup-only") {
+  if (process.argv[2] === "--configuration-only") {
+    try {
+      const config = await loadSafeConfiguration(root);
+      console.log(JSON.stringify({ status: "CONFIGURATION_VERIFIED", environment: config.environment, runtimeMode: config.runtimeMode ?? "hosted-nonproduction", projectRef: config.projectRef, noFixturesCreated: true }));
+    } catch (error) { console.error(error?.message?.startsWith("LOCAL_TOTP_DISABLED:") ? "FAIL LOCAL_TOTP_DISABLED: enable local TOTP enrollment and verification; no fixtures created" : "FAIL safe E2E configuration verification; no credentials printed"); process.exitCode = 1; }
+  } else if (process.argv[2] === "--cleanup-only") {
     try {
       await cleanupInterruptedRun(process.argv[3]);
     } catch (error) {

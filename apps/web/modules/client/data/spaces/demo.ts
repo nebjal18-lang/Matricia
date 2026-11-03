@@ -1,6 +1,6 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-export function canApplyClientSpaceDemo(_organizationName?: string | null) {
+export function canApplyClientSpaceDemo() {
   return false;
 }
 

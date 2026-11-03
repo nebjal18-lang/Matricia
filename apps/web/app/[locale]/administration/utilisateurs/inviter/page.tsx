@@ -1,3 +1,6 @@
+import{createAdminInvitationFormDefaults}from"@/modules/admin/screens/spaces/invitation-defaults";
+import {z}from"zod";
+import {getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
@@ -19,6 +22,8 @@ export default async function AdminInviteUserPage({
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/administration/utilisateurs/inviter` }));
   const directory = await loadAdminActorDirectory();
+  const franchisesResult=await(await getSupabaseServerClient()).rpc("list_admin_assignable_franchises_v1");
+  const franchises=z.array(z.object({id:z.string().uuid(),organizationId:z.string().uuid(),label:z.string()})).safeParse(franchisesResult.data);
   const a = actorCopy(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
   const organizations = [
@@ -44,13 +49,14 @@ export default async function AdminInviteUserPage({
       lead={a.inviteLead}
     >
       <main className="client-page">
-        <InviteUserForm
+        <InviteUserForm {...createAdminInvitationFormDefaults()}
           locale={locale}
           query={space.selectedQuery}
           organizations={organizations}
           eligibleIds={directory.inviteOrganizations.map((item) => item.id)}
           defaultOrganizationId={query.organizationId}
           defaultRole={query.role}
+          franchises={!franchisesResult.error&&franchises.success?franchises.data:[]}
         />
       </main>
     </AdminAppShell>

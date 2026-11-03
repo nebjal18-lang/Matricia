@@ -1,3 +1,5 @@
+import{FranchiseReviewDiff}from"./review-diff";
+import{CatalogServerPagination}from"./server-pagination";
 import Link from "next/link";
 import { Lock, Pencil } from "lucide-react";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
@@ -29,7 +31,7 @@ function filterRows(rows: FranchiseCatalogRow[], bucket: string | null) {
   const allowed = bucket ? FRANCHISE_VALIDATION_BUCKETS[bucket] : undefined;
   if (!bucket || allowed === undefined) return rows;
   if (allowed === null) return rows;
-  return rows.filter((item) => allowed.includes(item.status));
+  return rows.filter((item) => allowed.includes(item.status) || (bucket==="corrections"&&item.reviewEvents?.[0]?.status==="REJECTED"));
 }
 
 function reviewStatus(status: string, locale: Locale) {
@@ -45,6 +47,7 @@ export function FranchiseValidationsWorkbench({
   bucket = null,
   commandIdentity,
   organizationId = null,
+  filters,
 }: {
   locale: Locale;
   query: string;
@@ -52,12 +55,16 @@ export function FranchiseValidationsWorkbench({
   bucket?: string | null;
   commandIdentity?: { idempotencyKey: string; correlationId: string };
   organizationId?: string | null;
+  filters?:{q?:string;type?:string;category?:string;selected?:string};
 }) {
   const c = libraryCopy(locale);
   const all = [...workspace.services, ...workspace.questionnaires, ...workspace.rules];
   const activeBucket = bucket && bucket in FRANCHISE_VALIDATION_BUCKETS ? bucket : "brouillons";
-  const rows = filterRows(all, activeBucket);
-  const selected = rows[0] ?? null;
+  const needle=(filters?.q??"").trim().toLocaleLowerCase();
+  const rows = (workspace.serverPage?all:filterRows(all, activeBucket)).filter((item)=>(!filters?.type||filters.type==="all"||item.kind===filters.type)&&(!filters?.category||filters.category==="all"||item.category===filters.category||workspace.categories.some(category=>category.id===filters.category&&category.children.some(child=>child.id===item.subcategoryId)))&&(!needle||`${item.title} ${item.code} ${item.reviewEvents?.[0]?.comment??""}`.toLocaleLowerCase().includes(needle)));
+  const selected = rows.find((item)=>item.id===filters?.selected)??rows[0]??null;
+  const selectionHref=(id:string)=>{const params=new URLSearchParams(query.replace(/^\?/,""));for(const[key,value]of Object.entries(filters??{}))if(value)params.set(key,value);params.set("selected",id);return`/${locale}/franchise/validations/${activeBucket}?${params}`;};
+  const date=(value:string|null|undefined)=>value?new Intl.DateTimeFormat(locale==="ar"?"ar-MA":"fr-MA",{dateStyle:"medium",timeZone:"Africa/Casablanca"}).format(new Date(value)):"—";
   const bucketKeys = Object.keys(FRANCHISE_VALIDATION_BUCKETS);
   return (
     <main className="client-page">
@@ -71,7 +78,7 @@ export function FranchiseValidationsWorkbench({
             data-active={activeBucket === key ? "true" : undefined}
           >
             <span>{bucketLabel(key, locale)}</span>
-            <em dir="ltr">{key === "historique" ? all.length : filterRows(all, key).length}</em>
+            <em dir="ltr">{workspace.serverPage?.bucketCounts?(key==="historique"?Object.values(workspace.serverPage.bucketCounts).reduce((sum,n)=>sum+n,0):(FRANCHISE_VALIDATION_BUCKETS[key]??[]).reduce((sum,status)=>sum+(workspace.serverPage?.bucketCounts?.[status]??0),0)):key === "historique" ? all.length : filterRows(all, key).length}</em>
           </Link>
         ))}
       </nav>
@@ -80,19 +87,20 @@ export function FranchiseValidationsWorkbench({
           <header className="client-priority-head">
             <h2>{c.queueItems} <small dir="ltr">({rows.length})</small></h2>
           </header>
-          <form className="franchise-filters" action={`/${locale}/franchise/validations/${activeBucket}`} method="get">
+          <form className="franchise-filters" action={`/${locale}/franchise/validations/${activeBucket}`} method="get"><input type="hidden" name="organizationId" value={workspace.mandate.operatorOrganizationId??""}/><input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId}/>
             <label>
               <span className="sr-only">{c.kind}</span>
-              <select name="type" defaultValue="all"><option value="all">{c.queueAllTypes}</option></select>
+              <select name="type" defaultValue={filters?.type??"all"}><option value="all">{c.queueAllTypes}</option>{["SERVICE","QUESTIONNAIRE","RULE"].map((kind)=><option key={kind} value={kind}>{kind==="SERVICE"?c.servicesTitle:kind==="QUESTIONNAIRE"?c.questionnairesTitle:c.rulesTitle}</option>)}</select>
             </label>
             <label>
               <span className="sr-only">{c.category}</span>
-              <select name="category" defaultValue="all"><option value="all">{c.categoriesOfLibrary}</option></select>
+              <select name="category" defaultValue={filters?.category??"all"}><option value="all">{c.categoriesOfLibrary}</option>{[...new Set(all.flatMap((item)=>item.category?[item.category]:[]))].map((category)=><option key={category} value={category}>{category}</option>)}</select>
             </label>
             <label className="franchise-search">
               <span className="sr-only">{c.search}</span>
-              <input name="q" placeholder={c.search} />
+              <input name="q" defaultValue={filters?.q} placeholder={c.search} />
             </label>
+            <button type="submit" className="franchise-tool">{c.search}</button>
           </form>
           {rows.length === 0 ? <p>{c.emptyQueue}</p> : (
             <div className="client-table-wrap client-compare">
@@ -110,18 +118,18 @@ export function FranchiseValidationsWorkbench({
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((item, index) => (
-                    <tr key={`${item.kind}-${item.id}`} data-selected={index === 0 ? "true" : undefined}>
+                  {rows.map((item) => (
+                    <tr key={`${item.kind}-${item.id}`} data-selected={item.id === selected?.id ? "true" : undefined}>
                       <td><KindChip kind={item.kind} locale={locale} /></td>
                       <td>
-                        <strong>{item.title}</strong>
+                        <Link href={selectionHref(item.id)} className="client-soft-link"><strong>{item.title}</strong></Link>
                         <small>{item.subcategory ?? item.category ?? workspace.mandate.libraryName}</small>
                       </td>
                       <td><span className="franchise-version-chip" dir="ltr">{item.versionLabel ?? "v1.0"}</span></td>
                       <td><LanguageMarks item={item} /></td>
-                      <td>—</td>
+                      <td>{date(item.reviewEvents?.[0]?.reviewedAt??item.reviewEvents?.[0]?.requestedAt)}</td>
                       <td><em className="client-status-chip" data-tone={item.status === "DRAFT" ? "sky" : "peach"}>{reviewStatus(item.status, locale)}</em></td>
-                      <td>—</td>
+                      <td>{item.reviewEvents?.[0]?.comment??c.noComment}</td>
                       <td>
                         <Link href={item.href} className="franchise-tool franchise-tool-primary">
                           {item.status === "DRAFT" ? c.submitRow : nextAction(item.status, locale)}
@@ -133,6 +141,7 @@ export function FranchiseValidationsWorkbench({
               </table>
             </div>
           )}
+          <CatalogServerPagination page={workspace.serverPage} locale={locale} query={query}/>
           {commandIdentity && (activeBucket === "approuves" || activeBucket === "publications") ? (
             <FranchisePublishReleaseForm locale={locale} workspace={workspace} commandIdentity={commandIdentity} organizationId={organizationId} />
           ) : null}
@@ -153,25 +162,9 @@ export function FranchiseValidationsWorkbench({
             <Lock className="size-3.5" aria-hidden />
             <span>{c.scope} {workspace.mandate.libraryName}</span>
           </p>
-          <nav className="franchise-inspector-tabs" aria-label={c.reviewPanel}>
-            <span data-active="true">{c.reviewTimeline}</span>
-            <span>{c.reviewDetails}</span>
-          </nav>
-          <ol className="franchise-review-steps">
-            {c.validationSteps.map(([title, text], index) => (
-              <li key={title} data-done={index === 0 ? "true" : undefined}>
-                <em aria-hidden>{index === 0 ? "✓" : index + 1}</em>
-                <span>
-                  <strong>{title}</strong>
-                  <small>{text}</small>
-                </span>
-              </li>
-            ))}
-          </ol>
-          <div className="franchise-comment-box">
-            <strong>{c.lastComment}</strong>
-            <p>{c.noComment}</p>
-          </div>
+          <h3>{c.reviewTimeline}</h3>
+          {(selected?.reviewEvents?.length??0)>0?<ol className="franchise-review-steps">{selected?.reviewEvents?.map((event)=><li key={event.id}><span><strong>{catalogStatusLabel(event.status,locale)}</strong><small>{date(event.requestedAt)}{event.reviewedAt?` → ${date(event.reviewedAt)}`:""}</small><small>{event.comment??c.noComment}</small></span><FranchiseReviewDiff franchiseId={workspace.mandate.franchiseId} requestId={event.id} locale={locale}/></li>)}</ol>:<p>{locale==="ar"?"لم يُرسل هذا الإصدار للمراجعة بعد.":"Aucune demande de revue n’a encore été enregistrée pour cet élément."}</p>}
+          <div className="franchise-comment-box"><strong>{c.lastComment}</strong><p>{selected?.reviewEvents?.[0]?.comment??c.noComment}</p></div>
           <div className="franchise-toolbar">
             {selected ? <Link href={selected.href} className="franchise-tool"><Pencil className="size-4" aria-hidden /> {c.fixDraft}</Link> : null}
             <p className="client-access-note">{c.seeApproved}</p>

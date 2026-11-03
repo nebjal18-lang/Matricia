@@ -16,6 +16,8 @@ describe("client analysis form", () => {
     expect(html).toContain("Actualiser mon analyse");
   });
 
+  it("offers a named explicit choice when several services are published in the same scope",()=>{const html=renderToStaticMarkup(<CompleteForm locale="fr" organizations={[{id:"11111111-1111-4111-8111-111111111111",name:"Entreprise",latestAt:"2026-09-15T12:00:00Z"}]} serviceChoices={[{id:"22222222-2222-4222-8222-222222222222",name:"Audit de conformité"},{id:"33333333-3333-4333-8333-333333333333",name:"Préparation administrative"}]} questionnaireHref="/fr/client/questionnaires" m={messages("fr")} keyValue="44444444-4444-4444-8444-444444444444"/>);expect(html).toContain('name="analysisServiceId"');expect(html).toContain("Audit de conformité");expect(html).toContain("Préparation administrative");expect(html).toContain('value=""');});
+
   it("renders an honest empty state without an inactive form action", () => {
     const html = renderToStaticMarkup(<CompleteForm locale="ar" organizations={[]} questionnaireHref="/ar/client/questionnaires" m={messages("ar")} keyValue="44444444-4444-4444-8444-444444444444" />);
     expect(html).toContain("لا يوجد تقييم مكتمل");

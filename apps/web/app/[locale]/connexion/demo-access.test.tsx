@@ -17,6 +17,11 @@ describe("DemoAccess", () => {
     expect(html).toContain('value="admin"');
   });
 
+  it.each(["fr", "ar"] as const)("preserves the requested Admin creation page in every demo form in %s", locale => {
+    const next = `/${locale}/administration/entreprises/nouvelle`;
+    const html = renderToStaticMarkup(<DemoAccess locale={locale} nextPath={next} />);
+    expect(html.match(new RegExp(`name="next" value="${next}"`, "g"))).toHaveLength(4);
+  });
   it("expose les quatre personas de démonstration en arabe", () => {
     const html = renderToStaticMarkup(<DemoAccess locale="ar" />);
     expect(html).toContain("دخول تلقائي");

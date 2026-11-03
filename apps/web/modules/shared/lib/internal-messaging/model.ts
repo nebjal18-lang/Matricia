@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const uuidSchema = z.string().uuid();
-const participantKind = z.enum(["CLIENT", "PROVIDER"]);
+const participantKind = z.enum(["CLIENT", "PROVIDER", "FRANCHISE"]);
 const attachment = z.object({
   id: uuidSchema,
   name: z.string().min(1),
@@ -20,7 +20,8 @@ const message = z.object({
 });
 export const threadSummary = z.object({
   id: uuidSchema,
-  object_type: z.literal("RFQ"),
+  object_type: z.enum(["RFQ","FRANCHISE_RFQ"]),
+  franchise_id: uuidSchema.nullable().optional(),
   object_id: uuidSchema,
   service_request_id: uuidSchema,
   subject: z.string().min(1),
@@ -44,3 +45,8 @@ export const sendMessagePayload = z.object({ outcome: z.literal("INTERNAL_MESSAG
 export type InboxThread = z.infer<typeof threadSummary>;
 export type ThreadConversation = z.infer<typeof threadPayload>;
 export type ThreadOption = { rfqId: string; providerOrganizationId: string; senderOrganizationId: string; label: string };
+
+export const messageCursorSchema=z.object({createdAt:z.string().datetime({offset:true}),id:uuidSchema});
+export const threadPagePayload=threadPayload.extend({hasMore:z.boolean(),nextCursor:messageCursorSchema.nullable(),total:z.number().int().nonnegative()});
+export type MessageCursor=z.infer<typeof messageCursorSchema>;
+export type ThreadPage=z.infer<typeof threadPagePayload>;

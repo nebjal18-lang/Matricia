@@ -6,7 +6,7 @@ import { resolveClientSpace } from "@/modules/client/data/spaces/context";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { getEvolutionMessages } from "@/modules/client/screens/diagnostics/evolution/messages";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
-import { formatHundredths } from "@/modules/shared/lib/diagnostics-evolution/model";
+import { summarizeLatestEvolution, formatHundredths } from "@/modules/shared/lib/diagnostics-evolution/model";
 import { loadDiagnosticsEvolution } from "@/modules/shared/lib/diagnostics-evolution/repository";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import "@/modules/client/screens/diagnostics/diagnostic-connected.css";
@@ -24,7 +24,7 @@ export default async function DiagnosticsEvolutionPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/diagnostics/evolution` }));
-  const result = await loadDiagnosticsEvolution();
+  const result = await loadDiagnosticsEvolution(space.selectedOrganizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/diagnostics/evolution` }));
   const messages = getEvolutionMessages(locale);
   const c = spaceCopy(locale);
@@ -36,9 +36,9 @@ export default async function DiagnosticsEvolutionPage({
         quote: "Des diagnostics au service d’un Maroc qui entreprend.",
         period: "Période de comparaison",
         summary: "Synthèse des évolutions",
-        progress: "dimensions progressent",
+        progress: "bibliothèques progressent",
         stable: "dimension stable",
-        watch: "dimensions à surveiller",
+        watch: "bibliothèques à surveiller",
         overall: "Globalement, une trajectoire positive",
         detail: "Détail par dimension",
         detailLead: "Consultez l’évolution de vos scores et les explications associées.",
@@ -67,11 +67,10 @@ export default async function DiagnosticsEvolutionPage({
       };
 
   const points = result.status === "success" ? result.value.series.flatMap((series) => series.points) : [];
-  const latest = points[0];
-  const previous = points[1];
-  const improved = points.filter((point) => (point.deltaHundredths ?? 0) > 0).length;
-  const declined = points.filter((point) => (point.deltaHundredths ?? 0) < 0).length;
-  const stable = points.filter((point) => point.deltaHundredths === 0).length;
+  const summary = summarizeLatestEvolution(result.status === "success" ? result.value.series : []);
+  const latest = [...points].sort((a,b) => b.completedAt.localeCompare(a.completedAt))[0];
+  const previousAt = latest?.comparisonCompletedAt;
+  const {improved,declined,stable} = summary;
 
   return (
     <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" kicker={c.kicker}>
@@ -96,9 +95,9 @@ export default async function DiagnosticsEvolutionPage({
                 <div className="diag-conn-item-foot">
                   <strong>{t.period}</strong>
                   <span>
-                    {previous ? <time dateTime={previous.completedAt}>{new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(previous.completedAt))}</time> : "—"}
+                    {previousAt ? <time dateTime={previousAt}>{new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" }).format(new Date(previousAt))}</time> : "—"}
                     {" vs "}
-                    {latest ? <time dateTime={latest.completedAt}>{new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(latest.completedAt))}</time> : "—"}
+                    {latest ? <time dateTime={latest.completedAt}>{new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" }).format(new Date(latest.completedAt))}</time> : "—"}
                   </span>
                 </div>
               </section>
@@ -107,7 +106,7 @@ export default async function DiagnosticsEvolutionPage({
                 <article data-tone="mint"><small>{t.progress}</small><strong>{improved}</strong><p>{messages.timeline}</p></article>
                 <article data-tone="sky"><small>{t.stable}</small><strong>{stable}</strong><p>{messages.first}</p></article>
                 <article data-tone="amber"><small>{t.watch}</small><strong>{declined}</strong><p>{messages.critical}</p></article>
-                <article data-tone="violet"><small>{t.overall}</small><p>{messages.intro}</p></article>
+                <article data-tone="violet"><small>{(summary.status === "INSUFFICIENT" ? (locale === "fr" ? "Données comparables insuffisantes" : "بيانات مقارنة غير كافية") : summary.status === "DECLINING" ? (locale === "fr" ? "Dégradation à examiner" : "تراجع يحتاج مراجعة") : summary.status === "IMPROVING" ? (locale === "fr" ? "Progression observée" : "تقدم ملحوظ") : (locale === "fr" ? "Trajectoire stable" : "مسار مستقر"))}</small><p>{messages.intro}</p></article>
               </section>
 
               <div className="diag-conn-split">
@@ -131,7 +130,7 @@ export default async function DiagnosticsEvolutionPage({
                               <strong><bdi dir="ltr">{series.libraryCode}</bdi></strong>
                               <div dir="ltr">{formatHundredths(point.scoreHundredths)}/100 · {messages.ratings[point.rating]}</div>
                             </td>
-                            <td dir="ltr">{point.deltaHundredths === null ? messages.first : formatHundredths(point.deltaHundredths)}</td>
+                            <td dir="ltr">{point.deltaHundredths === null ? (locale === "fr" ? "Aucun point antérieur de même base de calcul" : "لا توجد نقطة سابقة بأساس حساب مماثل") : formatHundredths(point.deltaHundredths)}</td>
                             <td><bdi dir="ltr">{point.openAnomalies}</bdi>{point.criticalAnomalies ? ` · ${point.criticalAnomalies} ${messages.critical}` : ""}</td>
                             <td><Link href={`/${locale}/client/diagnostics/${point.id}${space.selectedQuery}`} style={{ color: "var(--diag-violet)", fontWeight: 720 }}>{t.understand} →</Link></td>
                           </tr>
@@ -153,7 +152,7 @@ export default async function DiagnosticsEvolutionPage({
                   <section className="diag-conn-card">
                     <h2>{t.next}</h2>
                     <ol className="diag-conn-plan" style={{ marginTop: 12 }}>
-                      <li><span>1</span><div><strong>{locale === "fr" ? "Approfondir les dimensions à surveiller" : "تعميق الأبعاد للمراقبة"}</strong></div></li>
+                      <li><span>1</span><div><strong>{locale === "fr" ? "Approfondir les bibliothèques à surveiller" : "تعميق المكتبات للمراقبة"}</strong></div></li>
                       <li><span>2</span><div><strong>{locale === "fr" ? "Mettre en place les actions recommandées" : "تنفيذ الإجراءات الموصى بها"}</strong></div></li>
                       <li><span>3</span><div><strong>{locale === "fr" ? "Planifier un nouveau diagnostic" : "تخطيط تشخيص جديد"}</strong></div></li>
                     </ol>

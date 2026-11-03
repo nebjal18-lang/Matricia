@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
+import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Bell, BookOpen, Lock, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
@@ -14,6 +16,7 @@ export type { FranchiseNavKey };
 export function FranchiseAppShell({
   locale,
   selectedQuery,
+  languagePath,
   selectedOrganizationId,
   userEmail,
   active,
@@ -26,6 +29,7 @@ export function FranchiseAppShell({
 }: {
   locale: Locale;
   selectedQuery: string;
+  languagePath?: string;
   selectedOrganizationId: string | null;
   userEmail: string | null;
   active: FranchiseNavKey;
@@ -38,6 +42,7 @@ export function FranchiseAppShell({
 }): ReactNode {
   const c = franchiseCopy(locale);
   const n = libraryCopy(locale);
+  const currentPath = safeReturnPath(languagePath, locale);
   const nav = buildFranchiseNav(locale, selectedQuery);
   const routeByActive: Record<FranchiseNavKey, string> = {
     home: "accueil",
@@ -122,14 +127,15 @@ export function FranchiseAppShell({
             <span className="franchise-notify-dot" aria-hidden />
           </Link>
           <nav className="client-lang-switch" aria-label={n.language}>
-            <Link href={`/fr/franchise/${routeByActive[active]}${selectedQuery}`} aria-current={locale === "fr" ? "page" : undefined}>FR</Link>
+            <Link href={currentPath ? (locale === "fr" ? currentPath : translateLocalPath(currentPath, locale, "fr")) : `/fr/franchise/${routeByActive[active]}${selectedQuery}`} aria-current={locale === "fr" ? "page" : undefined}>FR</Link>
             <span aria-hidden>|</span>
-            <Link href={`/ar/franchise/${routeByActive[active]}${selectedQuery}`} aria-current={locale === "ar" ? "page" : undefined}>AR</Link>
+            <Link href={currentPath ? (locale === "ar" ? currentPath : translateLocalPath(currentPath, locale, "ar")) : `/ar/franchise/${routeByActive[active]}${selectedQuery}`} aria-current={locale === "ar" ? "page" : undefined}>AR</Link>
           </nav>
           <WorkspaceAccountMenu
+            workspace="franchise"
             locale={locale}
             userEmail={userEmail}
-            returnTo={`/${locale}/franchise/accueil${selectedQuery}`}
+            returnTo={currentPath ?? `/${locale}/franchise/accueil${selectedQuery}`}
             fallbackInitial="F"
             label={n.account}
             displayName={n.account}

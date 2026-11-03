@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
+import { loadSubscriptionFunding } from "@/modules/client/screens/abonnement/funding";
+import { SubscriptionFundingNotice } from "@/modules/client/screens/abonnement/funding-notice";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { getSubscriptionMessages } from "@/modules/client/screens/abonnement/messages";
+import {subscriptionDateLabels} from "@/modules/client/screens/abonnement/display";
+import {workflowStatusLabel} from "@/modules/shared/lib/i18n/workflow-statuses";
 import { SubscriptionPanel } from "@/modules/client/screens/abonnement/subscription-panel";
 import { SubscriptionBoard } from "@/modules/client/screens/spaces/subscription-board";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
@@ -19,8 +23,8 @@ export default async function SubscriptionPage({ params, searchParams }: { param
   const space = await resolveClientSpace({ locale, organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/abonnement` }));
   const [result, creditsResult, roles] = await Promise.all([
-    loadSubscriptionDashboard(organizationId),
-    createServerCreditsRepository(organizationId).then((repository) => repository.load()),
+    loadSubscriptionDashboard(space.selectedOrganizationId),
+    createServerCreditsRepository(space.selectedOrganizationId).then((repository) => repository.load()),
     listOrganizationRoles(),
   ]);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/abonnement` }));
@@ -35,6 +39,7 @@ export default async function SubscriptionPage({ params, searchParams }: { param
   }
   const keys = Object.fromEntries(["trial", ...result.dashboard.plans.map((plan) => plan.id)].map((key) => [key, randomUUID()]));
   const selectedId = result.dashboard.organizationId;
+  const funding = await loadSubscriptionFunding(selectedId);
   const wallets = creditsResult.status === "success" ? creditsResult.value.wallets.filter((wallet) => wallet.organizationId === selectedId) : [];
   const boxes = creditsResult.status === "success" ? creditsResult.value.customerBoxes.filter((box) => box.organizationId === selectedId) : [];
   const catalog = creditsResult.status === "success" ? creditsResult.value.boxes : [];
@@ -42,6 +47,8 @@ export default async function SubscriptionPage({ params, searchParams }: { param
   const members = roles.status === "success" ? roles.memberships.filter((item) => item.status === "ACTIVE") : [];
   return (
     <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="finance" title={c.subPageTitle} lead={c.subPageLead} kicker={result.dashboard.organizationName}>
+      {creditsResult.status === "success" && creditsResult.value.catalogUnavailable ? <p role="alert" className="client-card">{locale === "fr" ? "Les versions des Boxes n’ont pas pu être chargées. Les quantités de crédits restent consultables." : "تعذر تحميل نسخ الصناديق. يمكن الاطلاع على كميات الأرصدة."}</p> : null}
+      <SubscriptionFundingNotice funding={funding} locale={locale} organizationId={selectedId} />
       <SubscriptionBoard
         locale={locale}
         query={space.selectedQuery}
@@ -54,14 +61,14 @@ export default async function SubscriptionPage({ params, searchParams }: { param
             const version = catalog.find((item) => item.id === box.boxVersionId);
             return {
               id: box.id,
-              name: version ? (locale === "ar" ? version.nameAr : version.nameFr) : box.boxVersionId,
-              budget: version ? `${version.creditBudget} ${version.currency}` : "—",
+              name: version ? (locale === "ar" ? version.nameAr : version.nameFr) : locale === "fr" ? "Version de la Box indisponible" : "نسخة الصندوق غير متاحة",
+              budget: version ? `${version.creditBudget} ${locale === "fr" ? "crédits" : "رصيد"}` : "—",
               href: `/${locale}/client/credits${space.selectedQuery}`,
             };
           }),
           operations: redemptions.slice(0, 6).map((item) => ({
             id: item.id,
-            title: item.status,
+            title: workflowStatusLabel(item.status,locale),
             quantity: item.reservedCredits,
             href: `/${locale}/client/credits${space.selectedQuery}`,
           })),
@@ -69,7 +76,7 @@ export default async function SubscriptionPage({ params, searchParams }: { param
       >
         <details className="client-ops" id="plans" open>
           <summary>{messages.plans}</summary>
-          <SubscriptionPanel dashboard={result.dashboard} locale={locale} messages={messages} keys={keys} />
+          <SubscriptionPanel dateLabels={subscriptionDateLabels(result.dashboard,locale)} dashboard={result.dashboard} locale={locale} messages={messages} keys={keys} />
         </details>
       </SubscriptionBoard>
     </ClientAppShell>

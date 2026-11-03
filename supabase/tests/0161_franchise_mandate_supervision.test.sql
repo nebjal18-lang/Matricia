@@ -23,12 +23,12 @@ select ok(
 
 select ok(
   (
-    select count(*) = 31
+    select count(*) = 30
       from pg_policies
      where schemaname = 'public'
        and policyname like '%franchise_library_read'
   ),
-  'thirty-one additive franchise library read policies exist'
+  'thirty additive franchise library read policies exist; messaging requires explicit participants'
 );
 
 select ok(
@@ -37,7 +37,7 @@ select ok(
   and exists (select 1 from pg_policies where policyname = 'quotes_franchise_library_read' and cmd = 'SELECT')
   and exists (select 1 from pg_policies where policyname = 'missions_franchise_library_read' and cmd = 'SELECT')
   and exists (select 1 from pg_policies where policyname = 'provider_services_franchise_library_read' and cmd = 'SELECT')
-  and exists (select 1 from pg_policies where policyname = 'internal_message_threads_franchise_library_read' and cmd = 'SELECT')
+  and not exists (select 1 from pg_policies where policyname = 'internal_message_threads_franchise_library_read')
   and exists (select 1 from pg_policies where policyname = 'dispute_cases_franchise_library_read' and cmd = 'SELECT'),
   'supervision policies are SELECT-only'
 );

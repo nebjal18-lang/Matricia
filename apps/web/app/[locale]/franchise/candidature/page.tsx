@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getFranchisePresentation } from "@/modules/public/data/franchise-presentation";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { FranchiseApplicationForm } from "../../(public)/franchise/franchise-application-form";
@@ -12,23 +13,8 @@ export default async function FranchiseCandidaturePage({ params }: { params: Pro
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const fr = locale === "fr";
-  const steps = fr
-    ? [
-        ["Candidature", "Vous nous transmettez votre demande en ligne."],
-        ["Évaluation", "Notre équipe étudie votre profil et votre projet."],
-        ["Périmètre et bibliothèque", "Nous définissons ensemble le territoire et la bibliothèque envisagés."],
-        ["Validation", "Le projet est soumis à une validation interne."],
-        ["Contrat", "Une fois validé, un contrat est établi dans un cadre clair et durable."],
-        ["Pilotage", "Vous êtes accompagné(e) dans le lancement et le suivi de votre bibliothèque."],
-      ]
-    : [
-        ["الترشيح", "ترسلون طلبكم عبر الإنترنت."],
-        ["التقييم", "تدرس فرقنا ملفكم ومشروعكم."],
-        ["النطاق والمكتبة", "نحدد معاً الإقليم والمكتبة المتوخاة."],
-        ["المصادقة", "يُعرض المشروع على مصادقة داخلية."],
-        ["العقد", "بعد المصادقة يُبرم عقد في إطار واضح ومستدام."],
-        ["القيادة", "تُرافقون في الإطلاق ومتابعة مكتبتكم."],
-      ];
+  const presentation = getFranchisePresentation(locale);
+  const steps = presentation.steps;
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="public-root flex min-h-dvh flex-col text-[var(--mat-navy)]">
@@ -38,17 +24,15 @@ export default async function FranchiseCandidaturePage({ params }: { params: Pro
         <section className="public-wrap grid gap-10 py-14 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
           <div>
             <p className="journey-eyebrow">{fr ? "Franchise Matricia" : "امتياز ماتريسيا"}</p>
-            <h1>{fr ? "Développez une bibliothèque Matricia dans votre territoire" : "طوّروا مكتبة ماتريسيا في إقليمكم"}</h1>
+            <h1>{presentation.title}</h1>
             <p className="public-lead mt-4">
-              {fr
-                ? "Rejoignez une initiative culturelle et éducative au service des professionnels marocains, et contribuez à faire rayonner le savoir dans votre région."
-                : "انضموا إلى مبادرة ثقافية وتعليمية في خدمة المهنيين المغاربة، وساهموا في إشعاع المعرفة في جهتكم."}
+              {presentation.definition}
             </p>
           </div>
-          <PublicPhoto scene="terrace" caption={fr ? "Des territoires plus forts par le savoir" : "أقاليم أقوى بالمعرفة"} />
+          <PublicPhoto scene="terrace" caption={presentation.caption} />
         </section>
         <section className="public-wrap grid gap-8 lg:grid-cols-[.85fr_1.15fr_.8fr]">
-          <PublicPhoto scene="zellige" caption={fr ? "Des bibliothèques au service des talents de nos régions" : "مكتبات في خدمة مواهب جهاتنا"} />
+          <PublicPhoto scene="zellige" caption={presentation.catalogCaption} />
           <div id="candidature-franchise">
             <FranchiseApplicationForm locale={locale} />
           </div>

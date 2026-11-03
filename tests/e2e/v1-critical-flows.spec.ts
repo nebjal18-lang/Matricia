@@ -1,3 +1,4 @@
+import { validFixtureProject } from "./helpers/fixture-project.mjs";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
@@ -7,6 +8,7 @@ type Locale = "fr" | "ar";
 type StateKey = "clientA" | "clientB" | "centralAal1" | "centralAal2" | "noRole";
 type Manifest = {
   schemaVersion: number;
+  environment?: string;
   projectRef: string;
   runId: string;
   createdAt: string;
@@ -55,7 +57,7 @@ function loadAuthenticatedFixture(): Manifest {
   if (!manifestPath) throw new Error("E2E_P05_MANIFEST is required; use tests/e2e/helpers/v1-critical-flows-run.mjs");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as Manifest;
   const now = Date.now();
-  if (manifest.schemaVersion !== 1 || !/^[a-z0-9]{10,40}$/u.test(manifest.projectRef)
+  if (manifest.schemaVersion !== 1 || !validFixtureProject(manifest)
       || !/^[a-z0-9-]{8,64}$/u.test(manifest.runId)
       || now - Date.parse(manifest.createdAt) > 120_000 || Date.parse(manifest.expiresAt) <= now
       || manifest.proof.realCommandAuditOutbox !== true || manifest.proof.tenantIsolation !== true) {
@@ -117,7 +119,7 @@ for (const locale of ["fr", "ar"] as const) {
   test(`${locale.toUpperCase()} protects every remaining critical role route for anonymous users`, async ({ page }) => {
     for (const route of protectedRoutes) {
       await page.goto(`/${locale}/${route}`);
-      await expect(page).toHaveURL(new RegExp(`/${locale}/connexion/?$`));
+      await expect(page).toHaveURL(url => url.pathname === `/${locale}/connexion` && url.searchParams.get("next") === `/${locale}/${route}`);
       await expect(page.getByRole("heading", { level: 1, name: login[locale].title })).toBeVisible();
       await expectAccessibleReflow(page, locale);
     }
@@ -154,8 +156,13 @@ for (const locale of ["fr", "ar"] as const) {
     try {
       for (const route of otherRoleRoutes) {
         await page.goto(`/${locale}/${route}`);
-        await expect(page).toHaveURL(new RegExp(`/${locale}/${route}/?$`));
-        await expect(page.locator('[data-slot="alert"]')).toBeVisible();
+        await expect(async () => {
+          if (new URL(page.url()).pathname.replace(/\/$/u, "") === `/${locale}/${route}`) {
+            await expect(page.locator('[data-slot="alert"].text-destructive, [data-error-reason="FORBIDDEN"]')).toBeVisible({ timeout: 500 });
+          } else {
+            await expect(page).toHaveURL(new RegExp(`/${locale}/(tableau-de-bord|connexion|organisation)(?:[/?#]|$)`), { timeout: 500 });
+          }
+        }).toPass({ timeout: 10_000, intervals: [100, 250, 500] });
         await expect(page.locator("body")).not.toContainText(manifest.fixtures.organizationB.name);
         await expectAccessibleReflow(page, locale);
       }

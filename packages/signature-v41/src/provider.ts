@@ -49,6 +49,8 @@ export interface SignatureEvidence {
   readonly providerEnvelopeId: string;
   readonly achievedLevel: SignatureLevel;
   readonly finalHash: string;
+  /** Exact source document hashes bound by the external evidence package. */
+  readonly documentHashes?: readonly string[];
   readonly certificateFingerprint?: string;
   readonly timestampTokenHash?: string;
 }
@@ -84,7 +86,7 @@ export function assessSignatureProviderReadiness(
   if (mode !== "DEVELOPMENT_MOCK" && mode !== "EXTERNAL") {
     return { status: "not_ready", code: "SIGNATURE_PROVIDER_MODE_INVALID" };
   }
-  if ((env.NODE_ENV === "production" || mode === "EXTERNAL") && provider.developmentOnly) {
+  if ((env.NODE_ENV === "production" || env.APP_ENV?.trim().toLowerCase() === "production" || mode === "EXTERNAL") && provider.developmentOnly) {
     return { status: "not_ready", code: "SIGNATURE_DEVELOPMENT_PROVIDER_FORBIDDEN" };
   }
   if (mode === "EXTERNAL" && env.SIGNATURE_PROVIDER_CODE?.trim() !== provider.code) {

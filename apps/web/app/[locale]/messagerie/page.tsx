@@ -1,10 +1,14 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import {messageHistoryHref,parseMessageCursor} from "./history-navigation";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
+import { InternalMessageAttachments, MessageAttachments } from "@/modules/shared/ui/internal-message-attachments";
 import { Badge } from "@/modules/shared/ui/badge";
 import { createInternalMessagingRepository } from "@/modules/shared/lib/internal-messaging/server-repository";
 import { resolveWorkspaceShell } from "@/modules/shared/lib/connected-space/workspace-shell";
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
-import { resolveClientSpace } from "@/modules/client/data/spaces/context";
+import { resolveConnectedSpace } from "@/modules/shared/lib/account-security/connected-space";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { MessagesBoard, SpaceActions } from "@/modules/client/screens/spaces/boards";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
@@ -20,8 +24,9 @@ function date(value: string, locale: Locale) {
 function ConversationPanel({
   locale,
   m,
-  result,
+  result,historyNavigation,
 }: {
+  historyNavigation?:ReactNode;
   locale: Locale;
   m: ReturnType<typeof getMessagingMessages>;
   result: Awaited<ReturnType<Awaited<ReturnType<typeof createInternalMessagingRepository>>["load"]>>;
@@ -40,13 +45,15 @@ function ConversationPanel({
           {result.value.conversation.messages.map((message) => (
             <li key={message.id}>
               <span>
-                <strong>{message.sender_alias === "CLIENT" ? m.client : m.provider}</strong>
+                <strong>{message.sender_alias === "CLIENT" ? m.client : message.sender_alias === "FRANCHISE"?m.franchise:m.provider}</strong>
                 <small>{date(message.created_at, locale)}</small>
                 <p>{message.body}</p>
+                <MessageAttachments attachments={message.attachments} locale={locale} />
               </span>
             </li>
           ))}
         </ol>
+        {historyNavigation}
         <SendMessageForm
           threadId={result.value.conversation.thread.id}
           senderOrganizationId={result.value.conversation.thread.participant_organization_id}
@@ -54,6 +61,7 @@ function ConversationPanel({
           m={m}
           locked={result.value.conversation.thread.status === "LOCKED"}
         />
+        {result.value.conversation.thread.status !== "LOCKED" ? <InternalMessageAttachments threadId={result.value.conversation.thread.id} senderOrganizationId={result.value.conversation.thread.participant_organization_id} locale={locale} /> : null}
       </div>
     );
   }
@@ -65,31 +73,38 @@ function ConversationPanel({
   );
 }
 
-export default async function MessagingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ fil?: string; organizationId?: string; q?: string }> }) {
+export default async function MessagingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ fil?: string; organizationId?: string; q?: string; page?:string;before?:string;beforeId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
+  const space = await resolveConnectedSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/messagerie` }));
-  const [result, workspaceShell] = await Promise.all([
-    (await createInternalMessagingRepository()).load(query.fil),
+  const repository=await createInternalMessagingRepository(),page=Math.min(100000,Math.max(1,Number.parseInt(query.page??"1",10)||1)),needle=(query.q??"").trim().slice(0,200);
+  const cursor=parseMessageCursor(query);if(!cursor.valid)notFound();
+  const [options, workspaceShell,inbox,history] = await Promise.all([
+    repository.load(undefined,{skipInbox:true}),
     resolveWorkspaceShell(space.selectedOrganizationId),
+    repository.search(needle,space.selectedOrganizationId??undefined,page),
+    query.fil?repository.history(query.fil,cursor.cursor):Promise.resolve(null),
   ]);
+  const result=options.status==="error"?options:history?.status==="error"?history:{status:"success"as const,value:{...options.value,conversation:history?.status==="success"?history.value:null}};
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/messagerie` }));
   const m = getMessagingMessages(locale);
   const c = spaceCopy(locale);
   const threads =
-    result.status === "success"
-      ? result.value.inbox.map((thread) => ({
+    inbox.status === "success"
+      ? inbox.value.inbox.map((thread) => ({
           id: thread.id,
           title: thread.subject,
-          meta: thread.counterparty_alias === "CLIENT" ? m.client : m.provider,
-          href: `/${locale}/messagerie?fil=${thread.id}${space.selectedOrganizationId ? `&organizationId=${space.selectedOrganizationId}` : ""}`,
+          meta: thread.counterparty_alias === "CLIENT" ? m.client : thread.counterparty_alias === "FRANCHISE"?m.franchise:m.provider,
+          href: `/${locale}/messagerie?${new URLSearchParams({fil:thread.id,q:needle,page:String(page),...(space.selectedOrganizationId?{organizationId:space.selectedOrganizationId}:{})})}`,
         }))
       : [];
 
+  const pageHref=(next:number)=>`/${locale}/messagerie?${new URLSearchParams({q:needle,page:String(next),...(query.fil?{fil:query.fil}:{}),...(space.selectedOrganizationId?{organizationId:space.selectedOrganizationId}:{})})}`;
   const board = (
-    <MessagesBoard locale={locale} query={space.selectedQuery} search={query.q} threads={threads} organizationName={space.organizationName}>
-      <ConversationPanel locale={locale} m={m} result={result} />
+    <MessagesBoard serverFiltered inboxError={inbox.status==="error"} inboxFooter={inbox.status==="success"?<><p>{inbox.value.total} {locale==="fr"?"fil(s) correspondant(s)":"محادثة مطابقة"}</p><nav className="flex gap-4" aria-label={locale==="fr"?"Pages des conversations":"صفحات المحادثات"}>{page>1?<Link className="min-h-11 underline" href={pageHref(page-1)}>{locale==="fr"?"Précédent":"السابق"}</Link>:null}{inbox.value.total>page*inbox.value.pageSize?<Link className="min-h-11 underline" href={pageHref(page+1)}>{locale==="fr"?"Suivant":"التالي"}</Link>:null}</nav></>:null} locale={locale} query={space.selectedQuery} search={needle} threads={threads} organizationName={space.organizationName}>
+      <ConversationPanel locale={locale} m={m} result={result} historyNavigation={history?.status==="success"?<nav className="flex flex-wrap items-center gap-4" aria-label={locale==="fr"?"Historique des messages":"سجل الرسائل"}><p>{history.value.total} {locale==="fr"?"message(s) au total":"رسالة إجمالاً"}</p>{history.value.hasMore&&history.value.nextCursor?<Link className="inline-flex min-h-11 items-center underline" href={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined},history.value.nextCursor)}>{locale==="fr"?"Messages plus anciens":"رسائل أقدم"}</Link>:null}{cursor.cursor?<Link className="inline-flex min-h-11 items-center underline" href={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined})}>{locale==="fr"?"Messages récents":"الرسائل الحديثة"}</Link>:null}</nav>:null}/>
+
     </MessagesBoard>
   );
 
@@ -114,6 +129,7 @@ export default async function MessagingPage({ params, searchParams }: { params: 
 
   return (
     <ClientAppShell
+      languagePath={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined},cursor.cursor)}
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}

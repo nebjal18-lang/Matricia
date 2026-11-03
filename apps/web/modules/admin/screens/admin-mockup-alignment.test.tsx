@@ -112,9 +112,11 @@ describe("admin dashboard mockups", () => {
     );
     expect(consultation).toContain("data-admin-layout=\"consultation\"");
     expect(consultation).toContain("Destinataires sélectionnés");
-    expect(consultation).toContain("Envoyer la consultation");
+    expect(consultation).toContain("Ouvrir la consultation après approbation");
     expect(reuse).toContain("data-admin-layout=\"document-reuse\"");
-    expect(reuse).toContain("Confirmer la liaison");
+    expect(reuse).toContain("Demander le consentement du propriétaire");
+    expect(reuse).not.toContain("Destination interdite (autre organisation)");
+    expect(reuse).not.toContain("Enregistrer le brouillon");
     expect(prefs).toContain("data-admin-layout=\"notification-preferences\"");
     expect(prefs).toContain("Modèles de notification publiés");
     expect(prefs).toContain("Aucun modèle actif");
@@ -140,7 +142,7 @@ describe("admin dashboard mockups", () => {
     expect(catalogue).toContain('id="domaines"');
     expect(catalogue).toContain('id="questions"');
     expect(catalogue).toContain('id="questionnaires"');
-    expect(catalogue).toContain('hubGroup="catalog"');
+    expect(catalogue).toContain('groupId="catalog"');
     expect(operations).toContain('id="outbox"');
     expect(operations).toContain('id="webhooks"');
     expect(operations).toContain('id="parametres"');

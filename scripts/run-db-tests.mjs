@@ -2,6 +2,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import postgres from 'postgres';
+import { prepareSqlTest } from './db-test-support.mjs';
 
 function parseEnv(source) {
   return Object.fromEntries(source.split(/\r?\n/).flatMap((line) => {
@@ -70,6 +71,10 @@ function validateTap(file, lines) {
   const numbered = assertionLines.map((line) => Number.parseInt(line.match(/^(?:not )?ok\s+(\d+)\b/)?.[1] ?? '', 10));
   if (numbered.some((number, index) => number !== index + 1)) {
     throw new Error(`${file}: TAP assertion numbers are missing, duplicated, or out of order`);
+  }
+
+  if (assertionLines.some(line => /#\s*(?:SKIP|TODO)\b/i.test(line))) {
+    throw new Error(`${file}: skipped or TODO SQL assertions cannot satisfy acceptance`);
   }
 
   const failures = assertionLines.filter((line) => line.startsWith('not ok'));
@@ -565,7 +570,7 @@ try {
   await cleanupStaleFinancialConcurrencyFixtures(sql);
   for (const file of files) {
     const source = await readFile(resolve(testDirectory, file), 'utf8');
-    const result = await sql.unsafe(source, [], { simple: true });
+    const result = await sql.unsafe(prepareSqlTest(source), [], { simple: true });
     const lines = tapLines(result);
     assertions += validateTap(file, lines);
     console.log(`PASS ${file}`);

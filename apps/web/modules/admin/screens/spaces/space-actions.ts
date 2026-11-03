@@ -1,5 +1,7 @@
 "use server";
 
+import{validOperationalSpaceInput}from"./operational-input";
+import { bindAdminDeployment } from "./environment";
 import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { decideGovernance, type FranchiseActionState } from "@/modules/franchise/screens/gouvernance/actions";
@@ -16,11 +18,20 @@ function prepareFourEyes(form: FormData) {
   const intent = value(form, "intent") || "CHANGE_CONFIGURATION";
   const summary = {
     intent,
+    draft: intent==="SAVE_DRAFT",
     space: value(form, "space"),
     view: value(form, "view"),
     note: value(form, "note"),
     decision: value(form, "decision"),
     justification: value(form, "justification") || value(form, "reason"),
+    providerIds: [...new Set(form.getAll("providerIds").map(String))].sort(),
+    context: value(form, "context"),
+    dueAt: value(form, "dueAt"),
+    channel: value(form, "channel"),
+    destination: value(form, "destination"),
+    documentId: value(form, "documentId"),
+    targetId: value(form, "targetId"),
+    purpose: value(form, "purpose"),
   };
   const canonical = JSON.stringify(summary);
   form.set("redactedSummary", canonical);
@@ -29,7 +40,7 @@ function prepareFourEyes(form: FormData) {
   if (!value(form, "resourceType")) form.set("resourceType", value(form, "space").toUpperCase() || "ADMIN_SPACE");
   if (!value(form, "resourceId")) form.set("resourceId", value(form, "itemId") || randomUUID());
   if (!value(form, "idempotencyKey")) form.set("idempotencyKey", randomUUID());
-  if (!value(form, "targetEnvironment")) form.set("targetEnvironment", process.env.APP_ENV === "production" ? "STAGING" : "DEVELOPMENT");
+  if (!value(form, "targetEnvironment")) form.set("targetEnvironment", process.env.APP_ENV === "production" ? "PRODUCTION" : process.env.APP_ENV === "staging" ? "STAGING" : "DEVELOPMENT");
   if (!value(form, "reason")) form.set("reason", value(form, "justification") || value(form, "note") || "Action d’administration soumise au contrôle à quatre yeux.");
 }
 
@@ -38,7 +49,9 @@ function touch(locale: string) {
 }
 
 export async function requestSpaceMutation(previous: AdminActionState, form: FormData): Promise<AdminActionState> {
+  if(!validOperationalSpaceInput(form))return{status:"error",reason:"VALIDATION"};
   prepareFourEyes(form);
+  if (!await bindAdminDeployment(form)) return { status: "error", reason: "FORBIDDEN" };
   const result = await requestAdminAction(previous, form);
   touch(value(form, "locale") || "fr");
   return result;

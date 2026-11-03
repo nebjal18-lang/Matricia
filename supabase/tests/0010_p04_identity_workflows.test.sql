@@ -1,6 +1,6 @@
 begin;
 set local search_path=public,extensions;
-select plan(29);
+select plan(30);
 
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at) values
 ('91000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','p04-owner@example.invalid','',now(),'{}','{"full_name":"Propriétaire P04","preferred_locale":"ar-MA"}',now(),now()),
@@ -17,34 +17,37 @@ grant select,insert,update on p04_observed to authenticated,service_role;
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000001',true);
-insert into p04_observed values('create_first',public.create_or_request_organization('P04 Société SARL','P04 Société','00 123-456 789','CLIENT_OWNER','p04-create-owner-key')::text);
-insert into p04_observed values('create_retry',public.create_or_request_organization('P04 Société SARL','P04 Société','00123456789','CLIENT_OWNER','p04-create-owner-key')::text);
+insert into p04_observed values('create_first',public.create_or_request_organization('P04 Société SARL','P04 Société','00 123-456 789-0000','CLIENT_OWNER','p04-create-owner-key')::text);
+insert into p04_observed values('create_retry',public.create_or_request_organization('P04 Société SARL','P04 Société','001234567890000','CLIENT_OWNER','p04-create-owner-key')::text);
 reset role;
 
 select is((select (value::jsonb)->>'outcome' from p04_observed where key='create_first'),'ORGANIZATION_CREATED','a new active ICE creates one organization passport');
 select is((select value from p04_observed where key='create_retry'),(select value from p04_observed where key='create_first'),'organization creation is idempotent');
 select is((select count(*) from public.organizations where legal_name='P04 Société SARL'),1::bigint,'idempotent retry creates no duplicate organization');
-select is((select normalized_value::text from public.organization_identifiers where organization_id=((select value::jsonb->>'organization_id' from p04_observed where key='create_first')::uuid)),'00123456789','ICE is normalized before persistence');
+select is((select normalized_value::text from public.organization_identifiers where organization_id=((select value::jsonb->>'organization_id' from p04_observed where key='create_first')::uuid)),'001234567890000','ICE is normalized before persistence');
 
 select throws_ok(
   $$insert into public.organization_identifiers(organization_id,identifier_type,normalized_value,verification_status,is_active)
-    values(((select value::jsonb->>'organization_id' from p04_observed where key='create_first')::uuid),'ICE','00-123-456-789','UNVERIFIED',true)$$,
+    values(((select value::jsonb->>'organization_id' from p04_observed where key='create_first')::uuid),'ICE','00-123-456-789-0000','UNVERIFIED',true)$$,
   '23505',null,'an active ICE cannot identify two active records even before verification'
 );
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000002',true);
-insert into p04_observed values('join_request',public.create_or_request_organization('Ignored Legal','Ignored Display','00123456789','CLIENT_OWNER','p04-request-access-key')::text);
+select set_config('request.jwt.claims','{"sub":"91000000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal2"}',true);
+insert into p04_observed values('join_request',public.create_or_request_organization('Ignored Legal','Ignored Display','001234567890000','CLIENT_OWNER','p04-request-access-key')::text);
 reset role;
 select is((select value::jsonb->>'outcome' from p04_observed where key='join_request'),'ACCESS_REQUESTED','an existing ICE creates an explicit access request');
 select is((select count(*) from public.organization_memberships where user_id='91000000-0000-0000-0000-000000000002'),0::bigint,'access request never silently creates or merges a membership');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000001',true);
-select public.decide_organization_access_request((select (value::jsonb->>'request_id')::uuid from p04_observed where key='join_request'),true);
+select set_config('request.jwt.claims','{"sub":"91000000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
+select public.decide_organization_join_v1((select (value::jsonb->>'request_id')::uuid from p04_observed where key='join_request'),true,1,(public.get_organization_join_workspace_v1(null,1)->'review_requests'->0->>'request_hash'),'Vérification propriétaire de la fixture','p04-explicit-owner-decision');
 reset role;
 select is((select status from public.organization_memberships where user_id='91000000-0000-0000-0000-000000000002'),'ACTIVE','authorized owner approval activates the requested membership');
 select is((select count(*) from public.organization_member_roles r join public.organization_memberships m on m.id=r.membership_id where m.user_id='91000000-0000-0000-0000-000000000002' and r.revoked_at is null),1::bigint,'approved access grants only the explicitly requested role');
+select is((select r.role_code from public.organization_member_roles r join public.organization_memberships m on m.id=r.membership_id where m.user_id='91000000-0000-0000-0000-000000000002' and r.revoked_at is null),'CLIENT_VIEWER','legacy ICE collision grants Viewer only after explicit owner decision, never implicit Owner');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000001',true);
@@ -107,8 +110,14 @@ select ok(not has_function_privilege('anon','public.reserve_otp_request(text,ine
 select ok(not has_function_privilege('authenticated','public.reserve_otp_request(text,inet)','EXECUTE'),'authenticated cannot forge trusted OTP rate-limit context');
 select ok(has_function_privilege('authenticated','public.list_my_sessions()','EXECUTE'),'authenticated identities may list only their own sessions through the RPC');
 select ok(not has_table_privilege('authenticated','auth.sessions','SELECT'),'authenticated identities cannot query raw auth sessions');
-select ok((select count(*)>=5 from public.audit_events where action in ('organization.created','organization.access.requested','organization.access.decided','organization.invitation.created','organization.invitation.accepted')),'identity state transitions are audited');
-select ok((select count(*)>=5 from public.event_outbox where event_type in ('OrganizationCreatedV1','OrganizationAccessRequestedV1','OrganizationAccessDecidedV1','OrganizationInvitationCreatedV1','OrganizationEmailInvitationRequestedV1','OrganizationInvitationAcceptedV1')),'identity state transitions emit durable Outbox events');
+select results_eq(
+ $$select action,count(*)from public.audit_events where organization_id=(select(value::jsonb->>'organization_id')::uuid from p04_observed where key='create_first')and action in('organization.created','organization.join.requested','organization.join.decided','organization.invitation.created','organization.invitation.accepted')group by action order by action$$,
+ $$select * from (values('organization.created'::text,1::bigint),('organization.invitation.accepted',1::bigint),('organization.invitation.created',1::bigint),('organization.join.decided',1::bigint),('organization.join.requested',1::bigint))expected(action,total)$$,
+ 'each actual passport, governed join and invitation transition has exactly one scoped audit');
+select results_eq(
+ $$select event_type,count(*)from public.event_outbox where organization_id=(select(value::jsonb->>'organization_id')::uuid from p04_observed where key='create_first')and event_type in('OrganizationCreatedV1','OrganizationJoinRequestedV1','OrganizationJoinDecidedV1','OrganizationEmailInvitationRequestedV1','OrganizationInvitationAcceptedV1')group by event_type order by event_type$$,
+ $$select * from (values('OrganizationCreatedV1'::text,1::bigint),('OrganizationEmailInvitationRequestedV1',1::bigint),('OrganizationInvitationAcceptedV1',1::bigint),('OrganizationJoinDecidedV1',1::bigint),('OrganizationJoinRequestedV1',1::bigint))expected(event_type,total)$$,
+ 'each actual passport, governed join and invitation transition has exactly one durable scoped outbox fact');
 
 select * from finish();
 rollback;

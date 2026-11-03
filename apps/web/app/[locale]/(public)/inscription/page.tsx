@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { configuredEmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
 import { notFound } from "next/navigation";
 import { Building2, Store, Landmark } from "lucide-react";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -78,7 +79,7 @@ export default async function PublicInscriptionPage({
           </div>
           {plan ? <p role="status" className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm">{chrome.planIntent} : <span dir="ltr">{plan}</span>. {chrome.planNote}</p> : null}
           <p className="mt-5 text-sm font-medium">{locale === "ar" ? "لغة التواصل المفضلة" : "Langue de communication préférée"} : {locale === "ar" ? "العربية" : "Français"}</p>
-          <InscriptionConsent locale={locale} nextPath={nextPath} />
+          <InscriptionConsent otpLength={configuredEmailOtpLength()} locale={locale} nextPath={nextPath} />
           <p className="mt-6 text-sm text-slate-600">{chrome.loginTitle} <Link className="font-semibold text-[var(--mat-violet)] underline-offset-4 hover:underline" href={`/${locale}/connexion`}>{chrome.loginAction}</Link></p>
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             <article className="rounded-2xl bg-[var(--mat-violet-soft)] p-4">

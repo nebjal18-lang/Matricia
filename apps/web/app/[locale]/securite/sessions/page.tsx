@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
+import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Badge } from "@/modules/shared/ui/badge";
-import { buttonVariants } from "@/modules/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/shared/ui/card";
 import { getDictionary } from "@/modules/shared/lib/i18n/dictionaries";
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
-import { cn } from "@/modules/shared/lib/utils";
 import { listMySessions, type SafeSession } from "./actions";
 import { RevokeSessionForm } from "./revoke-session-form";
 import { ConnectedAppShell } from "@/modules/shared/ui/connected-app-shell";
@@ -29,12 +29,19 @@ function deviceLabel(session: SafeSession, labels: { unknownDevice: string; mobi
   return /Mobile|Android|iPhone|iPad/i.test(session.userAgent) ? labels.mobileDevice : labels.desktopDevice;
 }
 
-export default async function SessionsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+export default async function SessionsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; next?: string; workspace?: string }> }) {
   const { locale } = await params;
   const query = await searchParams;
   if (!isLocale(locale)) notFound();
+  const nextPath = safeReturnPath(query.next, locale);
+  const contextQuery = new URLSearchParams();
+  if (query.organizationId) contextQuery.set("organizationId", query.organizationId);
+  if (nextPath) contextQuery.set("next", nextPath);
+  if (query.workspace) contextQuery.set("workspace", query.workspace);
+  const suffix = contextQuery.size ? `?${contextQuery}` : "";
+  const selfPath = `/${locale}/securite/sessions${suffix}`;
   const result = await listMySessions();
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/securite/sessions` }));
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: selfPath }));
   const messages = getDictionary(locale).sessions;
   const c = spaceCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
@@ -43,6 +50,10 @@ export default async function SessionsPage({ params, searchParams }: { params: P
     <ConnectedAppShell
       locale={locale}
       organizationId={query.organizationId}
+      allowContextFailure
+      currentPath={selfPath}
+      nextPath={nextPath}
+      workspace={query.workspace}
       title={c.sessions}
       lead={messages.description}
       clientActive="company"
@@ -52,21 +63,15 @@ export default async function SessionsPage({ params, searchParams }: { params: P
       <main className="client-page">
         <nav className="client-tabs" aria-label={c.orgTitle}>
           <Link href={`/${locale}/organisation${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{c.orgTitle}</Link>
-          <Link href={`/${locale}/securite/compte${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{c.security}</Link>
+          <Link href={`/${locale}/securite/compte${suffix}`}>{c.security}</Link>
           <a href="#sessions" aria-current="page">{c.sessions}</a>
           <Link href={`/${locale}/organisation/roles${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{c.people}</Link>
         </nav>
         <p>
-          <Link href={`/${alternate}/securite/sessions${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`} hrefLang={alternate} className="client-text-link">{messages.language}</Link>
+          <Link href={translateLocalPath(selfPath, locale, alternate)} hrefLang={alternate} className="client-text-link">{messages.language}</Link>
         </p>
         {result.status === "error" ? (
-          <Alert variant="destructive">
-            <AlertTitle>{messages.loadErrorTitle}</AlertTitle>
-            <AlertDescription>
-              <p>{messages.loadErrorDescription}</p>
-              <Link href={`/${locale}/securite/sessions`} className={cn(buttonVariants({ variant: "outline" }), "mt-2 min-h-11")}>{messages.retry}</Link>
-            </AlertDescription>
-          </Alert>
+          <WorkspaceFailure locale={locale} reason={result.reason === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED"} returnPath={selfPath} />
         ) : result.sessions.length === 0 ? (
           <article className="client-card">
             <h2>{messages.emptyTitle}</h2>

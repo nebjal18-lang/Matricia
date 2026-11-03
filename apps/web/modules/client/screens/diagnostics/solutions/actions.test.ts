@@ -3,7 +3,7 @@ const mocks = vi.hoisted(() => ({ decide: vi.fn(), revalidate: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
 vi.mock("@/modules/shared/lib/solution-insights/server-repository", () => ({ createServerSolutionInsightsRepository: async () => ({ decide: mocks.decide }) }));
 vi.mock("@/modules/shared/lib/solution-insights/model", async () => await import("@/modules/shared/lib/solution-insights/model"));
-import { decideAction, idle } from "./actions";
+import{decideAction}from"./actions";import{idle}from"./state";
 const id = "11111111-1111-4111-8111-111111111111";
 function form() { const value = new FormData(); value.set("locale", "fr"); value.set("solutionSetId", id); value.set("level", "ESSENTIAL"); value.set("decision", "ACCEPTED"); value.set("reason", "Choix validé"); value.set("deferredUntil", ""); value.set("idempotencyKey", id); return value; }
 beforeEach(() => { mocks.decide.mockReset(); mocks.revalidate.mockReset(); });

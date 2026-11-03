@@ -1,0 +1,14 @@
+"use client";
+import{useActionState,useEffect}from"react";
+import{useRouter}from"next/navigation";
+import type{Locale}from"@/modules/shared/lib/i18n/locale";
+import type{AdminPendingBillingIntent}from"@/modules/admin/data/providers/model";
+import{formatMinor}from"@/modules/provider/data/billing/model";
+import{resumeAdminBillingIntent,cancelAdminBillingIntent,type AdminBillingIntentState}from"./actions";
+function IntentRow({item,locale}:{item:AdminPendingBillingIntent;locale:Locale}){
+ const ar=locale==="ar",router=useRouter();const[state,resume,pending]=useActionState(resumeAdminBillingIntent,{status:"idle"}as AdminBillingIntentState);const[cancelState,cancel,cancelling]=useActionState(cancelAdminBillingIntent,{status:"idle"}as AdminBillingIntentState);
+ useEffect(()=>{if(state.status==="success"||cancelState.status==="success")router.refresh();},[state.status,cancelState.status,router]);
+ const blocked=item.expired||item.status==="REJECTED"||["INFECTED","ERROR"].includes(item.scanStatus);
+ return <article className="client-card"><h3>{item.providerName} · {item.reference} · {formatMinor(item.amountMinor,item.currency,locale)}</h3><p>{item.scanStatus}{blocked?(ar?" · الدليل مرفوض أو منتهي":" · justificatif refusé ou expiré"):""}</p><p>{ar?"النية محفوظة بعد إعادة تحميل الصفحة. لا تسجل حركة مالية قبل الفحص النظيف.":"Intention conservée après rechargement. Aucune écriture financière avant le contrôle antivirus conforme."}</p><div className="flex flex-wrap gap-3">{!blocked?<form action={resume}><input type="hidden"name="intentId"value={item.id}/><button disabled={pending}>{ar?"تحقق وإنهاء":"Vérifier et finaliser"}</button></form>:null}<form action={cancel}><input type="hidden"name="intentId"value={item.id}/><button disabled={cancelling}>{ar?"إلغاء النية":"Annuler l’intention"}</button></form></div><p role={state.status==="error"||cancelState.status==="error"?"alert":"status"}aria-live="polite">{state.status==="pending_scan"?(ar?"الفحص ما زال معلقاً، لم يسجل أي قيد.":"Analyse en attente ; aucun mouvement enregistré."):state.status==="error"||cancelState.status==="error"?(ar?"تعذر التنفيذ. تحققوا من الحالة والصلاحيات.":"Opération refusée. Vérifiez l’état et les habilitations."):state.status==="success"||cancelState.status==="success"?(ar?"تم تسجيل العملية.":"Opération enregistrée."):""}</p></article>;
+}
+export function AdminPendingBillingIntents({items,locale,unavailable}:{items:AdminPendingBillingIntent[];locale:Locale;unavailable?:boolean}){return <section className="client-stack"><h2>{locale==="ar"?"نيات الفوترة المحفوظة":"Intentions de facturation sauvegardées"}</h2>{unavailable?<p role="alert">{locale==="ar"?"بعض النيات غير متاحة؛ أعيدوا التحميل قبل إعادة الإرسال.":"Certaines intentions sont indisponibles ; actualisez avant de retransmettre un paiement."}</p>:null}{items.map((item)=><IntentRow key={item.id}item={item}locale={locale}/>)}</section>;}

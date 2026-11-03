@@ -1,3 +1,4 @@
+import {workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import Link from "next/link";
 import { Check, ShieldCheck } from "lucide-react";
 import { formatMinorExact } from "@/modules/client/data/rfq/model";
@@ -60,7 +61,7 @@ export function QuotePreviewWorkbench({
         <div>
           <div className="provider-chip-row">
             <h2>{w.quotePreviewTitle}{quote?.id ? <span className="client-space-label" dir="ltr">{quote.id.slice(0, 12)}</span> : null}</h2>
-            {quote?.status ? <span className="client-status-chip" data-tone="violet">{quote.status}</span> : null}
+            {quote?.status ? <span className="client-status-chip" data-tone="violet">{workflowStatusLabel(quote.status,locale)}</span> : null}
           </div>
           <p>{invitation?.description ?? w.quotePreviewLead}</p>
         </div>

@@ -1,3 +1,7 @@
+import{z}from"zod";
+import{getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
+import type{AdminHistoryPage}from"@/modules/admin/screens/history/model";
+import type{ConversationPage}from"@/modules/admin/screens/conversations/model";
 import { loadAdminGovernanceDashboard } from "@/modules/admin/data/governance-disputes/repository";
 import { loadAdminProviders } from "@/modules/admin/data/providers/repository";
 import type { AdminProviderDashboard, AdminProvider, AdminProviderService, AdminProviderDocument } from "@/modules/admin/data/providers/model";
@@ -18,10 +22,14 @@ export type SpaceRow = {
   organizationId?: string;
   treat?: boolean;
   extras?: Record<string, string>;
+  history?: Array<{ id: string; action: string; occurredAt: string; actorType: string; actorLabel?:string|null;reason?:string }>;
+  conversation?:ConversationPage|null;
+  historyPage?:AdminHistoryPage|null;
 };
 
 export type SpaceSnapshot = {
-  reason: "OK" | "FORBIDDEN" | "MFA_REQUIRED" | "UNAVAILABLE" | "INVALID_RESPONSE" | null;
+  reason: "OK" | "UNAUTHENTICATED" | "FORBIDDEN" | "MFA_REQUIRED" | "UNAVAILABLE" | "INVALID_RESPONSE" | null;
+  detailsReason?: "UNAUTHENTICATED" | "FORBIDDEN" | "MFA_REQUIRED" | "UNAVAILABLE" | "INVALID_RESPONSE";
   rows: SpaceRow[];
   treat: SpaceRow[];
   supervision: AdminSupervisionDashboard | null;
@@ -29,13 +37,50 @@ export type SpaceSnapshot = {
   governance: AdminGovernanceDashboard | null;
 };
 
+const specialSnapshotSpaces=new Set(["providers","qualification","capacite","franchises","territoires","gouvernance","litiges"]);
+const specialRowsSchema=z.object({rows:z.array(z.object({id:z.string().uuid(),title:z.string(),status:z.string(),organizationId:z.string().uuid(),cells:z.array(z.string()),extras:z.record(z.string(),z.string())})).max(20000),snapshotAt:z.string(),complete:z.literal(true)});
+function unavailableSnapshot(reason: SpaceSnapshot["reason"]): SpaceSnapshot {
+  return { reason, rows: [], treat: [], supervision: null, providers: null, governance: null };
+}
+function readReason(reason: string): NonNullable<SpaceSnapshot["detailsReason"]> {
+  return ["UNAUTHENTICATED", "FORBIDDEN", "MFA_REQUIRED", "INVALID_RESPONSE"].includes(reason)
+    ? reason as NonNullable<SpaceSnapshot["detailsReason"]> : "UNAVAILABLE";
+}
+export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, query: string, consistent = false): Promise<SpaceSnapshot> {
+  try {
+    if (!specialSnapshotSpaces.has(space)) return await loadBaseAdminSpaceSnapshot(locale, space, query, consistent);
+    // These actor/governance queues have their own authorized projection. A
+    // failure in an unrelated supervision reader must not replace their rows.
+    const client = await getSupabaseServerClient();
+    const response = await client.rpc("get_admin_special_space_snapshot_v1", { p_space: space, p_locale: locale });
+    if (response.error) return unavailableSnapshot(["PT401", "PGRST301", "PGRST302", "PGRST303"].includes(response.error.code) ? "UNAUTHENTICATED" : response.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE");
+    const parsed = specialRowsSchema.safeParse(response.data);
+    if (!parsed.success) return unavailableSnapshot("INVALID_RESPONSE");
+    const snapshot = unavailableSnapshot(null);
+    snapshot.rows = parsed.data.rows.map(row => ({ ...row, href: spaceHref(locale, space, query, row.id), tone: statusTone(row.status), treat: /PENDING|SUBMITTED|UNDER_REVIEW|IN_REVIEW|EXPIRED|REJECTED|SUSPENDED/.test(row.status) }));
+    snapshot.treat = snapshot.rows.filter(row => row.treat);
+    try {
+      if (["providers", "qualification", "capacite"].includes(space)) {
+        const details = await loadAdminProviders();
+        if (details.status === "success") snapshot.providers = details.dashboard;
+        else snapshot.detailsReason = readReason(details.reason);
+      } else {
+        const details = await loadAdminGovernanceDashboard(locale);
+        if (details.status === "success") snapshot.governance = details.value;
+        else snapshot.detailsReason = readReason(details.reason);
+      }
+    } catch { snapshot.detailsReason = "UNAVAILABLE"; }
+    return snapshot;
+  } catch { return unavailableSnapshot("UNAVAILABLE"); }
+}
+
 function sliceId(id: string) {
   return id.slice(0, 8);
 }
 
-export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, query: string): Promise<SpaceSnapshot> {
+async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, query: string,consistent=false): Promise<SpaceSnapshot> {
   const [supervision, providers, governance] = await Promise.all([
-    loadAdminSupervisionDashboard(120),
+    loadAdminSupervisionDashboard(120,consistent),
     ["providers", "qualification", "capacite", "documents"].includes(space) ? loadAdminProviders() : Promise.resolve(null),
     ["franchises", "territoires", "gouvernance", "litiges"].includes(space) ? loadAdminGovernanceDashboard(locale) : Promise.resolve(null),
   ]);
@@ -49,9 +94,9 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     governance: governance && governance.status === "success" ? governance.value : null,
   };
 
-  if (supervision.status === "error" && supervision.reason === "FORBIDDEN") snapshot.reason = "FORBIDDEN";
+  if (supervision.status === "error") snapshot.reason = readReason(supervision.reason);
   if (supervision.status === "error" && (supervision.reason === "UNAVAILABLE" || supervision.reason === "INVALID_RESPONSE")) snapshot.reason = supervision.reason;
-  if (providers && providers.status === "error") snapshot.reason = providers.reason === "MFA_REQUIRED" ? "MFA_REQUIRED" : providers.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE";
+  if (providers && providers.status === "error") { if (space === "documents") snapshot.detailsReason = readReason(providers.reason); else snapshot.reason = readReason(providers.reason); }
   if (governance && governance.status === "error") snapshot.reason = governance.reason === "MFA_REQUIRED" ? "MFA_REQUIRED" : governance.reason === "FORBIDDEN" ? "FORBIDDEN" : governance.reason === "INVALID_RESPONSE" ? "INVALID_RESPONSE" : "UNAVAILABLE";
 
   const dash = snapshot.supervision;
@@ -137,8 +182,8 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if (space === "matching" && dash?.matching?.length) {
-    snapshot.rows = dash.matching.map((item) => ({
+  if (space === "matching" && dash) {
+    snapshot.rows = (dash.matching??[]).map((item) => ({
       id: item.id,
       href: spaceHref(locale, "matching", query, item.id),
       title: item.organization_name,
@@ -165,7 +210,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if (space === "contrats" && dash?.contracts?.length) {
+  if (space === "contrats" && dash) {
     snapshot.rows = dash.contracts.map((item) => ({
       id: item.id,
       href: spaceHref(locale, "contrats", query, item.id),
@@ -180,7 +225,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if (space === "avenants" && dash?.amendments?.length) {
+  if (space === "avenants" && dash) {
     snapshot.rows = dash.amendments.map((item) => ({
       id: item.id,
       href: spaceHref(locale, "avenants", query, item.id),
@@ -195,7 +240,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if (space === "documents" && dash?.documents?.length) {
+  if (space === "documents" && dash) {
     snapshot.rows = dash.documents.map((item) => ({
       id: item.id,
       href: spaceHref(locale, "documents", query, item.id),
@@ -204,7 +249,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.organization_id,
-      extras: { kind: item.kind, version: String(item.version) },
+      extras: { kind: item.kind, version: String(item.version),statusCodes:item.expires_on&&item.expires_on<new Date().toISOString().slice(0,10)?"EXPIRED":item.expires_on&&item.expires_on<=new Date(Date.now()+30*86400000).toISOString().slice(0,10)?"EXPIRING":"" },
       treat: /PENDING|SUBMITTED|UNDER_REVIEW|EXPIRED|REJECTED|QUARANTINED/i.test(item.status),
     }));
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
@@ -221,6 +266,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
       organizationId: item.client_organization_id,
       extras: { rfqId: item.object_id, requestId: item.service_request_id, providerId: item.provider_organization_id },
     }));
+    snapshot.rows.push(...(dash.notifications??[]).map((item)=>({id:item.id,href:spaceHref(locale,"messagerie",query,item.id),title:item.event_type,cells:[item.event_type,item.organization_name,"Notification",item.channel,item.updated_at.slice(0,16),item.read_at?"0":"1",item.status,item.priority],status:item.status,tone:statusTone(item.status),organizationId:item.organization_id,extras:{kind:"NOTIFICATION",statusCodes:item.read_at?"":"UNREAD",errorCode:item.error_code??"",attemptCount:String(item.attempt_count)}})));
     snapshot.treat = snapshot.rows.filter((row) => row.status === "OPEN");
     return overlayDemo(locale, space, query, snapshot);
   }
@@ -259,7 +305,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
       id: item.id,
       href: spaceHref(locale, "devis", query, item.id),
       title: `${item.client_name} · ${item.provider_name}`,
-      cells: [sliceId(item.id), sliceId(item.request_id), item.provider_name, "1", "—", "—", "—", "—", "—", item.status, item.status],
+      cells: [sliceId(item.id), sliceId(item.request_id), item.provider_name, item.version_number?.toString()??"—", item.subtotal_minor??"—",item.tax_minor??"—",item.total_minor?`${item.total_minor} ${item.currency??""} (minor)`:"—",item.duration_days?.toString()??"—",item.valid_until??"—","—",item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.provider_organization_id,
@@ -268,27 +314,8 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if ((space === "contrats" || space === "avenants" || space === "missions" || space === "jalons") && dash) {
-    snapshot.rows = dash.missions.map((item) => ({
-      id: item.id,
-      href: spaceHref(locale, space, query, item.id),
-      title: `${item.client_name} → ${item.provider_name}`,
-      cells: space === "jalons"
-        ? [sliceId(item.id), `${item.milestone_count}`, `${item.deliverable_count}`, item.provider_name, item.updated_at?.slice(0, 10) ?? "—", String(item.deliverable_count), item.status, "—", item.status]
-        : space === "avenants"
-          ? [sliceId(item.id), sliceId(item.contract_id), item.status, "—", "—", "—", "—", item.status]
-          : space === "contrats"
-            ? [sliceId(item.contract_id), sliceId(item.id), item.client_name, item.provider_name, "1", "—", item.status, item.status, item.status]
-            : [sliceId(item.id), sliceId(item.contract_id), item.client_name, item.provider_name, `${item.milestone_count}`, `${item.deliverable_count}`, String(item.deliverable_count), item.status, item.status],
-      status: item.status,
-      tone: statusTone(item.status),
-      organizationId: item.client_organization_id,
-      extras: { contractId: item.contract_id, providerId: item.provider_organization_id },
-      treat: /BLOCKED|PENDING|START|CLOSUR/i.test(item.status),
-    }));
-    snapshot.treat = snapshot.rows.filter((row) => row.treat);
-    return overlayDemo(locale, space, query, snapshot);
-  }
+  if(space==="jalons"&&dash){snapshot.rows=(dash.milestones??[]).map(item=>({id:item.id,href:spaceHref(locale,space,query,item.id),title:locale==="ar"?item.title_ar:item.title_fr,cells:[locale==="ar"?item.title_ar:item.title_fr,sliceId(item.mission_id),item.milestone_key,item.owner_name,item.due_at??"—",String(item.deliverable_count),item.status,String(item.proof_count),item.status],status:item.status,tone:statusTone(item.status),organizationId:item.organization_id,extras:{missionId:item.mission_id,statusCodes:item.due_at&&new Date(item.due_at)<new Date()&&!["ACCEPTED","REJECTED"].includes(item.status)?"OVERDUE":""},treat:item.status==="SUBMITTED"||item.status==="REJECTED"}));snapshot.treat=snapshot.rows.filter(row=>row.treat);return overlayDemo(locale,space,query,snapshot);}
+  if(space==="missions"&&dash){snapshot.rows=dash.missions.map(item=>({id:item.id,href:spaceHref(locale,space,query,item.id),title:`${item.client_name} → ${item.provider_name}`,cells:[sliceId(item.id),sliceId(item.contract_id),item.client_name,item.provider_name,String(item.milestone_count),String(item.deliverable_count),"—","—",item.status],status:item.status,tone:statusTone(item.status),organizationId:item.client_organization_id,extras:{contractId:item.contract_id,providerId:item.provider_organization_id},treat:/BLOCKED|PENDING|START|CLOSUR/.test(item.status)}));snapshot.treat=snapshot.rows.filter(row=>row.treat);return overlayDemo(locale,space,query,snapshot);}
   if (space === "documents" && providerDash) {
     snapshot.rows = providerDash.documents.map((item) => documentRow(locale, query, item));
     snapshot.treat = snapshot.rows.filter((row) => /SUBMITTED|UNDER_REVIEW|EXPIRED/.test(row.status));
@@ -316,7 +343,7 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
 }
 
 function overlayDemo(locale: Locale, space: AdminSpaceId, query: string, snapshot: SpaceSnapshot) {
-  if (snapshot.reason === "MFA_REQUIRED" || snapshot.reason === "UNAVAILABLE" || snapshot.reason === "INVALID_RESPONSE" || snapshot.reason === "FORBIDDEN") {
+  if (snapshot.reason && snapshot.reason !== "OK") {
     return snapshot;
   }
   if (snapshot.rows.length > 0 || !canApplyAdminDemo()) return snapshot;

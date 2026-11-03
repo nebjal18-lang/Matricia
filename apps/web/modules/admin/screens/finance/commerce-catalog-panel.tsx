@@ -1,4 +1,5 @@
 "use client";
+import {commerceIdle}from"@/modules/admin/screens/finance/commerce-state";
 
 import { useActionState } from "react";
 import { Badge } from "@/modules/shared/ui/badge";
@@ -11,11 +12,9 @@ import {
   activateCreditPackAction,
   activateCreditPromotionAction,
   activatePlatformParameterAction,
-  commerceIdle,
   createCreditPackAction,
   createCreditPromotionAction,
   createPlatformParameterAction,
-  grantCreditPackAction,
   grantCreditPromotionAction,
   type CommerceActionState,
 } from "./commerce-actions";
@@ -24,9 +23,9 @@ import type { CommerceMessages } from "./commerce-messages";
 const control = "min-h-11 w-full rounded-md border bg-background px-3";
 const parameterKeys = ["DOCUMENT_EXPIRY_WARNING_DAYS", "VOLUME_RESERVATION_DEFAULT_TTL_HOURS", "CREDIT_PROMOTION_MAX_BONUS"];
 
-function Feedback({ state, m }: { state: CommerceActionState; m: CommerceMessages }) {
+function Feedback({ state, m, locale }: { state: CommerceActionState; m: CommerceMessages; locale: Locale }) {
   if (state.status === "idle") return null;
-  if (state.status === "success") return <p role="status" className="text-sm text-primary">{m.success} {state.outcome}</p>;
+  if (state.status === "success") return <p role="status" className="text-sm text-primary">{state.outcome==="MANUAL_CREDIT_GRANT_REQUESTED"?(locale==="ar"?"جمد الطلب. راجعه شخص مالي آخر ثم نفذه من لوحة المنح تحت الرقابة المزدوجة.":"Demande figée. Une autre personne Finance doit la revoir puis l’exécuter dans les attributions sous double contrôle."):<>{m.success} {state.outcome}</>}</p>;
   return <p role="alert" className="text-sm text-destructive">{m.errors[state.reason]}</p>;
 }
 
@@ -43,7 +42,6 @@ export function CommerceCatalogPanel({
   const name = (fr: string, ar: string) => (locale === "ar" ? ar : fr);
   const canWrite = catalog.capabilities.can_write && Boolean(auditOrganizationId);
   const draftPacks = catalog.packs.filter((item) => item.status === "DRAFT");
-  const activePacks = catalog.packs.filter((item) => item.status === "ACTIVE");
   const draftPromotions = catalog.promotions.filter((item) => item.status === "DRAFT");
   const activePromotions = catalog.promotions.filter((item) => item.status === "ACTIVE");
   const draftParameters = catalog.parameters.filter((item) => item.status === "DRAFT");
@@ -104,12 +102,10 @@ export function CommerceCatalogPanel({
           <Form title={m.activatePack} action={activateCreditPackAction} keyValue={keys.activatePack} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={draftPacks.length === 0}>
             <Select name="packVersionId" label={m.packs} values={draftPacks.map((item) => item.id)} labels={draftPacks.map((item) => `${item.code} v${item.version}`)} />
           </Form>
-          <Form title={m.grantPack} action={grantCreditPackAction} keyValue={keys.grantPack} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={activePacks.length === 0 || wallets.length === 0}>
-            <Select name="packVersionId" label={m.packs} values={activePacks.map((item) => item.id)} labels={activePacks.map((item) => `${item.code} v${item.version}`)} />
-            <Select name="walletId" label={m.wallet} values={wallets.map((item) => item.wallet_id)} labels={wallets.map((item) => item.organization_name)} />
-            <Select name="organizationId" label={m.organization} values={wallets.map((item) => item.organization_id)} labels={wallets.map((item) => item.organization_name)} />
-            <Field label={m.paymentRef}><Input name="paymentReference" required minLength={3} className={control} /></Field>
-          </Form>
+          <section className="grid gap-2 rounded border p-4">
+            <h4 className="font-semibold">{name("Achats de packs vérifiés", "مشتريات حزم متحققة")}</h4>
+            <p>{name("L’attribution d’un pack payé exige la capture confirmée par le prestataire de paiement et sa préparation comptable figée. Une référence saisie par l’Admin ne constitue pas une preuve de paiement. La configuration du pack reste disponible ici ; les cadeaux passent par la revue financière distincte.", "يتطلب منح حزمة مدفوعة دفعة مؤكدة من مقدم الدفع وإعدادها المحاسبي المجمد. لا يشكل المرجع الذي يدخله المسؤول دليلا على الدفع. يبقى إعداد الحزمة متاحا هنا، ويمر المنح المجاني بمراجعة مالية مستقلة.")}</p>
+          </section>
           <Form title={m.createPromotion} action={createCreditPromotionAction} keyValue={keys.promotion} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
             <Field label={m.code}><Input name="code" required className={control} dir="ltr" pattern="[A-Za-z][A-Za-z0-9_]{2,63}" /></Field>
             <Field label={m.nameFr}><Input name="nameFr" required minLength={2} className={control} /></Field>
@@ -178,7 +174,7 @@ function Form({
         <input type="hidden" name="auditOrganizationId" value={auditOrganizationId} />
         {children}
         <Button type="submit" disabled={pending || disabled} className="min-h-11">{pending ? m.processing : m.save}</Button>
-        <Feedback state={state} m={m} />
+        <Feedback state={state} m={m} locale={locale} />
       </form>
     </article>
   );

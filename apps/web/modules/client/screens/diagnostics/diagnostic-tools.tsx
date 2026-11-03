@@ -10,10 +10,10 @@ type Messages = {
   openEvolution: string;
 };
 
-export function DiagnosticTools({ locale, m }: { locale: "fr" | "ar"; m: Messages }) {
+export function DiagnosticTools({ locale, m,query="" }: { locale: "fr" | "ar"; m: Messages;query?:string }) {
   const tools = [
-    { href: `/${locale}/client/diagnostics/assistance`, title: m.assistance, description: m.assistanceHelp, action: m.openAssistance },
-    { href: `/${locale}/client/diagnostics/evolution`, title: m.evolution, description: m.evolutionHelp, action: m.openEvolution },
+    { href: `/${locale}/client/diagnostics/assistance${query}`, title: m.assistance, description: m.assistanceHelp, action: m.openAssistance },
+    { href: `/${locale}/client/diagnostics/evolution${query}`, title: m.evolution, description: m.evolutionHelp, action: m.openEvolution },
   ];
   return <section aria-labelledby="diagnostic-tools" className="space-y-3">
     <h2 id="diagnostic-tools" className="text-xl font-semibold">{m.tools}</h2>

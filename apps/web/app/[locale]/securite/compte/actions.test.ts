@@ -102,4 +102,12 @@ describe("account security server actions", () => {
       p_operation_id: "33333333-3333-4333-8333-333333333333",
     });
   });
+  it.each(["fr","ar"])("returns a local dossier only after the %s MFA challenge is verified and audited",async locale=>{
+    const form=factorForm();const next=`/${locale}/client/demandes/id?organizationId=org&tab=offres`;form.set("locale",locale);form.set("next",next);
+    await expect(verifyTotpEnrollment(idle,form)).resolves.toEqual({status:"success",nextPath:next});
+  });
+  it("never returns to a dossier when assurance remains AAL1",async()=>{mocks.getAuthenticatorAssuranceLevel.mockResolvedValue({data:{currentLevel:"aal1"},error:null});const form=factorForm();form.set("next","/fr/client/demandes/id");await expect(verifyTotpEnrollment(idle,form)).resolves.toEqual({status:"error",reason:"UNAVAILABLE"});});
+  it("never forwards an external target after MFA",async()=>{const form=factorForm();form.set("next","https://evil.invalid/");await expect(verifyTotpEnrollment(idle,form)).resolves.toEqual({status:"success"});});
+  it("does not return a dossier before the audit has completed",async()=>{mocks.adminRpc.mockResolvedValueOnce({data:null,error:null}).mockResolvedValue({error:{code:"503"}});const form=factorForm();form.set("next","/fr/client/demandes/id");await expect(verifyTotpEnrollment(idle,form)).resolves.toEqual({status:"error",reason:"AUDIT_PENDING"});});
+
 });

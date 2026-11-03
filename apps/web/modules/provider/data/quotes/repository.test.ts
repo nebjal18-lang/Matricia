@@ -1,6 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: vi.fn() }));
-import { parseQuoteVersionAmounts, sharedDocumentsFromRows, unambiguousTaxRules } from "./repository";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { loadProviderQuotes, parseQuoteVersionAmounts, sharedDocumentsFromRows, unambiguousTaxRules } from "./repository";
+
+describe("provider consultation and quote Auth reads", () => {
+  it.each([[503, "AUTH_QUERY_FAILED"], [401, "UNAUTHENTICATED"]] as const)("preserves Auth %s before reading business data", async (status, reason) => {
+    const from = vi.fn();
+    vi.mocked(getSupabaseServerClient).mockResolvedValue({ auth: { getUser: async () => ({ data: { user: null }, error: { status } }) }, from } as never);
+    expect(await loadProviderQuotes()).toEqual({ status: "error", reason });
+    expect(from).not.toHaveBeenCalled();
+  });
+});
 
 const rule = (id: string, category: string, rate: number) => ({
   id,

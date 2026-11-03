@@ -1,0 +1,31 @@
+-- Caller-RLS review details: no security-definer access to hidden catalogue versions.
+create function public.franchise_catalog_review_diff(p_franchise_id uuid,p_change_request_id uuid)returns jsonb
+language plpgsql stable security invoker set search_path=pg_catalog as $$
+declare request public.catalog_change_requests%rowtype;before_doc jsonb;after_doc jsonb;result jsonb;current_version uuid;
+begin
+ if not public.franchise_catalog_scope(p_franchise_id)then raise exception 'FRANCHISE_CATALOG_SCOPE_DENIED'using errcode='42501';end if;
+ select cr.*into request from public.catalog_change_requests cr join public.franchises f on f.library_id=cr.library_id where cr.id=p_change_request_id and f.id=p_franchise_id;
+ if request.id is null then raise exception 'FRANCHISE_CATALOG_SCOPE_DENIED'using errcode='42501';end if;
+ if request.target_type='SERVICE'then
+  select coalesce(current_draft_version_id,current_published_version_id)into current_version from public.catalog_services where id=request.target_id;
+  select to_jsonb(v)into after_doc from public.catalog_service_versions v where v.id=current_version and v.library_id=request.library_id;
+  select to_jsonb(v)into before_doc from public.catalog_service_versions v where v.service_id=request.target_id and v.library_id=request.library_id and case when current_version<>request.target_version_id then v.id=request.target_version_id else v.version<(after_doc->>'version')::int end order by v.version desc limit 1;
+ elsif request.target_type='QUESTIONNAIRE'then
+  select coalesce(current_draft_version_id,current_published_version_id)into current_version from public.questionnaires where id=request.target_id;
+  select to_jsonb(v)into after_doc from public.questionnaire_versions v where v.id=current_version and v.library_id=request.library_id;
+  select to_jsonb(v)into before_doc from public.questionnaire_versions v where v.questionnaire_id=request.target_id and v.library_id=request.library_id and case when current_version<>request.target_version_id then v.id=request.target_version_id else v.version<(after_doc->>'version')::int end order by v.version desc limit 1;
+ elsif request.target_type='RULE'then
+  select coalesce(current_draft_version_id,current_published_version_id)into current_version from public.question_rules where id=request.target_id;
+  select to_jsonb(v)into after_doc from public.question_rule_versions v where v.id=current_version and v.library_id=request.library_id;
+  select to_jsonb(v)into before_doc from public.question_rule_versions v where v.rule_id=request.target_id and v.library_id=request.library_id and case when current_version<>request.target_version_id then v.id=request.target_version_id else v.version<(after_doc->>'version')::int end order by v.version desc limit 1;
+ else raise exception 'INVALID_FRANCHISE_REVIEW_TARGET'using errcode='22023';end if;
+ if request.target_type='QUESTIONNAIRE'then
+  after_doc:=after_doc||jsonb_build_object('sections',coalesce((select jsonb_agg(jsonb_build_object('key',section_key,'label_fr',label_fr,'label_ar',label_ar,'help_fr',help_fr,'help_ar',help_ar,'order',sort_order)order by sort_order,section_key)from public.questionnaire_sections where questionnaire_version_id=current_version),'[]'::jsonb),'questions',coalesce((select jsonb_agg(jsonb_build_object('question_version_id',q.question_version_id,'section',s.section_key,'required',q.required_override,'order',q.sort_order)order by q.sort_order,q.question_version_id)from public.questionnaire_version_questions q join public.questionnaire_sections s on s.id=q.section_id where q.questionnaire_version_id=current_version),'[]'::jsonb),'rules',coalesce((select jsonb_agg(jsonb_build_object('rule_version_id',rule_version_id,'order',evaluation_order)order by evaluation_order,rule_version_id)from public.questionnaire_version_rules where questionnaire_version_id=current_version),'[]'::jsonb));
+  if before_doc is not null then before_doc:=before_doc||jsonb_build_object('sections',coalesce((select jsonb_agg(jsonb_build_object('key',section_key,'label_fr',label_fr,'label_ar',label_ar,'help_fr',help_fr,'help_ar',help_ar,'order',sort_order)order by sort_order,section_key)from public.questionnaire_sections where questionnaire_version_id=(before_doc->>'id')::uuid),'[]'::jsonb),'questions',coalesce((select jsonb_agg(jsonb_build_object('question_version_id',q.question_version_id,'section',s.section_key,'required',q.required_override,'order',q.sort_order)order by q.sort_order,q.question_version_id)from public.questionnaire_version_questions q join public.questionnaire_sections s on s.id=q.section_id where q.questionnaire_version_id=(before_doc->>'id')::uuid),'[]'::jsonb),'rules',coalesce((select jsonb_agg(jsonb_build_object('rule_version_id',rule_version_id,'order',evaluation_order)order by evaluation_order,rule_version_id)from public.questionnaire_version_rules where questionnaire_version_id=(before_doc->>'id')::uuid),'[]'::jsonb));end if;
+ end if;
+ if after_doc is null then raise exception 'FRANCHISE_CATALOG_SCOPE_DENIED'using errcode='42501';end if;
+ select jsonb_build_object('beforeVersion',before_doc->'version','afterVersion',after_doc->'version','beforeHash',coalesce(before_doc->'content_hash',before_doc->'compiled_hash'),'afterHash',coalesce(after_doc->'content_hash',after_doc->'compiled_hash'),'requestedBy',request.requested_by,'reviewedBy',request.reviewed_by,'changes',coalesce((select jsonb_agg(jsonb_build_object('field',field,'before',before_doc->field,'after',after_doc->field)order by field)from(select jsonb_object_keys(coalesce(before_doc,'{}'::jsonb)||after_doc)field)keys where field not in('id','version','row_version','status','created_at','created_by','published_at','retired_at','content_hash','compiled_hash','change_reason','translation_review_status','translation_reviewer_user_id','translation_reviewed_at','translation_review_proof_hash','translation_review_version')and(before_doc->field)is distinct from(after_doc->field)),'[]'::jsonb))into result;
+ return result;
+end$$;
+revoke all on function public.franchise_catalog_review_diff(uuid,uuid)from public,anon,service_role;
+grant execute on function public.franchise_catalog_review_diff(uuid,uuid)to authenticated;

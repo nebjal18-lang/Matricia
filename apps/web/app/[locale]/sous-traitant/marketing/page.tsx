@@ -24,7 +24,7 @@ export default async function ProviderMarketingPage({ params, searchParams }: { 
   const brandDefaults = result.status === "success" && space.selectedOrganizationId ? await loadMarketingBrandDefaults(space.selectedOrganizationId, locale) : null;
   const dimensionLabels = result.status === "success" ? await loadMarketingDimensionLabels(result.dashboard, locale) : {};
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="marketing" title={m.workspaceTitle} lead={m.workspaceLead} kicker={c.kicker}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="marketing" title={m.workspaceTitle} lead={m.workspaceLead} kicker={c.kicker}>
       {result.status === "error" ? (
         <Alert variant={result.reason === "NO_ORGANIZATION" ? "default" : "destructive"}>
           <AlertTitle>{result.reason === "NO_ORGANIZATION" ? m.noOrganization : result.reason === "FORBIDDEN" ? m.accessDenied : m.loadFailed}</AlertTitle>

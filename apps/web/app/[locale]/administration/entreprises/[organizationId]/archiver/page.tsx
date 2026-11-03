@@ -1,3 +1,4 @@
+import {randomUUID} from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
@@ -51,7 +52,7 @@ export default async function AdminEnterpriseArchivePage({
         </main>
       ) : (
         <main className="client-page">
-          <ArchiveOrganizationForm
+          <ArchiveOrganizationForm idempotencyKey={randomUUID()}
             locale={locale}
             query={space.selectedQuery}
             organizationId={org.id}

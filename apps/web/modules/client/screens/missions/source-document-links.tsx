@@ -1,0 +1,3 @@
+type Props={kind:"contract";id:string;versionId:string}|{kind:"amendment";id:string};
+/** These are unsigned source documents; signing evidence is a separate record. */
+export function SourceDocumentLinks(props:Props){const path=props.kind==="contract"?"contracts":"amendments";return<div className="mt-3 flex flex-wrap gap-4">{(["fr","ar"]as const).map(locale=>{const query=new URLSearchParams({locale,...(props.kind==="contract"?{contractVersionId:props.versionId}:{})});return<a key={locale} href={`/api/signatures/${path}/${encodeURIComponent(props.id)}/documents?${query}`} lang={locale} className="inline-flex min-h-11 items-center underline">{locale==="fr"?"Document source PDF — français":"وثيقة المصدر PDF — العربية"}</a>;})}</div>;}

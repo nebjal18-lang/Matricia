@@ -28,17 +28,20 @@ export type PaymentRuntimeConfig = {
 
 export function createPaymentGateway(config: PaymentRuntimeConfig) {
   assertProviderAllowed(config, config.provider);
+  const appEnvironment = process.env.APP_ENV?.trim().toLowerCase();
+  const production = appEnvironment === "production" || (!appEnvironment && process.env.NODE_ENV === "production");
   switch (config.provider) {
     case "DEMO":
+      if (process.env.NODE_ENV === "production" || process.env.APP_ENV?.trim().toLowerCase() === "production") throw new PaymentGatewayError("CONFIGURATION_INVALID");
       return new DemoPaymentGateway(config.demoWebhookSecret);
     case "CMI": {
-      if (!config.cmi || (config.cmi.environment === "live" && !config.liveEnabled)) {
+      if (!config.cmi || (production && (config.cmi.environment !== "live" || !config.liveEnabled)) || (config.cmi.environment === "live" && !config.liveEnabled)) {
         throw new PaymentGatewayError("CONFIGURATION_INVALID");
       }
       return new CmiPaymentGateway(config.cmi);
     }
     case "PAYPAL": {
-      if (!config.paypal || (config.paypal.environment === "live" && !config.liveEnabled)) {
+      if (!config.paypal || (production && (config.paypal.environment !== "live" || !config.liveEnabled)) || (config.paypal.environment === "live" && !config.liveEnabled)) {
         throw new PaymentGatewayError("CONFIGURATION_INVALID");
       }
       const client = new FetchPayPalOrderClient(config.paypal.environment, config.paypal.clientId, config.paypal.clientSecret);

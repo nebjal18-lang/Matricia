@@ -1,3 +1,4 @@
+import type { AllocationTarget } from "./allocation-targets";
 import { z } from "zod";
 
 export const uuid = z.string().uuid();
@@ -16,7 +17,7 @@ export type CostCenter = { id: string; organizationId: string; code: string; sta
 export type Allocation = { id: string; organizationId: string; costCenterId: string; budgetId: string; projectId: string | null; type: string; amountMinor: string; currency: string; createdAt: string };
 export type CalendarItem = { organizationId: string; projectId: string | null; itemId: string; sourceKind: string; eventType: string; titleFr: string; titleAr: string; startsAt: string; endsAt: string | null; status: string; occursOn: string | null; allDay: boolean };
 export type Library = { id: string; nameFr: string; nameAr: string };
-export type Portfolio = { organizations: Organization[]; sites: Site[]; projects: Project[]; contracts: Contract[]; tasks: Task[]; budgets: Budget[]; costCenters: CostCenter[]; allocations: Allocation[]; calendar: CalendarItem[]; libraries: Library[] };
+export type Portfolio = { allocationTargets?: AllocationTarget[]; allocationTargetsStatus?: "success" | "partial" | "unavailable"; allocationTargetsTruncated?: boolean; allocationInvoiceError?: "FORBIDDEN" | "UNAVAILABLE" | "INVALID_RESPONSE"; organizations: Organization[]; sites: Site[]; projects: Project[]; contracts: Contract[]; tasks: Task[]; budgets: Budget[]; costCenters: CostCenter[]; allocations: Allocation[]; calendar: CalendarItem[]; libraries: Library[] };
 
 export function displayCalendarDate(item: CalendarItem, localeValue: "fr" | "ar"): string {
   if (item.allDay && item.occursOn) {

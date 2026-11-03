@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -174,7 +175,7 @@ export function ClientDashboardHome({
         </Link>
         <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active="home" />
         <figure className="client-side-art">
-          <img src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>
@@ -446,7 +447,7 @@ export function ClientDashboardHome({
             </div>
             )}
             <aside className="client-card client-home-art" aria-hidden>
-              <img src="/scenes/medina-terrace.png" alt="" />
+              <Image src="/scenes/medina-terrace.png" alt="" width={600} height={900} />
               <p>{c.orgCaption}</p>
             </aside>
           </section>

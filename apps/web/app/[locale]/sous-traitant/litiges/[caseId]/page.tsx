@@ -34,7 +34,7 @@ export default async function ProviderDisputePage({
   const m = getProviderDisputeMessages(locale);
   const keys = Object.fromEntries(["respond", "appeal", "decide", "propose", "approve", "activate"].map((x) => [x, randomUUID()]));
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="disputes" title={m.title} lead={d.obligationKey}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="disputes" title={m.title} lead={d.obligationKey}>
       <DisputesBoard
         locale={locale}
         query={space.selectedQuery}

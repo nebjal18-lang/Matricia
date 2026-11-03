@@ -1,7 +1,8 @@
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import { loadProviderQuotes } from "@/modules/provider/data/quotes/repository";
@@ -18,7 +19,8 @@ export default async function ProviderQuotesPage({ params, searchParams }: { par
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/devis` }));
-  const result = await loadProviderQuotes(query.organizationId);
+  const contextState = providerContextReadState(space, query.organizationId);
+  const result = contextState ? { status: "error" as const, reason: "NO_ORGANIZATION" as const } : await loadProviderQuotes(space.selectedOrganizationId ?? undefined);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/devis` }));
   const m = getProviderQuoteMessages(locale);
   const c = providerCopy(locale);
@@ -30,16 +32,12 @@ export default async function ProviderQuotesPage({ params, searchParams }: { par
     ? filterListRows(quoteRowsFromInvitations(filterInvitationsByQuoteTab(result.dashboard.invitations, query.tab), locale, space.selectedQuery), query.q ?? "")
     : [];
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={c.quotesTitle} lead={c.quotesLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/devis/nouveau${space.selectedQuery}`} label={c.createQuote} />}>
-      <QuotesBoard locale={locale} query={boardQuery} rows={rows} tab={query.tab} empty={result.status === "error" ? m.loadError : undefined} />
-      <details id="devis-operation" className="client-ops">
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={c.quotesTitle} lead={c.quotesLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/devis/nouveau${space.selectedQuery}`} label={c.createQuote} />}>
+      {result.status === "success" ? <QuotesBoard locale={locale} query={boardQuery} rows={rows} tab={query.tab} /> : <ProviderReadState locale={locale} state={contextState ?? (result.status === "error" && result.reason === "NO_ORGANIZATION" ? "forbidden" : "unavailable")} retryHref={`/${locale}/sous-traitant/devis${space.selectedQuery}`} unavailableMessage={m.loadError} reason={space.readError ?? (result.status === "error" ? result.reason : undefined)} />}
+      {result.status === "success" ? <details id="devis-operation" className="client-ops">
         <summary>{c.opsQuotes}</summary>
-        {result.status === "error" ? (
-          <Alert variant="destructive"><AlertTitle>{m.loadError}</AlertTitle><AlertDescription>{m.failed}</AlertDescription></Alert>
-        ) : (
           <QuotePanel dashboard={result.dashboard} locale={locale} m={m} prefills={prefills} identities={Object.fromEntries(result.dashboard.invitations.map((item) => [item.id, { decision: randomUUID(), revision: randomUUID(), submit: randomUUID(), correlation: randomUUID() }]))} />
-        )}
-      </details>
+      </details> : null}
     </ProviderAppShell>
   );
 }

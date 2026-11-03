@@ -14,7 +14,7 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "test:integration": "vitest run --passWithNoTests tests/integration",
+    "test:integration": "node --experimental-strip-types --test tests/integration/*.test.mjs",
     "test:db": "node scripts/run-db-tests.mjs",
     "test:rls": "node scripts/run-db-tests.mjs",
     "test:e2e": "playwright test",
@@ -25,7 +25,25 @@
     "no-placeholders": "node --experimental-strip-types scripts/validate-no-placeholders.ts",
     "release:validate": "node --experimental-strip-types scripts/validate-release.ts",
     "demo:provision": "node scripts/provision-demo-library-personas.mjs",
-    "verify:phase00": "pnpm catalog:validate && pnpm spec:validate && pnpm traceability:validate"
+    "verify:phase00": "pnpm catalog:validate && pnpm spec:validate && pnpm traceability:validate && pnpm server-actions:validate",
+    "test:tooling": "node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/db-test-support.test.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs",
+    "release:structure": "node --experimental-strip-types scripts/validate-release.ts --structure-only",
+    "test:e2e:public": "node scripts/run-browser-acceptance.mjs public",
+    "test:e2e:authenticated": "node scripts/run-browser-acceptance.mjs authenticated",
+    "test:e2e:workflows": "node scripts/run-browser-acceptance.mjs workflows",
+    "test:e2e:local-delivery": "node tests/e2e/helpers/local-delivery-acceptance-run.mjs",
+    "test:security": "node scripts/run-db-tests.mjs",
+    "test:a11y": "node scripts/run-browser-acceptance.mjs authenticated",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:integration && pnpm test:tooling && pnpm verify:phase00 && pnpm build",
+    "test:performance": "node scripts/performance/browser-vitals.mjs",
+    "release:checks": "node scripts/release/run-checks.mjs",
+    "test:performance:api": "node scripts/performance/api-latency.mjs",
+    "test:performance:catalog": "node scripts/performance/catalog-performance-evidence.mjs",
+    "server-actions:validate": "node scripts/release/server-action-exports.mjs",
+    "test:e2e:admin-organizations": "node --experimental-strip-types tests/e2e/helpers/final-admin-acceptance.mjs",
+    "test:e2e:audit30-native": "node --experimental-strip-types tests/e2e/helpers/audit30-native-acceptance.mjs",
+    "test:e2e:audit30-public": "playwright test --config=playwright.audit30.config.ts tests/e2e/public/diagnostic-need-integrity.spec.ts --workers=1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -34,6 +52,17 @@
     "postgres": "3.4.7",
     "supabase": "2.117.0",
     "typescript": "5.9.3",
-    "vitest": "5.0.0"
+    "vitest": "5.0.3",
+    "vite": "8.1.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp": "0.35.5",
+      "source-map-js": "1.2.2",
+      "fast-uri": "3.1.9",
+      "vite": "8.1.6",
+      "minimatch": "11.0.1",
+      "brace-expansion": "5.0.12"
+    }
   }
 }

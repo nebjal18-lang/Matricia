@@ -1,3 +1,5 @@
+import { safeReturnPath } from "./return-path";
+
 /** Build /connexion URLs while preserving return path and registration intent. */
 
 export function connexionHref(
@@ -10,8 +12,8 @@ export function connexionHref(
   },
 ): string {
   const params = new URLSearchParams();
-  const next = options?.next?.trim();
-  if (next && next.startsWith(`/${locale}/`) && !next.startsWith("//") && !next.includes("\\")) {
+  const next = safeReturnPath(options?.next, locale);
+  if (next) {
     params.set("next", next);
   }
   if (options?.mode === "inscription") params.set("mode", "inscription");

@@ -16,7 +16,8 @@ import { filterProviderFacingActions } from "@/modules/provider/data/home/view-m
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
 import { loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
 import { resolveWorkspaceLanding, workspaceLandingPath } from "@/modules/shared/lib/connected-space/workspace-landing";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { availableWorkspaces } from "@/modules/shared/lib/auth/workspace-navigation";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { signOut } from "./actions";
 
 const membershipRows = z.array(
@@ -28,7 +29,6 @@ const membershipRows = z.array(
 );
 
 const PROVIDER_ROLES = new Set(["PROVIDER_OWNER", "PROVIDER_MANAGER", "PROVIDER_SALES", "PROVIDER_TECHNICIAN", "PROVIDER_VIEWER", "PROVIDER_ACCOUNTING"]);
-const CLIENT_ROLES = new Set(["CLIENT_OWNER", "CLIENT_ADMIN", "CLIENT_BUYER", "CLIENT_ACCOUNTING", "CLIENT_MEMBER", "CLIENT_VIEWER"]);
 
 function OrganizationSwitcher({
   locale,
@@ -114,7 +114,7 @@ export default async function DashboardPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ signout?: string; organizationId?: string; q?: string }>;
+  searchParams: Promise<{ signout?: string; organizationId?: string; q?: string; workspace?: string; navigation?: string }>;
 }) {
   const { locale } = await params;
   const query = await searchParams;
@@ -122,9 +122,9 @@ export default async function DashboardPage({
 
   const access = await loadMyPlatformAccess();
   if (access.status === "error" && access.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/tableau-de-bord` }));
-  const supabase = access.status === "ok" ? access.client : await getSupabaseServerClient();
-  const userId = access.status === "ok" ? access.userId : null;
-  if (!userId) redirect(connexionHref(locale, { next: `/${locale}/tableau-de-bord` }));
+  if (access.status === "error") return <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6"><WorkspaceFailure locale={locale} reason={access.reason} returnPath={`/${locale}/tableau-de-bord`} /></main>;
+  const supabase = access.client;
+  const userId = access.userId;
 
   const now = new Date().toISOString();
   const membershipsQuery = await supabase
@@ -137,6 +137,7 @@ export default async function DashboardPage({
 
   const memberships = membershipRows.safeParse(membershipsQuery.data);
   const organizationsUnavailable = Boolean(membershipsQuery.error) || !memberships.success;
+  if (organizationsUnavailable) return <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6"><WorkspaceFailure locale={locale} reason={membershipsQuery.error ? "QUERY_FAILED" : "INVALID_RESPONSE"} returnPath={`/${locale}/tableau-de-bord`} /></main>;
   const visibleMemberships = memberships.success
     ? (() => {
         const withoutFixtures = memberships.data.filter((membership) => !isCatalogFixtureOrganizationName(membership.organizations.display_name));
@@ -157,24 +158,30 @@ export default async function DashboardPage({
   const selectedMembership = visibleMemberships?.find((membership) => membership.id === context.selected?.membershipId) ?? null;
   const m = dashboardHomeCopy[locale];
   const alternate = locale === "fr" ? "ar" : "fr";
-  const selectedQuery = context.selected ? `?organizationId=${encodeURIComponent(context.selected.organizationId)}` : "";
+  let selectedQuery = context.selected ? `?organizationId=${encodeURIComponent(context.selected.organizationId)}` : "";
   const hasPlatformRole = access.status === "ok" && access.requirementSatisfied && access.roles.size > 0;
 
   const [membershipRoles, actionCenter] = await Promise.all([
     context.selected
       ? supabase.from("organization_member_roles").select("role_code").eq("membership_id", context.selected.membershipId).is("revoked_at", null).limit(20)
-      : Promise.resolve({ data: [] as Array<{ role_code: string }> }),
+      : Promise.resolve({ data: [] as Array<{ role_code: string }>, error: null }),
     loadUserActionCenterWithinBudget(locale, now, context.selected?.organizationId ?? null),
   ]);
+  if (membershipRoles.error) return <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6"><WorkspaceFailure locale={locale} reason="QUERY_FAILED" returnPath={`/${locale}/tableau-de-bord${selectedQuery}`} /></main>;
   const roleCodes = new Set((membershipRoles.data ?? []).map((row) => String(row.role_code)));
-  const landing = resolveWorkspaceLanding({
+  const defaultLanding = resolveWorkspaceLanding({
     membershipRoleCodes: roleCodes,
     platformRoleCodes: access.status === "ok" ? access.roles : [],
   });
-  if (landing === "administration" || landing === "franchise") redirect(workspaceLandingPath(locale, landing, selectedQuery));
+  const allowed = availableWorkspaces(roleCodes, access.roles);
+  const requestedWorkspace = allowed.find(kind => kind === query.workspace);
+  const landing = requestedWorkspace ?? defaultLanding;
+  if (requestedWorkspace) selectedQuery += `${selectedQuery ? "&" : "?"}workspace=${requestedWorkspace}`;
+  const roleFallback = Boolean(query.workspace && !requestedWorkspace) || query.navigation === "role-fallback";
+  if (landing === "administration" || landing === "franchise") redirect(workspaceLandingPath(locale, landing, `${selectedQuery}${roleFallback ? `${selectedQuery ? "&" : "?"}navigation=role-fallback` : ""}`));
+  const navigationNotice = roleFallback ? <p role="status" className="mx-4 mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">{locale === "ar" ? "المساحة المطلوبة غير متاحة لحسابكم. تم فتح مساحتكم المسموح بها." : "L’espace demandé n’est pas habilité pour votre compte. Votre espace autorisé a été ouvert."}</p> : null;
   const isProviderSpace = [...roleCodes].some((role) => PROVIDER_ROLES.has(role));
-  const isClientSpace = [...roleCodes].some((role) => CLIENT_ROLES.has(role));
-  const preferProvider = isProviderSpace && !isClientSpace;
+  const preferProvider = landing === "provider" && isProviderSpace;
 
   const scopedRaw = actionCenter.status === "success" ? filterDashboardActions(actionCenter.value.items, context.selected?.organizationId ?? null) : [];
   const scopedItems = preferProvider ? filterProviderFacingActions(scopedRaw, hasPlatformRole) : filterClientFacingActions(scopedRaw, hasPlatformRole);
@@ -203,6 +210,7 @@ export default async function DashboardPage({
     const { ProviderDashboardHome } = await import("@/modules/provider/screens/dashboard");
     return (
       <>
+        {navigationNotice}
         {query.signout === "failed" || context.rejected ? (
           <div className="space-y-2 px-4 pt-4">
             {query.signout === "failed" ? <Alert variant="destructive"><AlertDescription>{m.signOutError}</AlertDescription></Alert> : null}

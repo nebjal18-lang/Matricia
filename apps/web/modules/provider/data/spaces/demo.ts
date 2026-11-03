@@ -1,6 +1,6 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-export function canApplyProviderSpaceDemo(_organizationName?: string | null) {
+export function canApplyProviderSpaceDemo() {
   return false;
 }
 

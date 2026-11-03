@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { FranchiseLibraryHomeBoard, FranchiseLibraryOverviewBoard, FranchiseWorkQueueBoard } from "./library-boards";
 import { validationChipLabel } from "./library-chrome";
 import { FranchiseQuestionnairesWorkbench, FranchiseRulesWorkbench, FranchiseServicesWorkbench } from "./library-workbenches";
@@ -25,6 +25,8 @@ import {
 import { resolveFranchiseNestedView, FRANCHISE_NESTED_NAV_PATHS } from "@/modules/franchise/data/spaces/nested-views";
 import { demoFranchiseSpaces } from "@/modules/franchise/data/spaces/demo";
 import type { FranchiseLibraryWorkspace } from "@/modules/franchise/data/library/workspace";
+
+vi.mock("next/navigation",()=>({useRouter:()=>({push:vi.fn()}),usePathname:()=>"/fr/franchise/services",useSearchParams:()=>new URLSearchParams()}));
 
 const empty: FranchiseLibraryWorkspace = {
   mandate: {
@@ -209,11 +211,11 @@ describe("alignement maquettes constructeurs et espaces (06–20)", () => {
     expect(html).toContain("Créer un service");
     expect(html).toContain("Aperçu Client");
     expect(html).toContain("Livrables inclus");
-    expect(html).toContain("Banque de questions");
-    expect(html).toContain("Aperçu Client et test des branches");
-    expect(html).toContain("Analyse des branches");
-    expect(html).toContain("Simulation sans effet");
-    expect(html).toContain("Constructeur de règle");
+    expect(html).toContain("Composition et version du questionnaire");
+    expect(html).toContain("Simulation du questionnaire");
+    expect(html).toContain("ne modifie aucun diagnostic réel");
+    expect(html).toContain("sur le serveur");
+    expect(html).toContain("Conditions et actions de la règle");
     expect(html).toContain("Soumettre à Matricia");
     expect(html).toContain("Informatique");
     expect(html).not.toMatch(/exemple illustratif/i);

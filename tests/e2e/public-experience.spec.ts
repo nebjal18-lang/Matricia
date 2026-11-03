@@ -5,10 +5,10 @@ for (const locale of ["fr", "ar"] as const) {
   test(`public experience ${locale}: inscription, intentions, abonnements et accessibilité`, async ({ page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(`/${locale}`);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(locale === "fr" ? "Découvrez ce qui freine votre entreprise" : "اكتشفوا ما يبطئ شركتكم");
-    await expect(page.getByRole("link", { name: locale === "fr" ? "Analyser mon entreprise" : "حللوا شركتي" }).first()).toHaveAttribute("href", `/${locale}/diagnostic`);
-    await expect(page.getByRole("link", { name: locale === "fr" ? "Proposer mes services" : "اقترحوا خدماتكم" }).first()).toHaveAttribute("href", `/${locale}/fournisseur`);
-    await expect(page.getByRole("link", { name: locale === "fr" ? "J’ai déjà un besoin précis" : "لدي احتياج محدد" })).toHaveAttribute("href", `/${locale}/besoin`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(locale === "fr" ? "Découvrez ce qui freine votre entreprise" : "اكتشف ما يعيق تطور مؤسستك");
+    await expect(page.getByRole("link", { name: locale === "fr" ? "Analyser mon entreprise" : "تحليل مؤسستي" }).first()).toHaveAttribute("href", `/${locale}/diagnostic`);
+    await expect(page.getByRole("link", { name: locale === "fr" ? "Proposer mes services" : "تقديم خدماتي" }).first()).toHaveAttribute("href", `/${locale}/fournisseur`);
+    await expect(page.getByRole("link", { name: locale === "fr" ? "J’ai déjà un besoin précis" : "لدي حاجة محددة" })).toHaveAttribute("href", `/${locale}/besoin`);
     const registration = page.getByRole("link", { name: locale === "fr" ? "Créer un compte" : "إنشاء حساب" });
     if (await registration.first().isVisible()) await expect(registration.first()).toHaveAttribute("href", new RegExp(`/${locale}/inscription`));
     else {
@@ -21,7 +21,7 @@ for (const locale of ["fr", "ar"] as const) {
     expect(audit.violations.map(value => ({ id:value.id, targets:value.nodes.map(node => node.target) }))).toEqual([]);
     await page.screenshot({ path:testInfo.outputPath(`home-${locale}.png`), fullPage:true });
     await page.goto(`/${locale}/abonnements`);
-    await expect(page.getByRole("heading", { level:1 })).toContainText(locale === "fr" ? "Abonnements Matricia" : "اشتراكات ماتريسيا");
+    await expect(page.getByRole("heading", { level:1 })).toContainText(locale === "fr" ? "Des formules adaptées à vos besoins professionnels" : "صيغ مناسبة لاحتياجاتكم المهنية");
     await expect(page).toHaveURL(new RegExp(`/${locale}/abonnements$`));
     await page.goto(`/${locale}/contact`);
     await expect(page.getByRole("heading", { level:1 })).toBeVisible();

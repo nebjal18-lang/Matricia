@@ -87,6 +87,10 @@ export const RESOLUTION_CODES = [
 export function dossierHref(locale: "fr" | "ar", item: AdminWorkItem) {
   const type = item.resourceType.toLowerCase();
   const id = item.resourceId;
+  if (type === "notification_template_review") return `/${locale}/administration/messagerie/preferences`;
+  if (type === "membership_capability_review") return `/${locale}/administration/revues-capacites`;
+  if (type === "privacy_retention_action") return `/${locale}/administration/confidentialite`;
+  if (type === "client_assistance_request") return `/${locale}/administration/assistance/${id}`;
   if (type.includes("dispute") || item.sourceKind === "DISPUTE") return `/${locale}/administration/litiges/${id}`;
   if (type.includes("compliance")) return `/${locale}/administration/conformite-clients`;
   if (type.includes("provider") || type.includes("qualification")) return `/${locale}/administration/providers`;

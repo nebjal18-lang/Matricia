@@ -16,6 +16,7 @@ import { RuleBuilder } from "@/modules/admin/screens/catalogue/rule-builder";
 import { QuestionnaireBuilder } from "@/modules/admin/screens/catalogue/questionnaire-builder";
 import { getRuleValidationMessages } from "@/modules/admin/screens/catalogue/validation/messages";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminHubStrip } from "@/modules/admin/screens/spaces/boards";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
 
 export const dynamic = "force-dynamic";
@@ -32,9 +33,16 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
   if (!isLocale(locale)) notFound();
   const libraryId = queryValue(query.library);
   const selectedServiceId = queryValue(query.service);
+  const context = new URLSearchParams();
+  for (const key of ["organizationId", "library", "service"] as const) {
+    const value = queryValue(query[key]);
+    if (value) context.set(key, value);
+  }
+  const contextQuery = context.size ? `?${context.toString()}` : "";
+  const catalogueHref = `/${locale}/administration/catalogue${contextQuery}`;
   const repository = await createServerCatalogBuilderRepository();
   const result = await repository.loadWorkspace(libraryId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/catalogue` }));
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: catalogueHref }));
   const messages = getBuilderMessages(locale);
   const validationMessages = getRuleValidationMessages(locale);
   const c = adminCopy(locale);
@@ -43,14 +51,15 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
   const selectedService = result.status === "success" ? result.value.services.find((item) => item.id === selectedServiceId) : undefined;
 
   return (
-    <AdminModulePage locale={locale} active="catalog" path="catalogue" title={messages.title} lead={c.hubCatalogLead} hubGroup="catalog">
+    <AdminModulePage locale={locale} active="catalog" path="catalogue" title={messages.title} lead={c.hubCatalogLead} querySuffix={context.toString()}>
+      <div className="client-page admin-hub-wrap"><AdminHubStrip locale={locale} query={contextQuery} groupId="catalog" /></div>
       <p>
-        <Link href={`/${locale}/administration/catalogue/validation`} className={cn(buttonVariants({ variant: "outline" }), "min-h-11")}>{validationMessages.title}</Link>
+        <Link href={`/${locale}/administration/catalogue/validation${contextQuery}`} className={cn(buttonVariants({ variant: "outline" }), "min-h-11")}>{validationMessages.title}</Link>
       </p>
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{messages.unavailable}</AlertTitle>
-          <AlertDescription><Link href={`/${locale}/administration/catalogue`} className={cn(buttonVariants({ variant: "outline" }), "mt-2 min-h-11")}>{messages.retry}</Link></AlertDescription>
+          <AlertDescription><a href={catalogueHref} className={cn(buttonVariants({ variant: "outline" }), "mt-2 min-h-11")}>{messages.retry}</a></AlertDescription>
         </Alert>
       ) : (
         <>
@@ -59,6 +68,7 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
             <CardContent>
               {result.value.libraries.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noLibraries}</p> : (
                 <form method="get" className="grid items-end gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                  {queryValue(query.organizationId) ? <input type="hidden" name="organizationId" value={queryValue(query.organizationId)!} /> : null}
                   <div className="min-w-0 space-y-2">
                     <Label htmlFor="catalogue-library">{messages.library}</Label>
                     <select id="catalogue-library" name="library" defaultValue={libraryId ?? ""} dir={libraryId ? "ltr" : locale === "ar" ? "rtl" : "ltr"} required className="min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">

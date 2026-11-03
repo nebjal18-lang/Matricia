@@ -2,17 +2,7 @@ begin;
 set local search_path = public, extensions;
 select plan(6);
 
-select ok((
-  select pg_get_functiondef(p.oid) ~ 'matching'
-     and pg_get_functiondef(p.oid) ~ 'contracts'
-     and pg_get_functiondef(p.oid) ~ 'amendments'
-     and pg_get_functiondef(p.oid) ~ 'documents'
-     and pg_get_functiondef(p.oid) ~ 'messages'
-     and pg_get_functiondef(p.oid) ~ 'exceptions'
-     and pg_get_functiondef(p.oid) ~ 'templates'
-  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public' and p.proname = 'list_admin_supervision_projection'
-), 'supervision projection documents parcours keys');
+
 
 select ok((
   select pg_get_functiondef(p.oid) !~* '\m(insert|update|delete)\M'
@@ -35,25 +25,26 @@ select throws_ok(
   'tenant cannot read enriched supervision'
 );
 
-create temporary table p1623_observed(value jsonb);
+create temporary table p1623_observed(key text,value jsonb);
 grant select, insert on p1623_observed to authenticated;
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'a1623000-0000-4000-8000-000000000002', true);
 select set_config('request.jwt.claims', '{"sub":"a1623000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}', true);
-insert into p1623_observed values (public.list_admin_supervision_projection(10));
+insert into p1623_observed values ('legacy',public.list_admin_supervision_projection(10)),('paged',public.list_admin_supervision_page_v1(10,0));
 reset role;
 
+select ok((select value ?& array['matching','contracts','amendments','documents','messages','exceptions','templates'] and jsonb_typeof(value->'organizations')='array' from p1623_observed where key='paged'),'bounded projection returns actual enriched parcours keys');
 select ok((
   select value ? 'matching' and value ? 'contracts' and value ? 'amendments'
      and value ? 'documents' and value ? 'messages' and value ? 'exceptions' and value ? 'templates'
-  from p1623_observed
+  from p1623_observed where key='legacy'
 ), 'admin projection returns enriched parcours arrays');
 select ok((
   select jsonb_typeof(value->'matching') = 'array'
      and jsonb_typeof(value->'documents') = 'array'
      and jsonb_typeof(value->'messages') = 'array'
-  from p1623_observed
+  from p1623_observed where key='legacy'
 ), 'enriched keys are arrays');
 select ok((
   select has_function_privilege('authenticated', 'public.list_admin_supervision_projection(integer)', 'EXECUTE')

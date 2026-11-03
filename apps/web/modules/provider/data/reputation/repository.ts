@@ -1,3 +1,4 @@
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { z } from "zod";
 import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
@@ -15,12 +16,14 @@ const service = z.object({ id, current_published_version_id: id.nullable() });
 const serviceVersion = z.object({ id, name_fr: z.string(), name_ar: z.string() });
 const favorite = z.object({ id, provider_organization_id: id, service_id: id.nullable(), status: z.enum(["ACTIVE", "REMOVED"]), note: z.string().nullable(), row_version: z.number().int().positive(), created_at: z.string() });
 const revalidation = z.object({ favorite_id: id, request_id: id, eligible: z.boolean(), exclusion_reasons: z.array(z.string()), checked_at: z.string() });
-const request = z.object({ id, service_id: id, request_number: z.string(), status: z.string() });
+const request = z.object({ id, service_id: id, status: z.string() });
 type Failure = { status: "error"; reason: "UNAUTHENTICATED" | "NO_ORGANIZATION" | "ORGANIZATION_SELECTION_REQUIRED" | "FORBIDDEN_ORGANIZATION" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
 async function activeMembership(roleCodes: string[], requestedOrganizationId?: string, requireExplicitSelection = false) {
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const { data: auth, error: authError } = await client.auth.getUser();
+  const authFailure = classifyAuthReadFailure(authError);
+  if (authFailure) return { client, failure: { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" } as Failure };
   if (!auth.user) return { client, failure: { status: "error", reason: "UNAUTHENTICATED" } as Failure };
   const result = await client.from("organization_memberships").select("id,organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", roleCodes).limit(100);
   if (result.error) return { client, failure: { status: "error", reason: "QUERY_FAILED" } as Failure };
@@ -49,8 +52,8 @@ async function serviceLabels(client: Awaited<ReturnType<typeof getSupabaseServer
   return { status: "success" as const, labels: new Map(services.data.flatMap((item) => { const version = item.current_published_version_id ? versionsById.get(item.current_published_version_id) : null; return version ? [[item.id, { fr: version.name_fr, ar: version.name_ar }] as const] : []; })) };
 }
 
-export async function loadProviderReputation(): Promise<{ status: "success"; dashboard: ProviderReputationDashboard } | Failure> {
-  const auth = await activeMembership(["PROVIDER_OWNER", "PROVIDER_MANAGER", "PROVIDER_SALES", "PROVIDER_VIEWER"]);
+export async function loadProviderReputation(requestedOrganizationId?: string): Promise<{ status: "success"; dashboard: ProviderReputationDashboard } | Failure> {
+  const auth = await activeMembership(["PROVIDER_OWNER", "PROVIDER_MANAGER", "PROVIDER_SALES", "PROVIDER_VIEWER"], requestedOrganizationId, true);
   if (auth.failure) return auth.failure;
   const { client, membership: member } = auth;
   const organizationId = member.organization_id;
@@ -86,7 +89,7 @@ export async function loadClientFavorites(requestedOrganizationId?: string): Pro
   const [favoritesResult, checksResult, requestsResult] = await Promise.all([
     client.from("client_provider_favorites").select("id,provider_organization_id,service_id,status,note,row_version,created_at").eq("client_organization_id", organizationId).order("created_at", { ascending: false }).limit(100),
     client.from("favorite_eligibility_revalidations").select("favorite_id,request_id,eligible,exclusion_reasons,checked_at").eq("client_organization_id", organizationId).order("checked_at", { ascending: false }).limit(300),
-    client.from("service_requests").select("id,service_id,request_number,status").eq("client_organization_id", organizationId).not("status", "in", "(CANCELLED,EXPIRED)").order("created_at", { ascending: false }).limit(100),
+    client.from("service_requests").select("id,service_id,status").eq("client_organization_id", organizationId).not("status", "in", "(CANCELLED,EXPIRED)").order("created_at", { ascending: false }).limit(100),
   ]);
   if (favoritesResult.error || checksResult.error || requestsResult.error) return { status: "error", reason: "QUERY_FAILED" };
   const favorites = z.array(favorite).safeParse(favoritesResult.data), checks = z.array(revalidation).safeParse(checksResult.data), requests = z.array(request).safeParse(requestsResult.data);
@@ -95,7 +98,7 @@ export async function loadClientFavorites(requestedOrganizationId?: string): Pro
   if (labels.status === "error") return { status: "error", reason: "QUERY_FAILED" };
   const latestCheck = new Map<string, z.infer<typeof revalidation>>();
   for (const item of checks.data) if (!latestCheck.has(item.favorite_id)) latestCheck.set(item.favorite_id, item);
-  return { status: "success", dashboard: { organizationId, organizationName: member.organizations.display_name, canManage, favorites: favorites.data.map((item) => { const label = item.service_id ? labels.labels.get(item.service_id) : null; const check = latestCheck.get(item.id); return { id: item.id, providerOrganizationId: item.provider_organization_id, serviceId: item.service_id, serviceLabelFr: label?.fr ?? null, serviceLabelAr: label?.ar ?? null, status: item.status, note: item.note, rowVersion: item.row_version, createdAt: item.created_at, latestRevalidation: check ? { requestId: check.request_id, eligible: check.eligible, reasons: check.exclusion_reasons, checkedAt: check.checked_at } : null }; }), requests: requests.data.map((item) => ({ id: item.id, serviceId: item.service_id, reference: item.request_number, status: item.status })) } };
+  return { status: "success", dashboard: { organizationId, organizationName: member.organizations.display_name, canManage, favorites: favorites.data.map((item) => { const label = item.service_id ? labels.labels.get(item.service_id) : null; const check = latestCheck.get(item.id); return { id: item.id, providerOrganizationId: item.provider_organization_id, serviceId: item.service_id, serviceLabelFr: label?.fr ?? null, serviceLabelAr: label?.ar ?? null, status: item.status, note: item.note, rowVersion: item.row_version, createdAt: item.created_at, latestRevalidation: check ? { requestId: check.request_id, eligible: check.eligible, reasons: check.exclusion_reasons, checkedAt: check.checked_at } : null }; }), requests: requests.data.map((item) => ({ id: item.id, serviceId: item.service_id, reference: item.id, status: item.status })) } };
 }
 
 export type FavoriteProviderOption = { organizationId: string; name: string; services: Array<{ id: string; nameFr: string; nameAr: string }> };

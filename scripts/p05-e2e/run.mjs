@@ -1,5 +1,5 @@
-import { spawn } from "node:child_process";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { runSecuredBrowserSuite, writeLocalSuiteEvidence } from "../../tests/e2e/helpers/secured-browser-runner.mjs";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadSafeConfiguration } from "./environment.mjs";
@@ -45,11 +45,13 @@ async function run() {
   let fixture;
   let runError;
   let sanitizedEvidence;
+  let config;
+  let suiteSummary;
+  let cleanupFailed=false;
   try {
     fixture = await provision();
-    const config = await loadSafeConfiguration(root);
+    config = await loadSafeConfiguration(root);
     await validateFreshManifest(fixture.manifest, config);
-    const resultPath = resolve(authDirectory, "playwright-result.json");
     const environment = buildChildEnvironment(process.env, {
       E2E_BASE_URL: config.baseUrl,
       E2E_P05_MANIFEST: fixture.manifestPath,
@@ -58,19 +60,9 @@ async function run() {
       E2E_COMPLIANCE_STORAGE_STATE: fixture.manifest.states.centralAal2.path,
       E2E_COMPLIANCE_AAL1_STORAGE_STATE: fixture.manifest.states.centralAal1.path,
       E2E_NO_ROLE_STORAGE_STATE: fixture.manifest.states.noRole.path,
-      PLAYWRIGHT_JSON_OUTPUT_FILE: resultPath,
     });
-    const child = spawn(process.execPath, [resolve(root, "node_modules", "@playwright", "test", "cli.js"),
-      "test", "tests/e2e/p05-client-compliance.spec.ts", "--reporter=json"], {
-      cwd: root, env: environment, stdio: ["ignore", "inherit", "inherit"], shell: false,
-    });
-    const exitCode = await new Promise((resolveExit, reject) => {
-      child.once("error", reject);
-      child.once("exit", (code, signal) => signal ? reject(new Error("Playwright was interrupted")) : resolveExit(code ?? 1));
-    });
-    if (exitCode !== 0) throw new Error("Authenticated P05 Playwright suite failed");
-    const report = JSON.parse(await readFile(resultPath, "utf8"));
-    const passed = validatePlaywrightReport(report);
+    suiteSummary = await runSecuredBrowserSuite({root,config,environment,specifications:["tests/e2e/p05-client-compliance.spec.ts"],output:resolve(authDirectory,"browser"),expectedTests:EXPECTED_P05_TESTS});
+    const passed = suiteSummary.passed;
     sanitizedEvidence = {
       schemaVersion: 1,
       completedAt: new Date().toISOString(),
@@ -85,6 +77,7 @@ async function run() {
     console.log(`PASS P05 authenticated E2E suite (${passed} tests, zero skipped)`);
   } catch (error) {
     runError = error;
+    suiteSummary ??= error.browserSummary;
   } finally {
     if (fixture) {
       try {
@@ -92,12 +85,14 @@ async function run() {
         if (fixture.resources.retainedEvidence <= 0) throw new Error("Immutable fixture evidence was not retained");
         console.log("PASS P05 remote fixture neutralized; immutable evidence retained");
       } catch (error) {
+        cleanupFailed=true;
         runError = combineRunAndCleanupErrors(runError, error);
       }
     }
     try { await removeLocalArtifacts([authDirectory, playwrightMarkerPath]); }
-    catch (error) { runError = combineRunAndCleanupErrors(runError, error); }
+    catch (error) { cleanupFailed=true; runError = combineRunAndCleanupErrors(runError, error); }
   }
+  await writeLocalSuiteEvidence({root,suite:"p05-onboarding",config,summary:suiteSummary,failure:runError,cleanupVerified:!cleanupFailed,proof:{realAuthenticationStorageAudit:fixture?.manifest.proof.realCommandAuditOutbox===true&&fixture?.manifest.proof.storageIsolation===true}});
   if (runError) throw runError;
   await mkdir(dirname(evidencePath), { recursive: true });
   await writeFile(evidencePath, `${JSON.stringify(sanitizedEvidence, null, 2)}\n`, { encoding: "utf8" });

@@ -43,4 +43,17 @@ describe("public need intent", () => {
     expect(formatNeedScoreBasisPoints(1234, "ar")).toBe("12,34٪");
     expect(rankPublicNeedServices("court", "fr")).toEqual([]);
   });
+
+  it("signals missing approved Arabic service labels rather than silently returning French", () => {
+    const fr = canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "fr");
+    const ar = canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "ar");
+    expect(ar?.serviceName).toContain("الاسم العربي");
+    expect(ar?.serviceName).not.toBe(canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "fr")?.serviceName);
+    expect(fr?.serviceName ?? "").not.toContain("الاسم العربي");
+  });
+
+  it("matches approved Arabic domain terminology as well as French service names", () => {
+    expect(rankPublicNeedServices("أحتاج دعم الأمن السيبراني والبيانات", "ar", 5).length).toBeGreaterThan(0);
+    expect(rankPublicNeedServices("Audit du système d’information et feuille de route", "ar", 5)[0]?.serviceCode).toBe("IT-AUDIT-SI");
+  });
 });

@@ -1,0 +1,25 @@
+begin;
+set local search_path=public,private,extensions;
+select plan(6);
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('f1800000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','billing-pdf-owner@example.invalid','',now(),'{}','{"locale":"ar"}',now(),now());
+insert into public.organizations(id,legal_name,display_name,status,created_by)values('f1801000-0000-4000-8000-000000000001','Billing PDF Test SARL','Billing PDF Test','ACTIVE','f1800000-0000-4000-8000-000000000001');
+insert into public.provider_profiles(provider_organization_id,activity_summary,team_size,years_experience,accounting_contact_email,created_by)values('f1801000-0000-4000-8000-000000000001','Billing notification test fixture',1,1,'unverified-accounting@example.invalid','f1800000-0000-4000-8000-000000000001');
+insert into public.organization_memberships(id,organization_id,user_id,status,activated_at)values('f1802000-0000-4000-8000-000000000001','f1801000-0000-4000-8000-000000000001','f1800000-0000-4000-8000-000000000001','ACTIVE',now());
+insert into public.organization_member_roles(membership_id,role_code)values('f1802000-0000-4000-8000-000000000001','PROVIDER_OWNER');
+-- Trusted archived-artifact fixture only; the real issuer approval/financial/archive path is exercised by 0137.
+insert into public.client_billing_policy_versions(id,series_key,version,currency,tax_rate_bps,tax_label_fr,tax_label_ar,jurisdiction,issuer_snapshot,invoice_prefix,credit_prefix,invoice_start_number,credit_start_number,valid_from,service_label_fr,service_label_ar,approval_reference,content_hash,created_by)values('f1805000-0000-4000-8000-000000000001','TEST_NOTIFY180',1,'MAD',2000,'Test TVA','ضريبة الاختبار','MA-TEST','{"legal_name":"Issuer notification fixture","legal_form":"SARL","address":"Test address","ice":"999000000000180","if_number":"99900180","rc_number":"TEST180","contact_email":"test180@example.invalid"}','NI180','NC180',1,1,current_date,'Test service','خدمة اختبار','TEST_ONLY',repeat('c',64),'f1800000-0000-4000-8000-000000000001');
+insert into public.provider_billing_source_policy_bindings(id,provider_organization_id,kind,source_id,source_hash,policy_id,policy_snapshot,document_number,issued_on,bound_by)values('f1806000-0000-4000-8000-000000000001','f1801000-0000-4000-8000-000000000001','invoice','f1804000-0000-4000-8000-000000000001',repeat('a',64),'f1805000-0000-4000-8000-000000000001','{}','TEST-INV',current_date,'f1800000-0000-4000-8000-000000000001');
+-- Isolated archived-artifact fixture: notification tests never call a transport or create an accounting journal.
+insert into public.provider_billing_document_artifacts(id,provider_organization_id,kind,source_id,locale,source_hash,pdf_sha256,storage_path,snapshot,created_by,policy_binding_id)values('f1803000-0000-4000-8000-000000000001','f1801000-0000-4000-8000-000000000001','invoice','f1804000-0000-4000-8000-000000000001','ar',repeat('a',64),repeat('b',64),'billing-notification-test.pdf','{"number":"TEST-INV"}','f1800000-0000-4000-8000-000000000001','f1806000-0000-4000-8000-000000000001');
+select throws_ok($$select public.enqueue_provider_billing_pdf_notification('f1803000-0000-4000-8000-000000000001')$$,'42501','PROVIDER_BILLING_NOTIFICATION_DENIED','an absent service principal cannot enqueue billing notices');
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+-- This deliberately incomplete historical source must remain blocked. Positive
+-- archive/recipient/transport behavior is exercised by the governed chain in0137.
+select throws_ok($$select public.enqueue_provider_billing_pdf_notification('f1803000-0000-4000-8000-000000000001')$$,'55000','BILLING_RECIPIENT_REVIEW_OR_CORRECTION_REQUIRED','artifact without a real contractual invoice source cannot enqueue');
+select throws_ok($$select public.enqueue_provider_billing_pdf_notification('f1803000-0000-4000-8000-000000000001')$$,'55000','BILLING_RECIPIENT_REVIEW_OR_CORRECTION_REQUIRED','replaying an incomplete archive never fabricates a notification');
+select is((select count(*)from public.notification_instances where source_aggregate_id='f1803000-0000-4000-8000-000000000001'),0::bigint,'unverified accounting email or current owner cannot replace contractual recipient proof');
+select is((select count(*)from public.notification_deliveries d join public.notification_instances n on n.id=d.notification_id where n.source_aggregate_id='f1803000-0000-4000-8000-000000000001'),0::bigint,'blocked legacy artifact creates no transport attempt or delivery claim');
+update public.organization_memberships set status='SUSPENDED'where id='f1802000-0000-4000-8000-000000000001';
+select throws_ok($$select public.enqueue_provider_billing_pdf_notification('f1803000-0000-4000-8000-000000000001')$$,'55000','BILLING_RECIPIENT_REVIEW_OR_CORRECTION_REQUIRED','membership changes never substitute an identity for an incomplete original');
+select * from finish();
+rollback;

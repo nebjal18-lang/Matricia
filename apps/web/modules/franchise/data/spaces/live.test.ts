@@ -106,7 +106,7 @@ describe("franchise space live board", () => {
     expect(board.people[0]?.activities?.[0]?.evidence).toContain("invite://atlas");
     expect(board.requests[0]?.matching?.map((item) => item.name)).toContain("Studio Atlas");
     expect(board.documents.map((item) => item.title)).toEqual(expect.arrayContaining(["invite://atlas", "rfq://conseil"]));
-    expect(board.messages.map((item) => item.title)).toEqual(expect.arrayContaining(["Invitation envoyée", "Besoin cadré"]));
+    expect(board.messages).toEqual([]); // CRM activity is never presented as an actual conversation.
     expect(JSON.stringify(board)).not.toMatch(/50\s*%|Hatim Ahmitech|Jalil-NEOXA|NEOXA_JALIL|ASMA_MATRICIA/);
   });
 

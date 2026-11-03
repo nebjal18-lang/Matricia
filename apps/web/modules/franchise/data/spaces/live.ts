@@ -6,10 +6,9 @@ import type { FranchiseOperationsSnapshot } from "@/modules/franchise/data/opera
 import type { FranchiseCorrectivePlan } from "@/modules/franchise/data/quality/repository";
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { franchiseStageLabel } from "@/modules/franchise/data/spaces/labels";
-import { canApplyFranchiseSpaceDemo, demoFranchiseSpaces, type FinanceRow, type FranchiseSpaceBoardData, type MessageRow, type PersonRow, type QualityRow, type RequestRow, type SupervisionRow } from "@/modules/franchise/data/spaces/demo";
+import { demoFranchiseSpaces, type FinanceRow, type FranchiseSpaceBoardData, type MessageRow, type PersonRow, type QualityRow, type RequestRow, type SupervisionRow } from "@/modules/franchise/data/spaces/demo";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-const tones = ["mint", "peach", "violet", "sky"] as const;
 
 function evidenceLabels(refs: unknown[]): string[] {
   return refs.flatMap((ref) => {
@@ -43,7 +42,7 @@ function folderEvents(item: FranchiseCrmDashboard["prospects"][number]) {
   }));
 }
 
-function providerTone(stage: string): (typeof tones)[number] {
+function providerTone(stage: string): "mint" | "peach" | "violet" | "sky" {
   if (stage === "VERIFIED" || stage === "CONTRACT_SIGNED") return "mint";
   if (stage === "PROFILE_STARTED" || stage === "REGISTERED") return "violet";
   if (stage === "SENT" || stage === "OPENED") return "peach";
@@ -71,6 +70,7 @@ export function emptyFranchiseSpaces(locale: Locale, query: string): FranchiseSp
       mandate: "—",
       status: "—",
     },
+    providerDossiers:[],
     canWrite: false,
     people: [] as PersonRow[],
     requests: [] as RequestRow[],
@@ -104,6 +104,7 @@ export function emptyFranchiseSpaces(locale: Locale, query: string): FranchiseSp
 export function buildFranchiseSpaceBoard(input: {
   locale: Locale;
   query: string;
+  unavailableSections?:string[];
   libraryName?: string | null;
   crm?: FranchiseCrmDashboard | null;
   followups?: FollowupDashboard | null;
@@ -138,8 +139,11 @@ export function buildFranchiseSpaceBoard(input: {
   const people: PersonRow[] = providers.map((item) => ({
     id: item.id,
     name: item.organizationName || item.displayName,
-    services: item.sourceCode,
-    status: franchiseStageLabel(item.stage, locale),
+    linkedOrganizationId:item.linkedOrganizationId,
+    createdAt:item.createdAt,
+    dossier:input.operations?.providerDossiers?.find((d)=>d.organizationId===item.linkedOrganizationId),
+    services:input.operations?.providerDossiers?.find((d)=>d.organizationId===item.linkedOrganizationId)?.qualifications.map((q)=>q.serviceCode).join(", ")??(locale==="ar"?"خدمات غير موثقة":"Services non renseignés"),
+    status: input.operations?.providerDossiers?.find((d)=>d.organizationId===item.linkedOrganizationId)?.status??franchiseStageLabel(item.stage, locale),
     next: item.nextFollowupAt ? item.nextFollowupAt.slice(0, 10) : franchiseStageLabel(item.stage, locale),
     tone: providerTone(item.stage),
     stage: item.stage,
@@ -191,7 +195,7 @@ export function buildFranchiseSpaceBoard(input: {
     flag: item.urgency ?? item.status,
     tone: "sky" as const,
     stageCode: item.status,
-    matching: operationalMatching.filter((row) => row.requestId === item.id).map(({ requestId: _ignored, ...row }) => row),
+    matching: operationalMatching.filter((row) => row.requestId === item.id).map((row) => ({ id: row.id, name: row.name, status: row.status, href: row.href, tone: row.tone })),
   }));
   const requests = [...operationalRequests, ...crmRequests];
   const documents = [
@@ -207,37 +211,15 @@ export function buildFranchiseSpaceBoard(input: {
         kind: "evidence" as const,
       })));
     }),
-    ...(input.operations?.documents ?? []).map((item) => ({
-      id: item.id,
-      title: item.code,
-      owner: item.kind,
-      status: item.status,
-      href: `/${locale}/franchise/documents${q}`,
-      kind: "evidence" as const,
-    })),
+    ...(input.operations?.providerDossiers??[]).flatMap((provider)=>provider.documents.map((item)=>({id:item.id,title:item.code,owner:provider.name,status:item.expiresOn&&item.expiresOn<new Date().toISOString().slice(0,10)?"EXPIRED":item.status,href:`/${locale}/franchise/documents/${item.id}${q}`,kind:"evidence"as const,due:item.expiresOn??undefined}))),
   ];
-  const renewals = [...providers, ...clients].flatMap((item) => item.nextFollowupAt ? [{
-    id: item.id,
-    title: item.organizationName || item.displayName,
-    owner: item.displayName,
-    status: franchiseStageLabel(item.stage, locale),
-    href: item.type === "PROVIDER" ? `/${locale}/franchise/fournisseurs/${item.id}/capacite${q}` : `/${locale}/franchise/demandes/${item.id}/suivi${q}`,
-    kind: "renewal" as const,
-    due: item.nextFollowupAt.slice(0, 10),
-  }] : []);
+  const renewals: FranchiseSpaceBoardData["renewals"] = (input.operations?.providerDossiers??[]).flatMap((provider)=>[...provider.documents.filter((d)=>d.expiresOn).map((d)=>({id:d.id,title:d.code,owner:provider.name,status:d.expiresOn!<new Date().toISOString().slice(0,10)?"EXPIRED":d.status,href:`/${locale}/franchise/documents/${d.id}${q}`,kind:"renewal"as const,due:d.expiresOn!})),...(provider.partnerContract?.expiresAt?[{id:provider.partnerContract.id,title:locale==="ar"?"عقد الشراكة · نسخة "+provider.partnerContract.version:"Contrat partenaire · v"+provider.partnerContract.version,owner:provider.name,status:provider.partnerContract.status,href:`/${locale}/franchise/fournisseurs/contrats/${provider.partnerContract.id}${q}`,kind:"renewal"as const,due:provider.partnerContract.expiresAt}]:[])]).sort((a,b)=>a.due.localeCompare(b.due));
   const messages = [
-    ...[...providers, ...clients].flatMap((item) => item.activities.map((activity) => ({
-      id: activity.id,
-      title: activity.summary,
-      meta: `${item.displayName} · ${activity.type}`,
-      href: item.type === "PROVIDER" ? `/${locale}/franchise/fournisseurs/${item.id}${q}` : `/${locale}/franchise/demandes/${item.id}/consultation${q}`,
-      tone: providerTone(item.stage),
-    }))),
     ...(input.operations?.threads ?? []).map((item) => ({
       id: item.id,
       title: item.subject,
       meta: item.status,
-      href: `/${locale}/franchise/messages${q}`,
+      href: `/${locale}/franchise/messages${q}${q ? "&" : "?"}fil=${item.id}`,
       tone: "sky" as const,
     })),
   ];
@@ -368,6 +350,7 @@ export function buildFranchiseSpaceBoard(input: {
         const isLatest = index === 0;
         return [{
           id: closure.id,
+          href:`/${locale}/franchise/finance/releves/${closure.id}${q}`,
           title: isLatest ? c.preStatement : (locale === "ar" ? `كشف ${closure.periodStart} — ${closure.periodEnd}` : `Relevé ${closure.periodStart} — ${closure.periodEnd}`),
           object: c.yourShare,
           status: c.periodClosed,
@@ -561,7 +544,11 @@ export function buildFranchiseSpaceBoard(input: {
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
   const live: FranchiseSpaceBoardData = {
     ...empty,
+    providerDossiers:input.operations?.providerDossiers??[],
+    metrics:input.operations?.metrics??null,
+    unavailableSections:input.unavailableSections??[],
     treat,
+    pipeline:empty.pipeline.map((step,index)=>{const metrics=input.operations?.metrics;const net=metrics?.network;const values=[net?.providers,metrics?.requestCount,metrics?.missionCount,metrics?.qualitySnapshot?`${metrics.qualitySnapshot.scoreBasisPoints/100}%`:null,metrics?.completedMissions];const labels=locale==="ar"?["مزودون مرتبطون بالخدمات","طلبات · كامل التاريخ","مهام · كامل التاريخ","آخر تقييم مؤرخ","مهام مكتملة"]:["Prestataires liés aux services","Demandes · historique complet","Missions · historique complet","Dernière évaluation datée","Missions terminées"];return{...step,title:labels[index]??step.title,detail:values[index]==null?"—":String(values[index]),status:metrics?new Date(metrics.asOf).toLocaleDateString(locale==="ar"?"ar-MA":"fr-MA"):"—"};}),
     attention: [
       ...quality.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: `/${locale}/franchise/qualite${q}` })),
       ...followups.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: `/${locale}/franchise/relances${q}` })),
@@ -605,16 +592,5 @@ export function buildFranchiseSpaceBoard(input: {
     risks,
     incidents,
   };
-  const hasLive = people.length + requests.length + quality.length + performance.length + followups.length + decisions.length + mandates.length + finance.length + corrective.length + quotes.length + missions.length + anomalies.length + users.length + volume.length + definitions.length + incidents.length > 0
-    || (territory !== "—" && territory.length > 1);
-  if (!hasLive && canApplyFranchiseSpaceDemo()) return demoFranchiseSpaces(locale, q);
-  if (!canApplyFranchiseSpaceDemo()) return live;
-  const demo = demoFranchiseSpaces(locale, q);
-  return {
-    ...live,
-    documents: live.documents.length ? live.documents : demo.documents,
-    renewals: live.renewals.length ? live.renewals : demo.renewals,
-    messages: live.messages.length ? live.messages : demo.messages,
-    notifications: live.notifications.length ? live.notifications : demo.notifications,
-  };
+  return live;
 }

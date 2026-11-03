@@ -8,15 +8,28 @@ import type { SafeInvitation } from "@/app/[locale]/invitations/actions";
 import { getInvitationMessages } from "@/app/[locale]/invitations/messages";
 import type { AdminClientCase } from "@/modules/admin/data/clients/model";
 import { actorCopy } from "@/modules/admin/data/spaces/actors-copy";
-import { memberLabel, type ActorUserRow } from "@/modules/admin/data/spaces/actors-repository";
+import { type ActorUserRow } from "@/modules/admin/data/spaces/actors-repository";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
+import { matchesActorUser } from "@/modules/admin/data/spaces/actor-user-model";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
-import { inferOrgType } from "@/modules/admin/data/spaces/directory";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
 import type { SafeComplianceCase } from "@/modules/admin/screens/conformite-clients/actions";
 import { getComplianceMessages } from "@/modules/admin/screens/conformite-clients/messages";
 import { ActorIntentForm } from "@/modules/admin/screens/spaces/actor-forms";
 import { PipelineGlyph } from "./pipeline-step";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+
+function organizationQuery(query: string, organizationId: string | null) { const params=new URLSearchParams(query);if(organizationId)params.set("organizationId",organizationId);else params.delete("organizationId");const value=params.toString();return value?`?${value}`:""; }
+function accountLabel(locale: Locale, row: ActorUserRow | undefined) { return row?.displayName ?? row?.email ?? (locale === "ar" ? "حساب" : "Compte"); }
+function noOrganization(locale: Locale) { return locale === "ar" ? "بدون مؤسسة" : "Sans organisation"; }
+function accountStatusLabel(status: string, locale: Locale) {
+ const extra: Record<string,readonly[string,string]>={REVOKED:["Accès retiré","وصول مسحوب"],DELETED:["Compte supprimé","حساب محذوف"],PENDING_CONFIRMATION:["Confirmation attendue","بانتظار التأكيد"]};
+ return extra[status]?.[locale==="ar"?1:0]??workflowStatusLabel(status,locale);
+}
+function accountLastSignIn(value: string | null | undefined, locale: Locale) {
+ if(!value||!Number.isFinite(Date.parse(value)))return locale==="ar"?"غير مسجّل":"Non communiquée";
+ return new Intl.DateTimeFormat(locale==="ar"?"ar-MA":"fr-MA",{dateStyle:"short",timeStyle:"short",timeZone:"Africa/Casablanca"}).format(new Date(value));
+}
 
 function Cta({ href, children }: { href: string; children: ReactNode }) {
   return <Link href={href} className="client-ghost-link">{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>;
@@ -37,27 +50,27 @@ export function UsersBoard({
   invites,
   search,
   filters,
+  page = 1,
 }: {
   locale: Locale;
   query: string;
   users: ActorUserRow[];
   invites: SafeInvitation[];
+  page?: number;
   search?: string;
   filters?: { org?: string; role?: string; status?: string };
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
   const inviteMessages = getInvitationMessages(locale);
-  const orgs = [...new Set(users.map((row) => row.organizationName).filter(Boolean))].sort();
-  const roles = [...new Set(users.flatMap((row) => row.roles))].sort();
+  const orgs = [...new Map(users.flatMap(row=>row.organizationId&&row.organizationName?[[row.organizationId,{id:row.organizationId,name:row.organizationName}] as const]:[])).values()].sort((a,b)=>a.name.localeCompare(b.name));
+  const roles = [...new Set(users.flatMap((row) => [...row.roles,...(row.platformRoles??[])]))].sort();
   const statuses = [...new Set(users.map((row) => row.status))].sort();
-  const filtered = users.filter((row) => {
-    if (filters?.org && filters.org !== "all" && row.organizationName !== filters.org) return false;
-    if (filters?.role && filters.role !== "all" && !row.roles.includes(filters.role)) return false;
-    if (filters?.status && filters.status !== "all" && row.status !== filters.status) return false;
-    if (!search) return true;
-    return `${row.organizationName} ${row.roles.join(" ")} ${row.userId}`.toLowerCase().includes(search.toLowerCase());
-  });
+  const filtered = users.filter(row=>matchesActorUser(row,filters,search));
+  const pageCount=Math.max(1,Math.ceil(filtered.length/50));
+  const currentPage=Math.min(pageCount,Math.max(1,Number.isFinite(page)?Math.floor(page):1));
+  const visible=filtered.slice((currentPage-1)*50,currentPage*50);
+  const pageHref=(number:number)=>{const params=new URLSearchParams(query);if(search)params.set("q",search);for(const[k,v]of Object.entries(filters??{}))if(v)params.set(k,v);params.set("page",String(number));return `/${locale}/administration/utilisateurs?${params.toString()}`;};
   return (
     <main className="client-page">
       <section className="admin-two">
@@ -65,6 +78,7 @@ export function UsersBoard({
           <header className="client-priority-head">
             <div>
               <h2><Users className="size-4" aria-hidden /> {a.usersCard}</h2>
+              <Link href={`/${locale}/administration/utilisateurs/acces`}>{locale==="ar"?"مراجعات وصول الحسابات":"Revues des accès aux comptes"}</Link>
               <p>{a.usersCardLead}</p>
             </div>
           </header>
@@ -77,7 +91,8 @@ export function UsersBoard({
             <label>{c.orgs}
               <select name="org" defaultValue={filters?.org ?? "all"}>
                 <option value="all">{c.all}</option>
-                {orgs.map((org) => <option key={org} value={org}>{org}</option>)}
+                <option value="unassigned">{noOrganization(locale)}</option>
+                {orgs.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}
               </select>
             </label>
             <label>{c.roles}
@@ -89,7 +104,7 @@ export function UsersBoard({
             <label>{c.state}
               <select name="status" defaultValue={filters?.status ?? "all"}>
                 <option value="all">{c.all}</option>
-                {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                {statuses.map((status) => <option key={status} value={status}>{accountStatusLabel(status,locale)}</option>)}
               </select>
             </label>
             <button type="submit" className="admin-soft-cta">{locale === "ar" ? "تصفية" : "Filtrer"}</button>
@@ -103,35 +118,35 @@ export function UsersBoard({
                     <th>{a.orgActive}</th>
                     <th>{c.roles}</th>
                     <th>{c.state}</th>
-                    <th>{a.lastActivity}</th>
+                    <th>{locale==="ar"?"آخر تسجيل دخول":"Dernière connexion"}</th>
                     <th>{a.security}</th>
                     <th>{c.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((row) => (
+                  {visible.map((row) => (
                     <tr key={`${row.userId}-${row.membershipId}`}>
                       <td>
                         <span className="client-doc-cell">
-                          <span className="client-avatar" data-tone="violet">{row.organizationName.slice(0, 1)}</span>
+                          <span className="client-avatar" data-tone="violet">{accountLabel(locale,row).slice(0,1)}</span>
                           <span>
-                            <strong>{memberLabel(locale, row.organizationName)}</strong>
-                            <small dir="ltr">{row.userId.slice(0, 8)}</small>
+                            <strong>{accountLabel(locale,row)}</strong>
+                            <small dir="ltr">{row.email??row.userId.slice(0,8)}</small>
                           </span>
                         </span>
                       </td>
-                      <td>{row.organizationName}</td>
-                      <td><span className="client-status-chip" data-tone="violet">{row.roles[0] ?? "—"}</span></td>
-                      <td><span className="client-status-chip" data-tone={statusTone(row.status)}>{row.status}</span></td>
-                      <td dir="ltr">{row.updatedAt?.slice(0, 16) ?? "—"}</td>
-                      <td><ShieldCheck className="size-4" aria-hidden /> {a.mfa}</td>
+                      <td>{row.organizationName??noOrganization(locale)}</td>
+                      <td><span className="client-status-chip" data-tone="violet">{[...row.roles,...(row.platformRoles??[])].join(" · ") || "—"}</span></td>
+                      <td><span className="client-status-chip" data-tone={statusTone(row.accountStatus??row.status)}>{accountStatusLabel(row.accountStatus??row.status,locale)}</span></td>
+                      <td dir="ltr">{accountLastSignIn(row.lastSignInAt,locale)}</td>
+                      <td><ShieldCheck className="size-4" aria-hidden /> {row.mfaStatus === "ENABLED" ? (locale === "ar" ? "مفعّلة" : "Activée") : row.mfaStatus === "DISABLED" ? (locale === "ar" ? "غير مفعّلة" : "Non activée") : a.notShown}</td>
                       <td>
                         <details className="admin-row-menu">
                           <summary aria-label={c.actions}><MoreHorizontal className="size-4" /></summary>
                           <div>
-                            <Link href={`/${locale}/administration/utilisateurs/${row.userId}${query}`}><Eye className="size-3.5" aria-hidden />{c.consult}</Link>
-                            <Link href={`/${locale}/administration/utilisateurs/${row.userId}/roles${query}`}><Pencil className="size-3.5" aria-hidden />{a.editRoles}</Link>
-                            <Link href={`/${locale}/administration/entreprises/${row.organizationId}${query}`}><Building2 className="size-3.5" aria-hidden />{c.orgs}</Link>
+                            <Link href={`/${locale}/administration/utilisateurs/${row.userId}${organizationQuery(query,row.organizationId)}`}><Eye className="size-3.5" aria-hidden />{c.consult}</Link>
+                            <Link href={`/${locale}/administration/utilisateurs/${row.userId}/roles${organizationQuery(query,row.organizationId)}`}><Pencil className="size-3.5" aria-hidden />{a.editRoles}</Link>
+                            {row.organizationId?<Link href={`/${locale}/administration/entreprises/${row.organizationId}${query}`}><Building2 className="size-3.5" aria-hidden />{c.orgs}</Link>:null}
                           </div>
                         </details>
                       </td>
@@ -141,6 +156,7 @@ export function UsersBoard({
               </table>
             </div>
           )}
+          {filtered.length ? <nav aria-label={locale==="ar"?"صفحات المستخدمين":"Pages des utilisateurs"}className="flex flex-wrap items-center gap-3"><span>{currentPage} / {pageCount} · {filtered.length}</span>{currentPage>1?<Link href={pageHref(currentPage-1)}>{locale==="ar"?"السابق":"Précédent"}</Link>:null}{currentPage<pageCount?<Link href={pageHref(currentPage+1)}>{locale==="ar"?"التالي":"Suivant"}</Link>:null}</nav>:null}
           {filtered.length === 0 ? (
             <div className="admin-empty-card">
               <UserRound className="size-6" aria-hidden />
@@ -166,7 +182,7 @@ export function UsersBoard({
               </li>
             ))}
           </ul>
-          <p className="admin-note">{a.invitePolicy}</p>
+          <p className="admin-note">{a.invitePolicy}</p><Link href={`/${locale}/invitations`}>{locale==="ar"?"عرض كل الدعوات":"Voir toutes les invitations"}</Link>
         </aside>
       </section>
       <section className="admin-three">
@@ -221,7 +237,8 @@ export function UserFicheBoard({
   const a = actorCopy(locale);
   const c = adminCopy(locale);
   const primary = rows[0];
-  const orgName = primary?.organizationName ?? c.orgTitle;
+  const orgName = primary?.organizationName ?? noOrganization(locale);
+  const memberships=rows.filter(row=>row.membershipId!==null&&row.organizationId!==null);
   const base = `/${locale}/administration/utilisateurs/${userId}`;
   return (
     <main className="client-page">
@@ -231,27 +248,28 @@ export function UserFicheBoard({
             <div className="admin-user-hero">
               <span className="client-avatar" data-tone="violet">{orgName.slice(0, 1)}</span>
               <div>
-                <h2>{a.userFiche} — {memberLabel(locale, orgName)}</h2>
-                <p>{a.userFicheLead}</p>
+                <h2>{a.userFiche} — {accountLabel(locale,primary)}</h2>
+                <p>{primary?.email??a.userFicheLead}</p>
               </div>
-              <span className="admin-status">{primary?.status ?? c.statusActive}</span>
+              <span className="admin-status">{accountStatusLabel(primary?.accountStatus??primary?.status??"UNKNOWN",locale)}</span>
             </div>
           </article>
           <nav className="client-tabs" aria-label={c.overview}>
             <a href={`${base}${query}`}>{c.overview}</a>
             <a href={`${base}${query}#organisations`} aria-current="page">{a.orgsRoles}</a>
-            <a href={`/${locale}/securite/sessions${query}`}>{a.sessions}</a>
+            <a href={`${base}${query}#securite-compte`}>{a.sessions}</a>
             <a href={`${base}${query}#invitations`}>{c.invites}</a>
             <a href={`/${locale}/administration/operations${query}`}>{c.audit}</a>
           </nav>
           <article className="client-card" id="organisations">
             <header><h2>{a.memberOrgs}</h2><p>{a.memberOrgsLead}</p></header>
+            {memberships.length===0?<p>{noOrganization(locale)}</p>:null}
             <ul className="client-feed">
-              {rows.map((row) => (
+              {memberships.map((row) => (
                 <li key={row.membershipId}>
                   <span className="client-feed-icon" data-tone="violet"><Building2 className="size-4" aria-hidden /></span>
                   <span><strong>{row.organizationName}</strong><small>{a.memberSince}</small></span>
-                  <span className="client-status-chip" data-tone="mint">{row.status}</span>
+                  <span className="client-status-chip" data-tone={statusTone(row.status)}>{accountStatusLabel(row.status,locale)}</span>
                   <Cta href={`/${locale}/administration/entreprises/${row.organizationId}${query}`}>{c.open}</Cta>
                 </li>
               ))}
@@ -260,20 +278,21 @@ export function UserFicheBoard({
           <article className="client-card">
             <header><h2>{a.userRoles}</h2><p>{a.userRolesLead}</p></header>
             <ul className="client-feed">
-              {rows.map((row) => (
+              {memberships.map((row) => (
                 <li key={`${row.membershipId}-role`}>
                   <span className="client-feed-icon" data-tone="violet"><UserRound className="size-4" aria-hidden /></span>
                   <span><strong>{row.roles.join(" · ") || "—"}</strong><small>{row.organizationName}</small></span>
-                  <span className="client-status-chip" data-tone="mint">{row.status}</span>
+                  <span className="client-status-chip" data-tone={statusTone(row.status)}>{accountStatusLabel(row.status,locale)}</span>
                   <Cta href={`${base}/roles${query}`}>{a.editRoles}</Cta>
                 </li>
               ))}
             </ul>
           </article>
+          <article className="client-card"><h2>{locale==="ar"?"أدوار المنصة":"Rôles plateforme"}</h2><p>{primary?.platformRoles?.join(" · ")||"—"}</p><p>{locale==="ar"?"حالة الحساب":"État du compte"} : {accountStatusLabel(primary?.accountStatus??primary?.status??"UNKNOWN",locale)}</p></article>
           <article className="client-card">
             <header><h2>{a.associatedCaps}</h2><p>{a.associatedCapsLead}</p></header>
             <div className="admin-cap-pills">
-              {(primary?.roles ?? ["READ"]).slice(0, 5).map((role) => <span key={role}>{role}</span>)}
+              {[...(primary?.roles??[]),...(primary?.platformRoles??[])].map((role) => <span key={role}>{role}</span>)}
             </div>
           </article>
           <article className="client-card">
@@ -286,7 +305,7 @@ export function UserFicheBoard({
               </div>
               <div>
                 <h3>{a.funcPerimeter}</h3>
-                <p>{primary?.roles.join(" · ") || "—"}</p>
+                <p>{[...(primary?.roles??[]),...(primary?.platformRoles??[])].join(" · ") || "—"}</p>
                 <small>{a.funcPerimeterLead}</small>
               </div>
             </div>
@@ -295,20 +314,20 @@ export function UserFicheBoard({
         </div>
         <aside className="client-stack">
           <article className="client-card">
-            <h2><Shield className="size-4" aria-hidden /> {a.securityControls}</h2>
+            <h2 id="securite-compte"><Shield className="size-4" aria-hidden /> {a.securityControls}</h2>
             <ul className="admin-security">
-              <li><span><Lock className="size-4" aria-hidden /> {a.mfa}</span><span className="client-status-chip" data-tone="mint">{locale === "ar" ? "مفعّلة" : "Activée"}</span></li>
-              <li><span>{a.sessionStatus}</span><span className="client-status-chip" data-tone="sky">{a.notShown}</span></li>
+              <li><span><Lock className="size-4" aria-hidden /> {a.mfa}</span><span className="client-status-chip" data-tone={primary?.mfaStatus === "ENABLED" ? "mint" : "peach"}>{primary?.mfaStatus === "ENABLED" ? (locale === "ar" ? "مفعّلة" : "Activée") : primary?.mfaStatus === "DISABLED" ? (locale === "ar" ? "غير مفعّلة" : "Non activée") : a.notShown}</span></li>
+              <li><span>{a.sessionStatus}</span><span className="client-status-chip" data-tone="sky">{primary?.sessionCount ?? a.notShown}</span></li>
               <li><span>{a.roleRevocation}</span><span className="client-status-chip" data-tone="violet">{a.available}</span></li>
-              <li><span>{a.noCross}</span><span className="client-status-chip" data-tone="mint">{a.conform}</span></li>
+              <li><span>{a.noCross}</span><span className="client-status-chip" data-tone="sky">{a.notShown}</span></li>
             </ul>
           </article>
           <article className="client-card">
             <h2>{c.actions}</h2>
             <div className="admin-empty-actions">
               <Link href={`${base}/roles${query}`} className="admin-primary-cta">{a.editRoles}</Link>
-              <ActorIntentForm locale={locale} organizationId={primary?.organizationId} resourceId={userId} resourceType="SESSION" intent="RESTRICT_ENTITY" reason="Révocation de sessions demandée depuis la fiche utilisateur." label={a.revokeSession} tone="danger" />
-              <ActorIntentForm locale={locale} organizationId={primary?.organizationId} resourceId={userId} resourceType="MEMBERSHIP" intent="SUSPEND_ENTITY" reason="Suspension d’accès demandée depuis la fiche utilisateur." label={a.suspendAccount} tone="danger" />
+              {primary?.organizationId?<ActorIntentForm locale={locale} organizationId={primary.organizationId} resourceId={userId} resourceType="SESSION" intent="RESTRICT_ENTITY" reason="Révocation de sessions demandée depuis la fiche utilisateur." label={a.revokeSession} tone="danger" />:null}
+              {primary?.organizationId?<ActorIntentForm locale={locale} organizationId={primary.organizationId} resourceId={userId} resourceType="MEMBERSHIP" intent="SUSPEND_ENTITY" reason="Suspension d’accès demandée depuis la fiche utilisateur." label={a.suspendAccount} tone="danger" />:null}
             </div>
           </article>
           <article className="client-card">
@@ -511,7 +530,8 @@ export function ClientFicheBoard({
   const c = adminCopy(locale);
   const org = fiche.organization;
   const base = `/${locale}/administration/clients/${org.id}`;
-  const type = inferOrgType(`${org.display_name} ${org.legal_name}`, locale);
+  const compliance = org.client_compliance_snapshot;
+  const profile = org.client_legal_profile;
   return (
     <main className="client-page">
       <nav className="client-tabs" aria-label={c.overview}>
@@ -527,7 +547,7 @@ export function ClientFicheBoard({
         <article className="client-card">
           <header><h2>{a.onboardingState}</h2></header>
           <ol className="admin-journey">
-            {[{ label: locale === "ar" ? "التسجيل" : "Inscription", state: "done" }, { label: locale === "ar" ? "التحقق" : "Vérification", state: "done" }, { label: c.compliance, state: "current" }, { label: locale === "ar" ? "التفعيل" : "Activation", state: "pending" }].map((step) => (
+            {[{ label: locale === "ar" ? "التسجيل" : "Inscription", state: "done" }, { label: locale === "ar" ? "الملف" : "Profil", state: profile ? "done" : compliance ? "current" : "pending" }, { label: c.compliance, state: compliance?.currently_verified ? "done" : compliance ? "current" : "pending" }, { label: locale === "ar" ? "التفعيل" : "Activation", state: org.status === "ACTIVE" && compliance?.currently_verified ? "done" : "pending" }].map((step) => (
               <li key={step.label} data-state={step.state}><i aria-hidden /><span>{step.label}</span></li>
             ))}
           </ol>
@@ -537,8 +557,8 @@ export function ClientFicheBoard({
           <header><h2>{a.companyInfo}</h2></header>
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
-            <div><dt>{c.legalForm}</dt><dd>{type}</dd></div>
-            <div><dt>{c.activity}</dt><dd>{org.display_name}</dd></div>
+            <div><dt>{c.legalForm}</dt><dd>{profile?.legal_form ?? "—"}</dd></div>
+            <div><dt>{c.activity}</dt><dd>{profile?.activity ?? "—"}</dd></div>
             <div><dt>{locale === "ar" ? "البلد" : "Pays"}</dt><dd>{org.country_code}</dd></div>
           </dl>
           <Cta href={`/${locale}/administration/entreprises/${org.id}/modifier${query}`}>{a.seeProfile}</Cta>
@@ -547,18 +567,15 @@ export function ClientFicheBoard({
           <header><h2>{c.compliance}</h2></header>
           <dl className="admin-dl">
             <div><dt>{c.state}</dt><dd>{org.status}</dd></div>
-            <div><dt>KYC</dt><dd>{c.restrictedValue}</dd></div>
-            <div><dt>{c.documents}</dt><dd>{fiche.memberships.length}</dd></div>
+            <div><dt>KYC</dt><dd>{compliance?.status ?? "—"}</dd></div>
+            <div><dt>{c.documents}</dt><dd>{compliance?.document_count ?? "—"}</dd></div>
           </dl>
           <Cta href={`/${locale}/administration/conformite-clients${query}`}>{a.seeCompliance}</Cta>
         </article>
         <article className="client-card">
-          <header><h2>{c.required}</h2></header>
-          <div className="admin-empty-card">
-            <strong>{a.noRequired}</strong>
-            <p>{a.noRequiredLead}</p>
-          </div>
-          <Cta href={`/${locale}/administration/parcours${query}`}>{locale === "ar" ? "عرض كل الإجراءات" : "Voir toutes les actions"}</Cta>
+          <header><h2>{locale === "ar" ? "إجراءات الامتثال المطلوبة" : "Actions de conformité requises"}</h2></header>
+          {compliance ? compliance.required_actions.length ? <ul className="client-feed">{compliance.required_actions.map((action)=><li key={action.id}><span>{locale === "ar" ? action.label_ar : action.label_fr}</span></li>)}</ul> : <p>{locale === "ar" ? "لا توجد عوائق أو أسئلة امتثال مفتوحة في هذا الملف." : "Aucune anomalie bloquante ni question de conformité ouverte dans ce dossier."}</p> : <p>{locale === "ar" ? "ملف الامتثال غير متاح." : "Dossier de conformité non disponible."}</p>}
+          <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}` : `/${locale}/administration/conformite-clients${query}`}>{locale === "ar" ? "فتح ملف الامتثال" : "Ouvrir le dossier de conformité"}</Cta>
         </article>
         <article className="client-card">
           <header><h2>{a.dossierActivity}</h2></header>
@@ -576,13 +593,13 @@ export function ClientFicheBoard({
             <li><span><strong>{c.state}</strong><small>{org.status}</small></span></li>
             <li><span><strong>{c.ids}</strong><small dir="ltr">{org.id.slice(0, 8)}…</small></span></li>
           </ul>
-          <Cta href={`/${locale}/administration/entreprises/${org.id}/modifier${query}`}>{a.manageDocs}</Cta>
+          <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}` : `/${locale}/administration/conformite-clients${query}`}>{a.manageDocs}</Cta>
         </article>
         <article className="client-card">
           <header><h2>{c.requests}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{c.inProgress}</strong><small>{fiche.requests.length}</small></span></li>
-            <li><span><strong>{c.waiting}</strong><small>{fiche.disputes.length}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "الطلبات المسجلة" : "Demandes enregistrées"}</strong><small>{fiche.client_request_count ?? "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "النزاعات المعروضة" : "Litiges visibles"}</strong><small>{fiche.disputes.length}</small></span></li>
           </ul>
           <Cta href={`/${locale}/administration/parcours${query}`}>{a.seeRequests}</Cta>
         </article>
@@ -613,16 +630,18 @@ export function ComplianceBoard({
   query,
   cases,
   filter,
+  serverCounts,
 }: {
   locale: Locale;
   query: string;
   cases: SafeComplianceCase[];
   filter?: string;
+  serverCounts?: Record<"all"|"check"|"complement"|"review"|"decided", number>;
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
   const messages = getComplianceMessages(locale);
-  const counts = {
+  const counts = serverCounts ?? {
     all: cases.length,
     check: cases.filter((item) => item.status === "DOCUMENTS_REQUIRED" || item.status === "UNDER_REVIEW").length,
     complement: cases.filter((item) => item.status === "QUESTION_REQUIRED").length,

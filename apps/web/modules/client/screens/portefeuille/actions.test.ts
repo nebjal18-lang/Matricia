@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), revalidate: vi.fn() }));
@@ -48,6 +49,34 @@ describe("client portfolio actions", () => {
   it("requires a positive allocation and a SHA-256 evidence binding", async () => {
     await expect(recordAllocation(idle, form({ ...base, organizationId: id(2), costCenterId: id(3), budgetId: id(4), projectId: "", allocationType: "ACTUAL", amount: "0", evidenceHash: "bad" }))).resolves.toEqual({ status: "error", reason: "VALIDATION" });
     expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  const allocation = { ...base, organizationId: id(2), costCenterId: id(3), budgetId: id(4), projectId: "", allocationType: "ACTUAL", referenceChoice: `PROJECT:${id(5)}`, amount: "10,05" };
+  it("calculates the fingerprint from the real evidence and retains independent RPC authorization", async () => {
+    const data=form({...allocation,evidenceHash:"a".repeat(64)});
+    const bytes="%PDF-1.7\nMatricia test evidence";
+    data.set("evidenceFile",new File([bytes],"test.pdf",{type:"application/pdf"}));
+    await expect(recordAllocation(idle,data)).resolves.toEqual({status:"success"});
+    expect(mocks.rpc).toHaveBeenCalledWith("record_client_typed_cost_allocation",expect.objectContaining({p_reference_type:"PROJECT",p_reference_id:id(5),p_amount_minor:"1005",p_evidence_hash:createHash("sha256").update(bytes).digest("hex")}));
+  });
+  it.each(["MISSION","MISSION_MILESTONE","INVOICE","DOCUMENT","RFQ"])("keeps the native %s reference contract through a business selection", async referenceType => {
+    const data=form({...allocation,referenceChoice:`${referenceType}:${id(5)}`});
+    data.set("evidenceFile",new File(["%PDF-1.7 test"],"test.pdf",{type:"application/pdf"}));
+    await expect(recordAllocation(idle,data)).resolves.toEqual({status:"success"});
+    expect(mocks.rpc).toHaveBeenCalledWith("record_client_typed_cost_allocation",expect.objectContaining({p_reference_type:referenceType,p_reference_id:id(5)}));
+  });
+  it("rejects a submitted hash without a file and a file with a forged MIME", async () => {
+    const data=form({...allocation,evidenceHash:"a".repeat(64)});
+    await expect(recordAllocation(idle,data)).resolves.toEqual({status:"error",reason:"VALIDATION"});
+    data.set("evidenceFile",new File(["not a PDF"],"test.pdf",{type:"application/pdf"}));
+    await expect(recordAllocation(idle,data)).resolves.toEqual({status:"error",reason:"VALIDATION"});
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it("preserves a forbidden RPC result for a forged foreign object", async () => {
+    mocks.rpc.mockResolvedValue({status:"error",reason:"FORBIDDEN"});
+    const data=form(allocation);data.set("evidenceFile",new File(["%PDF-1.7 test"],"test.pdf",{type:"application/pdf"}));
+    await expect(recordAllocation(idle,data)).resolves.toEqual({status:"error",reason:"FORBIDDEN"});
+    expect(mocks.revalidate).not.toHaveBeenCalled();
   });
 
   it("links a validated contract to a project through the audited command", async () => {

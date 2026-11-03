@@ -1,160 +1,34 @@
+import { readAllPages } from "@/modules/client/data/pagination";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { ArrowRight, Headset, Lock, Paperclip, Save, Send } from "lucide-react";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
-import { spaceCopy } from "@/modules/client/data/spaces/copy";
+import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
+import { HumanAssistanceForm, HumanReplyForm, WithdrawAssistanceConsent, type HumanRequest } from "@/modules/client/screens/diagnostics/assistance/human-forms";
+import { loadClientDocumentVault } from "@/modules/client/data/documents/server-repository";
 import { AssistancePanel } from "@/modules/client/screens/diagnostics/assistance/assistance-panel";
 import { getAssistanceMessages } from "@/modules/client/screens/diagnostics/assistance/messages";
-import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 import { createServerAssistedIntelligenceRepository } from "@/modules/shared/lib/assisted-intelligence/server-repository";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import "@/modules/client/screens/diagnostics/diagnostic-connected.css";
-
-export default async function AssistancePage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string }>;
-}) {
-  const [{ locale }, query] = await Promise.all([params, searchParams]);
-  if (!isLocale(locale)) notFound();
-  const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
-  if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/diagnostics/assistance` }));
-  const messages = getAssistanceMessages(locale);
-  const result = await (await createServerAssistedIntelligenceRepository()).dashboard();
-  const kicker = spaceCopy(locale).kicker;
-  const t = locale === "fr"
-    ? {
-        title: "Demander une assistance",
-        lead: "Posez vos questions à un expert Matricia et avancez sereinement.",
-        formTitle: "Un expert Matricia peut relire votre analyse avec vous",
-        summary: "Résumé de votre demande",
-        consent: "J’accepte que les informations nécessaires à la relecture soient partagées avec un conseiller Matricia.",
-        draft: "Enregistrer le brouillon",
-        send: "Envoyer ma demande",
-        history: "Vos demandes d’assistance",
-        messages: "Accéder à tous mes messages sécurisés",
-        upload: "Glissez-déposez vos fichiers ici ou cliquez pour parcourir",
-        privacy: "Vos pièces restent dans l’espace sécurisé et ne sont visibles que des destinataires autorisés.",
-      }
-    : {
-        title: "طلب مساعدة",
-        lead: "اطرحوا أسئلة على خبير ماتريسيا وتقدموا باطمئنان.",
-        formTitle: "يمكن لخبير ماتريسيا مراجعة تحليلكم معكم",
-        summary: "ملخص طلبكم",
-        consent: "أوافق على مشاركة المعلومات اللازمة للمراجعة مع مستشار ماتريسيا.",
-        draft: "حفظ المسودة",
-        send: "إرسال طلبي",
-        history: "طلبات المساعدة",
-        messages: "الانتقال إلى رسائلي الآمنة",
-        upload: "اسحبوا الملفات هنا أو انقروا للاستعراض",
-        privacy: "تبقى الملفات في المساحة الآمنة ولا تُعرض إلا للمستلمين المصرح بهم.",
-      };
-
-  if (result.status === "error") {
-    const forbidden = result.reason === "FORBIDDEN";
-    return (
-      <ClientAppShell
-        locale={locale}
-        selectedQuery={space.selectedQuery}
-        selectedOrganizationId={space.selectedOrganizationId}
-        userEmail={space.userEmail}
-        organizationName={space.organizationName}
-        active="needs"
-        title={forbidden ? messages.forbiddenTitle : messages.errorTitle}
-        lead={forbidden ? messages.forbidden : messages.error}
-        kicker={kicker}
-      >
-        <main className="client-page" role={forbidden ? undefined : "alert"}>
-          <p>{forbidden ? messages.forbidden : messages.error}</p>
-        </main>
-      </ClientAppShell>
-    );
-  }
-
-  const decisionKeys = Object.fromEntries(result.value.suggestions.map((suggestion) => [suggestion.id, randomUUID()]));
-
-  return (
-    <ClientAppShell
-      locale={locale}
-      selectedQuery={space.selectedQuery}
-      selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail}
-      organizationName={space.organizationName}
-      active="needs"
-      kicker={kicker}
-    >
-      <main className="client-page">
-        <div className="diag-conn">
-          <header className="diag-conn-hero">
-            <div>
-              <h1>{t.title}</h1>
-              <p>{t.lead}</p>
-            </div>
-          </header>
-
-          <div className="diag-conn-split">
-            <section className="diag-conn-card">
-              <h2><Headset size={18} color="#642bef" aria-hidden />{t.formTitle}</h2>
-              <p className="diag-conn-callout" data-tone="sky" style={{ marginTop: 12 }}>{messages.safety}</p>
-              <div style={{ marginTop: 16 }}>
-                <AssistancePanel
-                  dashboard={result.value}
-                  locale={locale}
-                  messages={messages}
-                  keys={{ analysis: randomUUID(), similarity: randomUUID(), decisions: decisionKeys }}
-                />
-              </div>
-              <div className="diag-conn-callout" data-tone="sky" style={{ marginTop: 16 }}>
-                <Paperclip size={16} aria-hidden />
-                <div>
-                  <strong>{t.upload}</strong>
-                  <p style={{ marginTop: 4 }}><Lock size={14} style={{ display: "inline" }} aria-hidden /> {t.privacy}</p>
-                </div>
-              </div>
-            </section>
-
-            <aside className="diag-conn-stack">
-              <section className="diag-conn-card">
-                <h2>{t.summary}</h2>
-                <dl className="diag-conn-list" style={{ marginTop: 12 }}>
-                  <div><dt style={{ color: "#5e6a93", fontSize: "0.75rem" }}>{messages.organization}</dt><dd>{space.organizationName ?? "—"}</dd></div>
-                  <div><dt style={{ color: "#5e6a93", fontSize: "0.75rem" }}>{messages.context}</dt><dd>{messages.contexts.CONTEXTUAL_ASSISTANT}</dd></div>
-                </dl>
-                <label style={{ display: "flex", gap: 10, marginTop: 14, alignItems: "flex-start", fontSize: "0.86rem" }}>
-                  <input type="checkbox" defaultChecked style={{ marginTop: 3 }} />
-                  <span>{t.consent}</span>
-                </label>
-                <div className="diag-conn-stack" style={{ marginTop: 14 }}>
-                  <button type="button" className="diag-conn-btn-outline"><Save size={15} aria-hidden />{t.draft}</button>
-                  <Link href={`/${locale}/client/messages${space.selectedQuery}`} className="diag-conn-btn-grad"><Send size={15} aria-hidden />{t.send}<ArrowRight className="rtl-mirror" size={16} aria-hidden /></Link>
-                </div>
-              </section>
-              <section className="diag-conn-card">
-                <div className="diag-conn-item-foot">
-                  <h2>{t.history}</h2>
-                  <Link href={`/${locale}/client/messages${space.selectedQuery}`} style={{ color: "var(--diag-violet)", fontWeight: 720 }}>{t.messages}</Link>
-                </div>
-                <ul className="diag-conn-list" style={{ marginTop: 12 }}>
-                  {result.value.suggestions.slice(0, 3).map((suggestion) => (
-                    <li key={suggestion.id}>
-                      <span>•</span>
-                      <span>
-                        <strong>{messages.kinds[suggestion.kind] ?? suggestion.kind}</strong>
-                        <small style={{ display: "block", color: "#5e6a93" }}>{messages.statuses[suggestion.status]}</small>
-                      </span>
-                    </li>
-                  ))}
-                  {!result.value.suggestions.length ? <li><span>•</span><span>{messages.noSuggestions}</span></li> : null}
-                </ul>
-              </section>
-            </aside>
-          </div>
-        </div>
-      </main>
-    </ClientAppShell>
-  );
+export default async function AssistancePage({ params, searchParams }: { params: Promise<{locale:string}>; searchParams: Promise<{organizationId?:string;requestId?:string;page?:string}> }) {
+ const [{locale},query]=await Promise.all([params,searchParams]);if(!isLocale(locale))notFound();
+ const space=await resolveClientSpace({locale,organizationId:query.organizationId});if(space.status==='unauthenticated')redirect(`/${locale}/connexion`);
+ const client=await getSupabaseServerClient(); const actor=(await client.auth.getUser()).data.user!;
+ const page=Math.min(100000,Math.max(1,Number.parseInt(query.page??'1',10)||1));
+ const [requests,vault,intelligence]=await Promise.all([client.from('client_assistance_requests').select('id,subject,body,status,row_version,document_ids,created_by,updated_at,consent_revoked_at').eq('organization_id',space.selectedOrganizationId).order('updated_at',{ascending:false}).order('id').range((page-1)*20,page*20),loadClientDocumentVault(space.selectedOrganizationId), (await createServerAssistedIntelligenceRepository()).dashboard()]);
+ const selection=query.requestId?await client.from('client_assistance_requests').select('id,subject,body,status,row_version,document_ids,created_by,updated_at,consent_revoked_at').eq('organization_id',space.selectedOrganizationId).eq('id',query.requestId).maybeSingle():null;
+ const selected=selection?.data??undefined;if(query.requestId&&!selected&&!selection?.error)notFound();
+ const messages=selected?await readAllPages((from,to)=>client.from('client_assistance_messages').select('id,actor_user_id,body,created_at').eq('request_id',selected.id).order('created_at').order('id').range(from,to)):null;
+ const labels=locale==='fr'?{DRAFT:'Brouillon',SUBMITTED:'Envoyée au conseiller',ASSIGNED:'En cours de traitement',CLOSED:'Clôturée'}:{DRAFT:'مسودة',SUBMITTED:'أرسل إلى المستشار',ASSIGNED:'قيد المعالجة',CLOSED:'مغلق'};
+ const date=new Intl.DateTimeFormat(locale==='fr'?'fr-MA':'ar-MA',{dateStyle:'medium',timeStyle:'short',timeZone:'Africa/Casablanca'});
+ return <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={locale==='fr'?'Demander une assistance':'طلب مساعدة'}><main className="client-page grid gap-6">
+ {requests.error||selection?.error?<p role="alert">{locale==='fr'?'Les demandes sont momentanément indisponibles. Rechargez pour réessayer.':'الطلبات غير متاحة مؤقتاً. أعيدوا التحميل للمحاولة.'}</p>:<>
+ {vault.status==='error'?<p role="alert">{locale==='fr'?'Les pièces du coffre sont momentanément indisponibles. Vérifiez le coffre avant de joindre un document.':'مستندات الخزنة غير متاحة مؤقتاً. تحققوا من الخزنة قبل إرفاق مستند.'}</p>:null}
+ <section className="client-card"><h2>{selected?.subject??(locale==='fr'?'Nouvelle demande à un conseiller':'طلب جديد إلى مستشار')}</h2>
+ {!selected||selected.status==='DRAFT'?selected&&selected.created_by!==actor.id?<p>{locale==='fr'?'Seul l’auteur peut modifier ce brouillon.':'يمكن للمؤلف فقط تعديل المسودة.'}</p>:<HumanAssistanceForm key={`${selected?.id??'new'}:${selected?.row_version??0}`} locale={locale} organizationId={space.selectedOrganizationId} request={selected as HumanRequest|undefined} documents={vault.status==='success'?vault.value.documents.filter(document=>document.status==='VERIFIED'&&document.scanStatus==='CLEAN'&&document.scanResultId):[]} keyValue={randomUUID()}/>:<><p role="status">{selected.consent_revoked_at ? (locale === "fr" ? "Autorisation retirée — demande clôturée" : "تم سحب الإذن وإغلاق الطلب") : labels[selected.status as keyof typeof labels]}</p><p className="whitespace-pre-wrap">{selected.body}</p><ul>{selected.document_ids.map((id:string)=><li key={id}><a className="underline" href={selected.consent_revoked_at ? `/api/client/documents/${id}` : `/api/client/assistance/${selected.id}/documents/${id}`}>{vault.status==='success'?vault.value.documents.find(document=>document.id===id)?.fileName??id.slice(0,8):id.slice(0,8)}</a></li>)}</ul>{messages?.error?<p role="alert">{locale==='fr'?'Échanges indisponibles.':'المحادثة غير متاحة.'}</p>:<ol>{(messages?.data??[]).map(m=><li key={m.id} className="my-3 rounded-lg border p-3"><strong>{m.actor_user_id===actor.id?(locale==='fr'?'Vous':'أنتم'):(locale==='fr'?'Conseiller ou membre habilité':'مستشار أو عضو مخول')}</strong><time className="block text-sm">{date.format(new Date(m.created_at))}</time><p className="whitespace-pre-wrap">{m.body}</p></li>)}</ol>}{selected.status!=='CLOSED'&&selected.created_by===actor.id?<HumanReplyForm locale={locale} requestId={selected.id} keyValue={randomUUID()}/>:null}{selected.created_by===actor.id && !selected.consent_revoked_at ? <WithdrawAssistanceConsent locale={locale} requestId={selected.id} version={selected.row_version} keyValue={randomUUID()}/> : null}</>}
+ </section><section className="client-card"><h2>{locale==='fr'?'Vos demandes d’assistance':'طلبات المساعدة'}</h2><Link className="underline" href={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>{locale==='fr'?'Créer une autre demande':'إنشاء طلب آخر'}</Link><ul>{(requests.data??[]).slice(0,20).map(r=><li key={r.id} className="py-2"><Link className="underline" href={`/${locale}/client/diagnostics/assistance${space.selectedQuery}&requestId=${r.id}`}>{r.subject}</Link> · {labels[r.status as keyof typeof labels]} · {date.format(new Date(r.updated_at))}</li>)}</ul><nav className='flex gap-4' aria-label={locale==='fr'?'Pages des demandes d’assistance':'صفحات طلبات المساعدة'}>{page>1?<Link href={`${space.selectedQuery}&page=${page-1}`}>{locale==='fr'?'Précédent':'السابق'}</Link>:null}{(requests.data?.length??0)>20?<Link href={`${space.selectedQuery}&page=${page+1}`}>{locale==='fr'?'Suivant':'التالي'}</Link>:null}</nav>{!requests.data?.length?<p>{locale==='fr'?'Aucune demande enregistrée.':'لا توجد طلبات محفوظة.'}</p>:null}<Link href={`/${locale}/messagerie${space.selectedQuery}`}>{locale==='fr'?'Accéder à mes autres échanges sécurisés':'الوصول إلى محادثاتي الآمنة الأخرى'}</Link></section></>}
+ {intelligence.status==='success'?<details className="client-card"><summary>{locale==='fr'?'Analyse automatique distincte de la demande au conseiller':'تحليل آلي مستقل عن طلب المستشار'}</summary><AssistancePanel dashboard={intelligence.value} locale={locale} messages={getAssistanceMessages(locale)} keys={{analysis:randomUUID(),similarity:randomUUID(),decisions:Object.fromEntries(intelligence.value.suggestions.map(s=>[s.id,randomUUID()]))}}/></details>:null}
+ </main></ClientAppShell>;
 }

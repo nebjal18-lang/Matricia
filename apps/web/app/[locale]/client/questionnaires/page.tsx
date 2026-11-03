@@ -21,7 +21,7 @@ export default async function ClientQuestionnairesPage({ params, searchParams }:
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/questionnaires` }));
   const messages = getQuestionnaireMessages(locale);
   const repository = await createServerQuestionnaireSessionsRepository();
-  const [result, portfolio] = await Promise.all([repository.load(session, organizationId), loadClientPortfolio(organizationId ?? space.selectedOrganizationId ?? undefined)]);
+  const [result, portfolio] = await Promise.all([repository.load(session, space.selectedOrganizationId), loadClientPortfolio(organizationId ?? space.selectedOrganizationId ?? undefined)]);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/questionnaires` }));
   const sites = portfolio.status === "success" ? portfolio.value.sites.map((site) => ({ id: site.id, nameFr: site.nameFr, nameAr: site.nameAr })) : [];
   const alternate = locale === "fr" ? "ar" : "fr";

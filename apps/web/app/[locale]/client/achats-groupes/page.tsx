@@ -21,7 +21,7 @@ export default async function VolumePage({
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/achats-groupes` }));
   const messages = getVolumeMessages(locale);
-  const result = await loadVolumeProcurement(query.organizationId);
+  const result = await loadVolumeProcurement(space.selectedOrganizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/achats-groupes` }));
   return (
     <ClientAppShell

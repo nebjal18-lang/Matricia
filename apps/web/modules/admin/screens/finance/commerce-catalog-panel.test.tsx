@@ -51,6 +51,8 @@ describe("CommerceCatalogPanel", () => {
     expect(html).toContain("PACK_IT");
     expect(html).toContain("Créer un pack de crédits");
     expect(html).toContain("Créer une promotion");
+    expect(html).toContain("Achats de packs vérifiés");
+    expect(html).not.toContain('name="paymentReference"');
     expect(html).toContain("DOCUMENT_EXPIRY_WARNING_DAYS");
     expect(html).not.toMatch(/\bTODO\b|\bFIXME\b/);
   });

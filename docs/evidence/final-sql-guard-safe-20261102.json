@@ -1,0 +1,1811 @@
+{
+  "classification": "SYNTHETIC_SQL_CONTRACTS_ON_FRESH_ISOLATED_REPLAY",
+  "candidateRuntime": "caller-owned native-replay container; no shared database access",
+  "target": {
+    "name": "matricia_replay_e53893d1bf8243f8bc0ea2a73e69fdeb",
+    "network": "none",
+    "publicPorts": 0
+  },
+  "results": [
+    {
+      "file": "0001_schema_rls.test.sql",
+      "sha256": "e78922cdcd3e053d376dbf0f13a35a8e17bc92522b2984bc47db12a1781ee711",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0002_tenant_isolation.test.sql",
+      "sha256": "b5e2d1c28a39c0c56a9e3ffcc47a9630a277f8e31dca3e8ba2f77981b82e4fae",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0003_immutable_ledgers.test.sql",
+      "sha256": "f870e297f4121ef2d7facc1ed9b73ef66ae694e362c6d9c929c5cbbecbe4c3c5",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0004_financial_rpcs.test.sql",
+      "sha256": "da81c51ddf69494aaad6f727acd1547f8f354b70691ca77807a4e6124eb21475",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0005_outbox_dispatch.test.sql",
+      "sha256": "05c800e9ea049c9738dc73ccf3bdc370511f5bbd1b7f97047359415e59f661ae",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0006_security_invariants.test.sql",
+      "sha256": "03d2014cfa0ee9e6a10641adbe023b28b4ccb0441d18c78dbc89a30b4acb3dc6",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0007_p03_rls_matrix.test.sql",
+      "sha256": "3f03c61df99570dfa865065c47c73ab332c21d96ff85f35ad1b0e92d27756458",
+      "passed": true,
+      "assertions": 25,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0008_p03_audit_outbox.test.sql",
+      "sha256": "b07cb53468c3f412d618f0a3da6d72c8d17f5b66a90960e201bed1760f629eb2",
+      "passed": true,
+      "assertions": 17,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0009_p03_financial_concurrency.test.sql",
+      "sha256": "e8f86bfd79bffd1eab51a3a45b9d6627771fb7f0074ff97a330b011921ca20a8",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0010_p04_identity_workflows.test.sql",
+      "sha256": "8fd42a7bbd07cdd662bdd1225a7538edd060b768699b2c48eeca6189ab8752ff",
+      "passed": true,
+      "assertions": 30,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0011_readiness_probe.test.sql",
+      "sha256": "29d3a7fa526302bbcd7105cb897058db1ed3c0a06c07a459925c5f18952c1b3d",
+      "passed": true,
+      "assertions": 4,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0012_least_privilege_acl.test.sql",
+      "sha256": "faa339cd1bacbec6094c7c25efeba578b96d3946a4fd785dbcd3f73ee3d5cfb3",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0013_p04_role_requests.test.sql",
+      "sha256": "9b66b167db7b8e756d23c2fd363c040dc3c8fb0baafd0614538adf9f0a637afa",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0014_p04_invitation_decline.test.sql",
+      "sha256": "924aff535dd59bb6c19e967d237c50f71bf41f46659bc0aacd24862039d8e6d1",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0015_p04_email_invitations.test.sql",
+      "sha256": "cd1a26747548e2bba61186bce61f49c65a3615bb248473e0aa9848bef5a9f865",
+      "passed": true,
+      "assertions": 20,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0016_p04_account_security_policy.test.sql",
+      "sha256": "6c74611f6dc006cfbdff0e184bf5f84196ccee763eb3a516dcac310ad55e3417",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0017_p05_client_onboarding.test.sql",
+      "sha256": "993e5ab79b0362b07cb63e67a510fdc635fb64b37b1b036de521ac141badea73",
+      "passed": true,
+      "assertions": 37,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0018_p04_identity_security_hardening.test.sql",
+      "sha256": "c94e52b354a831238f8d1531214db388395a6646fe9509aad684a9ba5e22cb2e",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0019_p04_account_security_audit_saga.test.sql",
+      "sha256": "d3f5f2bbb8b6a73cf7bc984989e2cb1deabc8d1fa27d1698973750e54d0aa2c3",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0020_p05_client_compliance_documents.test.sql",
+      "sha256": "8a98c4c179a0fcf6d32c4a831fd65bb60b1a1f6a9281948b25d9fd44ae800580",
+      "passed": true,
+      "assertions": 31,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0021_p05_compliance_questions.test.sql",
+      "sha256": "75c672de88fdf818b3661bc0bf48329e89466d631471f9b6735fddd6426b6b38",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0022_p05_document_security_hardening.test.sql",
+      "sha256": "da71e749c868ffd08642610a1f7f67b0283a6f8ce8481ddba062f06aac5040b0",
+      "passed": true,
+      "assertions": 48,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0023_p05_compliance_anomaly_matrix.test.sql",
+      "sha256": "e9039f2f0e290aa76ec91b30bb293bc4afe087a3e20cfb58284f980cc0ce902d",
+      "passed": true,
+      "assertions": 20,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0024_p06_catalog_core.test.sql",
+      "sha256": "89a06510f4895a8d7cc350e3e1c218011982c8cb2f669d4d54686747b1624cad",
+      "passed": true,
+      "assertions": 107,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0025_p06_question_engine_persistence.test.sql",
+      "sha256": "e7fe6ada6ab738a4bf33d993746d6dfebabafb9df65b34cb2bd18b9edd6dfb50",
+      "passed": true,
+      "assertions": 119,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0026_p06_client_catalog_read_api.test.sql",
+      "sha256": "a129afc6110d02242749def95ae703313a222e0bcb0e09b1e48ff47745b5334b",
+      "passed": true,
+      "assertions": 55,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0027_p06_catalog_version_insert_compatibility.test.sql",
+      "sha256": "bdf51a3aed421a9ae7928ff1e1b9e4c03e60ab087b15ca4dd92f14d4e90fb47f",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0028_p06_catalog_version_explicit_snapshot_compatibility.test.sql",
+      "sha256": "c7e2709d0003011daff28f693da3dc6985eb677094d94e13ba1540067f76550c",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0029_p06_catalog_snapshot_lifecycle_hardening.test.sql",
+      "sha256": "9291bc3b9fbfae7fabbf4cfa45c1230a0c67179a10d341f9e593e1e55d74369a",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0030_p06_catalog_baseline_import.test.sql",
+      "sha256": "11c474e4a8f26b89cd1114506696ddc625a9f52382465a1f9db0af45d182637a",
+      "passed": true,
+      "assertions": 41,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0031_p06_catalog_hierarchy_commands.test.sql",
+      "sha256": "aff9140170d67856734daadccd8babd4a1140f2c198e187e2adacd7c3f095ca3",
+      "passed": true,
+      "assertions": 49,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0032_p06_catalog_service_commands.test.sql",
+      "sha256": "71c3921eb0a4a377bf6c291f2d414473a52a39cd85d9f1f77a791b3246fa845c",
+      "passed": true,
+      "assertions": 67,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0033_p06_catalog_hierarchy_legacy_compatibility.test.sql",
+      "sha256": "fd9087d98130da902bec049b7115ac37eeb1cd7e40c309e989f7d38d822275d9",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0034_p06_catalog_legacy_claim_role_compatibility.test.sql",
+      "sha256": "e52d240a0b608734157fc88eac24b9f3122e277b5c743c3dec9327f6d26ad2c8",
+      "passed": true,
+      "assertions": 32,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0035_p06_catalog_legacy_approval_evidence_compatibility.test.sql",
+      "sha256": "de208423d3fc9ce6e78b02d9b6a84ca2e4d4c796e500b43befd34d202f105e0f",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0036_p06_catalog_import_question_scope_compatibility.test.sql",
+      "sha256": "391b68ed4826d722d2164201a3cec0e4a6e9b1de7703253f776db4b47c9fa920",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0037_p06_catalog_import_draft_choice_compatibility.test.sql",
+      "sha256": "da5c62a02201765a221de450ab2d7c41e44a5d5b48bd07233c1c580c6828f5ea",
+      "passed": true,
+      "assertions": 3,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0038_p06_question_draft_choice_contract.test.sql",
+      "sha256": "04403ce72dd2095ee0df3d059374bc50b3114a9299abd243eede941a55b5d9c4",
+      "passed": true,
+      "assertions": 3,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0039_p06_question_builder_commands.test.sql",
+      "sha256": "a4dfbad3b49f9b4970e80098edff19a92bf8e52205871b5fe7cc76887cccae2c",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0040_p06_rule_builder_commands.test.sql",
+      "sha256": "450963a544f4c192cfcc736b7bb637614416a434e6512be58e8c022410d7c58f",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0041_p06_questionnaire_builder_create.test.sql",
+      "sha256": "3e4c127dcd8eb09cb5ff65e4afdcc20e69b3428dacb0c86ef49be25d176b5dd9",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0042_p06_questionnaire_snapshot_composition.test.sql",
+      "sha256": "23cc45fc35bf10fa890a2c904472e94333884a38bd16247b29cdc7a6cf1ec912",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0044_p07_quotes_comparison.test.sql",
+      "sha256": "dc3987f8733b9764f326f2befc21e34e9c253e4476e02cf520901aa64ff301eb",
+      "passed": true,
+      "assertions": 19,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0045_p08_contracts_missions_core.test.sql",
+      "sha256": "470227eaaf5a58e6d2e4fd012b9684eb5dd8df127dbba62a893a95e6809ebb1f",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0046_p09_provider_qualification.test.sql",
+      "sha256": "3fad96940055bf682abbf13a6a57e508e786774dc4a4ad9cdeac0c7ca351a7f3",
+      "passed": true,
+      "assertions": 42,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0047_p10_provider_billing_reconciliation.test.sql",
+      "sha256": "14abe75b171356002768d5bda95267ccddecabd3cbd6a24576c07d0a9c110e74",
+      "passed": true,
+      "assertions": 33,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0048_p11_disputes_reassignment.test.sql",
+      "sha256": "7c3bb4bcc678a01a50981ba1d148f053fa9036c9c9632c327215757c7dcc749b",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0049_p12_volume_procurement_pools.test.sql",
+      "sha256": "d37626b0ba4193aaf27d38737fc365f27f2d142095b570f93fc499adadc84229",
+      "passed": true,
+      "assertions": 30,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0050_p13_franchise_governance.test.sql",
+      "sha256": "c483afae1be71aac1d4b5c2ae260ebab9af0059b36e876f1753b98ab797f7a7d",
+      "passed": true,
+      "assertions": 31,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0051_p15_franchise_finance.test.sql",
+      "sha256": "dbe1fcbf91558107b78d653bfa720218341f5e28fdd105cb77f016048ae5f311",
+      "passed": true,
+      "assertions": 32,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0052_p15_subscription_plans_cycles.test.sql",
+      "sha256": "a943cb5bc450b99ea5fdea912d29f7fe1049846e1e7247cb135b5e13568835b5",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0053_p17_admin_command_center.test.sql",
+      "sha256": "294c8d817450a42a57bfb2c2e95dc599b14fa796ab9975e7bc37297a38885225",
+      "passed": true,
+      "assertions": 32,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0054_p07_diagnostics_opportunities.test.sql",
+      "sha256": "b82de2bc5dc2eda13eba42c2112dbe4c88d80213e60e05f6ea2e97f5fee0fdce",
+      "passed": true,
+      "assertions": 30,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0055_p08_boxes_credits_security.test.sql",
+      "sha256": "32e1212c49f221afac901c3b157688c00eb9db4f4fff4b8df0b64346b88f9db8",
+      "passed": true,
+      "assertions": 35,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0056_p17_notifications_preferences_delivery.test.sql",
+      "sha256": "0250e70bcd382931683cf5a87172e84d34de30fe0b3bb4b6ac3ace549fe6bfc3",
+      "passed": true,
+      "assertions": 40,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0057_p08_credit_wallet_client_admin_rls.test.sql",
+      "sha256": "0d35b44ca7c033322017a7a6a90a5f1e99d23053cbc08848fdd083d5dd2db8ce",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0058_p18_marketing_autopilot.test.sql",
+      "sha256": "e4809dd969c28de7eaf7b8796c800da76a46f8b3101f41e4377912207efa3bce",
+      "passed": true,
+      "assertions": 40,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0059_p10_franchise_crm_performance.test.sql",
+      "sha256": "b4d29eded355b6aa953404b3159a981c1a29dcfaaf8a648c89718128d83b1f5c",
+      "passed": true,
+      "assertions": 30,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0060_p14_morocco_tax_engine.test.sql",
+      "sha256": "a526b4cc1cfc80f966dbad84b46d59d16b50fb8371185633a6aadb98f7052ff8",
+      "passed": true,
+      "assertions": 49,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0061_p06_question_rule_advanced_engine.test.sql",
+      "sha256": "d7daa7cf4713ed27f606be0c97f05e939fdd9f0868979233979f929f316ae9db",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0062_p18_marketing_authorization_hardening.test.sql",
+      "sha256": "4f0d39fb9bfd740ee9f166995f41fe06705889a1f324bd255c39506b8a64fd31",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0063_p10_franchise_crm_security_hardening.test.sql",
+      "sha256": "9ca74e5945c7757500e1b9515113c6e45ebf17a72f9e8c889770b34c47ead955",
+      "passed": true,
+      "assertions": 23,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0064_p06_questionnaire_sessions.test.sql",
+      "sha256": "ec0b6892243b43283e6e4f37df29dc41152c78ac4f5564340bf992675ac08703",
+      "passed": true,
+      "assertions": 46,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0065_client_projects_budgets_calendar.test.sql",
+      "sha256": "3ebc308b44aebd9a927c6bb219fef4acca0700175ffe0cde9cc198ae4155cbd0",
+      "passed": true,
+      "assertions": 34,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0066_provider_reputation_badges_favorites.test.sql",
+      "sha256": "c234225b44735fe6cc09e34c8e6556835927409acf429368572bddd1368df45a",
+      "passed": true,
+      "assertions": 45,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0067_rewards_referrals_roi_savings.test.sql",
+      "sha256": "573763e991b90efd1eec717ba81703e6dae44074d483d6aa1a6bcc9ec1465a73",
+      "passed": true,
+      "assertions": 50,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0068_provider_feedback_privacy_hardening.test.sql",
+      "sha256": "ba43761e80dd0aa6747f8fb0d9bff060849900a026bbb88f54d4891066662a0f",
+      "passed": true,
+      "assertions": 30,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0069_rewards_referrals_roi_security_hardening.test.sql",
+      "sha256": "7792fd89630e03f13166d79628a915540f75738e70a8d21a655ce90c68071d40",
+      "passed": true,
+      "assertions": 41,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0070_client_portfolio_integrity_hardening.test.sql",
+      "sha256": "62bb6de82b1b1a78b6eedccd60d9b59caadfd01c701f0ac4a1894b02e7205871",
+      "passed": true,
+      "assertions": 25,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0072_provider_feedback_outbox_backfill.test.sql",
+      "sha256": "17748a44645fdbdf28094f0d5288d048c71e904aeae71e79c64934e6e506b5ce",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0073_referral_conversion_anti_oracle.test.sql",
+      "sha256": "a237d5316cc9b82750667f03ef0611b69b3bf939eb6d6e7aba6e7054536c9787",
+      "passed": true,
+      "assertions": 12,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0074_assisted_intelligence_quality.test.sql",
+      "sha256": "da8bcd654d2f8ca17999e8511c6d20d50317c0546d4809fbbc6f7204ede77abe",
+      "passed": true,
+      "assertions": 43,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0075_solution_bundles_benchmarks.test.sql",
+      "sha256": "5534ab9d6501c6373a20090eeaaf0cfbbd46316e61958d9df088fbcb77ea5295",
+      "passed": true,
+      "assertions": 44,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0076_rfq_clone_recurring_services.test.sql",
+      "sha256": "0b8bbc06b11b65a10c53fe4b1b0c13b2a89c3537da2b957a692d15166841943c",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0077_franchise_daily_digest.test.sql",
+      "sha256": "0289245fcfd2fb5c83d06f8b6c16521fdc695a1240049fa960bf57139a9de27b",
+      "passed": true,
+      "assertions": 55,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0078_benchmark_privacy_hardening.test.sql",
+      "sha256": "409f5c88fa0f6fb1f16cd935cfa14a02dcf0d385cead02ddd8ec6333e695b61f",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0079_assisted_intelligence_runtime_hardening.test.sql",
+      "sha256": "74e91529f632eacef6d320ea77436ef00ffe0dc90eed9ac930f9bb82a1d2b2c4",
+      "passed": true,
+      "assertions": 22,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0080_rfq_recurring_runtime_hardening.test.sql",
+      "sha256": "17ce334364407dddf408e79653ccdcb26fa1a3376156af71aeb2db50f6ef2f7e",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0081_benchmark_submission_lock_hardening.test.sql",
+      "sha256": "8d7aff69db8842d83bbe12e59d2716e691299e2d2bf88ade8859497ac03afda6",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0082_assistance_pii_minimization_hardening.test.sql",
+      "sha256": "52c5a6a637256729e25b25fa7ee5763fd533692361c4ef721e0197d33c7e1cf2",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0084_assistance_role_authorization_hardening.test.sql",
+      "sha256": "9bce8816f1f28dae13f3bf16ceffdcc20045f459558c76a8032d7ce0705497eb",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0085_benchmark_registry_and_bundle_concurrency.test.sql",
+      "sha256": "f1a36606dd820646d4e11c1afd8eee128166cba54f617279ad05ae9d22f9ef10",
+      "passed": true,
+      "assertions": 20,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0086_assistance_role_helper_acl.test.sql",
+      "sha256": "642245030b5b934a2da44d12a867c0c333fe965333d513b288056899813b08d9",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0087_assistance_null_input_retention.test.sql",
+      "sha256": "30732054bb1472244acadd415408c6fe3e469dd468175360fe099f51ec3fd555",
+      "passed": true,
+      "assertions": 6,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0088_benchmark_verified_value_binding.test.sql",
+      "sha256": "51037cced58efcac2e2b22a45e2e7bf49aaf6a5f170383b91610340aab0dffe8",
+      "passed": true,
+      "assertions": 22,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0090_assistance_retention_and_pii_hardening.test.sql",
+      "sha256": "b2833a1d5eedf705f34252b99d57f33d1ceda9e6606945f1e265dec4ee9a6b1e",
+      "passed": true,
+      "assertions": 21,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0091_assistance_purge_execution_hardening.test.sql",
+      "sha256": "3ddc8e42f9dd108e55d5928f8a27bfa337bd4bf21a4b53e9a8da4d96a06dfb00",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0093_question_rule_rpc_authorization_hardening.test.sql",
+      "sha256": "2cb7c01968a0c16b37aaf0b493c37243d7f4b94eb15f203266a45674034d1eaf",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0094_questionnaire_document_reference_scope.test.sql",
+      "sha256": "9eb838acc342efa960d3743f4439be3feb227a298cf6a9299568d372f0b608c9",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0095_recurring_viewer_read_policy.test.sql",
+      "sha256": "7a1beb62951bb16b2d245f5c4f659e0d2f3522417dcca5bb7b9576cfd3227dc2",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0096_admin_operations_projection_security.test.sql",
+      "sha256": "5ec6e411e362098b17bd228dc6ca54bc79fed8f1e25e96b8da1fcc86debd740b",
+      "passed": true,
+      "assertions": 17,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0097_real_payment_gateways.test.sql",
+      "sha256": "104949b548bc778b374a2f6b2d36406afe571e8600a53150948fedd3cdf07b31",
+      "passed": true,
+      "assertions": 23,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0098_rfq_fair_rotation_recurring_scheduler.test.sql",
+      "sha256": "4c493f289412c5ab871dae1d5341d077c61f49f23703a97f9bb297b5ee400ef6",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0099_rfq_invitation_current_region_guard.test.sql",
+      "sha256": "824385611fd3eac8a303d00f8041dc37149b4519ac7ea9b5b0bc7b69c76e210d",
+      "passed": true,
+      "assertions": 6,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0100_admin_revocation_and_rfq_versioned_eligibility.test.sql",
+      "sha256": "d78f6edca98a045a28b569e758bca663606fba253bfc9dc2cf9eb9143b8d0fa6",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0103_marketing_v1_completeness.test.sql",
+      "sha256": "c0289ce80c4949000ecd71f625fb688e828ae94cea5f61505474c020d3472083",
+      "passed": true,
+      "assertions": 34,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0104_contract_mission_checklist_snapshot.test.sql",
+      "sha256": "e4c9010f5bbe486af5676881d12eec634c75578a1203cbcb8e243ae8eeb56151",
+      "passed": true,
+      "assertions": 29,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0105_assistance_discovery_bundle_projection.test.sql",
+      "sha256": "78fd4b942423e0feb46cc07bc907f51527c9f53791832a02a29bc4c70d6cc85f",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0108_v41_finance_boundaries_procurement_rib.test.sql",
+      "sha256": "7607ca8fcdb0e2e21a3169b12792cdee3b7179fab476157a34c0538cac6b0ec9",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0109_v41_signature_provider_evidence.test.sql",
+      "sha256": "368dd5ffa49e7058a1e8d560cc87dfab125df84552792a2d29ecbcd4f96bdf27",
+      "passed": true,
+      "assertions": 26,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0110_v41_privacy_governance.test.sql",
+      "sha256": "01ab6b2fe7d1ef46792da4b03372a45aad8f3f763e2ea65a0f1813a7725c50b8",
+      "passed": true,
+      "assertions": 31,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0111_v41_finops_margin_treasury.test.sql",
+      "sha256": "28df1b0f7ca565318f3fa7dc7db02a90951a4618a277f6962477a2f58d88a244",
+      "passed": true,
+      "assertions": 25,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0112_v41_finance_workflow_commands.test.sql",
+      "sha256": "367b6bf4edf1244c9ff9e7bc5f0db2483894dcf164bbd0aac80cc87accf60073",
+      "passed": true,
+      "assertions": 47,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0113_v41_resilience_security_registry.test.sql",
+      "sha256": "d0f70ee946101fe04d1cd43468c08b97a8418ec530b5147bfca6fe3a254cf083",
+      "passed": true,
+      "assertions": 48,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0114_v41_legal_governance_marketing.test.sql",
+      "sha256": "a015320f57e6ce65df8b2a23af225ed8c0cba8e6fad99336702980892d2422cc",
+      "passed": true,
+      "assertions": 56,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0115_v41_finops_reconciliation_commands.test.sql",
+      "sha256": "84de142d3b69d7c427ca3845b1f3eba5f8dd574119cdc1b2cfb3ebda5d136d04",
+      "passed": true,
+      "assertions": 12,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0116_v41_admin_overview.test.sql",
+      "sha256": "cf99b9a10c5e288447b7bd626f57f8ac35599b571011b42c1c254087c4bb8efe",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0117_v41_admin_external_validations.test.sql",
+      "sha256": "68ee389f87ebc74e023fca230cded79d68bfef6d363b22af6fdc2651a83403ec",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0118_contract_amendment_activation.test.sql",
+      "sha256": "18b7f1706374c01214034970055ba3a2ba02a40bcb6bb7427d30870546ea41d8",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0119_secure_client_document_reuse.test.sql",
+      "sha256": "4c87e3f634912faa0bd8a0d77855b2b645fe5051fab9b92e98fb697a07c0424b",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0120_admin_badge_policy_versions.test.sql",
+      "sha256": "116dd7b28c1ff5f5f93576bab229caf83116ff298342ba5b72d8596f267c27ec",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0121_content_clone_provenance.test.sql",
+      "sha256": "9c3e9c3772fffb05d25b2667ac1d45f76272b1b8d7064d11eac3549f037de26a",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0122_typed_cost_center_financial_links.test.sql",
+      "sha256": "ea892e23cf2e2c1ce18047f2269d32d42cd825415aaa5a53a853344a357aa093",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0123_transversal_abuse_detection.test.sql",
+      "sha256": "4ec4963583f9a1c1af5d653d75d0aae077b4329534ece4f19499f94437619b94",
+      "passed": true,
+      "assertions": 12,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0124_versioned_prefill_freshness.test.sql",
+      "sha256": "b9c3fcf6ef824de62a04149a1f0abce6d17b2556814ceeb6aa39264278c8d702",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0125_delivery_proof_trusted_scan.test.sql",
+      "sha256": "d96fcde0d156f7797e917bc1a0bcae9d704fbf3e53f3f243532e9cd50eec234c",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0126_marketing_publication_worker.test.sql",
+      "sha256": "5a738263afa1a2bec56951a70b2612f8248ec6b6eab873808defe2d34f92eb96",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0127_marketing_calendar_scheduler.test.sql",
+      "sha256": "abdb723296483e414a0ec1bfa4da96ca90ab6148c61c2152a561101cce554b63",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0128_marketing_scheduling_sandbox_integrity.test.sql",
+      "sha256": "8d0a27f669db04c10be631287c8477a0c2b26deb49af84787863e568c35f998c",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0129_marketing_schedule_rule_commands.test.sql",
+      "sha256": "9f2b0d41964ef2252ffce015c8662a61ab41ce2aea9351941e58c51d00072e08",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0130_marketing_worker_lease_policy_hardening.test.sql",
+      "sha256": "bf306f8de2c0b4497ae34d6621434e5b3d16c5e5cb1e76c4ce2d0e20eb779be8",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0131_marketing_publication_attempt_integrity.test.sql",
+      "sha256": "0f8e6a16dee808d32159d020d4c5b5f938456855b204b769905596851a36f993",
+      "passed": true,
+      "assertions": 26,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0133_marketing_content_attribution_completion.test.sql",
+      "sha256": "6218b8a9e9a70fdef0c6a760c37d5dd25b63d93094dc1f75611fa9dbe541acd6",
+      "passed": true,
+      "assertions": 43,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0136_automation_runtime_completion.test.sql",
+      "sha256": "56a6fdf8447d741c5f0c9da1aede6b0c53dd28c095ba830fb0fe224eed28d929",
+      "passed": true,
+      "assertions": 33,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0138_financial_value_center_completion.test.sql",
+      "sha256": "5d30dbba733ccfa0cbff985d107273f9c94c44bceb3f52622e512c663fc5148b",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0139_public_contact_intake.test.sql",
+      "sha256": "42ff3cf20b2eb9393c4473ffc7614bfeef1162e6840ea9f306ebf908b125dafa",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0140_abuse_command_idempotency.test.sql",
+      "sha256": "8bef7a827aae0f11ceb5f1df70339e0dfbf487e12cb91b0d4ffd7f6a51413337",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0141_public_subscription_projection.test.sql",
+      "sha256": "b9d86baa0b99dc4f45a343276c7ffa238c69df20da58b89084d15ffb545d0399",
+      "passed": true,
+      "assertions": 4,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0142_diagnostic_opportunity_request_conversion.test.sql",
+      "sha256": "7e194038cb0b25b0adba112855df6cfc15960b50f35c1b0822c287be561da669",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0143_public_diagnostic_intake.test.sql",
+      "sha256": "2808d630a58824eb2be1a4d542ec2f79ebec222629371d955304995b3b2407ad",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0144_provider_qualification_private_uploads.test.sql",
+      "sha256": "5e630c13c7a0b34b2635330ec7b4818dc1171b1851f23de65e7f139d785c09a0",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0148_public_need_intake.test.sql",
+      "sha256": "5ee99a0c636b244060b40d2d364cc35f05a0a2e60befac8810a8f18b0b801803",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0148_security_view_event_trigger_hardening.test.sql",
+      "sha256": "6431666caa224cbf9e89e314e613f2e3d2b00555d1d62cd18638af2c647a8104",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0149_provider_document_maintenance_compatibility.test.sql",
+      "sha256": "b7258b10d30e7e583e8998c0ca3c82e08f3b63b5945485db69c179b6e3c83c29",
+      "passed": true,
+      "assertions": 4,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0150_notification_required_variables_regression.test.sql",
+      "sha256": "5a4265da11ef75bb532f1d848b2a59722c6c5b2cecea4217a609a7c6a3bd15e0",
+      "passed": true,
+      "assertions": 3,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0151_provider_payment_private_proofs.test.sql",
+      "sha256": "7f7260b185ded269c2c81aeac6685f8d0638d525e53190d9a94c23864a8d3d19",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0152_provider_payment_proof_trusted_scan.test.sql",
+      "sha256": "28904c556ae19c14ee0c5a512798abb13049d2e9f780da95de429fc7996885e4",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0152_rpc_negative_coverage.test.sql",
+      "sha256": "df438d5d7342bb1983eefbce8a44a841ad4cdb35d6dfadac7d45e1fb5940fafd",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0153_rpc_negative_coverage_remaining.test.sql",
+      "sha256": "bd0227ef33f2f749c1c59c83d5459af060087dc178b08c9aba9f8731a24858d1",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0156_admin_supervision_projection.test.sql",
+      "sha256": "bb52d0dc6d806babd91f75ab49a0937460ddeddcce059bde69544d1a65c6948d",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0157_provider_consultation_document_download.test.sql",
+      "sha256": "c211602997e7a147acf5a8d5c4c7b48cf5152232eb2914907787fca91d7cf50d",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0158_franchise_catalog_submit.test.sql",
+      "sha256": "d483222f7538495078c067a9bd50f84e8e3f044976c1b8d549d915006ed669ac",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0159_franchise_catalog_publication.test.sql",
+      "sha256": "a82c693e564b0fa6d8f945810ca4d95091c7ed21ab7873719343ab55aba043fa",
+      "passed": true,
+      "assertions": 21,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0159_need_intake_request_conversion.test.sql",
+      "sha256": "75a0cc356225e32775c83f6572568caa9061b83ff093343e60be7377ca8d8288",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0160_select_quote_and_notify.test.sql",
+      "sha256": "913626332d2c89ed136cee1b18aed6c8a7b4fea3c3284585d2eda444687fc24c",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0161_admin_supervision_parcours_enrichment.test.sql",
+      "sha256": "8d924b7976220778487727a95e7b940f5bef76ead6396e70dce77d0e7ff07e34",
+      "passed": true,
+      "assertions": 6,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0161_franchise_mandate_supervision.test.sql",
+      "sha256": "2ad68282dac97dba6f24bdbfb2c86f3b445dc6142edaeed7a1005f30b4bf3702",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0162_admin_boxes_pnl_closure_exceptions.test.sql",
+      "sha256": "e04388827c123d93a86d85e3df314c2dfa77cab9566fb8f6e6ee537951e7ee8d",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0163_admin_volume_activate_pool.test.sql",
+      "sha256": "b6c3240577c7de244a7866bb19119c260f59c81b32de10d08d23bdfd48ea972f",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0163_franchise_quality_volume_operations.test.sql",
+      "sha256": "8706837ad88456ee9e51ec5e99758ca7e0d9afa2abbac970127769737c55f575",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0164_client_new_request_entitlement.test.sql",
+      "sha256": "8c5f291c319187cf5a2b1b770aaee20dfea71d715caf1b479498876530494721",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0165_client_site_and_rfq_open_entitlement.test.sql",
+      "sha256": "bf3edba80d4044e8941a344076e9586972407ca4106f3dc0bb72c8a85bf730f1",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0166_admin_catalog_demand_vault.test.sql",
+      "sha256": "54dc0372771b32bcdf7d257cdcee52ecf3dcfde9f9b07f0949eb4fbbc2fb676f",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0169_client_subscription_invoice_reference.test.sql",
+      "sha256": "c0b4c4c168b47e2080ff62650d6d1456cf72f7e6e283d1f123b86afa2f871b01",
+      "passed": true,
+      "assertions": 3,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0170_need_request_quote_completeness.test.sql",
+      "sha256": "cee117a4b649b6509772cac2f5ded49af7fac8e2745b392904ebe7cc5b7f467a",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0171_marketing_workspaces_funnel.test.sql",
+      "sha256": "2b2aa9bca39503ac7e99575fca8ba9539353f9a875821387efd8360a7f56f360",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0172_provider_intervention_regions.test.sql",
+      "sha256": "553549f90d93104cc7cab1188340aff47e390b8ac27f05e5281db282fbd5389f",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0178_provider_delivery_integrity.test.sql",
+      "sha256": "5c5f73d32c30e0d083c813affddec368249d2ef3560e3dc7e56fb45e0d40d4c9",
+      "passed": true,
+      "assertions": 17,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0179_provider_document_scan_behavior.test.sql",
+      "sha256": "4266834b2efb71b8f83d7555a196234774916ac159250adb7e7cdbba23ca177f",
+      "passed": true,
+      "assertions": 12,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0180_provider_billing_pdf_notifications.test.sql",
+      "sha256": "d123acc266b44260e1c930643ae30e5242ef6b8cf77d2d4e27f1170651b6e1cc",
+      "passed": true,
+      "assertions": 6,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0181_admin_delivery_execution.test.sql",
+      "sha256": "31842b412eefb9c45b027cb3aec44ca1c7d35ed0e7bd5e3614e401918748de69",
+      "passed": true,
+      "assertions": 19,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0182_admin_role_and_organization_effects.test.sql",
+      "sha256": "6e5ecc6f8df8d2fbfdaa7a7455f15cdea06419f976bab478f9ff43d7c5de8b1c",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0183_admin_bounded_retention_execution.test.sql",
+      "sha256": "4aa766a25bab1ab3eb70ec67d0a389f3eca41dd5291b2c6e4800ea228e84e6dc",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0183_delivery_integrations.test.sql",
+      "sha256": "ddc0bee4329e21aa50967b314d57fd1f802598d4f8ce7374dfa76510afceea23",
+      "passed": true,
+      "assertions": 27,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0184_admin_multi_franchise_roles.test.sql",
+      "sha256": "9edcb68ce2045f1e30f174f2ce8507edb94aa8f713dee5c965d509f0646f6187",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0184_subscription_refunds.test.sql",
+      "sha256": "58ad9e1b8789abae03ac61c95550c350504534f1fd33214183dc6f2c0dc36e3e",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0185_admin_assistance_retention_capability.test.sql",
+      "sha256": "98a99620a2f2f84081c24d302b5f8e4b6e98dabd966905661809ac2995b9f1f6",
+      "passed": true,
+      "assertions": 12,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0185_notification_receipts.test.sql",
+      "sha256": "6a74964a699d7eea4ec414a3050588fd9b2242c9bea1440a7b2bb88fb41a35fe",
+      "passed": true,
+      "assertions": 16,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0186_admin_franchise_invitation_scope.test.sql",
+      "sha256": "72bc5d9f08ecd8b62fbce0d12cec91aaceb826b11c4060ddee741d229dd781e8",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0186_operational_metrics_and_dependency.test.sql",
+      "sha256": "e92fede755b5377e06dbebe3badcf7f990d85aeff1744055bd4f4f06979a670f",
+      "passed": true,
+      "assertions": 10,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0187_admin_retention_tracking_receipt.test.sql",
+      "sha256": "2fc4145bcd24cbd1f694ce473860cd236ba97a0b0bee8935b9cdb692a4660d22",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0187_refund_native_reconciliation.test.sql",
+      "sha256": "1d69d3354a4750bb7252b078eb263579a45985df3d40c7470f0eeaaa96defa61",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0190_franchise_composition_delivery.test.sql",
+      "sha256": "c131cb4b441268a111a59e0d3010ea2aed18d52869871b04b8c016d861d575c0",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0190_platform_privacy_readiness.test.sql",
+      "sha256": "0439af94ca6ae11bf7b7c5c7274328d802446325839c5ba0dc51dd62ef585939",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0191_admin_dsr_export_rectification.test.sql",
+      "sha256": "a37e354b94ae03a367502876c12b56fd8e4318929eaf773ec67eeaae3a4256da",
+      "passed": true,
+      "assertions": 11,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0191_franchise_balances_delivery.test.sql",
+      "sha256": "973b62c0ded126d4aa7b6e0b62f8f97fe238c9f43beee1169162c637f5b64708",
+      "passed": true,
+      "assertions": 5,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0192_admin_request_tracking.test.sql",
+      "sha256": "5e6f2959836ec87dc7e79944fa45499b579f90aa617a478c105c61adac847df0",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0195_franchise_legacy_catalog_scope.test.sql",
+      "sha256": "63bb074509d2767f60d6b83b25e340622b0f290eabea5038365b8e731fd439ee",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0196_social_native_verification.test.sql",
+      "sha256": "418734c0d6833d2fca4fac5a0f95e9047ef51d25b44c8b98bc90a1eb7bb8425f",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0197_franchise_catalog_mfa_delivery.test.sql",
+      "sha256": "4455bec3c02c0b84f2fbc360ba6f741451ac63af045762c9922ee1b3a55d1afc",
+      "passed": true,
+      "assertions": 4,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0202_subscription_financial_hold_guards.test.sql",
+      "sha256": "045dd38586b39403759fd65d872f59959d5def53bc028fec8d270c1a3bdafdac",
+      "passed": true,
+      "assertions": 25,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0204_franchise_activation_evidence_modes.test.sql",
+      "sha256": "84371e856792ea29b85bb58a040b8eb44928482ab37d91bd61edbdb5a04a0fc0",
+      "passed": true,
+      "assertions": 27,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0205_client_identity_operation_guards.test.sql",
+      "sha256": "714154b8bd2f8269498256b22be21514520437ff817c191a52fd6eda1e2148f9",
+      "passed": true,
+      "assertions": 19,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0205_franchise_governance_snapshot.test.sql",
+      "sha256": "ca5bf9eec157b993e60c5a78901b0c5ebc616223f246d6c87a859a8bf599e1ab",
+      "passed": true,
+      "assertions": 38,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0206_catalog_editorial_review.test.sql",
+      "sha256": "b86846cc4f84a5aab36e4b838d9c81851ac65da440721326d27eff745e1b98e2",
+      "passed": true,
+      "assertions": 62,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0207_account_legal_reacceptance.test.sql",
+      "sha256": "3b59e77266a7aaaa927faa0d31f94e52d32acedfb414c3a72a2f245439c2c906",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0208_catalog_legacy_source_four_eyes.test.sql",
+      "sha256": "4732ac8aefbf332ca5c05fad055a4df0f57dc682eb4b49703222cc7960162141",
+      "passed": true,
+      "assertions": 70,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0210_provider_durable_payment_intents.test.sql",
+      "sha256": "4f19c8eab94b020e0c32ba8f0208fdb991f0d5f69a24f682e3e60f7881298329",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0211_organization_join_owner_decisions.test.sql",
+      "sha256": "3508cf566cf7cdbfc912150e29492b145ec8bbb90109b38890c9347427489fff",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0211_provider_intervention_modes.test.sql",
+      "sha256": "11737bd20af8bbcb95c199e64c9282a136ddcacab13fedce06a957b96bfca0eb",
+      "passed": true,
+      "assertions": 12,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0217_meta_media_durable_execution.test.sql",
+      "sha256": "9a554123e55d03b09c5e2bfce621cfdade8d2f8392ede6e21e20645cd8fbb8cf",
+      "passed": true,
+      "assertions": 28,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0218_contract_signature_evidence_bridge.test.sql",
+      "sha256": "ee37283b889fa16764ab31febecec1517a6267bacf6e3c88b93e5129ef1b8085",
+      "passed": true,
+      "assertions": 52,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0219_franchise_mandate_signature_binding.test.sql",
+      "sha256": "87942403929b9f19a74bd21ff46fa71d85bbc339e7089d85743944b55a0eb92a",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0221_dsr_scope_response_delivery.test.sql",
+      "sha256": "1ff8eebe19423f3fbb3294a86c432eb6ad173d4d53a17971a534c79061565dc0",
+      "passed": true,
+      "assertions": 20,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0222_dsr_subject_financial_records.test.sql",
+      "sha256": "5103c8e8a8b46407f005812db8c30496b660538be9c6652ee4bf5a202d262e72",
+      "passed": true,
+      "assertions": 17,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0223_admin_client_compliance_pagination.test.sql",
+      "sha256": "b49d150e31614864658b043f9adde5d5f7685f5a7f8f251c20d33314d41b6075",
+      "passed": true,
+      "assertions": 6,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0224_notification_template_pair_editor.test.sql",
+      "sha256": "6aead89a9a43a614e9fdd9733caf46ab9019808727fc680c0dc70f04a7290b98",
+      "passed": true,
+      "assertions": 27,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0225_payment_trusted_environment.test.sql",
+      "sha256": "f7baad86c43d2f45aa9f7b4cc0e743ee1069c881a86752c17fdf1d7e8ad5bf3b",
+      "passed": true,
+      "assertions": 29,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0229_admin_account_directory_controls.test.sql",
+      "sha256": "6220734eb1e7607f5e96ed725be59046c0fb55716f5e39c509c3c702c8df1005",
+      "passed": true,
+      "assertions": 30,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0230_admin_client_fiche_facts.test.sql",
+      "sha256": "7c9ff32752391ee82e6654bd1deb9876f89979d8e905af7a03a7376c30e348e7",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0232_marketing_verified_business_funnel.test.sql",
+      "sha256": "d5b3c87417db9a6baf4ea699f6517eaf86f088d0e1ad70b58bb006b56905e46b",
+      "passed": true,
+      "assertions": 22,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0233_trusted_scan_environment.test.sql",
+      "sha256": "27fe7b1131695cca0988a62b5757ea25b71d179aea28090b9cedf03920cc61a7",
+      "passed": true,
+      "assertions": 13,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0234_live_session_authorization.test.sql",
+      "sha256": "88c4edbf6b3ae7ba97e26a69a9d1094f19e28bc6ea46cc7727091fd3a683b929",
+      "passed": true,
+      "assertions": 18,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0236_governed_service_tax_mapping.test.sql",
+      "sha256": "e623a1eff10e3ce56f7b82333e857c4389887f171a5aae72dbc9617d540c35ed",
+      "passed": true,
+      "assertions": 41,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0239_provider_quote_tax_scope.test.sql",
+      "sha256": "96475ad2af76bae8d70a7cca4df1a6fdaf4394887f55cef0090ee2e5c5a52cce",
+      "passed": true,
+      "assertions": 9,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0240_dsr_all_inventory_and_capture.test.sql",
+      "sha256": "adef22c1b6374bd797de5dfd4c092044c5f7c5ed422d651edccfa5d11d73a3c7",
+      "passed": true,
+      "assertions": 29,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0242_central_fiscal_governance.test.sql",
+      "sha256": "e41e40b48b914b6e43c2c11c45a0ceecf1984b7110be55cf2f1a0c452b6a5648",
+      "passed": true,
+      "assertions": 24,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0243_dsr_reviewed_private_files.test.sql",
+      "sha256": "b912e8619866f2672562640214f9d692c6507f605b982c9fbadb8ec5783e3160",
+      "passed": true,
+      "assertions": 61,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0245_subscription_funding_admission.test.sql",
+      "sha256": "b4ff22c12abec1339c142e444467e0b2dc0653e99dd3ead430b3136f3338254f",
+      "passed": true,
+      "assertions": 37,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0246_credit_lot_canonical_funding.test.sql",
+      "sha256": "f64f100f224251b64637cb146786de2545d12f710b64941a169f0216fd34344e",
+      "passed": true,
+      "assertions": 49,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0248_benefit_fulfillment_receipts.test.sql",
+      "sha256": "c7edecf1a8552cf9af43c40b3c00d5f5a097dcc69fa5dc451874856286fec87c",
+      "passed": true,
+      "assertions": 37,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0249_subscription_checkout_coordination.test.sql",
+      "sha256": "0cdc5c31b4beeabc7154747b2d596c386b7ebb896fb005422a204bfbdc7f164d",
+      "passed": true,
+      "assertions": 58,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0251_governed_manual_credit_grants.test.sql",
+      "sha256": "8ba871e4d76940de57db721549dc6dbc9a712f3800ce4bbe63badf6909ae7120",
+      "passed": true,
+      "assertions": 25,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0252_dsr_effective_processing_restriction.test.sql",
+      "sha256": "d01faaa717bbe05722095a1d7fd695ae36f2c24143b058458f6856cff6665e75",
+      "passed": true,
+      "assertions": 33,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0253_dsr_nonmember_account_scope.test.sql",
+      "sha256": "e08a60293b5e931ccbed37eafd3498cf3adf017f9b8959234229be0412f22cdb",
+      "passed": true,
+      "assertions": 8,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0254_benefit_admission_policies.test.sql",
+      "sha256": "9f0d0a3a1e2b3b30a30ce487e4b2190ee5c701d76d1d516fbfa60679da62b4cb",
+      "passed": true,
+      "assertions": 37,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0255_client_credit_catalog_privacy.test.sql",
+      "sha256": "592974adf23e9aa5dbb4b14320a3a11340fcfe8cb7f8ec936092f99e4a35d133",
+      "passed": true,
+      "assertions": 17,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0256_funded_customer_box_configuration.test.sql",
+      "sha256": "cdcac59eedba85d6e51b168e0791c186dd23c25e5f532d71b8a928f0ab3e707a",
+      "passed": true,
+      "assertions": 38,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0257_marketing_notification_restriction.test.sql",
+      "sha256": "07a57c49189f3628bbad7c74f7b57d8f3be6a68e82ae48d368cd89df9a595fff",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0258_dsr_unexecuted_rights_cannot_fulfil.test.sql",
+      "sha256": "d159c3d198d1ef859deb7610acb4c76780ecefad74bf40d34325fa17cf53f2d2",
+      "passed": true,
+      "assertions": 7,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0259_subscription_credit_worker.test.sql",
+      "sha256": "d4c0e8c255dd06e99c6144fbdce51385f0c0d094ad8ac4abb441a5d99a930729",
+      "passed": true,
+      "assertions": 36,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0260_dsr_financial_cursor.test.sql",
+      "sha256": "66ea3cb91908d142c75687cae41c636a3a66e77e2a375eb8e0bea9acf2bf67be",
+      "passed": true,
+      "assertions": 25,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0262_subscription_refund_frozen_posting_accounts.test.sql",
+      "sha256": "af4f0bef2026038678e4e9948eaf669fa8636e1111a50bd287d2fb4b845c741b",
+      "passed": true,
+      "assertions": 14,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0263_dsr_governed_erasure_dispositions.test.sql",
+      "sha256": "9e35455455997f4f738cbb438db03c1b2cbdb1808884b453bded7a02eb4c18cc",
+      "passed": true,
+      "assertions": 41,
+      "commandFailed": false,
+      "failures": []
+    },
+    {
+      "file": "0267_subscription_credit_adverse_facts.test.sql",
+      "sha256": "cc8f7948651161b996abf9a5e6d51b4fc01ed4dcd710a31b5441d5e8dcb8204c",
+      "passed": true,
+      "assertions": 15,
+      "commandFailed": false,
+      "failures": []
+    }
+  ]
+}

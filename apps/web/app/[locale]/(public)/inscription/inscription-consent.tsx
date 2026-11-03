@@ -1,11 +1,12 @@
 "use client";
 
+import type { EmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
 import { useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { OtpForm } from "../../connexion/otp-form";
 
-export function InscriptionConsent({ locale, nextPath }: { locale: Locale; nextPath: string }) {
+export function InscriptionConsent({ locale, nextPath, otpLength = 6 }: { locale: Locale; nextPath: string; otpLength?: EmailOtpLength }) {
   const [accepted, setAccepted] = useState(false);
   const fr = locale === "fr";
   return (
@@ -22,7 +23,7 @@ export function InscriptionConsent({ locale, nextPath }: { locale: Locale; nextP
       </label>
       {accepted ? (
         <div className="mt-6">
-          <OtpForm locale={locale} nextPath={nextPath} intent="registration" />
+          <OtpForm otpLength={otpLength} locale={locale} nextPath={nextPath} intent="registration" consentAccepted={accepted} />
         </div>
       ) : (
         <p className="mt-6 text-sm text-slate-600">{fr ? "Acceptez les conditions pour continuer par code sécurisé." : "اقبلوا الشروط للمتابعة برمز آمن."}</p>

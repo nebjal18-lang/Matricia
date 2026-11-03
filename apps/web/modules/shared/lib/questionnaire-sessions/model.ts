@@ -124,7 +124,7 @@ export function parseStructuredFields(question: Pick<Question, "type" | "structu
   if (!Array.isArray(rawFields) || !Number.isInteger(min) || !Number.isInteger(max) || Number(min) < 0 || Number(max) < Number(min) || Number(max) > 1000) return null;
   const fields: StructuredField[] = [];
   for (const raw of rawFields) {
-    const parsed = z.object({ key: z.string().min(1).max(120), type: answerType, nullable: z.boolean().default(false), options: z.array(z.string().min(1)).max(1000).default([]), numeric: z.record(z.unknown()).default({}), validation: z.record(z.unknown()).default({}) }).strict().safeParse(raw);
+    const parsed = z.object({ key: z.string().min(1).max(120), type: answerType, nullable: z.boolean().default(false), options: z.array(z.string().min(1)).max(1000).default([]), numeric: z.record(z.string(), z.unknown()).default({}), validation: z.record(z.string(), z.unknown()).default({}) }).strict().safeParse(raw);
     if (!parsed.success || parsed.data.type === "TABLE" || parsed.data.type === "REPEATER") return null;
     fields.push({ key: parsed.data.key, type: parsed.data.type, nullable: parsed.data.nullable, options: parsed.data.options, validation: parseQuestionValidation(parsed.data.validation) });
   }

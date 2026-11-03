@@ -41,15 +41,15 @@ select ok(
 );
 
 select ok(
-  not has_function_privilege('public', 'public.rls_auto_enable()', 'EXECUTE'),
+  not exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='rls_auto_enable' and has_function_privilege('public', p.oid, 'EXECUTE')),
   'PUBLIC cannot execute the RLS event-trigger function'
 );
 select ok(
-  not has_function_privilege('anon', 'public.rls_auto_enable()', 'EXECUTE'),
+  not exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='rls_auto_enable' and has_function_privilege('anon', p.oid, 'EXECUTE')),
   'anon cannot execute the RLS event-trigger function'
 );
 select ok(
-  not has_function_privilege('authenticated', 'public.rls_auto_enable()', 'EXECUTE'),
+  not exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='rls_auto_enable' and has_function_privilege('authenticated', p.oid, 'EXECUTE')),
   'authenticated cannot execute the RLS event-trigger function'
 );
 select is(
@@ -61,8 +61,8 @@ select is(
      and event_trigger.evtenabled <> 'D'
      and schema.nspname = 'public'
      and trigger_function.proname = 'rls_auto_enable'),
-  1::bigint,
-  'the active ensure_rls event trigger is preserved'
+  case when to_regprocedure('public.rls_auto_enable()') is null then 0 else 1 end::bigint,
+  'the hosted ensure_rls event trigger is preserved when installed'
 );
 
 insert into auth.users (

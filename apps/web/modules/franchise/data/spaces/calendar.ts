@@ -1,0 +1,6 @@
+/** Civil dates in the business timezone; date-only document deadlines remain date-only. */
+export function renewalCivilDate(value:string){if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value;const date=new Date(value);if(!Number.isFinite(date.getTime()))return null;return new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Casablanca",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);}
+export function renewalCalendarCounts(values:string[],now=new Date()){
+ const today=renewalCivilDate(now.toISOString())!;const civil=new Date(`${today}T00:00:00Z`);const year=civil.getUTCFullYear(),month=civil.getUTCMonth();const monday=new Date(civil);monday.setUTCDate(civil.getUTCDate()-(civil.getUTCDay()+6)%7);const nextMonday=new Date(monday);nextMonday.setUTCDate(monday.getUTCDate()+7);const monthStart=new Date(Date.UTC(year,month,1)),nextMonth=new Date(Date.UTC(year,month+1,1)),afterNext=new Date(Date.UTC(year,month+2,1));const dates=values.flatMap(value=>{const date=renewalCivilDate(value);return date?[Date.parse(`${date}T00:00:00Z`)]:[];});const between=(start:Date,end:Date)=>dates.filter(date=>date>=start.getTime()&&date<end.getTime()).length;
+ return{year,month,weekCount:between(monday,nextMonday),monthCount:between(monthStart,nextMonth),nextCount:between(nextMonth,afterNext)};
+}

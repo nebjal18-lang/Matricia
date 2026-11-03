@@ -24,7 +24,7 @@ const metricsSnapshot = z.object({
     total_prospects: nonNegativeInteger,
     client_prospects: nonNegativeInteger,
     provider_prospects: nonNegativeInteger,
-    pipeline: z.record(nonNegativeInteger),
+    pipeline: z.record(z.string(),nonNegativeInteger),
   }).strict(),
   followups: z.object({ overdue: nonNegativeInteger, next_24_hours: nonNegativeInteger }).strict(),
   performance: z.object({

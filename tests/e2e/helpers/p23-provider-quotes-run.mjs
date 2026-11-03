@@ -1,8 +1,10 @@
+import { runSecuredBrowserSuite, writeLocalSuiteEvidence } from "./secured-browser-runner.mjs";
+import { prepareLocalQuoteIdentity,cleanLocalQuoteIdentityFiles,closePendingLocalProviderScans } from './local-provider-identity-fixture.mjs';
+import { provisionLocalCatalogReference, neutralizeLocalCatalogReference } from "./local-catalog-reference.mjs";
 import { createHash, randomUUID } from "node:crypto";
 import { copyFile, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
 import { loadSafeConfiguration } from "../../../scripts/p05-e2e/environment.mjs";
 import { provision } from "../../../scripts/p05-e2e/provision.mjs";
 import { buildChildEnvironment, secureLocalPaths, sha256File, validateFreshManifest } from "../../../scripts/p05-e2e/security.mjs";
@@ -25,7 +27,7 @@ async function createProviderFixture(fixture) {
   const providerUserId = userByEmail.get(`p05-e2e-norole-${runId}@example.invalid`);
   if (!clientUserId || !foreignUserId || !providerUserId) throw new Error("P23 isolated identities are incomplete");
   const catalog = await database`select service.id as service_id,service.library_id
-    from public.catalog_services service order by service.id limit 1`;
+    from public.catalog_services service where service.status='PUBLISHED' and (${fixture.resources.localCatalog?.service ?? null}::uuid is null or service.id=${fixture.resources.localCatalog?.service ?? null}::uuid) order by service.id limit 1`;
   if (catalog.length !== 1) throw new Error("P23 requires one existing catalog service");
 
   const targetOrganizationId = randomUUID();
@@ -44,6 +46,7 @@ async function createProviderFixture(fixture) {
     };
   }
 
+  fixture.resources.organizationIds.push(targetOrganizationId, decoyOrganizationId);
   await database.begin(async (transaction) => {
     await transaction`insert into public.organizations(id,legal_name,display_name,status,created_by) values
       (${targetOrganizationId}::uuid,${targetOrganizationName},${targetOrganizationName},'ACTIVE',${providerUserId}::uuid),
@@ -76,25 +79,18 @@ async function createProviderFixture(fixture) {
       await transaction.unsafe("set local session_replication_role=origin");
     }
   });
-  fixture.resources.organizationIds.push(targetOrganizationId, decoyOrganizationId);
   return { targetOrganizationId, decoyOrganizationId, targetOrganizationName, decoyOrganizationName, categoryCode, taxRuleId, providerUserId, foreignUserId, cases };
 }
 
-async function proveForeignTenantDenied(database, providerFixture) {
-  await database.begin(async (transaction) => {
-    await transaction`select set_config('request.jwt.claims',${JSON.stringify({ sub: providerFixture.providerUserId, role: "authenticated", aal: "aal1" })},true)`;
-    await transaction.unsafe("set local role authenticated");
-    const invitations = await transaction`select rp.id from public.rfq_providers rp join public.rfqs rfq on rfq.id=rp.rfq_id where rp.provider_organization_id=${providerFixture.targetOrganizationId}::uuid`;
-    const versions = await transaction`select version.id from public.service_request_versions version where version.id=any(${Object.values(providerFixture.cases).map((item) => item.requestVersionId)}::uuid[])`;
-    const rules = await transaction`select id from public.tax_rule_versions where id=${providerFixture.taxRuleId}::uuid and status='ACTIVE' and professional_validation_status='VALIDATED'`;
-    if (invitations.length !== 4 || versions.length !== 4 || rules.length !== 1) throw new Error("P23 Provider RLS fixture is not readable");
-  });
-  await database.begin(async (transaction) => {
-    await transaction`select set_config('request.jwt.claims',${JSON.stringify({ sub: providerFixture.foreignUserId, role: "authenticated", aal: "aal1" })},true)`;
-    await transaction.unsafe("set local role authenticated");
-    const rows = await transaction`select id from public.rfq_providers where provider_organization_id=${providerFixture.targetOrganizationId}::uuid`;
-    if (rows.length !== 0) throw new Error("P23 cross-tenant RFQ visibility was not denied");
-  });
+async function proveForeignTenantDenied(fixture, providerFixture) {
+  const client=fixture.sessions.noRole.client,foreign=fixture.sessions.clientB.client;
+  const [invitations,versions,rules,denied]=await Promise.all([
+    client.from('rfq_providers').select('id').eq('provider_organization_id',providerFixture.targetOrganizationId),
+    client.from('service_request_versions').select('id').in('id',Object.values(providerFixture.cases).map(item=>item.requestVersionId)),
+    client.from('tax_rule_versions').select('id').eq('id',providerFixture.taxRuleId).eq('status','ACTIVE').eq('professional_validation_status','VALIDATED'),
+    foreign.from('rfq_providers').select('id').eq('provider_organization_id',providerFixture.targetOrganizationId),
+  ]);
+  if(invitations.error||versions.error||rules.error||denied.error||invitations.data?.length!==4||versions.data?.length!==4||rules.data?.length!==1||denied.data?.length!==0)throw new Error('P23 real-session cross-tenant ALLOW/DENY proof failed');
 }
 
 async function verifyProviderResults(database, providerFixture, mobileOnly) {
@@ -120,6 +116,8 @@ async function verifyProviderResults(database, providerFixture, mobileOnly) {
     (select count(*)::integer from public.event_outbox where organization_id=${providerFixture.targetOrganizationId}::uuid and event_type in('RFQ_INVITATION_ACCEPTED','QuoteRevisionCreatedV1','QuoteSubmittedV1')) as outbox`;
   if (result[0]?.quotes !== expectedCount || result[0]?.versions !== expectedCount || result[0]?.items !== expectedCount || result[0]?.exact !== true
       || evidence[0]?.audits !== expectedCount*3 || evidence[0]?.outbox !== expectedCount*3) throw new Error("P23 exact quote or audit/outbox evidence is incomplete");
+  const[identity]=await database`select count(*)::int as count,bool_and((${providerFixture.identity?.identityHash??null}::text is null or anchor.identity_hash=${providerFixture.identity?.identityHash??null}) and anchor.identity_snapshot->>'registered_address'='Adresse de recette locale du prestataire'and anchor.identity_snapshot->>'legal_name'=${providerFixture.identity?.legalName??providerFixture.targetOrganizationName})as exact from public.provider_quote_identity_snapshots anchor join public.quotes quote on quote.current_version_id=anchor.quote_version_id where quote.rfq_provider_id=any(${invitationIds}::uuid[])`;
+  if(identity?.count!==expectedCount||identity?.exact!==true)throw new Error('P23_CURRENT_IDENTITY_ANCHORS_INCOMPLETE');
 }
 
 async function neutralizeProviderFixture(database, providerFixture) {
@@ -144,13 +142,17 @@ async function neutralizeProviderFixture(database, providerFixture) {
   if (Object.values(active[0]).some((value) => value !== 0)) throw new Error("P23 provider fixture remains active");
 }
 
-let fixture; let providerFixture; let failure;
+let fixture; let providerFixture; let failure; let config; let suiteSummary; let cleanupFailed=false;
+let stage='base-fixture';
 try {
   fixture = await provision();
-  const config = await loadSafeConfiguration(root);
+  config = await loadSafeConfiguration(root);
+  stage='published-reference';if (config.runtimeMode === "isolated-local-docker") await provisionLocalCatalogReference(fixture);
   await validateFreshManifest(fixture.manifest, config);
-  providerFixture = await createProviderFixture(fixture);
-  await proveForeignTenantDenied(fixture.resources.database, providerFixture);
+  stage='provider-fixture';providerFixture = await createProviderFixture(fixture);
+  stage='current-identity-review';if(config.runtimeMode==='isolated-local-docker')providerFixture.identity=await prepareLocalQuoteIdentity(fixture,providerFixture.targetOrganizationId,providerFixture.providerUserId);
+  stage='real-session-isolation';
+  await proveForeignTenantDenied(fixture, providerFixture);
   await mkdir(authDirectory, { recursive: false, mode: 0o700 });
   await secureLocalPaths(authDirectory, []);
   await copyFile(fixture.manifest.states.noRole.path, authState);
@@ -169,20 +171,22 @@ try {
     E2E_P23_CASES: JSON.stringify(providerFixture.cases),
   });
   const mobileOnly = process.env.P23_SINGLE === "1";
-  const selectedRun = mobileOnly ? ["--project=chromium-mobile-360"] : [];
-  const child = spawn(process.execPath, [resolve(root, "node_modules", "@playwright", "test", "cli.js"), "test", "tests/e2e/p23-provider-quotes.spec.ts", "--workers=1", "--reporter=line", "--output", output, ...selectedRun], { cwd: root, env: environment, stdio: ["ignore", "inherit", "inherit"], shell: false });
-  const code = await new Promise((resolveExit, reject) => { child.once("error", reject); child.once("exit", (value, signal) => signal ? reject(new Error("P23 Playwright run was interrupted")) : resolveExit(value ?? 1)); });
-  if (code !== 0) throw new Error("P23 Provider quotes Playwright suite failed");
+  stage='browser';suiteSummary = await runSecuredBrowserSuite({root,config,environment,specifications:["tests/e2e/p23-provider-quotes.spec.ts"],output,expectedTests:mobileOnly?2:4,projects:mobileOnly?["chromium-mobile-360"]:[]});
+  stage='exact-money-audit-and-identity-anchors';
   await verifyProviderResults(fixture.resources.database, providerFixture, mobileOnly);
   console.log("PASS P23 Provider quotes E2E and exact financial evidence");
-} catch (error) { failure = error; }
+} catch (error) { failure = error; suiteSummary ??= error.browserSummary; }
 finally {
-  if (fixture && providerFixture) try { await neutralizeProviderFixture(fixture.resources.database, providerFixture); console.log("PASS P23 Provider fixture neutralized"); } catch (error) { failure = failure ? new AggregateError([failure, error], "P23 run and provider cleanup failed") : error; }
-  if (fixture) try { await fixture.cleanup(); if (fixture.resources.retainedEvidence <= 0) throw new Error("Immutable fixture evidence was not retained"); console.log("PASS P23 base fixture neutralized"); } catch (error) { failure = failure ? new AggregateError([failure, error], "P23 run and base cleanup failed") : error; }
-  try { await rm(output, { recursive: true, force: true }); } catch (error) { failure ??= error; }
-  try { await rm(authDirectory, { recursive: true, force: true }); } catch (error) { failure ??= error; }
-  if (fixture) try { const sharedAuth=resolve(dirname(fixture.manifestPath)),expected=resolve(root,"scripts","p05-e2e",".auth");if(sharedAuth!==expected)throw new Error("Refusing unverified P23 auth cleanup");await rm(sharedAuth,{recursive:true,force:true}); } catch (error) { failure ??= error; }
+  if(fixture)try{await closePendingLocalProviderScans(fixture,fixture.resources.localQuoteIdentityPaths);}catch(error){cleanupFailed=true;failure??=error;}
+  if(fixture)try{await cleanLocalQuoteIdentityFiles(fixture);}catch(error){cleanupFailed=true;failure??=error;}
+  if (fixture && providerFixture) try { await neutralizeProviderFixture(fixture.resources.database, providerFixture); console.log("PASS P23 Provider fixture neutralized"); } catch (error) { cleanupFailed=true; failure = failure ? new AggregateError([failure, error], "P23 run and provider cleanup failed") : error; }
+  if (fixture) try { await neutralizeLocalCatalogReference(fixture); } catch (error) { cleanupFailed=true; failure ??=error; }
+  if (fixture) try { await fixture.cleanup(); if (fixture.resources.retainedEvidence <= 0) throw new Error("Immutable fixture evidence was not retained"); console.log("PASS P23 base fixture neutralized"); } catch (error) { cleanupFailed=true; failure = failure ? new AggregateError([failure, error], "P23 run and base cleanup failed") : error; }
+  try { await rm(output, { recursive: true, force: true }); } catch (error) { cleanupFailed=true; failure ??= error; }
+  try { await rm(authDirectory, { recursive: true, force: true }); } catch (error) { cleanupFailed=true; failure ??= error; }
+  if (fixture) try { const sharedAuth=resolve(dirname(fixture.manifestPath)),expected=resolve(root,"scripts","p05-e2e",".auth");if(sharedAuth!==expected)throw new Error("Refusing unverified P23 auth cleanup");await rm(sharedAuth,{recursive:true,force:true}); } catch (error) { cleanupFailed=true; failure ??= error; }
 }
+await writeLocalSuiteEvidence({root,suite:"p23-quotes",config,summary:suiteSummary,failure,cleanupVerified:!cleanupFailed,proof:{stage,quoteFinancialAndAuditVerified:!failure}});
 if (failure) {
   const diagnostic = [failure.code, failure.constraint_name, failure.table_name].filter((value) => typeof value === "string" && /^[A-Za-z0-9_.-]{1,100}$/u.test(value)).join(":");
   console.error(`FAIL P23 Provider quotes E2E execution failed${diagnostic ? ` (${diagnostic})` : ""}; no credential or remote detail was printed`);

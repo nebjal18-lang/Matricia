@@ -14,9 +14,12 @@ export default defineConfig({
   outputDir: "artifacts/test-results/playwright",
   use: {
     baseURL,
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } }
+      : {}),
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: process.env.PLAYWRIGHT_VIDEO === "off" ? "off" : "retain-on-failure",
     locale: "fr-MA",
     timezoneId: "Africa/Casablanca",
   },
@@ -38,9 +41,22 @@ export default defineConfig({
     : { webServer: {
         command: "corepack pnpm dev",
         url: baseURL,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: !process.env.CI && process.env.E2E_LOCAL_ISOLATED !== "1",
         timeout: 120_000,
         env: {
+          ...(process.env.E2E_LOCAL_ISOLATED === "1" ? {
+            APP_ENV: "development",
+            PAYMENT_PROVIDER: "DEMO",
+            PAYMENT_PROVIDER_ALLOWLIST: "DEMO",
+            PAYMENT_LIVE_ENABLED: "false",
+            EMAIL_DELIVERY_MODE: "DEMO",
+            EMAIL_LIVE_DELIVERY_ENABLED: "false",
+            MARKETING_PUBLISH_MODE: "sandbox",
+            MARKETING_LIVE_PUBLISHING_ENABLED: "false",
+            MARKETING_CONTENT_PROVIDER_URL: "",
+            MARKETING_CONTENT_PROVIDER_API_KEY: "",
+            MARKETING_CONTENT_PROVIDER_ENDPOINT_ALLOWLIST: "",
+          } : {}),
           ...(process.env.E2E_CRON_SECRET ? { CRON_SECRET: process.env.E2E_CRON_SECRET } : {}),
           ...(process.env.E2E_DELIVERY_PROOF_SCANNER_MODE === "SANDBOX" ? { DELIVERY_PROOF_SCANNER_MODE: "SANDBOX" } : {}),
         },

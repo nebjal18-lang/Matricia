@@ -13,7 +13,7 @@ export default async function ProviderServicesPage({ params, searchParams }: { p
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/services` }));
-  const result = await loadProviderDashboard();
+  const result = await loadProviderDashboard(query.organizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/services` }));
   const c = providerCopy(locale);
   const needle = (query.q ?? "").trim().toLocaleLowerCase();
@@ -23,8 +23,8 @@ export default async function ProviderServicesPage({ params, searchParams }: { p
     : [];
   const boardQuery = providerSearchQuery(space.selectedQuery, { q: query.q, domain: query.domain });
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="services" title={c.svcTitle} lead={c.svcLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/qualification${space.selectedQuery}#capacite`} label={c.addService} />}>
-      <ServicesBoard locale={locale} query={boardQuery} services={services} domain={domain || undefined} />
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="services" title={c.svcTitle} lead={c.svcLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/qualification${space.selectedQuery}#capacite`} label={c.addService} />}>
+      <ServicesBoard regions={result.status==="success"?result.dashboard.regionCodes:[]} interventionModes={result.status==="success"?result.dashboard.interventionModes:[]} locale={locale} query={boardQuery} services={services} domain={domain || undefined} />
     </ProviderAppShell>
   );
 }

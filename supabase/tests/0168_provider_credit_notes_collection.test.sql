@@ -23,11 +23,11 @@ select ok((
 ), 'authenticated receives execute; anonymous and service_role do not');
 
 select ok((
-  pg_get_functiondef('public.issue_provider_credit_note(uuid,text,date,bigint,bigint,text,text,uuid)'::regprocedure)
+  pg_get_functiondef('public.issue_provider_credit_note_pre_policy_v1(uuid,text,date,bigint,bigint,text,text,uuid)'::regprocedure)
     not like '%update public.provider_invoices%'
-  and pg_get_functiondef('public.issue_provider_credit_note(uuid,text,date,bigint,bigint,text,text,uuid)'::regprocedure)
+  and pg_get_functiondef('public.issue_provider_credit_note_pre_policy_v1(uuid,text,date,bigint,bigint,text,text,uuid)'::regprocedure)
     like '%CREDIT_NOTE_EXCEEDS_INVOICE%'
-  and pg_get_functiondef('public.issue_provider_credit_note(uuid,text,date,bigint,bigint,text,text,uuid)'::regprocedure)
+  and pg_get_functiondef('public.issue_provider_credit_note_pre_policy_v1(uuid,text,date,bigint,bigint,text,text,uuid)'::regprocedure)
     like '%PROVIDER_CREDIT_NOTE%'
 ), 'credit notes never rewrite invoices and stay bounded by the original total');
 

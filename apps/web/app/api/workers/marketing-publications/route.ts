@@ -1,6 +1,7 @@
+import { withOperationalHeartbeat } from "@/modules/shared/lib/operations/heartbeat";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { resolveSocialCredentialReference } from "@/modules/shared/lib/marketing-autopilot/credential-resolver";
-import { publicationJobSchema, publishScheduledSocial, type PublicationResult } from "@/modules/shared/lib/marketing-autopilot/publisher";
+import { MAX_PUBLICATION_JOB_MS, publicationJobSchema, publishScheduledSocial, type PublicationResult } from "@/modules/shared/lib/marketing-autopilot/publisher";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -29,8 +30,10 @@ function countResult(summary: Summary, result: PublicationResult) {
   else summary.failed++;
 }
 
-export async function POST(request: Request) {
+async function runCycle(request: Request) {
   if (!authorized(request)) return Response.json({ code: "UNAUTHORIZED" }, { status: 401, headers });
+  const startedAt = performance.now();
+  const deadline = startedAt + (maxDuration * 1000) - 10_000;
   const client = getSupabaseAdminClient();
   const workerId = `web-${randomUUID()}`;
   const limit = requestedLimit(request);
@@ -41,6 +44,8 @@ export async function POST(request: Request) {
   else summary.timedOutMarked = marked;
 
   for (let index = 0; index < limit; index++) {
+    // Never claim work that cannot finish before the platform terminates this invocation.
+    if (performance.now() + MAX_PUBLICATION_JOB_MS > deadline) break;
     const claim = await client.rpc("claim_next_social_publication_job_v41", { p_worker_id: workerId, p_correlation_id: randomUUID() });
     if (claim.error) return Response.json({ code: "CLAIM_FAILED", summary }, { status: 503, headers });
     const raw = claim.data as unknown;
@@ -52,6 +57,11 @@ export async function POST(request: Request) {
     const parsed = publicationJobSchema.safeParse(raw);
     if (!parsed.success) { summary.failed++; summary.reconciliationRequired++; continue; }
     const job = parsed.data;
+    if(job.provider === "META" && ["INSTAGRAM","REEL"].includes(job.channel) && process.env.MARKETING_PUBLISH_MODE === "live") {
+      const persisted = await client.rpc("begin_social_media_execution_v1", {p_job_id:job.job_id,p_lease_token:job.lease_token});
+      if(persisted.error)summary.failed++; else summary.processed++;
+      continue;
+    }
     let result: PublicationResult;
     try {
       result = await publishScheduledSocial(job, {
@@ -89,3 +99,5 @@ export async function POST(request: Request) {
 }
 
 export const GET = POST;
+
+export async function POST(request: Request) { return withOperationalHeartbeat("MARKETING_PUBLICATIONS", 900, () => runCycle(request)); }

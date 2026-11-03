@@ -1,5 +1,6 @@
 "use server";
 
+import { serviceDetails,serviceDetailsSchema } from "@/modules/franchise/data/library/service-details";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { loadFranchiseLibraryWorkspace, type FranchiseLibraryWorkspace } from "@/modules/franchise/data/library/workspace";
@@ -9,15 +10,16 @@ import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
 export type FranchiseServiceActionState =
   | { status: "idle" }
-  | { status: "success"; serviceId: string; outcome?: string }
+  | { status: "success"; serviceId: string; outcome?: string;command?:{draftVersionId:string;identityRowVersion:number;versionRowVersion:number} }
   | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" };
 
 export type FranchiseSimulationActionState =
   | { status: "idle" }
-  | { status: "success"; detail: string }
+  | { status: "success"; detail: string; evaluation?: {scoreBasisPoints:number;engineVersion:string;actions:Array<{type:string;target?:string;[key:string]:unknown}>} }
   | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" };
 
 const createSchema = z.object({
+  ...serviceDetailsSchema,
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
   libraryId: uuidSchema,
@@ -34,6 +36,7 @@ const createSchema = z.object({
 });
 
 const commandSchema = z.object({
+  ...serviceDetailsSchema,
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
   libraryId: uuidSchema,
@@ -213,7 +216,7 @@ function mapRpcError(code: string | undefined, message: string | undefined): Ext
   return "UNAVAILABLE";
 }
 
-async function requireWorkspace(input: { locale: string; organizationId?: string; libraryId: string }): Promise<
+async function requireWorkspace(input: { locale: string; organizationId?: string; libraryId: string;serviceId?:string;questionnaireId?:string;ruleId?:string }): Promise<
   | { status: "ok"; workspace: FranchiseLibraryWorkspace }
   | { status: "error"; reason: Exclude<FranchiseServiceActionState, { status: "idle" | "success" }>["reason"] }
 > {
@@ -222,6 +225,8 @@ async function requireWorkspace(input: { locale: string; organizationId?: string
   const workspace = await loadFranchiseLibraryWorkspace({
     locale: parsedLocale,
     organizationId: input.organizationId && uuidSchema.safeParse(input.organizationId).success ? input.organizationId : undefined,
+    libraryId: input.libraryId,
+    catalog:{kind:input.ruleId?"RULE":input.questionnaireId?"QUESTIONNAIRE":"SERVICE",objectId:input.serviceId??input.questionnaireId??input.ruleId},
   });
   if (workspace.status === "error") {
     if (workspace.reason === "UNAUTHENTICATED") return { status: "error", reason: "UNAUTHENTICATED" };
@@ -249,6 +254,8 @@ export async function createFranchiseServiceAction(_state: FranchiseServiceActio
   if (!scoped.workspace.categories.some((category) => category.children.some((child) => child.id === parsed.data.subcategoryId))) {
     return { status: "error", reason: "FORBIDDEN" };
   }
+  const details=serviceDetails(parsed.data,null,{fr:parsed.data.descriptionFr,ar:parsed.data.descriptionAr});
+  if(!details)return{status:"error",reason:"VALIDATION"};
   const client = await getSupabaseServerClient();
   const response = await client.rpc("create_catalog_service", {
     p_library_id: parsed.data.libraryId,
@@ -259,22 +266,22 @@ export async function createFranchiseServiceAction(_state: FranchiseServiceActio
     p_name_ar: parsed.data.nameAr,
     p_short_description_fr: parsed.data.descriptionFr,
     p_short_description_ar: parsed.data.descriptionAr,
-    p_long_description_fr: parsed.data.descriptionFr,
-    p_long_description_ar: parsed.data.descriptionAr,
-    p_service_type: "ADVISORY",
-    p_unit_label_fr: parsed.data.locale === "ar" ? "وحدة" : "unité",
-    p_unit_label_ar: "وحدة",
-    p_credit_eligible: false,
-    p_volume_eligible: false,
-    p_recurring_eligible: false,
-    p_trial_eligible: false,
-    p_rfq_required: true,
-    p_fixed_fulfillment_allowed: false,
-    p_base_currency: "MAD",
-    p_sort_order: 1,
-    p_fulfillment_config: { schema_version: 1 },
-    p_visibility_rules: { schema_version: 1 },
-    p_sensitive: false,
+    p_long_description_fr: details.longDescriptionFr,
+    p_long_description_ar: details.longDescriptionAr,
+    p_service_type: details.serviceType,
+    p_unit_label_fr: details.unitLabelFr,
+    p_unit_label_ar: details.unitLabelAr,
+    p_credit_eligible: details.creditEligible,
+    p_volume_eligible: details.volumeEligible,
+    p_recurring_eligible: details.recurringEligible,
+    p_trial_eligible: details.trialEligible,
+    p_rfq_required: details.rfqRequired,
+    p_fixed_fulfillment_allowed: details.fixedFulfillmentAllowed,
+    p_base_currency: details.baseCurrency,
+    p_sort_order: details.sortOrder,
+    p_fulfillment_config: details.fulfillmentConfig,
+    p_visibility_rules: details.visibilityRules,
+    p_sensitive: details.sensitive,
     p_change_reason: parsed.data.changeReason,
     p_idempotency_key: parsed.data.idempotencyKey,
     p_correlation_id: parsed.data.correlationId,
@@ -292,11 +299,13 @@ export async function saveFranchiseServiceDraftAction(_state: FranchiseServiceAc
   const scoped = await requireWorkspace(parsed.data);
   if (scoped.status === "error") return scoped;
   const service = scoped.workspace.services.find((item) => item.id === parsed.data.serviceId);
-  if (!service?.command || service.command.draftVersionId !== parsed.data.draftVersionId) return { status: "error", reason: "FORBIDDEN" };
+  if (!service?.command) return { status: "error", reason: "FORBIDDEN" };
   if (!scoped.workspace.categories.some((category) => category.children.some((child) => child.id === parsed.data.subcategoryId))) {
     return { status: "error", reason: "FORBIDDEN" };
   }
   const command = service.command;
+  const details=serviceDetails(parsed.data,command,{fr:parsed.data.descriptionFr,ar:parsed.data.descriptionAr});
+  if(!details)return{status:"error",reason:"VALIDATION"};
   const client = await getSupabaseServerClient();
   const response = await client.rpc("save_catalog_service_draft", {
     p_service_id: parsed.data.serviceId,
@@ -308,22 +317,22 @@ export async function saveFranchiseServiceDraftAction(_state: FranchiseServiceAc
     p_name_ar: parsed.data.nameAr,
     p_short_description_fr: parsed.data.descriptionFr,
     p_short_description_ar: parsed.data.descriptionAr,
-    p_long_description_fr: parsed.data.descriptionFr,
-    p_long_description_ar: parsed.data.descriptionAr,
-    p_service_type: command.serviceType,
-    p_unit_label_fr: command.unitLabelFr,
-    p_unit_label_ar: command.unitLabelAr,
-    p_credit_eligible: command.creditEligible,
-    p_volume_eligible: command.volumeEligible,
-    p_recurring_eligible: command.recurringEligible,
-    p_trial_eligible: command.trialEligible,
-    p_rfq_required: command.rfqRequired,
-    p_fixed_fulfillment_allowed: command.fixedFulfillmentAllowed,
-    p_base_currency: command.baseCurrency,
-    p_sort_order: command.sortOrder,
-    p_fulfillment_config: command.fulfillmentConfig,
-    p_visibility_rules: command.visibilityRules,
-    p_sensitive: command.sensitive,
+    p_long_description_fr: details.longDescriptionFr,
+    p_long_description_ar: details.longDescriptionAr,
+    p_service_type: details.serviceType,
+    p_unit_label_fr: details.unitLabelFr,
+    p_unit_label_ar: details.unitLabelAr,
+    p_credit_eligible: details.creditEligible,
+    p_volume_eligible: details.volumeEligible,
+    p_recurring_eligible: details.recurringEligible,
+    p_trial_eligible: details.trialEligible,
+    p_rfq_required: details.rfqRequired,
+    p_fixed_fulfillment_allowed: details.fixedFulfillmentAllowed,
+    p_base_currency: details.baseCurrency,
+    p_sort_order: details.sortOrder,
+    p_fulfillment_config: details.fulfillmentConfig,
+    p_visibility_rules: details.visibilityRules,
+    p_sensitive: details.sensitive,
     p_change_reason: parsed.data.changeReason,
     p_expected_identity_row_version: parsed.data.identityRowVersion,
     p_expected_version_row_version: parsed.data.versionRowVersion,
@@ -332,7 +341,9 @@ export async function saveFranchiseServiceDraftAction(_state: FranchiseServiceAc
   });
   if (response.error) return { status: "error", reason: mapRpcError(response.error.code, response.error.message) };
   revalidateService(parsed.data.locale, parsed.data.serviceId);
-  return { status: "success", serviceId: parsed.data.serviceId, outcome: "SAVED" };
+  const saved=z.object({version_id:z.string().uuid(),identity_row_version:z.number().int().positive(),version_row_version:z.number().int().positive()}).safeParse(response.data);
+  if(!saved.success)return{status:"error",reason:"UNAVAILABLE"};
+  return { status: "success", serviceId: parsed.data.serviceId, outcome: "SAVED",command:{draftVersionId:saved.data.version_id,identityRowVersion:saved.data.identity_row_version,versionRowVersion:saved.data.version_row_version} };
 }
 
 export async function simulateFranchiseServiceImpactAction(_state: FranchiseServiceActionState, formData: FormData): Promise<FranchiseServiceActionState> {
@@ -395,15 +406,18 @@ export async function simulateFranchiseQuestionnaireAction(_state: FranchiseSimu
     return { status: "error", reason: "FORBIDDEN" };
   }
   const answers: Record<string, unknown> = {};
-  if (parsed.data.questionVersionId) {
-    const question = scoped.workspace.questions.find((item) => item.versionId === parsed.data.questionVersionId);
-    if (!question) return { status: "error", reason: "FORBIDDEN" };
-    const raw = parsed.data.answer?.trim() ?? "";
-    answers[parsed.data.questionVersionId] = question.answerType === "YES_NO"
-      ? raw === "true" || raw === "1" || raw.toLowerCase() === "oui" || raw.toLowerCase() === "yes"
-      : question.answerType === "INTEGER"
-        ? (Number.isFinite(Number.parseInt(raw || "0", 10)) ? Number.parseInt(raw || "0", 10) : 0)
-        : raw;
+  const allowed = new Set((scoped.workspace.compositionQuestions ?? []).filter((q)=>q.versionId===parsed.data.questionnaireVersionId).map((q)=>q.questionVersionId));
+  const entries = [...formData.entries()].filter(([key])=>key.startsWith("answer:")).map(([key,value])=>[key.slice(7),value] as const);
+  if(parsed.data.questionVersionId)entries.push([parsed.data.questionVersionId,parsed.data.answer ?? ""]);
+  if(entries.length>500)return{status:"error",reason:"VALIDATION"};
+  for(const [questionId,value] of entries){
+    if(!allowed.has(questionId))return{status:"error",reason:"FORBIDDEN"};
+    const question=scoped.workspace.questionVersionBank?.find((q)=>q.id===questionId);
+    if(!question || typeof value!=="string" || value.length>10000)return{status:"error",reason:"VALIDATION"};
+    const raw=value.trim();if(!raw)continue;
+    if(["YES_NO","INTEGER","DECIMAL","PERCENTAGE","MONEY","SINGLE_CHOICE","MULTIPLE_CHOICE","FILE"].includes(question.answerType)){
+      try{answers[questionId]=JSON.parse(raw);}catch{return{status:"error",reason:"VALIDATION"};}
+    }else answers[questionId]=raw;
   }
   const client = await getSupabaseServerClient();
   const response = await client.rpc("simulate_questionnaire_rule_engine", {
@@ -413,14 +427,16 @@ export async function simulateFranchiseQuestionnaireAction(_state: FranchiseSimu
   });
   if (response.error) return { status: "error", reason: mapRpcError(response.error.code, response.error.message) };
   const simulated = z.object({
-    triggered_actions: z.array(z.unknown()).optional(),
-    score_basis_points: z.number().int().optional(),
+    triggered_actions: z.array(z.object({type:z.string(),target:z.string().optional()}).passthrough()),
+    score_basis_points: z.number().int(),
+    engine_version:z.string(),
   }).passthrough().safeParse(response.data);
   if (!simulated.success) return { status: "error", reason: "UNAVAILABLE" };
   const actions = simulated.data.triggered_actions?.length ?? 0;
   return {
     status: "success",
-    detail: `${actions}:${simulated.data.score_basis_points ?? 0}`,
+    detail: `${actions}:${simulated.data.score_basis_points}`,
+    evaluation:{scoreBasisPoints:simulated.data.score_basis_points,engineVersion:simulated.data.engine_version,actions:simulated.data.triggered_actions},
   };
 }
 

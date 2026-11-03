@@ -2,7 +2,10 @@ import Link from "next/link";
 import { Boxes, CreditCard, FileText, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
-import { formatMinor, type SubscriptionDashboard } from "@/modules/shared/lib/subscriptions/model";
+import { type SubscriptionDashboard } from "@/modules/shared/lib/subscriptions/model";
+import {formatMinorExact as formatMinor} from "@/modules/shared/lib/solution-insights/model";
+import {workflowStatusLabel} from "@/modules/shared/lib/i18n/workflow-statuses";
+import {subscriptionDateLabel} from "../abonnement/display";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export type SubscriptionCreditsView = {
@@ -42,17 +45,17 @@ export function SubscriptionBoard({
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.mySub}</h2>
-            {subscription ? <span className="client-status-chip" data-tone="mint">{subscription.status}</span> : null}
+            {subscription ? <span className="client-status-chip" data-tone="mint">{workflowStatusLabel(subscription.status,locale)}</span> : null}
           </header>
           <h3>{plan ? `${plan.code} · v${plan.version}` : dashboard.organizationName}</h3>
-          {subscription?.currentPeriodEnd ? <p>{locale === "ar" ? "التجديد" : "Renouvellement"}: {subscription.currentPeriodEnd}</p> : null}
+          {subscription?.currentPeriodEnd ? <p>{locale === "ar" ? "التجديد" : "Renouvellement"}: {subscriptionDateLabel(subscription.currentPeriodEnd,locale)}</p> : null}
           <a href="#plans" className="client-cta">{c.manageSub}</a>
         </article>
         <article className="client-card">
           <header><h2>{c.inBrief}</h2></header>
           <ul className="client-brief-kpis">
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="violet"><Users className="size-4" aria-hidden /></span><strong dir="ltr">{credits.memberCount}</strong><small>{c.usersActive}</small></li>
-            <li className="client-kpi-card"><span className="client-feed-icon" data-tone="sky"><FileText className="size-4" aria-hidden /></span><strong dir="ltr">{cycles.length}</strong><small>{c.invoicesCount}</small></li>
+            <li className="client-kpi-card"><span className="client-feed-icon" data-tone="sky"><FileText className="size-4" aria-hidden /></span><strong dir="ltr">{cycles.length}</strong><small>{locale==="fr"?"Cycles comptabilisés":"الدورات المسجلة"}</small></li>
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="mint"><CreditCard className="size-4" aria-hidden /></span><strong dir="ltr">{credits.balance}</strong><small>{c.creditsAvailable} · {credits.unitCode}</small></li>
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="peach"><Boxes className="size-4" aria-hidden /></span><strong dir="ltr">{credits.boxes.length}</strong><small>{c.boxesAvailable}</small></li>
           </ul>
@@ -61,8 +64,8 @@ export function SubscriptionBoard({
       <section className="client-board client-board-compare" id="factures">
         <article className="client-card">
           <header className="client-priority-head">
-            <h2>{c.latestInvoices}</h2>
-            <Link href={`/${locale}/client/documents${query}`} className="client-text-link">{c.seeAllFin}</Link>
+            <h2>{locale==="fr"?"Derniers cycles comptabilisés":"آخر الدورات المسجلة"}</h2>
+            <Link href={`/${locale}/client/finances${query}#documents-commerciaux`} className="client-text-link">{c.seeAllFin}</Link>
           </header>
           {cycles.length === 0 ? <p>{locale === "ar" ? "لا توجد دورة فوترة بعد." : "Aucun cycle de facturation pour le moment."}</p> : (
             <div className="client-table-wrap">
@@ -71,10 +74,10 @@ export function SubscriptionBoard({
                 <tbody>
                   {cycles.slice(0, 6).map((cycle) => (
                     <tr key={cycle.id}>
-                      <td>{cycle.periodEnd}</td>
+                      <td>{subscriptionDateLabel(cycle.periodEnd,locale)}</td>
                       <td dir="ltr">{cycle.plan.code} · v{cycle.plan.version}</td>
                       <td dir="ltr">{formatMinor(cycle.amountMinor, cycle.currency, locale)}</td>
-                      <td><Link href={`/${locale}/client/abonnement/cycles/${cycle.id}${query}`} className="client-text-link">{c.seeInvoice}</Link></td>
+                      <td><Link href={`/${locale}/client/abonnement/cycles/${cycle.id}${query}`} className="client-text-link">{locale==="fr"?"Voir le cycle":"عرض الدورة"}</Link></td>
                     </tr>
                   ))}
                 </tbody>

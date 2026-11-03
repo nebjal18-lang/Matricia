@@ -59,7 +59,7 @@ function Table({
                   <td>{getProviderStatusLabel(locale, document.kind)}</td>
                   <td><span className="client-status-chip" data-tone={tone(document.status)}>{getProviderStatusLabel(locale, document.status)}</span></td>
                   <td dir="ltr">{document.expiresOn ?? "—"}</td>
-                  <td dir="ltr">{document.version}</td>
+                  <td><span dir="ltr">{document.version}</span> · {document.scanStatus==="CLEAN"?<a className="client-text-link" href={`/api/provider/documents/${document.id}`}>{locale==="ar"?"تنزيل":"Télécharger"}</a>:<span>{document.scanStatus==="PENDING"?(locale==="ar"?"الفحص جارٍ":"Analyse en attente"):(locale==="ar"?"في الحجر":"En quarantaine")}</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -81,7 +81,7 @@ export default async function ProviderCertificationsPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/qualification/certifications` }));
-  const result = await loadProviderDashboard();
+  const result = await loadProviderDashboard(query.organizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/qualification/certifications` }));
   const documents = result.status === "success" ? result.dashboard.documents : [];
   const copy = locale === "ar"
@@ -91,7 +91,7 @@ export default async function ProviderCertificationsPage({
   return (
     <ProviderAppShell
       locale={locale}
-      selectedQuery={space.selectedQuery}
+      organizations={space.organizations} selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
       active="qualify"

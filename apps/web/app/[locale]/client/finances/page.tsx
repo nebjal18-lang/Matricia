@@ -1,55 +1,34 @@
+import Link from "next/link";
+import { CommercialDocuments } from "@/modules/client/screens/finances/commercial-documents";
 import { notFound, redirect } from "next/navigation";
+import { z } from "zod";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { isDocumentExpired } from "@/modules/client/data/documents/expiry";
-import { loadClientDocumentVault } from "@/modules/client/data/documents/server-repository";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
-import { spaceCopy } from "@/modules/client/data/spaces/copy";
-import { FinancesBoard } from "@/modules/client/screens/spaces/boards";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
-import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { formatMinorExact } from "@/modules/shared/lib/solution-insights/model";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
-
-export default async function ClientFinancesPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+const entrySchema = z.object({ id: z.string().uuid(), kind: z.enum(["SUBSCRIPTION", "MISSION_RECEIPT"]), reference: z.string(), amount_minor: z.string().regex(/^\d+$/u), currency: z.string().regex(/^[A-Z]{3}$/u), status: z.enum(["PENDING", "CONFIRMED", "PARTIALLY_REFUNDED", "REFUNDED", "REVERSED", "DISPUTED", "DISPUTE_LOST"]), occurred_at: z.string().datetime({ offset: true }), mission_id: z.string().uuid().nullable(), is_demo: z.boolean(), event_type: z.enum(["PAYMENT_INTENT", "PAYMENT_SUCCEEDED", "MISSION_RECEIPT", "REFUND_SUCCEEDED", "PAYMENT_REVERSED", "DISPUTE_OPENED", "DISPUTE_WON", "DISPUTE_LOST"]), refunded_minor: z.string().regex(/^\d+$/u), remaining_minor: z.string().regex(/^\d+$/u), financial_hold: z.boolean() });
+export default async function ClientFinancesPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; type?: string; statut?: string; page?: string; billingQuery?: string; billingPage?: string; sourcePage?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
+  const fr = locale === "fr";
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/finances` }));
-  const result = await loadClientDocumentVault(query.organizationId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/finances` }));
-  const c = spaceCopy(locale);
-  const context = result.status === "success"
-    ? resolveClientOrganizationContext(result.value.organizations.map((organization) => ({ organization_id: organization.id })), query.organizationId)
-    : null;
-  const selectedId = context?.status === "success" ? context.membership.organization_id : null;
-  const documents = result.status === "success" && selectedId
-    ? result.value.documents.filter((document) => document.organizationId === selectedId)
-    : [];
-  const bindings = result.status === "success" && selectedId
-    ? result.value.bindings.filter((binding) => binding.organizationId === selectedId)
-    : [];
-  const targets = result.status === "success" && selectedId
-    ? result.value.targets.filter((target) => target.organizationId === selectedId)
-    : [];
-  const financialTypes = /facture|invoice|avoir|credit|paiement|payment|abonnement|subscription|tax|tva|fiscal/i;
-  const rows = documents
-    .filter((document) => financialTypes.test(`${document.type} ${document.fileName}`))
-    .map((document) => {
-      const binding = bindings.find((item) => item.documentId === document.id && !item.revokedAt);
-      const target = binding ? targets.find((item) => item.id === binding.targetId) : null;
-      const expired = isDocumentExpired(document.expiresOn);
-      return {
-        id: document.id,
-        title: document.fileName,
-        folder: target?.label ?? document.type,
-        status: expired ? (locale === "ar" ? "للمراجعة" : "À examiner") : (locale === "ar" ? "متاح" : "Disponible"),
-        next: expired ? (locale === "ar" ? "مراجعة المستند" : "Vérifier le document") : (locale === "ar" ? "فتح المستند" : "Ouvrir le document"),
-        href: `/${locale}/client/documents${space.selectedQuery}`,
-        tone: expired ? "peach" as const : "mint" as const,
-      };
-    });
-  return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="finance" title={c.finTitle} lead={c.finLead} kicker={c.kicker}>
-      <FinancesBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} rows={rows} />
-    </ClientAppShell>
-  );
+  const page = Math.min(100000, Math.max(1, Number.parseInt(query.page ?? "1", 10) || 1));
+  const kind = query.type === "SUBSCRIPTION" || query.type === "MISSION_RECEIPT" ? query.type : "";
+  const statuses = fr ? { PENDING: "Confirmation attendue", CONFIRMED: "Confirmé", PARTIALLY_REFUNDED: "Restitué en partie", REFUNDED: "Remboursé", REVERSED: "Paiement annulé", DISPUTED: "Litige ouvert", DISPUTE_LOST: "Litige perdu" } : { PENDING: "بانتظار التأكيد", CONFIRMED: "مؤكد", PARTIALLY_REFUNDED: "تمت إعادة جزء", REFUNDED: "تم الاسترداد", REVERSED: "دفع ملغى", DISPUTED: "نزاع مفتوح", DISPUTE_LOST: "نزاع خاسر" };
+  const events = fr ? { PAYMENT_INTENT: "Intention de paiement d’abonnement", PAYMENT_SUCCEEDED: "Paiement initial d’abonnement", MISSION_RECEIPT: "Règlement reçu par le Prestataire", REFUND_SUCCEEDED: "Remboursement confirmé", PAYMENT_REVERSED: "Annulation confirmée du paiement", DISPUTE_OPENED: "Ouverture de litige", DISPUTE_WON: "Clôture favorable du litige", DISPUTE_LOST: "Clôture défavorable du litige" } : { PAYMENT_INTENT: "نية دفع الاشتراك", PAYMENT_SUCCEEDED: "دفعة الاشتراك الأصلية", MISSION_RECEIPT: "تسوية استلمها مقدم الخدمة", REFUND_SUCCEEDED: "استرداد مؤكد", PAYMENT_REVERSED: "إلغاء مؤكد للدفع", DISPUTE_OPENED: "فتح نزاع", DISPUTE_WON: "إغلاق النزاع لصالحكم", DISPUTE_LOST: "إغلاق النزاع لغير صالحكم" };
+  const status = query.statut && Object.hasOwn(statuses,query.statut) ? query.statut : "";
+  const result = await (await getSupabaseServerClient()).rpc("list_client_financial_page", { p_organization_id: space.selectedOrganizationId, p_kind: kind, p_status: status, p_page: page });
+  const parsed = z.array(entrySchema).safeParse(result.data);
+  const rows = parsed.success ? parsed.data.slice(0,20) : [];
+  const date = new Intl.DateTimeFormat(fr ? "fr-MA" : "ar-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" });
+  const pageHref = (value: number) => `?${new URLSearchParams({ organizationId: space.selectedOrganizationId, type: kind, statut: status, page: String(value), billingQuery: query.billingQuery??"", billingPage:query.billingPage??"1", sourcePage:query.sourcePage??"1" })}`;
+  return <ClientAppShell languagePath={`/${locale}/client/finances?${new URLSearchParams({organizationId:space.selectedOrganizationId,type:kind,statut:status,page:String(page),billingQuery:query.billingQuery??"",billingPage:query.billingPage??"1",sourcePage:query.sourcePage??"1"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="finance" title={fr ? "Mes finances" : "أموالي"} lead={fr ? "Paiements d’abonnement et règlements de missions confirmés." : "مدفوعات الاشتراك وتسويات المهام المؤكدة."}>
+    <section className="client-card grid gap-5"><form method="get" className="flex flex-wrap items-end gap-4"><input type="hidden" name="organizationId" value={space.selectedOrganizationId}/><label className="grid gap-2">{fr ? "Nature" : "النوع"}<select name="type" defaultValue={kind} className="min-h-11 border p-2"><option value="">{fr ? "Toutes" : "الكل"}</option><option value="SUBSCRIPTION">{fr ? "Abonnement" : "اشتراك"}</option><option value="MISSION_RECEIPT">{fr ? "Règlement de mission" : "تسوية مهمة"}</option></select></label><label className="grid gap-2">{fr ? "Statut" : "الحالة"}<select name="statut" defaultValue={status} className="min-h-11 border p-2"><option value="">{fr ? "Tous" : "الكل"}</option>{Object.entries(statuses).map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label><button className="min-h-11 rounded-md border px-4">{fr ? "Filtrer" : "تصفية"}</button><Link href={`/${locale}/client/abonnement${space.selectedQuery}`} className="min-h-11 underline">{fr ? "Gérer mon abonnement" : "إدارة اشتراكي"}</Link></form>
+    {result.error || !parsed.success ? <p role="alert">{result.error?.code==="42501" ? (fr?"Votre rôle ne permet pas de consulter les données financières de cette organisation.":"دوركم لا يسمح بعرض البيانات المالية لهذه المنظمة.") : (fr?"Les données financières sont momentanément indisponibles. Réessayez.":"البيانات المالية غير متاحة مؤقتاً. حاولوا مجدداً.")}</p> : <><div className="overflow-x-auto"><table className="w-full text-start"><caption className="sr-only">{fr ? "Historique financier de l’organisation sélectionnée" : "السجل المالي للمنظمة المختارة"}</caption><thead><tr>{(fr ? ["Date", "Nature et référence", "Montant", "Statut", "Dossier"] : ["التاريخ", "النوع والمرجع", "المبلغ", "الحالة", "الملف"]).map(label=><th key={label} scope="col" className="p-3 text-start">{label}</th>)}</tr></thead><tbody>{rows.map(row=><tr key={`${row.kind}:${row.id}`} className="border-t"><td className="p-3">{date.format(new Date(row.occurred_at))}</td><td className="p-3">{events[row.event_type]}<span className="block text-sm">{row.reference}</span>{row.is_demo ? <strong className="block text-sm">{fr ? "Simulation de paiement" : "محاكاة دفع"}</strong> : null}</td><td className="p-3 whitespace-nowrap">{formatMinorExact(row.amount_minor,row.currency,locale)}{row.event_type === "PAYMENT_SUCCEEDED" && BigInt(row.refunded_minor)>BigInt(0) ? <span className="block text-sm">{fr ? "Restitué" : "أُعيد"} : {formatMinorExact(row.refunded_minor,row.currency,locale)} · {fr ? "Conservé" : "المتبقي"} : {formatMinorExact(row.remaining_minor,row.currency,locale)}</span> : null}</td><td className="p-3">{statuses[row.status]}{row.financial_hold ? <strong className="block text-sm">{fr ? "Nouvelles opérations suspendues" : "العمليات الجديدة معلقة"}</strong> : null}</td><td className="p-3">{row.mission_id ? <Link href={`/${locale}/client/missions/${row.mission_id}${space.selectedQuery}`} className="underline">{fr ? "Voir la mission" : "عرض المهمة"}</Link> : <Link href={`/${locale}/client/abonnement${space.selectedQuery}`} className="underline">{fr ? "Abonnement" : "الاشتراك"}</Link>}</td></tr>)}</tbody></table></div>{!rows.length ? <p>{fr ? "Aucune opération ne correspond à ces filtres." : "لا توجد عمليات مطابقة لهذه المرشحات."}</p> : null}<nav className="flex gap-4" aria-label={fr ? "Pages financières" : "الصفحات المالية"}>{page > 1 ? <Link href={pageHref(page-1)}>{fr ? "Précédent" : "السابق"}</Link> : null}{parsed.data.length > 20 ? <Link href={pageHref(page+1)}>{fr ? "Suivant" : "التالي"}</Link> : null}</nav></>}
+    <p className="text-sm">{fr ? "Une intention de paiement attend une confirmation du service de paiement. Les règlements de mission sont les encaissements confirmés par le Prestataire. Un litige affiche le montant concerné, sans représenter un nouveau débit." : "تنتظر نية الدفع تأكيد خدمة الدفع. تسويات المهام هي المقبوضات التي أكدها مقدم الخدمة. يعرض النزاع المبلغ المعني دون أن يمثل خصماً جديداً."}</p><Link href={`/${locale}/client/documents${space.selectedQuery}`} className="underline">{fr ? "Consulter mon coffre documentaire" : "عرض خزنة المستندات"}</Link></section>
+    <CommercialDocuments locale={locale} organizationId={space.selectedOrganizationId} query={(query.billingQuery??"").trim().slice(0,200)} page={Math.min(100000,Math.max(1,Number.parseInt(query.billingPage??"1",10)||1))} sourcePage={Math.min(100000,Math.max(1,Number.parseInt(query.sourcePage??"1",10)||1))} financialFilters={{type:kind,statut:status,page:String(page)}}/>
+  </ClientAppShell>;
 }

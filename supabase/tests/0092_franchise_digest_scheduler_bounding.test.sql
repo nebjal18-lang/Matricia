@@ -30,6 +30,20 @@ insert into public.organization_member_roles(membership_id,role_code,franchise_i
 ('c9200000-0000-4000-8000-000000000004','FRANCHISE_VIEWER','00000000-0000-4000-8000-000000000092'),
 ('c9200000-0000-4000-8000-000000000005','FRANCHISE_VIEWER','00000000-0000-4000-8000-000000000093');
 
+
+-- The dedicated role now authorizes a real active, dated mandate, not a status-only franchise fixture.
+set local session_replication_role=replica;
+do $fixture$declare f record;t uuid;m uuid;rule uuid;begin
+ select id into rule from public.franchise_economic_rule_versions where franchise_type='STANDARD'order by version desc limit 1;
+ for f in select *from public.franchises where id in('00000000-0000-4000-8000-000000000092','00000000-0000-4000-8000-000000000093')loop
+  t:=extensions.gen_random_uuid();m:=extensions.gen_random_uuid();
+  insert into public.franchise_territory_versions(id,franchise_id,version,territory_code,name_fr,name_ar,scope_snapshot,effective_from,content_hash,created_by)values(t,f.id,1,f.territory_code,'Territoire de recette','نطاق الاختبار','{}',now()-interval'1 day',repeat('a',64),f.created_by);
+  insert into public.franchise_mandate_versions(id,franchise_id,territory_version_id,economic_rule_version_id,version,mandate_status,rights_snapshot,obligations_snapshot,contract_snapshot,entry_fee_minor,entry_fee_mode,entry_fee_term_months,franchisee_share_bps,neoxa_share_bps,matricia_share_bps,distribution_basis,effective_from,content_hash,created_by)
+  values(m,f.id,t,rule,1,'ACTIVE','{}','{}','{}',0,'EXEMPT',0,5000,2500,2500,'DISTRIBUTABLE_PROFIT',now()-interval'1 day',repeat('b',64),f.created_by);
+  update public.franchises set current_mandate_version_id=m where id=f.id;
+ end loop;
+end$fixture$;
+set local session_replication_role=origin;
 insert into public.franchise_daily_digest_config_versions(franchise_id,recipient_user_id,version,policy_version_id,enabled,frequency,local_send_time,time_zone,locale,change_reason,content_hash,created_by)
 select'00000000-0000-4000-8000-000000000092','a9200000-0000-4000-8000-000000000002',n,(select id from public.franchise_daily_digest_policy_versions where status='ACTIVE'),n=50,'DAILY','00:00','UTC','fr-MA','Historique volume version '||n,md5(n::text)||md5(n::text),'a9200000-0000-4000-8000-000000000001'from generate_series(1,50)n;
 insert into public.franchise_daily_digest_config_versions(franchise_id,recipient_user_id,version,policy_version_id,enabled,frequency,local_send_time,time_zone,locale,change_reason,content_hash,created_by)values

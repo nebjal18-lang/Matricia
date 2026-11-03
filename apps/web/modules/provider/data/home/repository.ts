@@ -1,3 +1,6 @@
+import {capacitySummaryStatus} from "@/modules/provider/data/qualification/capacity-summary";
+import {interventionModeLabel} from "@/modules/provider/data/qualification/intervention-modes";
+import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import { loadProviderQuotes } from "@/modules/provider/data/quotes/repository";
 import { loadProviderMissions } from "@/modules/provider/data/missions/repository";
 import { loadProviderDashboard } from "@/modules/provider/data/qualification/repository";
@@ -23,7 +26,7 @@ export type ProviderHomeSnapshot =
       organizationName: string | null;
       organizationId: string | null;
       consultations: Array<{ id: string; title: string; status: string; href: string; tone: "sky" | "peach" | "mint" | "violet" }>;
-      capacity: { status: string; domains: string; zones: string };
+      capacity: { status: string; domains: string; zones: string; modalities?:string };
       reputation: { published: number; latest: string | null };
     }
   | { status: "error"; reason: "UNAUTHENTICATED" | "UNAVAILABLE" | "NO_PROVIDER_ORGANIZATION"; counts: ProviderHomeCounts; blockers: ProviderBlocker[] };
@@ -45,10 +48,10 @@ export async function loadProviderHomeSnapshot(input: {
   try {
     const [quotes, qualification, missions, billing, reputation] = await Promise.all([
       loadProviderQuotes(input.organizationId ?? undefined),
-      loadProviderDashboard(),
-      loadProviderMissions(input.locale),
-      loadProviderBilling(),
-      loadProviderReputation(),
+      loadProviderDashboard(input.organizationId ?? undefined),
+      loadProviderMissions(input.locale, input.organizationId ?? undefined),
+      loadProviderBilling(input.organizationId ?? undefined),
+      loadProviderReputation(input.organizationId ?? undefined),
     ]);
 
     if (quotes.status === "error" && quotes.reason === "UNAUTHENTICATED") {
@@ -129,9 +132,10 @@ export async function loadProviderHomeSnapshot(input: {
       : [];
     const capacityServices = qualOk ? qualification.dashboard.services : [];
     const capacity = {
-      status: capacityServices[0]?.capacityStatus ?? "—",
+      status: capacitySummaryStatus(capacityServices),
+      modalities:qualOk?qualification.dashboard.interventionModes?.map(mode=>interventionModeLabel(mode,input.locale)).join(" · ")||"—":"—",
       domains: [...new Set(capacityServices.map((service) => input.locale === "ar" ? service.libraryLabel.ar : service.libraryLabel.fr))].filter(Boolean).join(" · ") || "—",
-      zones: "—",
+      zones: qualOk ? qualification.dashboard.regionCodes?.map((code) => moroccoRegionLabel(code, input.locale)).join(" · ") || "—" : "—",
     };
     const publishedFeedback = reputation.status === "success" ? reputation.dashboard.feedback : [];
     const latestFeedback = publishedFeedback[0];

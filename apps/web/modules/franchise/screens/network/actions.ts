@@ -223,3 +223,12 @@ export async function advanceFranchiseFolderPipeline(_: FranchiseInviteState, fo
   refresh(text(form, "locale"), text(form, "organizationId"));
   return { status: "success", outcome: advanced.data.outcome, created: 1 };
 }
+
+export async function linkFranchiseProviderOrganization(_:FranchiseInviteState,form:FormData):Promise<FranchiseInviteState>{
+ const input=z.object({locale:z.enum(["fr","ar"]),prospectId:z.string().uuid(),providerOrganizationId:z.string().uuid(),rowVersion:z.coerce.number().int().positive(),reason:z.string().trim().min(3).max(500),idempotencyKey:z.string().uuid()}).safeParse(Object.fromEntries(form));
+ if(!input.success)return{status:"error",reason:"VALIDATION"};
+ const v=input.data;const saved=await rpc("link_franchise_provider_organization",{p_prospect_id:v.prospectId,p_provider_organization_id:v.providerOrganizationId,p_expected_row_version:v.rowVersion,p_reason:v.reason,p_idempotency_key:v.idempotencyKey});
+ if(saved.status!=="success")return{status:"error",reason:saved.reason};
+ refresh(v.locale,text(form,"organizationId"));revalidatePath(`/${v.locale}/franchise/fournisseurs/${v.prospectId}`);
+ return{status:"success",outcome:saved.data.outcome,created:0};
+}

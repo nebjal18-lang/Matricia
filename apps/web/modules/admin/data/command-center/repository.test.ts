@@ -15,7 +15,7 @@ const actionId = "44444444-4444-4444-8444-444444444444";
 function thenable(result: { data: unknown; error: unknown }) {
   const chain: Record<string, unknown> = {};
   const next = () => chain;
-  for (const method of ["select", "eq", "is", "in", "order", "limit"]) {
+  for (const method of ["select", "eq", "is", "in", "order", "limit", "range"]) {
     chain[method] = method === "select"
       ? (columns: string) => {
           mocks.selects.push(columns);
@@ -28,6 +28,11 @@ function thenable(result: { data: unknown; error: unknown }) {
 }
 
 describe("loadAdminCommandCenter", () => {
+  it("keeps Auth503 as a technical read failure", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: null }, error: { status: 503 } });
+    expect(await loadAdminCommandCenter()).toEqual({ status: "error", reason: "QUERY_FAILED" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     mocks.selects.length = 0;
     mocks.getUser.mockReset().mockResolvedValue({ data: { user: { id: userId } } });

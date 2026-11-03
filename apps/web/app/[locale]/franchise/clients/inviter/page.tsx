@@ -11,10 +11,10 @@ import { FranchiseMandateRail } from "@/modules/franchise/screens/library/librar
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
-export default async function FranchiseInviteClientPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+export default async function FranchiseInviteClientPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId });
+  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const crm = await loadFranchiseCrm();
   if (crm.status === "error" && crm.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/franchise/clients/inviter` }));
   const c = franchiseCopy(locale);

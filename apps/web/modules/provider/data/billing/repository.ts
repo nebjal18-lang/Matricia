@@ -1,3 +1,4 @@
+import { selectProviderMembership } from "@/modules/provider/data/spaces/organization-context";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { BillingDashboard, ProviderCommissionReceipt } from "./model";
@@ -7,7 +8,7 @@ const money = z.string().regex(/^\d+$/);
 const membership = z.object({ organization_id: id, organizations: z.object({ display_name: z.string().min(1) }) });
 const payableSchema = z.object({ id, occurred_on: z.string(), event_type: z.string(), currency: z.string(), total_due_minor: money });
 const statementSchema = z.object({ id, statement_number: z.string(), period_start: z.string(), period_end: z.string(), currency: z.string(), total_minor: money });
-const invoiceSchema = z.object({ id, invoice_number: z.string(), currency: z.string(), total_minor: money, paid_minor: money, outstanding_minor: money, credited_minor: money.optional(), payment_status: z.string(), due_on: z.string() });
+const invoiceSchema = z.object({ id, invoice_number: z.string(), currency: z.string(), total_minor: money, paid_minor: money, outstanding_minor: money, credited_minor: money.optional(), available_credit_minor:money.optional(), payment_status: z.string(), due_on: z.string() });
 const paymentSchema = z.object({ id, payment_reference: z.string(), currency: z.string(), amount_minor: money, paid_on: z.string() });
 const allocationSchema = z.object({ id: money, reconciliation_batch_id: id, payment_id: id, invoice_id: id, amount_minor: money, created_at: z.string() });
 const accountSchema = z.object({ id, code: z.string(), currency: z.string() });
@@ -20,7 +21,7 @@ type BillingLoadResult =
   | { status: "success"; dashboard: BillingDashboard }
   | { status: "error"; reason: "UNAUTHENTICATED" | "NO_BILLING_ORGANIZATION" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-export async function loadProviderBilling(): Promise<BillingLoadResult> {
+export async function loadProviderBilling(requestedOrganizationId?: string, requestedInvoiceId?: string, requestedPage=1): Promise<BillingLoadResult> {
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
@@ -28,16 +29,20 @@ export async function loadProviderBilling(): Promise<BillingLoadResult> {
   const membershipResult = await client.from("organization_memberships")
     .select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)")
     .eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null)
-    .in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_ACCOUNTING"]).limit(1).maybeSingle();
+    .in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_ACCOUNTING"]).limit(100);
   if (membershipResult.error) return { status: "error", reason: "QUERY_FAILED" };
-  const parsedMembership = membership.safeParse(membershipResult.data);
+  const parsedMembership = membership.safeParse(selectProviderMembership(z.array(membership).safeParse(membershipResult.data).data ?? [], requestedOrganizationId));
   if (!parsedMembership.success) return { status: "error", reason: membershipResult.data ? "INVALID_RESPONSE" : "NO_BILLING_ORGANIZATION" };
 
   const organizationId = parsedMembership.data.organization_id;
+  const page=Number.isSafeInteger(requestedPage)&&requestedPage>0&&requestedPage<=100000?requestedPage:1;
+  let invoiceQuery = client.from("provider_invoice_balances").select("id,invoice_number,currency,total_minor::text,paid_minor::text,outstanding_minor::text,credited_minor::text,available_credit_minor::text,payment_status,due_on").eq("provider_organization_id", organizationId).order("due_on", { ascending: false });
+  if (requestedInvoiceId) invoiceQuery = id.safeParse(requestedInvoiceId).success ? invoiceQuery.eq("id", requestedInvoiceId) : invoiceQuery.eq("invoice_number", requestedInvoiceId);
+  else invoiceQuery = invoiceQuery.order("id",{ascending:false}).range((page-1)*50,page*50);
   const [payablesResult, statementsResult, invoicesResult, paymentsResult, accountsResult, creditsResult, plansResult, planDecisionsResult, installmentsResult] = await Promise.all([
     client.from("provider_payable_events").select("id,occurred_on,event_type,currency,total_due_minor::text").eq("provider_organization_id", organizationId).order("occurred_on", { ascending: false }).limit(50),
     client.from("provider_statements").select("id,statement_number,period_start,period_end,currency,total_minor::text").eq("provider_organization_id", organizationId).order("issued_at", { ascending: false }).limit(30),
-    client.from("provider_invoice_balances").select("id,invoice_number,currency,total_minor::text,paid_minor::text,outstanding_minor::text,credited_minor::text,payment_status,due_on").eq("provider_organization_id", organizationId).order("due_on", { ascending: false }).limit(50),
+    invoiceQuery,
     client.from("provider_payments").select("id,payment_reference,currency,amount_minor::text,paid_on").eq("provider_organization_id", organizationId).order("paid_on", { ascending: false }).limit(50),
     client.from("financial_accounts").select("id,code,currency").eq("organization_id", organizationId).order("code"),
     client.from("provider_credit_notes").select("id,invoice_id,credit_number,currency,total_minor::text,issued_on").eq("provider_organization_id", organizationId).order("issued_on", { ascending: false }).limit(50),
@@ -68,10 +73,18 @@ export async function loadProviderBilling(): Promise<BillingLoadResult> {
   const allocations = z.array(allocationSchema).safeParse(allocationsResult.data);
   if (!allocations.success) return { status: "error", reason: "INVALID_RESPONSE" };
 
+  const pendingResult=await client.rpc("list_my_provider_billing_intents",{p_provider_organization_id:organizationId});
+  const pending=z.array(z.object({id,kind:z.enum(["PAYMENT","PAYABLE"]),status:z.enum(["PENDING","EXPIRED","REJECTED"]),reference:z.string(),amount_minor:money,currency:z.string(),scan_status:z.enum(["PENDING","CLEAN","INFECTED","ERROR"]),expired:z.boolean(),created_at:z.string()})).safeParse(pendingResult.data);
+  if(pendingResult.error||!pending.success)return {status:"error",reason:"QUERY_FAILED"};
+  const displayedInvoices=invoices.data.slice(0,50);
+  const stateSchema=z.array(z.object({source_id:id,status:z.enum(["READY","EDITION_PENDING","LEGACY_REVIEW_REQUIRED","CORRECTION_REQUIRED","CORRECTED"])}));
+  const states=await Promise.all(([['invoice',displayedInvoices.map(x=>x.id)],['statement',statements.data.map(x=>x.id)],['credit_note',credits.data.map(x=>x.id)]]as const).map(async([kind,ids])=>ids.length?client.rpc("get_provider_billing_document_states",{p_provider_organization_id:organizationId,p_kind:kind,p_source_ids:ids}):{data:[],error:null}));
+  const parsedStates=states.map(x=>stateSchema.safeParse(x.data));if(states.some(x=>x.error)||parsedStates.some(x=>!x.success))return{status:"error",reason:"QUERY_FAILED"};
+  const editionStates=new Map(parsedStates.flatMap(x=>x.success?x.data:[]).map(x=>[x.source_id,x.status]));
   const allocatedByPayment = new Map<string, bigint>();
   for (const item of allocations.data) allocatedByPayment.set(item.payment_id, (allocatedByPayment.get(item.payment_id) ?? BigInt(0)) + BigInt(item.amount_minor));
   if (payments.data.some((item) => (allocatedByPayment.get(item.id) ?? BigInt(0)) > BigInt(item.amount_minor))) return { status: "error", reason: "INVALID_RESPONSE" };
-  const invoiceById = new Map(invoices.data.map((item) => [item.id, item]));
+  const invoiceById = new Map(displayedInvoices.map((item) => [item.id, item]));
   const paymentById = new Map(payments.data.map((item) => [item.id, item]));
   const planStatus = new Map<string, { version: number; status: string }>();
   for (const row of planDecisions.data) {
@@ -80,11 +93,11 @@ export async function loadProviderBilling(): Promise<BillingLoadResult> {
   }
 
   return { status: "success", dashboard: {
-    organizationId,
+    pendingIntents:pending.data.map(x=>({id:x.id,kind:x.kind,status:x.status,reference:x.reference,amountMinor:x.amount_minor,currency:x.currency,scanStatus:x.scan_status,expired:x.expired,createdAt:x.created_at})),listPage:page,hasMoreInvoices:invoices.data.length>50,organizationId,
     organizationName: parsedMembership.data.organizations.display_name,
     payables: payables.data.map((item) => ({ id: item.id, occurredOn: item.occurred_on, eventType: item.event_type, currency: item.currency, totalDueMinor: item.total_due_minor })),
-    statements: statements.data.map((item) => ({ id: item.id, number: item.statement_number, periodStart: item.period_start, periodEnd: item.period_end, currency: item.currency, totalMinor: item.total_minor })),
-    invoices: invoices.data.map((item) => ({ id: item.id, number: item.invoice_number, currency: item.currency, totalMinor: item.total_minor, paidMinor: item.paid_minor, outstandingMinor: item.outstanding_minor, creditedMinor: item.credited_minor ?? "0", paymentStatus: item.payment_status, dueOn: item.due_on })),
+    statements: statements.data.map((item) => ({ editionStatus:editionStates.get(item.id)??"LEGACY_REVIEW_REQUIRED",id: item.id, number: item.statement_number, periodStart: item.period_start, periodEnd: item.period_end, currency: item.currency, totalMinor: item.total_minor })),
+    invoices: displayedInvoices.map((item) => ({ editionStatus:editionStates.get(item.id)??"LEGACY_REVIEW_REQUIRED",id: item.id, number: item.invoice_number, currency: item.currency, totalMinor: item.total_minor, availableCreditMinor:item.available_credit_minor??"0",paidMinor: item.paid_minor, outstandingMinor: item.outstanding_minor, creditedMinor: item.credited_minor ?? "0", paymentStatus: item.payment_status, dueOn: item.due_on })),
     payments: payments.data.map((item) => {
       const allocatedMinor = allocatedByPayment.get(item.id) ?? BigInt(0);
       return { id: item.id, reference: item.payment_reference, currency: item.currency, amountMinor: item.amount_minor, allocatedMinor: allocatedMinor.toString(), unallocatedMinor: (BigInt(item.amount_minor) - allocatedMinor).toString(), paidOn: item.paid_on };
@@ -98,6 +111,7 @@ export async function loadProviderBilling(): Promise<BillingLoadResult> {
     })),
     accounts: accounts.data,
     creditNotes: credits.data.map((item) => ({
+      editionStatus:editionStates.get(item.id)??"LEGACY_REVIEW_REQUIRED",
       id: item.id,
       number: item.credit_number,
       invoiceId: item.invoice_id,

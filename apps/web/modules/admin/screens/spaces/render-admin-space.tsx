@@ -1,6 +1,12 @@
+import { CreationPreparation, DocumentSharePreparation, governedPreparationSpaces } from "./creation-preparation";
+import { ProviderInvitationWorkspace } from "./provider-invitation";
+import{loadAdminHistoryPage}from"@/modules/admin/screens/history/actions";
 import Link from "next/link";
+import{loadAdminConversationPage}from"@/modules/admin/screens/conversations/actions";
 import { notFound, redirect } from "next/navigation";
 import { mfaRequiredMessage } from "@/modules/shared/lib/account-security/platform-access";
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
+import { AdminReadError } from "@/modules/admin/ui/admin-read-error";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { isAdminSpaceId, isReservedView, type AdminSpaceId } from "@/modules/admin/data/spaces/admin-nav";
@@ -43,19 +49,38 @@ export async function renderAdminSpacePage({
 }) {
   if (!isLocale(localeParam) || !isAdminSpaceId(spaceParam)) notFound();
   const locale = localeParam;
+  const returnParams = new URLSearchParams();
+  if (organizationId) returnParams.set("organizationId", organizationId);
+  if (q) returnParams.set("q", q);
+  if (vue) returnParams.set("vue", vue);
+  const returnPath = `/${locale}/administration/${spaceParam}${itemId ? `/${encodeURIComponent(itemId)}` : ""}${action ? `/${encodeURIComponent(action)}` : ""}${returnParams.size ? `?${returnParams.toString()}` : ""}`;
   const space: AdminSpaceId = spaceParam === "territoires" && itemId === "validations" ? "gouvernance" : spaceParam;
   if (space === "gouvernance" && spaceParam === "territoires") {
     itemId = undefined;
     action = undefined;
   }
-  const admin = await resolveAdminSpace({ locale, organizationId });
-  if (admin.status === "unauthenticated") redirect(`/${locale}/connexion`);
+  // Passing the full destination lets the shared account-security guard retain
+  // the dossier and filters through an MFA challenge, before any data is read.
+  const scopeInput = { locale, organizationId, returnPath };
+  const admin = await resolveAdminSpace(scopeInput);
+  if (admin.status === "unauthenticated") redirect(connexionHref(locale, { next: returnPath }));
   const snapshot = await loadAdminSpaceSnapshot(locale, space, admin.selectedQuery);
   const spec = spaceSpec(space);
+  const uiParams=new URLSearchParams(admin.selectedQuery);if(q)uiParams.set("q",q);if(vue)uiParams.set("vue",vue);const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
   const alternate = locale === "ar" ? "fr" : "ar";
+  const failureReason = snapshot.reason;
+  const currentHref = `/${locale}/administration/${space}${itemId ? `/${itemId}` : ""}${action ? `/${action}` : ""}${uiQuery}`;
+  if (failureReason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: currentHref }));
+  if (snapshot.detailsReason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: currentHref }));
   const reserved = itemId && isReservedView(itemId) ? itemId : null;
   const view = action ?? reserved ?? (itemId ? "detail" : "queue");
   const row = itemId && !reserved ? findSpaceRow(snapshot, itemId) : null;
+  if (row && (!snapshot.reason || snapshot.reason === "OK")) {
+    const history=await loadAdminHistoryPage(row.id,row.organizationId);
+    row.historyPage=history.status==="success"?history.page:null;
+    if(space==="messagerie"&&row.extras?.kind!=="NOTIFICATION"){const chat=await loadAdminConversationPage(row.id);row.conversation=chat.status==="success"?chat.page:null;}
+  }
+
 
   const groupLabel = spec.nav === "actors"
     ? (locale === "ar" ? "الفاعلون" : "Acteurs")
@@ -84,9 +109,11 @@ export async function renderAdminSpacePage({
   const special = specialKind ? specialBoardCopy(locale, specialKind) : null;
 
   let body;
-  if (view === "queue") {
+  if (failureReason && failureReason !== "OK") {
+    body = null;
+  } else if (view === "queue") {
     body = (
-      <SpaceQueueBoard locale={locale} query={admin.selectedQuery} space={space} rows={snapshot.rows} treat={snapshot.treat} search={q} vue={vue}>
+      <SpaceQueueBoard locale={locale} query={uiQuery} space={space} rows={snapshot.rows} treat={snapshot.treat} search={q} vue={vue}>
         {space === "providers" && snapshot.providers ? (
           <details className="client-ops">
             <summary>{getAdminProviderMessages(locale).title}</summary>
@@ -103,29 +130,32 @@ export async function renderAdminSpacePage({
       </SpaceQueueBoard>
     );
   } else if (reserved === "comparer") {
-    body = <SpaceCompareBoard locale={locale} query={admin.selectedQuery} space={space} rows={snapshot.rows} />;
+    body = <SpaceCompareBoard locale={locale} query={uiQuery} space={space} rows={snapshot.rows} />;
   } else if (reserved === "preferences" || action === "preferences") {
-    body = <NotificationPreferencesBoard locale={locale} query={admin.selectedQuery} templates={snapshot.supervision?.templates ?? []} />;
+    body = <NotificationPreferencesBoard locale={locale} query={uiQuery} templates={snapshot.supervision?.templates ?? []} />;
   } else if (reserved === "reutilisation" || action === "reutilisation") {
-    body = <DocumentReuseBoard locale={locale} query={admin.selectedQuery} row={row} />;
+    body = row ? <DocumentReuseBoard locale={locale} query={uiQuery} row={row} /> : <DocumentSharePreparation locale={locale} query={uiQuery} snapshot={snapshot} />;
   } else if (
     reserved === "nouvelle"
     || reserved === "preparer"
     || action === "modifier"
   ) {
-    body = <SpaceWizardBoard locale={locale} query={admin.selectedQuery} space={space} />;
+    body = space === "documents" ? <DocumentSharePreparation locale={locale} query={uiQuery} snapshot={snapshot} />
+      : space === "providers" ? await ProviderInvitationWorkspace({ locale, query: uiQuery, snapshot })
+        : governedPreparationSpaces.has(space) ? <CreationPreparation locale={locale} query={uiQuery} space={space} snapshot={snapshot} />
+          : <SpaceWizardBoard locale={locale} query={uiQuery} space={space} />;
   } else if (action === "consultation") {
     body = row
-      ? <ConsultationSendBoard locale={locale} query={admin.selectedQuery} row={row} />
-      : <MissingRecord locale={locale} space={space} query={admin.selectedQuery} />;
+      ? <ConsultationSendBoard locale={locale} query={uiQuery} row={row} />
+      : <MissingRecord locale={locale} space={space} query={uiQuery} />;
   } else if (action === "decision" || action === "revue" || action === "activation" || action === "activer" || action === "cycle") {
     body = row
-      ? <SpaceDecisionBoard locale={locale} query={admin.selectedQuery} space={space} row={row} />
-      : <MissingRecord locale={locale} space={space} query={admin.selectedQuery} />;
+      ? <SpaceDecisionBoard locale={locale} query={uiQuery} space={space} row={row} />
+      : <MissingRecord locale={locale} space={space} query={uiQuery} />;
   } else if (row) {
-    body = <SpaceDetailBoard locale={locale} query={admin.selectedQuery} space={space} row={row} />;
+    body = <SpaceDetailBoard locale={locale} query={uiQuery} space={space} row={row} />;
   } else {
-    body = <MissingRecord locale={locale} space={space} query={admin.selectedQuery} />;
+    body = <MissingRecord locale={locale} space={space} query={uiQuery} />;
   }
 
   return (
@@ -139,8 +169,8 @@ export async function renderAdminSpacePage({
       parcoursCurrent={spec.nav === "parcours" ? spec.current : undefined}
       searchAction={`/${locale}/administration/${space}`}
       searchPlaceholder={spec.search(locale)}
-      alternateHref={`/${alternate}/administration/${space}${itemId ? `/${itemId}` : ""}${action ? `/${action}` : ""}${admin.selectedQuery}`}
-      crumb={<AdminCrumb locale={locale} query={admin.selectedQuery} items={crumbItems} />}
+      alternateHref={`/${alternate}/administration/${space}${itemId ? `/${itemId}` : ""}${action ? `/${action}` : ""}${uiQuery}`}
+      crumb={<AdminCrumb locale={locale} query={uiQuery} items={crumbItems} />}
       title={
         special
           ? special.title
@@ -154,29 +184,23 @@ export async function renderAdminSpacePage({
       }
       lead={special?.lead ?? spec.lead(locale)}
       kicker={row ? row.status : undefined}
-      actions={specialKind ? <SpecialBoardActions locale={locale} kind={specialKind} /> : <SpaceHeaderActions locale={locale} query={admin.selectedQuery} spec={spec} />}
+      actions={snapshot.reason && snapshot.reason !== "OK" ? undefined : specialKind ? <SpecialBoardActions locale={locale} kind={specialKind} /> : <SpaceHeaderActions locale={locale} query={uiQuery} spec={spec} />}
     >
-      {snapshot.reason === "MFA_REQUIRED" ? (
-        <Alert variant="destructive">
-          <AlertTitle>{mfaRequiredMessage(locale)}</AlertTitle>
-          <AlertDescription>{locale === "ar" ? "الملفات تبقى مخفية حتى تفعيل العامل الثاني." : "Les files restent masquées tant que le second facteur n’est pas actif."}</AlertDescription>
-        </Alert>
-      ) : null}
-      {snapshot.reason === "FORBIDDEN" && snapshot.rows.length === 0 ? (
-        <Alert variant="destructive">
-          <AlertTitle>{locale === "ar" ? "وصول غير مسموح" : "Accès non autorisé"}</AlertTitle>
-          <AlertDescription>{locale === "ar" ? "دورك لا يسمح بهذا الإشراف." : "Votre rôle ne permet pas cet accès."}</AlertDescription>
-        </Alert>
-      ) : null}
-      {snapshot.reason === "UNAVAILABLE" || snapshot.reason === "INVALID_RESPONSE" ? (
-        <Alert>
-          <AlertTitle>{locale === "ar" ? "غير متاح" : "Indisponible"}</AlertTitle>
-          <AlertDescription>
-            <Link href={`/${locale}/administration/${space}`}>{locale === "ar" ? "إعادة المحاولة" : "Réessayer"}</Link>
-          </AlertDescription>
-        </Alert>
-      ) : null}
-      {body}
+      {failureReason && failureReason !== "OK" ? (
+        <main className="client-page">
+          {failureReason === "MFA_REQUIRED" ? <Alert variant="destructive">
+            <AlertTitle>{mfaRequiredMessage(locale)}</AlertTitle>
+            <AlertDescription>{locale === "ar" ? "البيانات مخفية حتى إتمام التحقق الأمني." : "Les données restent masquées jusqu’à la vérification de sécurité."}</AlertDescription>
+          </Alert> : <AdminReadError locale={locale} reason={failureReason} retryHref={currentHref} />}
+        </main>
+      ) : <>
+        {snapshot.detailsReason ? <aside className="client-page"><Alert>
+          <AlertTitle>{locale === "ar" ? "بعض التفاصيل غير متاحة" : "Certains détails sont indisponibles"}</AlertTitle>
+          <AlertDescription><p>{locale === "ar" ? "تظل القائمة المسترجعة متاحة. لم تحمل لوحات التشغيل الإضافية؛ لا يعني ذلك عدم وجود إجراءات معلقة." : "La liste récupérée reste consultable. Les panneaux opérationnels complémentaires n’ont pas été chargés ; cela ne signifie pas qu’aucune action n’est en attente."}</p><a href={currentHref}>{locale === "ar" ? "إعادة تحميل التفاصيل" : "Recharger les détails"}</a></AlertDescription>
+        </Alert></aside> : null}
+        {body}
+      </>}
+
     </AdminAppShell>
   );
 }

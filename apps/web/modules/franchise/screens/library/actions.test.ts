@@ -132,6 +132,8 @@ const workspace = {
       required: true,
       questionnaireId: "66666666-6666-4666-8666-666666666666",
     }],
+    compositionQuestions:[{versionId:"77777777-7777-4777-8777-777777777777",questionVersionId:"99999999-9999-4999-8999-999999999999",sectionKey:"GENERAL",required:true,sortOrder:1}],
+    questionVersionBank:[{id:"99999999-9999-4999-8999-999999999999",questionId:"88888888-8888-4888-8888-888888888888",labelFr:"Backup?",labelAr:"نسخ؟",answerType:"YES_NO",status:"PUBLISHED"}],
     releases: [],
   },
 };
@@ -143,7 +145,7 @@ function form(entries: Record<string, string>) {
 }
 
 beforeEach(() => {
-  mocks.rpc.mockReset().mockResolvedValue({ data: { outcome: "OK", service_id: serviceId, library_id: libraryId, blocking_dependencies: [], can_archive_immediately: true, triggered_actions: [], score_basis_points: 0 }, error: null });
+  mocks.rpc.mockReset().mockResolvedValue({ data: { outcome: "OK", service_id: serviceId, library_id: libraryId, blocking_dependencies: [], can_archive_immediately: true, triggered_actions: [], score_basis_points: 0, engine_version:"RULE_ENGINE_V1" }, error: null });
   mocks.load.mockReset().mockResolvedValue(workspace);
 });
 
@@ -158,14 +160,22 @@ describe("franchise library catalog actions", () => {
     expect(mocks.rpc).toHaveBeenCalledWith("create_catalog_service", expect.objectContaining({ p_library_id: libraryId, p_code: "IT_NEW" }));
   });
 
+  it("laisse le RPC rejouer une sauvegarde dont la réponse réseau a été perdue",async()=>{
+    const latest=structuredClone(workspace);latest.workspace.services[0]!.command!.draftVersionId="44444444-4444-4444-8444-444444444445";
+    mocks.load.mockResolvedValueOnce(latest);mocks.rpc.mockResolvedValueOnce({data:{version_id:latest.workspace.services[0]!.command!.draftVersionId,identity_row_version:2,version_row_version:1},error:null});
+    const result=await saveFranchiseServiceDraftAction(idle,form({locale:"fr",libraryId,serviceId,subcategoryId,code:"IT_BACKUP",nameFr:"Backup",nameAr:"نسخ احتياطي",descriptionFr:"Description",descriptionAr:"وصف الخدمة",changeReason:"Mise à jour bilingue",draftVersionId:versionId,identityRowVersion:"1",versionRowVersion:"1",idempotencyKey:key,correlationId:key}));
+    expect(result.status).toBe("success");expect(mocks.rpc).toHaveBeenCalledWith("save_catalog_service_draft",expect.objectContaining({p_version_id:versionId,p_idempotency_key:key}));
+  });
+
   it("enregistre le brouillon via save_catalog_service_draft", async () => {
+    mocks.rpc.mockResolvedValueOnce({data:{version_id:versionId,identity_row_version:2,version_row_version:2},error:null});
     const result = await saveFranchiseServiceDraftAction(idle, form({
       locale: "fr", libraryId, serviceId, subcategoryId, code: "IT_BACKUP", nameFr: "Backup", nameAr: "نسخ احتياطي",
       descriptionFr: "Description", descriptionAr: "وصف الخدمة", changeReason: "Mise à jour bilingue",
       draftVersionId: versionId, identityRowVersion: "1", versionRowVersion: "1",
       idempotencyKey: key, correlationId: key,
     }));
-    expect(result).toEqual({ status: "success", serviceId, outcome: "SAVED" });
+    expect(result).toEqual({ status: "success", serviceId, outcome: "SAVED",command:{draftVersionId:versionId,identityRowVersion:2,versionRowVersion:2} });
     expect(mocks.rpc).toHaveBeenCalledWith("save_catalog_service_draft", expect.objectContaining({
       p_service_id: serviceId,
       p_version_id: versionId,

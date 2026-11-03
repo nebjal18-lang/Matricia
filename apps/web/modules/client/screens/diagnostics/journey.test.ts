@@ -14,7 +14,8 @@ describe("diagnostic journey helpers", () => {
     expect(labelSolutionLevel("fr", "ASSISTED")).toBe("Accompagné");
     expect(labelSolutionLevel("fr", "MANAGED")).toBe("Piloté");
     expect(labelSolutionLevel("ar", "MANAGED")).toBe("تسيير");
-    expect(labelSolutionLevel("fr", "ESSENTIAL")).toBe("ESSENTIAL");
+    expect(labelSolutionLevel("fr", "ESSENTIAL")).toBe("Niveau non renseigné");
+    expect(labelSolutionLevel("ar",null)).toBe("المستوى غير محدد");
   });
 
   it("builds exact query strings without inventing scores", () => {

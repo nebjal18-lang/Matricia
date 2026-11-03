@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useId, useState } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
@@ -35,15 +35,23 @@ function Feedback({ state, locale, success }: { state: FranchiseCommandState; lo
   return <p role={state.status === "error" ? "alert" : "status"} aria-live="polite" className={state.status === "error" ? "min-h-5 text-sm text-destructive" : "min-h-5 text-sm text-primary"}>{value}</p>;
 }
 
+type CommandKeys = { idempotencyKey: string; correlationId: string };
+
+function useCommand(command: (state: FranchiseCommandState, data: FormData) => Promise<FranchiseCommandState>) {
+  const [keys, setKeys] = useState<CommandKeys>(() => ({ idempotencyKey: crypto.randomUUID(), correlationId: crypto.randomUUID() }));
+  const [state, action, pending] = useActionState(async (previous: FranchiseCommandState, data: FormData) => {
+    const result = await command(previous, data);
+    if (result.status === "success") setKeys({ idempotencyKey: crypto.randomUUID(), correlationId: crypto.randomUUID() });
+    return result;
+  }, idle);
+  return { state, action, pending, keys };
+}
+
 function HiddenScope({
-  locale, libraryId, organizationId, extra, reset,
+  locale, libraryId, organizationId, extra, keys,
 }: {
-  locale: Locale; libraryId?: string; organizationId?: string | null; extra?: Record<string, string>; reset: boolean;
+  locale: Locale; libraryId?: string; organizationId?: string | null; extra?: Record<string, string>; keys: CommandKeys;
 }) {
-  const [keys, setKeys] = useState(() => ({ idempotencyKey: crypto.randomUUID(), correlationId: crypto.randomUUID() }));
-  useEffect(() => {
-    if (reset) setKeys({ idempotencyKey: crypto.randomUUID(), correlationId: crypto.randomUUID() });
-  }, [reset]);
   return (
     <>
       <input type="hidden" name="locale" value={locale} />
@@ -59,11 +67,11 @@ function HiddenScope({
 export function FranchiseAnomalyDefinitionForm({ locale, libraryId, organizationId }: { locale: Locale; libraryId: string; organizationId?: string | null }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(upsertFranchiseAnomalyDefinition, idle);
+  const { state, action, pending, keys } = useCommand(upsertFranchiseAnomalyDefinition);
   if (!uuidPattern.test(libraryId)) return null;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} reset={state.status === "success"} />
+      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} keys={keys} />
       <div><Label htmlFor={`${prefix}-key`}>{c.definitionKey}</Label><Input id={`${prefix}-key`} name="definitionKey" required pattern="[A-Z][A-Z0-9_.-]{1,119}" dir="ltr" className="min-h-11 font-mono" /></div>
       <div><Label htmlFor={`${prefix}-sev`}>{c.severity}</Label><select id={`${prefix}-sev`} name="severity" className={control}><option value="INFO">INFO</option><option value="MINOR">MINOR</option><option value="IMPORTANT">IMPORTANT</option><option value="CRITICAL">CRITICAL</option></select></div>
       <div><Label htmlFor={`${prefix}-fr`}>{c.titleFr}</Label><Input id={`${prefix}-fr`} name="titleFr" required minLength={2} maxLength={240} /></div>
@@ -84,11 +92,11 @@ export function FranchiseAnomalyDefinitionForm({ locale, libraryId, organization
 export function FranchiseRiskDefinitionForm({ locale, libraryId, organizationId }: { locale: Locale; libraryId: string; organizationId?: string | null }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(upsertFranchiseRiskDefinition, idle);
+  const { state, action, pending, keys } = useCommand(upsertFranchiseRiskDefinition);
   if (!uuidPattern.test(libraryId)) return null;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} reset={state.status === "success"} />
+      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} keys={keys} />
       <div><Label htmlFor={`${prefix}-key`}>{c.definitionKey}</Label><Input id={`${prefix}-key`} name="definitionKey" required pattern="[A-Z][A-Z0-9_.-]{1,119}" dir="ltr" className="min-h-11 font-mono" /></div>
       <div><Label htmlFor={`${prefix}-imp`}>{c.impact}</Label><select id={`${prefix}-imp`} name="impact" className={control}><option value="LOW">LOW</option><option value="MEDIUM">MEDIUM</option><option value="HIGH">HIGH</option></select></div>
       <div><Label htmlFor={`${prefix}-pro`}>{c.probability}</Label><select id={`${prefix}-pro`} name="probability" className={control}><option value="LOW">LOW</option><option value="MEDIUM">MEDIUM</option><option value="HIGH">HIGH</option></select></div>
@@ -111,13 +119,13 @@ export function FranchiseRecommendationDefinitionForm({
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(upsertFranchiseRecommendationDefinition, idle);
+  const { state, action, pending, keys } = useCommand(upsertFranchiseRecommendationDefinition);
   const serviceRows = services.filter((item) => uuidPattern.test(item.id));
   const anomalyRows = (anomalies ?? []).filter((item) => uuidPattern.test(item.id));
   if (!uuidPattern.test(libraryId) || serviceRows.length === 0) return <p className="client-access-note">{c.emptyServicesForReco}</p>;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} reset={state.status === "success"} />
+      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} keys={keys} />
       <div><Label htmlFor={`${prefix}-key`}>{c.definitionKey}</Label><Input id={`${prefix}-key`} name="definitionKey" required pattern="[A-Z][A-Z0-9_.-]{1,119}" dir="ltr" className="min-h-11 font-mono" /></div>
       <div>
         <Label htmlFor={`${prefix}-svc`}>{c.linkedService}</Label>
@@ -155,12 +163,12 @@ export function FranchiseIncidentInstructForm({
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(instructFranchiseDispute, idle);
+  const { state, action, pending, keys } = useCommand(instructFranchiseDispute);
   const open = incidents.filter((item) => uuidPattern.test(item.id) && !["DECIDED", "CLOSED"].includes(item.status ?? ""));
   if (open.length === 0) return <p className="client-access-note">{c.openingClientOnly}</p>;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} organizationId={organizationId} reset={state.status === "success"} />
+      <HiddenScope locale={locale} organizationId={organizationId} keys={keys} />
       <div>
         <Label htmlFor={`${prefix}-case`}>{c.incidents}</Label>
         <select id={`${prefix}-case`} name="disputeCaseId" required className={control}>
@@ -182,14 +190,14 @@ export function FranchiseQualificationDecisionForm({
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(decideFranchiseProviderQualification, idle);
+  const { state, action, pending, keys } = useCommand(decideFranchiseProviderQualification);
   const rows = qualifications.filter((item) => uuidPattern.test(item.id) && item.rowVersion);
   const [selectedId, setSelectedId] = useState(rows[0]?.id ?? "");
   if (rows.length === 0) return null;
   const selected = rows.find((item) => item.id === selectedId) ?? rows[0];
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} organizationId={organizationId} extra={{ expectedRowVersion: String(selected?.rowVersion ?? 1) }} reset={state.status === "success"} />
+      <HiddenScope locale={locale} organizationId={organizationId} extra={{ expectedRowVersion: String(selected?.rowVersion ?? 1) }} keys={keys} />
       <div>
         <Label htmlFor={`${prefix}-q`}>{c.stepQual}</Label>
         <select id={`${prefix}-q`} name="qualificationId" required className={control} value={selected?.id} onChange={(event) => setSelectedId(event.target.value)}>
@@ -221,11 +229,11 @@ export function FranchiseQualificationDecisionForm({
 export function FranchiseMandateInviteForm({ locale, organizationId }: { locale: Locale; organizationId: string }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(inviteFranchiseMandateMember, idle);
+  const { state, action, pending, keys } = useCommand(inviteFranchiseMandateMember);
   if (!uuidPattern.test(organizationId)) return null;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} organizationId={organizationId} reset={state.status === "success"} />
+      <HiddenScope locale={locale} organizationId={organizationId} keys={keys} />
       <div><Label htmlFor={`${prefix}-email`}>{c.memberEmail}</Label><Input id={`${prefix}-email`} name="invitedEmail" type="email" required maxLength={320} /></div>
       <div>
         <Label htmlFor={`${prefix}-role`}>{c.memberRole}</Label>
@@ -260,12 +268,12 @@ export function FranchiseVolumeProposeForm({
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
-  const [state, action, pending] = useActionState(proposeFranchiseVolumePurchase, idle);
+  const { state, action, pending, keys } = useCommand(proposeFranchiseVolumePurchase);
   const rows = skus.filter((item) => uuidPattern.test(item.id));
   if (!uuidPattern.test(libraryId) || rows.length === 0) return <p className="client-access-note">{c.proposeVolume}</p>;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} reset={state.status === "success"} />
+      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} keys={keys} />
       <div>
         <Label htmlFor={`${prefix}-sku`}>{c.sku}</Label>
         <select id={`${prefix}-sku`} name="skuId" required className={control}>

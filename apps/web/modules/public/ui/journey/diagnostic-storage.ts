@@ -1,6 +1,5 @@
-export const diagnosticQuestionIds = ["sector", "team_size", "goals", "priority_tracking", "sales_tracking", "backup_restore", "decision_trace", "next_action"] as const;
-export type DiagnosticQuestionId = typeof diagnosticQuestionIds[number];
-export type DiagnosticAnswer = string | string[];
+import { diagnosticQuestionIds, type DiagnosticAnswer, type DiagnosticQuestionId } from "@/modules/public/data/journey/diagnostic-contract";
+export { diagnosticQuestionIds, type DiagnosticAnswer, type DiagnosticQuestionId } from "@/modules/public/data/journey/diagnostic-contract";
 export type StoredDiagnostic = { version: 2; expiresAt: number; step: number; answers: Partial<Record<DiagnosticQuestionId, DiagnosticAnswer>> };
 
 const isAnswer = (value: unknown): value is DiagnosticAnswer => typeof value === "string" || Array.isArray(value) && value.every((entry) => typeof entry === "string");

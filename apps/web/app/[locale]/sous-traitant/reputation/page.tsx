@@ -17,10 +17,10 @@ export default async function ProviderReputationPage({ params, searchParams }: {
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/reputation` }));
   const m = getReputationMessages(locale);
   const c = providerCopy(locale);
-  const result = await loadProviderReputation();
+  const result = await loadProviderReputation(query.organizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/reputation` }));
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="reputation" title={c.repTitle} lead={c.repLead} kicker={c.kicker}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="reputation" title={c.repTitle} lead={c.repLead} kicker={c.kicker}>
       <ReputationBoard locale={locale} query={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} />
       <details className="client-ops">
         <summary>{c.opsRep}</summary>

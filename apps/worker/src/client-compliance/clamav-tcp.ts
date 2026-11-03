@@ -14,6 +14,7 @@ export type ClamAvTcpConfig = Readonly<{
   timeoutMs: number;
   chunkBytes: number;
   maximumResponseBytes: number;
+  maximumDatabaseAgeMs?: number;
 }>;
 
 export type ClamAvHealth = Readonly<{ status: "up"; engineCode: "CLAMAV_TCP"; engineVersion: string }>;
@@ -57,6 +58,7 @@ export function readClamAvTcpConfig(env: NodeJS.ProcessEnv): ClamAvTcpConfig {
     timeoutMs: boundedInteger(env.CLAMAV_TIMEOUT_MS, 15_000, 100, 120_000),
     chunkBytes: boundedInteger(env.CLAMAV_CHUNK_BYTES, 65_536, 1_024, 1_048_576),
     maximumResponseBytes: 4_096,
+    maximumDatabaseAgeMs: boundedInteger(env.CLAMAV_MAX_DATABASE_AGE_HOURS?.trim()||undefined,48,1,168)*3_600_000,
   });
 }
 
@@ -69,6 +71,7 @@ function validatedConfig(config: ClamAvTcpConfig): ClamAvTcpConfig {
     || !Number.isSafeInteger(config.timeoutMs) || config.timeoutMs < 100 || config.timeoutMs > 120_000
     || !Number.isSafeInteger(config.chunkBytes) || config.chunkBytes < 1_024 || config.chunkBytes > 1_048_576
     || !Number.isSafeInteger(config.maximumResponseBytes) || config.maximumResponseBytes < 1 || config.maximumResponseBytes > 4_096
+    || (config.maximumDatabaseAgeMs !== undefined && (!Number.isSafeInteger(config.maximumDatabaseAgeMs) || config.maximumDatabaseAgeMs < 3_600_000 || config.maximumDatabaseAgeMs > 604_800_000))
     || !config.engineVersion.trim() || config.engineVersion.length > 80) {
     throw new DocumentScanError("ANTIVIRUS_CONFIG_INVALID");
   }
@@ -129,25 +132,29 @@ async function writeBounded(socket: Socket, bytes: Uint8Array): Promise<void> {
   if (!socket.write(bytes)) await waitForDrain(socket);
 }
 
-async function exchange(config: ClamAvTcpConfig, writer: (socket: Socket) => Promise<void>): Promise<string> {
-  const address = await resolveEndpoint(config);
+async function exchange(config: ClamAvTcpConfig, writer: (socket: Socket) => Promise<void>, pinnedAddress?:string): Promise<string> {
+  const address = pinnedAddress ?? await resolveWithinDeadline(config,Date.now()+config.timeoutMs);
   return new Promise((resolve, reject) => {
     const socket = createConnection({ host: address, port: config.port });
     const responseChunks: Buffer[] = [];
     let responseBytes = 0;
     let settled = false;
+    let totalTimer:ReturnType<typeof setTimeout>|undefined;
     const fail = (error: DocumentScanError) => {
       if (settled) return;
       settled = true;
+      clearTimeout(totalTimer);
       socket.destroy();
       reject(error);
     };
     const succeed = (response: string) => {
       if (settled) return;
       settled = true;
+      clearTimeout(totalTimer);
       socket.destroy();
       resolve(response);
     };
+    totalTimer=setTimeout(()=>fail(new DocumentScanError("ANTIVIRUS_UNAVAILABLE",true)),config.timeoutMs);
     socket.setTimeout(config.timeoutMs, () => fail(new DocumentScanError("ANTIVIRUS_UNAVAILABLE", true)));
     socket.once("error", () => fail(new DocumentScanError("ANTIVIRUS_UNAVAILABLE", true)));
     socket.on("data", (chunk: Buffer) => {
@@ -178,33 +185,53 @@ function parseClamAvResponse(response: string, engineVersion: string): Antivirus
   throw new DocumentScanError("ANTIVIRUS_RESPONSE_INVALID");
 }
 
-export function createClamAvTcpScanner(config: ClamAvTcpConfig): AntivirusScanner {
-  const safeConfig = validatedConfig(config);
-  return Object.freeze({
-    async scan(content: Uint8Array) {
-      const response = await exchange(safeConfig, async (socket) => {
-        await writeBounded(socket, Buffer.from("zINSTREAM\0", "ascii"));
-        for (let offset = 0; offset < content.byteLength; offset += safeConfig.chunkBytes) {
-          const chunk = content.subarray(offset, Math.min(offset + safeConfig.chunkBytes, content.byteLength));
-          const size = Buffer.allocUnsafe(4);
-          size.writeUInt32BE(chunk.length);
-          await writeBounded(socket, size);
-          await writeBounded(socket, chunk);
-        }
-        await writeBounded(socket, Buffer.alloc(4));
-      });
-      return parseClamAvResponse(response, safeConfig.engineVersion);
-    },
-  });
+function remainingConfig(config:ClamAvTcpConfig,deadline:number):ClamAvTcpConfig {
+ const remaining=deadline-Date.now();if(remaining<=0)throw new DocumentScanError("ANTIVIRUS_UNAVAILABLE",true);return {...config,timeoutMs:remaining};
 }
-
-export function createClamAvTcpHealthCheck(config: ClamAvTcpConfig): ClamAvHealthCheck {
-  const safeConfig = validatedConfig(config);
-  return Object.freeze({
-    async check() {
-      const response = (await exchange(safeConfig, (socket) => writeBounded(socket, Buffer.from("zPING\0", "ascii")))).trim();
-      if (response !== "PONG") throw new DocumentScanError("ANTIVIRUS_RESPONSE_INVALID");
-      return Object.freeze({ status: "up", engineCode: "CLAMAV_TCP", engineVersion: safeConfig.engineVersion });
-    },
-  });
+async function resolveWithinDeadline(config:ClamAvTcpConfig,deadline:number){
+ let timer:ReturnType<typeof setTimeout>|undefined;
+ try{return await Promise.race([resolveEndpoint(config),new Promise<never>((_resolve,reject)=>{timer=setTimeout(()=>reject(new DocumentScanError("ANTIVIRUS_UNAVAILABLE",true)),Math.max(1,deadline-Date.now()));})]);}finally{clearTimeout(timer);}
+}
+type NativeVersion=Readonly<{engine:string;database:string;updatedAt:string;attested:string}>;
+function parseNativeVersion(raw:string,config:ClamAvTcpConfig):NativeVersion {
+ const match=raw.trim().match(/^ClamAV ([0-9]+\.[0-9]+\.[0-9]+(?:[-.][A-Za-z0-9.-]+)?)\/([0-9]{1,12})\/(.{10,100})$/u);
+ if(!match||match[1]!==config.engineVersion||BigInt(match[2]!)<=0)throw new DocumentScanError("ANTIVIRUS_VERSION_UNVERIFIED",true);
+ const nativeDate=match[3]!;
+ const rfc=/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat), [0-9]{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} GMT$/u;
+ const clam=/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) +[0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4}$/u;
+ const timestamp=rfc.test(nativeDate)?Date.parse(nativeDate):clam.test(nativeDate)?Date.parse(`${nativeDate} UTC`):NaN;
+ if(!Number.isFinite(timestamp))throw new DocumentScanError("ANTIVIRUS_VERSION_UNVERIFIED",true);
+ const canonical=new Date(timestamp).toUTCString();const parts=canonical.split(" ");
+ const nativeCanonical=`${parts[0]?.replace(",","")} ${parts[2]} ${Number(parts[1])} ${parts[4]} ${parts[3]}`;
+ if(rfc.test(nativeDate)?nativeDate!==canonical:nativeDate.replace(/\s+/gu," ")!==nativeCanonical)throw new DocumentScanError("ANTIVIRUS_VERSION_UNVERIFIED",true);
+ const age=Date.now()-timestamp;
+ if(age < -300_000 || age > (config.maximumDatabaseAgeMs??172_800_000))throw new DocumentScanError("ANTIVIRUS_DATABASE_STALE",true);
+ const updatedAt=new Date(timestamp).toISOString(),attested=`${match[1]}/db:${match[2]}@${updatedAt}`;
+ if(attested.length>80)throw new DocumentScanError("ANTIVIRUS_VERSION_UNVERIFIED",true);
+ return Object.freeze({engine:match[1]!,database:match[2]!,updatedAt,attested});
+}
+async function versionAt(config:ClamAvTcpConfig,address:string){return parseNativeVersion(await exchange(config,socket=>writeBounded(socket,Buffer.from("zVERSION\0","ascii")),address),config);}
+export function createClamAvTcpScanner(config: ClamAvTcpConfig): AntivirusScanner {
+ const safeConfig=validatedConfig(config);
+ return Object.freeze({async scan(content:Uint8Array){
+  const deadline=Date.now()+safeConfig.timeoutMs,address=await resolveWithinDeadline(safeConfig,deadline);
+  const before=await versionAt(remainingConfig(safeConfig,deadline),address);
+  const response=await exchange(remainingConfig(safeConfig,deadline),async socket=>{
+   await writeBounded(socket,Buffer.from("zINSTREAM\0","ascii"));
+   for(let offset=0;offset<content.byteLength;offset+=safeConfig.chunkBytes){const chunk=content.subarray(offset,Math.min(offset+safeConfig.chunkBytes,content.byteLength));const size=Buffer.allocUnsafe(4);size.writeUInt32BE(chunk.length);await writeBounded(socket,size);await writeBounded(socket,chunk);}await writeBounded(socket,Buffer.alloc(4));
+  },address);
+  const after=await versionAt(remainingConfig(safeConfig,deadline),address);
+  if(before.attested!==after.attested)throw new DocumentScanError("ANTIVIRUS_VERSION_UNVERIFIED",true);
+  return parseClamAvResponse(response,after.attested);
+ }});
+}
+export function createClamAvTcpHealthCheck(config:ClamAvTcpConfig):ClamAvHealthCheck {
+ const safeConfig=validatedConfig(config);
+ return Object.freeze({async check(){
+  const deadline=Date.now()+safeConfig.timeoutMs,address=await resolveWithinDeadline(safeConfig,deadline);
+  const response=(await exchange(remainingConfig(safeConfig,deadline),socket=>writeBounded(socket,Buffer.from("zPING\0","ascii")),address)).trim();
+  if(response!=="PONG")throw new DocumentScanError("ANTIVIRUS_RESPONSE_INVALID");
+  const version=await versionAt(remainingConfig(safeConfig,deadline),address);
+  return Object.freeze({status:"up",engineCode:"CLAMAV_TCP",engineVersion:version.attested});
+ }});
 }

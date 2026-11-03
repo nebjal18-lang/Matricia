@@ -1,0 +1,4 @@
+import{z}from"zod";
+export const clientIdentityContextSchema=z.object({compliance_case_id:z.string().uuid(),organization_id:z.string().uuid(),case_row_version:z.number().int().positive(),profile_version:z.number().int().positive(),status:z.string(),identity_hash:z.string().regex(/^[a-f0-9]{64}$/),identity_snapshot:z.object({legal_name:z.string(),country_code:z.string(),identifiers:z.record(z.string(),z.string()),documents:z.array(z.object({id:z.string().uuid(),type:z.string(),sha256:z.string(),status:z.string(),scan_status:z.string(),version:z.number().int(),expires_on:z.string().nullable()}))})});
+export type ClientIdentityContext=z.infer<typeof clientIdentityContextSchema>;
+export type ClientIdentityState={status:"idle"}|{status:"success";proofHash:string}|{status:"error";reason:"VALIDATION"|"FORBIDDEN"|"STALE"|"DOCUMENTS_REQUIRED"|"FAILED"};

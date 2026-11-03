@@ -1,6 +1,13 @@
 import { createPublicKey, createVerify } from "node:crypto";
 import {
   assertPaymentRequest,
+  assertMinorAmount,
+  type PaymentRefundGateway,
+  type PaymentOrderLookupGateway,
+  type VerifiedOrderLookup,
+  type VerifiedRefundLookup,
+  type PaymentRefundRequest,
+  type VerifiedPaymentAdjustmentEvent,
   decimalToMinor,
   minorToDecimal,
   PaymentGatewayError,
@@ -23,17 +30,22 @@ export type PayPalOrderClient = {
     returnUrl: string;
   }): Promise<unknown>;
   captureOrder(input: { orderId: string; requestId: string }): Promise<unknown>;
+  lookupOrder?(orderId: string): Promise<unknown>;
+  lookupRefund?(refundId: string): Promise<unknown>;
+  refundCapture?(input: { captureId: string; requestId: string; amount: string; currency: string }): Promise<unknown>;
 };
 
 export type PayPalGatewayConfig = {
+  environment?:"sandbox"|"live";
   webhookId: string;
   certificateUrl: string;
   certificatePem: string;
   allowedCurrencies: ReadonlySet<string>;
 };
 
-export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGateway, PaymentWebhookVerifier {
+export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGateway, PaymentRefundGateway, PaymentWebhookVerifier, PaymentOrderLookupGateway {
   readonly code = "PAYPAL" as const;
+  readonly providerEnvironment:"LIVE"|"SANDBOX";
   private readonly certificateUrl: string;
 
   constructor(private readonly orderClient: PayPalOrderClient, private readonly config: PayPalGatewayConfig) {
@@ -54,6 +66,8 @@ export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGatew
     ) {
       throw new PaymentGatewayError("CONFIGURATION_INVALID");
     }
+    this.providerEnvironment=certificateUrl.hostname.includes(".sandbox.")?"SANDBOX":"LIVE";
+    if(config.environment && (config.environment === "live" ? "LIVE" : "SANDBOX") !== this.providerEnvironment)throw new PaymentGatewayError("CONFIGURATION_INVALID");
     this.certificateUrl = certificateUrl.toString();
   }
 
@@ -61,11 +75,11 @@ export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGatew
     assertPaymentRequest(request);
     assertGatewayCurrency(this.code, request.currency);
     if (!this.config.allowedCurrencies.has(request.currency)) throw new PaymentGatewayError("INVALID_CURRENCY");
-    const invoiceDigest = await sha256Hex(`paypal:${request.organizationId}:${request.planVersionId}:${request.idempotencyKey}`);
+    const invoiceDigest = await paypalInvoiceDigest(request);
     let response: unknown;
     try {
       response = await this.orderClient.createOrder({
-        requestId: request.idempotencyKey,
+        requestId: request.purchaseKind === "CREDIT_PACK" ? `p-${invoiceDigest.slice(0, 32)}` : request.idempotencyKey,
         invoiceId: `matricia-${invoiceDigest.slice(0, 32)}`,
         amount: minorToDecimal(request.amountMinor),
         currency: request.currency,
@@ -77,6 +91,7 @@ export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGatew
     const parsed = parseOrder(response);
     return {
       gateway: this.code,
+      providerEnvironment:this.providerEnvironment,
       providerIntentId: parsed.id,
       status: "REQUIRES_CONFIRMATION",
       amountMinor: request.amountMinor,
@@ -99,6 +114,62 @@ export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGatew
       throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");
     }
     return { status: "PENDING_WEBHOOK" };
+  }
+
+  async lookupOrder(orderId: string, expected: PaymentIntentRequest): Promise<VerifiedOrderLookup> {
+    assertPaymentRequest(expected);
+    assertGatewayCurrency(this.code, expected.currency);
+    if (!/^[A-Z0-9-]{8,200}$/u.test(orderId) || !this.orderClient.lookupOrder || !this.config.allowedCurrencies.has(expected.currency)) throw new PaymentGatewayError("INVALID_REQUEST");
+    let response: unknown;
+    try { response = await this.orderClient.lookupOrder(orderId); } catch { throw new PaymentGatewayError("PROVIDER_UNAVAILABLE"); }
+    if (!isRecord(response) || response.id !== orderId || response.intent !== "CAPTURE" || !["CREATED", "SAVED", "APPROVED", "PAYER_ACTION_REQUIRED", "VOIDED", "COMPLETED"].includes(String(response.status)) || !Array.isArray(response.purchase_units) || response.purchase_units.length !== 1) throw new PaymentGatewayError("INVALID_EVENT");
+    const unit: unknown = response.purchase_units[0];
+    const invoiceId = `matricia-${(await paypalInvoiceDigest(expected)).slice(0, 32)}`;
+    if (!isRecord(unit) || unit.invoice_id !== invoiceId || !isRecord(unit.amount) || unit.amount.currency_code !== expected.currency || unit.amount.value !== minorToDecimal(expected.amountMinor)) throw new PaymentGatewayError("INVALID_EVENT");
+    const payments = isRecord(unit.payments) ? unit.payments : null;
+    const captures = payments?.captures;
+    let capture: VerifiedOrderLookup["capture"] = null;
+    if (captures !== undefined) {
+      if (!Array.isArray(captures) || captures.length !== 1 || !isRecord(captures[0])) throw new PaymentGatewayError("INVALID_EVENT");
+      const item = captures[0];
+      if (response.status !== "COMPLETED" || item.status !== "COMPLETED" || typeof item.id !== "string" || !/^[A-Z0-9-]{8,200}$/u.test(item.id) || !isRecord(item.amount) || item.amount.currency_code !== expected.currency || item.amount.value !== minorToDecimal(expected.amountMinor) || typeof item.create_time !== "string" || !Number.isFinite(Date.parse(item.create_time)) || Date.parse(item.create_time) > Date.now() + 300_000) throw new PaymentGatewayError("INVALID_EVENT");
+      capture = {captureId:item.id, amountMinor:expected.amountMinor, currency:expected.currency, paidAt:new Date(item.create_time).toISOString()};
+    }
+    if ((response.status === "COMPLETED") !== (capture !== null)) throw new PaymentGatewayError("INVALID_EVENT");
+    let confirmation: VerifiedOrderLookup["confirmation"] = null;
+    if (Array.isArray(response.links) && response.links.some(link => isRecord(link) && link.rel === "approve")) {
+      const parsed = parseOrder(response); const url = new URL(parsed.approvalUrl);
+      if ((url.hostname.includes("sandbox")) !== (this.providerEnvironment === "SANDBOX")) throw new PaymentGatewayError("INVALID_EVENT");
+      confirmation = {method:"GET",url:parsed.approvalUrl};
+    }
+    return {confirmation, orderId, status:response.status as VerifiedOrderLookup["status"], amountMinor:expected.amountMinor, currency:expected.currency, verificationMethod:"API_OAUTH2_TLS", responseHash:await sha256Hex(JSON.stringify(response)), observedAt:new Date().toISOString(), capture};
+  }
+
+  async lookupRefund(refundId: string): Promise<VerifiedRefundLookup> {
+    if (!/^[A-Z0-9-]{8,200}$/u.test(refundId) || !this.orderClient.lookupRefund) throw new PaymentGatewayError("INVALID_REQUEST");
+    let response: unknown;
+    try { response = await this.orderClient.lookupRefund(refundId); } catch { throw new PaymentGatewayError("PROVIDER_UNAVAILABLE"); }
+    if (!isRecord(response) || response.id !== refundId || !["COMPLETED", "PENDING", "FAILED", "CANCELLED"].includes(String(response.status)) || !isRecord(response.amount) || typeof response.amount.value !== "string" || typeof response.amount.currency_code !== "string" || typeof response.invoice_id !== "string" || !/^[0-9a-f-]{36}$/iu.test(response.invoice_id)) throw new PaymentGatewayError("INVALID_EVENT");
+    const occurredAt = typeof response.update_time === "string" ? response.update_time : response.create_time;
+    if (typeof occurredAt !== "string" || Number.isNaN(Date.parse(occurredAt))) throw new PaymentGatewayError("INVALID_EVENT");
+    const captureId = refundCaptureParent(response);
+    if (!captureId) throw new PaymentGatewayError("INVALID_EVENT");
+    assertGatewayCurrency(this.code, response.amount.currency_code);
+    if (!this.config.allowedCurrencies.has(response.amount.currency_code)) throw new PaymentGatewayError("INVALID_CURRENCY");
+    return { refundId, captureId, invoiceId: response.invoice_id, amountMinor: decimalToMinor(response.amount.value), currency: response.amount.currency_code, status: response.status as VerifiedRefundLookup["status"], verificationMethod: "API_OAUTH2_TLS", occurredAt, responseHash: await sha256Hex(JSON.stringify(response)) };
+  }
+
+  async requestRefund(request: PaymentRefundRequest): Promise<{ refundId: string; status: "PENDING_WEBHOOK" }> {
+    if (!/^[A-Z0-9-]{8,200}$/u.test(request.captureId) || !/^[0-9a-f-]{36}$/iu.test(request.idempotencyKey)) throw new PaymentGatewayError("INVALID_REQUEST");
+    assertMinorAmount(request.amountMinor);
+    assertGatewayCurrency(this.code, request.currency);
+    if (!this.config.allowedCurrencies.has(request.currency)) throw new PaymentGatewayError("INVALID_CURRENCY");
+    if (!this.orderClient.refundCapture) throw new PaymentGatewayError("CONFIGURATION_INVALID");
+    let response: unknown;
+    try { response = await this.orderClient.refundCapture({ captureId: request.captureId, requestId: request.idempotencyKey, amount: minorToDecimal(request.amountMinor), currency: request.currency }); }
+    catch { throw new PaymentGatewayError("PROVIDER_UNAVAILABLE"); }
+    if (!isRecord(response) || typeof response.id !== "string" || !/^[A-Z0-9-]{8,200}$/u.test(response.id) || !["PENDING", "COMPLETED"].includes(String(response.status)) || !isRecord(response.amount) || response.amount.value !== minorToDecimal(request.amountMinor) || response.amount.currency_code !== request.currency) throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");
+    return { refundId: response.id, status: "PENDING_WEBHOOK" };
   }
 
   async verifyWebhook(
@@ -132,10 +203,16 @@ export class PayPalPaymentGateway implements PaymentGateway, PaymentCaptureGatew
       throw new PaymentGatewayError("INVALID_SIGNATURE");
     }
     if (!verified) throw new PaymentGatewayError("INVALID_SIGNATURE");
+    const adjustment = parseAdjustmentEvent(rawBody);
+    if (adjustment) {
+      assertGatewayCurrency(this.code, adjustment.currency);
+      return { ...adjustment, providerEnvironment:this.providerEnvironment,gateway: this.code, payloadHash: await sha256Hex(rawBody), signatureFingerprint: await sha256Hex(transmissionSignature) };
+    }
     const event = parseCaptureEvent(rawBody);
     assertGatewayCurrency(this.code, event.currency);
     return {
       gateway: this.code,
+      providerEnvironment:this.providerEnvironment,
       providerEventId: event.eventId,
       providerIntentId: event.orderId,
       eventType: "PAYMENT_SUCCEEDED",
@@ -217,6 +294,38 @@ export class FetchPayPalOrderClient implements PayPalOrderClient {
     return response.json();
   }
 
+  async lookupOrder(orderId: string): Promise<unknown> {
+    if (!/^[A-Z0-9-]{8,200}$/u.test(orderId)) throw new PaymentGatewayError("INVALID_REQUEST");
+    const token = await this.requestAccessToken();
+    const response = await fetch(`${this.baseUrl}/v2/checkout/orders/${encodeURIComponent(orderId)}`, {
+      headers:{authorization:`Bearer ${token}`}, signal:AbortSignal.timeout(this.timeoutMilliseconds), cache:"no-store", redirect:"error",
+    });
+    if (!response.ok || !response.body) throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");
+    const reader = response.body.getReader();const chunks:Uint8Array[]=[];let size=0;
+    try {
+      for (;;) {const {value,done}=await reader.read();if(done)break;size+=value.byteLength;if(size>262_144){await reader.cancel();throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");}chunks.push(value);}
+      return JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(Buffer.concat(chunks)));
+    } catch {throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");} finally {reader.releaseLock();}
+  }
+
+  async lookupRefund(refundId: string): Promise<unknown> {
+    const token = await this.requestAccessToken();
+    const response = await fetch(`${this.baseUrl}/v2/payments/refunds/${encodeURIComponent(refundId)}`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(this.timeoutMilliseconds), cache: "no-store", redirect: "error" });
+    if (!response.ok) throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");
+    return response.json();
+  }
+
+  async refundCapture(input: { captureId: string; requestId: string; amount: string; currency: string }): Promise<unknown> {
+    const token = await this.requestAccessToken();
+    const response = await fetch(`${this.baseUrl}/v2/payments/captures/${encodeURIComponent(input.captureId)}/refund`, {
+      method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json", "paypal-request-id": input.requestId, prefer: "return=representation" },
+      body: JSON.stringify({ amount: { value: input.amount, currency_code: input.currency }, invoice_id: input.requestId }),
+      signal: AbortSignal.timeout(this.timeoutMilliseconds), cache: "no-store", redirect: "error",
+    });
+    if (!response.ok) throw new PaymentGatewayError("PROVIDER_UNAVAILABLE");
+    return response.json();
+  }
+
   private async requestAccessToken(): Promise<string> {
     const tokenResponse = await fetch(`${this.baseUrl}/v1/oauth2/token`, {
       method: "POST",
@@ -279,6 +388,56 @@ function parseCaptureEvent(rawBody: Uint8Array): { eventId: string; orderId: str
   return { eventId: value.id, orderId: relatedIds.order_id, captureId: resource.id, amount: amount.value, currency: amount.currency_code, paidAt };
 }
 
+function refundCaptureParent(resource: Record<string, unknown>): string | null {
+  if (!Array.isArray(resource.links)) return null;
+  for (const link of resource.links) {
+    if (!isRecord(link) || link.rel !== "up" || typeof link.href !== "string") continue;
+    try { const url = new URL(link.href); if (url.protocol === "https:" && isPayPalApiHost(url.hostname) && !url.username && !url.password && !url.search && !url.hash) return /^\/v2\/payments\/captures\/([A-Z0-9-]{8,200})$/u.exec(url.pathname)?.[1] ?? null; } catch { return null; }
+  }
+  return null;
+}
+
+function parseAdjustmentEvent(rawBody: Uint8Array): Omit<VerifiedPaymentAdjustmentEvent, "gateway" | "providerEnvironment" | "payloadHash" | "signatureFingerprint"> | null {
+  let value: unknown;
+  try { value = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(rawBody)); } catch { throw new PaymentGatewayError("INVALID_EVENT"); }
+  if (!isRecord(value) || typeof value.event_type !== "string") throw new PaymentGatewayError("INVALID_EVENT");
+  if (!["PAYMENT.CAPTURE.REFUNDED", "PAYMENT.CAPTURE.REVERSED", "CUSTOMER.DISPUTE.CREATED", "CUSTOMER.DISPUTE.RESOLVED"].includes(value.event_type)) return null;
+  if (typeof value.id !== "string" || value.id.length < 8 || value.id.length > 200 || !isRecord(value.resource)) throw new PaymentGatewayError("INVALID_EVENT");
+  const resource = value.resource;
+  const occurredAt = value.create_time;
+  let eventType: VerifiedPaymentAdjustmentEvent["eventType"], captureId: unknown, amount: unknown;
+  if (value.event_type.startsWith("CUSTOMER.DISPUTE.")) {
+    const transactions = resource.disputed_transactions;
+    if (!Array.isArray(transactions) || transactions.length !== 1 || !isRecord(transactions[0])) throw new PaymentGatewayError("UNSUPPORTED_EVENT");
+    captureId = transactions[0].seller_transaction_id;
+    amount = resource.dispute_amount;
+    if (value.event_type === "CUSTOMER.DISPUTE.CREATED") eventType = "DISPUTE_OPENED";
+    else {
+      const outcome = isRecord(resource.dispute_outcome) ? resource.dispute_outcome.outcome_code : null;
+      if (outcome === "RESOLVED_SELLER_FAVOUR") eventType = "DISPUTE_WON";
+      else if (outcome === "RESOLVED_BUYER_FAVOUR") eventType = "DISPUTE_LOST";
+      else throw new PaymentGatewayError("UNSUPPORTED_EVENT");
+    }
+  } else {
+    eventType = value.event_type === "PAYMENT.CAPTURE.REFUNDED" ? "REFUND_SUCCEEDED" : "PAYMENT_REVERSED";
+    amount = resource.amount;
+    if (eventType === "REFUND_SUCCEEDED") {
+      if (resource.status !== "COMPLETED") throw new PaymentGatewayError("INVALID_EVENT");
+      const supplementary = isRecord(resource.supplementary_data) ? resource.supplementary_data : null;
+      captureId = supplementary && isRecord(supplementary.related_ids) ? supplementary.related_ids.capture_id : null;
+      if (!captureId && Array.isArray(resource.links)) {
+        const parent = resource.links.find(link => isRecord(link) && link.rel === "up" && typeof link.href === "string");
+        if (isRecord(parent) && typeof parent.href === "string") {
+          const url = new URL(parent.href);
+          if (url.protocol === "https:" && isPayPalApiHost(url.hostname) && !url.search && !url.hash) captureId = /^\/v2\/payments\/captures\/([A-Z0-9-]{8,200})$/u.exec(url.pathname)?.[1];
+        }
+      }
+    } else captureId = resource.id;
+  }
+  if (typeof captureId !== "string" || !/^[A-Z0-9-]{8,200}$/u.test(captureId) || typeof resource.id !== "string" || !/^[A-Za-z0-9-]{8,200}$/u.test(resource.id) || !isRecord(amount) || typeof amount.value !== "string" || typeof amount.currency_code !== "string" || !/^[A-Z]{3}$/u.test(amount.currency_code) || typeof occurredAt !== "string" || Number.isNaN(Date.parse(occurredAt))) throw new PaymentGatewayError("INVALID_EVENT");
+  return { providerEventId: value.id, eventType, providerPaymentId: captureId, providerAdjustmentId: resource.id, ...(eventType === "REFUND_SUCCEEDED" && typeof resource.invoice_id === "string" && /^[0-9a-f-]{36}$/iu.test(resource.invoice_id) ? { merchantReference: resource.invoice_id } : {}), amountMinor: decimalToMinor(amount.value), currency: amount.currency_code, occurredAt };
+}
+
 function header(headers: Readonly<Record<string, string | undefined>>, name: string, maximum: number): string {
   const value = headers[name];
   if (!value || value.length > maximum) throw new PaymentGatewayError("INVALID_SIGNATURE");
@@ -304,4 +463,11 @@ function isPayPalApprovalHost(hostname: string): boolean {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// Keep historical subscription references stable; packs have their own native order namespace.
+async function paypalInvoiceDigest(request: PaymentIntentRequest): Promise<string> {
+  return sha256Hex(request.purchaseKind === "CREDIT_PACK"
+    ? `paypal:credit-pack:${request.organizationId}:${request.packVersionId}:${request.idempotencyKey}`
+    : `paypal:${request.organizationId}:${request.planVersionId}:${request.idempotencyKey}`);
 }

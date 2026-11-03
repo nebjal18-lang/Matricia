@@ -1,20 +1,45 @@
-import{z}from"zod";
-import{getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
-import{categoryRows,centerPayload,templateRows,type NotificationDashboard}from"./model";
+import { unstable_rethrow } from "next/navigation";
+import { z } from "zod";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { categoryRows, centerPayload, type NotificationDashboard } from "./model";
 
-const member=z.object({organization_id:z.string().uuid(),organizations:z.object({display_name:z.string().min(1)})});
+const member = z.object({ organization_id: z.string().uuid(), organizations: z.object({ display_name: z.string().min(1) }) });
+type Result = { status: "success"; dashboard: NotificationDashboard } | { status: "error"; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "NO_ORGANIZATION" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-export async function loadNotificationCenter(locale:"fr"|"ar"):Promise<{status:"success";dashboard:NotificationDashboard}|{status:"error";reason:"UNAUTHENTICATED"|"NO_ORGANIZATION"|"QUERY_FAILED"|"INVALID_RESPONSE"}>{
- const c=await getSupabaseServerClient();const{data:a}=await c.auth.getUser();if(!a.user)return{status:"error",reason:"UNAUTHENTICATED"};
- const mr=await c.from("organization_memberships").select("organization_id,organizations!inner(display_name)").eq("user_id",a.user.id).eq("status","ACTIVE").limit(1).maybeSingle();if(mr.error)return{status:"error",reason:"QUERY_FAILED"};
- const m=member.safeParse(mr.data);if(!m.success)return{status:"error",reason:mr.data?"INVALID_RESPONSE":"NO_ORGANIZATION"};
- const[center,categories,templates]=await Promise.all([
-  c.rpc("list_notification_center",{p_organization_id:m.data.organization_id,p_limit:100}),
-  c.from("notification_preference_categories").select("code,label_fr,label_ar,mandatory").eq("status","ACTIVE").order("code"),
-  c.from("notification_template_versions").select("id,template_code,version,event_type,category_code,locale,subject_template,body_template,cta_path_template,priority,mandatory,channels,variable_keys,effective_from,content_hash").eq("status","ACTIVE").order("template_code").order("version",{ascending:false}).order("locale"),
- ]);
- if(center.error||categories.error||templates.error)return{status:"error",reason:"QUERY_FAILED"};
- const cp=centerPayload.safeParse(center.data),cr=categoryRows.safeParse(categories.data),tr=templateRows.safeParse(templates.data);if(!cp.success||!cr.success||!tr.success)return{status:"error",reason:"INVALID_RESPONSE"};
- const canViewDeliveryOperations=false;
- return{status:"success",dashboard:{organizationId:m.data.organization_id,organizationName:m.data.organizations.display_name,canViewDeliveryOperations,categories:cr.data.map(x=>({code:x.code,label:locale==="ar"?x.label_ar:x.label_fr,mandatory:x.mandatory})),preferences:cp.data.preferences,notifications:cp.data.notifications.map(n=>canViewDeliveryOperations?n:{...n,deliveries:[]}),templates:tr.data}};
+export async function loadNotificationCenter(locale: "fr" | "ar", organizationId?: string): Promise<Result> {
+  try {
+    const client = await getSupabaseServerClient();
+    const { data: auth, error: authError } = await client.auth.getUser();
+    if (authError) return { status: "error", reason: authError.status === 401 || authError.status === 403 || authError.name === "AuthSessionMissingError" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
+    if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
+    if (organizationId && !z.string().uuid().safeParse(organizationId).success) return { status: "error", reason: "FORBIDDEN" };
+    let membership = client.from("organization_memberships").select("organization_id,organizations!inner(display_name)").eq("user_id", auth.user.id).eq("status", "ACTIVE");
+    if (organizationId) membership = membership.eq("organization_id", organizationId);
+    const result = await membership.order("organization_id").limit(1).maybeSingle();
+    if (result.error) return { status: "error", reason: "QUERY_FAILED" };
+    const parsedMember = member.safeParse(result.data);
+    if (!parsedMember.success) return { status: "error", reason: result.data ? "INVALID_RESPONSE" : organizationId ? "FORBIDDEN" : "NO_ORGANIZATION" };
+    const selected = parsedMember.data;
+    const [center, categories] = await Promise.all([
+      client.rpc("list_notification_center", { p_organization_id: selected.organization_id, p_limit: 100 }),
+      client.from("notification_preference_categories").select("code,label_fr,label_ar,mandatory").eq("status", "ACTIVE").order("code"),
+    ]);
+    if (center.error || categories.error) return { status: "error", reason: "QUERY_FAILED" };
+    const payload = centerPayload.safeParse(center.data);
+    const parsedCategories = categoryRows.safeParse(categories.data);
+    if (!payload.success || !parsedCategories.success) return { status: "error", reason: "INVALID_RESPONSE" };
+    return { status: "success", dashboard: {
+      organizationId: selected.organization_id,
+      organizationName: selected.organizations.display_name,
+      canViewDeliveryOperations: false,
+      categories: parsedCategories.data.map(row => ({ code: row.code, label: locale === "ar" ? row.label_ar : row.label_fr, mandatory: row.mandatory })),
+      preferences: payload.data.preferences,
+      notifications: payload.data.notifications.map(notification => ({ ...notification, deliveries: [] })),
+      // The technical catalog belongs to the authorized Administration screens.
+      templates: [],
+    } };
+  } catch (error) {
+    unstable_rethrow(error);
+    return { status: "error", reason: "QUERY_FAILED" };
+  }
 }

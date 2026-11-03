@@ -45,7 +45,9 @@ export default async function NewRequestPage({
   }
   const messages = getClientRfqMessages(locale);
   const c = spaceCopy(locale);
-  const opportunity = query.opportunityId ? await loadOpportunityRequestContext(query.opportunityId) : null;
+  const opportunity = query.opportunityId ? await loadOpportunityRequestContext(query.opportunityId,space.selectedOrganizationId) : null;
+  if(opportunity&&opportunity.organizationId!==space.selectedOrganizationId){if(query.organizationId)notFound();redirect(`/${locale}/client/demandes/nouvelle?${new URLSearchParams({opportunityId:opportunity.opportunityId,organizationId:opportunity.organizationId})}`);}
+  if(opportunity?.existingRequestId)redirect(`/${locale}/client/demandes/${opportunity.existingRequestId}?organizationId=${opportunity.organizationId}`);
   const need = !opportunity && query.intakeId
     ? await loadNeedRequestContext(query.intakeId, query.serviceCode, space.selectedOrganizationId ?? undefined)
     : null;
@@ -86,7 +88,7 @@ export default async function NewRequestPage({
   const vault = entitlementOrgId ? await loadClientDocumentVault(entitlementOrgId) : { status: "error" as const, reason: "UNAVAILABLE" as const };
   const block = newRequestBlockReason({
     subscriptionStatus: subscription.status === "success" ? subscription.dashboard.subscription?.status : undefined,
-    expiredDocumentCount: vault.status === "success" ? expiredDocuments(vault.value.documents).length : 0,
+    expiredDocumentCount: vault.status === "success" ? vault.value.expiredDocumentCount ?? expiredDocuments(vault.value.documents).length : 0,
   });
   return (
     <ClientAppShell

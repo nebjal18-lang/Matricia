@@ -12,6 +12,7 @@ type ClaimedRow = {
 
 export interface OutboxRepository {
   claim(workerId: string, limit: number): Promise<readonly OutboxEnvelope[]>;
+  deferDependency?(eventId: string, workerId: string): Promise<void>;
   markPublished(eventId: string, workerId: string): Promise<void>;
   recordFailure(eventId: string, workerId: string, errorCode: string): Promise<void>;
 }
@@ -33,6 +34,10 @@ export function createSupabaseOutboxRepository(client: SupabaseClient): OutboxRe
         correlationId: row.correlation_id,
         payload: Object.freeze({ ...row.payload }),
       }));
+    },
+    async deferDependency(eventId, workerId) {
+      const { error } = await client.rpc("defer_outbox_document_dependency_v1", { p_event_id: eventId, p_worker_id: workerId });
+      assertSuccess(error, "OUTBOX_DEFER_DEPENDENCY_FAILED");
     },
     async markPublished(eventId, workerId) {
       const { error } = await client.rpc("mark_outbox_published", { p_event_id: eventId, p_worker_id: workerId });

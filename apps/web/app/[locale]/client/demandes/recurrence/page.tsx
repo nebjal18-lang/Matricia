@@ -28,7 +28,7 @@ export default async function ClientRecurringPage({
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/recurrence` }));
   const messages = getClientRecurringMessages(locale);
   const c = spaceCopy(locale);
-  const result = await (await createServerClientRecurringRepository()).load(query.organizationId);
+  const result = await (await createServerClientRecurringRepository()).load(space.selectedOrganizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/recurrence` }));
   const entitlementOrgId = space.selectedOrganizationId ?? query.organizationId;
   const [subscription, vault] = entitlementOrgId
@@ -36,7 +36,7 @@ export default async function ClientRecurringPage({
     : [{ status: "error" as const, reason: "UNAVAILABLE" as const }, { status: "error" as const, reason: "UNAVAILABLE" as const }];
   const block = newRequestBlockReason({
     subscriptionStatus: subscription.status === "success" ? subscription.dashboard.subscription?.status : undefined,
-    expiredDocumentCount: vault.status === "success" ? expiredDocuments(vault.value.documents).length : 0,
+    expiredDocumentCount: vault.status === "success" ? vault.value.expiredDocumentCount ?? expiredDocuments(vault.value.documents).length : 0,
   });
   const today = new Date();
   const horizon = new Date(today);

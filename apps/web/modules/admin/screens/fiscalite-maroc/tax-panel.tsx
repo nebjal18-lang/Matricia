@@ -22,6 +22,10 @@ function categoryName(dashboard: MoroccoTaxDashboard, code: string, locale: "fr"
 function Feedback({ state, m }: { state: TaxActionState; m: MoroccoTaxMessages }) { if (state.status === "idle") return null; const message = state.status === "success" ? m.success : ({ VALIDATION: m.invalid, FORBIDDEN: m.forbidden, AAL2_REQUIRED: m.aal2, CONFLICT: m.conflict, UNAUTHENTICATED: m.forbidden, FAILED: m.failed } as const)[state.reason]; return <Alert variant={state.status === "error" ? "destructive" : "default"} role={state.status === "error" ? "alert" : "status"} aria-live="polite"><AlertDescription>{message}</AlertDescription></Alert>; }
 function Field({ id, label: text, children }: { id: string; label: string; children: ReactNode }) { return <div className="space-y-2"><Label htmlFor={id}>{text}</Label>{children}</div>; }
 
+function TaxContextFields({context}:{context:MoroccoTaxDashboard["context"]}) {
+  return <><input type="hidden" name="contextKind" value={context.kind}/>{context.kind === "ORGANIZATION" ? <input type="hidden" name="organizationId" value={context.organizationId}/> : null}</>;
+}
+
 export function TaxPanel({ dashboard, locale, m, keys }: { dashboard: MoroccoTaxDashboard; locale: "fr" | "ar"; m: MoroccoTaxMessages; keys: Record<string, string> }) {
   const prefix = useId(), [simulation, simulateAction, simPending] = useActionState(simulateTax, initial), [proposal, proposeAction, proposalPending] = useActionState(proposeTaxRule, initial);
   return <div className="space-y-6">
@@ -45,7 +49,7 @@ export function TaxPanel({ dashboard, locale, m, keys }: { dashboard: MoroccoTax
         </form>
       </CardContent></Card>
       <Card><CardHeader><CardTitle>{m.proposal}</CardTitle><CardDescription>{m.subtitle}</CardDescription></CardHeader><CardContent>
-        <form action={proposeAction} className="grid gap-4 sm:grid-cols-2"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={dashboard.organizationId}/><input type="hidden" name="idempotencyKey" value={keys.proposal ?? commandId()}/>
+        <form action={proposeAction} className="grid gap-4 sm:grid-cols-2"><input type="hidden" name="locale" value={locale}/><TaxContextFields context={dashboard.context}/><input type="hidden" name="idempotencyKey" value={keys.proposal ?? commandId()}/>
           <Field id={`${prefix}-proposal-category`} label={m.category}><select id={`${prefix}-proposal-category`} name="categoryCode" className={control} required>{dashboard.categories.map(value => <option key={value.code} value={value.code}>{locale === "ar" ? value.nameAr : value.nameFr}</option>)}</select></Field>
           <Field id={`${prefix}-proposal-type`} label={m.type}><select id={`${prefix}-proposal-type`} name="ruleType" className={control}>{Object.entries(m.codes.types).map(([value, text]) => <option key={value} value={value}>{text}</option>)}</select></Field>
           <Field id={`${prefix}-proposal-rate`} label={m.rate}><Input id={`${prefix}-proposal-rate`} name="rateBasisPoints" type="number" min="0" max="10000" required/></Field>
@@ -66,7 +70,7 @@ function RuleCard({ rule, dashboard, locale, m, commandKey }: { rule: MoroccoTax
   const prefix = useId(), [state, action, pending] = useActionState(decideTaxRule, initial);
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-2"><CardTitle>{categoryName(dashboard, rule.categoryCode, locale)} · {m.version} {integer(rule.version, locale)}</CardTitle><Badge variant={rule.status === "ACTIVE" ? "default" : "secondary"}>{label(m.codes.statuses, rule.status, m.codes.unknown)}</Badge></div><CardDescription>{label(m.codes.types, rule.ruleType, m.codes.unknown)} · {integer(rule.rateBasisPoints, locale)} {m.codes.basisPointsUnit} · {label(m.codes.validations, rule.validationStatus, m.codes.unknown)}</CardDescription></CardHeader><CardContent className="space-y-4">
     <p className="text-sm">{rule.legalReference}</p><p className="text-sm text-muted-foreground">{m.period}: {date(rule.effectiveFrom, locale)} — {rule.effectiveTo ? date(rule.effectiveTo, locale) : "∞"}</p>
-    {rule.status === "DRAFT" || rule.status === "ACTIVE" ? <form action={action} className="grid gap-3 sm:grid-cols-2"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={dashboard.organizationId}/><input type="hidden" name="taxRuleVersionId" value={rule.id}/><input type="hidden" name="rowVersion" value={rule.rowVersion}/><input type="hidden" name="idempotencyKey" value={commandKey}/>
+    {rule.status === "DRAFT" || rule.status === "ACTIVE" ? <form action={action} className="grid gap-3 sm:grid-cols-2"><input type="hidden" name="locale" value={locale}/><TaxContextFields context={dashboard.context}/><input type="hidden" name="taxRuleVersionId" value={rule.id}/><input type="hidden" name="rowVersion" value={rule.rowVersion}/><input type="hidden" name="idempotencyKey" value={commandKey}/>
       <Field id={`${prefix}-decision`} label={m.decision}><select id={`${prefix}-decision`} name="decision" className={control}>{rule.status === "DRAFT" ? <><option value="APPROVE">{m.approve}</option><option value="REJECT">{m.reject}</option></> : <option value="RETIRE">{m.retire}</option>}</select></Field>
       <Field id={`${prefix}-validation`} label={m.validation}><select id={`${prefix}-validation`} name="professionalValidationStatus" className={control}><option value="DEMO">{m.codes.validations.DEMO}</option><option value="VALIDATED">{m.codes.validations.VALIDATED}</option></select></Field>
       <Field id={`${prefix}-reference`} label={m.validationReference}><Input id={`${prefix}-reference`} name="validationReference" minLength={3} required/></Field>

@@ -20,7 +20,7 @@ export default async function ClientPortfolioPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/portefeuille` }));
-  const result = await loadClientPortfolio(query.organizationId);
+  const result = await loadClientPortfolio(space.selectedOrganizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/portefeuille` }));
   const m = getMessages(locale);
   if (result.status === "error") {

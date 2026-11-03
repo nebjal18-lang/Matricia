@@ -6,7 +6,7 @@ import { canonicalizeAnswer, answerType, answerRowVersion, commandKey, isoDate, 
 import { createServerQuestionnaireSessionsRepository } from "@/modules/shared/lib/questionnaire-sessions/server-repository";
 
 export type QuestionnaireActionState = { status: "idle" } | { status: "success"; operation: "STARTED" | "SAVED" | "SUBMITTED"; sessionId: string; serverRowVersion?: number; answerRowVersion?: number } | { status: "error"; reason: QuestionnaireFailure | "VALIDATION" };
-export const idleQuestionnaireAction: QuestionnaireActionState = { status: "idle" };
+
 const identity = z.object({ locale: questionnaireLocale, idempotencyKey: commandKey, correlationId: questionnaireUuid }).strict();
 const text = (form: FormData, name: string) => form.get(name);
 function refresh(locale: "fr" | "ar", sessionId?: string) { revalidatePath(`/${locale}/client/questionnaires`); if (sessionId) revalidatePath(`/${locale}/client/questionnaires?session=${sessionId}`); }

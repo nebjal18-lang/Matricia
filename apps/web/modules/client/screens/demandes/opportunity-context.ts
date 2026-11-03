@@ -4,7 +4,7 @@ import { uuidSchema } from "@/modules/client/data/rfq/model";
 
 const opportunitySchema = z.object({
   id: uuidSchema, organization_id: uuidSchema, diagnostic_run_id: uuidSchema,
-  recommendation_id: uuidSchema, service_id: uuidSchema.nullable(), status: z.string(),
+  recommendation_id: uuidSchema.nullable(),known_data:z.record(z.string(),z.unknown()).optional(), service_id: uuidSchema.nullable(), status: z.string(),
   missing_fields: z.array(z.unknown()), service_request_id: uuidSchema.nullable(),
 }).strict();
 const runSchema = z.object({ id: uuidSchema, organization_id: uuidSchema, questionnaire_session_id: uuidSchema, library_id: uuidSchema, site_id: uuidSchema.nullable() }).strict();
@@ -32,18 +32,18 @@ export async function createRequestFromOpportunity(input:{ opportunityId:string;
 export async function loadOpportunityRequestContext(opportunityId: string, organizationId?: string): Promise<OpportunityRequestContext | null> {
   if (!uuidSchema.safeParse(opportunityId).success || (organizationId && !uuidSchema.safeParse(organizationId).success)) return null;
   const client = await getSupabaseServerClient();
-  let opportunityQuery = client.from("diagnostic_opportunities").select("id,organization_id,diagnostic_run_id,recommendation_id,service_id,status,missing_fields,service_request_id").eq("id", opportunityId);
+  let opportunityQuery = client.from("diagnostic_opportunities").select("id,organization_id,diagnostic_run_id,recommendation_id,known_data,service_id,status,missing_fields,service_request_id").eq("id", opportunityId);
   if (organizationId) opportunityQuery = opportunityQuery.eq("organization_id", organizationId);
   const opportunityResult = await opportunityQuery.maybeSingle();
   const opportunity = opportunitySchema.safeParse(opportunityResult.data);
-  if (opportunityResult.error || !opportunity.success || opportunity.data.status !== "RFQ_READY" || !opportunity.data.service_id || opportunity.data.missing_fields.length > 0) return null;
+  if (opportunityResult.error || !opportunity.success || !["RFQ_READY","CONVERTED"].includes(opportunity.data.status) || !opportunity.data.service_id || opportunity.data.missing_fields.length > 0) return null;
 
   const [runResult, recommendationResult] = await Promise.all([
     client.from("diagnostic_runs").select("id,organization_id,questionnaire_session_id,library_id,site_id").eq("id", opportunity.data.diagnostic_run_id).eq("organization_id", opportunity.data.organization_id).maybeSingle(),
-    client.from("diagnostic_recommendations").select("title_fr,title_ar,client_text_fr,client_text_ar").eq("id", opportunity.data.recommendation_id).eq("organization_id", opportunity.data.organization_id).maybeSingle(),
+    opportunity.data.recommendation_id?client.from("diagnostic_recommendations").select("title_fr,title_ar,client_text_fr,client_text_ar").eq("id", opportunity.data.recommendation_id).eq("organization_id", opportunity.data.organization_id).maybeSingle():Promise.resolve({data:null,error:null}),
   ]);
   const run = runSchema.safeParse(runResult.data), recommendation = recommendationSchema.safeParse(recommendationResult.data);
-  if (runResult.error || recommendationResult.error || !run.success || !recommendation.success) return null;
+  if (runResult.error || recommendationResult.error || !run.success || (opportunity.data.recommendation_id!==null&&!recommendation.success)) return null;
 
   const serviceResult = await client.from("catalog_services").select("id,library_id,current_published_version_id,status").eq("id", opportunity.data.service_id).eq("library_id", run.data.library_id).eq("status", "PUBLISHED").maybeSingle();
   const service = serviceSchema.safeParse(serviceResult.data);
@@ -56,14 +56,16 @@ export async function loadOpportunityRequestContext(opportunityId: string, organ
   const version = serviceVersionSchema.safeParse(versionResult.data), snapshot = snapshotSchema.safeParse(snapshotResult.data);
   if (versionResult.error || snapshotResult.error || !version.success || !snapshot.success) return null;
 
+  const published=opportunity.data.known_data?.published_opportunity as Record<string,unknown>|undefined;
+  const field=(name:string,fallback:string)=>typeof published?.[name]==="string"&&published[name].trim()?published[name] as string:fallback;
   return {
     opportunityId: opportunity.data.id, organizationId: opportunity.data.organization_id,
     serviceId: service.data.id, libraryId: service.data.library_id,
     questionnaireVersionId: snapshot.data.questionnaire_version_id,
     catalogSnapshotHash: version.data.content_hash, questionnaireSnapshotHash: snapshot.data.questionnaire_snapshot_hash,
     serviceNameFr: version.data.name_fr, serviceNameAr: version.data.name_ar,
-    titleFr: recommendation.data.title_fr, titleAr: recommendation.data.title_ar,
-    descriptionFr: recommendation.data.client_text_fr, descriptionAr: recommendation.data.client_text_ar,
+    titleFr:field("title_fr",recommendation.success?recommendation.data.title_fr:"Priorité issue des règles publiées"), titleAr:field("title_ar",recommendation.success?recommendation.data.title_ar:"أولوية ناتجة عن القواعد المنشورة"),
+    descriptionFr:field("client_text_fr",recommendation.success?recommendation.data.client_text_fr:""), descriptionAr:field("client_text_ar",recommendation.success?recommendation.data.client_text_ar:""),
     existingRequestId: opportunity.data.service_request_id, siteId: run.data.site_id,
   };
 }

@@ -1,3 +1,6 @@
+import {capacitySummaryStatus} from "@/modules/provider/data/qualification/capacity-summary";
+import {interventionModeLabel,type InterventionMode} from "@/modules/provider/data/qualification/intervention-modes";
+import {moroccoRegionLabel} from "@/modules/shared/lib/geo/morocco-regions";
 import Link from "next/link";
 import { ArrowRight, CheckSquare, ClipboardList, Cloud, FileText, Paperclip, Plus, Search, Sprout, Star, Zap } from "lucide-react";
 import type { ReactNode } from "react";
@@ -24,6 +27,10 @@ function capacityStatusLabel(status: string, locale: Locale, fallback: string) {
   if (normalized === "LIMITED" || normalized === "PARTIAL") {
     return locale === "ar" ? "قدرة محدودة" : "Capacité limitée";
   }
+  if(normalized==="MIXED")return locale==="ar"?"تختلف حسب الخدمة":"Variable selon le service";
+  if(normalized==="NOT_DECLARED")return locale==="ar"?"غير معلنة":"Non déclarée";
+  if(normalized==="FULL")return locale==="ar"?"ممتلئة":"Complète";
+  if(normalized==="PAUSED")return locale==="ar"?"متوقفة":"En pause";
   if (normalized === "UNAVAILABLE" || normalized === "CLOSED") {
     return locale === "ar" ? "غير متاح" : "Indisponible";
   }
@@ -242,7 +249,7 @@ export function ProviderHomeBoard({
               </span>
             </li>
             <li><span><strong>{c.domains}</strong><small>{capacity.domains}</small></span></li>
-            <li><span><strong>{c.zones}</strong><small>{capacity.zones}</small></span></li>
+            <li><span><strong>{c.zones}</strong><small>{capacity.zones}</small></span></li><li><span><strong>{c.modalities}</strong><small>{"modalities"in capacity?String(capacity.modalities??c.capacityUnset):c.capacityUnset}</small></span></li>
           </ul>
           <Cta href={`/${locale}/sous-traitant/qualification${query}#capacite`} soft>{c.refresh}</Cta>
         </article>
@@ -280,7 +287,7 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
   const profileReady = Boolean(dashboard?.profile);
   const servicesReady = services.length > 0;
   const docsReady = documents.length > 0;
-  const capacityReady = services.some((service) => Boolean(service.capacityStatus));
+  const capacityReady = services.length>0&&services.every(service=>service.capacityStatus!=="NOT_DECLARED");
   const checklist = live
     ? [
         { id: "profile", title: c.checkActivity, status: profileReady ? c.statusSent : c.statusOpen, tone: profileReady ? "mint" : "peach", href: `/${locale}/sous-traitant/qualification${query}#qualification`, action: profileReady ? "open" : "complete" },
@@ -400,7 +407,7 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
   );
 }
 
-export function ServicesBoard({ locale, query, services, domain }: { locale: Locale; query: string; services?: readonly ProviderService[]; domain?: string }) {
+export function ServicesBoard({ locale, query, services, domain,regions,interventionModes }: { locale: Locale; query: string; services?: readonly ProviderService[]; domain?: string;regions?:readonly string[];interventionModes?:readonly InterventionMode[] }) {
   const c = providerCopy(locale);
   const demo = demoProviderSpaces(locale, query);
   const live = services !== undefined || !canApplyProviderSpaceDemo();
@@ -416,13 +423,13 @@ export function ServicesBoard({ locale, query, services, domain }: { locale: Loc
     : [];
   const visibleGroups = live && domain ? groups.filter((group) => group.domain === domain) : groups;
   const capacityLead = live
-    ? capacityStatusLabel(declared[0]?.capacityStatus ?? c.capacityUnset, locale, c.capacityUnset)
+    ? capacityStatusLabel(capacitySummaryStatus(declared), locale, c.capacityUnset)
     : demo.capacity.status;
   const delayLead = live
     ? (declared[0]?.leadTimeDays !== null && declared[0] ? `${declared[0].leadTimeDays} j` : c.capacityUnset)
     : c.indicativeDelay;
-  const zonesLead = live ? c.capacityUnset : demo.capacity.zones;
-  const modalitiesLead = live ? c.capacityUnset : c.presentialRemote;
+  const zonesLead = live ? regions?.map(code=>moroccoRegionLabel(code,locale)).join(" · ")||c.capacityUnset : demo.capacity.zones;
+  const modalitiesLead = live ? interventionModes?.map(mode=>interventionModeLabel(mode,locale)).join(" · ")||c.capacityUnset : c.presentialRemote;
   const capacityByServiceLead = live
     ? (declared.length ? String(declared.length) : c.capacityUnset)
     : String(demo.services.reduce((n, g) => n + g.items.length, 0));
@@ -775,6 +782,8 @@ export function ProviderDocumentsBoard({
   loadError = false,
   search = "",
   view = "all",
+  page=1,
+  hasMore=false,
 }: {
   locale: Locale;
   query: string;
@@ -782,6 +791,8 @@ export function ProviderDocumentsBoard({
   loadError?: boolean;
   search?: string;
   view?: "all" | "qualification";
+  page?:number;
+  hasMore?:boolean;
 }) {
   const c = providerCopy(locale);
   const qualifyHref = `/${locale}/sous-traitant/qualification${query}#documents`;
@@ -796,6 +807,7 @@ export function ProviderDocumentsBoard({
     const qs = nextParams.toString();
     return `/${locale}/sous-traitant/documents${qs ? `?${qs}` : ""}`;
   };
+  const pageHref=(next:number)=>{const p=new URLSearchParams(params);p.set("page",String(next));if(search.trim())p.set("q",search.trim());if(view!=="all")p.set("vue",view);return `/${locale}/sous-traitant/documents?${p}`;};
   const needle = search.trim().toLocaleLowerCase();
   const rows = (documents ?? []).filter((document) => {
     if (view === "qualification" && !/LEGAL|INSURANCE|QUALIF|COMPLIANCE|IDENTITY/i.test(document.kind)) return false;
@@ -821,6 +833,7 @@ export function ProviderDocumentsBoard({
             </form>
           </header>
           {loadError ? <p role="alert">{c.docsLoadError}</p> : null}
+          <nav aria-label={locale==="ar"?"صفحات الوثائق":"Pages des documents"}>{page>1?<Link href={pageHref(page-1)} className="client-ghost-link">{locale==="ar"?"السابق":"Précédente"}</Link>:null} <span>{locale==="ar"?"الصفحة":"Page"} {page}</span> {hasMore?<Link href={pageHref(page+1)} className="client-ghost-link">{locale==="ar"?"التالي":"Suivante"}</Link>:null}</nav>
           {!loadError && rows.length === 0 ? <p role="status">{c.docsEmpty}</p> : null}
           {rows.length > 0 ? (
           <div className="client-table-wrap" id="docs">
@@ -833,7 +846,7 @@ export function ProviderDocumentsBoard({
                     <td>{document.kind}</td>
                     <td><span className="client-status-chip" data-tone={documentTone(document.status)}>{getProviderStatusLabel(locale, document.status)}</span></td>
                     <td>{c.docsPrivate}</td>
-                    <td><Cta href={`${qualifyHref}`}>{documentTone(document.status) === "mint" ? c.open : c.replace}</Cta></td>
+                    <td>{document.scanStatus === "CLEAN" ? <a href={`/api/provider/documents/${document.id}`} className="client-ghost-link">{c.open}</a> : <span role="status">{document.scanStatus === "PENDING" ? (locale === "ar" ? "الفحص جارٍ" : "Analyse en attente") : (locale === "ar" ? "في الحجر" : "En quarantaine")}</span>} <Cta href={qualifyHref}>{c.replace}</Cta></td>
                   </tr>
                 ))}
               </tbody>

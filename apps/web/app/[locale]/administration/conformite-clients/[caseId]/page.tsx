@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
@@ -28,7 +29,7 @@ export default async function ClientComplianceDecisionPage({
   if (!isLocale(locale) || !z.string().uuid().safeParse(caseId).success) notFound();
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/administration/conformite-clients/${caseId}` }));
-  const result = await listClientComplianceReviews();
+  const result = await listClientComplianceReviews({caseId});
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/conformite-clients/${caseId}` }));
   const a = actorCopy(locale);
   const messages = getComplianceMessages(locale);
@@ -61,6 +62,7 @@ export default async function ClientComplianceDecisionPage({
         </main>
       ) : item ? (
         <>
+          <Link className="admin-soft-cta" href={`/${locale}/administration/conformite-clients/${item.id}/identite`}>{locale==="ar"?"مراجعة ICE وIF وRC والوثائق":"Revoir ICE, IF, RC et les pièces"}</Link>
           <ComplianceDecisionBoard
             locale={locale}
             query={space.selectedQuery}

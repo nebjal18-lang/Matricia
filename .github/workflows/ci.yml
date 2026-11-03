@@ -16,7 +16,7 @@ jobs:
       # Public, deliberately non-secret values for hermetic Next.js validation.
       NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-local-publishable-key-not-a-secret
-      NEXT_PUBLIC_APP_URL: http://localhost:5173
+      NEXT_PUBLIC_APP_URL: https://matricia.example
       SUPABASE_SERVICE_ROLE_KEY: ci-local-service-role-key-not-a-secret
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +32,9 @@ jobs:
       - run: node --experimental-strip-types scripts/validate-boundaries.ts
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm -r --workspace-concurrency=1 test --maxWorkers=2
+      - run: pnpm test:integration
+      - run: pnpm test:tooling
       - run: pnpm no-placeholders
       - run: pnpm build
 
@@ -56,3 +58,30 @@ jobs:
           APP_ENV: development
           DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+
+  browser-public:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-local-publishable-key-not-a-secret
+      NEXT_PUBLIC_APP_URL: https://matricia.example
+      PLAYWRIGHT_VIDEO: "off"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e:public
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-browser-acceptance
+          path: artifacts/test-results/acceptance/*-summary.json
+          if-no-files-found: error

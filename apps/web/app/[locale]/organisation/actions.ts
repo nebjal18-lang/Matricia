@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
-import { recordMarketingFunnelEvent } from "@/modules/shared/lib/marketing-autopilot/funnel";
+import { captureMarketingFunnelTouch,recordMarketingFunnelEvent } from "@/modules/shared/lib/marketing-autopilot/funnel";
 
 const ownerRoles = ["CLIENT_OWNER", "PROVIDER_OWNER", "FRANCHISE_OWNER"] as const;
 
@@ -16,14 +16,14 @@ const organizationRequestSchema = z.object({
 });
 
 export type OrganizationField = "legalName" | "displayName" | "ice" | "ownerRole";
-type OrganizationFailureReason = "UNAUTHENTICATED" | "ALREADY_MEMBER" | "IDEMPOTENCY_MISMATCH" | "UNAVAILABLE";
+type OrganizationFailureReason = "UNAUTHENTICATED" | "ALREADY_MEMBER" | "IDEMPOTENCY_MISMATCH" | "UNAVAILABLE" | "FRANCHISE_MANDATE_REQUIRED";
 export type OrganizationActionState =
   | { status: "idle" }
   | { status: "error"; reason: "VALIDATION"; fieldErrors: Partial<Record<OrganizationField, true>> }
   | { status: "error"; reason: OrganizationFailureReason }
   | { status: "success"; outcome: "ORGANIZATION_CREATED" | "ACCESS_REQUESTED" };
 
-type RpcResponse = { outcome?: unknown };
+type RpcResponse = { outcome?: unknown;organization_id?:unknown };
 
 function validationErrors(error: z.ZodError): Partial<Record<OrganizationField, true>> {
   const errors: Partial<Record<OrganizationField, true>> = {};
@@ -36,6 +36,7 @@ function validationErrors(error: z.ZodError): Partial<Record<OrganizationField, 
 
 function databaseErrorReason(message: string): OrganizationFailureReason {
   if (message.includes("UNAUTHENTICATED")) return "UNAUTHENTICATED";
+  if(message.includes("FRANCHISE_JOIN_REQUIRES_APPROVED_MANDATE"))return "FRANCHISE_MANDATE_REQUIRED";
   if (message.includes("ALREADY_MEMBER")) return "ALREADY_MEMBER";
   if (message.includes("IDEMPOTENCY_PAYLOAD_MISMATCH")) return "IDEMPOTENCY_MISMATCH";
   return "UNAVAILABLE";
@@ -63,6 +64,7 @@ export async function createOrRequestOrganization(
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return { status: "error", reason: "UNAUTHENTICATED" };
 
+  await captureMarketingFunnelTouch();
   const { data, error } = await supabase.rpc("create_or_request_organization", {
     p_legal_name: parsed.data.legalName,
     p_display_name: parsed.data.displayName,
@@ -77,6 +79,10 @@ export async function createOrRequestOrganization(
   if (outcome !== "ORGANIZATION_CREATED" && outcome !== "ACCESS_REQUESTED") {
     return { status: "error", reason: "UNAVAILABLE" };
   }
-  if (outcome === "ORGANIZATION_CREATED") await recordMarketingFunnelEvent("REGISTRATION_STARTED", user.id);
+  if (outcome === "ORGANIZATION_CREATED") {
+    const organizationId=z.string().uuid().safeParse((data as RpcResponse).organization_id);
+    if(!organizationId.success)return{status:"error",reason:"UNAVAILABLE"};
+    await recordMarketingFunnelEvent("REGISTRATION_STARTED", organizationId.data);
+  }
   return { status: "success", outcome };
 }

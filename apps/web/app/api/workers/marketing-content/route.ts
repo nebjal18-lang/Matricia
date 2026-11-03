@@ -1,3 +1,4 @@
+import { withOperationalHeartbeat } from "@/modules/shared/lib/operations/heartbeat";
 import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { serviceContentInput } from "@/modules/shared/lib/marketing-autopilot/content-engine";
@@ -11,7 +12,7 @@ const claimSchema=serviceContentInput.extend({outcome:z.literal("CLAIMED"),idemp
 
 function authorized(request:Request){const expected=process.env.CRON_SECRET??"",supplied=request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]??"";const a=Buffer.from(expected),b=Buffer.from(supplied);return a.length>=32&&a.length===b.length&&timingSafeEqual(a,b)}
 
-export async function POST(request:Request){
+async function runCycle(request:Request){
   if(!authorized(request))return Response.json({code:"UNAUTHORIZED"},{status:401,headers});
   const admin=getSupabaseAdminClient(),workerId=crypto.randomUUID();
   const claim=await admin.rpc("claim_next_marketing_content_generation_v1",{p_worker_id:workerId,p_lease_seconds:120});
@@ -26,4 +27,7 @@ export async function POST(request:Request){
   if(result.error){await recordFailure("PERSIST_FAILED");return Response.json({code:"PERSIST_FAILED"},{status:503,headers})}
   return Response.json({outcome:"MARKETING_CONTENT_BATCH_GENERATED",provider:generated.provider,failoverUsed:generated.failoverUsed,count:generated.contents.length,result:result.data},{headers});
 }
-export const GET=()=>Response.json({code:"METHOD_NOT_ALLOWED"},{status:405,headers});
+// Vercel Cron invokes GET; authorization and claims are identical for both methods.
+export const GET = POST;
+
+export async function POST(request: Request) { return withOperationalHeartbeat("MARKETING_CONTENT", 900, () => runCycle(request)); }

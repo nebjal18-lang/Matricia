@@ -16,14 +16,18 @@ export default async function ClientComplianceAdministrationPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; filter?: string }>;
+  searchParams: Promise<{ organizationId?: string; filter?: string; page?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/administration/conformite-clients` }));
-  const result = await listClientComplianceReviews();
+  const requestedPage = Number(query.page ?? "1");
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const filter = ["all","check","complement","review","decided"].includes(query.filter ?? "all") ? query.filter ?? "all" : "all";
+  const result = await listClientComplianceReviews({page, filter});
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/conformite-clients` }));
+  const serverCounts = result.status === "success" ? result.counts : undefined;
   const a = actorCopy(locale);
   const messages = getComplianceMessages(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
@@ -42,7 +46,7 @@ export default async function ClientComplianceAdministrationPage({
       actorCurrent="compliance"
       searchAction={`/${locale}/administration/conformite-clients`}
       searchPlaceholder={messages.navigation}
-      alternateHref={`/${alternate}/administration/conformite-clients${space.selectedQuery}`}
+      alternateHref={`/${alternate}/administration/conformite-clients${space.selectedQuery ? `${space.selectedQuery}&` : "?"}filter=${filter}&page=${page}`}
       crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/entreprises${space.selectedQuery}`, label: locale === "ar" ? "الفاعلون" : "Acteurs" }, { label: a.complianceTitle }]} />}
       title={messages.title}
       lead={a.complianceLead}
@@ -56,7 +60,7 @@ export default async function ClientComplianceAdministrationPage({
                 <Link href={`/${locale}/securite/compte`} className="admin-primary-cta">{messages.configureMfa}</Link>
               </AlertDescription>
             </Alert>
-            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={cases} filter={query.filter} />
+            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={cases} filter={filter} serverCounts={serverCounts} />
           </main>
         ) : blocked ? (
           <main className="client-page">
@@ -64,7 +68,7 @@ export default async function ClientComplianceAdministrationPage({
               <AlertTitle>{messages.forbiddenTitle}</AlertTitle>
               <AlertDescription><p>{messages.forbiddenDescription}</p></AlertDescription>
             </Alert>
-            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={[]} filter={query.filter} />
+            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={[]} filter={filter} serverCounts={serverCounts} />
           </main>
         ) : result.status === "error" && cases.length === 0 ? (
           <main className="client-page">
@@ -75,11 +79,12 @@ export default async function ClientComplianceAdministrationPage({
                 <Link href={`/${locale}/administration/conformite-clients`} className="admin-soft-cta">{messages.retry}</Link>
               </AlertDescription>
             </Alert>
-            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={[]} filter={query.filter} />
+            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={[]} filter={filter} serverCounts={serverCounts} />
           </main>
         ) : (
-        <ComplianceBoard locale={locale} query={space.selectedQuery} cases={cases} filter={query.filter} />
+        <ComplianceBoard locale={locale} query={space.selectedQuery} cases={cases} filter={filter} serverCounts={serverCounts} />
       )}
+      {result.status === "success" ? <nav className="client-page flex gap-4" aria-label={locale === "ar" ? "صفحات الامتثال" : "Pages de conformité"}>{page>1?<Link href={`/${locale}/administration/conformite-clients${space.selectedQuery ? `${space.selectedQuery}&` : "?"}filter=${filter}&page=${page-1}`}>{locale === "ar" ? "السابق" : "Précédent"}</Link>:null}<span>{page}</span>{result.hasNext?<Link href={`/${locale}/administration/conformite-clients${space.selectedQuery ? `${space.selectedQuery}&` : "?"}filter=${filter}&page=${page+1}`}>{locale === "ar" ? "التالي" : "Suivant"}</Link>:null}</nav>:null}
     </AdminAppShell>
   );
 }

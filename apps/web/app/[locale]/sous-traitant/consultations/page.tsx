@@ -1,3 +1,5 @@
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { loadProviderQuotes } from "@/modules/provider/data/quotes/repository";
@@ -13,7 +15,8 @@ export default async function ProviderConsultationsPage({ params, searchParams }
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/consultations` }));
-  const result = await loadProviderQuotes(query.organizationId);
+  const contextState = providerContextReadState(space, query.organizationId);
+  const result = contextState ? { status: "error" as const, reason: "NO_ORGANIZATION" as const } : await loadProviderQuotes(space.selectedOrganizationId ?? undefined);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/consultations` }));
   const c = providerCopy(locale);
   const boardQuery = providerSearchQuery(space.selectedQuery, { q: query.q, tab: query.tab });
@@ -21,8 +24,8 @@ export default async function ProviderConsultationsPage({ params, searchParams }
     ? filterListRows(consultationRowsFromInvitations(filterInvitationsByConsultTab(result.dashboard.invitations, query.tab), locale, space.selectedQuery), query.q ?? "")
     : [];
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={c.consultTitle} lead={c.consultLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/services${space.selectedQuery}`} label={c.seeCriteria} />}>
-      <ConsultationsBoard locale={locale} query={boardQuery} rows={rows} tab={query.tab} empty={result.status === "error" ? (locale === "ar" ? "تعذر تحميل الاستشارات." : "Impossible de charger les consultations.") : undefined} />
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={c.consultTitle} lead={c.consultLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/services${space.selectedQuery}`} label={c.seeCriteria} />}>
+      {result.status === "success" ? <ConsultationsBoard locale={locale} query={boardQuery} rows={rows} tab={query.tab} /> : <ProviderReadState locale={locale} state={contextState ?? (result.status === "error" && result.reason === "NO_ORGANIZATION" ? "forbidden" : "unavailable")} retryHref={`/${locale}/sous-traitant/consultations${space.selectedQuery}`} unavailableMessage={locale === "ar" ? "تعذر تحميل الاستشارات." : "Impossible de charger les consultations."} reason={space.readError ?? (result.status === "error" ? result.reason : undefined)} />}
     </ProviderAppShell>
   );
 }

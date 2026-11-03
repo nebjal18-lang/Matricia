@@ -1,6 +1,6 @@
 import type { ClientOrganization, ClientRequestSummary, QuoteComparison, QuoteComparisonRow } from "./model";
 
-export type FailureReason = "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_INPUT" | "INVALID_RESPONSE" | "UNAVAILABLE";
+export type FailureReason = "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_INPUT" | "INVALID_RESPONSE" | "TAX_POLICY_REQUIRED" | "TAX_ORIGIN_REVIEW" | "CATALOG_REVIEW" | "MFA_REQUIRED" | "UNAVAILABLE";
 export type Result<T> = { status: "success"; value: T } | { status: "error"; reason: FailureReason };
 export type ClientRfqRepository = {
   list(): Promise<Result<{ organizations: ClientOrganization[]; requests: ClientRequestSummary[] }>>;

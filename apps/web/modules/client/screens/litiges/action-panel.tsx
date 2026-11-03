@@ -4,7 +4,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Textarea } from "@/modules/shared/ui/textarea";
 import { formatMinorAmount,type DisputeDetail } from "@/modules/shared/lib/disputes/model";
-import { activateAction,appealAction,approveAction,decideAction,idle,proposeAction,respondAction,type ActionState } from "./actions";
+import{activateAction,appealAction,approveAction,decideAction,proposeAction,respondAction,type ActionState}from"./actions";import{idle}from"./state";
 import { EvidenceFields } from "./evidence-fields";
 import type { DisputeMessages } from "./messages";
 

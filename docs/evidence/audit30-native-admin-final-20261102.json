@@ -1,0 +1,117 @@
+{
+  "scope": "LOCAL_SYNTHETIC_NATIVE_AUTH_AND_ORGANIZATION_ACCEPTANCE",
+  "mode": "ADMIN_ONLY",
+  "runId": "98134296-5f49-4751-926c-e0029db59e28",
+  "roleBootstrap": "TEST_ONLY_NOT_GOVERNED_ROLE_ASSIGNMENT_PROOF",
+  "provenance": {
+    "harnessSha256": "fccc4aefa0752275e0b7bd46778e966dc1354977eee39bff451569559e390148",
+    "buildId": "WbMCesSFfKN1R2pa9hytw"
+  },
+  "rpc": [
+    {
+      "actor": "admin",
+      "authenticatedAal2": true,
+      "code": null,
+      "organizationCount": 100,
+      "schemaValid": true
+    },
+    {
+      "actor": "ordinary",
+      "authenticatedAal2": true,
+      "code": "42501",
+      "organizationCount": null,
+      "schemaValid": false
+    }
+  ],
+  "browser": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true,
+      "menuBoundsVerified": true,
+      "menuKeyboardTabVerified": true,
+      "publicAdminWorkspaceVerified": true
+    }
+  ],
+  "cleanup": {
+    "verified": true,
+    "actors": 4,
+    "organizations": 3,
+    "immutableEvidenceRetained": true
+  },
+  "status": "PASSED",
+  "nativeSignOut": {
+    "verified": true,
+    "protectedRouteDenied": true,
+    "publicAnonymousNavigation": true
+  },
+  "classification": "LOCAL_REAL_GOTRUE_AAL2_ADMIN_MENU_GEOMETRY_KEYBOARD_AND_SIGNOUT",
+  "limitations": [
+    "Admin role is a test-only fixture bootstrap.",
+    "This does not certify OTP form, governed role assignment or external deployment."
+  ]
+}

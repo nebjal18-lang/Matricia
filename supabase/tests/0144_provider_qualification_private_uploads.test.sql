@@ -1,5 +1,5 @@
 begin;
-select plan(12);
+select plan(13);
 select has_table('public','provider_document_upload_reservations','upload reservations exist');
 select ok((select relrowsecurity from pg_class where oid='public.provider_document_upload_reservations'::regclass),'reservations use RLS');
 select ok(not has_table_privilege('authenticated','public.provider_document_upload_reservations','INSERT'),'providers cannot forge reservations');
@@ -7,10 +7,11 @@ select ok(has_function_privilege('authenticated','public.begin_provider_document
 select ok(not has_function_privilege('anon','public.begin_provider_document_upload(uuid,text,bigint)','EXECUTE'),'anonymous users cannot reserve uploads');
 select ok((select public is false and file_size_limit=10485760 from storage.buckets where id='provider-qualification'),'provider evidence bucket is private and limited');
 select ok((select allowed_mime_types=array['application/pdf','image/jpeg','image/png']::text[] from storage.buckets where id='provider-qualification'),'bucket MIME allowlist is explicit');
-select policies_are('storage','objects',array['client_compliance_storage_insert','client_compliance_storage_read','delivery_proof_storage_insert','delivery_proof_storage_orphan_delete','delivery_proof_storage_owner_unbound_read','delivery_proof_storage_party_read','provider_payment_proof_storage_orphan_delete','provider_payment_proof_storage_reserved_insert','provider_payment_proof_storage_scoped_read','provider_qualification_storage_orphan_delete','provider_qualification_storage_reserved_insert','provider_qualification_storage_scoped_read'],'storage policies include provider and payment-proof reserved insert, orphan delete and scoped read');
+select ok(not exists(select unnest(array['client_billing_objects_private','provider_payable_proof_storage_read','provider_qualification_storage_franchise_read','client_compliance_storage_insert','client_compliance_storage_read','delivery_proof_storage_insert','delivery_proof_storage_orphan_delete','delivery_proof_storage_owner_unbound_read','delivery_proof_storage_party_read','provider_payment_proof_storage_orphan_delete','provider_payment_proof_storage_reserved_insert','provider_payment_proof_storage_scoped_read','provider_qualification_storage_orphan_delete','provider_qualification_storage_reserved_insert','provider_qualification_storage_scoped_read']::text[])except select policyname::text from pg_policies where schemaname='storage'and tablename='objects'),'required provider/payment-proof policies remain alongside newer restrictive policies');
 select trigger_is('public','provider_document_versions','provider_document_versions_validate_storage','private','validate_provider_document_storage_binding','provider document insert validates its storage reservation');
 select trigger_is('public','provider_document_versions','provider_document_versions_bind_upload','private','bind_provider_document_upload','provider document insert binds its reservation');
 select ok(pg_get_functiondef('private.validate_provider_document_storage_binding()'::regprocedure) like '%PROVIDER_DOCUMENT_STORAGE_METADATA_MISMATCH%','binding validates object MIME and size');
 select ok(pg_get_functiondef('private.validate_provider_document_storage_binding()'::regprocedure) like '%new.supersedes_version_id%' and pg_get_functiondef('private.bind_provider_document_upload()'::regprocedure) like '%new.reviewed_by is not null%','human review versions safely reuse the already bound immutable object');
+select ok(exists(select 1 from pg_policies where schemaname='storage'and tablename='objects'and policyname='storage_live_session_required_v1'and permissive='RESTRICTIVE'and qual like '%current_auth_session_active_v1%'and with_check like '%current_auth_session_active_v1%'),'native session guard remains a restrictive condition alongside scoped grants');
 select * from finish();
 rollback;

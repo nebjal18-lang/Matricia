@@ -1,5 +1,6 @@
 "use server";
 
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -57,7 +58,7 @@ export type AccountSecurityResult =
 export type EnrollmentState =
   | { status: "idle" }
   | { status: "enrollment"; factorId: string; qrCode: string; secret: string }
-  | { status: "success" }
+  | { status: "success"; nextPath?: string }
   | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FACTOR_LIMIT" | "AUDIT_PENDING" | "UNAVAILABLE" };
 export type PasswordState =
   | { status: "idle" }
@@ -205,10 +206,13 @@ export async function verifyTotpEnrollment(
     code: code.data,
   });
   if (verified.error) return { status: "error", reason: "VALIDATION" };
+  const assurance = await context.supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.error || assurance.data?.currentLevel !== "aal2") return { status: "error", reason: "UNAVAILABLE" };
   const audited = await completeAuditedSecurityChange(operationId);
   if (!audited) return { status: "error", reason: "AUDIT_PENDING" };
   revalidatePath(`/${locale}/securite/compte`);
-  return { status: "success" };
+  const nextPath = safeReturnPath(formData.get("next"),locale);
+  return { status: "success", ...(nextPath ? { nextPath } : {}) };
 }
 
 export async function requestPasswordNonce(

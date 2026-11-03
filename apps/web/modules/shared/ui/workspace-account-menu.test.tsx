@@ -20,9 +20,14 @@ describe("menu de compte des espaces connectés", () => {
     expect(html).toContain("demo.admin@matricia.test");
     expect(html).toContain('name="returnTo" value="/fr/administration/command-center"');
     expect(html).toContain('name="locale" value="fr"');
-    expect(html).toContain('href="/fr/securite/sessions"');
+    expect(html).toContain('href="/fr/securite/sessions?next=%2Ffr%2Fadministration%2Fcommand-center&amp;workspace=administration"');
   });
 
+  it("preserves organization and selected provider workspace on shared security pages", () => {
+    const html = renderToStaticMarkup(<WorkspaceAccountMenu locale="ar" userEmail={null} returnTo="/ar/tableau-de-bord?organizationId=org" fallbackInitial="P" label="الحساب" workspace="provider" />);
+    expect(html).toContain("organizationId=org&amp;workspace=provider");
+    expect(html).toContain("next=%2Far%2Ftableau-de-bord%3ForganizationId%3Dorg");
+  });
   it("traduit la déconnexion en arabe", () => {
     const html = renderToStaticMarkup(
       <WorkspaceAccountMenu

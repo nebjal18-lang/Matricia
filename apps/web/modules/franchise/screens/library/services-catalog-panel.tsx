@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import{usePathname,useRouter,useSearchParams}from"next/navigation";
+import type{CatalogServerPage}from"@/modules/franchise/data/library/server-page";
+import { useState } from "react";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import type { FranchiseCatalogRow, FranchiseCategoryNode } from "@/modules/franchise/data/library/workspace-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -22,7 +24,9 @@ export function ServicesCatalogPanel({
   libraryId,
   organizationId,
   commandIdentity,
+  serverPage,
 }: {
+  serverPage?:CatalogServerPage;
   locale: Locale;
   workspaceName: string;
   categories: FranchiseCategoryNode[];
@@ -33,60 +37,32 @@ export function ServicesCatalogPanel({
   commandIdentity: { idempotencyKey: string; correlationId: string };
 }) {
   const c = libraryCopy(locale);
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("ALL");
-  const [language, setLanguage] = useState("ALL");
-  const [complete, setComplete] = useState("ALL");
-  const [validation, setValidation] = useState("ALL");
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const rows = useMemo(() => services.filter((item) => {
-    if (query && !`${item.title} ${item.code}`.toLowerCase().includes(query.toLowerCase())) return false;
-    if (status !== "ALL" && item.status !== status) return false;
-    if (language === "FR" && !item.nameFr) return false;
-    if (language === "AR" && !item.nameAr) return false;
-    if (complete === "FULL" && completeness(item) < 100) return false;
-    if (complete === "PARTIAL" && completeness(item) === 100) return false;
-    if (validation === "DRAFT" && item.status !== "DRAFT") return false;
-    if (validation === "REVIEW" && !["IN_REVIEW", "FRANCHISE_REVIEW", "CENTRAL_REVIEW"].includes(item.status)) return false;
-    if (validation === "PUBLISHED" && item.status !== "PUBLISHED" && item.status !== "APPROVED") return false;
-    if (categoryId) {
-      const parent = categories.find((node) => node.id === categoryId);
-      if (parent) {
-        if (item.category !== parent.title) return false;
-      } else if (item.subcategoryId !== categoryId) {
-        return false;
-      }
-    }
-    return true;
-  }), [services, query, status, language, complete, validation, categoryId, categories]);
-  useEffect(() => {
-    setPage(1);
-  }, [query, status, language, complete, validation, categoryId]);
-  const pageCount = Math.max(1, Math.ceil(rows.length / 8) || 1);
-  const safePage = Math.min(page, pageCount);
-  const paged = rows.slice((safePage - 1) * 8, safePage * 8);
+  const router=useRouter();const pathname=usePathname();const searchParams=useSearchParams();
+  const [query,setQuery]=useState(serverPage?.search??"");
+  const status=serverPage?.status??"ALL";const language=serverPage?.language??"ALL";const complete=serverPage?.completeness??"ALL";const validation=serverPage?.validation??"ALL";const categoryId=serverPage?.categoryId??null;
+  function navigate(values:Record<string,string|null>){const params=new URLSearchParams(searchParams.toString());params.delete("page");for(const[key,value]of Object.entries(values)){if(value&&value!=="ALL")params.set(key,value);else params.delete(key);}router.push(`${pathname}?${params}`);}
+  const rows=services;const paged=rows;const pageCount=Math.max(1,Math.ceil((serverPage?.groups.SERVICE.total??rows.length)/25));const safePage=serverPage?.page??1;
 
   return (
     <>
       <article className="client-card">
         <header><h2>{c.catalogTree}</h2></header>
         <p className="client-access-note">{workspaceName}</p>
-        <label className="franchise-search">
+        <form onSubmit={(event)=>{event.preventDefault();navigate({q:query});}} className="franchise-search"><label>
           <span className="sr-only">{c.searchService}</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.searchService} />
-        </label>
+          <input value={query} onChange={(event) => { setQuery(event.target.value); }} placeholder={c.searchService} />
+        </label><button type="submit" className="franchise-tool">{locale==="ar"?"بحث":"Rechercher"}</button></form>
         {categories.length === 0 ? <p>{c.emptyCategories}</p> : (
           <ul className="franchise-tree">
             {categories.map((category) => (
               <li key={category.id}>
-                <button type="button" className="franchise-tree-btn" data-selected={categoryId === category.id ? "true" : undefined} onClick={() => setCategoryId(category.id)}>
+                <button type="button" className="franchise-tree-btn" data-selected={categoryId === category.id ? "true" : undefined} onClick={() => { navigate({category:categoryId===category.id?null:category.id}); }}>
                   {category.title}
                 </button>
                 <ul>
                   {category.children.map((child) => (
                     <li key={child.id}>
-                      <button type="button" className="franchise-tree-btn" data-selected={categoryId === child.id ? "true" : undefined} onClick={() => setCategoryId(child.id)}>
+                      <button type="button" className="franchise-tree-btn" data-selected={categoryId === child.id ? "true" : undefined} onClick={() => { navigate({category:categoryId===child.id?null:child.id}); }}>
                         {child.title}
                       </button>
                     </li>
@@ -108,11 +84,11 @@ export function ServicesCatalogPanel({
       <article className="client-card">
         <header className="client-priority-head">
           <h2>{c.filterServices}</h2>
-          <button type="button" className="client-soft-link" onClick={() => { setQuery(""); setStatus("ALL"); setLanguage("ALL"); setComplete("ALL"); setValidation("ALL"); setCategoryId(null); }}>{c.resetFilters}</button>
+          <button type="button" className="client-soft-link" onClick={() => { setQuery(""); navigate({q:null,status:null,language:null,completeness:null,validation:null,category:null}); }}>{c.resetFilters}</button>
         </header>
         <div className="franchise-filters">
           <label><span className="sr-only">{c.state}</span>
-            <select value={status} onChange={(event) => setStatus(event.target.value)}>
+            <select value={status} onChange={(event) => { navigate({status:event.target.value}); }}>
               <option value="ALL">{c.allStatuses}</option>
               <option value="DRAFT">{c.drafts}</option>
               <option value="IN_REVIEW">{c.inReview}</option>
@@ -120,21 +96,21 @@ export function ServicesCatalogPanel({
             </select>
           </label>
           <label><span className="sr-only">{c.language}</span>
-            <select value={language} onChange={(event) => setLanguage(event.target.value)}>
+            <select value={language} onChange={(event) => { navigate({language:event.target.value}); }}>
               <option value="ALL">{c.language}</option>
               <option value="FR">FR</option>
               <option value="AR">AR</option>
             </select>
           </label>
           <label><span className="sr-only">{c.completeness}</span>
-            <select value={complete} onChange={(event) => setComplete(event.target.value)}>
+            <select value={complete} onChange={(event) => { navigate({completeness:event.target.value}); }}>
               <option value="ALL">{c.completeness}</option>
               <option value="FULL">100%</option>
               <option value="PARTIAL">0–99%</option>
             </select>
           </label>
           <label><span className="sr-only">{c.validation}</span>
-            <select value={validation} onChange={(event) => setValidation(event.target.value)}>
+            <select value={validation} onChange={(event) => { navigate({validation:event.target.value}); }}>
               <option value="ALL">{c.validation}</option>
               <option value="DRAFT">{c.drafts}</option>
               <option value="REVIEW">{c.inReview}</option>
@@ -182,11 +158,9 @@ export function ServicesCatalogPanel({
             </div>
           )}
         <nav className="franchise-pagination" aria-label={c.page}>
-          {Array.from({ length: pageCount }, (_, index) => index + 1).map((n) => (
-            n === safePage
-              ? <span key={n} aria-current="page">{n}</span>
-              : <button key={n} type="button" onClick={() => setPage(n)}>{n}</button>
-          ))}
+          <span>{serverPage?.groups.SERVICE.total??rows.length} · {safePage}/{pageCount}</span>
+          {safePage>1?<button type="button" onClick={()=>navigate({page:String(safePage-1)})}>{locale==="ar"?"السابق":"Précédent"}</button>:null}
+          {safePage<pageCount?<button type="button" onClick={()=>navigate({page:String(safePage+1)})}>{locale==="ar"?"التالي":"Suivant"}</button>:null}
         </nav>
         <p className="client-access-note">{c.clientsNote}</p>
       </article>

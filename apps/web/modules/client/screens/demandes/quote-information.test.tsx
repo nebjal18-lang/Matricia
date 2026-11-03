@@ -52,12 +52,14 @@ describe("informations complémentaires pour les devis", () => {
     expect(html.replace(/<[^>]+>/gu, " ")).not.toMatch(/users_count|[0-9a-f]{8}-[0-9a-f]{4}/u);
   });
 
-  it("confirme l’état complet sans formulaire", () => {
+  it("conserve la confirmation complète et permet de préciser un mode facultatif", () => {
     const info = toQuoteInformation({ ...raw, status: "DRAFT", required_fields_complete: true, region_code: "CASABLANCA_SETTAT", questions: raw.questions.map((question) => ({ ...question, answer: "12" })) }, "fr")!;
     const html = renderToStaticMarkup(<QuoteInformationForm locale="fr" information={info} messages={messages.fr} idempotencyKey={uid(5)} />);
     expect(html).toContain('role="status"');
     expect(html).toContain(messages.fr.completeDone);
-    expect(html).not.toContain("<button");
+    expect(html).toContain('name="interventionMode"');
+    expect(html).toContain('value="HYBRID"');
+    expect(html).toContain("<button");
   });
 
   it("transmet seulement les réponses et la région validées", async () => {
@@ -66,6 +68,16 @@ describe("informations complémentaires pour les devis", () => {
     expect(result).toEqual({ status: "success", complete: true, missing: [] });
     expect(mocks.rpc).toHaveBeenCalledWith("complete_service_request_information", expect.objectContaining({ p_request_id: uid(1), p_expected_row_version: 3, p_region_code: "CASABLANCA_SETTAT", p_answers: { users_count: "12", modules: "Paie, Stock" } }));
     expect(mocks.revalidate).toHaveBeenCalledWith(`/fr/client/demandes/${uid(1)}`);
+  });
+
+  it("enregistre uniquement le mode canonique choisi et refuse un libellé traduit",async()=>{
+    mocks.rpc.mockResolvedValue({data:{status:"DRAFT",missing_quote_keys:[]},error:null});
+    const base={locale:"ar",requestId:uid(1),rowVersion:"3",idempotencyKey:uid(5),interventionMode:"HYBRID"};
+    await completeRequestInformationAction({status:"idle"},form(base));
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_service_request_information",expect.objectContaining({p_answers:{intervention_mode:"HYBRID"}}));
+    mocks.rpc.mockClear();
+    expect(await completeRequestInformationAction({status:"idle"},form({...base,interventionMode:"مختلط"}))).toEqual({status:"error",reason:"VALIDATION"});
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
   it("refuse une région hors référentiel sans appel serveur", async () => {

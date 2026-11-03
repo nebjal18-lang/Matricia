@@ -49,7 +49,7 @@ export function JalonsBoard({
 }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo(organizationName ?? null) && (!mission || mission.milestones.length === 0);
+  const preferDemo = canApplyClientSpaceDemo() && (!mission || mission.milestones.length === 0);
   const jalons = preferDemo
     ? demo.jalons
     : (mission?.milestones ?? []).map((item) => ({

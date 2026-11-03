@@ -10,16 +10,20 @@ import { sha256Hex, signWebhook, verifyPaymentWebhook } from "./webhook";
 
 export class DemoPaymentGateway implements PaymentGateway, PaymentWebhookVerifier {
   readonly code = "DEMO" as const;
+  readonly providerEnvironment="DEMO" as const;
 
   constructor(private readonly webhookSecret?: string) {}
 
   async createIntent(request: PaymentIntentRequest): Promise<PaymentIntent> {
     assertPaymentRequest(request);
     const digest = await sha256Hex(
-      `demo-intent:${request.idempotencyKey}:${request.organizationId}:${request.planVersionId}:${request.billingInterval}:${request.amountMinor}:${request.currency}`,
+      request.purchaseKind === "CREDIT_PACK"
+        ? `demo-pack-intent:${request.idempotencyKey}:${request.organizationId}:${request.packVersionId}:${request.amountMinor}:${request.currency}`
+        : `demo-intent:${request.idempotencyKey}:${request.organizationId}:${request.planVersionId}:${request.billingInterval}:${request.amountMinor}:${request.currency}`,
     );
     return {
       gateway: this.code,
+      providerEnvironment:this.providerEnvironment,
       providerIntentId: `demo_pi_${digest.slice(0, 32)}`,
       status: "REQUIRES_CONFIRMATION",
       amountMinor: request.amountMinor,
@@ -42,6 +46,7 @@ export class DemoPaymentGateway implements PaymentGateway, PaymentWebhookVerifie
     const eventDigest = await sha256Hex(`demo-event:${input.providerIntentId}:${input.paymentReference}`);
     const rawBody = new TextEncoder().encode(JSON.stringify({
       gateway: this.code,
+      providerEnvironment:this.providerEnvironment,
       providerEventId: `demo_evt_${eventDigest.slice(0, 32)}`,
       providerIntentId: input.providerIntentId,
       eventType: "PAYMENT_SUCCEEDED",

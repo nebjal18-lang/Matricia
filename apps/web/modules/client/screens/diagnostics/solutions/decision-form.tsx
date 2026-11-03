@@ -2,7 +2,7 @@
 import { useActionState, useId, useState } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import type { SolutionLevel } from "@/modules/shared/lib/solution-insights/model";
-import { decideAction, idle } from "./actions";
+import{decideAction}from"./actions";import{idle}from"./state";
 import type { Messages } from "./messages";
 
 export function DecisionForm({ locale, solutionSetId, level, idempotencyKey, m }: { locale: "fr" | "ar"; solutionSetId: string; level: SolutionLevel; idempotencyKey: string; m: Messages }) {

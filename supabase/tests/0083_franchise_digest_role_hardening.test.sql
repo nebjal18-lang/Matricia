@@ -3,9 +3,9 @@ set local search_path=public,extensions;
 select plan(36);
 
 select ok((select p.prosecdef and p.proconfig::text like'%search_path=%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='franchise_digest_role_access'),'dedicated franchise digest access helper is hardened');
-select ok((select p.prosrc like'%f.status=''ACTIVE''%'and p.prosrc like'%FRANCHISE_OWNER%'and p.prosrc like'%FRANCHISE_MANAGER%'and p.prosrc like'%FRANCHISE_VIEWER%'and p.prosrc like'%mr.revoked_at is null%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='franchise_digest_role_access'),'helper requires active franchise and active dedicated role');
+select ok(not private.franchise_digest_role_access(null,false,null),'anonymous caller has no dedicated franchise digest scope');
 select ok((select p.prosrc like'%SUPER_ADMIN%'and p.prosrc like'%MATRICIA_ADMIN%'and p.prosrc like'%READ_ONLY_AUDITOR%'and p.prosrc like'%p_allow_platform_admin%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='franchise_digest_role_access'),'only explicit platform admin roles receive administrative read scope');
-select ok((select p.prosrc like'%mr.franchise_id=f.id%'and p.prosrc like'%mr.franchise_id is null%'and p.prosrc like'%count(*)from public.franchises sibling%'and p.prosrc like'%sibling.status=''ACTIVE''%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='franchise_digest_role_access'),'exact franchise scope is required when an operator has multiple active franchises');
+select ok(not private.franchise_digest_role_access(extensions.gen_random_uuid(),false,extensions.gen_random_uuid()),'unknown franchise does not inherit organization membership');
 select ok(not exists(select 1 from pg_policies where schemaname='public'and policyname in('franchise_digest_configs_scoped_read','franchise_digests_scoped_read','franchise_digest_jobs_scoped_read','franchise_digest_attempts_scoped_read')),'broad organization-membership digest policies are removed');
 select ok((select count(*)=4 and bool_and(qual like'%franchise_digest_role_access%')from pg_policies where schemaname='public'and policyname in('franchise_digest_configs_role_read','franchise_digests_role_read','franchise_digest_jobs_role_read','franchise_digest_attempts_role_read')),'all digest histories use dedicated role-aware RLS');
 select ok((select count(*)=2 from pg_trigger where tgname in('franchise_digest_job_recipient_guard','franchise_digest_notification_recipient_guard')and not tgisinternal),'scheduling and notification writes both revalidate recipient role');
@@ -36,6 +36,20 @@ insert into public.organization_member_roles(membership_id,role_code,franchise_i
 ('c8300000-0000-4000-8000-000000000002','CLIENT_OWNER',null),
 ('c8300000-0000-4000-8000-000000000003','FRANCHISE_OWNER','d8300000-0000-4000-8000-000000000002');
 insert into public.platform_user_roles(user_id,role_code)values('a8300000-0000-4000-8000-000000000004','MATRICIA_ADMIN');
+
+-- The dedicated role now authorizes a real active, dated mandate, not a status-only franchise fixture.
+set local session_replication_role=replica;
+do $fixture$declare f record;t uuid;m uuid;rule uuid;begin
+ select id into rule from public.franchise_economic_rule_versions where franchise_type='STANDARD'order by version desc limit 1;
+ for f in select *from public.franchises where id in('d8300000-0000-4000-8000-000000000001','d8300000-0000-4000-8000-000000000002')loop
+  t:=extensions.gen_random_uuid();m:=extensions.gen_random_uuid();
+  insert into public.franchise_territory_versions(id,franchise_id,version,territory_code,name_fr,name_ar,scope_snapshot,effective_from,content_hash,created_by)values(t,f.id,1,f.territory_code,'Territoire de recette','نطاق الاختبار','{}',now()-interval'1 day',repeat('a',64),f.created_by);
+  insert into public.franchise_mandate_versions(id,franchise_id,territory_version_id,economic_rule_version_id,version,mandate_status,rights_snapshot,obligations_snapshot,contract_snapshot,entry_fee_minor,entry_fee_mode,entry_fee_term_months,franchisee_share_bps,neoxa_share_bps,matricia_share_bps,distribution_basis,effective_from,content_hash,created_by)
+  values(m,f.id,t,rule,1,'ACTIVE','{}','{}','{}',0,'EXEMPT',0,5000,2500,2500,'DISTRIBUTABLE_PROFIT',now()-interval'1 day',repeat('b',64),f.created_by);
+  update public.franchises set current_mandate_version_id=m where id=f.id;
+ end loop;
+end$fixture$;
+set local session_replication_role=origin;
 insert into public.franchise_daily_digest_config_versions(id,franchise_id,recipient_user_id,version,policy_version_id,enabled,frequency,local_send_time,time_zone,locale,change_reason,content_hash,created_by)
 values('e8300000-0000-4000-8000-000000000001','d8300000-0000-4000-8000-000000000001','a8300000-0000-4000-8000-000000000001',1,(select id from public.franchise_daily_digest_policy_versions where status='ACTIVE'),'true','DAILY','00:00','UTC','fr-MA','Configuration runtime P83',repeat('a',64),'a8300000-0000-4000-8000-000000000001');
 

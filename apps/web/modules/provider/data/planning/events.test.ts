@@ -5,6 +5,8 @@ import {
   eventCalendarDay,
   eventsForDay,
   mondayOnOrBefore,
+  isAllDayEvent,
+  eventHourLabel,
   weekDays,
 } from "./events";
 
@@ -20,6 +22,7 @@ describe("planning calendar", () => {
     expect(eventCalendarDay("2027-01-15T00:00:00.000Z")).toBe("2027-01-15");
   });
 
+  it("distingue une date civile d’une vraie échéance à minuit",()=>{expect(isAllDayEvent("2026-10-31")).toBe(true);expect(eventHourLabel("2026-10-31","fr")).toBeNull();expect(isAllDayEvent("2026-10-31T00:00:00Z")).toBe(false);expect(eventHourLabel("2026-10-31T00:00:00Z","fr")).not.toBeNull();});
   it("collecte uniquement les dossiers réels sans inventer d’horaire", () => {
     const events = collectPlanningEvents({
       locale: "fr",
@@ -43,7 +46,7 @@ describe("planning calendar", () => {
             regionCode: "CASABLANCA",
             currency: "MAD",
             taxCategoryCode: null,
-            quote: { id: id(5), status: "DRAFT", currentVersionId: id(6), versionNumber: 1, currency: "MAD", subtotalMinor: "100", taxMinor: "20", totalMinor: "120" },
+            quote: { id: id(5), status: "DRAFT", validUntil:"2025-05-15T14:00:00Z", currentVersionId: id(6), versionNumber: 1, currency: "MAD", subtotalMinor: "100", taxMinor: "20", totalMinor: "120" },
           }],
         },
       },
@@ -61,6 +64,7 @@ describe("planning calendar", () => {
       },
     });
     expect(events.map((event) => event.kind)).toEqual(["consultation", "quote", "document"]);
+    expect(events.find(event=>event.kind==="quote")?.dueAt).toBe("2025-05-15T14:00:00Z");
     expect(events[0]?.href).toContain("/sous-traitant/consultations/");
     expect(eventsForDay(events, "2025-05-16")[0]?.label).toContain("RC_2026");
   });

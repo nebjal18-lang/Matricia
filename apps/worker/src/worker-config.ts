@@ -42,16 +42,17 @@ export function readWorkerRuntimeConfig(env: NodeJS.ProcessEnv): WorkerRuntimeCo
 
   const supabase = new URL(required(env, "NEXT_PUBLIC_SUPABASE_URL"));
   const projectMatch = supabase.hostname.match(/^([a-z0-9]{20})\.supabase\.co$/);
-  if (supabase.protocol !== "https:" || !projectMatch || supabase.pathname !== "/"
+  const localProject = environment === "development" && env.NODE_ENV !== "production"
+    && env.WORKER_LOCAL_SUPABASE_ENABLED === "true"
+    && env.WORKER_LOCAL_SUPABASE_PROJECT_ID === "Matricia"
+    && supabase.origin === "http://127.0.0.1:54321";
+  if ((!localProject && (supabase.protocol !== "https:" || !projectMatch)) || supabase.pathname !== "/"
     || supabase.username || supabase.password || supabase.search || supabase.hash) {
     throw new Error("WORKER_CONFIG_SUPABASE_URL_INVALID");
   }
-  const projectRef = projectMatch[1];
+  const projectRef = localProject ? "Matricia" : projectMatch?.[1];
   if (!projectRef) throw new Error("WORKER_CONFIG_SUPABASE_URL_INVALID");
-  const configuredProjectRef = required(env, "SUPABASE_PROJECT_REF");
-  if (configuredProjectRef !== projectRef) {
-    throw new Error("WORKER_CONFIG_SUPABASE_PROJECT_REF_MISMATCH");
-  }
+  if (required(env, "SUPABASE_PROJECT_REF") !== projectRef) throw new Error("WORKER_CONFIG_SUPABASE_PROJECT_REF_MISMATCH");
 
   const dispatchUrl = new URL(required(env, "WORKER_DISPATCH_URL"));
   const dispatchAllowedHosts = allowedHosts(env, "WORKER_DISPATCH_ALLOWED_HOSTS");

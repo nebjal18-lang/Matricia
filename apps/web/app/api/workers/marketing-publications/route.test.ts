@@ -1,9 +1,11 @@
+vi.mock("@/modules/shared/lib/operations/heartbeat", () => ({ withOperationalHeartbeat: (_service: string, _expires: number, run: () => Promise<Response>) => run() }));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), publish: vi.fn(), resolve: vi.fn() }));
 vi.mock("@/modules/shared/lib/supabase/admin", () => ({ getSupabaseAdminClient: () => ({ rpc: mocks.rpc }) }));
 vi.mock("@/modules/shared/lib/marketing-autopilot/credential-resolver", () => ({ resolveSocialCredentialReference: mocks.resolve }));
 vi.mock("@/modules/shared/lib/marketing-autopilot/publisher", () => ({
+  MAX_PUBLICATION_JOB_MS: 40_000,
   publicationJobSchema: { safeParse: (value: unknown) => ({ success: true, data: value }) },
   publishScheduledSocial: mocks.publish,
 }));
@@ -124,3 +126,15 @@ describe("marketing publication worker", () => {
     expect(mocks.rpc).toHaveBeenCalledWith("claim_next_social_publication_job_v41", expect.any(Object));
   });
 });
+
+ it("never claims a publication when the invocation lacks its worst-case time budget", async () => {
+    process.env.CRON_SECRET = secret;
+    mocks.rpc.mockReset();
+    mocks.rpc.mockResolvedValue({ data: { marked: 0 }, error: null });
+    const clock = vi.spyOn(performance, "now").mockReturnValueOnce(0).mockReturnValue(15_000);
+    try {
+      const response = await POST(request("?limit=10"));
+      expect(response.status).toBe(200);
+      expect(mocks.rpc).not.toHaveBeenCalledWith("claim_next_social_publication_job_v41", expect.anything());
+    } finally { clock.mockRestore(); }
+  });

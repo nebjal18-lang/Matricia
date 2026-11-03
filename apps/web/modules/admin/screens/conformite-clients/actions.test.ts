@@ -87,6 +87,12 @@ describe("listClientComplianceReviews", () => {
     mocks.rpc.mockResolvedValue(satisfied);
   });
 
+  it("ouvre une fiche par identifiant sans chercher dans une première page", async () => {
+    mocks.rpc.mockImplementation(async (name: string) => name === "get_admin_client_compliance_page_v1" ? {data: {cases: [], page: 1, has_next: false, counts: {all:55,check:27,complement:0,review:0,decided:0}}, error:null} : satisfied);
+    await expect(listClientComplianceReviews({caseId})).resolves.toMatchObject({status:"success",cases:[]});
+    expect(mocks.rpc).toHaveBeenCalledWith("get_admin_client_compliance_page_v1", {p_page:1,p_filter:"all",p_case_id:caseId});
+  });
+
   it("retourne un DTO minimal sans profil détaillé, chemin, hash ni identifiants tenant", async () => {
     const casesResult = { data: [{
       id: caseId,
@@ -98,6 +104,7 @@ describe("listClientComplianceReviews", () => {
       created_at: "2026-09-10T10:00:00Z",
       updated_at: "2026-09-11T10:00:00Z",
     }], error: null };
+    mocks.rpc.mockImplementation(async (name: string) => name === "get_admin_client_compliance_page_v1" ? {data: {cases: casesResult.data, page: 1, has_next: false, counts: {all:1,check:1,complement:0,review:1,decided:0}}, error:null} : satisfied);
     const profilesResult = { data: [{
       compliance_case_id: caseId,
       version: 2,
@@ -171,6 +178,7 @@ describe("listClientComplianceReviews", () => {
     const result = await listClientComplianceReviews();
     expect(result).toEqual({
       status: "success",
+      page: 1, hasNext: false, counts: {all:1,check:1,complement:0,review:1,decided:0},
       cases: [{
         id: caseId,
         organizationName: "Atlas Conseil",

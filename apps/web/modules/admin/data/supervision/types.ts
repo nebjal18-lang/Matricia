@@ -3,6 +3,7 @@ import { z } from "zod";
 const uuid = z.string().uuid();
 
 export const supervisionSchema = z.object({
+  notifications:z.array(z.object({id:uuid,organization_id:uuid,organization_name:z.string(),event_type:z.string(),channel:z.string(),status:z.string(),priority:z.string(),read_at:z.string().nullable(),updated_at:z.string(),error_code:z.string().nullable(),attempt_count:z.number().int().nonnegative()})).optional(),
   as_of: z.string(),
   read_only: z.boolean(),
   organizations: z.array(z.object({
@@ -11,6 +12,8 @@ export const supervisionSchema = z.object({
     legal_name: z.string(),
     status: z.string(),
     created_at: z.string(),
+    role_codes: z.array(z.string()).optional(),
+    client_compliance_status:z.string().nullable().optional(),provider_identity_verified:z.boolean().nullable().optional(),canonical_identity_verified:z.boolean().optional(),
     member_count: z.number().int().nonnegative(),
     open_requests: z.number().int().nonnegative(),
     open_disputes: z.number().int().nonnegative(),
@@ -35,6 +38,7 @@ export const supervisionSchema = z.object({
     provider_name: z.string(),
     client_name: z.string(),
     status: z.string(),
+    version_number:z.number().int().positive().nullable().optional(),currency:z.string().nullable().optional(),subtotal_minor:z.string().nullable().optional(),tax_minor:z.string().nullable().optional(),total_minor:z.string().nullable().optional(),duration_days:z.number().int().nullable().optional(),valid_until:z.string().nullable().optional(),
     updated_at: z.string().nullable(),
   })),
   missions: z.array(z.object({
@@ -102,6 +106,7 @@ export const supervisionSchema = z.object({
     provider_name: z.string(),
     client_organization_id: uuid,
   })).default([]),
+  milestones:z.array(z.object({id:uuid,mission_id:uuid,milestone_key:z.string(),title_fr:z.string(),title_ar:z.string(),status:z.string(),organization_id:uuid,owner_name:z.string(),due_at:z.string().nullable(),deliverable_count:z.number().int().nonnegative(),proof_count:z.number().int().nonnegative()})).optional(),
   documents: z.array(z.object({
     id: uuid,
     kind: z.string(),
@@ -155,10 +160,17 @@ export const ficheSchema = z.object({
     display_name: z.string(),
     legal_name: z.string(),
     status: z.string(),
+    role_codes: z.array(z.string()).optional(),
+    client_compliance_status:z.string().nullable().optional(),provider_identity_verified:z.boolean().nullable().optional(),canonical_identity_verified:z.boolean().optional(),
+    client_legal_profile:z.object({version:z.number().int(),legal_form:z.string().nullable(),activity:z.string().nullable(),registered_city:z.string().nullable(),registered_address:z.record(z.string(),z.unknown()).nullable(),if_number:z.string().nullable(),rc_number:z.string().nullable()}).nullable().optional(),
+    client_compliance_snapshot:z.object({case_id:uuid,status:z.string(),profile_version:z.number().int().nullable(),document_count:z.number().int(),verified_document_count:z.number().int(),currently_verified:z.boolean(),required_actions:z.array(z.object({id:uuid,kind:z.enum(["ANOMALY","QUESTION"]),code:z.string(),label_fr:z.string(),label_ar:z.string()}))}).nullable().optional(),
+    row_version: z.number().int().positive().optional(),
+    administration_details: z.record(z.string(),z.unknown()).optional(),
     country_code: z.string(),
     created_at: z.string(),
     updated_at: z.string().nullable(),
   }),
+  client_request_count:z.number().int().optional(),
   memberships: z.array(z.object({
     id: uuid,
     user_id: uuid,

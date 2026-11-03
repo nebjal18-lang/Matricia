@@ -5,9 +5,7 @@ vi.mock("@/modules/shared/lib/diagnostics-opportunities/server-repository", () =
   createServerDiagnosticsRepository: async () => ({ list: mocks.list, complete: mocks.complete }),
 }));
 vi.mock("@/modules/shared/lib/supabase/server", () => ({
-  getSupabaseServerClient: async () => ({
-    from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ not: () => ({ order: () => ({ limit: mocks.listServices }) }) }) }) }) }),
-  }),
+ getSupabaseServerClient:async()=>({from:(table:string)=>{const chain:Record<string,unknown>={};for(const method of["select","eq","not","order"])chain[method]=vi.fn(()=>chain);chain.limit=table==="questionnaire_sessions"?mocks.list:mocks.listServices;return chain;}}),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
 vi.mock("node:crypto", () => ({ randomUUID: () => "99999999-9999-4999-8999-999999999999" }));
@@ -31,31 +29,40 @@ function form() {
 describe("latest client analysis", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("derives the submitted assessment and published service on the server", async () => {
-    mocks.list.mockResolvedValue({ status: "success", value: { sessions: [{ id: sessionId, libraryId, organizationId }], runs: [], services: [] } });
+  it("uses the submitted assessment and published engine without inferring a service", async () => {
+    mocks.list.mockResolvedValue({data:[{id:sessionId,library_id:libraryId,organization_id:organizationId}],error:null});
     mocks.listServices.mockResolvedValue({ data: [{ id: serviceId }], error: null });
-    mocks.complete.mockResolvedValue({ status: "success", value: {} });
+    mocks.complete.mockResolvedValue({ status: "success", value: {diagnostic_run_id:sessionId,opportunity_created:false} });
 
-    await expect(completeLatestAction({ status: "idle" }, form())).resolves.toEqual({ status: "success" });
-    expect(mocks.complete).toHaveBeenCalledWith(expect.objectContaining({ sessionId, serviceId }));
+    await expect(completeLatestAction({ status: "idle" }, form())).resolves.toEqual({ status: "success",diagnosticRunId:sessionId,organizationId });
+    expect(mocks.complete).toHaveBeenCalledWith(expect.objectContaining({ sessionId, serviceId:null }));
     expect(mocks.revalidate).toHaveBeenCalledWith("/fr/client/diagnostics");
   });
 
   it("does not invent a result when no submitted assessment exists", async () => {
-    mocks.list.mockResolvedValue({ status: "success", value: { sessions: [], runs: [], services: [] } });
+    mocks.list.mockResolvedValue({data:[],error:null});
     await expect(completeLatestAction({ status: "idle" }, form())).resolves.toEqual({ status: "error", reason: "NO_SUBMITTED_ASSESSMENT" });
     expect(mocks.complete).not.toHaveBeenCalled();
   });
 
-  it("does not choose an arbitrary service when the scope is ambiguous", async () => {
-    mocks.list.mockResolvedValue({ status: "success", value: { sessions: [{ id: sessionId, libraryId, organizationId }], runs: [], services: [] } });
-    mocks.listServices.mockResolvedValue({ data: [{ id: serviceId }, { id: "55555555-5555-4555-8555-555555555555" }], error: null });
-    await expect(completeLatestAction({ status: "idle" }, form())).resolves.toEqual({ status: "error", reason: "ANALYSIS_SCOPE_REQUIRED" });
-    expect(mocks.complete).not.toHaveBeenCalled();
+  it("reports missing published policy without fabricating a result",async()=>{
+    mocks.list.mockResolvedValue({data:[{id:sessionId,library_id:libraryId,organization_id:organizationId}],error:null});
+    mocks.complete.mockResolvedValue({status:"error",reason:"POLICY_REQUIRED"});
+    expect(await completeLatestAction({status:"idle"},form())).toEqual({status:"error",reason:"PUBLISHED_POLICY_REQUIRED"});
+    expect(mocks.listServices).not.toHaveBeenCalled();
+  });
+
+  it("uses an explicit published service choice only after its scoped lookup",async()=>{
+    mocks.list.mockResolvedValue({data:[{id:sessionId,library_id:libraryId,organization_id:organizationId}],error:null});
+    mocks.listServices.mockResolvedValue({data:[{id:serviceId}],error:null});mocks.complete.mockResolvedValue({status:"success",value:{diagnostic_run_id:sessionId,opportunity_created:false}});
+    const value=form();value.set("analysisServiceId",serviceId);
+    expect(await completeLatestAction({status:"idle"},value)).toEqual({status:"success",diagnosticRunId:sessionId,organizationId});expect(mocks.complete).toHaveBeenCalledWith(expect.objectContaining({serviceId}));
+    mocks.complete.mockClear();mocks.listServices.mockResolvedValue({data:[],error:null});
+    expect(await completeLatestAction({status:"idle"},value)).toEqual({status:"error",reason:"ANALYSIS_SCOPE_REQUIRED"});expect(mocks.complete).not.toHaveBeenCalled();
   });
 
   it("never falls back to a session from another authorized organization", async () => {
-    mocks.list.mockResolvedValue({ status: "success", value: { sessions: [{ id: sessionId, libraryId, organizationId: "66666666-6666-4666-8666-666666666666" }], runs: [], services: [] } });
+    mocks.list.mockResolvedValue({data:[{id:sessionId,library_id:libraryId,organization_id:"66666666-6666-4666-8666-666666666666"}],error:null});
     await expect(completeLatestAction({ status: "idle" }, form())).resolves.toEqual({ status: "error", reason: "NO_SUBMITTED_ASSESSMENT" });
     expect(mocks.listServices).not.toHaveBeenCalled();
     expect(mocks.complete).not.toHaveBeenCalled();

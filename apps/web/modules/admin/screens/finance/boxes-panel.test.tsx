@@ -4,6 +4,8 @@ import type { AdminBoxesDashboard } from "@/modules/admin/data/boxes/model";
 import { BoxesPanel } from "./boxes-panel";
 import { getCommerceMessages } from "./commerce-messages";
 
+vi.mock("next/navigation",()=>({useRouter:()=>({refresh:vi.fn()})}));
+
 vi.mock("./commerce-actions", () => ({
   commerceIdle: { status: "idle" },
   createBenefitAction: async () => ({ status: "idle" }),
@@ -80,7 +82,11 @@ describe("BoxesPanel", () => {
     expect(html).toContain("Box Gold");
     expect(html).toContain("Approbation requise avant publication");
     expect(html).toContain("Créer une version d’avantage");
-    expect(html).toContain("Attribution manuelle de crédits");
+    expect(html).toContain("Attributions de crédits sous double contrôle");
+    expect(html).toContain("Crédits du cycle d’abonnement payé");
+    expect(html).toContain("/fr/administration/avantages/regles");
+    expect(html).toContain("/fr/administration/avantages/livraisons");
+    expect(html).not.toContain('value="SUBSCRIPTION_GRANT"');
     expect(html).not.toMatch(/\bTODO\b|\bFIXME\b/);
     expect(html).not.toMatch(/placeholder="/i);
   });

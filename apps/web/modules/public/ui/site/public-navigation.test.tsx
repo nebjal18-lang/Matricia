@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@/modules/shared/lib/auth/select-workspace", () => ({ selectWorkspace: vi.fn() }));
 let currentPathname = "/fr";
 vi.mock("next/navigation", () => ({ usePathname: () => currentPathname }));
 vi.mock("@/modules/shared/ui/button", () => ({ buttonVariants: () => "button" }));
@@ -51,6 +52,22 @@ describe("PublicNavigation", () => {
     expect(html).toContain("rtl-mirror");
   });
 
+  it.each(["fr", "ar"] as const)("shows verified current space and only its authorized role choices in %s", locale => {
+    currentPathname = `/${locale}/entreprises`;
+    const html = renderToStaticMarkup(<PublicNavigation locale={locale} sessionNavigation={{ signedIn: true, landing: "administration", options: [{ kind: "administration", href: `/${locale}/administration/command-center?workspace=administration` }, { kind: "client", href: `/${locale}/tableau-de-bord?workspace=client` }] }} />);
+    expect(html).toContain(locale === "fr" ? "Mon espace · Administration" : "مساحتي · الإدارة");
+    expect(html).toContain(locale === "fr" ? "Changer d’espace" : "تغيير المساحة");
+    expect(html).toContain('name="workspace" value="administration"');
+    expect(html).toContain('name="workspace" value="client"');
+    expect(html).not.toContain('value="provider"');
+    expect(html).not.toContain(`href="/${locale}/connexion"`);
+    expect(html).not.toContain(`href="/${locale}/inscription"`);
+  });
+  it("does not offer role switching to a single-role member", () => {
+    const html = renderToStaticMarkup(<PublicNavigation locale="fr" sessionNavigation={{ signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] }} />);
+    expect(html).toContain("Mon espace · Client");
+    expect(html).not.toContain("Changer d’espace");
+  });
   it("résout strictement les routes actives", () => {
     expect(isPublicNavLinkActive("/fr/services/IT-001", "/fr/services")).toBe(true);
     expect(isPublicNavLinkActive("/fr/fournisseur", "/fr/services")).toBe(false);

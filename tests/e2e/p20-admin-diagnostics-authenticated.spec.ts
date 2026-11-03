@@ -6,9 +6,9 @@ type Locale = "fr" | "ar";
 type Surface = { name: string; route: string; stateVariable: "E2E_ADMIN_STORAGE_STATE" | "E2E_CLIENT_STORAGE_STATE"; heading: Record<Locale,string>; navigation?: Record<Locale,string> };
 
 const surfaces: Surface[] = [
-  { name: "command center", route: "administration/command-center", stateVariable: "E2E_ADMIN_STORAGE_STATE", heading: { fr: "Toutes les pages d’administration", ar: "كل صفحات الإدارة" }, navigation: { fr: "Navigation du command center", ar: "التنقل في مركز القيادة" } },
+  { name: "command center", route: "administration/command-center", stateVariable: "E2E_ADMIN_STORAGE_STATE", heading: { fr: "Administration Matricia", ar: "إدارة ماتريسيا" }, navigation: { fr: "Navigation du command center", ar: "التنقل في مركز القيادة" } },
   { name: "marketing autopilot", route: "administration/marketing-autopilot", stateVariable: "E2E_ADMIN_STORAGE_STATE", heading: { fr: "Marketing Autopilot", ar: "التسويق الآلي" } },
-  { name: "diagnostics", route: "client/diagnostics", stateVariable: "E2E_CLIENT_STORAGE_STATE", heading: { fr: "Comprendre vos priorités", ar: "فهم أولوياتكم" } },
+  { name: "diagnostics", route: "client/diagnostics", stateVariable: "E2E_CLIENT_STORAGE_STATE", heading: { fr: "Mes diagnostics", ar: "تشخيصاتي" } },
 ];
 
 async function expectAccessible(page: Page) {
@@ -29,7 +29,7 @@ for (const surface of surfaces) {
   for (const locale of ["fr", "ar"] as const) {
     test(`authenticated ${surface.name} ${locale.toUpperCase()} is RTL-safe, keyboard reachable and accessible`, async ({ browser }, testInfo) => {
       const statePath = process.env[surface.stateVariable];
-      test.skip(!statePath || !existsSync(statePath), `${surface.stateVariable} must reference a generated authenticated Playwright state`);
+      if (!statePath || !existsSync(statePath)) throw new Error("A generated authenticated diagnostic state is required");
       const viewport = testInfo.project.name.includes("mobile") ? { width: 360, height: 800 } : { width: 1280, height: 900 };
       const { context, page } = await openAuthenticated(browser, statePath!, locale, surface.route, viewport);
       await expect(page).toHaveURL(new RegExp(`/${locale}/${surface.route}/?$`));

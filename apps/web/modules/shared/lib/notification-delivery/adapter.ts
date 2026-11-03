@@ -13,7 +13,7 @@ export type NotificationDeliveryJob = {
 };
 
 export type NotificationDeliveryResult =
-  | { outcome: "DELIVERED"; providerMessageId: string; evidence: Record<string, string | boolean> }
+  | { outcome: "DELIVERED" | "SENT"; providerMessageId: string; evidence: Record<string, string | boolean> }
   | { outcome: "RETRYABLE_FAILURE" | "PERMANENT_FAILURE"; errorCode: string; evidence: Record<string, string | boolean> };
 
 type DeliveryEnvironment = Record<string, string | undefined>;
@@ -76,6 +76,18 @@ function validMailbox(value: string | undefined): value is string {
   return Boolean(value && value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(value));
 }
 
+export function notificationText(job: NotificationDeliveryJob, env: DeliveryEnvironment): string {
+  if (!job.ctaPath) return job.body;
+  const base = env.NEXT_PUBLIC_APP_URL;
+  if (!base || !job.ctaPath.startsWith("/") || job.ctaPath.startsWith("//") || /[\\\r\n]/u.test(job.ctaPath)) return job.body;
+  try {
+    const origin = new URL(base);
+    const target = new URL(job.ctaPath, origin);
+    if (origin.protocol !== "https:" || target.origin !== origin.origin) return job.body;
+    return `${job.body}\n\n${target.href}`;
+  } catch { return job.body; }
+}
+
 function resendRequest(job: NotificationDeliveryJob, env: DeliveryEnvironment): EmailProviderRequest | null {
   const token = env.RESEND_API_KEY?.trim();
   const fromEmail = env.RESEND_FROM_EMAIL?.trim();
@@ -90,7 +102,7 @@ function resendRequest(job: NotificationDeliveryJob, env: DeliveryEnvironment): 
       from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
       to: [job.recipientEmail],
       subject: job.subject,
-      text: job.body,
+      text: notificationText(job, env),
       headers: { "X-Entity-Ref-ID": job.providerIdempotencyKey },
     },
   };
@@ -123,7 +135,7 @@ export async function deliverNotification(job: NotificationDeliveryJob, dependen
   if (job.channel === "IN_APP") return { outcome: "DELIVERED", providerMessageId: `in-app-${job.deliveryId}`, evidence: { adapter: "IN_APP" } };
   if (!job.recipientEmail || !job.providerIdempotencyKey) return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_RECIPIENT_INVALID", evidence: { adapter: "EMAIL" } };
   const mode = dependencies.env.EMAIL_DELIVERY_MODE;
-  if (mode === "DEMO") return dependencies.env.NODE_ENV === "production"
+  if (mode === "DEMO") return (dependencies.env.NODE_ENV === "production" || dependencies.env.APP_ENV?.trim().toLowerCase() === "production")
     ? { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_DEMO_FORBIDDEN", evidence: { adapter: "EMAIL" } }
     : { outcome: "DELIVERED", providerMessageId: demoMessageId(job), evidence: { adapter: "EMAIL_DEMO", deterministic: true } };
   if (!mode) return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_MODE_UNCONFIGURED", evidence: { adapter: "EMAIL" } };
@@ -141,12 +153,12 @@ export async function deliverNotification(job: NotificationDeliveryJob, dependen
     });
     if (response.ok) {
       const messageId = await providerMessageId(response, provider.adapter);
-      if (!messageId || messageId.length < 3 || messageId.length > 200 || /[\u0000-\u001f\u007f]/u.test(messageId)) return { outcome: "RETRYABLE_FAILURE", errorCode: "EMAIL_PROVIDER_MESSAGE_ID_INVALID", evidence: { adapter: provider.adapter } };
-      return { outcome: "DELIVERED", providerMessageId: messageId, evidence: { adapter: provider.adapter, accepted: true } };
+      if (!messageId || messageId.length < 3 || messageId.length > 200 || /[\u0000-\u001f\u007f]/u.test(messageId)) return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_PROVIDER_RECONCILIATION_REQUIRED", evidence: { adapter: provider.adapter } };
+      return { outcome: "SENT", providerMessageId: messageId, evidence: { adapter: provider.adapter, accepted: true, deliveryConfirmed: false, recipientHash: createHash("sha256").update(job.recipientEmail.trim().toLowerCase()).digest("hex") } };
     }
     if (response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500) return { outcome: "RETRYABLE_FAILURE", errorCode: `EMAIL_PROVIDER_${response.status}`, evidence: { adapter: provider.adapter } };
     return { outcome: "PERMANENT_FAILURE", errorCode: `EMAIL_PROVIDER_${response.status}`, evidence: { adapter: provider.adapter } };
   } catch {
-    return { outcome: "RETRYABLE_FAILURE", errorCode: "EMAIL_PROVIDER_UNAVAILABLE", evidence: { adapter: provider.adapter } };
+    return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_PROVIDER_RECONCILIATION_REQUIRED", evidence: { adapter: provider.adapter } };
   }
 }

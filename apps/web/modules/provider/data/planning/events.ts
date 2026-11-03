@@ -1,3 +1,5 @@
+import{workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
+import type { BillingDashboard } from "@/modules/provider/data/billing/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ProviderMissionDashboard } from "@/modules/provider/data/missions/model";
 import type { ProviderDashboard } from "@/modules/provider/data/qualification/model";
@@ -5,7 +7,7 @@ import type { ProviderQuoteDashboard } from "@/modules/provider/data/quotes/mode
 
 export const PLANNING_TIME_ZONE = "Africa/Casablanca";
 
-export type PlanningKind = "consultation" | "quote" | "milestone" | "document";
+export type PlanningKind = "consultation" | "quote" | "milestone" | "document" | "invoice" | "renewal";
 
 export type PlanningEvent = {
   id: string;
@@ -17,8 +19,8 @@ export type PlanningEvent = {
 };
 
 const kindLabels: Record<Locale, Record<PlanningKind, string>> = {
-  fr: { consultation: "Consultation", quote: "Devis", milestone: "Jalon", document: "Document" },
-  ar: { consultation: "استشارة", quote: "عرض", milestone: "معلم", document: "وثيقة" },
+  fr: { consultation: "Consultation", quote: "Devis", milestone: "Jalon", document: "Document", invoice: "Échéance de facture",renewal:"Renouvellement du contrat partenaire" },
+  ar: { consultation: "استشارة", quote: "عرض", milestone: "معلم", document: "وثيقة", invoice: "استحقاق فاتورة",renewal:"تجديد عقد الشراكة" },
 };
 
 export function ymdInZone(iso: string, timeZone = PLANNING_TIME_ZONE): string {
@@ -26,7 +28,7 @@ export function ymdInZone(iso: string, timeZone = PLANNING_TIME_ZONE): string {
 }
 
 export function eventCalendarDay(dueAt: string, timeZone = PLANNING_TIME_ZONE): string {
-  const dateOnly = /^(\d{4}-\d{2}-\d{2})T00:00:00/u.exec(dueAt);
+  const dateOnly = /^(\d{4}-\d{2}-\d{2})$/u.exec(dueAt);
   if (dateOnly) return dateOnly[1]!;
   return ymdInZone(dueAt, timeZone);
 }
@@ -49,7 +51,7 @@ export function weekDays(monday: string): string[] {
 }
 
 export function isAllDayEvent(dueAt: string): boolean {
-  return /T00:00:00/u.test(dueAt);
+  return /^\d{4}-\d{2}-\d{2}$/u.test(dueAt);
 }
 
 export function eventHourLabel(dueAt: string, locale: Locale, timeZone = PLANNING_TIME_ZONE): string | null {
@@ -68,6 +70,7 @@ export function collectPlanningEvents(input: {
   quotes: { status: "success"; dashboard: ProviderQuoteDashboard } | { status: "error" };
   missions: { status: "success"; dashboard: ProviderMissionDashboard } | { status: "error" };
   qualification: { status: "success"; dashboard: ProviderDashboard } | { status: "error" };
+  billing?: { status: "success"; dashboard: BillingDashboard } | { status: "error" };
 }): PlanningEvent[] {
   const labels = kindLabels[input.locale];
   const events: PlanningEvent[] = [];
@@ -84,13 +87,13 @@ export function collectPlanningEvents(input: {
           href: `/${input.locale}/sous-traitant/consultations/${invite.id}${orgQuery}`,
         });
       }
-      if (invite.quote && ["DRAFT", "SUBMITTED", "REVISED"].includes(invite.quote.status)) {
+      if (invite.quote?.validUntil && ["DRAFT", "SUBMITTED", "REVISED"].includes(invite.quote.status)) {
         events.push({
           id: `quote:${invite.quote.id}`,
           kind: "quote",
           kindLabel: labels.quote,
-          label: `${invite.description} · ${invite.quote.status}`,
-          dueAt: invite.deadline,
+          label: `${invite.description} · ${workflowStatusLabel(invite.quote.status,input.locale)}`,
+          dueAt: invite.quote.validUntil,
           href: `/${input.locale}/sous-traitant/devis/${invite.quote.id}${orgQuery}`,
         });
       }
@@ -106,7 +109,7 @@ export function collectPlanningEvents(input: {
             kindLabel: labels.milestone,
             label: milestone.title,
             dueAt: milestone.dueAt,
-            href: `/${input.locale}/sous-traitant/missions/${mission.id}`,
+            href: `/${input.locale}/sous-traitant/missions/${mission.id}${input.organizationQuery}`,
           });
         }
       }
@@ -119,11 +122,17 @@ export function collectPlanningEvents(input: {
           id: `doc:${document.id}`,
           kind: "document",
           kindLabel: labels.document,
-          label: `${document.code} · ${document.status}`,
-          dueAt: `${document.expiresOn}T00:00:00.000Z`,
-          href: `/${input.locale}/sous-traitant/qualification#documents`,
+          label: `${document.code} · ${workflowStatusLabel(document.status,input.locale)}`,
+          dueAt: document.expiresOn,
+          href: `/${input.locale}/sous-traitant/qualification${input.organizationQuery}#documents`,
         });
       }
+    }
+  }
+  if (input.billing?.status === "success") {
+    for (const invoice of input.billing.dashboard.invoices) {
+      if (invoice.outstandingMinor === "0") continue;
+      events.push({ id: `invoice:${invoice.id}`, kind: "invoice", kindLabel: labels.invoice, label: invoice.number, dueAt: invoice.dueOn, href: `/${input.locale}/sous-traitant/facturation/${invoice.id}${input.organizationQuery}` });
     }
   }
   return events.sort((left, right) => Date.parse(left.dueAt) - Date.parse(right.dueAt));

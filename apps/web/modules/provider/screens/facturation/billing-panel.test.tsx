@@ -4,6 +4,7 @@ import type { BillingDashboard } from "@/modules/provider/data/billing/model";
 import { BillingPanel } from "./billing-panel";
 import { getBillingMessages } from "./messages";
 
+vi.mock("next/navigation",()=>({useRouter:()=>({refresh:vi.fn()})}));
 vi.mock("./actions", () => ({
   issueInvoice: async () => ({ status: "idle" }),
   issueStatement: async () => ({ status: "idle" }),
@@ -50,7 +51,7 @@ describe("BillingPanel overdue hold", () => {
     expect(html).toContain('role="alert"');
     expect(html).toContain("nouvelles consultations");
     expect(html).toContain("missions en cours continuent");
-    expect(html).toContain("Échue");
+    expect(html).toContain("Échéance dépassée");
     expect(html).not.toMatch(/\bTODO\b|\bFIXME\b/);
   });
 });

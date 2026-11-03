@@ -1,5 +1,8 @@
+import {capacitySummaryStatus} from "@/modules/provider/data/qualification/capacity-summary";
+import {interventionModeLabel} from "@/modules/provider/data/qualification/intervention-modes";
+import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import Link from "next/link";
-import { ArrowRight, Bell, MapPin, Monitor, Settings2 } from "lucide-react";
+import { ArrowRight, Bell, MapPin, Settings2 } from "lucide-react";
 import { PreferenceForm } from "@/app/[locale]/notifications/notification-forms";
 import { getNotificationMessages } from "@/app/[locale]/notifications/messages";
 import type { NotificationDashboard } from "@/modules/shared/lib/notifications/model";
@@ -46,9 +49,6 @@ const copy = {
   },
 } as const;
 
-function modalityActive(raw: string | null | undefined, needle: RegExp) {
-  return Boolean(raw && needle.test(raw));
-}
 
 export function ProviderSettingsBoard({
   locale,
@@ -64,9 +64,9 @@ export function ProviderSettingsBoard({
   const c = copy[locale];
   const n = getNotificationMessages(locale);
   const capacityHref = `/${locale}/sous-traitant/qualification${query}#capacite`;
-  const first = dashboard?.services[0];
-  const modalityText = first?.capacityStatus ?? "";
-  const zones = first ? (locale === "ar" ? first.libraryLabel.ar : first.libraryLabel.fr) : c.unset;
+  const capacityStatus=capacitySummaryStatus(dashboard?.services??[]);
+
+  const zones = dashboard?.regionCodes?.map((code) => moroccoRegionLabel(code, locale)).join(" · ") || c.unset;
 
   return (
     <main className="client-page provider-settings">
@@ -84,12 +84,8 @@ export function ProviderSettingsBoard({
             <div className="provider-settings-grid">
               <section>
                 <h3>{c.modalities}</h3>
-                <ul className="provider-settings-checks">
-                  <li data-on={modalityActive(modalityText, /site|Sur site|ميدان|موقع/i) ? "true" : undefined}><Monitor aria-hidden className="size-4" />{c.onsite}</li>
-                  <li data-on={modalityActive(modalityText, /t[eé]l[eé]|remote|عن بعد|بعد/i) ? "true" : undefined}><Monitor aria-hidden className="size-4" />{c.remote}</li>
-                  <li data-on={modalityActive(modalityText, /hybrid|hybride|هجين/i) ? "true" : undefined}><Monitor aria-hidden className="size-4" />{c.hybrid}</li>
-                </ul>
-                <p className="client-access-note">{first ? (locale === "ar" ? `الحالة الحالية: ${first.capacityStatus}` : `Statut actuel : ${first.capacityStatus}`) : c.unset}</p>
+                <p>{dashboard?.interventionModes?.length?dashboard.interventionModes.map(mode=>interventionModeLabel(mode,locale)).join(" · "):c.unset}</p><Link className="client-text-link" href={`/${locale}/sous-traitant/qualification${query}#intervention`}>{locale==="ar"?"تعديل الكيفيات":"Modifier les modalités"}</Link>
+                <p className="client-access-note">{locale==="ar"?"القدرة الحالية":"Disponibilité actuelle"}: {capacityStatus==="MIXED"?(locale==="ar"?"تختلف حسب الخدمة":"Variable selon le service"):capacityStatus==="FULL"?(locale==="ar"?"ممتلئة":"Complète"):capacityStatus==="PAUSED"?(locale==="ar"?"متوقفة":"En pause"):capacityStatus==="LIMITED"?(locale==="ar"?"محدودة":"Limitée"):capacityStatus==="AVAILABLE"?(locale==="ar"?"متاحة":"Disponible"):c.unset}</p>
               </section>
               <section>
                 <h3><MapPin className="size-4" aria-hidden /> {c.zones}</h3>

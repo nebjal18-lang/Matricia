@@ -1,5 +1,8 @@
 begin;
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='transactional-scan-fixture-0155',configured_at=clock_timestamp()where singleton;
+
 set local search_path=public,extensions;
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='TEST/RFQ-AUTHORITY-0155',configured_at=clock_timestamp()where singleton;
 select plan(26);
 
 -- MAT-FUNC-019 behavioral proof: three equivalent providers compete for three
@@ -81,18 +84,63 @@ update public.provider_qualifications q set current_decision_id=f.qualification_
 insert into public.provider_capacity_versions(provider_organization_id,service_id,version_number,capacity_status,available_units,lead_time_days,effective_from,reason,declared_by)
 select provider_organization_id,'f1554000-0000-4000-8000-000000000001',1,'AVAILABLE',5,2,now()-interval '1 day','Capacité équivalente','f1550000-0000-4000-8000-000000000001' from provider_fixture;
 
+set local session_replication_role=origin;
 insert into public.provider_document_families(id,provider_organization_id,document_kind,code,created_by)
 select extensions.gen_random_uuid(),f.provider_organization_id,k.kind,'ROTATION_'||k.kind,'f1550000-0000-4000-8000-000000000001'
 from provider_fixture f cross join (values('LEGAL'),('FISCAL'),('INSURANCE')) k(kind);
-insert into public.provider_document_versions(family_id,provider_organization_id,version_number,status,issued_on,expires_on,storage_object_path,content_hash,change_reason,submitted_by,reviewed_by,reviewed_at)
-select d.id,d.provider_organization_id,1,'VERIFIED',current_date-30,current_date+365,'rotation/'||d.id::text,repeat('d',64),'Preuve équivalente','f1550000-0000-4000-8000-000000000001','f1550000-0000-4000-8000-000000000001',now()
-from public.provider_document_families d where d.provider_organization_id in(select provider_organization_id from provider_fixture);
+-- This test fixture uses the public upload/review commands and trusted scanner RPC;
+-- it never marks a document VERIFIED by bypassing the clean-scan guard.
+create function pg_temp.seed_clean_provider_document(p_family uuid,p_actor uuid,p_expires date)returns uuid language plpgsql as $$
+declare family public.provider_document_families%rowtype;reservation jsonb;recorded jsonb;reviewed jsonb;job uuid;prior_claims text:=current_setting('request.jwt.claims',true);key uuid:=extensions.gen_random_uuid();
+begin
+ select*into family from public.provider_document_families where id=p_family;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',p_actor,'role','authenticated','aal','aal2')::text,true);
+ reservation:=public.begin_provider_document_upload(family.provider_organization_id,'application/pdf',20);
+ insert into storage.objects(bucket_id,name,owner_id,metadata)values('provider-qualification',reservation->>'storage_object_path',p_actor::text,'{"mimetype":"application/pdf","size":20}');
+ recorded:=public.record_provider_document_version(family.provider_organization_id,family.document_kind,family.code,jsonb_build_object('issued_on',(current_date-30)::text,'expires_on',p_expires::text,'storage_object_path',reservation->>'storage_object_path','content_hash',repeat('d',64),'metadata',jsonb_build_object('declared_mime_type','application/pdf','declared_size_bytes',20)),array[]::uuid[],'Governed SQL fixture',key::text);
+ select id into job from public.provider_document_scan_jobs where document_version_id=(recorded->>'document_version_id')::uuid;
+ perform set_config('request.jwt.claims','{"role":"service_role"}',true);
+ perform public.record_provider_document_scan_result(job,'CLEAN','SQL_FIXTURE_SCANNER','test-only',repeat('d',64),'fixture-scan:'||key::text);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',p_actor,'role','authenticated','aal','aal2')::text,true);
+ reviewed:=public.review_provider_document((recorded->>'document_version_id')::uuid,'VERIFIED','Controlled test review','FIXTURE-V1','fixture-review:'||key::text);
+ perform set_config('request.jwt.claims',coalesce(prior_claims,''),true);
+ return(reviewed->>'document_version_id')::uuid;
+exception when others then perform set_config('request.jwt.claims',coalesce(prior_claims,''),true);raise;
+end$$;
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('f1559000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','f1559000-0000-4000-8000-000000000001@example.invalid','',now(),'{}','{}',now(),now());
+insert into public.platform_user_roles(user_id,role_code)values('f1559000-0000-4000-8000-000000000001','SUPER_ADMIN');
+select pg_temp.seed_clean_provider_document(d.id,'f1559000-0000-4000-8000-000000000001',current_date+365)from public.provider_document_families d where d.provider_organization_id in(select provider_organization_id from provider_fixture);
+create temporary sequence fixture_identity_seq;
+create function pg_temp.revalidate_fixture_provider(p_org uuid,p_actor uuid)returns void language plpgsql as $$
+declare snapshot jsonb;prior text:=current_setting('request.jwt.claims',true);seq text:=lpad(nextval('fixture_identity_seq')::text,9,'0');begin
+ insert into public.organization_identifiers(organization_id,identifier_type,normalized_value,verification_status)values(p_org,'ICE','997155'||seq,'PENDING'),(p_org,'IF','99915501','PENDING'),(p_org,'RC','TEST-155-'||seq,'PENDING');
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',p_actor,'role','authenticated','aal','aal2')::text,true);
+ snapshot:=public.get_provider_identity_review_context_v1(p_org);
+ perform public.revalidate_provider_identity_v1(p_org,(snapshot->>'organization_row_version')::integer,(snapshot->>'profile_row_version')::integer,snapshot->>'identity_hash',(snapshot->>'company_decision_id')::uuid,'Explicit synthetic identity review in transactional fixture',extensions.gen_random_uuid());
+ perform set_config('request.jwt.claims',coalesce(prior,''),true);
+exception when others then perform set_config('request.jwt.claims',coalesce(prior,''),true);raise;end$$;
+select pg_temp.revalidate_fixture_provider(provider_organization_id,'f1559000-0000-4000-8000-000000000001')from provider_fixture;
 
+
+set local session_replication_role=replica;
 insert into public.service_requests(id,client_organization_id,library_id,service_id,questionnaire_version_id,current_version_id,status,created_by)
 select request_id,'f1551000-0000-4000-8000-000000000001','f1554100-0000-4000-8000-000000000001','f1554000-0000-4000-8000-000000000001','f1554300-0000-4000-8000-000000000001',request_version_id,'READY','f1550000-0000-4000-8000-000000000001' from request_fixture;
 insert into public.service_request_versions(id,request_id,client_organization_id,library_id,version_number,description,urgency,currency_code,required_quote_data,required_fields_complete,catalog_snapshot_hash,questionnaire_snapshot_hash,change_reason,content_hash,created_by)
 select request_version_id,request_id,'f1551000-0000-4000-8000-000000000001','f1554100-0000-4000-8000-000000000001',1,'Demande équivalente de rotation numéro '||sequence_number,'NORMAL','MAD','{"region_code":"CASABLANCA"}',true,repeat('a',64),repeat('b',64),'Fixture rotation',repeat(sequence_number::text,64),'f1550000-0000-4000-8000-000000000001' from request_fixture;
 set local session_replication_role=origin;
+
+
+-- Declared historical Client publication source; fiscal approvals below use
+-- real commands and never update a rate or reviewed mapping directly.
+set local session_replication_role=replica;
+insert into public.catalog_service_versions(id,service_id,library_id,version,status,name_fr,name_ar,short_description_fr,short_description_ar,long_description_fr,long_description_ar,service_type,unit_label_fr,unit_label_ar,sort_order,change_reason,content_hash,created_by,published_at,primary_subcategory_id,code,slug)values('f1554010-0000-4000-8000-000000000001','f1554000-0000-4000-8000-000000000001','f1554100-0000-4000-8000-000000000001',1,'PUBLISHED','Service publié ROTATION155','خدمة منشورة ROTATION155','Précondition de recette locale','شرط اختبار محلي','Référence publiée historique de recette locale','مرجع منشور تاريخي للاختبار المحلي','CONSULTING','mission','مهمة',1,'Précondition historique publiée',repeat('a',64),'f1550000-0000-4000-8000-000000000001',now()-interval'1 day','f1554120-0000-4000-8000-000000000001','ROTATION155_PUBLISHED','rotation155-published');
+update public.catalog_services set status='PUBLISHED',current_published_version_id='f1554010-0000-4000-8000-000000000001'where id='f1554000-0000-4000-8000-000000000001';
+insert into public.catalog_releases(id,library_id,release_key,status,source_bundle_hash,snapshot_hash,published_at,created_by)values('f1554200-0000-4000-8000-000000000002','f1554100-0000-4000-8000-000000000001','ROTATION155.CLIENT.V1','PUBLISHED',repeat('a',64),repeat('a',64),now()-interval'1 day','f1550000-0000-4000-8000-000000000001');
+insert into public.questionnaires(id,library_id,code,status,current_published_version_id,created_by)values('f1554210-0000-4000-8000-000000000002','f1554100-0000-4000-8000-000000000001','ROTATION155_CLIENT','PUBLISHED','f1554300-0000-4000-8000-000000000002','f1550000-0000-4000-8000-000000000001');
+insert into public.questionnaire_versions(id,questionnaire_id,library_id,catalog_release_id,version,status,title_fr,title_ar,description_fr,description_ar,audience,engine_version,policy_version,snapshot_hash,translation_review_status,translation_reviewer_user_id,translation_reviewed_at,translation_review_proof_hash,translation_review_version,change_reason,created_by,published_at)values('f1554300-0000-4000-8000-000000000002','f1554210-0000-4000-8000-000000000002','f1554100-0000-4000-8000-000000000001','f1554200-0000-4000-8000-000000000002',1,'PUBLISHED','Questionnaire Client publié ROTATION155','استبيان العميل المنشور ROTATION155','Référence historique publiée de recette','مرجع تاريخي منشور للاختبار','CLIENT','2.0.0','ROTATION155_CLIENT',repeat('b',64),'APPROVED','f1559000-0000-4000-8000-000000000001',now()-interval'1 day',repeat('b',64),1,'Précondition historique Client publiée','f1550000-0000-4000-8000-000000000001',now()-interval'1 day');
+insert into public.catalog_release_items(release_id,library_id,object_type,object_id,version_id,content_hash,sort_order)values('f1554200-0000-4000-8000-000000000002','f1554100-0000-4000-8000-000000000001','SERVICE','f1554000-0000-4000-8000-000000000001','f1554010-0000-4000-8000-000000000001',repeat('a',64),1);
+set local session_replication_role=origin;
+update public.service_requests set questionnaire_version_id='f1554300-0000-4000-8000-000000000002'where id in(select request_id from request_fixture);
 
 create temporary table rotation_results(kind text primary key,value jsonb);
 create temporary table rotation_visibility(kind text primary key,value bigint);
@@ -101,7 +149,7 @@ grant select,insert on rotation_results,rotation_visibility to authenticated;
 -- Run and open each independent operation sequentially. Every open updates the
 -- 90-day invitation history consumed by the following real matching run.
 set local role authenticated;
-select set_config('request.jwt.claims','{"sub":"f1550000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
+select set_config('request.jwt.claims','{"sub":"f1550000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into rotation_results values('MATCH_1',public.run_service_request_matching('f1553000-0000-4000-8000-000000000001','MATCH-V1',1,'func155-match-1','f1559000-0000-4000-8000-000000000001'));
 insert into rotation_results select 'OPEN_1',public.open_service_request_rfq('f1553000-0000-4000-8000-000000000001',(select (value->>'matching_run_id')::uuid from rotation_results where kind='MATCH_1'),statement_timestamp()+interval '7 days','func155-open-1','f1559000-0000-4000-8000-000000000002');
 insert into rotation_results values('MATCH_2',public.run_service_request_matching('f1553000-0000-4000-8000-000000000002','MATCH-V1',1,'func155-match-2','f1559000-0000-4000-8000-000000000003'));
@@ -145,7 +193,7 @@ select is((select value from rotation_visibility where kind='RFQS'),0::bigint,'R
 select is((select value from rotation_visibility where kind='INVITATIONS'),0::bigint,'invitation RLS hides all provider awards from foreign tenant');
 
 set local role authenticated;
-select set_config('request.jwt.claims','{"sub":"f1550000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
+select set_config('request.jwt.claims','{"sub":"f1550000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into rotation_visibility values('CLIENT_RUNS',(select count(*) from public.matching_runs where request_id in(select request_id from request_fixture)));
 insert into rotation_visibility values('CLIENT_RFQS',(select count(*) from public.rfqs where request_id in(select request_id from request_fixture)));
 reset role;

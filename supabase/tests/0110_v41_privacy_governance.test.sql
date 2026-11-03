@@ -43,6 +43,12 @@ insert into public.data_categories(id,organization_id,processing_activity_id,cat
 insert into public.retention_policies(id,organization_id,data_category_id,version,status,retention_days,trigger_event,disposition,legal_basis_reference,effective_from,created_by) values
 ('c1100000-0000-0000-0000-000000000014','ca110000-0000-0000-0000-000000000001','c1100000-0000-0000-0000-000000000012',1,'ACTIVE',365,'ACCOUNT_CLOSED','ANONYMIZE','policy-demo','2026-09-13','c1100000-0000-0000-0000-000000000001');
 
+-- A compliant fixture includes the actual bilingual notices, legal purpose,
+-- active effective processing activity and MFA required by the production gate.
+update public.processing_activities set status='ACTIVE',effective_from=current_date-1 where organization_id='ca110000-0000-0000-0000-000000000001';
+insert into public.processing_purposes(organization_id,processing_activity_id,purpose_key,label_fr,label_ar,legal_basis,legal_basis_reference,created_by)values('ca110000-0000-0000-0000-000000000001','c1100000-0000-0000-0000-000000000010','account-management','Gestion de compte','إدارة الحساب','CONTRACT','fixture-approved-contract-0110','c1100000-0000-0000-0000-000000000001');
+insert into public.privacy_notices(organization_id,notice_key,version,locale,content_hash,storage_reference,status,published_at,effective_from,created_by)select 'ca110000-0000-0000-0000-000000000001','privacy',1,locale,repeat('b',64),'privacy/fixture-0110-'||locale||'.pdf','PUBLISHED',now(),now()-interval'1 day','c1100000-0000-0000-0000-000000000001'from unnest(array['fr-MA','ar-MA'])locale;
+select set_config('request.jwt.claims','{"sub":"c1100000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
 select set_config('request.jwt.claim.sub','c1100000-0000-0000-0000-000000000001',true);
 select lives_ok($$select public.assert_privacy_production_ready('ca110000-0000-0000-0000-000000000001')$$,'production gate passes a compliant tenant');
 insert into public.international_transfers(organization_id,processing_activity_id,provider_name,destination_country,transfer_mechanism,compliance_status,created_by) values('ca110000-0000-0000-0000-000000000001','c1100000-0000-0000-0000-000000000010','Example provider','US','CONTRACTUAL_SAFEGUARDS','REQUIRED_NOT_COMPLETED','c1100000-0000-0000-0000-000000000001');

@@ -437,6 +437,8 @@
 
 .admin-org-layout {
   display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.9rem;
 }
 
@@ -823,13 +825,7 @@
   color: var(--mat-mint-ink);
 }
 
-.admin-workspace .client-ops:not([open]) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-}
+
 
 .admin-two {
   display: grid;
@@ -1250,3 +1246,40 @@
   align-items: center;
   gap: 0.45rem;
 }
+
+/* Keep menus in the scrollable table flow, including the final row on mobile. */
+.admin-workspace .client-table-wrap .admin-row-menu[open] > div {
+  position: static;
+}
+
+.admin-filters > label {
+  flex: 1 1 8rem;
+  min-width: min(8rem, 100%);
+  max-width: 100%;
+}
+
+@media (max-width: 959px) {
+  .admin-workspace .client-side-nav { flex-wrap: wrap; align-items: flex-start; }
+  .admin-workspace .admin-side-group { flex: 1 1 100%; min-width: 0; }
+  .admin-workspace .admin-side-sub { display: flex; flex-wrap: wrap; padding-inline: 0; }
+}
+
+/* Anchor the account menu to the full topbar when its controls wrap on mobile. */
+.admin-workspace .client-topbar { position: relative; z-index: 30; }
+.admin-workspace .client-account { position: static; z-index: 31; }
+.admin-workspace .client-account[open] > div {
+  position: absolute;
+  inset-inline-start: auto;
+  inset-inline-end: 1rem;
+  inset-block-start: calc(100% + 0.25rem);
+  z-index: 32;
+  box-sizing: border-box;
+  inline-size: min(20rem, calc(100% - 2rem));
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 2rem);
+  max-block-size: min(32rem, 75dvh);
+  margin: 0;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+}
+.admin-workspace .client-account[open] > div > * { min-inline-size: 0; }

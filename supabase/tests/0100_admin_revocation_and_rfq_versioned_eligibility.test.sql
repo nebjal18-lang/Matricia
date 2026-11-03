@@ -1,4 +1,6 @@
-begin;set local search_path=public,extensions;select plan(14);
+begin;
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='transactional-scan-fixture-0100',configured_at=clock_timestamp()where singleton;
+set local search_path=public,extensions;select plan(14);
 
 select ok((select p.prosrc like'%has_platform_role%'and p.prosrc not like'%from public.platform_user_roles%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='list_admin_operations_projection'),'Admin projection uses canonical revocation-aware authorization');
 select ok((select p.prosrc like'%provider_company_decisions%'and p.prosrc like'%provider_qualification_decisions%'and p.prosrc like'%provider_capacity_versions%'and p.prosrc like'%provider_document_versions%'and p.prosrc like'%provider_restriction_decisions%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='provider_service_eligibility_snapshot'),'eligibility is derived from versioned provider evidence');
@@ -31,7 +33,41 @@ insert into public.provider_document_families(id,provider_organization_id,docume
 ('ad400000-0000-4000-8000-000000000001','ab000000-0000-4000-8000-000000000002','LEGAL','LEGAL','aa000000-0000-4000-8000-000000000002'),
 ('ad400000-0000-4000-8000-000000000002','ab000000-0000-4000-8000-000000000002','FISCAL','FISCAL','aa000000-0000-4000-8000-000000000002'),
 ('ad400000-0000-4000-8000-000000000003','ab000000-0000-4000-8000-000000000002','INSURANCE','INSURANCE','aa000000-0000-4000-8000-000000000002');
-insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,issued_on,expires_on,storage_object_path,content_hash,change_reason,submitted_by,reviewed_by,reviewed_at)select extensions.gen_random_uuid(),id,'ab000000-0000-4000-8000-000000000002',1,'VERIFIED',current_date-30,current_date+365,'p100/'||code,repeat(substr(md5(code),1,1),64),'Preuve valide','aa000000-0000-4000-8000-000000000002','aa000000-0000-4000-8000-000000000002',now()from public.provider_document_families where provider_organization_id='ab000000-0000-4000-8000-000000000002';
+-- This test fixture uses the public upload/review commands and trusted scanner RPC;
+-- it never marks a document VERIFIED by bypassing the clean-scan guard.
+create function pg_temp.seed_clean_provider_document(p_family uuid,p_actor uuid,p_expires date)returns uuid language plpgsql as $$
+declare family public.provider_document_families%rowtype;reservation jsonb;recorded jsonb;reviewed jsonb;job uuid;prior_claims text:=current_setting('request.jwt.claims',true);key uuid:=extensions.gen_random_uuid();
+begin
+ select*into family from public.provider_document_families where id=p_family;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',p_actor,'role','authenticated','aal','aal2')::text,true);
+ reservation:=public.begin_provider_document_upload(family.provider_organization_id,'application/pdf',20);
+ insert into storage.objects(bucket_id,name,owner_id,metadata)values('provider-qualification',reservation->>'storage_object_path',p_actor::text,'{"mimetype":"application/pdf","size":20}');
+ recorded:=public.record_provider_document_version(family.provider_organization_id,family.document_kind,family.code,jsonb_build_object('issued_on',(current_date-30)::text,'expires_on',p_expires::text,'storage_object_path',reservation->>'storage_object_path','content_hash',repeat('d',64),'metadata',jsonb_build_object('declared_mime_type','application/pdf','declared_size_bytes',20)),array[]::uuid[],'Governed SQL fixture',key::text);
+ select id into job from public.provider_document_scan_jobs where document_version_id=(recorded->>'document_version_id')::uuid;
+ perform set_config('request.jwt.claims','{"role":"service_role"}',true);
+ perform public.record_provider_document_scan_result(job,'CLEAN','SQL_FIXTURE_SCANNER','test-only',repeat('d',64),'fixture-scan:'||key::text);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',p_actor,'role','authenticated','aal','aal2')::text,true);
+ reviewed:=public.review_provider_document((recorded->>'document_version_id')::uuid,'VERIFIED','Controlled test review','FIXTURE-V1','fixture-review:'||key::text);
+ perform set_config('request.jwt.claims',coalesce(prior_claims,''),true);
+ return(reviewed->>'document_version_id')::uuid;
+exception when others then perform set_config('request.jwt.claims',coalesce(prior_claims,''),true);raise;
+end$$;
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('f1009000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','f1009000-0000-4000-8000-000000000001@example.invalid','',now(),'{}','{}',now(),now());
+insert into public.platform_user_roles(user_id,role_code)values('f1009000-0000-4000-8000-000000000001','SUPER_ADMIN');
+select pg_temp.seed_clean_provider_document(id,'f1009000-0000-4000-8000-000000000001',current_date+365)from public.provider_document_families where provider_organization_id='ab000000-0000-4000-8000-000000000002';
+create temporary sequence fixture_identity_seq;
+create function pg_temp.revalidate_fixture_provider(p_org uuid,p_actor uuid)returns void language plpgsql as $$
+declare snapshot jsonb;prior text:=current_setting('request.jwt.claims',true);seq text:=lpad(nextval('fixture_identity_seq')::text,9,'0');begin
+ if not exists(select 1 from public.organization_identifiers where organization_id=p_org)then
+ insert into public.organization_identifiers(organization_id,identifier_type,normalized_value,verification_status)values(p_org,'ICE','997100'||seq,'PENDING'),(p_org,'IF','99910001','PENDING'),(p_org,'RC','TEST-100-'||seq,'PENDING');
+ end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',p_actor,'role','authenticated','aal','aal2')::text,true);
+ snapshot:=public.get_provider_identity_review_context_v1(p_org);
+ perform public.revalidate_provider_identity_v1(p_org,(snapshot->>'organization_row_version')::integer,(snapshot->>'profile_row_version')::integer,snapshot->>'identity_hash',(snapshot->>'company_decision_id')::uuid,'Explicit synthetic identity review in transactional fixture',extensions.gen_random_uuid());
+ perform set_config('request.jwt.claims',coalesce(prior,''),true);
+exception when others then perform set_config('request.jwt.claims',coalesce(prior,''),true);raise;end$$;
+select pg_temp.revalidate_fixture_provider('ab000000-0000-4000-8000-000000000002','f1009000-0000-4000-8000-000000000001');
+
 
 select ok((private.provider_service_eligibility_snapshot('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001')->>'eligible')::boolean,'ALLOW runtime: valid versioned evidence is eligible');
 insert into public.provider_capacity_versions(provider_organization_id,service_id,version_number,capacity_status,available_units,lead_time_days,effective_from,reason,declared_by)values('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001',2,'FULL',0,2,now(),'Capacité pleine','aa000000-0000-4000-8000-000000000002');
@@ -47,12 +83,16 @@ update public.provider_qualifications set current_decision_id='ad300000-0000-400
 insert into public.provider_company_decisions(id,provider_organization_id,decision_version,company_status,partner_contract_status,partner_contract_expires_at,reason,rule_version,decided_by,correlation_id,decided_at)values('ad000000-0000-4000-8000-000000000002','ab000000-0000-4000-8000-000000000002',2,'VERIFIED','SIGNED',now()-interval'1 day','Contrat expiré','P100-V2','aa000000-0000-4000-8000-000000000002','ae000000-0000-4000-8000-000000000004',now()-interval'2 days');
 select ok((private.provider_service_eligibility_snapshot('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001')->'reasons')?'PARTNER_CONTRACT_INVALID','DENY runtime: expired partner contract');
 insert into public.provider_company_decisions(id,provider_organization_id,decision_version,company_status,partner_contract_status,partner_contract_expires_at,reason,rule_version,decided_by,correlation_id)values('ad000000-0000-4000-8000-000000000003','ab000000-0000-4000-8000-000000000002',3,'VERIFIED','SIGNED',now()+interval'1 year','Contrat restauré','P100-V3','aa000000-0000-4000-8000-000000000002','ae000000-0000-4000-8000-000000000005');
-insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,issued_on,expires_on,storage_object_path,content_hash,change_reason,supersedes_version_id,submitted_by,reviewed_by,reviewed_at)select 'ad500000-0000-4000-8000-000000000001',family.id,family.provider_organization_id,2,'VERIFIED',current_date-30,current_date-1,'p100/legal-expired',repeat('e',64),'Document expiré',latest.id,'aa000000-0000-4000-8000-000000000002','aa000000-0000-4000-8000-000000000002',now()from public.provider_document_families family join lateral(select version.id from public.provider_document_versions version where version.family_id=family.id order by version.version_number desc limit 1)latest on true where family.id='ad400000-0000-4000-8000-000000000001';
+select pg_temp.seed_clean_provider_document('ad400000-0000-4000-8000-000000000001','f1009000-0000-4000-8000-000000000001',current_date-1);
 select ok((private.provider_service_eligibility_snapshot('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001')->'reasons')?'DOCUMENT_LEGAL_INVALID','DENY runtime: expired required company document');
-insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,issued_on,expires_on,storage_object_path,content_hash,change_reason,supersedes_version_id,submitted_by,reviewed_by,reviewed_at)values('ad500000-0000-4000-8000-000000000002','ad400000-0000-4000-8000-000000000001','ab000000-0000-4000-8000-000000000002',3,'VERIFIED',current_date,current_date+365,'p100/legal-restored',repeat('f',64),'Document restauré','ad500000-0000-4000-8000-000000000001','aa000000-0000-4000-8000-000000000002','aa000000-0000-4000-8000-000000000002',now());
+select pg_temp.seed_clean_provider_document('ad400000-0000-4000-8000-000000000001','f1009000-0000-4000-8000-000000000001',current_date+365);
 insert into public.provider_restriction_decisions(provider_organization_id,service_id,restriction_type,decision_version,action,reason,evidence_refs,rule_version,decided_by,correlation_id)values('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001','QUALITY',1,'IMPOSED','Restriction active','["manual-review"]','P100-V1','aa000000-0000-4000-8000-000000000002','ae000000-0000-4000-8000-000000000006');
 select ok((private.provider_service_eligibility_snapshot('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001')->'reasons')?'ACTIVE_HUMAN_RESTRICTION','DENY runtime: active human restriction');
 insert into public.provider_restriction_decisions(provider_organization_id,service_id,restriction_type,decision_version,action,reason,evidence_refs,rule_version,decided_by,correlation_id)values('ab000000-0000-4000-8000-000000000002','ac300000-0000-4000-8000-000000000001','QUALITY',2,'LIFTED','Restriction levée','["manual-review"]','P100-V2','aa000000-0000-4000-8000-000000000002','ae000000-0000-4000-8000-000000000007');
+
+-- Replacement of the LEGAL version and company decision deliberately invalidated the previous identity review.
+-- A fresh governed review binds all three current CLEAN versions before testing positive RFQ admission.
+select pg_temp.revalidate_fixture_provider('ab000000-0000-4000-8000-000000000002','f1009000-0000-4000-8000-000000000001');
 
 insert into public.service_requests(id,client_organization_id,library_id,service_id,status,created_by)select ('af000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,case when n=3 then'ab000000-0000-4000-8000-000000000002'::uuid else'ab000000-0000-4000-8000-000000000001'::uuid end,'ac000000-0000-4000-8000-000000000001','ac300000-0000-4000-8000-000000000001','MATCHING',case when n=3 then'aa000000-0000-4000-8000-000000000002'::uuid else'aa000000-0000-4000-8000-000000000001'::uuid end from generate_series(1,4)n;
 insert into public.service_request_versions(id,request_id,client_organization_id,library_id,version_number,description,urgency,currency_code,required_quote_data,required_fields_complete,catalog_snapshot_hash,questionnaire_snapshot_hash,change_reason,content_hash,created_by)select ('af100000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,('af000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,case when n=3 then'ab000000-0000-4000-8000-000000000002'::uuid else'ab000000-0000-4000-8000-000000000001'::uuid end,'ac000000-0000-4000-8000-000000000001',1,'Demande P100','NORMAL','MAD',jsonb_build_object('region_code',case when n=1 then'RABAT'else'CASABLANCA'end),true,repeat('4',64),repeat('5',64),'Fixture P100',repeat('6',64),case when n=3 then'aa000000-0000-4000-8000-000000000002'::uuid else'aa000000-0000-4000-8000-000000000001'::uuid end from generate_series(1,4)n;update public.service_requests r set current_version_id=v.id from public.service_request_versions v where v.request_id=r.id and r.id::text like'af000000-%';

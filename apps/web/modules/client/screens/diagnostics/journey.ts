@@ -26,9 +26,9 @@ export function clientHref(path: string, query: string, extra?: Record<string, s
   return encoded ? `${path}?${encoded}` : path;
 }
 
-export function labelSolutionLevel(locale: Locale, level: string) {
+export function labelSolutionLevel(locale: Locale, level: string|null) {
   const labels = SOLUTION_LEVEL_LABELS[locale];
-  return labels[level as keyof typeof labels] ?? level;
+  return (level?labels[level as keyof typeof labels]:null) ?? (locale==="fr"?"Niveau non renseigné":"المستوى غير محدد");
 }
 
 export function formatDimensionKey(key: string) {
@@ -55,3 +55,6 @@ export function latestEvolutionHighlights(
 export function opportunityRequestHref(locale: Locale, opportunityId: string, selectedQuery: string) {
   return clientHref(`/${locale}/client/demandes/nouvelle`, selectedQuery, { opportunityId });
 }
+
+export function labelDiagnosticSeverity(locale:Locale,severity:string){const labels:Record<string,readonly[string,string]>={INFO:["Information","معلومة"],LOW:["Faible","منخفضة"],WARNING:["À surveiller","تتطلب المتابعة"],HIGH:["Élevée","عالية"],CRITICAL:["Critique","حرجة"]};return labels[severity]?.[locale==="fr"?0:1]??(locale==="fr"?"Gravité non renseignée":"الخطورة غير محددة");}
+export function labelDiagnosticPriority(locale:Locale,priority:number|null){return priority===null?(locale==="fr"?"Priorité non renseignée":"الأولوية غير محددة"):`${new Intl.NumberFormat(locale==="fr"?"fr-MA":"ar-MA",{maximumFractionDigits:2}).format(priority)}/100`;}

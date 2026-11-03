@@ -29,6 +29,7 @@ export default async function ClientSearchPage({
   const c = clientDashboardCopy[locale];
   return (
     <ClientAppShell
+      languagePath={`/${locale}/client/recherche?${new URLSearchParams({organizationId:space.selectedOrganizationId,q})}`}
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
@@ -38,7 +39,7 @@ export default async function ClientSearchPage({
       lead={c.searchResultsLead}
       kicker={spaceCopy(locale).kicker}
     >
-      <SearchResultsBoard locale={locale} query={result.query} hits={result.hits} unavailable={result.unavailable} />
+      <SearchResultsBoard locale={locale} query={result.query} hits={result.hits} unavailable={result.unavailable} moreResults={result.moreResults} />
     </ClientAppShell>
   );
 }

@@ -8,7 +8,7 @@ import { solutionDecision, solutionLevel, uuid } from "@/modules/shared/lib/solu
 
 export type ActionReason = "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "UNAVAILABLE";
 export type State = { status: "idle" } | { status: "success" } | { status: "error"; reason: ActionReason };
-export const idle: State = { status: "idle" };
+
 const input = z.object({ locale: z.enum(["fr", "ar"]), solutionSetId: uuid, level: solutionLevel, decision: solutionDecision, reason: z.string().trim().min(3).max(2000), deferredUntil: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/u), z.literal("")]), idempotencyKey: z.string().min(8).max(200) });
 function actionReason(reason: SolutionFailure): ActionReason {
   if (reason === "UNAUTHENTICATED" || reason === "FORBIDDEN" || reason === "CONFLICT") return reason;

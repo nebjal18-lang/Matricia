@@ -1,4 +1,5 @@
 "use client";
+import {commerceIdle}from"@/modules/admin/screens/finance/commerce-state";
 
 import { useActionState } from "react";
 import { Badge } from "@/modules/shared/ui/badge";
@@ -7,7 +8,7 @@ import { Input } from "@/modules/shared/ui/input";
 import type { AdminVolumeDashboard } from "@/modules/admin/data/volume/model";
 import { formatExactUnits, formatMinorExact } from "@/modules/shared/lib/volume-procurement/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
-import { activateFrameworkPoolAction, createFrameworkAction, commerceIdle } from "@/modules/admin/screens/finance/commerce-actions";
+import { activateFrameworkPoolAction, createFrameworkAction } from "@/modules/admin/screens/finance/commerce-actions";
 import { getCommerceMessages } from "@/modules/admin/screens/finance/commerce-messages";
 
 const control = "min-h-11 w-full rounded-md border bg-background px-3";

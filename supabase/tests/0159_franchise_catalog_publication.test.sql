@@ -112,13 +112,20 @@ insert into p59_observed values (
     'p59-q-create'
   )
 );
+-- Legacy approval remains valid for a real questionnaire with already approved dependencies.
+reset role;
+insert into public.question_bank_questions(id,library_id,question_key,scope,created_by)values('f5997000-0000-4000-8000-000000000001','f5930000-0000-0000-0000-000000000001','P59_LEGACY_READY','LIBRARY','f5900000-0000-0000-0000-000000000002');
+insert into public.question_versions(id,question_id,library_id,version,status,label_fr,label_ar,answer_type,data_key,content_hash,change_reason,created_by)values('f5997100-0000-4000-8000-000000000001','f5997000-0000-4000-8000-000000000001','f5930000-0000-0000-0000-000000000001',1,'APPROVED','Question déjà approuvée','سؤال معتمد','YES_NO','p59.legacy_ready',repeat('a',64),'Dépendance approuvée existante','f5900000-0000-0000-0000-000000000002');
+update public.question_bank_questions set current_draft_version_id='f5997100-0000-4000-8000-000000000001'where id='f5997000-0000-4000-8000-000000000001';
+set local role authenticated;
+select public.add_catalog_questionnaire_question((select(value->>'version_id')::uuid from p59_observed where key='questionnaire'),(select id from public.questionnaire_sections where questionnaire_version_id=(select(value->>'version_id')::uuid from p59_observed where key='questionnaire')limit 1),'f5997100-0000-4000-8000-000000000001',1,true,1,'p59-ready-question');
 insert into p59_observed values (
   'q-submitted',
   public.submit_franchise_catalog_questionnaire(
     (select (value->>'questionnaire_id')::uuid from p59_observed where key = 'questionnaire'),
     (select (value->>'version_id')::uuid from p59_observed where key = 'questionnaire'),
     1,
-    1,
+    2,
     'p59-q-submit'
   )
 );
@@ -128,7 +135,7 @@ insert into p59_observed values (
     (select (value->>'questionnaire_id')::uuid from p59_observed where key = 'questionnaire'),
     (select (value->>'version_id')::uuid from p59_observed where key = 'questionnaire'),
     1,
-    1,
+    2,
     'p59-q-submit'
   )
 );
@@ -161,7 +168,7 @@ insert into p59_observed values (
 select set_config('request.jwt.claims', '{"sub":"f5900000-0000-0000-0000-000000000003","role":"authenticated","aal":"aal2"}', true);
 select extensions.throws_ok(
   format(
-    $sql$select public.submit_franchise_catalog_questionnaire(%L::uuid,%L::uuid,2,2,'p59-q-cross')$sql$,
+    $sql$select public.submit_franchise_catalog_questionnaire(%L::uuid,%L::uuid,2,3,'p59-q-cross')$sql$,
     (select value->>'questionnaire_id' from p59_observed where key = 'questionnaire'),
     (select value->>'version_id' from p59_observed where key = 'questionnaire')
   ),

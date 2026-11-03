@@ -1,0 +1,8 @@
+import {describe,it,expect} from "vitest";
+import {compareQuoteRevisions} from "./revision-diff";
+import type {QuotePrefill} from "@/modules/provider/screens/devis/prefill";
+const original:QuotePrefill={solution:"Audit",deliverables:"Rapport",inclusions:"Atelier",exclusions:"Voyage",prerequisites:"Accès",warranty:"Trois mois",correctionTerms:"Reprise",proposedStartDate:"2026-11-03",durationDays:"3",validUntil:"2026-11-02T18:00",changeReason:"Initial",lines:[{label:"Audit",quantity:"1",unitCode:"DAY",unitPrice:"900719925474099.99",taxRuleVersionId:"11111111-1111-4111-8111-111111111111",itemKind:"ONE_TIME",recurrenceInterval:""}]};
+describe("immutable quote differences",()=>{
+ it("compares exact large prices, conditions and added lines without changing the original",()=>{const v2={...original,exclusions:"Voyage et nuitée",lines:[{...original.lines[0]!,unitPrice:"900719925474100.00"},{...original.lines[0]!,label:"Atelier"}]};const v3={...v2,durationDays:"4"};expect(compareQuoteRevisions(original,v2).map(x=>x.field)).toEqual(["exclusions","line:1","line:2"]);expect(compareQuoteRevisions(original,v2)[1]?.before).toContain("900719925474099.99");expect(compareQuoteRevisions(v2,v3)).toEqual([{field:"durationDays",before:"3",after:"4"}]);expect(original.lines[0]?.unitPrice).toBe("900719925474099.99");});
+ it("reports removal and yields no fake difference for equal snapshots",()=>{expect(compareQuoteRevisions(original,{...original,lines:[]})).toEqual([expect.objectContaining({field:"line:1",after:"—"})]);expect(compareQuoteRevisions(original,structuredClone(original))).toEqual([]);});
+});

@@ -91,7 +91,7 @@ function WorkCard({ item, locale, m, keys, enrichment }: { item: AdminWorkItem; 
   const dateLocale = locale === "ar" ? "ar-MA" : "fr-MA";
 
   return (
-    <article className="admin-work-card">
+    <article id={`work-${item.id}`} className="admin-work-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="admin-eyebrow !text-[var(--ad-forest)]">{queue}</p>
@@ -107,6 +107,7 @@ function WorkCard({ item, locale, m, keys, enrichment }: { item: AdminWorkItem; 
         <div><dt className="text-muted-foreground">{locale === "ar" ? "الإجراء التالي" : "Prochaine action"}</dt><dd>{next}</dd></div>
       </dl>
       <div className="mt-3 flex flex-wrap gap-2">
+        <Link href={`/${locale}/administration/support/${item.id}`} className="admin-btn-outline !min-h-10 !px-3 !text-sm">{locale === "ar" ? "الوصول المؤقت" : "Accès support temporaire"}</Link>
         <Link href={dossierHref(locale, item)} className="admin-btn-outline !min-h-10 !px-3 !text-sm">{locale === "ar" ? "فتح الملف" : "Ouvrir le dossier"}</Link>
         <span className="admin-badge" data-tone="default">{status}</span>
       </div>
@@ -158,7 +159,7 @@ function ActionCard({ action, locale, m, keyValue }: { action: AdminCommandCente
   const statusLabel = getCommandCenterCodeLabel(locale, "status", action.status);
 
   return (
-    <article className="admin-work-card">
+    <article className="admin-work-card" id={`admin-action-${action.id}`}>
       <div className="flex flex-wrap justify-between gap-3">
         <h3 className="font-semibold">{actionLabel}</h3>
         <span className="admin-badge" data-tone="default">
@@ -172,7 +173,7 @@ function ActionCard({ action, locale, m, keyValue }: { action: AdminCommandCente
       <p className="mt-2 text-sm text-muted-foreground">
         {m.approvalsRequired}: <span dir="ltr">{action.approvalsRequired}</span>
       </p>
-      {action.canDecide !== false ? (
+      {action.status === "PENDING_APPROVAL" && action.canDecide !== false ? (
         <form action={formAction} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
           <Hidden locale={locale} keyValue={keyValue}>
             <input type="hidden" name="actionRequestId" value={action.id} />
@@ -194,7 +195,7 @@ function ActionCard({ action, locale, m, keyValue }: { action: AdminCommandCente
           </div>
         </form>
       ) : (
-        <p className="mt-4 rounded-md bg-muted p-3 text-sm text-muted-foreground">{m.readOnlyDecision}</p>
+        <div className="mt-4 rounded-md bg-muted p-3 text-sm text-muted-foreground"><p>{action.status==="PENDING_APPROVAL"?m.readOnlyDecision:statusLabel}</p>{action.executedAt?<time>{action.executedAt}</time>:null}{action.resultHash?<p className="break-all"dir="ltr">{action.resultHash}</p>:null}</div>
       )}
     </article>
   );
@@ -202,6 +203,7 @@ function ActionCard({ action, locale, m, keyValue }: { action: AdminCommandCente
 
 export function CommandCenterPanel({
   dashboard,
+  query = "",
   locale,
   m,
   keys,
@@ -209,6 +211,7 @@ export function CommandCenterPanel({
   enrichment = {},
 }: {
   dashboard: AdminCommandCenter;
+  query?:string;
   locale: Locale;
   m: CommandCenterMessages;
   keys: string[];
@@ -228,7 +231,7 @@ export function CommandCenterPanel({
         <div><span>{m.dueToday}</span><strong dir="ltr">{summary.dueToday}</strong></div>
         <div><span>{m.humanReview}</span><strong dir="ltr">{summary.humanReview}</strong></div>
         <div><span>{m.exceptions}</span><strong dir="ltr">{summary.exceptions}</strong></div>
-        <div><span>{m.pending}</span><strong dir="ltr">{dashboard.actions.length}</strong></div>
+        <div><span>{locale==="ar"?"طلبات هذه الصفحة":"Demandes de cette page"}</span><strong dir="ltr">{dashboard.actions.length}</strong></div>
       </div>
 
       {summary.humanReview > 0 ? <p role="note" className="admin-notice">{m.humanReviewNotice}</p> : null}
@@ -262,11 +265,13 @@ export function CommandCenterPanel({
         <div className="admin-section-head">
           <h2 id={`${p}-approvals`}>{m.sensitive}</h2>
         </div>
+        <form method="get"className="flex flex-wrap gap-3"><label>{locale==="ar"?"حالة الطلب":"État de la demande"}<select name="actionStatus"defaultValue={dashboard.actionStatus??"ALL"}>{["ALL","PENDING_APPROVAL","AUTHORIZED","REQUEST_TRACKED","EXECUTED","FAILED","REJECTED","CANCELLED"].map((status)=><option key={status}value={status}>{status==="ALL"?(locale==="ar"?"الكل":"Tous"):getCommandCenterCodeLabel(locale,"status",status)}</option>)}</select></label><button>{locale==="ar"?"تصفية":"Filtrer"}</button></form>
         {dashboard.actions.length === 0 ? (
           <p className="admin-panel text-muted-foreground">{m.emptyActions}</p>
         ) : (
           dashboard.actions.map((action, index) => <ActionCard key={action.id} action={action} locale={locale} m={m} keyValue={keys[dashboard.workItems.length * 2 + index]!} />)
         )}
+        {(dashboard.actionPage??1)>1||dashboard.hasMoreActions?<nav aria-label={locale==="ar"?"صفحات الطلبات":"Pages des demandes"}className="flex flex-wrap gap-3">{(dashboard.actionPage??1)>1?<Link href={`/${locale}/administration/command-center?${new URLSearchParams({...Object.fromEntries(new URLSearchParams(query)),actionPage:String((dashboard.actionPage??1)-1),actionStatus:dashboard.actionStatus??"ALL"})}`}>{locale==="ar"?"السابق":"Précédent"}</Link>:null}<span>{dashboard.actionPage??1}</span>{dashboard.hasMoreActions?<Link href={`/${locale}/administration/command-center?${new URLSearchParams({...Object.fromEntries(new URLSearchParams(query)),actionPage:String((dashboard.actionPage??1)+1),actionStatus:dashboard.actionStatus??"ALL"})}`}>{locale==="ar"?"التالي":"Suivant"}</Link>:null}</nav>:null}
       </section>
 
       {dashboard.capabilities?.requestAction !== false ? (

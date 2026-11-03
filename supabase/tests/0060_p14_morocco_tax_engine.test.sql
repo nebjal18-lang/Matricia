@@ -1,6 +1,6 @@
 begin;
 set local search_path=public,extensions;
-select plan(46);
+select plan(49);
 
 -- 01
 select ok((select count(*)=3 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public'and c.relkind='r'and c.relname=any(array['tax_jurisdictions','tax_categories','tax_rule_validation_events'])),'Morocco tax reference and validation tables exist');
@@ -67,19 +67,19 @@ select ok((select p.prosrc like'%p_actor=auth.uid()%'and p.prosrc like'%coalesce
 -- 32
 select ok((select count(*)=4 and bool_and(pg_get_functiondef(p.oid)like'%morocco_tax_admin%')from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname=any(array['list_morocco_tax_rules','simulate_morocco_tax','propose_morocco_tax_rule','decide_morocco_tax_rule'])),'all public tax workflows enforce the central AAL2 authorization helper');
 -- 33
-select ok((select strpos(p.prosrc,'begin_contract_command')<strpos(p.prosrc,'select coalesce(max(version)')and strpos(p.prosrc,'request_hash')<strpos(p.prosrc,'begin_contract_command')from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='propose_morocco_tax_rule'),'proposal reserves idempotency before allocating a version number');
+select ok((select strpos(p.prosrc,'begin_fiscal_command_v1')<strpos(p.prosrc,'select coalesce(max(version)')and strpos(p.prosrc,'request_hash')<strpos(p.prosrc,'begin_fiscal_command_v1')from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='propose_morocco_tax_rule'),'proposal reserves idempotency before allocating a version number');
 -- 33
 select ok((select pg_get_functiondef(p.oid)like'%morocco.tax_rule.proposed%'and pg_get_functiondef(p.oid)like'%MoroccoTaxRuleProposedV1%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='propose_morocco_tax_rule'),'tax proposals are audited and emit Outbox events');
 -- 34
 select ok((select p.prosrc like'%a=x.created_by%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_morocco_tax_rule'),'rule authors cannot approve their own proposal');
 -- 35
-select ok((select strpos(p.prosrc,'begin_contract_command')<strpos(p.prosrc,'INVALID_MOROCCO_TAX_LIFECYCLE')from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_morocco_tax_rule'),'decision retries replay before current lifecycle validation');
+select ok((select strpos(p.prosrc,'begin_fiscal_command_v1')<strpos(p.prosrc,'INVALID_MOROCCO_TAX_LIFECYCLE')from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_morocco_tax_rule'),'decision retries replay before current lifecycle validation');
 -- 36
 select ok((select p.prosrc like'%STALE_MOROCCO_TAX_RULE%'and p.prosrc like'%row_version=row_version+1%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_morocco_tax_rule'),'decisions enforce optimistic concurrency');
 -- 37
 select ok((select pg_get_functiondef(p.oid)like'%morocco.tax_rule.decided%'and pg_get_functiondef(p.oid)like'%MoroccoTaxRuleActivatedV1%'and pg_get_functiondef(p.oid)like'%MoroccoTaxRuleRetiredV1%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_morocco_tax_rule'),'tax decisions are audited and emit lifecycle Outbox events');
 -- 38
-select ok((select p.prosrc like'%effective_from<=p_effective_on%'and p.prosrc like'%effective_to>=p_effective_on%'and p.prosrc like'%status=''ACTIVE''%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='resolve_morocco_tax'),'resolution applies category and inclusive effective dates');
+select ok((select regexp_replace(p.prosrc,'\s+','','g') like'%effective_from<=p_effective_on%'and regexp_replace(p.prosrc,'\s+','','g') like'%effective_to>=p_effective_on%'and regexp_replace(p.prosrc,'\s+','','g') like'%status=''ACTIVE''%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='resolve_morocco_tax'),'resolution applies category and inclusive effective dates');
 -- 39
 select ok((select pg_get_functiondef(p.oid)like'%CREDIT_NOTE_SOURCE_RULE_REQUIRED%'and pg_get_functiondef(p.oid)like'%p_source_rule_version_id%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='resolve_morocco_tax'),'credit notes resolve only through their source version');
 -- 40
@@ -92,10 +92,19 @@ select is(private.calculate_tax_minor(101,2000),20::bigint,'exact half-away calc
 select is(private.calculate_tax_minor(103,2000),21::bigint,'exact half-away calculation rounds 20.6 up');
 -- 44
 select is(private.calculate_tax_minor(-103,2000),(-21)::bigint,'negative credit-note calculation rounds symmetrically');
+select throws_ok($$select private.resolve_morocco_tax('PROVIDER_COMMISSION','2026-09-10',12345,null::uuid)$$,'P0002','MOROCCO_TAX_RULE_NOT_FOUND','retired DEMO seeds cannot drive financial calculations');
+-- Transaction-local fiscal approval fixture; never activate the DEMO seed rules.
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
+values('f0310000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','tax-fixture-reviewer@example.invalid','',now(),'{}','{}',now(),now());
+insert into public.tax_rule_versions(jurisdiction_code,category_code,version,rate_basis_points,effective_from,effective_to,status,professional_validation_status,rule_type,priority,conditions,legal_reference,rounding_strategy,approved_by,approved_at,validation_reference,content_hash,change_reason)
+select jurisdiction_code,category_code,999,rate_basis_points,effective_from,null,'ACTIVE','VALIDATED',rule_type,priority,'{"test_fixture":true}','Transactional automated test approval, not a production tax validation',rounding_strategy,'f0310000-0000-4000-8000-000000000001',now(),'TEST-ONLY-APPROVAL',content_hash,'Hermetic test-only validated fiscal rule fixture'
+from public.tax_rule_versions where jurisdiction_code='MA' and professional_validation_status='DEMO' and status='RETIRED';
+
+select is(private.resolve_morocco_tax('PROVIDER_COMMISSION','2026-09-10',12345,null::uuid)->>'professional_validation_status','VALIDATED','financial tax resolution uses the separately approved test version');
 -- 45
 select ok((private.resolve_morocco_tax('PROVIDER_COMMISSION','2026-09-10',12345,null::uuid)->>'tax_amount_minor')='2469'and(private.resolve_morocco_tax('PROVIDER_COMMISSION','2026-09-10',12345,null::uuid)->>'line_gross_minor')='14814','database-resolved HT to TVA to TTC is exact and serialized safely');
 -- 46
-select ok((select strpos(p.prosrc,'begin_provider_billing_command')<strpos(p.prosrc,'resolve_morocco_tax')and p.prosrc like'%PENALTY_ACCRUAL''then''PENALTY''%'and split_part(p.prosrc,'r:=private.begin_provider_billing_command',1)not like'%tax_rule_version_id%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='record_provider_payable_event'),'provider payable mapping is category-aware and retries replay before tax resolution');
+select ok((select strpos(p.prosrc,'begin_provider_billing_command')<strpos(p.prosrc,'resolve_morocco_tax')and p.prosrc like'%PENALTY_ACCRUAL''then''PENALTY''%'and split_part(p.prosrc,'r:=private.begin_provider_billing_command',1)not like'%tax_rule_version_id%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='record_provider_payable_event_pre_archive_v1'),'provider payable mapping is category-aware and retries replay before tax resolution');
 
 select * from finish();
 rollback;

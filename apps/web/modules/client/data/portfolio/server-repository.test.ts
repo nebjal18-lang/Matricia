@@ -1,6 +1,7 @@
 import { describe,expect,it,vi } from "vitest";
 vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:vi.fn()}));
-import { validPortfolioTenantPayload } from "./server-repository";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { portfolioRpc, validPortfolioTenantPayload } from "./server-repository";
 
 const a="00000000-0000-4000-8000-000000000001",b="00000000-0000-4000-8000-000000000002";
 const project={id:"00000000-0000-4000-8000-000000000011",organization_id:a};
@@ -20,4 +21,16 @@ describe("client portfolio tenant payload",()=>{
     expect(validPortfolioTenantPayload([a],[project],[contract],[{...link,project_id:foreignProject.id}],[])).toBe(false);
     expect(validPortfolioTenantPayload([a],[project],[contract],[link],[{...event,project_id:foreignProject.id}])).toBe(false);
   });
+});
+
+describe("allocation execution acknowledgement",()=>{
+ it.each([null,{}, {outcome:"OK"},{outcome:"CLIENT_TYPED_COST_ALLOCATED",allocation_id:"invalid"}])("does not claim an allocation from an invalid acknowledgement %j",async data=>{
+  vi.mocked(getSupabaseServerClient).mockResolvedValue({auth:{getUser:async()=>({data:{user:{id:a}}})},rpc:async()=>({data,error:null})} as never);
+  expect(await portfolioRpc("record_client_typed_cost_allocation",{})).toEqual({status:"error",reason:"UNAVAILABLE"});
+ });
+ it("accepts only the native audited allocation outcome with an actual record",async()=>{
+  const data={outcome:"CLIENT_TYPED_COST_ALLOCATED",allocation_id:a};
+  vi.mocked(getSupabaseServerClient).mockResolvedValue({auth:{getUser:async()=>({data:{user:{id:a}}})},rpc:async()=>({data,error:null})} as never);
+  expect(await portfolioRpc("record_client_typed_cost_allocation",{})).toEqual({status:"success",value:data});
+ });
 });

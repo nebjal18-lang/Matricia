@@ -1,0 +1,10 @@
+import { z } from "zod";
+const history=z.array(z.object({at:z.string().datetime({offset:true}),outcome:z.string(),action:z.string()}));
+const minor=z.string().regex(/^-?\d+$/);
+export const evidenceReference=z.object({outcome:z.literal("ALLOWED"),id:z.string().uuid(),code:z.string().regex(/^[A-Z][A-Z0-9_.-]{1,79}$/),providerName:z.string(),version:z.number().int().positive(),status:z.string(),expiresOn:z.string().nullable(),contentHash:z.string().regex(/^[a-f0-9]{64}$/),bucket:z.literal("provider-qualification"),path:z.string().min(3),mimeType:z.enum(["application/pdf","image/jpeg","image/png"]),sizeBytes:z.number().int().positive(),accessHistory:history});
+export const statementExport=z.object({outcome:z.literal("ALLOWED"),id:z.string().uuid(),bookId:z.string().uuid(),version:z.number().int().positive(),periodStart:z.string().date(),periodEnd:z.string().date(),currency:z.string().regex(/^[A-Z]{3}$/),revenueMinor:minor,costsMinor:minor,profitMinor:minor,shareMinor:minor,contentHash:z.string().regex(/^[a-f0-9]{64}$/),cutoffAt:z.string().datetime({offset:true}),closedAt:z.string().datetime({offset:true}),ruleVersionId:z.string().uuid(),proofs:z.array(z.object({referenceType:z.string(),referenceId:z.string(),proofHash:z.string().nullable(),amountMinor:minor})),accessHistory:history});
+export function statementCsv(value:z.infer<typeof statementExport>){
+ const rows=[['statement_id',value.id],['version',String(value.version)],['period_start',value.periodStart],['period_end',value.periodEnd],['currency',value.currency],['revenue_minor',value.revenueMinor],['costs_minor',value.costsMinor],['distributable_profit_minor',value.profitMinor],['franchisee_share_minor',value.shareMinor],['content_hash',value.contentHash],['rule_version_id',value.ruleVersionId],['entry_cutoff_at',value.cutoffAt],['closed_at',value.closedAt]];
+ // All values are validated identifiers, ISO dates or exact decimal integers, with no free-form formula cells.
+ return '\uFEFF'+rows.map(row=>row.map(cell=>'"'+cell.replaceAll('"','""')+'"').join(';')).join('\r\n')+'\r\n';
+}

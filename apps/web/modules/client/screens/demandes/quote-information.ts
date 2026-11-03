@@ -20,6 +20,7 @@ const informationSchema = z.object({
   version_number: z.number().int().positive(),
   required_fields_complete: z.boolean(),
   region_code: z.string(),
+  intervention_mode: z.enum(["ONSITE","REMOTE","HYBRID"]).nullable().optional(),
   questions: z.array(questionSchema),
 });
 
@@ -40,6 +41,7 @@ export type QuoteInformation = {
   versionNumber: number;
   complete: boolean;
   regionCode: string;
+  interventionMode?: "ONSITE" | "REMOTE" | "HYBRID" | null;
   questions: QuoteQuestion[];
 };
 
@@ -66,6 +68,7 @@ export function toQuoteInformation(raw: unknown, locale: "fr" | "ar"): QuoteInfo
     versionNumber: value.version_number,
     complete: value.required_fields_complete,
     regionCode: value.region_code,
+    interventionMode: value.intervention_mode ?? null,
     questions: value.questions.map((question) => ({
       dataKey: question.data_key,
       required: question.required,

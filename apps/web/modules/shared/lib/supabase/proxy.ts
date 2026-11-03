@@ -1,3 +1,4 @@
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPublicEnvironment } from "@/modules/shared/lib/env";
@@ -71,7 +72,11 @@ export async function refreshSupabaseSession(request: NextRequest) {
     request.nextUrl.pathname === `/${locale}/${prefix}`
     || request.nextUrl.pathname.startsWith(`/${locale}/${prefix}/`)
   );
-  if (!user && isProtected) return NextResponse.redirect(new URL(`/${locale}/connexion`, request.url));
-  if (user && isLogin) return NextResponse.redirect(new URL(`/${locale}/tableau-de-bord`, request.url));
+  if (!user && isProtected) {
+    const login = new URL(`/${locale}/connexion`, request.url);
+    login.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(login);
+  }
+  if (user && isLogin) return NextResponse.redirect(new URL(safeReturnPath(request.nextUrl.searchParams.get("next"),locale) ?? `/${locale}/tableau-de-bord`, request.url));
   return withLocaleCookie(response, request, locale);
 }

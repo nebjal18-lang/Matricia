@@ -1,0 +1,22 @@
+"use server";
+import{z}from"zod";
+import{revalidatePath}from"next/cache";
+import{getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
+export type ClientBillingState={status:"idle"|"success"|"error";reason?:string;documentId?:string};
+export async function manageClientBilling(_:ClientBillingState,form:FormData):Promise<ClientBillingState>{
+ const t=(key:string)=>String(form.get(key)??"").trim();const locale=z.enum(["fr","ar"]).safeParse(t("locale"));const key=z.string().uuid().safeParse(t("idempotencyKey"));if(!locale.success||!key.success)return{status:"error",reason:"VALIDATION"};
+ let rpc:string;let args:Record<string,unknown>;
+ if(t("intent")==="create"){
+  const rate=t("taxRate").replace(",",".");if(!/^\d{1,3}(?:\.\d{1,2})?$/u.test(rate))return{status:"error",reason:"VALIDATION"};const[whole,decimal=""]=rate.split(".");const bps=Number(whole)*100+Number(decimal.padEnd(2,"0"));
+  const issuer={legal_name:t("issuerName"),legal_form:t("issuerLegalForm"),address:t("issuerAddress"),ice:t("issuerIce"),if_number:t("issuerIf"),rc_number:t("issuerRc"),contact_email:t("issuerEmail")};
+  const input=z.object({series_key:z.string().regex(/^[A-Z][A-Z0-9_]{2,63}$/u),version:z.coerce.number().int().positive(),currency:z.string().regex(/^[A-Z]{3}$/u),tax_rate_bps:z.number().int().min(0).max(10000),tax_label_fr:z.string().min(2),tax_label_ar:z.string().min(2),jurisdiction:z.string().min(2),issuer:z.object({legal_name:z.string().min(2),legal_form:z.string().min(2),address:z.string().min(3),ice:z.string().regex(/^\d{15}$/u),if_number:z.string().regex(/^\d{6,20}$/u),rc_number:z.string().min(2),contact_email:z.string().email()}),invoice_prefix:z.string().regex(/^[A-Z0-9]{2,12}$/u),credit_prefix:z.string().regex(/^[A-Z0-9]{2,12}$/u),invoice_start_number:z.string().regex(/^[1-9]\d{0,17}$/u),credit_start_number:z.string().regex(/^[1-9]\d{0,17}$/u),valid_from:z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),service_label_fr:z.string().min(2),service_label_ar:z.string().min(2),approval_reference:z.string().min(8)}).safeParse({series_key:t("seriesKey"),version:t("version"),currency:t("currency").toUpperCase(),tax_rate_bps:bps,tax_label_fr:t("taxLabelFr"),tax_label_ar:t("taxLabelAr"),jurisdiction:t("jurisdiction"),issuer,invoice_prefix:t("invoicePrefix"),credit_prefix:t("creditPrefix"),invoice_start_number:t("invoiceStart"),credit_start_number:t("creditStart"),valid_from:t("validFrom"),service_label_fr:t("serviceLabelFr"),service_label_ar:t("serviceLabelAr"),approval_reference:t("approvalReference")});if(!input.success)return{status:"error",reason:"VALIDATION"};
+  rpc="create_client_billing_policy_v1";args={p_payload:input.data,p_idempotency_key:key.data};
+ }else if(t("intent")==="approve"){
+  const input=z.object({id:z.string().uuid(),approve:z.enum(["true","false"]),reason:z.string().min(10).max(2000)}).safeParse({id:t("policyId"),approve:t("approve"),reason:t("reason")});if(!input.success)return{status:"error",reason:"VALIDATION"};rpc="approve_client_billing_policy_v1";args={p_policy_id:input.data.id,p_approve:input.data.approve==="true",p_reason:input.data.reason,p_idempotency_key:key.data};
+ }else if(t("intent")==="issue"){
+  const input=z.object({event:z.string().regex(/^\d+$/u),adjustment:z.union([z.string().uuid(),z.literal("")])}).safeParse({event:t("paymentEventId"),adjustment:t("adjustmentId")});if(!input.success)return{status:"error",reason:"VALIDATION"};rpc="issue_client_commercial_document_v1";args={p_payment_event_id:input.data.event,p_adjustment_id:input.data.adjustment||null,p_idempotency_key:key.data};
+ }else return{status:"error",reason:"VALIDATION"};
+ const client=await getSupabaseServerClient();const{data:auth}=await client.auth.getUser();if(!auth.user)return{status:"error",reason:"UNAUTHENTICATED"};const result=await client.rpc(rpc,args);
+ if(result.error){const specific=["BILLING_POLICY_REQUIRED","CLIENT_BILLING_IDENTITY_REQUIRED","SIMULATED_PAYMENT_NOT_INVOICEABLE","FOUR_EYES_REQUIRED"].find((code)=>result.error.message?.includes(code));return{status:"error",reason:specific??(result.error.code==="42501"?"FORBIDDEN":result.error.code==="55000"?"BLOCKED":"FAILED")};}
+ const parsed=z.object({outcome:z.string(),document_id:z.string().uuid().optional()}).safeParse(result.data);if(!parsed.success)return{status:"error",reason:"FAILED"};revalidatePath(`/${locale.data}/administration/facturation-clients`);return{status:"success",reason:parsed.data.outcome,documentId:parsed.data.document_id};
+}

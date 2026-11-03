@@ -2,8 +2,8 @@ begin;
 set local search_path=public,extensions;
 select plan(26);
 
-select ok((select p.prosrc like'%mr.franchise_id=f.id%'and p.prosrc like'%count(*)from public.franchises sibling%'and p.prosrc like'%sibling.status=''ACTIVE''%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='franchise_digest_role_access'),'role helper requires exact franchise scope in multi-franchise organizations');
-select ok((select p.prosrc like'%mr.franchise_id is null%'and p.prosrc like'%=1%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='franchise_digest_role_access'),'unscoped franchise role is allowed only for a single-active-franchise operator');
+select ok(not private.franchise_digest_role_access(null,false,null),'anonymous caller cannot inherit a franchise role');
+select ok(not private.franchise_digest_role_access(extensions.gen_random_uuid(),false,extensions.gen_random_uuid()),'unknown actor cannot inherit an unscoped franchise role');
 select ok((select p.prosecdef and p.proconfig::text like'%search_path=%'and p.prosrc like'%new.created_by%'and p.prosrc like'%new.recipient_user_id%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='guard_franchise_digest_config_scope'),'configuration guard validates actor and recipient scopes');
 select ok(exists(select 1 from pg_trigger where tgname='franchise_digest_config_scope_guard'and not tgisinternal),'configuration scope guard is installed');
 select ok((select p.prosrc like'%franchise_digest_role_access(v.franchise_id,false,v.recipient_user_id)%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='schedule_franchise_daily_digests'),'scheduler filters invalid recipients before processing');
@@ -38,12 +38,26 @@ insert into public.organization_member_roles(membership_id,role_code,franchise_i
 ('c8900000-0000-4000-8000-000000000005','FRANCHISE_VIEWER',null);
 insert into public.platform_user_roles(user_id,role_code)values('a8900000-0000-4000-8000-000000000006','MATRICIA_ADMIN');
 
+
+-- The dedicated role now authorizes a real active, dated mandate, not a status-only franchise fixture.
+set local session_replication_role=replica;
+do $fixture$declare f record;t uuid;m uuid;rule uuid;begin
+ select id into rule from public.franchise_economic_rule_versions where franchise_type='STANDARD'order by version desc limit 1;
+ for f in select *from public.franchises where id in('d8900000-0000-4000-8000-000000000001','d8900000-0000-4000-8000-000000000002')loop
+  t:=extensions.gen_random_uuid();m:=extensions.gen_random_uuid();
+  insert into public.franchise_territory_versions(id,franchise_id,version,territory_code,name_fr,name_ar,scope_snapshot,effective_from,content_hash,created_by)values(t,f.id,1,f.territory_code,'Territoire de recette','نطاق الاختبار','{}',now()-interval'1 day',repeat('a',64),f.created_by);
+  insert into public.franchise_mandate_versions(id,franchise_id,territory_version_id,economic_rule_version_id,version,mandate_status,rights_snapshot,obligations_snapshot,contract_snapshot,entry_fee_minor,entry_fee_mode,entry_fee_term_months,franchisee_share_bps,neoxa_share_bps,matricia_share_bps,distribution_basis,effective_from,content_hash,created_by)
+  values(m,f.id,t,rule,1,'ACTIVE','{}','{}','{}',0,'EXEMPT',0,5000,2500,2500,'DISTRIBUTABLE_PROFIT',now()-interval'1 day',repeat('b',64),f.created_by);
+  update public.franchises set current_mandate_version_id=m where id=f.id;
+ end loop;
+end$fixture$;
+set local session_replication_role=origin;
 select ok(private.franchise_digest_role_access('d8900000-0000-4000-8000-000000000001',false,'a8900000-0000-4000-8000-000000000001'),'ALLOW: F1 manager has exact F1 scope');
 select ok(not private.franchise_digest_role_access('d8900000-0000-4000-8000-000000000001',false,'a8900000-0000-4000-8000-000000000003'),'DENY: F2 manager cannot access F1 in the same organization');
 select ok(not private.franchise_digest_role_access('d8900000-0000-4000-8000-000000000001',false,'a8900000-0000-4000-8000-000000000005'),'DENY: NULL-scoped role is not global in a multi-franchise organization');
 select ok(private.franchise_digest_role_access('d8900000-0000-4000-8000-000000000001',true,'a8900000-0000-4000-8000-000000000006'),'ALLOW: authorized platform admin retains supervised read scope');
 
-select throws_ok($sql$set local role authenticated;select set_config('request.jwt.claim.sub','a8900000-0000-4000-8000-000000000003',true);select public.configure_franchise_daily_digest('d8900000-0000-4000-8000-000000000001','a8900000-0000-4000-8000-000000000002',true,'DAILY','08:00','UTC','fr-MA','Tentative manager F2 vers F1','p89-deny-actor')$sql$,'42501'::char(5),'FRANCHISE_DIGEST_CONFIG_ACTOR_SCOPE_DENIED','DENY: F2 manager cannot configure F1');
+select throws_ok($sql$set local role authenticated;select set_config('request.jwt.claim.sub','a8900000-0000-4000-8000-000000000003',true);select public.configure_franchise_daily_digest('d8900000-0000-4000-8000-000000000001','a8900000-0000-4000-8000-000000000002',true,'DAILY','08:00','UTC','fr-MA','Tentative manager F2 vers F1','p89-deny-actor')$sql$,'42501'::char(5),'FRANCHISE_DIGEST_CONFIG_DENIED','DENY: F2 manager cannot configure F1');
 select throws_ok($sql$set local role authenticated;select set_config('request.jwt.claim.sub','a8900000-0000-4000-8000-000000000001',true);select public.configure_franchise_daily_digest('d8900000-0000-4000-8000-000000000001','a8900000-0000-4000-8000-000000000004',true,'DAILY','08:00','UTC','fr-MA','Tentative destinataire F2','p89-deny-recipient')$sql$,'42501'::char(5),'FRANCHISE_DIGEST_CONFIG_RECIPIENT_SCOPE_DENIED','DENY: F1 manager cannot target F2 recipient');
 
 create temporary table p89_observed(key text primary key,value jsonb);

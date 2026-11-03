@@ -6,21 +6,13 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Building2, Factory, Lock, Monitor, MoreHorizontal, ShieldCheck, ShoppingCart } from "lucide-react";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
+import { diagnosticOptionIds as optionIds } from "@/modules/public/data/journey/diagnostic-contract";
 import { diagnosticQuestionIds as questionIds, parseStoredDiagnostic, type DiagnosticAnswer as Answer, type DiagnosticQuestionId as QuestionId, type StoredDiagnostic as Stored } from "./diagnostic-storage";
 import { AnalyzingView, DetailView, HonestStatesView, RecapView, RecoveryStatesView, ResultView, SaveView, computePriorities, type OrganizationOption, type PriorityKey, type SaveState } from "./prediagnostic-phases";
 import styles from "./diagnostic-premium.module.css";
 
 const storageKey = "matricia.public-diagnostic.v2";
 const legacyKeys = ["matricia.public-diagnostic", "matricia.public-diagnostic.fr", "matricia.public-diagnostic.ar"];
-const optionIds: Record<Exclude<QuestionId, "next_action">, readonly string[]> = {
-  sector: ["industry_logistics", "commerce", "professional_services", "construction", "other"],
-  team_size: ["solo", "small", "medium", "large"],
-  goals: ["save_time", "control_costs", "grow_sales", "secure_activity", "global_review"],
-  priority_tracking: ["regular", "partial", "no", "unknown"],
-  sales_tracking: ["shared", "manual", "ad_hoc", "unknown"],
-  backup_restore: ["recent", "old", "no", "unknown", "not_applicable"],
-  decision_trace: ["systematic", "partial", "no", "unknown"],
-};
 const legacyQuestionIds = ["goals", "sector", "team_size", "priority_tracking", "sales_tracking", "backup_restore", "decision_trace", "next_action"] as const;
 type Phase = "questions" | "recap" | "analyzing" | "result" | "detail" | "save" | "honest" | "recovery";
 
@@ -142,7 +134,7 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
   }
 
   if (phase === "detail") {
-    return <DetailView locale={locale} priority={detailKey} onBack={() => setPhase("result")} />;
+    return <DetailView locale={locale} priority={detailKey} answers={state.answers} onBack={() => setPhase("result")} />;
   }
 
   if (phase === "save") {
@@ -235,7 +227,7 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
         <div className={styles.board}>
           <section className={styles.card} aria-labelledby="diagnostic-question">
             <div className={styles.cardHead}>
-              <p className={styles.cardEyebrow}>{copy.steps[state.step]}</p>
+              <p className={styles.cardEyebrow}>{copy.questionLabels[questionId]}</p>
               <p className={styles.progressMeta} aria-live="polite">{copy.progress(state.step + 1, questionIds.length)}</p>
             </div>
             <div className={styles.progressTrack} aria-hidden="true"><span className={styles.progressFill} style={{ width: `${progressPct}%` }} /></div>

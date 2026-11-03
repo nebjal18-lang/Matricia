@@ -1,3 +1,5 @@
+import type{CatalogPageInput}from "@/modules/franchise/data/library/server-page";
+import { scopeFranchiseDashboards } from "@/modules/franchise/data/spaces/scoped-dashboard";
 import { redirect } from "next/navigation";
 import { loadFranchiseCrm } from "@/modules/franchise/data/crm/repository";
 import { loadFranchiseDigest } from "@/modules/franchise/data/digest/repository";
@@ -6,15 +8,26 @@ import { loadFranchiseDashboard } from "@/modules/franchise/data/governance/repo
 import { loadFranchiseOperations } from "@/modules/franchise/data/operations/repository";
 import { loadFranchiseCorrectivePlans } from "@/modules/franchise/data/quality/repository";
 import { resolveFranchiseSpace } from "@/modules/franchise/data/spaces/context";
-import { buildFranchiseSpaceBoard } from "@/modules/franchise/data/spaces/live";
+import { buildFranchiseSpaceBoard, emptyFranchiseSpaces } from "@/modules/franchise/data/spaces/live";
 import { loadFranchiseLibraryWorkspace, type FranchiseLibraryLoadResult } from "@/modules/franchise/data/library/workspace";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string }) {
+export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string;franchiseId?:string;catalog?:CatalogPageInput }) {
   const space = await resolveFranchiseSpace(input);
   if (space.status === "unauthenticated") redirect(`/${input.locale}/connexion`);
-  const result = await loadFranchiseLibraryWorkspace({ locale: input.locale, organizationId: input.organizationId });
+  if (space.errorReason) return { space, result: { status: "error" as const, reason: space.errorReason } };
+  if (space.organizations.length > 1 && !space.selectedOrganizationId) {
+    return { space, result: { status: "error" as const, reason: "ORGANIZATION_REQUIRED" as const } };
+  }
+  const result = await loadFranchiseLibraryWorkspace({ locale: input.locale, organizationId: space.selectedOrganizationId ?? undefined,franchiseId:input.franchiseId,catalog:input.catalog });
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${input.locale}/connexion`);
+  if (result.status === "success") {
+    const organizationId = result.workspace.mandate.operatorOrganizationId ?? null;
+    const selected = new URLSearchParams();
+    if (organizationId) selected.set("organizationId", organizationId);
+    selected.set("franchiseId", result.workspace.mandate.franchiseId);
+    return { space: { ...space, selectedOrganizationId: organizationId, selectedQuery: `?${selected}` }, result };
+  }
   return { space, result };
 }
 
@@ -48,6 +61,7 @@ export function franchiseSpaceLiveArgs(input: {
     query: input.query,
     libraryName,
     libraryId: workspace.mandate.libraryId,
+    franchiseId: workspace.mandate.franchiseId,
     operatorOrganizationId: workspace.mandate.operatorOrganizationId ?? null,
     volumeServices: workspace.services
       .filter((item) => item.command?.volumeEligible)
@@ -67,7 +81,9 @@ export async function loadFranchiseSpaceFromLibrary(input: {
   query: string;
   result: FranchiseLibraryLoadResult;
 }) {
-  return loadFranchiseSpaceLive(franchiseSpaceLiveArgs(input));
+  if(input.result.status!=="success")return emptyFranchiseSpaces(input.locale,input.query);
+  const selected=new URLSearchParams(input.query.replace(/^\?/,""));selected.set("organizationId",input.result.workspace.mandate.operatorOrganizationId??"");selected.set("franchiseId",input.result.workspace.mandate.franchiseId);
+  return loadFranchiseSpaceLive(franchiseSpaceLiveArgs({...input,query:`?${selected}`}));
 }
 
 export async function loadFranchiseSpaceLive(input: {
@@ -75,28 +91,38 @@ export async function loadFranchiseSpaceLive(input: {
   query: string;
   libraryName?: string | null;
   libraryId?: string | null;
+  franchiseId?: string | null;
   operatorOrganizationId?: string | null;
   volumeServices?: Array<{ id: string; title: string; status: string; href: string }>;
   catalogRules?: Array<{ id: string; title: string; status: string; href: string; actions?: Array<{ type: string; target?: string }> }>;
 }) {
   const [crm, followups, governance, plans, digest, operations] = await Promise.all([
-    loadFranchiseCrm(),
-    loadFranchiseFollowups(),
-    loadFranchiseDashboard(input.locale),
+    loadFranchiseCrm(input.franchiseId ?? undefined),
+    loadFranchiseFollowups(input.franchiseId ?? undefined),
+    loadFranchiseDashboard(input.locale,input.franchiseId?{franchiseId:input.franchiseId,libraryId:input.libraryId ?? undefined,organizationId:input.operatorOrganizationId ?? undefined}:undefined),
     loadFranchiseCorrectivePlans(),
-    loadFranchiseDigest(),
-    input.libraryId ? loadFranchiseOperations({ libraryId: input.libraryId, operatorOrganizationId: input.operatorOrganizationId }) : Promise.resolve(null),
+    loadFranchiseDigest(input.franchiseId ?? undefined),
+    input.libraryId ? loadFranchiseOperations({ libraryId: input.libraryId, operatorOrganizationId: input.operatorOrganizationId,franchiseId:input.franchiseId }).then((value)=>({status:"success"as const,value})).catch(()=>({status:"error"as const})) : Promise.resolve(null),
   ]);
+  const scoped = scopeFranchiseDashboards({
+    organizationId: input.operatorOrganizationId, libraryId: input.libraryId, franchiseId: input.franchiseId,
+    governance: governance.status === "success" ? governance.dashboard : null,
+    crm: crm.status === "success" ? crm.dashboard : null,
+    followups: followups.status === "success" ? followups.dashboard : null,
+    digest: digest.status === "success" ? digest.dashboard : null,
+    plans: plans.status === "success" ? plans.plans : null,
+  });
   return buildFranchiseSpaceBoard({
     locale: input.locale,
     query: input.query,
     libraryName: input.libraryName,
-    crm: crm.status === "success" ? crm.dashboard : null,
-    followups: followups.status === "success" ? followups.dashboard : null,
-    governance: governance.status === "success" ? governance.dashboard : null,
-    plans: plans.status === "success" ? plans.plans : null,
-    digest: digest.status === "success" ? digest.dashboard : null,
-    operations,
+    crm: scoped.crm,
+    followups: scoped.followups,
+    governance: scoped.governance,
+    plans: scoped.plans,
+    digest: scoped.digest,
+    operations:operations?.status==="success"?operations.value:null,
+    unavailableSections:[...(crm.status==="error"?["CRM"]:[]),...(followups.status==="error"?["FOLLOWUPS"]:[]),...(governance.status==="error"?["GOVERNANCE"]:[]),...(plans.status==="error"?["QUALITY"]:[]),...(digest.status==="error"?["DIGEST"]:[]),...(operations?.status==="error"?["OPERATIONS"]:[])],
     volumeServices: input.volumeServices,
     catalogRules: input.catalogRules,
   });

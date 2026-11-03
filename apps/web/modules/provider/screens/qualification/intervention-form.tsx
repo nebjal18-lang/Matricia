@@ -1,0 +1,13 @@
+"use client";
+import{useActionState,useEffect,useState}from"react";
+import{useRouter}from"next/navigation";
+import{Button}from"@/modules/shared/ui/button";
+import{Textarea}from"@/modules/shared/ui/textarea";
+import{interventionMode,interventionModeLabel,type InterventionMode}from"@/modules/provider/data/qualification/intervention-modes";
+import{declareProviderInterventionModes,type ProviderActionState}from"./actions";
+const idle:ProviderActionState={status:"idle"};
+export function InterventionForm({organizationId,current,version,locale,idempotencyKey}:{organizationId:string;current:readonly InterventionMode[];version:number;locale:"fr"|"ar";idempotencyKey:string}){
+ const router=useRouter(),[state,action,pending]=useActionState(declareProviderInterventionModes,idle),[key,setKey]=useState(idempotencyKey);
+ useEffect(()=>{if(state.status!=="success")return;const timer=window.setTimeout(()=>{setKey(crypto.randomUUID());router.refresh();},0);return()=>window.clearTimeout(timer);},[state.status,router]);
+ return <section className="client-card" id="intervention"><h2>{locale==="ar"?"كيفيات التدخل":"Modalités d’intervention"}</h2><p>{locale==="ar"?"صرّح بالكيفيات التي تقدمها فعلاً. تُحفظ كل نسخة ويستعملها التوافق عند طلب كيفية معينة.":"Déclarez les modalités réellement proposées. Chaque version est conservée et le matching les utilise lorsque le besoin impose une modalité."}</p><form action={action} className="space-y-4"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId}/><input type="hidden" name="expectedVersion" value={version}/><input type="hidden" name="idempotencyKey" value={key}/><fieldset><legend>{locale==="ar"?"الكيفيات المقدمة":"Modalités proposées"}</legend>{interventionMode.options.map(mode=><label className="flex min-h-11 items-center gap-3" key={mode}><input type="checkbox" name="modes" value={mode} defaultChecked={current.includes(mode)}/>{interventionModeLabel(mode,locale)}</label>)}</fieldset><label className="block">{locale==="ar"?"سبب التغيير":"Motif du changement"}<Textarea name="reason" required minLength={3} maxLength={500}/></label><Button disabled={pending}>{pending?(locale==="ar"?"جارٍ الحفظ…":"Enregistrement…"):(locale==="ar"?"حفظ نسخة":"Enregistrer une version")}</Button><p role={state.status==="error"?"alert":"status"}>{state.status==="success"?(locale==="ar"?"حُفظت النسخة.":"Version enregistrée."):state.status==="error"?(locale==="ar"?"راجع الاختيار أو حدّث الصفحة إذا تغيرت النسخة.":"Vérifiez la sélection ou actualisez si la version a changé."):""}</p></form></section>;
+}

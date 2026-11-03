@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import {interventionDeclaration} from "@/modules/provider/data/qualification/intervention-modes";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { providerCapacityInputSchema, providerDocumentInputSchema, providerProfileInputSchema, providerServiceInputSchema } from "@/modules/provider/data/qualification/model";
 import { providerRegionsInputSchema } from "@/modules/provider/data/qualification/regions";
@@ -62,4 +63,11 @@ export async function recordProviderDocument(_:ProviderActionState,data:FormData
   if(result.error){await client.storage.from(reserved.data.storage_bucket).remove([reserved.data.storage_object_path]);return failure(result.error)}
   const recorded=outcomeSchema.safeParse(result.data);if(!recorded.success){await client.storage.from(reserved.data.storage_bucket).remove([reserved.data.storage_object_path]);return{status:"error",reason:"FAILED"}}
   return{status:"success",outcome:recorded.data.outcome};
+}
+
+export async function declareProviderInterventionModes(_:ProviderActionState,data:FormData):Promise<ProviderActionState>{
+ if(!isLocale(text(data,"locale")))return{status:"error",reason:"VALIDATION"};
+ const parsed=interventionDeclaration.safeParse({organizationId:text(data,"organizationId"),modes:data.getAll("modes").map(String),reason:text(data,"reason"),expectedVersion:text(data,"expectedVersion"),idempotencyKey:text(data,"idempotencyKey")});
+ if(!parsed.success)return{status:"error",reason:"VALIDATION"};const v=parsed.data;
+ return rpc("declare_provider_intervention_modes",{p_provider_organization_id:v.organizationId,p_modes:v.modes,p_reason:v.reason,p_expected_version:v.expectedVersion,p_idempotency_key:v.idempotencyKey});
 }

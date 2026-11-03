@@ -1,3 +1,5 @@
+import {SelectedQuoteContract}from"@/modules/client/screens/missions/selected-quote-contract";
+import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
@@ -17,7 +19,7 @@ export default async function CompareOffersPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; requestId: string }>;
-  searchParams: Promise<{ rfq?: string; organizationId?: string }>;
+  searchParams: Promise<{ rfq?: string; organizationId?: string;identityQuote?:string;identityPage?:string }>;
 }) {
   const [{ locale, requestId }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale) || !uuidSchema.safeParse(requestId).success) notFound();
@@ -28,8 +30,10 @@ export default async function CompareOffersPage({
   const repository = await createServerClientRfqRepository();
   const detail = await repository.detail(requestId);
   if (detail.status === "error" && detail.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres` }));
-  if (detail.status === "error" || !detail.value) notFound();
+  if(detail.status==="error")return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle}><p role="alert">{detail.reason==="FORBIDDEN"?(locale==="fr"?"Votre rôle ne permet pas de consulter ces offres.":"دوركم لا يسمح بعرض هذه العروض."):(locale==="fr"?"Les offres sont momentanément indisponibles. Réessayez.":"العروض غير متاحة مؤقتاً. حاولوا مجدداً.")}</p><Link href={`/${locale}/client/demandes/${requestId}/offres${space.selectedQuery}`}>{locale==="fr"?"Réessayer":"إعادة المحاولة"}</Link></ClientAppShell>;
+  if (!detail.value) notFound();
 
+  if(detail.value.organizationId!==space.selectedOrganizationId){if(query.organizationId)notFound();redirect(`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:detail.value.organizationId,...(query.rfq?{rfq:query.rfq}:{})})}`);}
   const rfqId = query.rfq ?? detail.value.rfqId;
   if (query.rfq && detail.value.rfqId && query.rfq !== detail.value.rfqId) notFound();
   if (!query.rfq && detail.value.rfqId) {
@@ -38,7 +42,7 @@ export default async function CompareOffersPage({
   }
   if (!rfqId || !uuidSchema.safeParse(rfqId).success) {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
         <RequestsBoard locale={locale} query={space.selectedQuery} compareHref={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} rows={[]} organizationName={space.organizationName} />
       </ClientAppShell>
     );
@@ -48,7 +52,7 @@ export default async function CompareOffersPage({
   if (comparison.status === "error" && comparison.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres` }));
   if (comparison.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
         <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المقارنة." : "Impossible de charger la comparaison."}</p></main>
       </ClientAppShell>
     );
@@ -59,7 +63,7 @@ export default async function CompareOffersPage({
   const offerFacts = Object.fromEntries(facts);
 
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
+    <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
       <main className="client-page">
         <ComparisonPanel
           locale={locale}
@@ -78,6 +82,7 @@ export default async function CompareOffersPage({
           offerFacts={offerFacts}
           assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}
         />
+        {["PROVIDER_SELECTED","CONTRACT_PENDING","CONTRACTED"].includes(detail.value.status)?<SelectedQuoteContract navigationQuery={query} locale={locale} organizationId={space.selectedOrganizationId} requestId={requestId}/>:null}
       </main>
     </ClientAppShell>
   );

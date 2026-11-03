@@ -1,3 +1,4 @@
+import { getClientRfqMessages } from "@/modules/client/screens/demandes/messages";
 import Link from "next/link";
 import { ArrowRight, Briefcase, Cloud, FileText, Filter, Folder, Goal, MessageSquare, Plus, Scale, Search, Target } from "lucide-react";
 import type { ReactNode } from "react";
@@ -101,7 +102,7 @@ export function DiagnosticsBoard({
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, "");
   const analyseHref = evolutionHref;
-  const preferDemo = canApplyClientSpaceDemo(organizationName ?? null) && findings.length === 0;
+  const preferDemo = canApplyClientSpaceDemo() && findings.length === 0;
   const priorities = preferDemo
     ? demo.priorities.map((row) => ({
         id: row.id,
@@ -351,10 +352,10 @@ export function DiagnosticsBoard({
 }
 
 
-export function RequestsBoard({ locale, query, compareHref, rows, organizationName }: { locale: Locale; query: string; compareHref: string; rows: Array<{ id: string; title: string; status: string; last: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }>; organizationName?: string | null }) {
+export function RequestsBoard({ locale, query, compareHref, rows, searchQuery, statusFilter }: { locale: Locale; query: string; compareHref: string; searchQuery?: string; statusFilter?: string; rows: Array<{ id: string; title: string; status: string; last: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }>; organizationName?: string | null }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const demoOn = canApplyClientSpaceDemo(organizationName ?? null);
+  const demoOn = canApplyClientSpaceDemo();
   const list = demoOn ? demo.requests : rows;
   const kpis = demoOn
     ? demo.requestKpis
@@ -369,7 +370,7 @@ export function RequestsBoard({ locale, query, compareHref, rows, organizationNa
         {kpis.map((kpi) => (
           <Link key={kpi.id} href={kpi.href} className="client-card client-insight">
             <span className="client-feed-icon" data-tone={kpi.tone}><FileText className="size-4" aria-hidden /></span>
-            <div><h3>{kpi.title}</h3><p>{kpi.detail}</p></div>
+            <div><h3>{kpi.title}{kpi.id !== "k3" ? <small className="block">{locale === "fr" ? "Sur cette page" : "في هذه الصفحة"}</small> : null}</h3><p>{kpi.detail}</p></div>
             <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
           </Link>
         ))}
@@ -378,20 +379,22 @@ export function RequestsBoard({ locale, query, compareHref, rows, organizationNa
         <article className="client-card" id="filtres">
           <header>
             <h2>{c.allRequests}</h2>
-            <div className="client-table-tools">
+            <form method="get" className="client-table-tools">
+              {new URLSearchParams(query).get("organizationId")?<input type="hidden" name="organizationId" value={new URLSearchParams(query).get("organizationId")!}/>:null}
               <label className="client-top-search">
                 <Search className="size-4" aria-hidden />
                 <span className="sr-only">{c.searchRequest}</span>
-                <input name="q" placeholder={c.searchRequest} />
+                <input name="q" defaultValue={searchQuery} maxLength={200} placeholder={c.searchRequest} />
               </label>
               <label className="client-status-filter">
                 <span className="sr-only">{c.allStatuses}</span>
-                <select defaultValue="all" name="statut">
-                  <option value="all">{c.allStatuses}</option>
-                  {list.map((row) => <option key={row.id} value={row.id}>{row.status}</option>)}
+                <select defaultValue={statusFilter??""} name="statut">
+                  <option value="">{c.allStatuses}</option>
+                  {Object.entries(getClientRfqMessages(locale).statuses).map(([code,label])=><option key={code} value={code}>{label}</option>)}
                 </select>
               </label>
-            </div>
+              <button type="submit" className="client-ghost-link">{locale==='fr'?'Rechercher':'بحث'}</button>
+            </form>
           </header>
           {list.length === 0 ? (
             <p>{c.emptyBoard}</p>
@@ -440,10 +443,10 @@ export type MissionBoardView = {
   files: Array<{ id: string; title: string; href: string; kind: "pdf" | "docx" | "xlsx" | "file" | "message" | "folder" }>;
 };
 
-export function MissionsBoard({ locale, query, organizationName, view }: { locale: Locale; query: string; organizationName?: string | null; view?: MissionBoardView }) {
+export function MissionsBoard({ locale, query, view }: { locale: Locale; query: string; organizationName?: string | null; view?: MissionBoardView }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo(organizationName ?? null) && !view?.validations.length && !view?.steps.length;
+  const preferDemo = canApplyClientSpaceDemo() && !view?.validations.length && !view?.steps.length;
   const data = preferDemo ? demo.missions : {
     validations: view?.validations ?? [],
     steps: view?.steps ?? [],
@@ -545,10 +548,10 @@ export type DocumentBoardRow = {
   tone: "violet" | "sky" | "mint" | "peach";
 };
 
-export function DocumentsBoard({ locale, query, children, organizationName, documents, toHandle, recent }: { locale: Locale; query: string; children?: ReactNode; organizationName?: string | null; documents?: DocumentBoardRow[]; toHandle?: Array<{ id: string; title: string; href: string; tone: "violet" | "sky" | "mint" | "peach"; action: "examine" | "confirm" | "reply" }>; recent?: DocumentBoardRow[] }) {
+export function DocumentsBoard({ locale, query, children, documents, toHandle, recent }: { locale: Locale; query: string; children?: ReactNode; organizationName?: string | null; documents?: DocumentBoardRow[]; toHandle?: Array<{ id: string; title: string; href: string; tone: "violet" | "sky" | "mint" | "peach"; action: "examine" | "confirm" | "reply" }>; recent?: DocumentBoardRow[] }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo(organizationName ?? null) && (!documents || documents.length === 0);
+  const preferDemo = canApplyClientSpaceDemo() && (!documents || documents.length === 0);
   const rows = preferDemo ? demo.documents : documents ?? [];
   const handle = preferDemo ? demo.toHandle : toHandle ?? [];
   const recentRows = preferDemo ? demo.recentDocuments : recent ?? rows;
@@ -624,10 +627,10 @@ export function DocumentsBoard({ locale, query, children, organizationName, docu
   );
 }
 
-export function FinancesBoard({ locale, query, organizationName, rows }: { locale: Locale; query: string; organizationName?: string | null; rows?: Array<{ id: string; title: string; folder: string; status: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }> }) {
+export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: string; organizationName?: string | null; rows?: Array<{ id: string; title: string; folder: string; status: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }> }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo(organizationName ?? null) && (!rows || rows.length === 0);
+  const preferDemo = canApplyClientSpaceDemo() && (!rows || rows.length === 0);
   const list = preferDemo ? demo.finances : rows ?? [];
   return (
     <main className="client-page">
@@ -696,10 +699,10 @@ export function FinancesBoard({ locale, query, organizationName, rows }: { local
   );
 }
 
-export function CompanyBoard({ locale, query, organizationName, alternate, people }: { locale: Locale; query: string; organizationName: string | null; alternate: "fr" | "ar"; people?: Array<{ id: string; name: string; role: string }> }) {
+export function CompanyBoard({ locale, query, organizationName, people }: { locale: Locale; query: string; organizationName: string | null; alternate: "fr" | "ar"; people?: Array<{ id: string; name: string; role: string }> }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const demoOn = canApplyClientSpaceDemo(organizationName);
+  const demoOn = canApplyClientSpaceDemo();
   const legalName = organizationName ?? (demoOn ? (locale === "ar" ? "عميل · تواصل وتسويق وإبداع" : "Client · Communication, marketing et création") : "—");
   const members = people ?? (demoOn ? demo.people : []);
   return (
@@ -729,6 +732,7 @@ export function CompanyBoard({ locale, query, organizationName, alternate, peopl
         <article className="client-card">
           <header><h2>{c.security}</h2></header>
           <ul className="client-feed">
+            <li><Link href={`/${locale}/confidentialite/demandes`}><span>{locale==="fr"?"Mes demandes de données":"طلباتي المتعلقة بالبيانات"}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/securite/compte${query}`}><span>{c.accountSec}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/securite/sessions`}><span>{c.sessions}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/notifications${query}`}><span>{c.notif}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
@@ -780,13 +784,13 @@ export function CompanyBoard({ locale, query, organizationName, alternate, peopl
   );
 }
 
-export function MessagesBoard({ locale, query, search, children, threads, organizationName }: { locale: Locale; query: string; search?: string; children: ReactNode; threads?: Array<{ id: string; title: string; meta: string; href: string }>; organizationName?: string | null }) {
+export function MessagesBoard({ locale, query, search, children, threads,serverFiltered=false,inboxError=false,inboxFooter }: { locale: Locale; query: string; search?: string; children: ReactNode; threads?: Array<{ id: string; title: string; meta: string; href: string }>; organizationName?: string | null;serverFiltered?:boolean;inboxError?:boolean;inboxFooter?:ReactNode }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
   const liveThreads = threads ?? [];
-  const showDemo = canApplyClientSpaceDemo(organizationName ?? null) && liveThreads.length === 0;
+  const showDemo = !serverFiltered && canApplyClientSpaceDemo() && liveThreads.length === 0;
   const needle = (search ?? "").trim().toLocaleLowerCase();
-  const inbox = (showDemo ? demo.inbox : liveThreads).filter((item) => !needle || `${item.title} ${item.meta}`.toLocaleLowerCase().includes(needle));
+  const inbox = (showDemo ? demo.inbox : liveThreads).filter((item) => serverFiltered || !needle || `${item.title} ${item.meta}`.toLocaleLowerCase().includes(needle));
   const organizationId = new URLSearchParams(query.replace(/^\?/, "")).get("organizationId");
   return (
     <main className="client-page">
@@ -803,10 +807,11 @@ export function MessagesBoard({ locale, query, search, children, threads, organi
             <Link href={`/${locale}/client/demandes${query}`}>{c.linked}</Link>
           </nav>
           <ul className="client-feed" id="messages-inbox">
-            {inbox.length === 0 ? <li><span>{c.emptyBoard}</span></li> : inbox.map((item) => (
+            {inboxError ? <li><p role="alert">{locale==="fr"?"Les fils sont momentanément indisponibles. Réessayez.":"المحادثات غير متاحة مؤقتاً. حاولوا مجدداً."}</p></li> : inbox.length === 0 ? <li><span>{c.emptyBoard}</span></li> : inbox.map((item) => (
               <li key={item.id}><Link href={item.href}><span className="client-feed-icon" data-tone={"tone" in item ? item.tone : "violet"}>{("kind" in item && item.kind === "folder") ? <Folder className="size-4" aria-hidden /> : <MessageSquare className="size-4" aria-hidden />}</span><span><strong>{item.title}</strong><small>{item.meta}</small></span><em>{item.meta}</em></Link></li>
             ))}
           </ul>
+          {inboxFooter}
         </article>
         <article className="client-card client-msg-thread">
           {showDemo ? (

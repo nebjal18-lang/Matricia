@@ -1,3 +1,4 @@
+import {workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import Link from "next/link";
 import { formatMinor } from "@/modules/provider/data/billing/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -81,7 +82,7 @@ export function ProviderPurchasesBoard({
           {current && plan ? (
             <dl className="client-fact-grid">
               <div><small>{m.plan}</small><span>{plan.code} · v{plan.version}</span></div>
-              <div><small>{m.status}</small><span>{current.status}</span></div>
+              <div><small>{m.status}</small><span>{workflowStatusLabel(current.status,locale)}</span></div>
               <div><small>{m.period}</small><span dir="ltr">{current.currentPeriodEnd ?? "—"}</span></div>
               <div><small>{m.plan}</small><span dir="ltr">{formatMinor(plan.monthlyPriceMinor, plan.currency, locale)}</span></div>
             </dl>
@@ -102,7 +103,7 @@ export function ProviderPurchasesBoard({
                   <tr key={row.id}>
                     <td>{row.benefitReference}</td>
                     <td dir="ltr">{row.reservedUnits}</td>
-                    <td>{row.status}</td>
+                    <td>{workflowStatusLabel(row.status,locale)}</td>
                   </tr>
                 ))}
               </tbody>

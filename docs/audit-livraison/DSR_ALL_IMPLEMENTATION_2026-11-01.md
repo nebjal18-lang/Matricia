@@ -1,0 +1,26 @@
+# DSR ALL : inventaire, capture et remise contrôlée
+
+Le lot 267000/010/020 apporte un processus exécutable. Il ne contient aucune classification juridique ni approbation réelle préremplie. La console `/fr/administration/confidentialite/inventaire` (également AR) expose les sources déployées, les liens vérifiables avec le titulaire, les champs autorisés et les exclusions motivées. Les métadonnées Auth autorisées sont distinguées des mots de passe, tokens, graines MFA et clés privées, qui restent non exportables même après deux approbations.
+
+Le responsable crée un inventaire, classe toutes les sources et tous les champs puis fige une version avec référence juridique. Un autre responsable habilité AAL2 lit cette version et décide. Une modification du schéma ou du code des extracteurs invalide la compatibilité technique et impose une nouvelle version revue. Les sources financières personnelles de 261000 sont réutilisées sans modifier leur assembleur : elles constituent une source dérivée explicitement classifiée et chaque enregistrement peut être revu individuellement. L’ancienne adhésion à une organisation ne donne jamais accès au ledger de cette organisation.
+
+Le titulaire vérifié confirme le périmètre ALL. L’opérateur capture au même instant MVCC les données du compte et les données personnelles liées à l’organisation de cette demande. La capture immuable garde ses hashes et sa date de coupe. Les nombres sont conservés exactement sous forme de chaînes. Les références d’autres utilisateurs dans une ligne ne sont pas remises par défaut. Les champs JSON exportables font l’objet d’une suppression des clés d’authentification ; les exclusions supplémentaires s’appliquent à une copie, après proposition et décision indépendante. Les chemins de propriétés objets sont pris en charge ; une collection doit être revue comme champ entier ou enregistrements distincts, sans suppression par index qui déplacerait les cibles suivantes.
+
+Les candidats Storage et leurs emplacements restent privés au personnel. Le lot Provider 267100 apporte les vraies dispositions, importations, scans, revues des octets et accusés par fichier. Les traitements externes issus des registres applicables ajoutent des emplacements d’import explicites. Une absence de contrôleur configuré, une famille inconnue, un import manquant ou un manifeste incomplet empêchent une réponse ALL complète. CLEAN décrit un résultat de scan et ne constitue jamais une anonymisation.
+
+La réponse remise contient uniquement les sources divulguées, les exclusions documentées et le manifeste final revu ; elle ne contient pas la liste brute des candidats Storage. L’assemblage exige le hash exact du manifeste. Le protocole 241320 conserve sa revue indépendante, son accès privé par le titulaire même après révocation de son adhésion, son hash UTF-8 et son accusé authentifié. Une réponse ALL complète ne peut être accusée puis satisfaire FULFILLED que si tous ses fichiers réellement inclus ont aussi leurs accusés liés aux hashes de réponse et de manifeste. Une réponse partielle peut être remise honnêtement mais ne clôture pas ALL.
+
+## Preuves exécutées
+
+- SQL 0240 : **29 assertions**, ROLLBACK, sur les vrais collecteur et manifeste 267100. Isolation du titulaire et du tenant, champs secrets interdits, grands montants exacts, quatre yeux, couverture technique entière, capture et Outbox idempotentes, exclusions réellement appliquées à la copie et original conservé, refus de déclarer une couverture complète sans registre applicable.
+- Modèle de choix d’expurgation : quatre tests unitaires ; propriétés imbriquées, échappements, absence de parcours d’index et valeurs non exposées dans les choix.
+- TypeScript et lint ciblé : PASS, avec les composants réels de fichiers du lot Provider.
+- Provider `d27870b` : SQL 0243 **61 assertions PASS/ROLLBACK**, depuis les vrais inventaire/capture publics jusqu’au manifeste complet, à la réponse revue, aux accès/accusés de chaque fichier et de réponse puis à la transition publique FULFILLED ; rôle révoqué refusé avant rejeu d’un ancien reçu. Dix-huit tests Node de buffers réels passent. Les résultats de scan/commit de la fixture SQL sont des frontières service déterministes explicitement déclarées, pas une certification native HTTP/antivirus.
+
+## Preuves encore à compléter
+
+- La preuve positive SQL complète est désormais apportée par 0243/Provider et doit être intégrée avec son commit. Une recette HTTP/Storage native des octets et du scanner reste distincte des callbacks service déterministes de la fixture SQL et des tests Node de buffers.
+- Recette navigateur FR/AR et sessions natives sur le candidat intégré.
+- Au-delà de 20 000 enregistrements ou de 16 MiB, refus explicite `PRIVACY_EXPORT_REQUIRES_BATCH_JOB`. Le travail asynchrone correspondant n’est pas livré par ce lot.
+- L’effacement total n’est pas implémenté par cet export ; les opérations de rétention existantes restent bornées par leurs politiques approuvées, gels et obligations financières.
+- Références et décisions juridiques applicables, CNDP, transferts, notices et classifications effectives : à fournir et approuver par les responsables habilités ; aucune validation réelle n’est inventée par les fixtures locales.

@@ -26,3 +26,14 @@ describe("marketing content provider orchestration",()=>{
   });
   it("rejects DNS, private and non-allowlisted provider endpoints",()=>{for(const endpoint of["https://generator.example.invalid/v1/content","https://127.0.0.1/v1/content","https://10.0.0.1/v1/content"]){expect(()=>configuredExternalProvider({endpoint,endpointAllowlist:[endpoint],apiKey:"k".repeat(32)})).toThrow("MARKETING_PROVIDER_CONFIG_INVALID")}expect(()=>configuredExternalProvider({endpoint:"https://8.8.8.8/v1/content",endpointAllowlist:[],apiKey:"k".repeat(32)})).toThrow("MARKETING_PROVIDER_CONFIG_INVALID")});
 });
+
+it("pins allowed DNS answers and rejects a mixed private answer before connecting", async () => {
+  const contents = await deterministicSandboxProvider.generate(request);
+  const sendPinned = vi.fn(async () => new Response(JSON.stringify(contents)));
+  const config = { endpoint: "https://generator.example.com/content", endpointAllowlist: ["https://generator.example.com/content"], apiKey: "k".repeat(32), sendPinned };
+  await expect(configuredExternalProvider({ ...config, resolveAddresses: async () => ["8.8.8.8"] }).generate(request)).resolves.toHaveLength(3);
+  expect(sendPinned).toHaveBeenCalledWith(new URL(config.endpoint), "8.8.8.8", expect.any(String), expect.any(Object), expect.any(AbortSignal));
+  sendPinned.mockClear();
+  await expect(configuredExternalProvider({ ...config, resolveAddresses: async () => ["8.8.8.8", "127.0.0.1"] }).generate(request)).rejects.toThrow("MARKETING_PROVIDER_ADDRESS_DENIED");
+  expect(sendPinned).not.toHaveBeenCalled();
+});

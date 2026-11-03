@@ -1,0 +1,12 @@
+import { beforeEach, expect, it, vi } from "vitest";
+const mocks=vi.hoisted(()=>({run:vi.fn()}));
+vi.mock("@/modules/shared/lib/operations/heartbeat",()=>({withOperationalHeartbeat:(_s:string,_e:number,run:()=>Promise<Response>)=>run()}));
+vi.mock("@/modules/shared/lib/marketing-autopilot/meta-admin-client",()=>({getMetaAdminClient:()=>({})}));
+vi.mock("@/modules/shared/lib/marketing-autopilot/meta-media-runner",()=>({runMetaMediaStep:mocks.run}));
+import { GET,POST } from "./route";
+const request=(token="x".repeat(32))=>new Request("https://app.test/api/workers/marketing-media",{headers:{authorization:`Bearer ${token}`}});
+beforeEach(()=>{vi.resetAllMocks();process.env.CRON_SECRET="x".repeat(32);process.env.MARKETING_PUBLISH_MODE="live";mocks.run.mockResolvedValue("PROCESSING");});
+it("supports authenticated scheduled GET and POST with one bounded media step",async()=>{expect(GET).toBe(POST);expect((await GET(request())).status).toBe(200);expect(mocks.run).toHaveBeenCalledTimes(1);});
+it("refuses unauthenticated worker calls",async()=>{expect((await GET(request("wrong"))).status).toBe(401);expect(mocks.run).not.toHaveBeenCalled();});
+it("does not execute live media work in sandbox mode",async()=>{process.env.MARKETING_PUBLISH_MODE="sandbox";expect((await GET(request())).status).toBe(200);expect(mocks.run).not.toHaveBeenCalled();});
+it("reports persistence/native-step failures as unavailable without exposing details",async()=>{mocks.run.mockRejectedValue(new Error("private provider response"));const response=await GET(request());expect(response.status).toBe(503);expect(await response.text()).not.toContain("private provider response");});

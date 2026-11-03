@@ -1,3 +1,4 @@
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { AdminCommandCenter } from "./model";
@@ -37,13 +38,17 @@ const action = z.object({
   status: z.string(),
   requested_by: id,
   requested_at: z.string(),
+  executed_at:z.string().nullable().optional(),
+  execution_result_hash:z.string().nullable().optional(),
   row_version: z.number().int().positive(),
 });
 export type AdminLoadResult = { status: "success"; dashboard: AdminCommandCenter } | { status: "error"; reason: "UNAUTHENTICATED" | "MFA_REQUIRED" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-export async function loadAdminCommandCenter(): Promise<AdminLoadResult> {
+export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<AdminLoadResult> {
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const { data: auth, error: authError } = await client.auth.getUser();
+  const authFailure = classifyAuthReadFailure(authError);
+  if (authFailure) return { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const securityResult = await client.rpc("get_my_account_security_requirement");
   if (securityResult.error) return { status: "error", reason: "QUERY_FAILED" };
@@ -56,9 +61,13 @@ export async function loadAdminCommandCenter(): Promise<AdminLoadResult> {
   const central = roles.has("SUPER_ADMIN") || roles.has("MATRICIA_ADMIN");
   const canRequest = !readOnly && [...roles].some((item) => ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "FINANCE_MANAGER", "DISPUTE_MANAGER", "LIBRARY_MANAGER", "SUPPORT_AGENT"].includes(item));
   const decisionRole = !readOnly && [...roles].some((item) => ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "FINANCE_MANAGER", "DISPUTE_MANAGER", "LIBRARY_MANAGER"].includes(item));
+  const actionPage=Number.isFinite(page)?Math.min(100000,Math.max(1,Math.floor(page))):1;
+  const actionStatus=["PENDING_APPROVAL","AUTHORIZED","REQUEST_TRACKED","EXECUTED","FAILED","REJECTED","CANCELLED"].includes(status)?status:"ALL";
+  let actionsQuery=client.from("admin_operational_action_requests").select("id,work_item_id,organization_id,action_type,target_environment,resource_type,resource_id,reason,approvals_required,status,requested_by,requested_at,row_version,executed_at,execution_result_hash",{count:"exact"});
+  if(actionStatus!=="ALL")actionsQuery=actionsQuery.eq("status",actionStatus);
   const [workQuery, actionQuery] = await Promise.all([
     client.from("admin_work_items").select("id,queue_version_id,organization_id,source_kind,resource_type,resource_id,title_fr,title_ar,priority,status,due_at,assigned_to,row_version").in("status", ["OPEN", "CLAIMED", "WAITING_INFORMATION"]).order("severity_rank", { ascending: false }).order("due_at").limit(100),
-    client.from("admin_operational_action_requests").select("id,work_item_id,organization_id,action_type,target_environment,resource_type,resource_id,reason,approvals_required,status,requested_by,requested_at,row_version").eq("status", "PENDING_APPROVAL").order("requested_at").limit(100),
+    actionsQuery.order("requested_at",{ascending:false}).order("id").range((actionPage-1)*100,actionPage*100-1),
   ]);
   if (workQuery.error || actionQuery.error) return { status: "error", reason: "QUERY_FAILED" };
   const workRows = z.array(work).safeParse(workQuery.data);
@@ -75,6 +84,7 @@ export async function loadAdminCommandCenter(): Promise<AdminLoadResult> {
   return {
     status: "success",
     dashboard: {
+      actionPage,actionStatus,hasMoreActions:typeof actionQuery.count==="number"?actionQuery.count>actionPage*100:actionRows.data.length===100,
       capabilities: { requestAction: canRequest },
       workItems: workRows.data.flatMap((item) => {
         const version = queues.get(item.queue_version_id);
@@ -113,7 +123,8 @@ export async function loadAdminCommandCenter(): Promise<AdminLoadResult> {
         requestedBy: item.requested_by,
         requestedAt: item.requested_at,
         rowVersion: item.row_version,
-        canDecide: decisionRole && item.requested_by !== auth.user.id,
+        canDecide: item.status==="PENDING_APPROVAL" && decisionRole && item.requested_by !== auth.user.id,
+        resultHash:item.execution_result_hash??null,executedAt:item.executed_at??null,
       })),
     },
   };

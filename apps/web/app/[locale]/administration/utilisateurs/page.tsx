@@ -14,7 +14,7 @@ export default async function AdminUsersPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; q?: string; org?: string; role?: string; status?: string }>;
+  searchParams: Promise<{ organizationId?: string; q?: string; page?: string; org?: string; role?: string; status?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -24,6 +24,8 @@ export default async function AdminUsersPage({
   const a = actorCopy(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
   const users = directory.users;
+  const exportParams=new URLSearchParams(space.selectedQuery);for(const[key,value]of Object.entries(query))if(value&&key!=="page")exportParams.set(key,value);
+  const exportQuery=exportParams.size?`?${exportParams.toString()}`:"";
 
   return (
     <AdminAppShell
@@ -35,18 +37,18 @@ export default async function AdminUsersPage({
       actorCurrent="users"
       searchAction={`/${locale}/administration/utilisateurs`}
       searchPlaceholder={a.searchUsers}
-      alternateHref={`/${alternate}/administration/utilisateurs${space.selectedQuery}`}
+      alternateHref={`/${alternate}/administration/utilisateurs${exportQuery}`}
       crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/entreprises${space.selectedQuery}`, label: locale === "ar" ? "الفاعلون" : "Acteurs" }, { label: a.usersTitle }]} />}
       title={a.usersTitle}
       lead={a.usersLead}
       actions={
         <>
-          <a href={`/${locale}/administration/utilisateurs/export${space.selectedQuery}`} className="admin-dir-action" data-tone="white"><Download className="size-4" aria-hidden />{locale === "ar" ? "تصدير" : "Exporter"}</a>
+          <a href={`/${locale}/administration/utilisateurs/export${exportQuery}`} className="admin-dir-action" data-tone="white"><Download className="size-4" aria-hidden />{locale === "ar" ? "تصدير" : "Exporter"}</a>
           <Link href={`/${locale}/administration/utilisateurs/inviter${space.selectedQuery}`} className="admin-primary-cta"><UserPlus className="size-4" aria-hidden />{a.inviteUser}</Link>
         </>
       }
     >
-      <UsersBoard locale={locale} query={space.selectedQuery} users={users} invites={directory.invites} search={query.q} filters={{ org: query.org, role: query.role, status: query.status }} />
+      {directory.reason ? <p role="alert">{locale==="ar"?"بيانات المستخدمين غير متاحة. تحققوا من الصلاحيات والمصادقة.":"Annuaire indisponible. Vérifiez les habilitations et la MFA."}</p> : <UsersBoard page={Number(query.page??"1")} locale={locale} query={space.selectedQuery} users={users} invites={directory.invites} search={query.q} filters={{ org: query.org, role: query.role, status: query.status }} />}
     </AdminAppShell>
   );
 }

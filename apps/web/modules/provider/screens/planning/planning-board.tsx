@@ -14,6 +14,8 @@ const tones: Record<PlanningKind, "peach" | "violet" | "mint" | "sky"> = {
   quote: "violet",
   milestone: "mint",
   document: "sky",
+  invoice: "peach",
+  renewal:"sky",
 };
 
 export function PlanningWeekBoard({
@@ -56,7 +58,7 @@ export function PlanningWeekBoard({
         <p className="client-access-note">{ar ? "التوقيت: إفريقيا/الدار البيضاء" : "Fuseau horaire : Afrique/Casablanca"}</p>
       </div>
       <ul className="provider-planning-legend" aria-label={ar ? "أنواع المواعيد" : "Types d’échéances"}>
-        {(["consultation", "quote", "milestone", "document"] as const).map((kind) => (
+        {(["consultation", "quote", "milestone", "document", "invoice", "renewal"] as const).map((kind) => (
           <li key={kind}><span className="client-status-chip" data-tone={tones[kind]}>{planningKindLabel(locale, kind)}</span></li>
         ))}
       </ul>

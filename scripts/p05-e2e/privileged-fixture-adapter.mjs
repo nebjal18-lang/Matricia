@@ -33,6 +33,8 @@ export async function neutralizeFixture(database, fixture) {
       stage = "outbox";
       await transaction`update public.event_outbox set published_at=coalesce(published_at,clock_timestamp()),locked_at=null,locked_by=null
         where organization_id=any(${fixture.organizationIds}::uuid[])`;
+      stage = "franchise mandates";
+      await transaction`update public.franchises set status='TERMINATED',updated_at=clock_timestamp(),row_version=row_version+1 where operator_organization_id=any(${fixture.organizationIds}::uuid[]) and status<>'TERMINATED'`;
       stage = "organization roles";
       await transaction`update public.organization_member_roles role set revoked_at=coalesce(role.revoked_at,clock_timestamp())
         from public.organization_memberships membership

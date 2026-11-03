@@ -8,8 +8,11 @@ describe("OTP identity primitives", () => {
     expect(normalizeEmail("missing-domain@" )).toBeNull();
   });
 
-  it("accepts the hosted eight-digit code and a six-digit local code", () => {
-    expect(normalizeOtp("12345678")).toBe("12345678");
+  it("accepts exactly the configured provider length and defaults to six", () => {
+    expect(normalizeOtp("12345678")).toBeNull();
+    expect(normalizeOtp("12345678",8)).toBe("12345678");
+    expect(normalizeOtp("123456",8)).toBeNull();
+    expect(normalizeOtp("1234567",7)).toBe("1234567");
     expect(normalizeOtp("123456")).toBe("123456");
     expect(normalizeOtp("1234567")).toBeNull();
     expect(normalizeOtp("12345x")).toBeNull();
@@ -17,8 +20,8 @@ describe("OTP identity primitives", () => {
 
   it("writes one digit or a pasted code without dropping the tail", () => {
     expect(applyOtpDigits("12", 2, "9")).toBe("129");
-    expect(applyOtpDigits("", 0, "123456789")).toBe("12345678");
-    expect(applyOtpDigits("12345678", 2, "")).toBe("1245678");
+    expect(applyOtpDigits("", 0, "123456789")).toBe("123456");
+    expect(applyOtpDigits("123456", 2, "")).toBe("12456");
   });
 
   it("keeps French and Arabic authentication keys aligned", () => {

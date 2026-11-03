@@ -1,4 +1,6 @@
 begin;
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='transactional-scan-fixture-0022',configured_at=clock_timestamp()where singleton;
+
 set local search_path=public,extensions;
 select plan(48);
 

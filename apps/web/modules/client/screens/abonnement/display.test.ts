@@ -1,0 +1,7 @@
+import {describe,expect,it}from"vitest";
+import{subscriptionDateLabel,subscriptionDateLabels,subscriptionIntervalLabel,subscriptionReasonLabel}from"./display";
+import type{SubscriptionDashboard}from"@/modules/shared/lib/subscriptions/model";
+describe("subscription business presentation",()=>{
+ it.each(["fr","ar"]as const)("localizes intervals and reasons without rendering unknown technical codes (%s)",locale=>{expect(subscriptionIntervalLabel("MONTHLY",locale)).not.toContain("MONTHLY");expect(subscriptionIntervalLabel("ANNUAL",locale)).not.toContain("ANNUAL");expect(subscriptionReasonLabel("VERIFIED_PAYMENT",locale)).not.toContain("VERIFIED_PAYMENT");expect(subscriptionReasonLabel("UNRECOGNIZED_REASON",locale)).not.toContain("UNRECOGNIZED_REASON");expect(subscriptionReasonLabel("toString",locale)).not.toBeTypeOf("function");});
+ it("serializes canonical server date labels and rejects invalid dates",()=>{const source={plans:[{validFrom:"2026-11-01",validTo:null}],subscription:{currentPeriodEnd:"2026-10-31T22:56:00.000Z",pendingChangeEffectiveAt:null,cycles:[],transitions:[]}}as unknown as SubscriptionDashboard,labels=subscriptionDateLabels(source,"fr");expect(JSON.parse(JSON.stringify(labels))[source.subscription!.currentPeriodEnd!]).toBe(subscriptionDateLabel(source.subscription!.currentPeriodEnd!,"fr"));expect(labels["2026-11-01"]).toContain("2026");expect(subscriptionDateLabel("bad-date","fr")).toBe("Date indisponible");});
+});

@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { buildWorkerReadiness, createWorkerCycle } from "./worker-cycle";
 
 describe("worker dependency cycle", () => {
-  it("does not claim Outbox work and reports not ready when antivirus is unavailable", async () => {
-    const pollOutbox = vi.fn();
+  it("continues independent Outbox work while reporting antivirus unavailable", async () => {
+    const pollOutbox = vi.fn().mockResolvedValue({ failed: 0 });
     const onFailure = vi.fn();
     const cycle = createWorkerCycle({
       checkAntivirus: vi.fn().mockRejectedValue(new Error("unavailable")),
@@ -14,11 +14,11 @@ describe("worker dependency cycle", () => {
 
     await cycle.run();
 
-    expect(pollOutbox).not.toHaveBeenCalled();
+    expect(pollOutbox).toHaveBeenCalledOnce();
     expect(onFailure).toHaveBeenCalledWith("antivirus");
     expect(cycle.getState()).toEqual({
       antivirus: { ok: false, latencyMs: 0 },
-      outbox: { ok: false, latencyMs: 0 },
+      outbox: { ok: true, latencyMs: 0 },
     });
     expect(buildWorkerReadiness(cycle.getState()).status).not.toBe("ready");
   });
@@ -35,4 +35,15 @@ describe("worker dependency cycle", () => {
 
     expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
   });
+});
+
+it("polls unrelated events while the antivirus health check is still waiting", async () => {
+  let resolveHealth: () => void = () => {};
+  const health = new Promise<void>(resolve => { resolveHealth = resolve; });
+  const pollOutbox = vi.fn(async () => ({ failed: 0 }));
+  const cycle = createWorkerCycle({ checkAntivirus: () => health, pollOutbox, onFailure: vi.fn() });
+  const running = cycle.run();
+  expect(pollOutbox).toHaveBeenCalledOnce();
+  resolveHealth(); await running;
+  expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
 });

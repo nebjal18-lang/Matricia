@@ -1,4 +1,7 @@
+import{AdminDecisionHistory}from"@/modules/admin/screens/history/panel";
+import { adminPillCode, filterAdminRows } from "@/modules/admin/data/spaces/filters";
 import Link from "next/link";
+import{AdminConversationMessages}from"@/modules/admin/screens/conversations/messages";
 import {
   ArrowRight, Download, Eye, MoreHorizontal, Pencil, Plus, Search, ShieldAlert,
 } from "lucide-react";
@@ -65,23 +68,16 @@ export function SpaceQueueBoard({
   const columns = dataColumns(spec.columns(locale));
   const orgId = query.includes("organizationId=") ? new URLSearchParams(query.replace("?", "")).get("organizationId") : null;
   const statuses = [...new Set(rows.map((row) => row.status).filter(Boolean))];
-  const visibleRows = (() => {
-    let list = rows;
-    if (search?.trim()) {
-      const needle = search.trim().toLocaleLowerCase();
-      list = list.filter((row) => `${row.title} ${row.status} ${row.cells.join(" ")}`.toLocaleLowerCase().includes(needle));
-    }
-    if (vue?.trim()) {
-      const needle = vue.trim().toLocaleLowerCase();
-      list = list.filter((row) => `${row.status} ${row.cells.join(" ")}`.toLocaleLowerCase().includes(needle));
-    }
-    return list;
-  })();
-  const pillHref = (pill: string, index: number) => {
+  const visibleRows = filterAdminRows(rows, space, vue, search);
+  const visibleTreat=filterAdminRows(treat,space,vue,search);
+  const pillHref = (_pill: string, index: number) => {
+    if(space==="messagerie"&&index===6)return spaceHref(locale,space,query,"preferences");
     const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
-    if (index === 0) params.delete("vue");
-    else params.set("vue", pill);
-    params.delete("q");
+    void _pill;
+    const code = adminPillCode(space, index);
+    if (!code) params.delete("vue");
+    else params.set("vue", code);
+    if(search)params.set("q",search);
     const qs = params.toString();
     return `/${locale}/administration/${space}${qs ? `?${qs}` : ""}`;
   };
@@ -92,7 +88,7 @@ export function SpaceQueueBoard({
           {pills.length ? (
             <nav className="admin-pills" aria-label={spec.title(locale)}>
               {pills.map((pill, index) => (
-                <Link key={pill} href={pillHref(pill, index)} aria-current={(index === 0 && !vue) || vue === pill ? "page" : undefined}>{pill}</Link>
+                <Link key={pill} href={pillHref(pill, index)} aria-current={(!adminPillCode(space, index) && !vue) || vue === adminPillCode(space, index) ? "page" : undefined}>{pill}</Link>
               ))}
             </nav>
           ) : null}
@@ -102,6 +98,7 @@ export function SpaceQueueBoard({
               <label>{t(locale, "Statut", "الحالة")}
                 <select name="vue" defaultValue={vue ?? ""}>
                   <option value="">{t(locale, "Tous", "الكل")}</option>
+                  {vue&&!statuses.includes(vue)?<option value={vue}>{pills.find((_,index)=>adminPillCode(space,index)===vue)??vue}</option>:null}
                   {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
                 </select>
               </label>
@@ -114,6 +111,7 @@ export function SpaceQueueBoard({
             <button type="submit" className="admin-soft-cta">{t(locale, "Filtrer", "تصفية")}</button>
             <Link href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
           </form>
+          <p role="status">{visibleRows.length} {t(locale,"résultats filtrés","نتائج مصفاة")}</p>
           {visibleRows.length === 0 ? null : (
             <div className="client-table-wrap">
               <table className="client-space-table">
@@ -161,9 +159,9 @@ export function SpaceQueueBoard({
                 <h2><ShieldAlert className="size-4" aria-hidden /> {spec.treatTitle(locale)}</h2>
               </div>
             </header>
-            {treat.length === 0 ? <p className="client-access-note">{t(locale, "Aucun élément prioritaire.", "لا يوجد عنصر ذو أولوية.")}</p> : (
+            {visibleTreat.length === 0 ? <p className="client-access-note">{t(locale, "Aucun élément prioritaire.", "لا يوجد عنصر ذو أولوية.")}</p> : (
               <ul className="admin-treat">
-                {treat.slice(0, 6).map((row) => (
+                {visibleTreat.slice(0, 6).map((row) => (
                   <li key={row.id}>
                     <span>
                       <strong>{row.title}</strong>
@@ -255,7 +253,7 @@ export function SpaceHeaderActions({ locale, query, spec }: { locale: Locale; qu
         <Cta href={spaceHref(locale, spec.id, query, spec.createView)} tone="primary"><Plus className="size-4" aria-hidden />{spec.createLabel(locale)}</Cta>
       ) : null}
       {spec.exportable ? (
-        <Cta href={`/${locale}/administration/export/${spec.id}${query}`} tone="white" download><Download className="size-4" aria-hidden />{t(locale, "Exporter", "تصدير")}</Cta>
+        <Cta href={`/${locale}/administration/export/${spec.id}${query}`} tone="white" download><Download className="size-4" aria-hidden />{t(locale, "Exporter les résultats filtrés", "تصدير النتائج المصفاة")}</Cta>
       ) : null}
       {spec.id === "devis" ? <Cta href={spaceHref(locale, spec.id, query, "comparer")} tone="soft">{t(locale, "Comparer", "مقارنة")}</Cta> : null}
       {spec.id === "diagnostics" ? <Cta href={`/${locale}/administration/operations${query}`} tone="soft">{t(locale, "Archiver / restaurer", "أرشفة / استعادة")}</Cta> : null}
@@ -334,18 +332,12 @@ export function SpaceDetailBoard({
 }
 
 function ConversationLayout({ locale, query, space, row }: { locale: Locale; query: string; space: AdminSpaceId; row: SpaceRow }) {
+  if(row.extras?.kind==="NOTIFICATION")return <article className="client-card"><h2>{row.title}</h2><p>{row.status}</p><p>{t(locale,"Tentatives","المحاولات")} : {row.extras.attemptCount}</p>{row.extras.errorCode?<p>{t(locale,"Erreur de livraison","خطأ التسليم")} : {row.extras.errorCode}</p>:null}<p>{row.cells[3]} · {row.cells[4]}</p></article>;
   return (
     <section className="admin-two">
       <article className="client-card">
         <header><h2>{t(locale, "Conversation du dossier", "محادثة الملف")}</h2></header>
-        <ul className="client-feed">
-          {row.cells.map((cell, index) => (
-            <li key={`${row.id}-msg-${index}`}>
-              <span className="client-feed-icon" data-tone={index % 2 === 0 ? "violet" : "sky"}>{index + 1}</span>
-              <span><strong>{cell}</strong><small>{row.status}</small></span>
-            </li>
-          ))}
-        </ul>
+        <AdminConversationMessages threadId={row.id} locale={locale} initial={row.conversation}/>
       </article>
       <aside className="client-stack">
         <article className="client-card">
@@ -485,14 +477,7 @@ export function SpaceDecisionBoard({
             ))}
             <article className="client-card">
               <h2>{t(locale, "Historique des décisions", "تاريخ القرارات")}</h2>
-              <ol className="admin-cycle">
-                {pipeline.slice(0, 5).map((step, index) => (
-                  <li key={step.label}>
-                    <PipelineGlyph index={index} tone={step.tone} />
-                    <div><strong>{step.label}</strong><small>{step.hint}</small></div>
-                  </li>
-                ))}
-              </ol>
+              <AdminDecisionHistory resourceId={row.id}organizationId={row.organizationId}locale={locale}initial={row.historyPage}/>
             </article>
             <SpaceSensitiveActions locale={locale} organizationId={row.organizationId} resourceId={row.id} resourceType={spec.resourceType} />
           </aside>

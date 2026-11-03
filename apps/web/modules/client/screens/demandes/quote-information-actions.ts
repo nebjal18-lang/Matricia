@@ -10,13 +10,14 @@ import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 export type CompleteInformationState =
   | { status: "idle" }
   | { status: "success"; complete: boolean; missing: string[] }
-  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "UNAVAILABLE" };
+  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "TAX_ORIGIN_REVIEW" | "UNAVAILABLE" };
 
 const inputSchema = z.object({
   locale: localeSchema,
   requestId: uuidSchema,
   rowVersion: z.coerce.number().int().positive(),
   regionCode: z.string().trim().refine((value) => value === "" || isMoroccoRegionCode(value)),
+  interventionMode: z.enum(["", "ONSITE", "REMOTE", "HYBRID"]).optional(),
   idempotencyKey: uuidSchema,
 });
 const outputSchema = z.object({ status: z.string(), missing_quote_keys: z.array(z.string()) }).passthrough();
@@ -28,6 +29,7 @@ export async function completeRequestInformationAction(_: CompleteInformationSta
     requestId: form.get("requestId"),
     rowVersion: form.get("rowVersion"),
     regionCode: form.get("regionCode") ?? "",
+    interventionMode: form.has("interventionMode") ? form.get("interventionMode") : undefined,
     idempotencyKey: form.get("idempotencyKey"),
   });
   if (!parsed.success) return { status: "error", reason: "VALIDATION" };
@@ -39,6 +41,7 @@ export async function completeRequestInformationAction(_: CompleteInformationSta
     if (text) answers[match[1]!] = answers[match[1]!] ? `${answers[match[1]!]}, ${text}` : text;
     if (Object.keys(answers).length > 60) return { status: "error", reason: "VALIDATION" };
   }
+  if(parsed.data.interventionMode!==undefined) answers.intervention_mode=parsed.data.interventionMode;
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
@@ -51,6 +54,7 @@ export async function completeRequestInformationAction(_: CompleteInformationSta
     p_correlation_id: randomUUID(),
   });
   if (result.error) {
+    if(result.error.message?.includes("SERVICE_TAX_ORIGIN_REVIEW_REQUIRED")||result.error.message?.includes("SERVICE_TAX_EXACT_SOURCE_REQUIRED"))return{status:"error",reason:"TAX_ORIGIN_REVIEW"};
     if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
     if (result.error.code === "40001" || result.error.code === "55000") return { status: "error", reason: "CONFLICT" };
     if (result.error.code === "22023") return { status: "error", reason: "VALIDATION" };

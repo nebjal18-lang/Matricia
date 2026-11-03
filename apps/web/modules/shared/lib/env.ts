@@ -35,6 +35,7 @@ export function getPaymentRuntimeConfig(): PaymentRuntimeConfig {
   const allowedProviders = parseEnumSet(process.env.PAYMENT_PROVIDER_ALLOWLIST, ["DEMO", "CMI", "PAYPAL"] as const);
   const liveEnabled = process.env.PAYMENT_LIVE_ENABLED === "true";
   if (provider === "DEMO") {
+    if (process.env.NODE_ENV === "production" || process.env.APP_ENV?.trim().toLowerCase() === "production") throw new Error("PAYMENT_DEMO_FORBIDDEN");
     return { provider, allowedProviders, liveEnabled, demoWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET_DEMO };
   }
   if (provider === "CMI") {

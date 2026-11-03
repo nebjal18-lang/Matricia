@@ -1,7 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { FranchiseQuestionnairesWorkbench, FranchiseRulesWorkbench, FranchiseServicesWorkbench } from "./library-workbenches";
 import type { FranchiseLibraryWorkspace } from "@/modules/franchise/data/library/workspace";
+
+vi.mock("next/navigation",()=>({useRouter:()=>({push:vi.fn()}),usePathname:()=>"/fr/franchise/services",useSearchParams:()=>new URLSearchParams()}));
 
 const workspace: FranchiseLibraryWorkspace = {
   mandate: {

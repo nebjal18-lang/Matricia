@@ -27,14 +27,14 @@ export default async function ClientMissionJalonsPage({
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/missions/${missionId}/jalons` }));
   const messages = getMissionMessages(locale);
   const c = spaceCopy(locale);
-  const [result, amendments] = await Promise.all([loadContractMissions(locale, query.organizationId), loadClientAmendments(query.organizationId)]);
+  const [result, amendments] = await Promise.all([loadContractMissions(locale, space.selectedOrganizationId), loadClientAmendments(space.selectedOrganizationId)]);
   const dashboard = result.status === "success"
     ? { ...result.dashboard, missions: result.dashboard.missions.filter((item) => item.id === missionId) }
     : null;
   const mission = dashboard?.missions[0] ?? null;
 
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
+    <ClientAppShell languagePath={`/${locale}/client/missions/${missionId}/jalons${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
       <JalonsBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} mission={mission} messages={messages} assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>
         {result.status === "error" ? (
           <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
@@ -46,6 +46,7 @@ export default async function ClientMissionJalonsPage({
             <div className="space-y-6">
               <MissionPanel d={dashboard} locale={locale} m={messages} />
               <MilestoneDecisions dashboard={dashboard} locale={locale} messages={messages} />
+              {amendments.status==="error"?<p role="alert">{locale==="fr"?"Les avenants sont momentanément indisponibles ou nécessitent une nouvelle vérification de vos droits. Les autres données restent consultables.":"ملاحق العقود غير متاحة مؤقتاً أو تتطلب التحقق مجدداً من الصلاحيات. ما تزال البيانات الأخرى متاحة."}</p>:null}
               {amendments.status === "success" && amendments.value.organizationId === dashboard.organizationId ? (
                 <AmendmentPanel d={amendments.value} locale={locale} keys={Object.fromEntries(amendments.value.items.flatMap((item) => [[`submit:${item.id}`, randomUUID()], [`sign:${item.id}`, randomUUID()]]))} />
               ) : null}

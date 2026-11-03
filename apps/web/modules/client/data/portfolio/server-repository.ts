@@ -1,5 +1,8 @@
+import { loadAllocationTargets } from "./allocation-targets";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { uuid } from "./model";
 import type { Portfolio, RepoResult } from "./model";
 
 type Row = Record<string, unknown>;
@@ -17,7 +20,9 @@ export function validPortfolioTenantPayload(organizationIds:string[],projectRows
 export async function loadClientPortfolio(requestedOrganizationId?: string): Promise<RepoResult<Portfolio>> {
   const client = await getSupabaseServerClient();
   const { data: auth, error: authError } = await client.auth.getUser();
-  if (authError || !auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
+  const authFailure = classifyAuthReadFailure(authError);
+  if (authFailure) return { status: "error", reason: authFailure };
+  if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const memberships = await client.from("organization_memberships").select("id,organization_id").eq("user_id", auth.user.id).eq("status", "ACTIVE").limit(100);
   if (memberships.error) return { status: "error", reason: "UNAVAILABLE" };
   const membershipRows = rows(memberships.data);
@@ -44,10 +49,10 @@ export async function loadClientPortfolio(requestedOrganizationId?: string): Pro
     client.from("client_project_tasks").select("id,project_id,organization_id,task_key,task_type,status,due_at,current_version,row_version").in("organization_id", organizationIds).order("due_at", { ascending: true }).limit(2000),
     client.from("client_project_task_versions").select("task_id,organization_id,version,title_fr,title_ar").in("organization_id", organizationIds).limit(4000),
     client.from("client_annual_budgets").select("id,organization_id,fiscal_year,currency,library_id,site_id,project_id,current_version,status").in("organization_id", organizationIds).order("fiscal_year", { ascending: false }).limit(1000),
-    client.from("client_annual_budget_versions").select("budget_id,organization_id,version,amount_minor,approved_amount_minor").in("organization_id", organizationIds).limit(2000),
+    client.from("client_annual_budget_versions").select("budget_id,organization_id,version,amount_minor::text,approved_amount_minor::text").in("organization_id", organizationIds).limit(2000),
     client.from("client_cost_centers").select("id,organization_id,code,status,current_version").in("organization_id", organizationIds).limit(1000),
     client.from("client_cost_center_versions").select("cost_center_id,organization_id,version,name_fr,name_ar").in("organization_id", organizationIds).limit(2000),
-    client.from("client_cost_allocations").select("id,organization_id,cost_center_id,budget_id,project_id,allocation_type,amount_minor,currency,created_at").in("organization_id", organizationIds).order("created_at", { ascending: false }).limit(2000),
+    client.from("client_cost_allocations").select("id,organization_id,cost_center_id,budget_id,project_id,allocation_type,amount_minor::text,currency,created_at").in("organization_id", organizationIds).order("created_at", { ascending: false }).limit(2000),
     client.from("client_central_calendar").select("organization_id,project_id,item_id,source_kind,event_type,title_fr,title_ar,starts_at,ends_at,status,occurs_on,all_day").in("organization_id", organizationIds).order("starts_at", { ascending: true }).limit(2000),
     client.from("catalog_libraries").select("id,current_published_version_id,published:catalog_library_versions!catalog_libraries_published_fk(id,library_id,status,name_fr,name_ar)").eq("status", "PUBLISHED").not("current_published_version_id", "is", null).limit(20)
   ]);
@@ -75,8 +80,15 @@ export async function loadClientPortfolio(requestedOrganizationId?: string): Pro
   for (const role of roleRows) { const org = membershipOrg.get(text(role, "membership_id")); if (org) { const set = byOrg.get(org) ?? new Set<string>(); set.add(text(role, "role_code")); byOrg.set(org, set); } }
   const siteVersionRows = rows(siteVersions.data), projectVersionRows = rows(projectVersions.data), taskVersionRows = rows(taskVersions.data), budgetVersionRows = rows(budgetVersions.data), centerVersionRows = rows(costCenterVersions.data);
   const contractProject = new Map(rows(projectContracts.data).map(row => [text(row,"contract_id"),text(row,"project_id")]));
+  const allocationTargets = await loadAllocationTargets(client, organizationIds[0]!);
   const current = (list: Row[], idKey: string, id: string, version: number) => list.find(row => text(row, idKey) === id && Number(row.version) === version);
+  const requiredVersions: Array<[Row[], Row[], string]> = [[rows(sites.data),siteVersionRows,"site_id"],[rows(projects.data),projectVersionRows,"project_id"],[rows(tasks.data),taskVersionRows,"task_id"],[rows(budgets.data),budgetVersionRows,"budget_id"],[rows(costCenters.data),centerVersionRows,"cost_center_id"]];
+  if (requiredVersions.some(([entities,versions,key]) => entities.some(row => !current(versions,key,text(row,"id"),Number(row.current_version))))) return { status:"error",reason:"UNAVAILABLE" };
   return { status: "success", value: {
+    allocationTargetsStatus: allocationTargets.status,
+    allocationTargetsTruncated: allocationTargets.status !== "unavailable" && allocationTargets.truncated,
+    allocationInvoiceError: allocationTargets.status === "unavailable" ? undefined : allocationTargets.invoiceError,
+    allocationTargets: allocationTargets.status === "unavailable" ? [] : allocationTargets.targets,
     organizations: rows(organizations.data).map(row => { const id = text(row, "id"), set = byOrg.get(id) ?? new Set<string>(); const capabilities: ("READ"|"MANAGE_PORTFOLIO"|"MANAGE_BUDGET")[] = ["READ"]; if (["CLIENT_OWNER","CLIENT_ADMIN","CLIENT_BUYER"].some(role => set.has(role))) capabilities.push("MANAGE_PORTFOLIO"); if (["CLIENT_OWNER","CLIENT_ADMIN","CLIENT_ACCOUNTING"].some(role => set.has(role))) capabilities.push("MANAGE_BUDGET"); return { id, name: text(row, "display_name"), capabilities }; }),
     sites: rows(sites.data).map(row => { const id=text(row,"id"), version=Number(row.current_version), v=current(siteVersionRows,"site_id",id,version); return { id, organizationId:text(row,"organization_id"), code:text(row,"code"), nameFr:v?text(v,"name_fr"):text(row,"code"), nameAr:v?text(v,"name_ar"):text(row,"code") }; }),
     projects: rows(projects.data).map(row => { const id=text(row,"id"), version=Number(row.current_version), v=current(projectVersionRows,"project_id",id,version); return { id, organizationId:text(row,"organization_id"), code:text(row,"project_code"), siteId:nullable(row,"site_id"), status:text(row,"status"), version, rowVersion:Number(row.row_version), progressBasisPoints:Number(row.progress_basis_points), nameFr:v?text(v,"name_fr"):text(row,"project_code"), nameAr:v?text(v,"name_ar"):text(row,"project_code"), descriptionFr:v?text(v,"description_fr"):"", descriptionAr:v?text(v,"description_ar"):"", startedOn:nullable(row,"started_on"), targetEndOn:nullable(row,"target_end_on") }; }),
@@ -96,5 +108,6 @@ export async function portfolioRpc(name: string, input: Record<string, unknown>)
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const { data, error } = await client.rpc(name, input);
   if (error) return { status: "error", reason: error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
+  if (name === "record_client_typed_cost_allocation" && (!data || typeof data !== "object" || data.outcome !== "CLIENT_TYPED_COST_ALLOCATED" || !uuid.safeParse(data.allocation_id).success)) return {status:"error",reason:"UNAVAILABLE"};
   return { status: "success", value: (data ?? {}) as Record<string, unknown> };
 }

@@ -1,15 +1,34 @@
+export type PaymentProviderEnvironment = "DEMO" | "SANDBOX" | "LIVE" | "UNVERIFIED";
 export type PaymentGatewayCode = "DEMO" | "CMI" | "PAYPAL";
 export type BillingInterval = "MONTHLY" | "ANNUAL";
 
-export type PaymentIntentRequest = {
+type PaymentIntentCommon = {
   organizationId: string;
-  planVersionId: string;
-  billingInterval: BillingInterval;
   amountMinor: string;
   currency: string;
   idempotencyKey: string;
   returnUrl: string;
 };
+export type PaymentIntentRequest = PaymentIntentCommon & (
+  | { purchaseKind?: "SUBSCRIPTION"; planVersionId: string; billingInterval: BillingInterval }
+  | { purchaseKind: "CREDIT_PACK"; packVersionId: string }
+);
+export type VerifiedOrderLookup = {
+  orderId: string;
+  status: "CREATED" | "SAVED" | "APPROVED" | "PAYER_ACTION_REQUIRED" | "VOIDED" | "COMPLETED";
+  amountMinor: string;
+  currency: string;
+  verificationMethod: "API_OAUTH2_TLS";
+  responseHash: string;
+  observedAt: string;
+  confirmation: PaymentConfirmation | null;
+  capture: null | { captureId: string; amountMinor: string; currency: string; paidAt: string };
+};
+export interface PaymentOrderLookupGateway {
+  readonly code: "PAYPAL";
+  readonly providerEnvironment: PaymentProviderEnvironment;
+  lookupOrder(orderId: string, expected: PaymentIntentRequest): Promise<VerifiedOrderLookup>;
+}
 
 export type PaymentConfirmation =
   | { method: "GET"; url: string }
@@ -17,6 +36,7 @@ export type PaymentConfirmation =
 
 export type PaymentIntent = {
   gateway: PaymentGatewayCode;
+  providerEnvironment:PaymentProviderEnvironment;
   providerIntentId: string;
   status: "REQUIRES_CONFIRMATION";
   amountMinor: string;
@@ -24,8 +44,9 @@ export type PaymentIntent = {
   confirmation: PaymentConfirmation | null;
 };
 
-export type VerifiedPaymentEvent = {
+export type VerifiedPaymentSuccessEvent = {
   gateway: PaymentGatewayCode;
+  providerEnvironment:PaymentProviderEnvironment;
   providerEventId: string;
   providerIntentId: string;
   eventType: "PAYMENT_SUCCEEDED";
@@ -37,18 +58,45 @@ export type VerifiedPaymentEvent = {
   signatureFingerprint: string;
 };
 
+export type VerifiedPaymentAdjustmentEvent = {
+  gateway: "PAYPAL";
+  providerEnvironment:PaymentProviderEnvironment;
+  providerEventId: string;
+  eventType: "REFUND_SUCCEEDED" | "PAYMENT_REVERSED" | "DISPUTE_OPENED" | "DISPUTE_WON" | "DISPUTE_LOST";
+  providerPaymentId: string;
+  providerAdjustmentId: string;
+  merchantReference?: string;
+  amountMinor: string;
+  currency: string;
+  occurredAt: string;
+  payloadHash: string;
+  signatureFingerprint: string;
+};
+export type VerifiedPaymentEvent = VerifiedPaymentSuccessEvent | VerifiedPaymentAdjustmentEvent;
+export type PaymentRefundRequest = { captureId: string; amountMinor: string; currency: string; idempotencyKey: string };
+export type VerifiedRefundLookup = { refundId: string; captureId: string; invoiceId: string; amountMinor: string; currency: string; status: "COMPLETED" | "PENDING" | "FAILED" | "CANCELLED"; verificationMethod: "API_OAUTH2_TLS"; responseHash: string; occurredAt: string };
+export interface PaymentRefundGateway {
+  readonly code: "PAYPAL";
+  readonly providerEnvironment:PaymentProviderEnvironment;
+  lookupRefund(refundId: string): Promise<VerifiedRefundLookup>;
+  requestRefund(request: PaymentRefundRequest): Promise<{ refundId: string; status: "PENDING_WEBHOOK" }>;
+}
+
 export interface PaymentGateway {
   readonly code: PaymentGatewayCode;
+  readonly providerEnvironment:PaymentProviderEnvironment;
   createIntent(request: PaymentIntentRequest): Promise<PaymentIntent>;
 }
 
 export interface PaymentCaptureGateway {
   readonly code: "PAYPAL";
+  readonly providerEnvironment:PaymentProviderEnvironment;
   requestCapture(providerIntentId: string, idempotencyKey: string): Promise<{ status: "PENDING_WEBHOOK" }>;
 }
 
 export interface PaymentWebhookVerifier {
   readonly code: PaymentGatewayCode;
+  readonly providerEnvironment:PaymentProviderEnvironment;
   verifyWebhook(rawBody: Uint8Array, headers: Readonly<Record<string, string | undefined>>, receivedAt?: Date): Promise<VerifiedPaymentEvent>;
 }
 
@@ -73,9 +121,11 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const maximumMinor = BigInt("9223372036854775807");
 
 export function assertPaymentRequest(request: PaymentIntentRequest): void {
-  if (!uuid.test(request.organizationId) || !uuid.test(request.planVersionId) || !uuid.test(request.idempotencyKey)) {
+  if (!uuid.test(request.organizationId) || !uuid.test(request.purchaseKind === "CREDIT_PACK" ? request.packVersionId : request.planVersionId) || !uuid.test(request.idempotencyKey)) {
     throw new PaymentGatewayError("INVALID_REQUEST");
   }
+  if (request.purchaseKind !== undefined && request.purchaseKind !== "SUBSCRIPTION" && request.purchaseKind !== "CREDIT_PACK") throw new PaymentGatewayError("INVALID_REQUEST");
+  if (request.purchaseKind !== "CREDIT_PACK" && !["MONTHLY", "ANNUAL"].includes(request.billingInterval)) throw new PaymentGatewayError("INVALID_REQUEST");
   assertMinorAmount(request.amountMinor);
   if (!/^[A-Z]{3}$/u.test(request.currency)) throw new PaymentGatewayError("INVALID_CURRENCY");
   let returnUrl: URL;

@@ -29,35 +29,17 @@ import {
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
+import { diagnosticOptionIds as optionIds } from "@/modules/public/data/journey/diagnostic-contract";
+import { computePriorities, diagnosticPriorityTriggers, type PriorityKey } from "@/modules/public/data/journey/diagnostic-priorities";
+export { computePriorities } from "@/modules/public/data/journey/diagnostic-priorities";
 import { diagnosticQuestionIds as questionIds, type DiagnosticAnswer as Answer, type DiagnosticQuestionId as QuestionId, type StoredDiagnostic as Stored } from "./diagnostic-storage";
 import styles from "./diagnostic-premium.module.css";
 
 type SaveState = { status: "idle" } | { status: "success"; intakeId: string } | { status: "error"; reason: "VALIDATION" | "FORBIDDEN" | "UNAVAILABLE" };
 type OrganizationOption = { id: string; name: string };
-type PriorityKey = "organization" | "sales" | "security" | "verify";
 type Kind = "opportunity" | "declared" | "risk" | "verify";
 
-const optionIds: Record<Exclude<QuestionId, "next_action">, readonly string[]> = {
-  sector: ["industry_logistics", "commerce", "professional_services", "construction", "other"],
-  team_size: ["solo", "small", "medium", "large"],
-  goals: ["save_time", "control_costs", "grow_sales", "secure_activity", "global_review"],
-  priority_tracking: ["regular", "partial", "no", "unknown"],
-  sales_tracking: ["shared", "manual", "ad_hoc", "unknown"],
-  backup_restore: ["recent", "old", "no", "unknown", "not_applicable"],
-  decision_trace: ["systematic", "partial", "no", "unknown"],
-};
-
 const kinds: Record<PriorityKey, Kind> = { organization: "opportunity", sales: "declared", security: "risk", verify: "verify" };
-
-export function computePriorities(answers: Stored["answers"]): PriorityKey[] {
-  const items: PriorityKey[] = [];
-  const goals = Array.isArray(answers.goals) ? answers.goals : [];
-  if (answers.priority_tracking === "no" || answers.priority_tracking === "partial") items.push("organization");
-  if (answers.sales_tracking === "manual" || answers.sales_tracking === "ad_hoc" || goals.includes("grow_sales") && answers.sales_tracking !== "shared") items.push("sales");
-  if (answers.backup_restore === "no" || goals.includes("secure_activity") && answers.backup_restore === "old") items.push("security");
-  if ([answers.priority_tracking, answers.sales_tracking, answers.backup_restore, answers.decision_trace].includes("unknown")) items.push("verify");
-  return [...new Set(items)].slice(0, 3);
-}
 
 function answerLabel(locale: Locale, id: QuestionId, answer: Answer | undefined): string {
   const copy = getPublicJourneyCopy(locale).diagnostic;
@@ -66,9 +48,18 @@ function answerLabel(locale: Locale, id: QuestionId, answer: Answer | undefined)
   if (id === "next_action") return typeof answer === "string" ? answer : "—";
   const labels = copy.questions[index]?.[2] ?? [];
   const ids = optionIds[id];
-  if (Array.isArray(answer)) return answer.map((value) => labels[ids.indexOf(value)] ?? labels.at(-1) ?? "—").join(", ") || "—";
+  if (Array.isArray(answer)) return answer.map((value) => labels[ids.indexOf(value)] ?? copy.answerUnavailable).join(locale === "ar" ? "، " : ", ") || "—";
   const choice = ids.indexOf(id === "sector" && answer === "health_social" ? "other" : answer);
-  return labels[choice] ?? labels.at(-1) ?? "—";
+  return labels[choice] ?? copy.answerUnavailable;
+}
+
+function observationLabel(locale: Locale, priority: PriorityKey, answers: Stored["answers"]): string {
+  const copy = getPublicJourneyCopy(locale).diagnostic;
+  if (priority === "verify") return copy.priorities.verify[1];
+  const questions = { organization: "priority_tracking", sales: "sales_tracking", security: "backup_restore" } as const;
+  const id = questions[priority];
+  const value = answers[id] === undefined ? copy.answerNotProvided : answerLabel(locale, id, answers[id]);
+  return `${copy.questionLabels[id]} : ${value}`;
 }
 
 function PageChrome({ locale, children, footer = true }: { locale: Locale; children: ReactNode; footer?: boolean }) {
@@ -165,11 +156,11 @@ export function RecapView({
             {questionIds.map((id, index) => {
               const Icon = recapIcons[index] ?? ClipboardList;
               return (
-                <div key={id} className={styles.recapRow}>
+                <div key={id} className={styles.recapRow} data-question={id}>
                   <span className={styles.recapIcon} aria-hidden="true"><Icon size={18} /></span>
-                  <span className={styles.recapLabel}>{copy.recapLabels[index]}</span>
+                  <span className={styles.recapLabel}>{copy.questionLabels[id]}</span>
                   <span className={styles.recapValue}>{answerLabel(locale, id, answers[id])}</span>
-                  <button type="button" className={styles.recapEdit} onClick={() => onEdit(index)}>
+                  <button type="button" className={styles.recapEdit} aria-label={`${copy.editAnswer} : ${copy.questionLabels[id]}`} onClick={() => onEdit(index)}>
                     <Pencil size={14} aria-hidden="true" />{copy.editAnswer}
                   </button>
                 </div>
@@ -219,9 +210,6 @@ export function AnalyzingView({
     return () => timers.forEach((id) => window.clearTimeout(id));
   }, [onDone]);
   const summaryIds = ["sector", "team_size", "goals", "next_action"] as const;
-  const summaryLabels = locale === "fr"
-    ? ["Secteur d’activité", "Taille de l’entreprise", "Objectif principal", "Autres sujets mentionnés"]
-    : ["قطاع النشاط", "حجم المؤسسة", "الهدف الرئيسي", "مواضيع أخرى مذكورة"];
   return (
     <PageChrome locale={locale}>
       <Hero eyebrow={copy.eyebrow} title={copy.analyzingTitle} intro={copy.analyzingIntro} script={copy.scriptNote} />
@@ -248,10 +236,10 @@ export function AnalyzingView({
         <section className={styles.card}>
           <p className={styles.cardEyebrow}>{copy.recapTitle}</p>
           <div className={styles.recapList}>
-            {summaryIds.map((id, index) => (
+            {summaryIds.map((id) => (
               <div key={id} className={styles.recapRow}>
                 <span className={styles.recapIcon} aria-hidden="true"><ClipboardList size={18} /></span>
-                <span className={styles.recapLabel}>{summaryLabels[index]}</span>
+                <span className={styles.recapLabel}>{copy.questionLabels[id]}</span>
                 <span className={styles.recapValue}>{answerLabel(locale, id, answers[id])}</span>
                 <span />
               </div>
@@ -348,7 +336,7 @@ export function ResultView({
                       <h2 className={`${styles.priorityTitle} ${styles.priorityTitleDesktop}`}>{item[0]}</h2>
                       <div className={styles.priorityMeta}>
                         <p className={styles.priorityRow}><Sparkles className={styles.priorityRowIcon} size={15} aria-hidden="true" /><span><strong>{copy.typeLabel} :</strong> {copy.typeLabels[key]}</span></p>
-                        <div className={`${styles.priorityBlock} ${styles.priorityBlockMint}`}><CheckCircle2 size={16} aria-hidden="true" /><div><strong>{copy.constat}</strong><p>{item[1]}</p></div></div>
+                        <div className={`${styles.priorityBlock} ${styles.priorityBlockMint}`}><CheckCircle2 size={16} aria-hidden="true" /><div><strong>{copy.constat}</strong><p>{observationLabel(locale, key, answers)}</p></div></div>
                         <div className={`${styles.priorityBlock} ${styles.priorityBlockViolet}`}><Lightbulb size={16} aria-hidden="true" /><div><strong>{copy.whyItMatters}</strong><p>{item[2]}</p></div></div>
                         <div className={`${styles.priorityBlock} ${styles.priorityBlockCoral}`}><Target size={16} aria-hidden="true" /><div><strong>{copy.recommendedAction}</strong><p>{item[3]}</p></div></div>
                       </div>
@@ -418,20 +406,21 @@ export function ResultView({
 export function DetailView({
   locale,
   priority,
+  answers,
   onBack,
 }: {
   locale: Locale;
   priority: PriorityKey;
+  answers: Stored["answers"];
   onBack: () => void;
 }) {
   const copy = getPublicJourneyCopy(locale).diagnostic;
   const item = copy.priorities[priority];
   const needHref = `/${locale}/besoin?source=diagnostic&priority=${encodeURIComponent(priority)}`;
-  const linked = [
-    { label: copy.questions[2]?.[0] ?? "", quote: item[1] },
-    { label: copy.questions[3]?.[0] ?? "", quote: item[2] },
-    { label: copy.questions[4]?.[0] ?? "", quote: item[3] },
-  ];
+  const linked = diagnosticPriorityTriggers(answers)[priority].map((id) => ({
+    id, label: copy.questions[questionIds.indexOf(id)]?.[0] ?? copy.questionLabels[id],
+    quote: answerLabel(locale, id, answers[id]),
+  }));
   return (
     <PageChrome locale={locale}>
       <p className={styles.breadcrumb}>{copy.detailBreadcrumb}</p>
@@ -446,9 +435,10 @@ export function DetailView({
                 <p>{copy.detailAnswersLead}</p>
               </div>
             </div>
-            <div className={styles.linkedGrid}>
-              {linked.map((entry, index) => (
-                <div key={`linked-${index}`} className={styles.linkedBox}>
+            {!linked.length ? <p role="status">{copy.detailNoEvidence}</p> : null}
+            <div className={styles.linkedGrid} data-answer-trace>
+              {linked.map((entry) => (
+                <div key={entry.id} className={styles.linkedBox} data-question={entry.id}>
                   <small>{copy.detailLinked}</small>
                   <strong>{entry.label}</strong>
                   <p>« {entry.quote} »</p>
@@ -461,7 +451,9 @@ export function DetailView({
               <Lightbulb size={22} color="#d97706" aria-hidden="true" />
               <div>
                 <h2>{copy.detailWhyTitle}</h2>
+                <p><strong>{copy.constat} : </strong>{observationLabel(locale, priority, answers)}</p>
                 <p>{item[2]}</p>
+                <p><strong>{copy.recommendedAction} : </strong>{item[3]}</p>
               </div>
             </div>
           </section>
@@ -474,26 +466,32 @@ export function DetailView({
               </div>
             </div>
           </section>
-          <section className={styles.detailCard}>
+          {linked.length ? <section className={styles.detailCard} aria-labelledby="diagnostic-action-plan">
             <div className={styles.detailCardHead}>
               <Target size={22} color="#1e7a5c" aria-hidden="true" />
               <div>
-                <h2>{copy.detailPlanTitle}</h2>
+                <h2 id="diagnostic-action-plan">{copy.detailPlanTitle}</h2>
                 <p>{copy.detailPlanLead}</p>
+                <p>{copy.detailEvidence} {linked.map((entry) => `${copy.questionLabels[entry.id]} : ${entry.quote}`).join(" · ")}</p>
               </div>
             </div>
-            <div className={styles.actionSteps}>
-              {[4, 5, 6].map((index, step) => (
-                <div key={`${priority}-${step}`} className={styles.actionStep}>
+            <div className={styles.actionSteps} role="list">
+              {copy.actionPlans[priority].map((action, step) => (
+                <div key={`${priority}-${step}`} className={styles.actionStep} role="listitem" data-action-step={step + 1}>
                   <span>{step + 1}</span>
                   <div>
-                    <strong>{item[index]}</strong>
-                    <p>{item[3]}</p>
+                    <strong>{item[step + 4]}</strong>
+                    <p>{action.action}</p>
+                    <dl>
+                      <div><dt>{copy.detailDeliverable}</dt><dd>{action.deliverable}</dd></div>
+                      <div><dt>{copy.detailOwner}</dt><dd>{action.owner}</dd></div>
+                      <div><dt>{copy.detailDone}</dt><dd>{action.done}</dd></div>
+                    </dl>
                   </div>
                 </div>
               ))}
             </div>
-          </section>
+          </section> : null}
         </div>
         <aside className={styles.planCard}>
           <h2 className={styles.planHead}>{copy.detailAbout}</h2>

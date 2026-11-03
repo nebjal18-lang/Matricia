@@ -1,3 +1,5 @@
+import { legalPublication } from "./publication";
+import { legalPublicationLabel } from "./publication-copy";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,6 +20,8 @@ export function createLegalPage(documentId: LegalDocumentId) {
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     const doc = getLegalDocument(locale, documentId);
+    const publication = legalPublication();
+    const identity = publication.values;
     const siblings = [
       { id: "mentions" as const, href: `/${locale}/mentions-legales` },
       { id: "confidentialite" as const, href: `/${locale}/confidentialite` },
@@ -38,6 +42,8 @@ export function createLegalPage(documentId: LegalDocumentId) {
           ["Données relatives aux préférences", "Gérer vos choix (cookies et communications)", "Pendant la durée de conservation des préférences", "Accès, rectification, opposition"],
         ];
 
+    const retention = locale === "fr" ? identity.LEGAL_RETENTION_FR : identity.LEGAL_RETENTION_AR;
+    for (const row of table) row[2] = retention ?? (locale === "fr" ? "Durée non communiquée par l’éditeur" : "لم يحدد الناشر مدة الاحتفاظ");
     return (
       <main id="contenu-principal" className="public-page px-4 py-12 text-[var(--mat-navy)] sm:px-6 sm:py-16" dir={locale === "ar" ? "rtl" : "ltr"}>
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
@@ -50,18 +56,35 @@ export function createLegalPage(documentId: LegalDocumentId) {
             <Link href={`/${locale}/confidentialite#securite`}>{locale === "ar" ? "الأمن والبيانات" : "Sécurité et données"}</Link>
             <Link href={`/${locale}/contact`}>{locale === "ar" ? "اتصل بنا" : "Nous contacter"}</Link>
           </nav>
-          <article>
+          <article className="min-w-0">
             <p className="journey-eyebrow">{locale === "ar" ? "ثقة وشفافية" : "Confiance et transparence"}</p>
             <h1 className="mt-3">{doc.title}</h1>
             <p className="mt-4 text-sm text-slate-500">{locale === "ar" ? `آخر تحديث: ${doc.updated}` : `Date de mise à jour : ${doc.updated}`}</p>
             <p className="mt-6 text-lg leading-8 text-slate-600">{doc.description}</p>
+            {!publication.ready ? <section role="status" aria-labelledby="publication-status" className="mt-6 rounded-lg border p-4">
+              <h2 id="publication-status" className="text-lg font-semibold">{locale === "fr" ? "Publication définitive en attente" : "النشر النهائي قيد الاستكمال"}</h2>
+              <p className="mt-2">{locale === "fr" ? "Les informations ci-dessous restent à fournir ou à valider par l’éditeur. Les informations disponibles sont provisoires et ne constituent pas une validation juridique. Contactez-nous avant tout engagement contractuel." : "ما زال على الناشر تقديم المعلومات التالية أو اعتمادها. المعلومات المتاحة مؤقتة ولا تعني اعتماداً قانونياً. تواصلوا معنا قبل أي التزام تعاقدي."}</p>
+              <ul className="mt-3 list-disc space-y-1 ps-5">{publication.missing.map(field => <li key={field}>{legalPublicationLabel(locale, field)}</li>)}</ul>
+              <Link href={`/${locale}/contact`} className="mt-3 inline-flex min-h-11 items-center font-semibold underline">{locale === "fr" ? "Demander les informations à l’éditeur" : "طلب المعلومات من الناشر"}</Link>
+            </section> : null}
+            {documentId === "mentions" && [identity.LEGAL_ENTITY_NAME, identity.LEGAL_ENTITY_FORM, identity.LEGAL_ENTITY_ADDRESS, identity.LEGAL_REGISTRATION_ID, identity.LEGAL_PUBLICATION_DIRECTOR, identity.LEGAL_HOST_NAME, identity.LEGAL_HOST_ADDRESS, identity.LEGAL_PRIVACY_EMAIL].some(Boolean) ? <dl className="mt-6 grid gap-3">{([
+              [locale === "fr" ? "Raison sociale" : "الاسم القانوني", identity.LEGAL_ENTITY_NAME],
+              [locale === "fr" ? "Forme juridique" : "الشكل القانوني", identity.LEGAL_ENTITY_FORM],
+              [locale === "fr" ? "Siège" : "المقر", identity.LEGAL_ENTITY_ADDRESS],
+              [locale === "fr" ? "Immatriculation" : "التسجيل", identity.LEGAL_REGISTRATION_ID],
+              [locale === "fr" ? "Direction de publication" : "مدير النشر", identity.LEGAL_PUBLICATION_DIRECTOR],
+              [locale === "fr" ? "Hébergeur" : "المضيف", identity.LEGAL_HOST_NAME],
+              [locale === "fr" ? "Adresse de l’hébergeur" : "عنوان المضيف", identity.LEGAL_HOST_ADDRESS],
+              [locale === "fr" ? "Contact pour vos données personnelles" : "التواصل بشأن بياناتكم الشخصية", identity.LEGAL_PRIVACY_EMAIL],
+            ]).filter(([, value]) => value).map(([label,value]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}</dl> : null}
+            {documentId === "confidentialite" && identity.LEGAL_PRIVACY_EMAIL ? <p className="mt-4">{locale === "fr" ? "Contact pour vos données personnelles : " : "جهة الاتصال لبياناتكم الشخصية: "}<a href={`mailto:${identity.LEGAL_PRIVACY_EMAIL}`} className="underline">{identity.LEGAL_PRIVACY_EMAIL}</a></p> : null}
             {documentId === "confidentialite" ? (
-              <div id="securite" className="mt-8 overflow-x-auto rounded-2xl border border-[var(--mat-border)] bg-white">
+              <div id="securite" role="region" aria-label={locale === "fr" ? "Traitement des données personnelles" : "معالجة البيانات الشخصية"} tabIndex={0} className="mt-8 min-w-0 max-w-full overflow-x-auto rounded-2xl border border-[var(--mat-border)] bg-white">
                 <table className="min-w-full text-sm">
                   <thead className="bg-[var(--mat-canvas)] text-start">
                     <tr>
                       {(locale === "ar" ? ["فئة البيانات", "غاية المعالجة", "مدة الحفظ", "حقوقكم"] : ["Catégorie de données", "Finalité du traitement", "Durée de conservation", "Vos droits"]).map((heading) => (
-                        <th key={heading} className="px-4 py-3 font-semibold">{heading}</th>
+                        <th key={heading} scope="col" className="px-4 py-3 font-semibold">{heading}</th>
                       ))}
                     </tr>
                   </thead>

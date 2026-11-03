@@ -18,7 +18,6 @@ const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, locale: "fr-MA" });
 const page = await context.newPage();
 await page.goto(`${base}/fr/connexion`, { waitUntil: "networkidle", timeout: 90_000 });
-const form = page.locator(`form[action*="demo"], form`).filter({ has: page.locator(`button, input[value="${persona}"], [name="persona"]`) }).first();
 // Prefer explicit demo persona button
 const demoBtn = page.getByRole("button", { name: /franchis|client|prestataire|admin|démo|demo/i }).filter({ hasText: new RegExp(persona === "franchise" ? "franchis" : persona === "provider" ? "prestataire|sous-trait" : persona, "i") }).first();
 if (await demoBtn.count()) {

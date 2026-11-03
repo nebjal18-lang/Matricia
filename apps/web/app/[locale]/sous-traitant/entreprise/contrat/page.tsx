@@ -18,7 +18,7 @@ export default async function ProviderPartnerContractPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/entreprise/contrat` }));
-  const result = await loadProviderDashboard();
+  const result = await loadProviderDashboard(query.organizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/entreprise/contrat` }));
   const profile = result.status === "success" ? result.dashboard.profile : null;
   const proofs = result.status === "success" ? result.dashboard.documents.filter((item) => item.kind === "PARTNER_CONTRACT") : [];
@@ -31,7 +31,7 @@ export default async function ProviderPartnerContractPage({
   return (
     <ProviderAppShell
       locale={locale}
-      selectedQuery={space.selectedQuery}
+      organizations={space.organizations} selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
       active="company"

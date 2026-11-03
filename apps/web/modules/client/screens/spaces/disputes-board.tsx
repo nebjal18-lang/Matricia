@@ -21,7 +21,6 @@ function statusTone(status: DisputeSummary["status"]): "violet" | "mint" | "sky"
 export function DisputesBoard({
   locale,
   query,
-  organizationName,
   cases,
   selected,
   messages,
@@ -42,7 +41,7 @@ export function DisputesBoard({
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
   const base = hrefPrefix ?? `/${locale}/client/litiges`;
-  const preferDemo = !hrefPrefix && canApplyClientSpaceDemo(organizationName ?? null) && cases.length === 0;
+  const preferDemo = !hrefPrefix && canApplyClientSpaceDemo() && cases.length === 0;
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
   const listHref = `${base}${query}`;
   const helpHref = `/${locale}/contact${query}`;

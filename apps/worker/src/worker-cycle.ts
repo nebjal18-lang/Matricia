@@ -23,6 +23,7 @@ export function createWorkerCycle(dependencies: Readonly<{
   let state: WorkerCycleState = Object.freeze({ antivirus: null, outbox: null });
 
   const run = createNonOverlappingTask(async () => {
+    const antivirusCycle = async () => {
     const antivirusStarted = monotonicNow();
     try {
       await dependencies.checkAntivirus();
@@ -32,13 +33,15 @@ export function createWorkerCycle(dependencies: Readonly<{
       });
     } catch {
       state = Object.freeze({
+        ...state,
         antivirus: { ok: false, latencyMs: Math.max(0, monotonicNow() - antivirusStarted) },
-        outbox: { ok: false, latencyMs: 0 },
       });
       dependencies.onFailure("antivirus");
-      return;
+      // Document handlers remain fail-closed themselves. Independent events must continue.
     }
 
+    };
+    const outboxCycle = async () => {
     const outboxStarted = monotonicNow();
     try {
       const result = await dependencies.pollOutbox();
@@ -53,6 +56,8 @@ export function createWorkerCycle(dependencies: Readonly<{
       });
       dependencies.onFailure("outbox");
     }
+    };
+    await Promise.all([antivirusCycle(), outboxCycle()]);
   });
 
   return Object.freeze({ run, getState: () => state });

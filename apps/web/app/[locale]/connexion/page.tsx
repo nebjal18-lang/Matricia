@@ -1,3 +1,7 @@
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
+import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
+import { configuredEmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
+import { InscriptionConsent } from "../(public)/inscription/inscription-consent";
 import { ArrowLeft, LockKeyhole, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -33,10 +37,10 @@ export default async function LoginPage({ params, searchParams }: { params: Prom
   const registration = query.mode === "inscription";
   const registrationRole = query.role === "fournisseur" ? "fournisseur" : "client";
   const planCode = sanitizePlanCode(query.plan);
-  const nextPath = typeof query.next === "string" && query.next.startsWith("/" + locale + "/") && !query.next.startsWith("//") && !query.next.includes("\\") ? query.next : undefined;
+  const nextPath = safeReturnPath(query.next, locale);
   const defaultRegistrationPath = `/${locale}/organisation${registrationRole === "fournisseur" ? "?role=fournisseur" : ""}`;
   const effectiveNextPath = registration ? nextPath ?? defaultRegistrationPath : nextPath;
-  const translatedNextPath = effectiveNextPath ? `/${alternate}/${effectiveNextPath.split("/").slice(2).join("/")}` : undefined;
+  const translatedNextPath = effectiveNextPath ? translateLocalPath(effectiveNextPath, locale, alternate) : undefined;
   const languageHref = withQuery(`/${alternate}/connexion`, {
     mode: registration ? "inscription" : undefined,
     role: registration ? registrationRole : undefined,
@@ -79,9 +83,9 @@ export default async function LoginPage({ params, searchParams }: { params: Prom
             </div>
           ) : null}
           {planCode ? <p role="status" className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950"><strong>{chrome.planIntent} :</strong> <span dir="ltr">{planCode}</span>. {chrome.planNote}</p> : null}
-          {!registration && nextPath ? <p className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6">{locale === "ar" ? "كان لديكم طلب قيد الإعداد؟ تشخيصكم واحتياجكم وترشيحكم يُستأنفون تلقائياً بعد الاتصال." : "Vous aviez une demande en cours ? Pas d’inquiétude, votre diagnostic, vos besoins et votre candidature prestataire seront automatiquement repris après cette connexion."}</p> : null}
-          <div className="mt-8"><OtpForm locale={locale} nextPath={effectiveNextPath} intent={registration ? "registration" : "login"} /></div>
-          {!registration && isPublicDemoAccessEnabled() ? <DemoAccess locale={locale} /> : null}
+          {!registration && nextPath ? <p className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6">{locale === "ar" ? "بعد الاتصال ستعودون إلى الصفحة المطلوبة إذا كانت صلاحياتكم تسمح بذلك. قد يلزم تحقق معزّز." : "Après connexion, vous retrouverez la page demandée si votre compte est habilité. Une vérification renforcée peut être nécessaire."}</p> : null}
+          <div className="mt-8">{registration ? <InscriptionConsent otpLength={configuredEmailOtpLength()} locale={locale} nextPath={effectiveNextPath ?? defaultRegistrationPath}/> : <OtpForm otpLength={configuredEmailOtpLength()} locale={locale} nextPath={effectiveNextPath}/>}</div>
+          {!registration && isPublicDemoAccessEnabled() ? <DemoAccess locale={locale} nextPath={effectiveNextPath} /> : null}
           {!registration && (query.demo === "unavailable" || query.demo === "disabled") ? <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">{query.demo === "disabled" ? chrome.demoDisabled : chrome.demoUnavailable}</p> : null}
           <ul className="mt-8 space-y-3 text-sm text-slate-600">
             {(locale === "fr"

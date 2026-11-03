@@ -13,6 +13,7 @@ import { sha256Hex } from "./webhook";
 import { assertGatewayCurrency } from "./currency-exponents";
 
 export type CmiGatewayConfig = {
+  environment?:"demo"|"live";
   gatewayUrl: string;
   allowedGatewayHosts: ReadonlySet<string>;
   merchantId: string;
@@ -21,6 +22,7 @@ export type CmiGatewayConfig = {
 
 export class CmiPaymentGateway implements PaymentGateway, PaymentWebhookVerifier {
   readonly code = "CMI" as const;
+  readonly providerEnvironment:"SANDBOX"|"UNVERIFIED";
   private readonly gatewayUrl: string;
 
   constructor(private readonly config: CmiGatewayConfig) {
@@ -38,13 +40,16 @@ export class CmiPaymentGateway implements PaymentGateway, PaymentWebhookVerifier
     ) {
       throw new PaymentGatewayError("CONFIGURATION_INVALID");
     }
+    this.providerEnvironment=config.environment !== "live" && url.hostname === "testpayment.cmi.co.ma" ? "SANDBOX" : "UNVERIFIED";
     this.gatewayUrl = url.toString();
   }
 
   async createIntent(request: PaymentIntentRequest): Promise<PaymentIntent> {
     assertPaymentRequest(request);
     assertGatewayCurrency(this.code, request.currency);
-    const digest = await sha256Hex(`cmi:${request.organizationId}:${request.planVersionId}:${request.idempotencyKey}`);
+    const digest = await sha256Hex(request.purchaseKind === "CREDIT_PACK"
+      ? `cmi:credit-pack:${request.organizationId}:${request.packVersionId}:${request.idempotencyKey}`
+      : `cmi:${request.organizationId}:${request.planVersionId}:${request.idempotencyKey}`);
     const providerIntentId = `matricia-${digest.slice(0, 32)}`;
     const nonce = digest.slice(32);
     const callbackUrl = callbackFromReturnUrl(request.returnUrl, "cmi");
@@ -68,6 +73,7 @@ export class CmiPaymentGateway implements PaymentGateway, PaymentWebhookVerifier
     );
     return {
       gateway: this.code,
+      providerEnvironment:this.providerEnvironment,
       providerIntentId,
       status: "REQUIRES_CONFIRMATION",
       amountMinor: request.amountMinor,
@@ -112,6 +118,7 @@ export class CmiPaymentGateway implements PaymentGateway, PaymentWebhookVerifier
     if (!currency || Number.isNaN(receivedAt.getTime())) throw new PaymentGatewayError("INVALID_EVENT");
     return {
       gateway: this.code,
+      providerEnvironment:this.providerEnvironment,
       providerEventId,
       providerIntentId,
       eventType: "PAYMENT_SUCCEEDED",

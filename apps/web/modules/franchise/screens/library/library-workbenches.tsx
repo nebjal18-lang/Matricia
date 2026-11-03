@@ -1,3 +1,4 @@
+import{CatalogServerPagination}from"./server-pagination";
 import Link from "next/link";
 import { Beaker, ClipboardList, Eye, GitBranch, ListOrdered, Lock, Plus, RotateCcw, Send, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
@@ -9,7 +10,7 @@ import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import type { FranchiseCatalogRow, FranchiseLibraryWorkspace, FranchiseQuestionRow } from "@/modules/franchise/data/library/workspace-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { MandateBanner, StatusChip, kindLabel, nextAction } from "./library-boards";
-import { FranchiseScopeInfo, FranchiseSecurityPanel } from "./library-chrome";
+import { FranchiseScopeInfo } from "./library-chrome";
 import { FranchiseServiceDraftForm, FranchiseServiceCommandForms } from "./service-builder";
 import { FranchiseQuestionnaireSandbox } from "./sandbox-form";
 import { FranchiseArchiveServiceForm, FranchiseCatalogSubmitForm, FranchiseCloneQuestionnaireForm, FranchiseDuplicateServiceForm, FranchisePublishReleaseForm } from "./catalog-commands";
@@ -61,7 +62,7 @@ export function FranchiseServicesWorkbench({
         <ToolLink href={selected ? `/${locale}/franchise/services/${selected.id}/validation${query}` : `/${locale}/franchise/validations${query}`} label={c.submitValidation} />
       </Toolbar>
       <section className="franchise-workbench franchise-workbench-services">
-        <ServicesCatalogPanel locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} />
+        <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} />
         <aside className="client-card franchise-service-drawer">
           {createMode || !selected ? (
             <>
@@ -171,9 +172,7 @@ export function FranchiseQuestionnairesWorkbench({
   organizationId?: string | null;
 }) {
   const c = libraryCopy(locale);
-  const listed = search
-    ? workspace.questionnaires.filter((item) => `${item.title} ${item.code}`.toLowerCase().includes(search.toLowerCase()))
-    : workspace.questionnaires;
+  const listed=workspace.questionnaires;
   const selected = listed.find((item) => item.id === selectedId) ?? workspace.questionnaires.find((item) => item.id === selectedId) ?? listed[0] ?? workspace.questionnaires[0] ?? null;
   const questions = workspace.questions.filter((item) => !selected || item.questionnaireId === selected.id || item.questionnaireId === null);
   const selectedQuestion: FranchiseQuestionRow | null = questions[0] ?? null;
@@ -195,7 +194,7 @@ export function FranchiseQuestionnairesWorkbench({
           <form className="franchise-search" method="get" action={`/${locale}/franchise/questionnaires`} role="search">
             {query.includes("organizationId=") ? <input type="hidden" name="organizationId" value={new URLSearchParams(query.startsWith("?") ? query.slice(1) : query).get("organizationId") ?? ""} /> : null}
             <label className="sr-only" htmlFor="franchise-q-search">{c.searchQuestionnaire}</label>
-            <input id="franchise-q-search" name="q" defaultValue={search} placeholder={c.searchQuestionnaire} />
+            <input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId}/><input id="franchise-q-search" name="q" defaultValue={search} placeholder={c.searchQuestionnaire} />
           </form>
           {listed.length === 0 ? <p>{c.emptyQuestionnaires}</p> : (
             <ul className="client-feed">
@@ -208,7 +207,7 @@ export function FranchiseQuestionnairesWorkbench({
                 </li>
               ))}
             </ul>
-          )}
+          )}<CatalogServerPagination page={workspace.serverPage} locale={locale} query={query}/>
         </article>
         <article className="client-card">
           <header className="client-priority-head">
@@ -336,9 +335,7 @@ export function FranchiseRulesWorkbench({
   organizationId?: string | null;
 }) {
   const c = libraryCopy(locale);
-  const listed = search
-    ? workspace.rules.filter((item) => `${item.title} ${item.code}`.toLowerCase().includes(search.toLowerCase()))
-    : workspace.rules;
+  const listed=workspace.rules;
   const selected = listed.find((item) => item.id === selectedId) ?? workspace.rules.find((item) => item.id === selectedId) ?? listed[0] ?? workspace.rules[0] ?? null;
   const messages = getBuilderMessages(locale);
   const firstService = workspace.services[0];
@@ -357,7 +354,7 @@ export function FranchiseRulesWorkbench({
             {query.includes("organizationId=") ? <input type="hidden" name="organizationId" value={new URLSearchParams(query.startsWith("?") ? query.slice(1) : query).get("organizationId") ?? ""} /> : null}
             {selected ? <input type="hidden" name="ruleId" value={selected.id} /> : null}
             <label className="sr-only" htmlFor="franchise-rule-search">{c.searchRule}</label>
-            <input id="franchise-rule-search" name="q" defaultValue={search} placeholder={c.searchRule} />
+            <input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId}/><input id="franchise-rule-search" name="q" defaultValue={search} placeholder={c.searchRule} />
           </form>
           {listed.length === 0 ? <p>{c.emptyRules}</p> : (
             <ul className="client-feed">
@@ -370,7 +367,7 @@ export function FranchiseRulesWorkbench({
                 </li>
               ))}
             </ul>
-          )}
+          )}<CatalogServerPagination page={workspace.serverPage} locale={locale} query={query}/>
           <p className="client-access-note">{c.goodPractices}</p>
         </article>
         <article className="client-card">

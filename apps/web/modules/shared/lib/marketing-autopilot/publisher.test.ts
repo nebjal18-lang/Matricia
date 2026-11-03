@@ -61,3 +61,13 @@ describe("social publication adapters", () => {
     await expect(publishScheduledSocial(job, { mode: "live", liveEnabled: true, resolveCredential: () => "secret-not-json", fetch: vi.fn() })).resolves.toEqual({ outcome: "PERMANENT_FAILURE", errorCode: "INVALID_CREDENTIAL_CONFIGURATION" });
   });
 });
+
+it("reconciles a successful response without ID rather than publishing twice", async () => {
+  const request: typeof fetch = vi.fn(async () => new Response(null, { status: 201 }));
+  await expect(publishScheduledSocial(job, { mode: "live", liveEnabled: true, resolveCredential: () => credential, fetch: request })).resolves.toEqual({ outcome: "RECONCILIATION_REQUIRED", errorCode: "PROVIDER_ID_MISSING" });
+  expect(request).toHaveBeenCalledOnce();
+});
+
+it.each(["INSTAGRAM","REEL"] as const)("refuses legacy inline %s media publication without durable checkpoints",async channel=>{
+ const request=vi.fn();await expect(publishScheduledSocial({...job,provider:"META",channel},{mode:"live",liveEnabled:true,resolveCredential:()=>JSON.stringify({accessToken:"test-credential-".repeat(3),targetId:"123456",graphVersion:"v23.0"}),fetch:request})).resolves.toEqual({outcome:"PERMANENT_FAILURE",errorCode:"META_DURABLE_EXECUTOR_REQUIRED"});expect(request).not.toHaveBeenCalled();
+});

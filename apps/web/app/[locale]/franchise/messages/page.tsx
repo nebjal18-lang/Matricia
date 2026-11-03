@@ -1,27 +1,24 @@
+import { randomUUID } from "node:crypto";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
-import { libraryCopy } from "@/modules/franchise/data/library/copy";
-import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
-import { MessagesBoard } from "@/modules/franchise/screens/spaces/boards";
-import { franchiseMandateName, loadFranchiseSpaceFromLibrary, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
+import { InternalMessageAttachments,MessageAttachments } from "@/modules/shared/ui/internal-message-attachments";
+import { messageCursorSchema } from "@/modules/shared/lib/internal-messaging/model";
+import { loadFranchiseMessaging } from "@/modules/franchise/data/messaging/repository";
+import { OpenFranchiseMessageForm, SendFranchiseMessageForm } from "@/modules/franchise/screens/messages/forms";
+import { franchiseMandateName, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
-
-export default async function FranchiseMessagesPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; q?: string; page?: string }> }) {
-  const [{ locale }, query] = await Promise.all([params, searchParams]);
-  if (!isLocale(locale)) notFound();
-  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId });
-  const c = libraryCopy(locale);
-  const s = franchiseCopy(locale);
-  const mandateName = franchiseMandateName(result);
-  const board = await loadFranchiseSpaceFromLibrary({ locale, query: space.selectedQuery, result });
-  return (
-    <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="messages" title={s.messagesTitleRich} lead={s.messagesLeadRich} kicker={c.scope} mandateName={mandateName}>
-      {result.status === "error" ? (
-        <Alert variant="destructive"><AlertTitle>{c.unavailable}</AlertTitle><AlertDescription>{result.reason === "NO_MANDATE" ? c.noMandate : c.scopeHelp}</AlertDescription></Alert>
-      ) : (
-        <MessagesBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={board} search={query.q} page={query.page} />
-      )}
-    </FranchiseAppShell>
-  );
+export default async function FranchiseMessagesPage({params,searchParams}:{params:Promise<{locale:string}>;searchParams:Promise<{organizationId?:string;franchiseId?:string;fil?:string;q?:string;page?:string;before?:string;beforeId?:string}>}){
+ const[{locale},query]=await Promise.all([params,searchParams]);if(!isLocale(locale))notFound();
+ const{space,result}=await requireFranchiseLibrary({locale,organizationId:query.organizationId,franchiseId:query.franchiseId});const ar=locale==="ar";
+ const page=Number(query.page??1);const parsedCursor=messageCursorSchema.safeParse({createdAt:query.before,id:query.beforeId});const cursorInvalid=Boolean(query.before||query.beforeId)&&!parsedCursor.success;
+ const loaded=result.status==="success"&&!cursorInvalid?await loadFranchiseMessaging({franchiseId:result.workspace.mandate.franchiseId,threadId:query.fil,search:(query.q??"").trim(),page,cursor:parsedCursor.success?parsedCursor.data:undefined}):null;
+ const scope=result.status==="success"?{locale,organizationId:result.workspace.mandate.operatorOrganizationId!,franchiseId:result.workspace.mandate.franchiseId,commandKey:randomUUID()}:null;
+ const link=(updates:Record<string,string|null>)=>{const values=new URLSearchParams();if(scope){values.set("organizationId",scope.organizationId);values.set("franchiseId",scope.franchiseId);}if(query.q)values.set("q",query.q);if(query.fil)values.set("fil",query.fil);if(query.page)values.set("page",query.page);for(const[k,v]of Object.entries(updates)){if(v===null)values.delete(k);else values.set(k,v);}return`/${locale}/franchise/messages?${values}`;};
+ return <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="messages" title={ar?"المراسلة الآمنة":"Messagerie sécurisée"} lead={ar?"تبادلات مرتبطة بالملفات ضمن التفويض الحالي.":"Des échanges liés aux dossiers du mandat sélectionné."} kicker={ar?"صاحب الامتياز":"Franchisé"} mandateName={franchiseMandateName(result)}>
+  <main className="client-page">{!loaded||loaded.status==="error"||!scope?<p role="alert">{ar?"تعذر تحميل المراسلة. تحققوا من الرابط وأعيدوا المحاولة.":"La messagerie n’a pas pu être chargée. Vérifiez le lien et réessayez."}</p>:<div className="grid gap-5 lg:grid-cols-3">
+   <section className="client-card space-y-4"><h2>{ar?"المحادثات":"Conversations"}</h2><form method="get"><input type="hidden" name="organizationId" value={scope.organizationId}/><input type="hidden" name="franchiseId" value={scope.franchiseId}/><label className="franchise-field">{ar?"البحث في المواضيع والرسائل":"Rechercher dans les objets et messages"}<input name="q" defaultValue={query.q} maxLength={120}/></label><button type="submit" className="franchise-tool">{ar?"بحث":"Rechercher"}</button></form><p>{loaded.total} {ar?"محادثة مطابقة":"conversation(s) correspondante(s)"}</p><ul className="space-y-3">{loaded.inbox.map((thread)=><li key={thread.id}><Link aria-current={query.fil===thread.id?"page":undefined} className="client-soft-link" href={link({fil:thread.id})}>{thread.subject}</Link><small className="block">{thread.message_count} {ar?"رسالة":"message(s)"} · {thread.counterparty_alias==="CLIENT"?(ar?"عميل":"Client"):(ar?"مقدم خدمة":"Prestataire")}</small></li>)}</ul>{loaded.inbox.length===0?<p>{ar?"لا توجد محادثات مطابقة في هذه الصفحة.":"Aucune conversation correspondante sur cette page."}</p>:null}<nav aria-label={ar?"صفحات المحادثات":"Pages des conversations"} className="flex flex-wrap gap-3">{loaded.page>1?<Link className="franchise-tool" href={link({page:String(loaded.page-1)})}>{ar?"السابق":"Précédent"}</Link>:null}{loaded.page*loaded.pageSize<loaded.total?<Link className="franchise-tool" href={link({page:String(loaded.page+1)})}>{ar?"التالي":"Suivant"}</Link>:null}</nav></section>
+   <section className="client-card space-y-4 lg:col-span-2">{loaded.conversation?<><h2>{loaded.conversation.thread.subject}</h2><p>{loaded.conversation.messages.length} / {loaded.conversation.total} {ar?"رسالة. تُعرض هوية المشاركين المحمية.":"message(s). Les participants utilisent leur identité protégée."}</p><nav aria-label={ar?"سجل المحادثة":"Historique de la conversation"} className="flex flex-wrap gap-3">{loaded.conversation.nextCursor?<Link className="franchise-tool" href={link({before:loaded.conversation.nextCursor.createdAt,beforeId:loaded.conversation.nextCursor.id})}>{ar?"رسائل أقدم":"Messages plus anciens"}</Link>:null}{query.before?<Link className="franchise-tool" href={link({before:null,beforeId:null})}>{ar?"أحدث الرسائل":"Messages récents"}</Link>:null}</nav><ol className="space-y-4">{loaded.conversation.messages.map((message)=><li key={message.id} className="rounded-lg border p-3"><strong>{message.sender_alias==="FRANCHISE"?(ar?"صاحب الامتياز":"Franchisé"):message.sender_alias==="CLIENT"?(ar?"العميل":"Client"):(ar?"مقدم الخدمة":"Prestataire")}</strong><time className="block text-sm" dateTime={message.created_at}>{new Intl.DateTimeFormat(ar?"ar-MA":"fr-MA",{dateStyle:"medium",timeStyle:"short",timeZone:"Africa/Casablanca"}).format(new Date(message.created_at))}</time><p className="whitespace-pre-wrap">{message.body}</p><MessageAttachments attachments={message.attachments} locale={locale}/></li>)}</ol><SendFranchiseMessageForm key={loaded.conversation.thread.id} scope={scope} threadId={loaded.conversation.thread.id} locked={loaded.conversation.thread.status==="LOCKED"}/>{loaded.conversation.thread.status!=="LOCKED"?<InternalMessageAttachments threadId={loaded.conversation.thread.id} senderOrganizationId={loaded.conversation.thread.participant_organization_id} locale={locale}/>:null}</>:<OpenFranchiseMessageForm scope={scope} options={loaded.options}/>}<Link className="franchise-tool" href={link({fil:null,before:null,beforeId:null})}>{ar?"تبادل جديد":"Nouvel échange"}</Link></section>
+  </div>}</main>
+ </FranchiseAppShell>;
 }

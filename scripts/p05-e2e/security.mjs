@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const CHILD_ENV_ALLOWLIST = new Set([
-  "CI", "COLORTERM", "ComSpec", "FORCE_COLOR", "HOME", "HOMEDRIVE", "HOMEPATH", "LANG", "LOCALAPPDATA",
+  "CI", "E2E_LOCAL_ISOLATED", "E2E_LOCAL_PROJECT_ID", "COREPACK_HOME", "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH", "PLAYWRIGHT_VIDEO", "COLORTERM", "ComSpec", "FORCE_COLOR", "HOME", "HOMEDRIVE", "HOMEPATH", "LANG", "LOCALAPPDATA",
   "NO_COLOR", "NUMBER_OF_PROCESSORS", "OS", "PATH", "PATHEXT", "ProgramData", "ProgramFiles", "ProgramFiles(x86)",
   "SystemDrive", "SystemRoot", "TEMP", "TERM", "TMP", "USERPROFILE", "windir",
 ]);

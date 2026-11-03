@@ -1,0 +1,59 @@
+{
+  "date_client": "2026-10-31",
+  "timezone_client": "America/Toronto",
+  "head": "dbf309cd4ec5c48212c43243203dd98150ee5114",
+  "tracked_diff_sha256": "bdf573a76f78001a736c6c2e00fbd5126165bbbc1b61c22dca42e26ac511f4e5",
+  "untracked_product_sources": {
+    "scripts/start-local-supabase.sh": "5f878b6580082079886fde0ebcbccffafeb6d2012bf6aa07cbf4b607cb097cd7",
+    "supabase/migrations/20261031100000_restore_financial_canonical_idempotency.sql": "94ed9399e18acf9701cd633772cadf06e0596d78ececffda864bd6408cae0475",
+    "tests/e2e/cookie-preferences.spec.ts": "afe3e44aabc76a289497612d66287cabca87a37598ebf4b5e3ed81efd92fa67d"
+  },
+  "review_domains": 6,
+  "product_code_changed_during_audit": false,
+  "production_inspected": false,
+  "sql_local_metadata": {
+    "public_tables": 461,
+    "public_tables_without_rls": 0,
+    "public_security_definer_functions": 446,
+    "policies": 467
+  },
+  "static_inventory": {
+    "routes": 204,
+    "pages": 161,
+    "route_handlers": 26,
+    "actions": 253,
+    "interactions": 1333,
+    "runtime_validation_debt_heuristic": 525
+  },
+  "read_only_runtime_observations": [
+    {
+      "path": "/api/readiness",
+      "http": 200,
+      "status": "ready"
+    },
+    {
+      "path": "/api/workers/marketing-content",
+      "method": "GET",
+      "http": 405
+    }
+  ],
+  "release_validate": {
+    "exit_code": 0,
+    "verified_requirements": 5,
+    "total_requirements": 76,
+    "certifies": "structure_only"
+  },
+  "previous_correction_evidence_not_rerun_in_this_audit": {
+    "unit_tests_passed": 1265,
+    "sql_files": 174,
+    "sql_assertions": 3833,
+    "concurrency_scenarios": 4,
+    "clean_migrations": 233,
+    "public_cookie_e2e": 18
+  },
+  "limitations": [
+    "No full penetration test",
+    "No production or hosted-provider configuration inspected",
+    "No fresh complete authenticated business acceptance run"
+  ]
+}

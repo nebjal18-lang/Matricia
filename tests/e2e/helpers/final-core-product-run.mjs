@@ -1,5 +1,8 @@
+import { runSecuredBrowserSuite, writeLocalSuiteEvidence } from "./secured-browser-runner.mjs";
+import { localFixturePdf } from './local-fixture-pdf.mjs';
+import { closePendingLocalProviderScans } from './local-provider-identity-fixture.mjs';
+import { provisionLocalCatalogReference, neutralizeLocalCatalogReference } from "./local-catalog-reference.mjs";
 import { createHash, randomUUID } from "node:crypto";
-import { spawn } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,7 +18,9 @@ const output = resolve(directory, "playwright");
 const sharedAuthDirectory = resolve(root, "scripts", "p05-e2e", ".auth");
 const evidencePath = resolve(root, "docs", "evidence", "final-core-product-020-last-run.json");
 const hash = (value) => createHash("sha256").update(`${runId}:${value}`).digest("hex");
-let base; let created; let failure; let evidence; let cleanupFailed=false;
+let base; let created; let failure; let evidence; let cleanupFailed=false; let config; let suiteSummary;
+const knownPdf=localFixturePdf(['SYNTHETIC LOCAL PROVIDER QUALIFICATION FIXTURE','NOT AN OFFICIAL DOCUMENT']);
+const knownPdfHash=createHash("sha256").update(knownPdf).digest("hex");
 
 function sanitizedPlaywrightFailure(value) {
   const queue=[value],messages=[];
@@ -35,7 +40,7 @@ async function createFixture(fixture) {
     from public.catalog_services service join public.catalog_service_versions version on version.id=service.current_published_version_id and version.status='PUBLISHED'
     join public.catalog_libraries library on library.id=service.library_id and library.status='PUBLISHED' and library.current_published_version_id is not null
     join public.catalog_subcategories category on category.id=service.primary_subcategory_id and category.status='PUBLISHED' and category.current_published_version_id is not null
-    where service.status='PUBLISHED' and library.current_release_id is not null order by service.code limit 1`;
+    where service.status='PUBLISHED' and library.current_release_id is not null and (${fixture.resources.localCatalog?.service??null}::uuid is null or service.id=${fixture.resources.localCatalog?.service??null}::uuid) order by service.code limit 1`;
   if (!catalog) throw new Error("Final core fixture requires one published catalog service with a current release");
   const ids = Object.fromEntries(["request","requestVersion","matchingRun","matchingRunPrevious","candidatePrevious","rfq","thread","clientParticipant","providerParticipant","message","snapshot","capacityProvider","capacityMembership","capacityProviderService","capacityQualification","capacityDecision","capacitySession","capacityCompanyDecision","capacityQuestionnaire","capacityQuestionnaireVersion",...Array.from({length:3},(_,index)=>`provider${index}`),...Array.from({length:3},(_,index)=>`candidate${index}`),...Array.from({length:3},(_,index)=>`invitation${index}`),...Array.from({length:3},(_,index)=>`quote${index}`),...Array.from({length:3},(_,index)=>`quoteVersion${index}`),...Array.from({length:3},(_,index)=>`capacityDocumentFamily${index}`),...Array.from({length:3},(_,index)=>`capacityDocumentVersion${index}`)].map((key)=>[key,randomUUID()]));
   const clientOrganizationId = fixture.manifest.fixtures.organizationA.id;
@@ -44,12 +49,19 @@ async function createFixture(fixture) {
   const foreignMarker = `FOREIGN-${runId.slice(0,8)}`;
   const validUntil = new Date(Date.now()+30*24*60*60*1000).toISOString();
   const rows=[];
+  fixture.resources.organizationIds.push(ids.provider0,ids.provider1,ids.provider2,ids.capacityProvider);
+  fixture.resources.localFinalPdfPaths=[];
   await database.begin(async(transaction)=>{
     await transaction.unsafe("set local session_replication_role=replica");
     for(let index=0;index<3;index+=1){
-      await transaction`insert into public.organizations(id,legal_name,display_name,status,created_by)values(${ids[`provider${index}`]}::uuid,${`Final Provider ${index} ${runId}`},${`Final Provider ${index}`},'ACTIVE',${client.id}::uuid)`;
+      await transaction`insert into public.organizations(id,legal_name,display_name,status,created_by)values(${ids[`provider${index}`]}::uuid,${`Final Provider ${index} ${runId}`},${`P05 E2E Final Provider ${index} ${runId}`},'ACTIVE',${client.id}::uuid)`;
     }
-    await transaction`insert into public.organizations(id,legal_name,display_name,status,created_by)values(${ids.capacityProvider}::uuid,${`P05 E2E Capacity Provider ${runId}`},${`Prestataire capacité ${runId.slice(0,8)}`},'ACTIVE',${providerUser.id}::uuid)`;
+    await transaction`insert into public.organizations(id,legal_name,display_name,status,created_by)values(${ids.capacityProvider}::uuid,${`P05 E2E Capacity Provider ${runId}`},${`P05 E2E Capacity Provider ${runId}`},'ACTIVE',${providerUser.id}::uuid)`;
+    if(fixture.config.runtimeMode==='isolated-local-docker'){
+      const ice=(BigInt(`0x${hash('provider-ice').slice(0,14)}`)%1_000_000_000_000_000n).toString().padStart(15,'0');
+      const fiscal=(BigInt(`0x${hash('provider-if').slice(0,10)}`)%100_000_000n).toString().padStart(8,'0');
+      await transaction`insert into public.organization_identifiers(organization_id,identifier_type,normalized_value,verification_status,is_active)values(${ids.capacityProvider}::uuid,'ICE',${ice},'PENDING',true),(${ids.capacityProvider}::uuid,'IF',${fiscal},'PENDING',true),(${ids.capacityProvider}::uuid,'RC',${`E2E${runId.replaceAll('-','').slice(0,16)}`},'PENDING',true)`;
+    }
     await transaction`insert into public.organization_memberships(id,organization_id,user_id,status,activated_at)values(${ids.capacityMembership}::uuid,${ids.capacityProvider}::uuid,${providerUser.id}::uuid,'ACTIVE',clock_timestamp())`;
     await transaction`insert into public.organization_member_roles(membership_id,role_code,granted_by)values(${ids.capacityMembership}::uuid,'PROVIDER_OWNER',${providerUser.id}::uuid)`;
     await transaction`insert into public.provider_profiles(provider_organization_id,company_status,overall_status,activity_summary,team_size,years_experience,secondary_subcontracting_allowed,accounting_contact_email,partner_contract_status,created_by)values(${ids.capacityProvider}::uuid,'VERIFIED','ACTIVE','Prestation de qualification E2E contrôlée',4,6,false,null,'SIGNED',${providerUser.id}::uuid)`;
@@ -66,7 +78,7 @@ async function createFixture(fixture) {
     await transaction`update public.provider_qualifications set current_decision_id=${ids.capacityDecision}::uuid where id=${ids.capacityQualification}::uuid`;
     for (const [index, kind] of ["LEGAL","FISCAL","INSURANCE"].entries()) {
       await transaction`insert into public.provider_document_families(id,provider_organization_id,document_kind,code,created_by)values(${ids[`capacityDocumentFamily${index}`]}::uuid,${ids.capacityProvider}::uuid,${kind},${`E2E_${kind}`},${providerUser.id}::uuid)`;
-      await transaction`insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,storage_object_path,content_hash,change_reason,submitted_by,reviewed_by,reviewed_at)values(${ids[`capacityDocumentVersion${index}`]}::uuid,${ids[`capacityDocumentFamily${index}`]}::uuid,${ids.capacityProvider}::uuid,1,'VERIFIED',${`test-only/${ids.capacityProvider}/${kind.toLowerCase()}.pdf`},${hash(`capacity-document-${kind}`)},'Fixture TEST vérifiée',${providerUser.id}::uuid,${providerUser.id}::uuid,clock_timestamp())`;
+      await transaction`insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,storage_object_path,content_hash,change_reason,submitted_by,reviewed_by,reviewed_at)values(${ids[`capacityDocumentVersion${index}`]}::uuid,${ids[`capacityDocumentFamily${index}`]}::uuid,${ids.capacityProvider}::uuid,1,'VERIFIED',${`test-only/${ids.capacityProvider}/${kind.toLowerCase()}.pdf`},${knownPdfHash},'Fixture TEST vérifiée',${providerUser.id}::uuid,${providerUser.id}::uuid,clock_timestamp())`;
     }
     await transaction`insert into public.service_requests(id,client_organization_id,library_id,service_id,status,created_by)values(${ids.request}::uuid,${clientOrganizationId}::uuid,${catalog.library_id}::uuid,${catalog.service_id}::uuid,'CLIENT_REVIEW',${client.id}::uuid)`;
     await transaction`insert into public.service_request_versions(id,request_id,client_organization_id,library_id,version_number,description,urgency,currency_code,required_quote_data,required_fields_complete,catalog_snapshot_hash,questionnaire_snapshot_hash,change_reason,content_hash,created_by)values(${ids.requestVersion}::uuid,${ids.request}::uuid,${clientOrganizationId}::uuid,${catalog.library_id}::uuid,1,${`Comparaison finale ${runId.slice(0,8)}`},'NORMAL','MAD',${transaction.json({})},true,${hash("catalog")},${hash("questionnaire")},'Fixture E2E finale',${hash("request")},${client.id}::uuid)`;
@@ -92,16 +104,41 @@ async function createFixture(fixture) {
     await transaction`insert into public.internal_messages(id,thread_id,sender_participant_id,sender_organization_id,sender_user_id,body,idempotency_key)values(${ids.message}::uuid,${ids.thread}::uuid,${ids.clientParticipant}::uuid,${clientOrganizationId}::uuid,${client.id}::uuid,${message},${`final-${runId}`})`;
     await transaction.unsafe("set local session_replication_role=origin");
   });
+  fixture.resources.finalCoreCreated={ids,clientOrganizationId,subject,message,foreignMarker,providerUserId:providerUser.id,capacityServiceId:catalog.service_id,capacityServiceLabelFr:catalog.service_label_fr};
+  if (fixture.config.runtimeMode==='isolated-local-docker') {
+    // Known clean PDF metadata is a historical test precondition, not a claim
+    // that a production malware scanner or compliance reviewer was exercised.
+    for (const [index,kind] of ["LEGAL","FISCAL","INSURANCE"].entries()) {
+      const path=`test-only/${ids.capacityProvider}/${kind.toLowerCase()}.pdf`;
+      fixture.resources.localFinalPdfPaths.push(path);
+      const upload=await fixture.resources.admin.storage.from('provider-qualification').upload(path,knownPdf,{contentType:'application/pdf',upsert:false});
+      if(upload.error)throw new Error('FINAL_CORE_REAL_PDF_UPLOAD_FAILED');
+      const [job]=await database`insert into public.provider_document_scan_jobs(document_version_id,provider_organization_id,storage_object_path,declared_sha256,declared_mime_type)values(${ids[`capacityDocumentVersion${index}`]}::uuid,${ids.capacityProvider}::uuid,${path},${knownPdfHash},'application/pdf')returning id`;
+      const scan=await fixture.resources.admin.rpc('record_provider_document_scan_result',{p_upload_id:job.id,p_result:'CLEAN',p_engine_code:'LOCAL_FIXTURE_KNOWN_PDF',p_engine_version:'1',p_computed_sha256:knownPdfHash,p_idempotency_key:`local-known-pdf:${job.id}`});
+      if(scan.error||scan.data?.result!=='CLEAN')throw new Error('FINAL_CORE_KNOWN_PDF_PRECONDITION_FAILED');
+    }
+    const central=fixture.sessions.central.client;
+    const review=await central.rpc('get_provider_identity_review_context_v1',{p_provider_organization_id:ids.capacityProvider});
+    if(review.error||!review.data?.identity_hash||review.data.document_version_ids?.length!==3)throw new Error('FINAL_CORE_IDENTITY_REVIEW_CONTEXT_REQUIRED');
+    const validation=await central.rpc('revalidate_provider_identity_v1',{p_provider_organization_id:ids.capacityProvider,p_expected_organization_row_version:review.data.organization_row_version,p_expected_profile_row_version:review.data.profile_row_version,p_expected_identity_hash:review.data.identity_hash,p_expected_company_decision_id:review.data.company_decision_id,p_reason:'Validation humaine synthétique de recette locale, sans certification réelle',p_idempotency_key:randomUUID(),p_correlation_id:randomUUID()});
+    if(validation.error)throw new Error('FINAL_CORE_REAL_IDENTITY_REVALIDATION_FAILED');
+    const current=await central.rpc('get_provider_identity_review_context_v1',{p_provider_organization_id:ids.capacityProvider});
+    if(current.error||current.data?.currently_verified!==true)throw new Error('FINAL_CORE_CURRENT_IDENTITY_NOT_VERIFIED');
+    fixture.resources.localProviderIdentityRevalidated=true;
+  }
   return {ids,clientOrganizationId,subject,message,foreignMarker,providerUserId:providerUser.id,capacityServiceId:catalog.service_id,capacityServiceLabelFr:catalog.service_label_fr};
 }
 
 async function cleanup(database, item){
-  await database.begin(async(transaction)=>{await transaction.unsafe("set local session_replication_role=replica");
-    await transaction`delete from public.quote_comparison_snapshots where id=${item.ids.snapshot}::uuid`;await transaction`delete from public.internal_messages where thread_id=${item.ids.thread}::uuid`;await transaction`delete from public.internal_message_participants where thread_id=${item.ids.thread}::uuid`;await transaction`delete from public.internal_message_threads where id=${item.ids.thread}::uuid`;await transaction`delete from public.quote_versions where rfq_id=${item.ids.rfq}::uuid`;await transaction`delete from public.quotes where rfq_id=${item.ids.rfq}::uuid`;await transaction`delete from public.rfq_providers where rfq_id=${item.ids.rfq}::uuid`;await transaction`delete from public.rfqs where id=${item.ids.rfq}::uuid`;await transaction`delete from public.matching_candidates where matching_run_id in(select id from public.matching_runs where request_id=${item.ids.request}::uuid)`;await transaction`delete from public.matching_runs where request_id=${item.ids.request}::uuid`;await transaction`delete from public.service_request_versions where request_id=${item.ids.request}::uuid`;await transaction`delete from public.service_requests where id=${item.ids.request}::uuid`;
-    await transaction`delete from public.event_outbox where organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.audit_events where organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from private.provider_qualification_command_keys where actor_user_id=${item.providerUserId}::uuid and operation_scope='provider.capacity.declare'`;await transaction`delete from public.provider_capacity_versions where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_qualification_decisions where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_qualifications where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_document_service_links where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_document_versions where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_document_families where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_service_match_profiles where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_services where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_company_decisions where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_match_profiles where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.provider_profiles where provider_organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.questionnaire_sessions where organization_id=${item.ids.capacityProvider}::uuid`;await transaction`delete from public.questionnaire_versions where id=${item.ids.capacityQuestionnaireVersion}::uuid`;await transaction`delete from public.questionnaires where id=${item.ids.capacityQuestionnaire}::uuid`;await transaction`delete from public.organization_member_roles where membership_id=${item.ids.capacityMembership}::uuid`;await transaction`delete from public.organization_memberships where id=${item.ids.capacityMembership}::uuid`;await transaction`delete from public.organizations where id=${item.ids.capacityProvider}::uuid`;
-    await transaction`delete from public.organizations where id=any(${[item.ids.provider0,item.ids.provider1,item.ids.provider2]}::uuid[])`;await transaction.unsafe("set local session_replication_role=origin");});
-  const [remaining]=await database`select (select count(*) from public.organizations where id=${item.ids.capacityProvider}::uuid)+(select count(*) from public.provider_capacity_versions where provider_organization_id=${item.ids.capacityProvider}::uuid) as count`;
-  if(Number(remaining?.count)!==0)throw new Error("Final core provider fixture cleanup verification failed");
+  // Keep all real command/audit/outbox history. The shared cleanup revokes
+  // memberships, archives every fixture organization and disables Auth users.
+  await database.begin(async tx=>{
+    await tx.unsafe("set local session_replication_role='replica'");
+    await tx`update public.questionnaire_versions set status='SUPERSEDED',superseded_at=clock_timestamp() where id=${item.ids.capacityQuestionnaireVersion}::uuid and status='PUBLISHED'`;
+    await tx`update public.questionnaires set status='ARCHIVED',archived_at=clock_timestamp() where id=${item.ids.capacityQuestionnaire}::uuid`;
+  });
+  const [remaining]=await database`select count(*)::int as count from public.questionnaire_versions where id=${item.ids.capacityQuestionnaireVersion}::uuid and status='PUBLISHED'`;
+  if(remaining?.count!==0)throw new Error('FINAL_CORE_REFERENCE_REMAINS_PUBLISHED');
 }
 
 async function verifyProviderCapacityProof(database,item){
@@ -117,35 +154,31 @@ async function verifyProviderCapacityProof(database,item){
 }
 
 try{
-  base=await provision();const config=await loadSafeConfiguration(root);await validateFreshManifest(base.manifest,config);created=await createFixture(base);
+  base=await provision();config=await loadSafeConfiguration(root);await validateFreshManifest(base.manifest,config);if(config.runtimeMode==="isolated-local-docker")await provisionLocalCatalogReference(base);created=await createFixture(base);
   await mkdir(directory,{recursive:false,mode:0o700});await mkdir(output,{recursive:false,mode:0o700});await secureLocalPaths(directory,[output]);
   const manifest={schemaVersion:1,environment:"TEST",expiresAt:new Date(Date.now()+20*60_000).toISOString(),clientState:base.manifest.states.clientA.path,foreignClientState:base.manifest.states.clientB.path,providerState:base.manifest.states.noRole.path,messaging:{threadId:created.ids.thread,subject:created.subject,message:created.message,foreignMarker:created.foreignMarker},comparison:{requestId:created.ids.request,rfqId:created.ids.rfq,foreignMarker:created.foreignMarker},matching:{requestId:created.ids.request,policyVersion:"MATCH-V1",minimumRuns:2},providerQualification:{organizationId:created.ids.capacityProvider,serviceId:created.capacityServiceId,serviceLabelFr:created.capacityServiceLabelFr}};
   await writeFile(manifestPath,JSON.stringify(manifest),{mode:0o600,flag:"wx"});
   const env=buildChildEnvironment(process.env,{E2E_BASE_URL:config.baseUrl,E2E_FINAL_CORE_PRODUCT_MANIFEST:manifestPath,...(process.env.E2E_EXTERNAL_SERVER==="1"?{E2E_EXTERNAL_SERVER:"1"}:{})});
-  const child=spawn(process.execPath,[resolve(root,"node_modules","@playwright","test","cli.js"),"test","tests/e2e/final-core-product.spec.ts","--project=chromium-desktop","--workers=1","--reporter=json","--output",output],{cwd:root,env,stdio:["ignore","pipe","pipe"],shell:false});
-  let reportText="";child.stdout.setEncoding("utf8");child.stderr.setEncoding("utf8");
-  child.stdout.on("data",chunk=>{reportText+=chunk;});child.stderr.on("data",()=>{});
-  const code=await new Promise((done,reject)=>{
-    const timeout=setTimeout(()=>{child.kill();reject(new Error("Final core Playwright timed out"));},90_000);
-    child.once("error",error=>{clearTimeout(timeout);reject(error);});
-    child.once("exit",(value,signal)=>{clearTimeout(timeout);signal?reject(new Error("Final core Playwright interrupted")):done(value??1);});
-  });
-  let report;try{report=JSON.parse(reportText);}catch{throw new Error("Final core Playwright report invalid");}
-  if(code!==0)throw new Error(`Final core Playwright failed: ${sanitizedPlaywrightFailure(report)}`);
-  const stats=report?.stats;if(!stats||stats.expected!==4||stats.unexpected!==0||stats.skipped!==0)throw new Error("Final core Playwright report incomplete");
+  suiteSummary=await runSecuredBrowserSuite({root,config,environment:env,specifications:["tests/e2e/final-core-product.spec.ts"],output,expectedTests:4,projects:["chromium-desktop"]});
+  const stats={expected:suiteSummary.passed,unexpected:0,skipped:0,flaky:0,duration:Date.parse(suiteSummary.finishedAt)-Date.parse(suiteSummary.startedAt)};
   const providerCapacity=await verifyProviderCapacityProof(base.resources.database,created);
+  const [messaging]=await base.resources.database`select count(distinct message.id)::int as messages,count(distinct audit.id)::int as audits,count(distinct event.id)::int as events from public.internal_messages message join public.audit_events audit on audit.resource_id=message.id::text and audit.action='messaging.message.sent' join public.event_outbox event on event.correlation_id=audit.correlation_id and event.event_type='InternalMessageSentV1' where message.thread_id=${created.ids.thread}::uuid and message.body=${`${created.message} — réponse persistée`}`;
+  if(messaging?.messages!==1||messaging?.audits!==1||messaging?.events!==1)throw new Error('FINAL_CORE_MESSAGE_PERSISTENCE_PROOF_FAILED');
   evidence={schemaVersion:1,environment:"TEST",generatedAt:new Date().toISOString(),outcome:"PASS",command:"node tests/e2e/helpers/final-core-product-run.mjs",stats:{expected:stats.expected,unexpected:stats.unexpected,flaky:stats.flaky,skipped:stats.skipped,durationMs:Math.round(stats.duration)},requirements:["MAT-FUNC-007","MAT-FUNC-013","MAT-FUNC-018","MAT-FUNC-019","MAT-FUNC-020"],security:["cross-tenant-deny","provider-capacity-matching-inclusion-exclusion"],providerCapacity,cleanup:"verified"};
   console.log("PASS final core product authenticated E2E: MAT-FUNC-007, MAT-FUNC-013, MAT-FUNC-018, MAT-FUNC-019 and MAT-FUNC-020");
-}catch(error){failure=error;}finally{
-  if(base&&created)try{await cleanup(base.resources.database,created);console.log("PASS final core product fixture neutralized");}catch(error){cleanupFailed=true;failure=failure?new AggregateError([failure,error]):error;}
+}catch(error){failure=error;suiteSummary??=error.browserSummary;}finally{
+  if(base)try{await closePendingLocalProviderScans(base,base.resources.localFinalPdfPaths);}catch(error){cleanupFailed=true;failure??=error;}
+  if(base?.resources.localFinalPdfPaths?.length)try{const removal=await base.resources.admin.storage.from('provider-qualification').remove(base.resources.localFinalPdfPaths);if(removal.error)throw new Error('FINAL_CORE_PDF_BYTES_CLEANUP_FAILED');}catch(error){cleanupFailed=true;failure??=error;}
+  if(base&&(created||base.resources.finalCoreCreated))try{await cleanup(base.resources.database,created??base.resources.finalCoreCreated);console.log("PASS final core product fixture neutralized");}catch(error){cleanupFailed=true;failure=failure?new AggregateError([failure,error]):error;}
+  if(base)try{await neutralizeLocalCatalogReference(base);}catch(error){cleanupFailed=true;failure??=error;}
   if(base)try{await base.cleanup();}catch(error){cleanupFailed=true;failure=failure?new AggregateError([failure,error]):error;}
   try{await rm(directory,{recursive:true,force:true});}catch(error){cleanupFailed=true;failure??=error;}
   try{await rm(sharedAuthDirectory,{recursive:true,force:true});}catch(error){cleanupFailed=true;failure??=error;}
 }
+await writeLocalSuiteEvidence({root,suite:"final-core",config,summary:suiteSummary,failure,cleanupVerified:!cleanupFailed,proof:{knownPdfIsPreconditionOnly:true,providerIdentityRevalidatedViaRealAal2Command:base?.resources.localProviderIdentityRevalidated===true,providerCapacityAuditVerified:!failure}});
 if(!failure&&evidence)try{await writeFile(evidencePath,JSON.stringify(evidence,null,2)+"\n",{encoding:"utf8"});}catch(error){failure=error;}
 if(failure){
-  const message = failure instanceof Error ? failure.message : "unknown failure";
-  const sanitized=message.replace(/(?:postgres(?:ql)?|https?):\/\/\S+/giu,"[redacted-endpoint]");
+  const sanitized=typeof failure.message==='string'&&/^[A-Z0-9_.:-]{1,160}$/u.test(failure.message)?failure.message:'FINAL_CORE_FAILED';
   try{await writeFile(evidencePath,JSON.stringify({schemaVersion:1,environment:"TEST",generatedAt:new Date().toISOString(),outcome:"FAIL",command:"node tests/e2e/helpers/final-core-product-run.mjs",requirements:["MAT-FUNC-020"],error:sanitized,cleanup:cleanupFailed?"failed":"verified"},null,2)+"\n",{encoding:"utf8"});}catch{}
   console.error(`FAIL final core product E2E: ${sanitized}`);
   process.exitCode=1;

@@ -70,6 +70,7 @@ describe("invitation mutations", () => {
     mocks.rpc.mockResolvedValue({ data: { outcome: "INVITATION_CREATED", invitation_id: invitationId }, error: null });
   });
 
+  it.each([["create",createInvitation,inviteForm],["accept",acceptInvitation,decisionForm],["decline",declineInvitation,decisionForm]] as const)("preserves a technical Auth outage when attempting to %s an invitation",async(_name,action,form)=>{mocks.getUser.mockResolvedValue({data:{user:null},error:{status:503,name:"AuthRetryableFetchError"}});await expect(action(idle,form())).resolves.toEqual({status:"error",reason:"UNAVAILABLE"});expect(mocks.rpc).not.toHaveBeenCalled();});
   it("valide les champs et les rôles avant tout accès Auth", async () => {
     const result = await createInvitation(idle, inviteForm({ organizationId: "invalid", roleCodes: ["SUPER_ADMIN"] }));
     expect(result).toEqual({ status: "error", reason: "VALIDATION" });
@@ -168,6 +169,8 @@ describe("listInvitations", () => {
     });
   });
 
+  it.each([{status:503,name:"AuthRetryableFetchError"},{status:500,name:"AuthApiError"},{name:"TypeError"}])("does not mistake Auth transport failure %j for a missing session",async error=>{mocks.getUser.mockResolvedValue({data:{user:null},error});await expect(listInvitations()).resolves.toEqual({status:"error",reason:"UNAVAILABLE"});expect(mocks.from).not.toHaveBeenCalled();});
+  it.each([{status:401,name:"AuthApiError"},{name:"AuthSessionMissingError"}])("recognizes a known invalid session %j",async error=>{mocks.getUser.mockResolvedValue({data:{user:null},error});await expect(listInvitations()).resolves.toEqual({status:"error",reason:"UNAUTHENTICATED"});expect(mocks.from).not.toHaveBeenCalled();});
   it("ne lance aucune requête tenant si la session est absente", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: null }, error: null });
     await expect(listInvitations()).resolves.toEqual({ status: "error", reason: "UNAUTHENTICATED" });

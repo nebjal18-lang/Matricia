@@ -1,6 +1,7 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import servicesSource from "@/modules/public/data/catalogue/services.json";
 import { getStaticPublicCatalogue } from "@/modules/public/data/catalogue/static-projection";
+import { publicCatalogueLabel } from "@/modules/public/data/catalogue/localized-label";
 
 export const PUBLIC_NEED_INTENT_SOURCE = "PUBLIC_SERVICE_PROJECTION" as const;
 
@@ -49,7 +50,7 @@ export function canonicalizePublicNeedClassification(
   if (typeof input.serviceCode !== "string") return null;
   const service = serviceByCode.get(input.serviceCode.trim().toUpperCase());
   if (!service || service.libraryCode !== libraryCode) return null;
-  return { source: PUBLIC_NEED_INTENT_SOURCE, libraryCode, libraryName, serviceCode: service.serviceCode, serviceName: service.serviceName };
+  return { source: PUBLIC_NEED_INTENT_SOURCE, libraryCode, libraryName, serviceCode: service.serviceCode, serviceName: publicCatalogueLabel(service.serviceName, locale) };
 }
 
 export function resolvePublicNeedQuery(query: NeedQuery, locale: Locale): {
@@ -64,7 +65,8 @@ export function resolvePublicNeedQuery(query: NeedQuery, locale: Locale): {
   const names = libraryNames(locale);
   let service = requestedCode ? serviceByCode.get(requestedCode) : undefined;
   if (!service && !requestedCode && requestedService) {
-    const candidates = services.filter((candidate) => normalize(candidate.serviceName) === normalize(requestedService));
+    const candidates = services.filter((candidate) => normalize(candidate.serviceName) === normalize(requestedService)
+      || normalize(publicCatalogueLabel(candidate.serviceName, locale)) === normalize(requestedService));
     if (candidates.length === 1) service = candidates[0];
   }
   if (requestedCode && !service) return { initialNeed: q, classification: null, invalidSelection: true };
@@ -78,7 +80,7 @@ export function resolvePublicNeedQuery(query: NeedQuery, locale: Locale): {
     ? canonicalizePublicNeedClassification({ libraryCode, serviceCode: service?.serviceCode ?? null }, locale)
     : null;
   return {
-    initialNeed: q || service?.serviceName || "",
+    initialNeed: q || (service ? publicCatalogueLabel(service.serviceName, locale) : ""),
     classification,
     invalidSelection: false,
   };
@@ -164,13 +166,19 @@ export function rankPublicNeedServices(need: string, locale: Locale, limit = 5):
   const text = need.trim();
   if (text.length < 10 || limit < 1) return [];
   const names = libraryNames(locale);
+  const namesFr = libraryNames("fr");
+  const namesAr = libraryNames("ar");
   return services
     .map((service) => ({
       libraryCode: service.libraryCode,
       serviceCode: service.serviceCode,
-      serviceName: service.serviceName,
+      serviceName: publicCatalogueLabel(service.serviceName, locale),
       libraryName: names.get(service.libraryCode) ?? service.libraryCode,
-      scoreBasisPoints: overlapBasisPoints(text, `${service.serviceName} ${service.serviceCode}`),
+      scoreBasisPoints: Math.max(
+        overlapBasisPoints(text, `${service.serviceName} ${service.serviceCode}`),
+        overlapBasisPoints(text, namesFr.get(service.libraryCode) ?? ""),
+        overlapBasisPoints(text, namesAr.get(service.libraryCode) ?? ""),
+      ),
     }))
     .filter((candidate) => candidate.scoreBasisPoints > 0)
     .sort((left, right) => right.scoreBasisPoints - left.scoreBasisPoints || left.serviceCode.localeCompare(right.serviceCode))

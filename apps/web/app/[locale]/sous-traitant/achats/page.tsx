@@ -31,7 +31,7 @@ export default async function ProviderPurchasesPage({
     : [null, null];
   const m = getPurchaseMessages(locale);
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="purchases" title={m.title} lead={m.lead}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="purchases" title={m.title} lead={m.lead}>
       <ProviderPurchasesBoard
         locale={locale}
         query={space.selectedQuery}

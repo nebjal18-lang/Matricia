@@ -1,5 +1,6 @@
 "use client";
 
+import{ProductionReference}from"./production-reference";
 import { useActionState, type ReactNode } from "react";
 import Link from "next/link";
 import { ActorIntentForm } from "@/modules/admin/screens/spaces/actor-forms";
@@ -60,7 +61,7 @@ export function SpaceMutationForm({
   const [state, action, pending] = useActionState(requestSpaceMutation, idle);
   return (
     <form action={action} className="client-stack">
-      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
       <input type="hidden" name="space" value={space} />
       <input type="hidden" name="itemId" value={itemId} />
       <input type="hidden" name="organizationId" value={organizationId ?? ""} />
@@ -77,7 +78,7 @@ export function SpaceMutationForm({
       </article>
       <div className="admin-form-foot">
         <Link href={`/${locale}/administration/${space}${query}`} className="client-ghost-link">{locale === "ar" ? "إلغاء" : "Annuler"}</Link>
-        <button type="submit" name="intent" value="CHANGE_CONFIGURATION" className="admin-soft-cta" disabled={pending}>{locale === "ar" ? "حفظ المسودة" : "Enregistrer le brouillon"}</button>
+        <button type="submit" name="intent" value="SAVE_DRAFT" className="admin-soft-cta" disabled={pending}>{locale === "ar" ? "حفظ المسودة" : "Enregistrer le brouillon"}</button>
         <button type="submit" className="admin-primary-cta" disabled={pending}>{pending ? "…" : submitLabel}</button>
       </div>
       <Feedback state={state} locale={locale} />
@@ -163,7 +164,7 @@ export function CompanyDecisionForm({
   const [state, action, pending] = useActionState(submitProviderCompany, idleProvider);
   const ar = locale === "ar";
   return (
-    <form action={action} className="client-stack">
+    <form action={action} className="client-stack"><a href={`/${locale}/administration/providers/${organizationId}/identite`}>{ar?"مراجعة الهوية الحالية ووثائقها":"Revoir l’identité courante et ses pièces"}</a>
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="expectedRowVersion" value={rowVersion} />
       <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />

@@ -1,3 +1,8 @@
+import {workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
+import { InvoiceFacts } from "@/modules/provider/screens/facturation/invoice-facts";
+import type { ProviderInvoiceDossier } from "@/modules/provider/data/billing/dossier";
+import { compareQuoteRevisions } from "@/modules/provider/data/quotes/revision-diff";
+import type { ProviderQuoteRevision } from "@/modules/provider/data/quotes/repository";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -68,6 +73,7 @@ function ScopeNote({ locale, query }: { locale: Locale; query: string }) {
 function formatMedium(locale: Locale, value: string, withTime = false) {
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
     dateStyle: "medium",
+    timeZone: "Africa/Casablanca",
     ...(withTime ? { timeStyle: "short" as const } : {}),
   }).format(new Date(value));
 }
@@ -142,6 +148,7 @@ export function ConsultationDetailWorkbench({
       <section className="provider-workbench-layout" id="consult-overview">
         <div className="provider-workbench-main">
           <div className="provider-consult-cards">
+            {invitation?.adminConsultation?<article className="client-card"><h3>{invitation.adminConsultation.subject}</h3><p className="whitespace-pre-wrap">{invitation.adminConsultation.context}</p><p>{locale==="ar"?"تاريخ الرد المطلوب":"Réponse attendue le"} : <time dateTime={invitation.adminConsultation.responseDeadline}>{invitation.adminConsultation.responseDeadline}</time></p></article>:null}
             <article className="client-card">
               <CardHead icon={<Target className="size-4" />}>{w.consultObjectiveTitle}</CardHead>
               <p>{objective}</p>
@@ -245,7 +252,6 @@ export function ConsultationDetailWorkbench({
 export function QuoteMultilineWorkbench({
   locale,
   query,
-  quoteId,
   invitation,
   quotePanel,
   prefill,
@@ -256,14 +262,15 @@ export function QuoteMultilineWorkbench({
   invitation?: ProviderQuoteDashboard["invitations"][number] | null;
   quotePanel?: ReactNode;
   prefill?: QuotePrefill;
+  history?: ProviderQuoteRevision[] | null;
 }) {
   const w = workbenchCopy(locale);
   const currency = invitation?.currency ?? invitation?.quote?.currency ?? null;
   const subtotal = invitation?.quote?.subtotalMinor && currency ? formatMinor(invitation.quote.subtotalMinor, currency, locale) : "—";
   const tax = invitation?.quote?.taxMinor && currency ? formatMinor(invitation.quote.taxMinor, currency, locale) : "—";
   const total = invitation?.quote?.totalMinor && currency ? formatMinor(invitation.quote.totalMinor, currency, locale) : "—";
-  const createdOn = invitation?.deadline ? formatMedium(locale, invitation.deadline) : "—";
-  const validity = prefill?.validUntil ? formatMedium(locale, prefill.validUntil) : "—";
+  const createdOn = invitation?.quote?.createdAt ? formatMedium(locale, invitation.quote.createdAt) : "—";
+  const validity = invitation?.quote?.validUntil ? formatMedium(locale, invitation.quote.validUntil) : "—";
   return (
     <main className="client-page provider-workbench provider-quote-multiline">
       <p className="provider-breadcrumb">
@@ -277,7 +284,7 @@ export function QuoteMultilineWorkbench({
           <p>{w.quoteCreateLead}</p>
         </div>
         <div className="provider-workbench-meta">
-          <span className="provider-autosave"><FileText className="size-4" aria-hidden />{w.quoteDraftSaved}</span>
+          <span className="provider-autosave"><FileText className="size-4" aria-hidden />{invitation?.quote?.currentVersionId ? (locale==="ar"?`نسخة الخادم v${invitation.quote.versionNumber??"—"} محفوظة`:`Version serveur v${invitation.quote.versionNumber??"—"} enregistrée`) : (locale === "ar" ? "لم تحفظ نسخة بعد" : "Aucune version enregistrée")}</span>
           <span className="client-status-chip" data-tone="mint">{invitation?.quote?.status ?? w.quoteDraftStatus}</span>
         </div>
       </header>
@@ -322,14 +329,11 @@ export function QuoteMultilineWorkbench({
           <article className="client-card">
             <header><h3>{w.quoteChecks}</h3></header>
             <ul className="client-feed">
-              <li><Check className="size-4" aria-hidden /><span>{w.quoteCheckLines}</span></li>
-              <li><Check className="size-4" aria-hidden /><span>{w.quoteCheckValid}</span></li>
-              <li><Check className="size-4" aria-hidden /><span>{w.quoteCheckDate}</span></li>
-              <li><Check className="size-4" aria-hidden /><span>{w.quoteCheckAmounts}</span></li>
-              <li><Check className="size-4" aria-hidden /><span>{w.quoteNoBlocker}</span></li>
+              <li><span>{locale === "ar" ? "تظهر نتائج التحقق في نموذج العرض قبل الحفظ والإرسال." : "Les contrôles du formulaire déterminent les champs manquants avant enregistrement et envoi."}</span></li>
+              <li><span>{locale === "ar" ? "حالة النسخة المحفوظة" : "État de la version enregistrée"} : {invitation?.quote?.status ?? "—"}</span></li>
             </ul>
             <div className="provider-workbench-actions">
-              <Link href={`/${locale}/sous-traitant/devis${query}`} className="client-ghost-link">{w.quoteSaveDraft}</Link>
+              <Link href={`/${locale}/sous-traitant/devis${query}`} className="client-ghost-link">{w.breadcrumbQuotes}</Link>
               {invitation?.quote?.id ? <Link href={`/${locale}/sous-traitant/devis/${invitation.quote.id}/apercu${query}`} className="client-ghost-link">{w.quotePreview}</Link> : null}
               {invitation ? <Link href={`/${locale}/sous-traitant/devis/${invitation.quote?.id ?? invitation.id}/revision${query}`} className="client-cta">{w.quoteContinue}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link> : null}
             </div>
@@ -340,12 +344,19 @@ export function QuoteMultilineWorkbench({
   );
 }
 
+function revisionFieldLabel(field:string,locale:Locale){
+ if(field.startsWith("line:"))return `${locale==="ar"?"السطر":"Ligne"} ${field.slice(5)}`;
+ const labels:Record<string,[string,string]>={currency:["Devise","العملة"],solution:["Solution","الحل"],deliverables:["Livrables","المخرجات"],inclusions:["Inclusions","المشمول"],exclusions:["Exclusions","الاستثناءات"],prerequisites:["Prérequis","المتطلبات"],warranty:["Garantie","الضمان"],correctionTerms:["Corrections","التصحيحات"],proposedStartDate:["Début prévu","البداية المتوقعة"],durationDays:["Durée (jours)","المدة بالأيام"],validUntil:["Validité (Casablanca)","الصلاحية بتوقيت الدار البيضاء"]};
+ return labels[field]?.[locale==="ar"?1:0]??field;
+}
+
 export function QuoteRevisionWorkbench({
   locale,
   query,
   quoteId,
   invitation,
   quotePanel,
+  history,
 }: {
   locale: Locale;
   query: string;
@@ -353,11 +364,12 @@ export function QuoteRevisionWorkbench({
   invitation?: ProviderQuoteDashboard["invitations"][number] | null;
   quotePanel?: ReactNode;
   prefill?: QuotePrefill;
+  history?: ProviderQuoteRevision[] | null;
 }) {
   const w = workbenchCopy(locale);
   const currency = invitation?.currency ?? invitation?.quote?.currency ?? null;
   const total = invitation?.quote?.totalMinor && currency ? formatMinor(invitation.quote.totalMinor, currency, locale) : "—";
-  const version = invitation?.quote?.versionNumber ?? 1;
+
   return (
     <main className="client-page provider-workbench provider-quote-revision">
       <p className="provider-breadcrumb">
@@ -378,10 +390,9 @@ export function QuoteRevisionWorkbench({
         <div className="provider-workbench-main">
           <article className="client-card">
             <header><h3>{w.quoteVersionHistory}</h3></header>
-            <ol className="client-journey provider-version-rail">
-              <li data-state="done"><span>v{Math.max(1, version - 1)}</span><small>{w.quoteImmutable}</small></li>
-              <li data-state="current"><span>v{version}</span><small>{w.quoteEditing}</small></li>
-            </ol>
+            {history === null ? <p role="alert">{locale === "ar" ? "تعذر تحميل سجل النسخ." : "Impossible de charger l’historique des versions."}</p> : !history?.length ? <p role="status">{locale === "ar" ? "لا توجد نسخة محفوظة." : "Aucune version enregistrée."}</p> : <ol className="client-journey provider-version-rail">
+              {history.map((item,index) => {const previous=history[index+1];const differences=item.snapshot&&previous?.snapshot?compareQuoteRevisions(previous.snapshot,item.snapshot,locale):null;return <li key={item.id} data-state={item.id === invitation?.quote?.currentVersionId ? "current" : "done"}><span>v{item.version}</span><time dateTime={item.createdAt}>{formatMedium(locale, item.createdAt, true)}</time><small>{item.changeReason}</small><small>{locale==="ar"?"المؤلف":"Auteur"}: <code dir="ltr">{item.authorId}</code></small><details><summary>{locale==="ar"?"بصمة النسخة":"Empreinte de la version"}</summary><code dir="ltr">{item.contentHash}</code></details>{previous?<details><summary>{locale==="ar"?"مقارنة":"Comparer"} v{previous.version} → v{item.version}</summary>{differences===null?<p role="status">{locale==="ar"?"تعذر تحميل بيانات المقارنة.":"Données de comparaison indisponibles."}</p>:differences.length===0?<p>{locale==="ar"?"لا اختلاف في المحتوى التجاري.":"Aucun changement de contenu commercial."}</p>:<dl>{differences.map(change=><div key={change.field}><dt>{revisionFieldLabel(change.field,locale)}</dt><dd><del className="whitespace-pre-wrap">{change.before||"—"}</del> → <ins className="whitespace-pre-wrap">{change.after||"—"}</ins></dd></div>)}</dl>}</details>:null}</li>;})}
+            </ol>}
             <p className="client-access-note">{w.quoteReviseNotice}</p>
             {quotePanel}
             <p className="client-verified">{w.quoteDoubleClick}</p>
@@ -390,19 +401,11 @@ export function QuoteRevisionWorkbench({
         <aside className="provider-workbench-rail client-stack">
           <article className="client-card">
             <header><h3>{w.quoteChangeSummary}</h3></header>
-            <ul className="client-feed provider-change-legend">
-              <li data-change="added"><span><strong>{w.quoteAdded}</strong></span></li>
-              <li data-change="modified"><span><strong>{w.quoteModified}</strong><small>{w.quoteTotalsOk}</small></span></li>
-              <li data-change="unchanged"><span><strong>{w.quoteUnchanged}</strong><small>{w.quoteScopeOk}</small></span></li>
-            </ul>
+            <p>{locale === "ar" ? "يُسجّل سبب كل تغيير مع النسخة غير القابلة للتعديل. راجع البيانات في النموذج قبل حفظ نسخة جديدة." : "Le motif de chaque changement accompagne sa version immuable. Vérifiez les données du formulaire avant d’enregistrer une nouvelle version."}</p>
           </article>
           <article className="client-card">
             <header><h3>{w.quoteSubmitChecklist}</h3></header>
-            <ul className="client-feed">
-              {[w.quoteScopeOk, w.quoteTotalsOk, w.quoteTaxOk, w.quoteValidityOk, w.quoteAttachmentsOk, w.quoteDeadlineOk].map((item) => (
-                <li key={item}><Check className="size-4" aria-hidden /><span>{item}</span></li>
-              ))}
-            </ul>
+            <p>{locale === "ar" ? "يُتحقق من المبالغ والضريبة والصلاحية عند الحفظ والإرسال." : "Les montants, la fiscalité et la validité sont contrôlés lors de l’enregistrement et de l’envoi."}</p>
             <p className="provider-money-total"><strong dir="ltr">{total}</strong></p>
             <p className="client-access-note">{w.quoteNoPeerAmounts}</p>
             {invitation?.quote?.status === "SUBMITTED" ? <p className="client-verified">{w.quoteSubmitSuccess}</p> : null}
@@ -441,7 +444,7 @@ export function MissionDeliveryWorkbench({
   const history = mission?.deliverables.flatMap((item) => item.versions.map((version) => ({
     id: version.id,
     title: item.label,
-    detail: `${version.proofScanStatus} · v${version.version}`,
+    detail: `${workflowStatusLabel(version.proofScanStatus,locale)} · v${version.version}`,
   }))) ?? [];
   const messagesHref = `/${locale}/sous-traitant/messages${query}`;
   const current = steps.find((step) => step.state === "current") ?? steps[0];
@@ -464,7 +467,7 @@ export function MissionDeliveryWorkbench({
           <p className="client-space-label" dir="ltr">{missionId.slice(0, 12)}</p>
           <h3>{title}</h3>
           <div className="provider-chip-row">
-            <span className="client-status-chip" data-tone="mint">{mission?.status ?? w.missionInProgress}</span>
+            <span className="client-status-chip" data-tone="mint">{mission?.status ? workflowStatusLabel(mission.status,locale):w.missionInProgress}</span>
             {mission?.status && /SIGN|ACCEPT|ACTIVE|SIGNED/i.test(mission.status) ? (
               <span className="provider-meta-chip">{w.missionContractSigned}</span>
             ) : null}
@@ -532,19 +535,21 @@ export function InvoiceSettlementWorkbench({
   invoiceId,
   invoice,
   billingPanel,
+  dossier,
 }: {
   locale: Locale;
   query: string;
   invoiceId: string;
   invoice?: BillingDashboard["invoices"][number] | null;
   billingPanel?: ReactNode;
+  dossier?:ProviderInvoiceDossier|null;
 }) {
   const w = workbenchCopy(locale);
   const currency = invoice?.currency ?? null;
   const total = invoice && currency ? formatMinor(invoice.totalMinor, currency, locale) : "—";
   const paid = invoice && currency ? formatMinor(invoice.paidMinor, currency, locale) : "—";
   const outstanding = invoice && currency ? formatMinor(invoice.outstandingMinor, currency, locale) : "—";
-  const settled = Boolean(invoice && invoice.outstandingMinor === "0" && invoice.paidMinor !== "0");
+  const settled = Boolean(invoice && invoice.outstandingMinor === "0");
   const declared = Boolean(invoice && invoice.paidMinor !== "0");
   return (
     <main className="client-page provider-workbench provider-invoice-settlement">
@@ -564,7 +569,7 @@ export function InvoiceSettlementWorkbench({
           <header className="client-priority-head">
             <div>
               <p className="client-space-label" dir="ltr">{invoice?.number ?? invoiceId.slice(0, 12)}</p>
-              <span className="client-status-chip" data-tone={settled ? "mint" : "peach"}>{settled ? w.invoiceSettled : (invoice?.paymentStatus.replaceAll("_", " ") ?? "—")}</span>
+              <span className="client-status-chip" data-tone={settled ? "mint" : "peach"}>{settled ? w.invoiceSettled : (invoice?workflowStatusLabel(invoice.paymentStatus,locale):"—")}</span>
             </div>
           </header>
           <dl className="provider-money">
@@ -578,41 +583,19 @@ export function InvoiceSettlementWorkbench({
           <TriangleAlert className="size-4" aria-hidden />
           <p>{w.invoicePaymentNotProof}</p>
           <div className="provider-workbench-actions">
-            <Link href={`/${locale}/sous-traitant/documents${query}`} className="client-cta">{w.invoiceAddProof}</Link>
+            <Link href="#provider-payment-proof" className="client-cta">{w.invoiceAddProof}</Link>
             <Link href={`/${locale}/sous-traitant/messages${query}`} className="client-ghost-link">{w.invoiceReportGap}</Link>
           </div>
         </article>
       </section>
-      <section className="provider-invoice-middle">
-        <article className="client-card">
-          <header><h3>{w.invoiceRelatedDocs}</h3></header>
-          <p role="status">{w.invoiceNoDocs}</p>
-        </article>
-        <article className="client-card">
-          <header className="client-priority-head">
-            <h3>{w.invoiceBilledDeliverables}</h3>
-            <span className="client-status-chip" data-tone="mint">{w.invoiceAllAccepted}</span>
-          </header>
-          <p role="status">{w.invoiceNoDeliverable}</p>
-        </article>
-        <article className="client-card">
-          <CardHead icon={<Settings2 className="size-4" />}>{w.invoiceFiscal}</CardHead>
-          <ul className="client-feed">
-            <li><span><strong>{w.invoiceCurrency}</strong><small>{invoice?.currency ? w.invoiceCurrencyMad : "—"}</small></span></li>
-            <li><span><strong>{w.invoiceTaxBase}</strong><small>{w.invoiceTaxBaseHt}</small></span></li>
-            <li><span><strong>{w.invoiceTaxRegime}</strong><small>{w.invoiceTaxNormal}</small></span></li>
-          </ul>
-        </article>
-      </section>
+      {dossier && currency ? <InvoiceFacts dossier={dossier} locale={locale} currency={currency} query={query}/> : <p role="alert">{locale === "ar" ? "تعذر تحميل تفاصيل الملف. لا يمكن تأكيد الوثائق أو التسليمات." : "Le détail du dossier est indisponible. Les documents et livraisons ne peuvent pas être confirmés."}</p>}
       <section className="provider-invoice-bottom">
         <article className="client-card">
           <header><h3>{w.invoiceFollow}</h3></header>
           <ol className="client-journey provider-invoice-steps">
-            <li data-state={invoice ? "done" : "todo"}><span><ClipboardCheck className="size-4" aria-hidden /></span><small>{w.invoiceStepDraft}</small></li>
-            <li data-state={invoice ? "done" : "todo"}><span><Send className="size-4" aria-hidden /></span><small>{w.invoiceStepSubmitted}</small></li>
-            <li data-state={invoice ? "done" : "todo"}><span><Check className="size-4" aria-hidden /></span><small>{w.invoiceStepApproved}</small></li>
-            <li data-state={declared ? "done" : "todo"}><span><Check className="size-4" aria-hidden /></span><small>{w.invoiceStepDeclared}</small></li>
-            <li data-state={settled ? "current" : "todo"}><span><Check className="size-4" aria-hidden /></span><small>{w.invoiceStepReconciled}</small></li>
+            <li data-state={invoice?.editionStatus==="READY" ? "done" : "todo"}><span><ClipboardCheck className="size-4" aria-hidden /></span><small>{invoice?.editionStatus==="READY"?(locale === "ar" ? "الفاتورة متاحة" : "Facture disponible"):(locale === "ar" ? "إصدار الفاتورة قيد الانتظار" : "Édition de la facture en attente")}</small></li>
+            <li data-state={declared ? "done" : "todo"}><span><Check className="size-4" aria-hidden /></span><small>{locale === "ar" ? "تخصيص الدفع" : "Paiement affecté"}</small></li>
+            <li data-state={settled ? "current" : "todo"}><span><Check className="size-4" aria-hidden /></span><small>{locale === "ar" ? "الرصيد صفر" : "Solde nul"}</small></li>
           </ol>
         </article>
         <article className="client-card">

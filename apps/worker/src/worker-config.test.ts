@@ -44,3 +44,11 @@ describe("worker runtime configuration", () => {
     expect(config.dispatchUrl.protocol).toBe("http:");
   });
 });
+
+const local = { ...base, APP_ENV: "development", NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321", SUPABASE_PROJECT_REF: "Matricia", WORKER_LOCAL_SUPABASE_ENABLED: "true", WORKER_LOCAL_SUPABASE_PROJECT_ID: "Matricia" };
+it("allows only explicit development access to the exact local Matricia Supabase API", () => {
+  expect(readWorkerRuntimeConfig(local)).toMatchObject({ environment: "development", supabaseUrl: "http://127.0.0.1:54321", supabaseProjectRef: "Matricia" });
+});
+it.each([{ ...local, APP_ENV: "production" }, { ...local, APP_ENV: "staging" }, { ...local, NODE_ENV: "production" }, { ...local, WORKER_LOCAL_SUPABASE_ENABLED: "false" }, { ...local, WORKER_LOCAL_SUPABASE_PROJECT_ID: "Other" }, { ...local, NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54322" }, { ...local, NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.2:54321" }, { ...local, SUPABASE_PROJECT_REF: "wrong-project" }])("rejects local-mode drift and production/staging bypass", env => {
+  expect(() => readWorkerRuntimeConfig(env)).toThrow(/WORKER_CONFIG_/);
+});

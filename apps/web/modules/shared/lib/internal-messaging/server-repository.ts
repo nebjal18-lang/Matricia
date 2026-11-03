@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { InternalMessagingRepository, MessagingFailure } from "./repository";
-import { inboxPayload, openThreadPayload, sendMessagePayload, threadPayload, uuidSchema, type ThreadOption } from "./model";
+import { messageCursorSchema,threadPagePayload,inboxPayload, openThreadPayload, sendMessagePayload, threadPayload, uuidSchema, type ThreadOption } from "./model";
 
 const membershipRows=z.array(z.object({organization_id:uuidSchema}));
 const requestRows=z.array(z.object({id:uuidSchema,client_organization_id:uuidSchema}));
@@ -12,10 +12,12 @@ function failure(error:{code?:string}|null):MessagingFailure{return error?.code=
 export async function createInternalMessagingRepository():Promise<InternalMessagingRepository>{
  const client=await getSupabaseServerClient();
  return{
-  async load(threadId){
+  async history(threadId,cursor){const user=await client.auth.getUser();if(user.error||!user.data.user)return{status:"error",reason:"UNAUTHENTICATED"};const input=z.object({threadId:uuidSchema,cursor:messageCursorSchema.optional()}).safeParse({threadId,cursor});if(!input.success)return{status:"error",reason:"INVALID_RESPONSE"};const response=await client.rpc("get_internal_message_thread_page",{p_thread_id:input.data.threadId,p_before_created_at:input.data.cursor?.createdAt??null,p_before_message_id:input.data.cursor?.id??null,p_page_size:50});if(response.error)return{status:"error",reason:failure(response.error)};const parsed=threadPagePayload.safeParse(response.data);return parsed.success?{status:"success",value:parsed.data}:{status:"error",reason:"INVALID_RESPONSE"};},
+  async search(query,organizationId,page=1){const user=await client.auth.getUser();if(user.error||!user.data.user)return{status:"error",reason:"UNAUTHENTICATED"};const input=z.object({query:z.string().trim().max(120),organizationId:uuidSchema.optional(),page:z.number().int().positive().max(100000)}).safeParse({query,organizationId,page});if(!input.success)return{status:"error",reason:"INVALID_RESPONSE"};const response=await client.rpc("search_internal_message_inbox",{p_search:input.data.query,p_organization_id:input.data.organizationId??null,p_page:input.data.page});if(response.error)return{status:"error",reason:failure(response.error)};const parsed=z.object({inbox:inboxPayload,total:z.number().int().nonnegative(),page:z.number().int().positive(),pageSize:z.literal(25)}).safeParse(response.data);return parsed.success?{status:"success",value:parsed.data}:{status:"error",reason:"INVALID_RESPONSE"};},
+  async load(threadId,loadOptions){
    const{data:userData,error:userError}=await client.auth.getUser();if(userError||!userData.user)return{status:"error",reason:"UNAUTHENTICATED"};
    const[inboxResult,membershipsResult,rfqsResult]=await Promise.all([
-    client.rpc("list_internal_message_inbox",{p_limit:100}),
+    loadOptions?.skipInbox?Promise.resolve({data:[],error:null}):client.rpc("list_internal_message_inbox",{p_limit:100}),
     client.from("organization_memberships").select("organization_id").eq("user_id",userData.user.id).eq("status","ACTIVE").limit(100),
     client.from("rfqs").select("id,request_id,status").eq("status","OPEN").limit(200),
    ]);

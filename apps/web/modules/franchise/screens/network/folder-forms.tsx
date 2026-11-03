@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useId, useState } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
@@ -8,7 +8,7 @@ import { ACTIVITY_TYPES, nextPipelineStage, PIPELINE_STAGES, type PipelineStage 
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { franchiseStageLabel } from "@/modules/franchise/data/spaces/labels";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
-import { advanceFranchiseFolderPipeline, recordFranchiseFolderActivity, type FranchiseInviteState } from "./actions";
+import { advanceFranchiseFolderPipeline, recordFranchiseFolderActivity, linkFranchiseProviderOrganization, type FranchiseInviteState } from "./actions";
 import { canMutateFranchiseFolder } from "./folder-guards";
 
 export { canMutateFranchiseFolder };
@@ -63,10 +63,11 @@ export function FranchiseFolderActivityForm({
   const c = franchiseCopy(locale);
   const prefix = useId();
   const [key, setKey] = useState(() => crypto.randomUUID());
-  const [state, action, pending] = useActionState(recordFranchiseFolderActivity, idle);
-  useEffect(() => {
-    if (state.status === "success") setKey(crypto.randomUUID());
-  }, [state]);
+  const [state, action, pending] = useActionState(async (previous: FranchiseInviteState, data: FormData) => {
+    const result = await recordFranchiseFolderActivity(previous, data);
+    if (result.status === "success") setKey(crypto.randomUUID());
+    return result;
+  }, idle);
   return (
     <form action={action} className="franchise-props-form">
       <input type="hidden" name="locale" value={locale} />
@@ -118,10 +119,11 @@ export function FranchiseFolderAdvanceForm({
   const prefix = useId();
   const next = PIPELINE_STAGES.includes(stage as PipelineStage) ? nextPipelineStage(stage as PipelineStage) : null;
   const [key, setKey] = useState(() => crypto.randomUUID());
-  const [state, action, pending] = useActionState(advanceFranchiseFolderPipeline, idle);
-  useEffect(() => {
-    if (state.status === "success") setKey(crypto.randomUUID());
-  }, [state]);
+  const [state, action, pending] = useActionState(async (previous: FranchiseInviteState, data: FormData) => {
+    const result = await advanceFranchiseFolderPipeline(previous, data);
+    if (result.status === "success") setKey(crypto.randomUUID());
+    return result;
+  }, idle);
   if (!next) return <p className="client-access-note">{c.pipelineComplete}</p>;
   return (
     <form action={action} className="franchise-props-form">
@@ -194,4 +196,9 @@ export function FranchiseFolderTimeline({
       {!events?.length && !activities?.length ? <p className="franchise-empty-panel">{c.consultationEmpty}</p> : null}
     </>
   );
+}
+
+export function FranchiseProviderLinkForm({locale,prospectId,rowVersion,organizationId,options}:{locale:Locale;prospectId:string;rowVersion:number;organizationId:string|null;options:Array<{organizationId:string;name:string}>}){
+ const ar=locale==="ar";const[key,setKey]=useState(()=>crypto.randomUUID());const[state,action,pending]=useActionState(async(previous:FranchiseInviteState,form:FormData)=>{const result=await linkFranchiseProviderOrganization(previous,form);if(result.status==="success")setKey(crypto.randomUUID());return result;},idle);
+ return <form action={action} className="franchise-props-form"><h3>{ar?"ربط الملف بمنظمة مقدم الخدمة":"Relier ce dossier à l’organisation prestataire"}</h3><p>{ar?"اختاروا المنظمة المؤكدة. لن يتم الربط بالاسم أو البريد تلقائياً.":"Choisissez l’organisation confirmée. Le nom et le courriel ne créent aucun rapprochement automatique."}</p><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId??""}/><input type="hidden" name="prospectId" value={prospectId}/><input type="hidden" name="rowVersion" value={rowVersion}/><input type="hidden" name="idempotencyKey" value={key}/><fieldset disabled={pending||options.length===0}><label className="franchise-field">{ar?"المنظمة":"Organisation"}<select name="providerOrganizationId" required>{options.map((o)=><option key={o.organizationId} value={o.organizationId}>{o.name} · {o.organizationId.slice(0,8).toUpperCase()}</option>)}</select></label><label className="franchise-field">{ar?"دليل التحقق من الربط":"Motif et preuve du rapprochement"}<input name="reason" required minLength={3} maxLength={500}/></label><Button type="submit" disabled={pending}>{ar?"حفظ الربط الصريح":"Enregistrer le lien explicite"}</Button></fieldset><Feedback state={state} locale={locale} success={ar?"حُفظ الربط في الخادم":"Lien enregistré sur le serveur"}/></form>;
 }

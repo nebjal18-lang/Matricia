@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -35,13 +36,13 @@ describe("provider dashboard mockups", () => {
         title={c.homeTitle}
         lead={c.homeLead}
         kicker={c.kicker}
-        actions={<a href="/fr/sous-traitant/qualification">{c.completeProfile}</a>}
+        actions={<Link href="/fr/sous-traitant/qualification">{c.completeProfile}</Link>}
       >
         <ProviderHomeBoard locale="fr" query="" actionItems={[]} />
       </ProviderAppShell>,
     );
     expect(shell).toContain("ESPACE PRESTATAIRE");
-    expect(shell).toContain("/scenes/arch-city.png");
+    expect(decodeURIComponent(shell)).toContain("/scenes/arch-city.png");
     expect(shell).toContain(c.brandFooter);
     expect(shell).toContain("Votre activité, en toute clarté");
     expect(shell).toContain("À traiter maintenant");

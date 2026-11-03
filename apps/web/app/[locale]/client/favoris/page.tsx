@@ -21,10 +21,10 @@ export default async function FavoritesPage({
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/favoris` }));
   const messages = getFavoriteMessages(locale);
-  const result = await loadClientFavorites(query.organizationId);
+  const result = await loadClientFavorites(space.selectedOrganizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/favoris` }));
   const optionsResult = result.status === "success" && result.dashboard.canManage
-    ? await loadFavoriteProviderOptions(query.organizationId)
+    ? await loadFavoriteProviderOptions(space.selectedOrganizationId)
     : null;
   const providerOptions = optionsResult?.status === "success" ? optionsResult.options : [];
   return (

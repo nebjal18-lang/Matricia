@@ -8,6 +8,7 @@ export const quoteDraftInput = z.object({
 }).superRefine((value,context)=>{if((value.itemKind==="RECURRING")!==(value.recurrenceInterval!==""))context.addIssue({code:"custom",path:["recurrenceInterval"],message:"RECURRENCE_MISMATCH"});if(Date.parse(value.validUntil)<=Date.now())context.addIssue({code:"custom",path:["validUntil"],message:"VALIDITY_EXPIRED"});});
 export const invitationDecisionInput=z.object({locale:z.enum(["fr","ar"]),invitationId:quoteUuid,decision:z.enum(["ACCEPT","DECLINE"]),reason:z.string().trim().max(500),rowVersion:z.coerce.number().int().positive(),idempotencyKey:quoteUuid,correlationId:quoteUuid}).superRefine((v,c)=>{if(v.decision==="DECLINE"&&v.reason.length<3)c.addIssue({code:"custom",path:["reason"],message:"REASON_REQUIRED"});});
 export const submitQuoteInput=z.object({locale:z.enum(["fr","ar"]),quoteId:quoteUuid,quoteVersionId:quoteUuid,idempotencyKey:quoteUuid,correlationId:quoteUuid});
+export const submitQuoteIdentityInput=submitQuoteInput.extend({expectedIdentityHash:z.string().regex(/^[0-9a-f]{64}$/u),registeredAddress:z.string().trim().min(5).max(1000),confirmed:z.literal("yes")});
 export const lines=(value:string)=>value.split(/\r?\n/u).map(item=>item.trim()).filter(Boolean).slice(0,100);export function formatBasisPointsExact(value:number):string{if(!Number.isInteger(value)||value<0)throw new Error("INVALID_BASIS_POINTS");const digits=String(value).padStart(3,"0"),whole=digits.slice(0,-2),fraction=digits.slice(-2).replace(/0+$/u,"");return fraction?`${whole}.${fraction}`:whole;}
 export type ProviderTaxRule={id:string;category:string;rateBasisPoints:number;effectiveFrom:string;effectiveTo:string|null};
 export function isTaxRuleApplicable(rule:ProviderTaxRule,effectiveOn:string):boolean{return /^\d{4}-\d{2}-\d{2}$/u.test(effectiveOn)&&rule.effectiveFrom<=effectiveOn&&(rule.effectiveTo===null||rule.effectiveTo>=effectiveOn);}
@@ -111,16 +112,20 @@ export type ProviderQuoteInvitation = {
   rowVersion: number;
   rfqId: string;
   deadline: string;
+  deadlineLabels?:Record<"fr"|"ar",string>;
   requestId: string;
   description: string;
   regionCode: string;
   currency: string;
   taxCategoryCode: string | null;
   pack?: ConsultationPack;
-  quote: null | { id: string; status: string; currentVersionId: string | null; versionNumber: number | null; currency: string | null; subtotalMinor: string | null; taxMinor: string | null; totalMinor: string | null };
+  adminConsultation?:{subject:string;context:string;responseDeadline:string;channel:"platform"}|null;
+  quote: null | { selectedVersionId?:string|null;identityAnchored?:boolean;id: string; status: string; currentVersionId: string | null; versionNumber: number | null; currency: string | null; subtotalMinor: string | null; taxMinor: string | null; totalMinor: string | null; validUntil?: string | null; createdAt?: string | null };
 };
 
+export type ProviderQuoteIdentityReview={publicationAllowed?:boolean;publicationBlockReason?:string|null;canonicalRegisteredAddress?:string|null;verified:boolean;identityHash:string;reviewId:string|null;legalName:string;ice:string|null};
 export type ProviderQuoteDashboard = {
+  identityReview?:ProviderQuoteIdentityReview;
   organizations: { id: string; name: string }[];
   organizationId: string;
   organizationName: string;

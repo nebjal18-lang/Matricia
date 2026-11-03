@@ -1,0 +1,42 @@
+begin;
+set local search_path=public,extensions;
+grant usage on schema extensions to authenticated,service_role;
+select plan(10);
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT'where singleton;
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
+select ('a1810000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'00000000-0000-0000-0000-000000000000','authenticated','authenticated','delivery-admin-'||i||'@example.invalid','',now(),'{}','{}',now(),now()from generate_series(1,4)i;
+insert into public.platform_user_roles(user_id,role_code)select ('a1810000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,case when i=4 then'SUPPORT_AGENT'else'MATRICIA_ADMIN'end from generate_series(1,4)i;
+insert into public.organizations(id,legal_name,display_name,status,created_by)values('b1810000-0000-4000-8000-000000000001','Delivery Test','Delivery Test','ACTIVE','a1810000-0000-4000-8000-000000000001');
+insert into public.organization_memberships(id,organization_id,user_id,status)values('c1810000-0000-4000-8000-000000000001','b1810000-0000-4000-8000-000000000001','a1810000-0000-4000-8000-000000000004','ACTIVE');
+insert into public.organization_member_roles(membership_id,role_code)values('c1810000-0000-4000-8000-000000000001','CLIENT_OWNER'),('c1810000-0000-4000-8000-000000000001','PROVIDER_OWNER');
+
+
+insert into public.organizations(id,legal_name,display_name,status,created_by)select('b1980000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'Snapshot legal '||i,'Snapshot '||i,'PENDING','a1810000-0000-4000-8000-000000000001'from generate_series(1,501)i;
+insert into public.organization_memberships(id,organization_id,user_id,status)select('c1980000-0000-4000-8000-'||right(id::text,12))::uuid,id,'a1810000-0000-4000-8000-000000000004','ACTIVE'from public.organizations where id::text like'b1980000-%';
+insert into public.audit_events(organization_id,actor_user_id,actor_type,action,resource_type,resource_id,correlation_id,metadata,event_hash)select'b1810000-0000-4000-8000-000000000001','a1810000-0000-4000-8000-000000000001','USER','admin.fixture.history','fixture','history-fixture0198',extensions.gen_random_uuid(),jsonb_build_object('reason','Motif réel de fixture '||i),repeat('0',64)from generate_series(1,220)i;
+set local session_replication_role=replica;
+insert into public.catalog_libraries(id,code,slug,status,steward_organization_id,created_by)values('f1980000-0000-4000-8000-000000000001','SNAPSHOT_198','snapshot-198','DRAFT','b1810000-0000-4000-8000-000000000001','a1810000-0000-4000-8000-000000000001');
+insert into public.franchises(id,library_id,operator_organization_id,franchise_type,operator_code,territory_code,status,created_by)select('f1980000-0000-4000-8001-'||lpad(i::text,12,'0'))::uuid,'f1980000-0000-4000-8000-000000000001','b1810000-0000-4000-8000-000000000001','STANDARD','FRANCHISEE','SNAP_'||i,'CONTRACT_PENDING','a1810000-0000-4000-8000-000000000001'from generate_series(1,121)i;
+set local session_replication_role=origin;
+create temporary table results(k text,v jsonb);grant all on results to authenticated;
+set local role authenticated;select set_config('request.jwt.claim.sub','a1810000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a1810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
+insert into results values('supervision',public.get_admin_supervision_snapshot_v1());
+insert into results values('actors',public.get_admin_actor_directory_snapshot_v1());
+insert into results values('history1',public.get_admin_resource_history_page_v1('history-fixture0198','b1810000-0000-4000-8000-000000000001',null,100));
+insert into results select'history2',public.get_admin_resource_history_page_v1('history-fixture0198','b1810000-0000-4000-8000-000000000001',v->>'nextBefore',100)from results where k='history1';
+insert into results select'history3',public.get_admin_resource_history_page_v1('history-fixture0198','b1810000-0000-4000-8000-000000000001',v->>'nextBefore',100)from results where k='history2';
+insert into results values('franchises',public.get_admin_special_space_snapshot_v1('franchises','fr'));
+insert into results values('providers',public.get_admin_special_space_snapshot_v1('providers','fr'));
+reset role;
+select is((select count(*)from results,jsonb_array_elements(v->'organizations')o where k='supervision'and o->>'id'like'b1980000-%'),501::bigint,'one statement snapshot includes organizations beyond former limits');
+select is((select count(*)from results,jsonb_array_elements(v->'rows')o where k='actors'and o->>'organization_id'like'b1980000-%'),501::bigint,'actor snapshot includes memberships beyond the first server page');
+select is((select jsonb_array_length(v->'events')from results where k='history1'),100,'history loads its first bounded page');
+select is((select jsonb_array_length(v->'events')from results where k='history3'),20,'history reaches the oldest events beyond two hundred');
+select is((select v->>'hasMore'from results where k='history3'),'false','history cursor explicitly terminates');
+select is((select count(distinct e->>'id')from results,jsonb_array_elements(v->'events')e where k like'history%'),220::bigint,'history pages contain no duplicate or omitted decision');
+select is((select count(*)from results,jsonb_array_elements(v->'rows')o where k='franchises'and o->>'id'like'f1980000-%'),121::bigint,'specialized snapshot includes franchises beyond the shared dashboard cap');
+select is((select v->>'complete'from results where k='franchises'),'true','specialized franchise snapshot reports completion only after its full query');
+select is((select v->>'complete'from results where k='providers'),'true','Provider snapshot uses caller RLS and returns complete authorized rows');
+set local role authenticated;select set_config('request.jwt.claims','{"sub":"a1810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
+select throws_ok($$select public.get_admin_resource_history_page_v1('history-fixture0198')$$,'42501','ADMIN_HISTORY_DENIED','each history page rechecks MFA');
+reset role;select*from finish();rollback;

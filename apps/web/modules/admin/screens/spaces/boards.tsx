@@ -1,3 +1,4 @@
+import{filterAdminOrgRows,localizeStatus}from"@/modules/admin/data/spaces/view-model";
 import Link from "next/link";
 import {
   Archive,
@@ -189,19 +190,11 @@ export function OrganizationsBoard({
   filters?: { type?: string; status?: string; compliance?: string; plan?: string };
 }) {
   const c = adminCopy(locale);
-  const types = [...new Set(rows.map((row) => row.type).filter(Boolean))].sort();
-  const statuses = [...new Set(rows.map((row) => row.status).filter(Boolean))].sort();
-  const compliances = [...new Set(rows.map((row) => row.compliance).filter(Boolean))].sort();
-  const plans = [...new Set(rows.map((row) => row.plan).filter(Boolean))].sort();
-  const filtered = rows.filter((row) => {
-    if (filters?.type && filters.type !== "all" && row.type !== filters.type) return false;
-    if (filters?.status && filters.status !== "all" && row.status !== filters.status) return false;
-    if (filters?.compliance && filters.compliance !== "all" && row.compliance !== filters.compliance) return false;
-    if (filters?.plan && filters.plan !== "all" && row.plan !== filters.plan) return false;
-    if (!search) return true;
-    const haystack = `${row.name} ${row.legalName} ${row.type} ${row.status}`.toLowerCase();
-    return haystack.includes(search.toLowerCase());
-  });
+  const types = [...new Set(rows.flatMap(row=>row.typeCodes?.length?row.typeCodes:[row.type]).filter(Boolean))].sort();
+  const statuses = [...new Set(rows.map(row=>row.statusCode??row.status).filter(Boolean))].sort();
+  const compliances = [...new Set(rows.map(row=>row.complianceCode??row.compliance).filter(Boolean))].sort();
+  const plans = [...new Set(rows.map(row=>row.planCode??row.plan).filter(Boolean))].sort();
+  const filtered = filterAdminOrgRows(rows,filters??{},search,archives);
   const orgParams = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
   const organizationId = orgParams.get("organizationId");
   return (
@@ -214,25 +207,25 @@ export function OrganizationsBoard({
             <label>{c.type}
               <select name="type" defaultValue={filters?.type ?? "all"}>
                 <option value="all">{c.all}</option>
-                {types.map((type) => <option key={type} value={type}>{type}</option>)}
+                {types.map((type) => <option key={type} value={type}>{["CLIENT","PROVIDER","FRANCHISE","INTERNAL"].includes(type)?inferOrgType("",locale,[type]):type}</option>)}
               </select>
             </label>
             <label>{c.state}
               <select name="status" defaultValue={filters?.status ?? "all"}>
                 <option value="all">{c.all}</option>
-                {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status,locale)}</option>)}
               </select>
             </label>
             <label>{c.compliance}
               <select name="compliance" defaultValue={filters?.compliance ?? "all"}>
                 <option value="all">{c.all}</option>
-                {compliances.map((compliance) => <option key={compliance} value={compliance}>{compliance}</option>)}
+                {compliances.map((compliance) => <option key={compliance} value={compliance}>{compliance==="CURRENT"?c.complianceOk:compliance==="REVIEW"?c.complianceReview:locale==="ar"?"غير متحقق":"Non vérifié"}</option>)}
               </select>
             </label>
             <label>{c.plan}
               <select name="plan" defaultValue={filters?.plan ?? "all"}>
                 <option value="all">{c.all}</option>
-                {plans.map((plan) => <option key={plan} value={plan}>{plan}</option>)}
+                {plans.map((plan) => <option key={plan} value={plan}>{plan==="UNKNOWN"?c.unknownPlan:plan}</option>)}
               </select>
             </label>
             <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={archives} />{c.includeArchived}</label>
@@ -251,7 +244,7 @@ export function OrganizationsBoard({
             </div>
           </div>
           {filtered.length === 0 ? null : (
-            <div className="client-table-wrap">
+            <div className="client-table-wrap" tabIndex={0} role="region" aria-label={c.allOrgs}>
               <table className="client-space-table">
                 <thead>
                   <tr>
@@ -366,7 +359,7 @@ export function OrganizationFicheBoard({
           <header><h2>{c.info}</h2></header>
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
-            <div><dt>{c.type}</dt><dd>{inferOrgType(`${org.display_name} ${org.legal_name}`, locale)}</dd></div>
+            <div><dt>{c.type}</dt><dd>{inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes)}</dd></div>
             <div><dt>{c.activity}</dt><dd>{org.display_name}</dd></div>
             <div><dt>{c.ids}</dt><dd dir="ltr">{org.country_code}</dd></div>
             <div><dt>{locale === "ar" ? "المعرّف" : "Réf."}</dt><dd dir="ltr">{org.id.slice(0, 8)}…</dd></div>

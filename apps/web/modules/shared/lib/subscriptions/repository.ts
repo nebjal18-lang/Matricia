@@ -43,7 +43,7 @@ const historicalPlanSchema = z.object({
   monthly_credit_grant: exactInteger,
   core_allocation_basis_points: z.number().int().min(0).max(10_000),
   benefit_pool_allocation_basis_points: z.number().int().min(0).max(10_000),
-  limits_snapshot: z.record(z.unknown()),
+  limits_snapshot: z.record(z.string(), z.unknown()),
   box_version_reference: z.string().nullable(),
   valid_from: z.string(),
   valid_to: z.string().nullable(),
@@ -52,7 +52,7 @@ const historicalPlanSchema = z.object({
     code: z.string(),
     enabled: z.boolean(),
     quota_value: exactInteger.nullable(),
-    configuration: z.record(z.unknown()),
+    configuration: z.record(z.string(), z.unknown()),
   })),
 });
 const cycleSchema = z.object({

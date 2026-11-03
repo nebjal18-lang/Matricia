@@ -1,2 +1,4 @@
 import{describe,expect,it}from"vitest";import{messages}from"./messages";describe("credit translations",()=>{it("ships FR and AR wallet workflows",()=>{expect(messages("fr").title).not.toBe(messages("ar").title);expect(Object.keys(messages("ar").statuses)).toHaveLength(8)})});
 
+
+describe("funding notices",()=>{it("explains unlinked or incompatible lots in both languages without changing their historical balance",()=>{for(const locale of ["fr","ar"]as const){const m=messages(locale);expect(Object.keys(m.fundingStatuses)).toEqual(["ELIGIBLE","SOURCE_UNVERIFIED","ENVIRONMENT_INCOMPATIBLE","PAYMENT_HELD"]);expect(m.fundingStatuses.SOURCE_UNVERIFIED).not.toBe(m.fundingStatuses.ELIGIBLE);expect(m.fundingStatuses.ENVIRONMENT_INCOMPATIBLE).not.toBe(m.fundingStatuses.ELIGIBLE);expect(m.balance).not.toContain("disponible");}})});

@@ -1,9 +1,10 @@
 "use client";
 
+import{ProductionReference}from"./production-reference";
 import Link from "next/link";
 import { useActionState, type ReactNode } from "react";
 import {
-  AlertTriangle, CheckCircle2, Eye, FileText, Lock, Plus, RefreshCw, Send, ShieldCheck, Users,
+  CheckCircle2, Eye, FileText, Lock, Plus, RefreshCw, Send, ShieldCheck, Users,
 } from "lucide-react";
 import { requestSpaceMutation, type AdminActionState } from "./space-actions";
 import { PipelineGlyph } from "./pipeline-step";
@@ -29,7 +30,7 @@ function HiddenIdentity({
 }) {
   return (
     <>
-      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
       <input type="hidden" name="space" value={space} />
       <input type="hidden" name="itemId" value={itemId} />
       <input type="hidden" name="organizationId" value={organizationId ?? ""} />
@@ -115,7 +116,7 @@ export function ConsultationSendBoard({
               <h2>{t(locale, "Destinataires sélectionnés", "المستلمون المختارون")}</h2>
               <Link href={`/${locale}/administration/providers${query}`} className="admin-soft-cta"><Plus className="size-4" aria-hidden />{t(locale, "Ajouter des prestataires", "إضافة مقدمي خدمات")}</Link>
             </header>
-            <p>{t(locale, "Prestataires issus du matching explicable. L’envoi ouvre une demande à quatre yeux : l’admin ne remplace pas le client pour publier la consultation.", "مقدمو الخدمات من المطابقة القابلة للتفسير. الإرسال يطلب تحققاً بأربعة أعين: الإدارة لا تحل محل العميل لنشر الاستشارة.")}</p>
+            <p>{t(locale, "Prestataires issus du matching explicable. L’envoi ouvre une demande à quatre yeux. Après approbation, seuls les destinataires approuvés et encore éligibles sont invités.", "مقدمو الخدمات من المطابقة القابلة للتفسير. الإرسال يطلب تحققاً بأربعة أعين. بعد الموافقة تتم دعوة الجهات المعتمدة والتي لا تزال مؤهلة فقط.")}</p>
             {recipients.length === 0 ? (
               <p className="admin-banner" data-tone="warn">{t(locale, "Aucun candidat de matching n’est encore disponible pour cette demande.", "لا يوجد مرشح مطابقة لهذه الطلب بعد.")}</p>
             ) : (
@@ -167,7 +168,7 @@ export function ConsultationSendBoard({
               </div>
               <div className="admin-field">
                 <label htmlFor="consult-due">{t(locale, "Délai de réponse souhaité", "أجل الرد المطلوب")}</label>
-                <input id="consult-due" name="dueAt" type="date" />
+                <input id="consult-due" name="dueAt" type="date" required />
                 <label htmlFor="consult-channel">{t(locale, "Canal de questions", "قناة الأسئلة")}</label>
                 <select id="consult-channel" name="channel" defaultValue="platform">
                   <option value="platform">{t(locale, "Via la plateforme Matricia", "عبر منصة ماتريسيا")}</option>
@@ -207,8 +208,8 @@ export function ConsultationSendBoard({
         <div className="admin-form-foot" data-span="2">
           <Link href={`/${locale}/administration/matching${query}`} className="client-ghost-link">{t(locale, "Retour au matching", "العودة إلى المطابقة")}</Link>
           <button type="submit" name="intent" value="CHANGE_CONFIGURATION" className="admin-soft-cta" disabled={pending}>{t(locale, "Enregistrer le brouillon", "حفظ المسودة")}</button>
-          <button type="submit" name="decision" value="SUBMIT" className="admin-danger-cta" disabled={pending}>{t(locale, "Soumettre à validation", "إرسال للمصادقة")}</button>
-          <button type="submit" name="decision" value="SEND" className="admin-primary-cta" disabled={pending}><Send className="size-4" aria-hidden />{pending ? "…" : t(locale, "Envoyer la consultation", "إرسال الاستشارة")}</button>
+          <button type="submit" name="decision" value="SUBMIT" className="admin-danger-cta" disabled={pending}>{t(locale, "Soumettre la proposition à validation", "إرسال المقترح للمصادقة")}</button>
+          <button type="submit" name="decision" value="SEND" className="admin-primary-cta" disabled={pending}><Send className="size-4" aria-hidden />{pending ? "…" : t(locale, "Ouvrir la consultation après approbation", "فتح الاستشارة بعد الموافقة")}</button>
         </div>
         <Feedback state={state} locale={locale} />
       </form>
@@ -225,10 +226,10 @@ export function DocumentReuseBoard({
   const steps = reuseSteps(locale);
   const itemId = row?.id ?? crypto.randomUUID();
   const destinations = [
-    { value: "compliance", label: t(locale, "Conformité", "الامتثال"), hint: t(locale, "Associer une exigence ou un contrôle", "ربط متطلب أو رقابة"), tone: "violet" as const },
-    { value: "request", label: t(locale, "Demande", "طلب"), hint: t(locale, "Attacher à un besoin ou une demande", "ربطه بحاجة أو طلب"), tone: "sky" as const },
-    { value: "contract", label: t(locale, "Contrat", "عقد"), hint: t(locale, "Lier à un contrat existant", "ربطه بعقد قائم"), tone: "peach" as const },
-    { value: "mission", label: t(locale, "Mission", "مهمة"), hint: t(locale, "Lier à une mission en cours", "ربطه بمهمة جارية"), tone: "mint" as const },
+    {value:"COMPLIANCE_CASE",label:t(locale,"Conformité","الامتثال"),hint:t(locale,"Lier au dossier de conformité existant","ربط ملف الامتثال الموجود"),tone:"violet"as const},
+    { value: "SERVICE_REQUEST", label: t(locale, "Demande", "طلب"), hint: t(locale, "Attacher à un besoin ou une demande", "ربطه بحاجة أو طلب"), tone: "sky" as const },
+    { value: "CONTRACT_VERSION", label: t(locale, "Contrat", "عقد"), hint: t(locale, "Lier à un contrat existant", "ربطه بعقد قائم"), tone: "peach" as const },
+    { value: "MISSION", label: t(locale, "Mission", "مهمة"), hint: t(locale, "Lier à une mission en cours", "ربطه بمهمة جارية"), tone: "mint" as const },
   ];
   return (
     <main className="client-page" data-admin-layout="document-reuse" data-admin-space="documents">
@@ -254,8 +255,8 @@ export function DocumentReuseBoard({
             </header>
             <div className="admin-field">
               <label htmlFor="reuse-document">{t(locale, "Document", "الوثيقة")} *</label>
-              <select id="reuse-document" name="note" required defaultValue={row?.title ?? ""}>
-                <option value={row?.title ?? ""}>{row?.title ?? t(locale, "Document du coffre", "وثيقة الخزينة")}</option>
+              <select id="reuse-document" name="documentId" required defaultValue={row?.id ?? ""}>
+                <option value={row?.id ?? ""}>{row?.title ?? t(locale, "Document du coffre", "وثيقة الخزينة")}</option>
               </select>
             </div>
             <p className="admin-banner" data-tone="sky">{t(locale, "Vous réutilisez le document existant. Aucun duplicata ne sera créé, seul un lien sécurisé sera établi.", "تعيدون استخدام الوثيقة القائمة. لن يُنشأ أي نسخة، بل رابط آمن فقط.")}</p>
@@ -276,13 +277,14 @@ export function DocumentReuseBoard({
             </div>
             <div className="admin-field">
               <label htmlFor="reuse-target">{t(locale, "Élément de destination", "عنصر الوجهة")} *</label>
-              <input id="reuse-target" name="context" required minLength={3} placeholder={t(locale, "Rechercher une exigence ou un contrôle de conformité…", "ابحثوا عن متطلب أو رقابة امتثال…")} />
+              <input id="reuse-target" name="targetId" required pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder={t(locale, "Référence de la demande, version de contrat ou mission", "مرجع الطلب أو نسخة العقد أو المهمة")} />
             </div>
           </article>
+          <div className="admin-field"><label htmlFor="reuse-purpose">{t(locale, "Finalité de la réutilisation", "غرض إعادة الاستخدام")}</label><textarea id="reuse-purpose" name="purpose" required minLength={3} maxLength={500}/></div>
           <article className="admin-banner" data-tone="danger">
             <strong>{t(locale, "Vérification du périmètre d’organisation", "التحقق من نطاق المؤسسة")}</strong>
-            <p><CheckCircle2 className="size-4" aria-hidden /> {t(locale, "Destination autorisée — le document et la destination appartiennent à la même organisation.", "وجهة مصرّح بها — الوثيقة والوجهة تنتميان لنفس المؤسسة.")}</p>
-            <p><AlertTriangle className="size-4" aria-hidden /> {t(locale, "Destination interdite (autre organisation) — cette destination appartient à une autre organisation et n’est pas accessible.", "وجهة محظورة (مؤسسة أخرى) — هذه الوجهة لمؤسسة أخرى وغير متاحة.")}</p>
+            <p>{t(locale, "Le serveur vérifie l’organisation propriétaire, la destination et l’état antivirus. Le propriétaire doit ensuite consentir dans son coffre.", "يتحقق الخادم من المؤسسة والوجهة وحالة فحص الملف. ثم يلزم موافقة المالك في الخزينة.")}</p>
+            <p>{t(locale, "Les destinations d’une autre organisation sont refusées lors de la vérification.", "تُرفض وجهات المؤسسات الأخرى أثناء التحقق.")}</p>
           </article>
         </section>
         <aside className="client-stack">
@@ -296,12 +298,12 @@ export function DocumentReuseBoard({
               <div><dt>{t(locale, "Source / provenance", "المصدر")}</dt><dd>{row?.cells[1] ?? "—"}</dd></div>
               <div><dt>{t(locale, "Organisation propriétaire", "المؤسسة المالكة")}</dt><dd>{row?.cells[1] ?? "—"}</dd></div>
             </dl>
-            <p className="admin-banner" data-tone="ok">{t(locale, "Document à jour — conforme à la politique de fraîcheur.", "وثيقة محدّثة — مطابقة لسياسة الحداثة.")}</p>
+            <p className="admin-banner" data-tone="ok">{t(locale, "La validité sera contrôlée lors du consentement du propriétaire.", "سيتم التحقق من الصلاحية عند موافقة المالك.")}</p>
           </article>
           <article className="client-card">
             <header><h2>{t(locale, "Politique de fraîcheur", "سياسة الحداثة")}</h2></header>
             <dl className="admin-dl">
-              <div><dt>{t(locale, "Statut actuel", "الحالة الحالية")}</dt><dd><span className="client-status-chip" data-tone="mint">{t(locale, "À jour", "محدّث")}</span></dd></div>
+              <div><dt>{t(locale, "Statut actuel", "الحالة الحالية")}</dt><dd><span className="client-status-chip" data-tone="mint">{row?.status ?? "—"}</span></dd></div>
               <div><dt>{t(locale, "Dernière mise à jour", "آخر تحديث")}</dt><dd>{row?.status ?? "—"}</dd></div>
               <div><dt>{t(locale, "Durée de validité", "مدة الصلاحية")}</dt><dd>{row?.cells[8] ?? "—"}</dd></div>
               <div><dt>{t(locale, "Expiration", "الانتهاء")}</dt><dd>{row?.cells[8] ?? "—"}</dd></div>
@@ -320,8 +322,8 @@ export function DocumentReuseBoard({
         </aside>
         <div className="admin-form-foot" data-span="2">
           <Link href={`/${locale}/administration/documents${query}`} className="client-ghost-link">{t(locale, "Annuler", "إلغاء")}</Link>
-          <button type="submit" name="intent" value="CHANGE_CONFIGURATION" className="admin-soft-cta" disabled={pending}>{t(locale, "Enregistrer le brouillon", "حفظ المسودة")}</button>
-          <button type="submit" name="decision" value="LINK" className="admin-primary-cta" disabled={pending}>{pending ? "…" : t(locale, "Confirmer la liaison", "تأكيد الربط")}</button>
+
+          <button type="submit" name="decision" value="LINK" className="admin-primary-cta" disabled={pending}>{pending ? "…" : t(locale, "Demander le consentement du propriétaire", "طلب موافقة المالك")}</button>
         </div>
         <Feedback state={state} locale={locale} />
       </form>
@@ -343,8 +345,8 @@ export function NotificationPreferencesBoard({
         <section className="client-stack" id="regles">
           <article className="client-card">
             <header>
-              <h2>{t(locale, "Modèles de notification publiés", "قوالب الإشعارات المنشورة")}</h2>
-              <p>{t(locale, "Versions actives versionnées. La publication d’un nouveau modèle n’est pas ouverte ici : toute modification passe par une demande à quatre yeux.", "النسخ النشطة المُصدَّرة. لا يُنشر قالب جديد من هنا: أي تعديل يمر بطلب تحقق بأربعة أعين.")}</p>
+              <h2>{t(locale, "Modèles de notification publiés", "قوالب الإشعارات المنشورة")}</h2><Link href={`/${locale}/administration/notifications/modeles`} className="admin-soft-cta">{t(locale,"Ouvrir l’éditeur FR/AR et les approbations","فتح محرر الفرنسية والعربية والموافقات")}</Link>
+              <p>{t(locale, "Versions actives conservées. Révisez les textes FR/AR dans l’éditeur dédié ; l’activation exige des approbations indépendantes.", "تُحفظ النسخ النشطة. راجعوا النصوص الفرنسية والعربية في المحرر المخصص؛ يتطلب التفعيل موافقات مستقلة.")}</p>
             </header>
             {templates.length === 0 ? (
               <p className="admin-banner" data-tone="warn">{t(locale, "Aucun modèle actif n’est visible avec vos droits actuels.", "لا يظهر أي قالب نشط بصلاحياتك الحالية.")}</p>
@@ -398,7 +400,7 @@ export function NotificationPreferencesBoard({
             <div className="admin-form-foot">
               <Link href={`/${locale}/administration/messagerie${query}`} className="client-ghost-link">{t(locale, "Retour à la messagerie", "العودة إلى المراسلة")}</Link>
               <button type="submit" name="intent" value="CHANGE_CONFIGURATION" className="admin-primary-cta" disabled={pending || templates.length === 0}>
-                {pending ? "…" : t(locale, "Soumettre à validation", "إرسال للمصادقة")}
+                {pending ? "…" : t(locale, "Soumettre la proposition à validation", "إرسال المقترح للمصادقة")}
               </button>
             </div>
           </article>

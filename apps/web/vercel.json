@@ -36,6 +36,26 @@
     {
       "path": "/api/workers/domain-schedulers?limit=100",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/provider-document-scans",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/marketing-media",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/internal-message-attachment-scans",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/privacy-file-scans",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/subscription-credit-grants",
+      "schedule": "* * * * *"
     }
   ]
 }

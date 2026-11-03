@@ -1,0 +1,1830 @@
+{
+  "scope": "LOCAL_SYNTHETIC_NATIVE_AUTH_AND_ORGANIZATION_ACCEPTANCE",
+  "runId": "240fe6cc-5f63-421f-9986-4299fb54e4e2",
+  "roleBootstrap": "TEST_ONLY_NOT_GOVERNED_ROLE_ASSIGNMENT_PROOF",
+  "provenance": {
+    "harnessSha256": "331a57e42b1be4b87359bf8d5e5180ae20d31a42f8305c5e4eca6a5b28e93361",
+    "buildId": "cq8xTYOaQeQHs-8zthv4q"
+  },
+  "rpc": [
+    {
+      "actor": "admin",
+      "authenticatedAal2": true,
+      "code": null,
+      "organizationCount": 100,
+      "schemaValid": true
+    },
+    {
+      "actor": "ordinary",
+      "authenticatedAal2": true,
+      "code": "42501",
+      "organizationCount": null,
+      "schemaValid": false
+    }
+  ],
+  "browser": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "realSearchAndSelection": true,
+      "ownOrganizationHeadingVerified": true
+    }
+  ],
+  "cleanup": {
+    "verified": true,
+    "actors": 4,
+    "organizations": 3,
+    "immutableEvidenceRetained": true
+  },
+  "status": "PASSED",
+  "client": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/demandes",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/documents",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "messagerie",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/finances",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/credits",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/favoris",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": false,
+      "expectedInvoiceProjectionPartial": false,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/portefeuille",
+      "http": 200,
+      "selectedOrganizationRetained": true,
+      "technicalError": true,
+      "expectedInvoiceProjectionPartial": true,
+      "horizontalOverflow": false,
+      "hasHeading": true
+    }
+  ],
+  "readiness": [
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "provider",
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 375,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 390,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 768,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "fr",
+      "width": 1440,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 375,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 390,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 768,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/accueil",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/bibliotheque",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/services",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/questionnaires",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/regles",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/validations",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/documents",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/gouvernance",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    },
+    {
+      "role": "franchise",
+      "locale": "ar",
+      "width": 1440,
+      "path": "franchise/marketing",
+      "http": 200,
+      "technicalError": false,
+      "horizontalOverflow": false,
+      "qualificationAndMandateWorkflowCertified": false
+    }
+  ],
+  "classification": "LOCAL_REAL_GOTRUE_AAL2_READINESS_NOT_COMPLETE_BUSINESS_WORKFLOWS",
+  "limitations": [
+    "8 expected partial invoice selector states: new read RPC not applied to shared local database.",
+    "No positive qualified Provider consultation/quote/document download workflow or signed Franchise mandate was certified.",
+    "Native run used build cq8xTYOaQeQHs-8zthv4q. The final build changes only the scoped public Need CSS; the public journey was rerun on the final build.",
+    "The privileged role is a test-only fixture bootstrap, not evidence of the governed role-assignment workflow.",
+    "Only Next.js prefetch requests were aborted; requested navigations used the live local server."
+  ]
+}

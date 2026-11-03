@@ -1,0 +1,11 @@
+import{renderToStaticMarkup}from"react-dom/server";
+import{describe,expect,it,vi}from"vitest";
+vi.mock("./actions",()=>({acceptDelivery:vi.fn(),createAmendment:vi.fn(),createMission:vi.fn(),signContract:vi.fn(),submitContract:vi.fn()}));
+import{MissionPanel}from"./mission-panel";
+import{getMissionMessages}from"./messages";
+import type{ContractMissionDashboard}from"@/modules/shared/lib/contracts-missions/model";
+const id="a0000000-0000-4000-8000-000000000001",snapshot={versionId:id,version:1,selectedQuoteVersionId:id,priceMinor:"12000",currency:"MAD",contentHash:"a".repeat(64),changeReason:"Version acceptée",createdAt:"2026-10-31T22:56:00Z",createdAtLabel:"31 oct. 2026,23:56",items:[],signatures:[]},dashboard:ContractMissionDashboard={organizationId:id,organizationName:"Client",contracts:[{...snapshot,id,providerOrganizationId:id,providerOrganizationName:"Prestataire contractuel",title:"Conformité du dossier",status:"COMPLETED",currentVersion:1,rowVersion:1,signatureCount:0,history:[]}],missions:[{id,contractId:id,contractVersionId:id,title:"Conformité du dossier",contractSnapshot:snapshot,status:"IN_PROGRESS",startedAt:null,completedAt:null,milestones:[{id,key:"FIRST",title:"Vérification des pièces",status:"SUBMITTED",dueAt:null,rowVersion:1}],deliverables:[{id,key:"REPORT",label:"Rapport final",status:"ACCEPTED",currentVersion:1,proofScanStatus:"CLEAN",criteria:[]}]}]};
+describe("Client contractual business labels",()=>{
+ it("uses the frozen request and Provider names while translating all visible workflow states",()=>{const html=renderToStaticMarkup(<MissionPanel d={dashboard} locale="fr" m={getMissionMessages("fr")}/>);expect(html).toContain("Conformité du dossier");expect(html).toContain("Prestataire contractuel");expect(html).toContain("Terminé");expect(html).toContain("En cours");expect(html).toContain("Soumis");expect(html).not.toMatch(/COMPLETED|IN_PROGRESS|SUBMITTED|ACCEPTED/);});
+ it("keeps unknown states explicitly unconfirmed in native Arabic",()=>{const d={...dashboard,contracts:[{...dashboard.contracts[0]!,status:"FUTURE_UNRECOGNIZED"}]};const html=renderToStaticMarkup(<MissionPanel d={d} locale="ar" m={getMissionMessages("ar")}/>);expect(html).toContain("حالة تتطلب التحقق");expect(html).not.toContain("FUTURE_UNRECOGNIZED");});
+});

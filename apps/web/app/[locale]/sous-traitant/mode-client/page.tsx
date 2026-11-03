@@ -35,7 +35,7 @@ export default async function ProviderModeClientPage({
     : { title: "Mode Client", lead: "Deux contextes, une seule plateforme — sans recréer l’organisation.", current: "Contexte professionnel actuel", switch: "Continuer en Mode Client", request: "Activer le rôle Client", pending: "Une demande de rôle Client est en attente.", isolated: "Vos consultations et devis professionnels restent dans l’espace prestataire." };
 
   return (
-    <ProviderAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="modeClient" title={copy.title} lead={copy.lead}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="modeClient" title={copy.title} lead={copy.lead}>
       <main className="client-page provider-mode-client">
         <section className="client-board client-board-compare">
           <article className="client-card">

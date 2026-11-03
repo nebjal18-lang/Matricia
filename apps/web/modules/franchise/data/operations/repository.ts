@@ -1,9 +1,13 @@
+import { supervisionMetrics,type FranchiseSupervisionMetrics } from "../spaces/metrics";
+import { providerDossiers,type ProviderDossier } from "../network/provider-dossier";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
 const id = z.string().uuid();
 
 export type FranchiseOperationsSnapshot = {
+  providerDossiers?:ProviderDossier[];
+  metrics?:FranchiseSupervisionMetrics|null;
   requests: Array<{ id: string; status: string; title: string; urgency: string | null }>;
   matching: Array<{ id: string; requestId: string; eligible: boolean; scoreBps: number }>;
   quotes: Array<{ id: string; requestId: string; status: string; totalMinor: string | null; currency: string | null }>;
@@ -47,14 +51,20 @@ const empty: FranchiseOperationsSnapshot = {
 
 function rows<T>(schema: z.ZodType<T>, value: unknown): T[] {
   const parsed = z.array(schema).safeParse(value);
-  return parsed.success ? parsed.data : [];
+  if(!parsed.success)throw new Error("FRANCHISE_OPERATIONS_INVALID_RESPONSE");
+  return parsed.data;
 }
 
-export async function loadFranchiseOperations(input: { libraryId: string; operatorOrganizationId?: string | null }): Promise<FranchiseOperationsSnapshot> {
+export async function loadFranchiseOperations(input: { libraryId: string; operatorOrganizationId?: string | null;franchiseId?:string|null }): Promise<FranchiseOperationsSnapshot> {
   if (!z.string().uuid().safeParse(input.libraryId).success) return empty;
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
   if (!auth.user) return empty;
+  const[dossiersResult,metricsResult]=await Promise.all([input.franchiseId?client.rpc("franchise_provider_dossiers",{p_franchise_id:input.franchiseId}):Promise.resolve({data:[],error:null}),input.franchiseId?client.rpc("franchise_supervision_metrics",{p_franchise_id:input.franchiseId}):Promise.resolve({data:null,error:null})]);
+  const metrics=metricsResult.data?supervisionMetrics.safeParse(metricsResult.data):null;
+  if(metricsResult.error||(metrics&&!metrics.success))throw new Error("FRANCHISE_METRICS_UNAVAILABLE");
+  const dossiers=providerDossiers.safeParse(dossiersResult.data);
+  if(dossiersResult.error||!dossiers.success)throw new Error("FRANCHISE_PROVIDER_DOSSIERS_UNAVAILABLE");
   const [requestsResult, anomaliesResult, recommendationsResult, opportunitiesResult, qualificationsResult, capacitiesResult, documentVersionsResult, threadsResult, membersResult, missionsResult, skusResult] = await Promise.all([
     client.from("service_requests").select("id,status,service_id,library_id").eq("library_id", input.libraryId).order("updated_at", { ascending: false }).limit(100),
     client.from("diagnostic_anomalies").select("id,title_fr,title_ar,severity,status,anomaly_code,blocking,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("created_at", { ascending: false }).limit(100),
@@ -70,6 +80,7 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
     client.from("missions").select("id,status,started_at").order("created_at", { ascending: false }).limit(50),
     client.from("service_skus").select("id,code,status,service_id,catalog_services!inner(library_id)").eq("catalog_services.library_id", input.libraryId).eq("status", "ACTIVE").limit(100),
   ]);
+  if([requestsResult,anomaliesResult,recommendationsResult,opportunitiesResult,qualificationsResult,capacitiesResult,documentVersionsResult,threadsResult,membersResult,missionsResult,skusResult].some((r)=>r.error))throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const requestRows = rows(z.object({ id, status: z.string(), service_id: id }), requestsResult.data);
   const requestIds = requestRows.map((item) => item.id);
   const missionRows = rows(z.object({ id, status: z.string(), started_at: z.string().nullable() }), missionsResult.data);
@@ -100,6 +111,7 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
     client.from("recommendation_definition_versions").select("id,definition_id,service_id,solution_level,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).limit(200),
     client.from("franchise_volume_proposals").select("id,sku_id,status,payment_model").eq("library_id", input.libraryId).order("created_at", { ascending: false }).limit(100),
   ]);
+  if([servicesResult,versionsResult,matchingResult,rfqsResult,disputesResult,anomalyDefResult,riskDefResult,recoDefResult,proposalResult].some((r)=>r.error))throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const serviceCodes = new Map(rows(z.object({ id, code: z.string() }), servicesResult.data).map((item) => [item.id, item.code]));
   const qualificationIdentities = rows(z.object({
     id,
@@ -111,6 +123,7 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
   const decisionsResult = decisionIds.length
     ? await client.from("provider_qualification_decisions").select("id,status").in("id", decisionIds).limit(200)
     : { data: [], error: null };
+  if(decisionsResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const decisionStatus = new Map(rows(z.object({ id, status: z.string() }), decisionsResult.data).map((item) => [item.id, item.status]));
   function latestBy<T extends { definition_id: string; version: number }>(value: unknown, schema: z.ZodType<T>): T[] {
     const latest = new Map<string, T>();
@@ -125,15 +138,18 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
   const candidatesResult = matchingRuns.length
     ? await client.from("matching_candidates").select("id,matching_run_id,eligible,score_basis_points").in("matching_run_id", matchingRuns.map((item) => item.id)).limit(200)
     : { data: [], error: null };
+  if(candidatesResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const runRequest = new Map(matchingRuns.map((item) => [item.id, item.request_id]));
   const rfqs = rows(z.object({ id, request_id: id }), rfqsResult.data);
   const quotesResult = rfqs.length
     ? await client.from("quotes").select("id,status,rfq_id").in("rfq_id", rfqs.map((item) => item.id)).limit(100)
     : { data: [], error: null };
+  if(quotesResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const quoteRows = rows(z.object({ id, status: z.string(), rfq_id: id }), quotesResult.data);
   const versionsQuoteResult = quoteRows.length
     ? await client.from("quote_versions").select("quote_id,total_minor,currency,version_number").in("quote_id", quoteRows.map((item) => item.id)).limit(200)
     : { data: [], error: null };
+  if(versionsQuoteResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const latestQuote = new Map<string, { totalMinor: string; currency: string; version: number }>();
   for (const version of rows(z.object({
     quote_id: id,
@@ -148,6 +164,8 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
   }
   const rfqRequest = new Map(rfqs.map((item) => [item.id, item.request_id]));
   return {
+    providerDossiers:dossiers.data,
+    metrics:metrics?.success?metrics.data:null,
     requests: requestRows.map((item) => ({
       id: item.id,
       status: item.status,

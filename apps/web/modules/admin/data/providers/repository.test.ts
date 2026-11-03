@@ -23,7 +23,7 @@ const accountId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 function thenable(result: { data: unknown; error: unknown }) {
   const chain: Record<string, unknown> = {};
   const next = () => chain;
-  for (const method of ["select", "eq", "is", "in", "order", "limit"]) {
+  for (const method of ["select", "eq", "is", "in", "order", "limit", "range"]) {
     chain[method] = method === "select"
       ? (columns: string) => {
           mocks.selects.push(columns);
@@ -47,7 +47,7 @@ describe("loadAdminProviders", () => {
       if (name === "get_my_account_security_requirement") {
         return { data: [{ requirement_satisfied: true, matched_role_codes: ["MATRICIA_ADMIN"] }], error: null };
       }
-      if (name === "list_admin_supervision_projection") {
+      if (name === "list_admin_provider_organization_names_v1") {
         return { data: { organizations: [{ id: orgId, display_name: "Atelier Atlas" }] }, error: null };
       }
       return { data: { eligible: false, reasons: ["CAPACITY_NOT_DECLARED"], qualification_status: "APPROVED" }, error: null };

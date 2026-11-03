@@ -1,0 +1,16 @@
+import { beforeEach,describe,expect,it,vi } from "vitest";
+const mocks=vi.hoisted(()=>({getUser:vi.fn(),assurance:vi.fn(),rpc:vi.fn(),revalidate:vi.fn()}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mocks.getUser,mfa:{getAuthenticatorAssuranceLevel:mocks.assurance}},rpc:mocks.rpc})}));
+vi.mock("next/cache",()=>({revalidatePath:mocks.revalidate}));
+import{issueClientDocument}from"./issue-actions";
+const org="b2040000-0000-4000-8000-000000000001",doc="f2040000-0000-4000-8000-000000000001";
+function form(){const value=new FormData();Object.entries({locale:"ar",organizationId:org,paymentEventId:"9223372036854775000",idempotencyKey:"a2040000-0000-4000-8000-000000000001"}).forEach(([key,item])=>value.set(key,item));return value;}
+beforeEach(()=>{vi.clearAllMocks();mocks.getUser.mockResolvedValue({data:{user:{id:"owner"}},error:null});mocks.assurance.mockResolvedValue({data:{currentLevel:"aal2"},error:null});mocks.rpc.mockResolvedValue({data:{outcome:"CLIENT_DOCUMENT_ISSUED",document_id:doc,document_number:"CI204-2026-00000001",kind:"INVOICE"},error:null});});
+describe("scoped Client commercial issuance",()=>{
+ it("never rounds a bigint source id and sends the selected organization plus stable key",async()=>{expect(await issueClientDocument({status:"idle"},form())).toEqual({status:"success",number:"CI204-2026-00000001"});expect(mocks.rpc).toHaveBeenCalledWith("issue_scoped_client_commercial_document_v1",expect.objectContaining({p_organization_id:org,p_payment_event_id:"9223372036854775000",p_adjustment_id:null,p_idempotency_key:"a2040000-0000-4000-8000-000000000001"}));expect(mocks.revalidate).toHaveBeenCalledWith("/ar/client/finances");});
+ it("requires a real authenticated second factor before a mutation",async()=>{mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1"},error:null});expect(await issueClientDocument({status:"idle"},form())).toEqual({status:"error",code:"MFA"});expect(mocks.rpc).not.toHaveBeenCalled();});
+ it.each([["BILLING_POLICY_REQUIRED","POLICY"],["CLIENT_BILLING_IDENTITY_REQUIRED","IDENTITY"],["SIMULATED_PAYMENT_NOT_INVOICEABLE","SIMULATION"],["CLIENT_DOCUMENT_SOURCE_DENIED","UNAVAILABLE"]])("reports %s without displaying a successful issuance",async(message,code)=>{mocks.rpc.mockResolvedValue({data:null,error:{message}});expect(await issueClientDocument({status:"idle"},form())).toEqual({status:"error",code});expect(mocks.revalidate).not.toHaveBeenCalled();});
+ it("refuses malformed or unexpected RPC results",async()=>{mocks.rpc.mockResolvedValue({data:{outcome:"OK"},error:null});expect(await issueClientDocument({status:"idle"},form())).toEqual({status:"error",code:"UNAVAILABLE"});});
+ it("preserves a controlled failure when the network fails",async()=>{mocks.rpc.mockRejectedValue(new Error("network"));expect(await issueClientDocument({status:"idle"},form())).toEqual({status:"error",code:"UNAVAILABLE"});});
+ it("never sends a malformed id or an unauthenticated request",async()=>{const invalid=form();invalid.set("paymentEventId","1e3");expect((await issueClientDocument({status:"idle"},invalid)).status).toBe("error");mocks.getUser.mockResolvedValue({data:{user:null},error:null});expect((await issueClientDocument({status:"idle"},form())).status).toBe("error");expect(mocks.rpc).not.toHaveBeenCalled();});
+});

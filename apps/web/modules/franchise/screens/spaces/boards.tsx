@@ -1,3 +1,5 @@
+import{renewalCivilDate,renewalCalendarCounts}from"@/modules/franchise/data/spaces/calendar";
+import { moroccoRegions } from "@/modules/shared/lib/geo/morocco-regions";
 import Link from "next/link";
 import { ArrowRight, Bell, Briefcase, CheckCircle2, FileText, LineChart, Lock, MapPin, ShieldCheck, Users } from "lucide-react";
 import type { ReactNode } from "react";
@@ -10,7 +12,7 @@ import { emptyFranchiseSpaces } from "@/modules/franchise/data/spaces/live";
 import { MandateBanner } from "@/modules/franchise/screens/library/library-boards";
 import { FranchiseMandateRail } from "@/modules/franchise/screens/library/library-chrome";
 import { canMutateFranchiseFolder } from "@/modules/franchise/screens/network/folder-guards";
-import { FranchiseFolderActivityForm, FranchiseFolderAdvanceForm, FranchiseFolderTimeline } from "@/modules/franchise/screens/network/folder-forms";
+import { FranchiseFolderActivityForm, FranchiseFolderAdvanceForm, FranchiseFolderTimeline, FranchiseProviderLinkForm } from "@/modules/franchise/screens/network/folder-forms";
 import {
   FranchiseAnomalyDefinitionForm,
   FranchiseIncidentInstructForm,
@@ -56,17 +58,15 @@ function documentSensitivity(kind: string, status: string, locale: Locale): { la
   return { label: c.sensitivityLow, tone: "mint" };
 }
 
-function RenewalCalendar({ locale, dueDates, weekCount, monthCount, nextCount }: { locale: Locale; dueDates: string[]; weekCount: number; monthCount: number; nextCount: number }) {
+function RenewalCalendar({ locale, dueDates }: { locale: Locale; dueDates: string[] }) {
   const c = franchiseCopy(locale);
-  const now = new Date();
-  const year = now.getUTCFullYear();
-  const month = now.getUTCMonth();
+  const {year,month,weekCount,monthCount,nextCount}=renewalCalendarCounts(dueDates);
   const first = new Date(Date.UTC(year, month, 1));
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const startPad = (first.getUTCDay() + 6) % 7;
   const monthLabel = new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { month: "long", year: "numeric", timeZone: "UTC" }).format(first);
   const dueDays = new Set(
-    dueDates
+    dueDates.map(value=>renewalCivilDate(value)??"")
       .map((value) => {
         const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
         if (!match) return null;
@@ -86,7 +86,7 @@ function RenewalCalendar({ locale, dueDates, weekCount, monthCount, nextCount }:
   return (
     <div className="franchise-mini-calendar" aria-label={monthLabel}>
       <header><strong>{monthLabel}</strong></header>
-      <div className="franchise-cal-grid" role="grid">
+      <div className="franchise-cal-grid" role="group" aria-label={monthLabel}>
         {weekDays.map((day) => <span key={day} className="franchise-cal-head">{day}</span>)}
         {cells.map((day, index) => (
           <span
@@ -164,9 +164,9 @@ function Cta({ href, children, soft = false }: { href: string; children: ReactNo
   return <Link href={href} className={soft ? "client-soft-link" : "franchise-tool"}>{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>;
 }
 
-function Banner({ locale, mandateName }: SpaceBoardProps) {
+function Banner({ locale, mandateName,board }: SpaceBoardProps) {
   const n = libraryCopy(locale);
-  return <MandateBanner locale={locale} name={mandateName ?? n.mandate} />;
+  return <><MandateBanner locale={locale} name={mandateName ?? n.mandate} />{board?.unavailableSections?.length?<p className="client-card" role="alert">{locale==="ar"?"بعض الأقسام غير متاحة مؤقتاً. أعيدوا تحميل الصفحة للمحاولة.":"Certaines sections sont temporairement indisponibles. Rechargez la page pour réessayer."} <bdi dir="ltr">{board.unavailableSections.join(", ")}</bdi></p>:null}</>;
 }
 
 export function FranchiseHomeBoard({ locale, query, mandateName, board }: SpaceBoardProps) {
@@ -174,7 +174,7 @@ export function FranchiseHomeBoard({ locale, query, mandateName, board }: SpaceB
   const demo = resolveBoard({ locale, query, board });
   return (
     <main className="client-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat">
         {demo.treat.map((item) => (
           <Link key={item.id} href={item.href} className="franchise-kpi-tile" data-tone={item.tone}>
@@ -226,9 +226,10 @@ export function FranchiseHomeBoard({ locale, query, mandateName, board }: SpaceB
 export function PerimeterBoard({ locale, query, mandateName, view, board, organizationId }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['GOVERNANCE']))return <UnavailableSection locale={locale} query={query}/>;
   return (
     <main className="client-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-workbench">
         <article className="client-card">
           <header><h2>{view === "utilisateurs" ? c.users : c.authorized}</h2></header>
@@ -280,44 +281,55 @@ export function PerimeterBoard({ locale, query, mandateName, view, board, organi
   );
 }
 
+function UnavailableSection({locale,query}:{locale:Locale;query:string}){return <main className="client-page"><article className="client-card" role="alert"><h2>{locale==="ar"?"البيانات غير متاحة مؤقتاً":"Données temporairement indisponibles"}</h2><p>{locale==="ar"?"تعذر تحميل هذا القسم. لا يمكن تأكيد العدد أو عدم وجود عناصر حالياً.":"Le chargement de cette section a échoué. Le nombre d’éléments et leur absence ne peuvent pas être confirmés."}</p><a className="franchise-tool" href={query||"?"}>{locale==="ar"?"إعادة المحاولة":"Réessayer"}</a></article></main>;}
+function sourceUnavailable(board:FranchiseSpaceBoardData|undefined,sources:string[]){return Boolean(board?.unavailableSections.some(source=>sources.includes(source)));}
+
 export function NetworkBoard({ locale, query, mandateName, view, itemId, search, page, board, organizationId }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,itemId?['CRM','OPERATIONS']:['CRM']))return <UnavailableSection locale={locale} query={query}/>;
   const selected = itemId ? demo.people.find((row) => row.id === itemId) ?? null : null;
   const needle = (search ?? "").trim().toLocaleLowerCase();
   const filtered = demo.people.filter((row) => matchesNetworkFilter(view, row.stage) && (!needle || `${row.name} ${row.services} ${row.status}`.toLocaleLowerCase().includes(needle)));
   const paged = paginate(filtered, page);
   const people = paged.rows;
-  const activeCount = demo.people.length;
-  const qualifiedCount = demo.people.filter((row) => matchesNetworkFilter("qualifies", row.stage)).length;
-  const supportCount = demo.people.filter((row) => matchesNetworkFilter("accompagnement", row.stage)).length;
-  const incompleteCount = demo.people.filter((row) => matchesNetworkFilter("incomplets", row.stage)).length;
-  const docsWatch = demo.renewals.length || demo.documents.filter((row) => row.kind === "evidence").length;
+  const network=demo.metrics?.network;
+  const activeCount=network?.activeProviders??null;
+  const qualifiedCount=network?.qualifiedProviders??null;
+  const supportCount=network?.inProgressProviders??null;
+  const incompleteCount=network?.incompleteProviders??null;
+  const docsWatch=network?.documentsExpiring??null;
+  const networkShare=(count:number|null)=>count===null||!network?"—":integerShare(count,network.providers,locale);
   const tab = (href: string, label: string, active: boolean) => <Link href={href} data-active={active ? "true" : undefined}>{label}</Link>;
   if (selected) {
-    const docs = demo.documents.filter((row) => row.kind === "evidence" || !row.kind).slice(0, 6);
+    const dossier=selected.dossier;
+    const unknown=locale==="ar"?"غير موثق":"Non renseigné";
+    const docs=(dossier?.documents??[]).map((d)=>({id:d.id,title:d.code,status:d.status}));
+    const qualifications=(dossier?.qualifications??[]).map((r)=>({id:r.id,title:r.serviceCode,status:r.status,rowVersion:r.rowVersion,meta:r.serviceCode}));
+    const availability=dossier?.capacities.map((c)=>`${c.serviceCode} : ${c.status}${c.availableUnits===null?"":` (${c.availableUnits})`}`).join(" · ")||unknown;
+    const regions=dossier?.regions.map((code)=>{const r=moroccoRegions.find((r)=>r.code===code);return r?(locale==="ar"?r.nameAr:r.nameFr):code;}).join(", ")||unknown;
     const decisionNote = selected.activities?.find((item) => /qualif|décision|decision|تأهيل/i.test(`${item.type} ${item.summary}`));
     return (
       <main className="client-page franchise-network-page franchise-provider-dossier">
-        <Banner locale={locale} query={query} mandateName={mandateName} />
+        <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
         <article className="client-card franchise-provider-hero-card">
           <div className="franchise-provider-hero">
             <span className="franchise-kpi-icon" data-tone={selected.tone}><Briefcase className="size-4" aria-hidden /></span>
             <div>
               <strong>{selected.name}</strong>
-              <em className="client-status-chip" data-tone="mint">{c.providerActive}</em>
+              <em className="client-status-chip" data-tone="sky">{dossier?.status??unknown}</em>
               <p>{selected.email ?? selected.services}</p>
             </div>
             <Link href={`/${locale}/franchise/fournisseurs/${selected.id}${query}`} className="franchise-tool franchise-tool-primary">{c.openProviderFolder}</Link>
           </div>
           <dl className="franchise-props franchise-provider-meta">
             <div><small>{c.providerType}</small><span>{c.serviceTypeLabel}</span></div>
-            <div><small>{c.relationSince}</small><span dir="ltr">{selected.nextFollowupAt ? selected.nextFollowupAt.slice(0, 10) : "—"}</span></div>
+            <div><small>{c.relationSince}</small><span dir="ltr">{selected.createdAt ? selected.createdAt.slice(0, 10) : "—"}</span></div>
             <div><small>{c.globalStatus}</small><span className="client-status-chip" data-tone={selected.tone}>{selected.status}</span></div>
             <div><small>{c.services}</small><span>{selected.services || "—"}</span></div>
-            <div><small>{c.capacityLevel}</small><span>{locale === "ar" ? "عالية" : "Haute"}</span></div>
-            <div><small>{c.zoneIntervention}</small><span>{c.zoneNational}</span></div>
-            <div><small>{c.availability}</small><span>{c.availableNow}</span></div>
+            <div><small>{c.capacityLevel}</small><span>{dossier?.teamSize??unknown}</span></div>
+            <div><small>{c.zoneIntervention}</small><span>{regions}</span></div>
+            <div><small>{c.availability}</small><span>{availability}</span></div>
           </dl>
         </article>
         <nav className="franchise-pill-tabs" aria-label={selected.name}>
@@ -329,13 +341,15 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
         </nav>
         <section className="franchise-dossier-grid">
           <article className="client-card">
+            {!selected.linkedOrganizationId?<p role="status">{locale==="ar"?"هذا عميل محتمل غير مرتبط بعد بمنظمة مقدم خدمة. لا تُنسب إليه أي وثيقة أو قدرة.":"Ce prospect n’est pas encore relié à une organisation prestataire. Aucune qualification, pièce ou disponibilité ne lui est attribuée."}</p>:null}
+            {demo.canWrite&&selected.rowVersion?<FranchiseProviderLinkForm locale={locale} prospectId={selected.id} rowVersion={selected.rowVersion} organizationId={organizationId||organizationIdFromQuery(query)||null} options={demo.providerDossiers}/>:null}
             <header><h2>{c.stepQual}</h2></header>
-            {demo.qualifications.length === 0 ? <p className="franchise-empty-panel">{c.emptyQualifications}</p> : (
+            {qualifications.length === 0 ? <p className="franchise-empty-panel">{c.emptyQualifications}</p> : (
               <div className="client-table-wrap">
                 <table className="client-space-table franchise-dense-table">
                   <thead><tr><th>{c.servicesTab}</th><th>{c.proofs}</th><th>{c.state}</th><th>{c.action}</th></tr></thead>
                   <tbody>
-                    {demo.qualifications.map((row) => (
+                    {qualifications.map((row) => (
                       <tr key={row.id}>
                         <td>{row.title}</td>
                         <td>{row.meta ?? "—"}</td>
@@ -350,16 +364,12 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
             {view === "capacite" || !view || view === "qualification" ? (
               <section className="franchise-capacity-block">
                 <header><h3>{c.capacityAvailability}</h3></header>
-                <p className="client-access-note">
-                  {locale === "ar"
-                    ? "حجم الفريق ومتوسط المهلة غير محسوبين بعد من بيانات القدرة الحية."
-                    : "Taille d’équipe et délai moyen ne sont pas encore calculés à partir des données de capacité live."}
-                </p>
+                <p>{availability}</p><ul>{dossier?.capacities.map((item)=><li key={item.id}>{item.serviceCode} · {item.leadTimeDays} {locale==="ar"?"أيام":"jours"}</li>)}</ul>
               </section>
             ) : null}
             {view === "documents" ? (
               <>
-                <p className="client-access-note">{c.docsUpToDate}</p>
+                <p className="client-access-note">{locale==="ar"?"وثائق المنظمة المرتبطة فقط.":"Uniquement les documents de l’organisation explicitement reliée."}</p>
                 {folderEvidence(selected).length ? (
                   <ul className="client-feed">
                     {folderEvidence(selected).map((ref) => (
@@ -382,7 +392,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
                   <FranchiseQualificationDecisionForm
                     locale={locale}
                     organizationId={organizationId || organizationIdFromQuery(query) || null}
-                    qualifications={demo.qualifications.filter((row) => row.rowVersion)}
+                    qualifications={qualifications.filter((row) => row.rowVersion)}
                   />
                 ) : null}
               </>
@@ -414,7 +424,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
                 <p className="franchise-empty-panel">{c.emptyProviderDocs}</p>
               ) : (
                 <ul className="franchise-dot-list">
-                  {(docs.length ? docs.map((row) => ({ id: row.id, title: row.title, status: row.status })) : folderEvidence(selected).map((ref) => ({ id: ref, title: ref, status: c.docsUpToDate }))).map((row) => (
+                  {(docs.length ? docs.map((row) => ({ id: row.id, title: row.title, status: row.status })) : folderEvidence(selected).map((ref) => ({ id: ref, title: ref, status: c.evidence }))).map((row) => (
                     <li key={row.id}><span className="franchise-dot" data-tone="mint" /><span><strong>{row.title}</strong><small>{row.status}</small></span></li>
                   ))}
                 </ul>
@@ -423,9 +433,9 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
             <article className="client-card">
               <header><h2>{c.capacityTitle}</h2></header>
               <ul className="franchise-dot-list">
-                <li><span className="franchise-dot" data-tone="mint" /><strong>{c.capacityLevel}</strong><small>{locale === "ar" ? "عالية" : "Haute"}</small></li>
-                <li><span className="franchise-dot" data-tone="sky" /><strong>{c.zoneNational}</strong><small>{c.zoneNational}</small></li>
-                <li><span className="franchise-dot" data-tone="violet" /><strong>{c.availability}</strong><small>{c.availableNow}</small></li>
+                <li><span className="franchise-dot" data-tone="mint" /><strong>{c.capacityLevel}</strong><small>{dossier?.teamSize??unknown}</small></li>
+                <li><span className="franchise-dot" data-tone="sky" /><strong>{regions}</strong><small>{regions}</small></li>
+                <li><span className="franchise-dot" data-tone="violet" /><strong>{c.availability}</strong><small>{availability}</small></li>
               </ul>
             </article>
           </aside>
@@ -435,13 +445,13 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
   }
   return (
     <main className="client-page franchise-network-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat franchise-net-kpis">
-        <article className="franchise-kpi-tile" data-tone="sky"><span className="franchise-kpi-icon" data-tone="sky"><Users className="size-4" aria-hidden /></span><span><strong dir="ltr">{activeCount}</strong><small>{c.netActive}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="mint"><span className="franchise-kpi-icon" data-tone="mint"><ShieldCheck className="size-4" aria-hidden /></span><span><strong dir="ltr">{qualifiedCount}</strong><small>{c.qualified} · {integerShare(qualifiedCount, activeCount, locale)} {c.netQualifiedShare}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="peach"><span className="franchise-kpi-icon" data-tone="peach"><Briefcase className="size-4" aria-hidden /></span><span><strong dir="ltr">{supportCount}</strong><small>{c.netInProgress} · {integerShare(supportCount, activeCount, locale)} {c.netQualifiedShare}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span><span><strong dir="ltr">{incompleteCount}</strong><small>{c.netToQualify} · {integerShare(incompleteCount, activeCount, locale)} {c.netQualifiedShare}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><Bell className="size-4" aria-hidden /></span><span><strong dir="ltr">{docsWatch}</strong><small>{c.netDocsExpiring}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="sky"><span className="franchise-kpi-icon" data-tone="sky"><Users className="size-4" aria-hidden /></span><span><strong dir="ltr">{activeCount??"—"}</strong><small>{c.netActive}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="mint"><span className="franchise-kpi-icon" data-tone="mint"><ShieldCheck className="size-4" aria-hidden /></span><span><strong dir="ltr">{qualifiedCount??"—"}</strong><small>{c.qualified} · {networkShare(qualifiedCount)} {c.netQualifiedShare}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="peach"><span className="franchise-kpi-icon" data-tone="peach"><Briefcase className="size-4" aria-hidden /></span><span><strong dir="ltr">{supportCount??"—"}</strong><small>{c.netInProgress} · {networkShare(supportCount)} {c.netQualifiedShare}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span><span><strong dir="ltr">{incompleteCount??"—"}</strong><small>{c.netToQualify} · {networkShare(incompleteCount)} {c.netQualifiedShare}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><Bell className="size-4" aria-hidden /></span><span><strong dir="ltr">{docsWatch??"—"}</strong><small>{c.netDocsExpiring}</small></span></article>
       </section>
       <form action={`/${locale}/franchise/fournisseurs`} method="get" className="franchise-filters franchise-net-filters">
         {organizationIdFromQuery(query) ? <input type="hidden" name="organizationId" value={organizationIdFromQuery(query)} /> : null}
@@ -482,9 +492,9 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
                     <td><span className="franchise-row-title"><span className="franchise-kpi-icon" data-tone={row.tone}>{row.name.slice(0, 1)}</span>{row.name}</span></td>
                     <td><em className="franchise-kind-chip">{row.services}</em></td>
                     <td><span className="client-status-chip" data-tone={row.tone}>{row.status}</span></td>
-                    <td><em className="franchise-capacity-bars" aria-label={locale === "ar" ? "عالية" : "Haute"} data-level="3"><i /><i /><i /></em></td>
-                    <td><span className="franchise-dot" data-tone="mint" /> {c.availableNow}</td>
-                    <td><em className="client-status-chip" data-tone="mint">{locale === "ar" ? "محدَّث" : "À jour"}</em></td>
+                    <td>{row.dossier?.teamSize??"—"}</td>
+                    <td>{row.dossier?.capacities.map((c)=>`${c.serviceCode}: ${c.status}`).join(" · ")||"—"}</td>
+                    <td>{row.dossier?.documents.map((d)=>d.status).join(" · ")||"—"}</td>
                     <td dir="ltr">—</td>
                     <td><Cta href={`/${locale}/franchise/fournisseurs/${row.id}${query}`} soft>{c.openFolder}</Cta></td>
                   </tr>
@@ -515,6 +525,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
 export function FranchiseRequestsBoard({ locale, query, mandateName, view, itemId, search, stageFilter, ownerFilter, page, board }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['CRM']))return <UnavailableSection locale={locale} query={query}/>;
   const href = `/${locale}/franchise/demandes${query}`;
   const selected = itemId ? demo.requests.find((row) => row.id === itemId) ?? null : null;
   const needle = (search ?? "").trim().toLocaleLowerCase();
@@ -534,7 +545,7 @@ export function FranchiseRequestsBoard({ locale, query, mandateName, view, itemI
   const followCount = demo.requests.filter((row) => row.tone === "mint" || row.tone === "sky").length;
   return (
     <main className="client-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat">
         <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span><span><strong dir="ltr">{openCount}</strong><small>{c.reqKpiOpen}</small></span></article>
         <article className="franchise-kpi-tile" data-tone="peach"><span className="franchise-kpi-icon" data-tone="peach"><Bell className="size-4" aria-hidden /></span><span><strong dir="ltr">{waitingCount}</strong><small>{c.reqKpiWaiting}</small></span></article>
@@ -707,6 +718,7 @@ export function FranchiseRequestsBoard({ locale, query, mandateName, view, itemI
 export function QualityBoard({ locale, query, mandateName, view, search, page, board, libraryId, organizationId, services }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['QUALITY', 'OPERATIONS']))return <UnavailableSection locale={locale} query={query}/>;
   const needle = (search ?? "").trim().toLocaleLowerCase();
   const matches = (value: string) => !needle || value.toLocaleLowerCase().includes(needle);
   const qualityPath = view ? `/${locale}/franchise/qualite/${view}` : `/${locale}/franchise/qualite`;
@@ -738,7 +750,7 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
   const selectedReview = pagedQuality.rows[0] ?? demo.quality[0] ?? null;
   return (
     <main className="client-page franchise-quality-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat">
         <article className="franchise-kpi-tile" data-tone="sky"><span className="franchise-kpi-icon" data-tone="sky"><FileText className="size-4" aria-hidden /></span><span><strong dir="ltr">{reviewsCount}</strong><small>{c.reviewsDue}</small></span></article>
         <article className="franchise-kpi-tile" data-tone="peach"><span className="franchise-kpi-icon" data-tone="peach"><Bell className="size-4" aria-hidden /></span><span><strong dir="ltr">{nonConfCount}</strong><small>{c.nonConformities}</small></span></article>
@@ -878,45 +890,33 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
 export function PerformanceBoard({ locale, query, mandateName, view, board }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
-  const requestCount = demo.requests.length;
-  const missionDone = demo.missions.length;
-  const qualified = demo.people.filter((row) => matchesNetworkFilter("qualifies", row.stage)).length;
-  const peopleCount = demo.people.length;
-  const conversionLabel = requestCount === 0 && missionDone === 0
-    ? "—"
-    : integerShare(missionDone, Math.max(requestCount, 1), locale);
-  const capacityLabel = peopleCount === 0
-    ? "—"
-    : integerShare(qualified, Math.max(peopleCount, 1), locale);
-  const serviceRows = [
-    ...demo.requests.map((row) => ({ id: row.id, title: row.title, demandes: 1, status: row.stage, href: `/${locale}/franchise/demandes/${row.id}${query}` })),
-    ...demo.performance.map((row) => ({ id: row.id, title: row.title, demandes: 0, status: row.status, href: `/${locale}/franchise/performance${query}` })),
-  ].slice(0, 8);
-  const maxDemandes = Math.max(1, ...serviceRows.map((row) => row.demandes));
-  const shareRows = demo.people
-    .map((row) => ({
-      id: row.id,
-      name: row.name,
-      count: demo.requests.filter((request) => request.matching?.some((match) => match.id === row.id)).length,
-    }))
-    .filter((row) => row.count > 0)
-    .slice(0, 5);
+  if(sourceUnavailable(board,['OPERATIONS']))return <UnavailableSection locale={locale} query={query}/>;
+  const metrics=demo.metrics;
+  const requestCount=metrics?.requestCount??null;
+  const missionDone=metrics?.completedMissions??null;
+  const conversionLabel=metrics&&metrics.conversionDenominator>0?integerShare(metrics.convertedRequests,metrics.conversionDenominator,locale):"—";
+  const capacityLabel=metrics&&metrics.capacityProviders>0?integerShare(metrics.availableProviders,metrics.capacityProviders,locale):"—";
+  const serviceRows=(metrics?.byService??[]).map((row)=>({id:row.id,title:locale==="ar"?row.titleAr:row.titleFr,demandes:row.requests,status:metrics!.methodologyVersion,href:`/${locale}/franchise/demandes${query}`}));
+  const maxDemandes=Math.max(1,...serviceRows.map((r)=>r.demandes));
+  const shareRows=(metrics?.byProvider??[]).map((r)=>({id:r.organizationId,name:r.name,count:r.missions}));
   const shareTotal = shareRows.reduce((sum, row) => sum + row.count, 0);
   const shareColors = ["#642bef", "#3b82f6", "#14b8a6", "#f59e0b", "#ef4444"];
   return (
     <main className="client-page franchise-performance-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <div className="franchise-section-head franchise-section-head-actions">
         <Link href={`/${locale}/franchise/gouvernance${query}`} className="franchise-tool">{c.perfMethodology}</Link>
       </div>
       <section className="franchise-treat franchise-perf-kpis">
-        <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span><span><strong dir="ltr">{requestCount}</strong><small>{c.perfVolume}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="sky"><span className="franchise-kpi-icon" data-tone="sky"><LineChart className="size-4" aria-hidden /></span><span><strong dir="ltr">—</strong><small>{c.perfResponseDelay}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="violet"><span className="franchise-kpi-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span><span><strong dir="ltr">{requestCount??"—"}</strong><small>{c.perfVolume}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="sky"><span className="franchise-kpi-icon" data-tone="sky"><LineChart className="size-4" aria-hidden /></span><span><strong dir="ltr">{metrics?.responseAverageSeconds==null?"—":`${new Intl.NumberFormat(locale==="ar"?"ar-MA":"fr-MA",{maximumFractionDigits:1}).format(metrics.responseAverageSeconds/3600)} h`}</strong><small>{c.perfResponseDelay}</small></span></article>
         <article className="franchise-kpi-tile" data-tone="mint"><span className="franchise-kpi-icon" data-tone="mint"><ShieldCheck className="size-4" aria-hidden /></span><span><strong dir="ltr">{conversionLabel}</strong><small>{c.perfConversion}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="peach"><span className="franchise-kpi-icon" data-tone="peach"><Briefcase className="size-4" aria-hidden /></span><span><strong dir="ltr">{missionDone} / {Math.max(requestCount, missionDone)}</strong><small>{c.perfMissions}</small></span></article>
-        <article className="franchise-kpi-tile" data-tone="mint"><span className="franchise-kpi-icon" data-tone="mint"><CheckCircle2 className="size-4" aria-hidden /></span><span><strong dir="ltr">{demo.quality.length}</strong><small>{c.perfQualityNote}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="peach"><span className="franchise-kpi-icon" data-tone="peach"><Briefcase className="size-4" aria-hidden /></span><span><strong dir="ltr">{missionDone??"—"} / {metrics?.missionCount??"—"}</strong><small>{c.perfMissions}</small></span></article>
+        <article className="franchise-kpi-tile" data-tone="mint"><span className="franchise-kpi-icon" data-tone="mint"><CheckCircle2 className="size-4" aria-hidden /></span><span><strong dir="ltr">{metrics?.qualitySnapshot?`${new Intl.NumberFormat(locale==="ar"?"ar-MA":"fr-MA",{maximumFractionDigits:2}).format(metrics.qualitySnapshot.scoreBasisPoints/100)} %`:"—"}</strong><small>{c.perfQualityNote}</small></span></article>
         <article className="franchise-kpi-tile" data-tone="sky"><span className="franchise-kpi-icon" data-tone="sky"><Users className="size-4" aria-hidden /></span><span><strong dir="ltr">{capacityLabel}</strong><small>{c.perfCapacity} · {c.servicesCovered}</small></span></article>
       </section>
+      <p className="client-access-note">{locale==="ar"?"النطاق: المكتبة التابعة للتفويض المحدد، كامل السجل حتى وقت القياس. التحويل: طلبات اختير لها مقدم خدمة / طلبات لها استشارة. القدرة: منظمات لها قدرة متاحة / منظمات صرحت بقدرة. الرسم: مهام فعلية غير ملغاة حسب منظمة مقدم الخدمة.":"Périmètre : bibliothèque du mandat sélectionné, historique complet jusqu’à la mesure. Conversion : demandes avec prestataire sélectionné / demandes ayant une consultation. Capacité : organisations disponibles / organisations ayant déclaré une capacité. Répartition : missions réelles hors annulations par organisation prestataire."} {metrics?<><bdi dir="ltr">{metrics.methodologyVersion} · {metrics.asOf}</bdi>{metrics.qualitySnapshot?<span> · {metrics.qualitySnapshot.modelVersion} · {metrics.qualitySnapshot.periodStart} — {metrics.qualitySnapshot.periodEnd}</span>:null}</>:<span role="status">{locale==="ar"?"القياسات غير متاحة حالياً.":"Mesures indisponibles pour le moment."}</span>}</p>
+      {demo.performance.length?<section className="client-card"><h2>{c.objectives}</h2><ul className="client-feed">{demo.performance.map((item)=><li key={item.id}><span><strong>{item.title}</strong><small>{item.status} · {item.next}</small></span></li>)}</ul></section>:null}
       <section className="franchise-perf-mid">
         <article className="client-card">
           <header><h2>{c.perfVolume}</h2></header>
@@ -971,9 +971,9 @@ export function PerformanceBoard({ locale, query, mandateName, view, board }: Sp
                   demo.corrective.map((row) => (
                     <tr key={row.id}><td>{row.title}</td><td dir="ltr">—</td><td><span className="client-status-chip" data-tone="peach">{row.status}</span></td><td>{row.due}</td><td><Cta href={`/${locale}/franchise/qualite/actions${query}`} soft>{c.open}</Cta></td></tr>
                   ))
-                ) : serviceRows.length === 0 && demo.performance.length === 0 ? (
+                ) : serviceRows.length === 0 ? (
                   <tr><td colSpan={5}>{c.emptyPerformance}</td></tr>
-                ) : (serviceRows.length ? serviceRows : demo.performance.map((row) => ({ id: row.id, title: row.title, demandes: 0, status: row.status, href: `/${locale}/franchise/performance${query}` }))).map((row) => (
+                ) : serviceRows.map((row) => (
                   <tr key={row.id}>
                     <td>{row.title}</td>
                     <td dir="ltr">{row.demandes}</td>
@@ -1026,6 +1026,7 @@ export function FollowupsBoard({ locale, query, mandateName, view, page, board }
   const c = franchiseCopy(locale);
   const n = libraryCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['FOLLOWUPS']))return <UnavailableSection locale={locale} query={query}/>;
   const followPath = view ? `/${locale}/franchise/relances/${view}` : `/${locale}/franchise/relances`;
   const pagedFollowups = paginate(demo.followups, page);
   const pagedJournal = paginate(demo.journal, page);
@@ -1049,7 +1050,7 @@ export function FollowupsBoard({ locale, query, mandateName, view, page, board }
   const upcoming = stages[2]!.rows.length;
   return (
     <main className="client-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat">
         <article className="franchise-kpi-tile" data-tone="violet" data-active={!view || view === "pipeline" ? "true" : undefined}>
           <span className="franchise-kpi-icon" data-tone="violet"><Bell className="size-4" aria-hidden /></span>
@@ -1170,9 +1171,10 @@ export function FollowupsBoard({ locale, query, mandateName, view, page, board }
 export function GovernanceBoard({ locale, query, mandateName, view, board }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['GOVERNANCE']))return <UnavailableSection locale={locale} query={query}/>;
   return (
     <main className="client-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat franchise-gov-summary">
         <article className="franchise-kpi-tile" data-tone="violet">
           <span className="franchise-kpi-icon" data-tone="violet"><ShieldCheck className="size-4" aria-hidden /></span>
@@ -1244,7 +1246,7 @@ export function GovernanceBoard({ locale, query, mandateName, view, board }: Spa
               {demo.govHistory.map((item) => (
                 <li key={item.id}><span className="franchise-dot" data-tone="mint" /><span><strong>{item.title}</strong><small>{item.actor}</small></span></li>
               ))}
-              <li><span className="franchise-dot" data-tone="sky" /><span><strong>{c.liveMandate}</strong><small>{locale === "ar" ? "اليوم" : "Aujourd’hui"}</small></span></li>
+              {demo.govHistory.length === 0 ? <li><span>{c.emptyGovernanceHistory}</span></li> : null}
             </ol>
           </article>
           <article className="client-card franchise-mandate-ok">
@@ -1265,6 +1267,7 @@ export function GovernanceBoard({ locale, query, mandateName, view, board }: Spa
 export function FranchiseFinanceBoard({ locale, query, mandateName, view, board, libraryId, organizationId }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['GOVERNANCE', 'OPERATIONS']))return <UnavailableSection locale={locale} query={query}/>;
   const statements = demo.finance.filter((row) => row.kind !== "entryFee" && row.kind !== "payout" && row.title !== c.entryFee);
   const fees = demo.finance.filter((row) => row.kind === "entryFee" || row.title === c.entryFee);
   const payouts = demo.finance.filter((row) => row.kind === "payout");
@@ -1286,7 +1289,7 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
           : c.finItems;
   return (
     <main className="client-page">
-      <Banner locale={locale} query={query} mandateName={mandateName} />
+      <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
       <section className="franchise-treat">
         <article className="franchise-kpi-tile" data-tone="sky">
           <span className="franchise-kpi-icon" data-tone="sky"><FileText className="size-4" aria-hidden /></span>
@@ -1339,7 +1342,7 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
                     <tr><td colSpan={4}>{empty}</td></tr>
                   ) : rows.map((row) => (
                     <tr key={row.id}>
-                      <td>{row.title}</td>
+                      <td>{"href"in row&&row.href?<Link href={row.href} prefetch={false} className="client-soft-link">{row.title}</Link>:row.title}</td>
                       <td>{"object" in row ? row.object : "—"}</td>
                       <td><span className="client-status-chip" data-tone={"tone" in row ? row.tone : "sky"}>{row.status}</span></td>
                       <td>{"auth" in row ? row.auth : "—"}</td>
@@ -1362,7 +1365,7 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
   );
 }
 
-export function DocumentsBoard({ locale, query, mandateName, view, search, page, board }: SpaceBoardProps) {
+export function DocumentsBoard({ locale, query, view, search, page, board }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const n = libraryCopy(locale);
   const demo = resolveBoard({ locale, query, board });
@@ -1382,15 +1385,15 @@ export function DocumentsBoard({ locale, query, mandateName, view, search, page,
   const expiring = demo.renewals.length;
   const dueDates = demo.renewals.map((row) => ("due" in row && row.due ? row.due : "")).filter(Boolean);
   return (
-    <main className="client-page franchise-docs-page">
+    <main className="client-page franchise-docs-page"><Banner locale={locale} query={query} board={demo}/>
       <div className="franchise-section-head franchise-section-head-actions">
         <span className="client-access-note franchise-secure-chip"><Lock className="size-4" aria-hidden /> {c.secureStorage}</span>
         <p className="client-access-note">{locale === "ar" ? "إضافة وثيقة غير متاحة من هذه الشاشة بعد." : "L’ajout de document n’est pas encore branché ici."}</p>
       </div>
       <nav className="franchise-pill-tabs" aria-label={n.documentsTitle}>
-        <Link href={`/${locale}/franchise/documents${query}`} className="franchise-pill-tab" data-active={!view ? "true" : undefined}><span>{c.allDocuments}</span><em dir="ltr">{demo.documents.length}</em></Link>
-        <Link href={`/${locale}/franchise/documents${query}?vue=verifier`} className="franchise-pill-tab" data-active={view === "verifier" ? "true" : undefined}><span>{c.toVerify}</span><em dir="ltr">{toVerify}</em></Link>
-        <Link href={`/${locale}/franchise/documents/renouvellements${query}`} className="franchise-pill-tab" data-active={view === "renouvellements" ? "true" : undefined}><span>{c.expiringSoon}</span><em dir="ltr">{expiring}</em></Link>
+        <Link href={`/${locale}/franchise/documents${query}`} className="franchise-pill-tab" data-active={!view ? "true" : undefined}><span>{c.allDocuments}</span><em dir="ltr">{sourceUnavailable(board,["CRM","OPERATIONS"])?"—":demo.documents.length}</em></Link>
+        <Link href={`/${locale}/franchise/documents${query}${query?"&":"?"}vue=verifier`} className="franchise-pill-tab" data-active={view === "verifier" ? "true" : undefined}><span>{c.toVerify}</span><em dir="ltr">{sourceUnavailable(board,["CRM","OPERATIONS"])?"—":toVerify}</em></Link>
+        <Link href={`/${locale}/franchise/documents/renouvellements${query}`} className="franchise-pill-tab" data-active={view === "renouvellements" ? "true" : undefined}><span>{c.expiringSoon}</span><em dir="ltr">{sourceUnavailable(board,["OPERATIONS"])?"—":expiring}</em></Link>
       </nav>
       <div className="franchise-toolbar">
         <form action={`/${locale}/franchise/documents`} method="get" className="franchise-search">
@@ -1422,7 +1425,7 @@ export function DocumentsBoard({ locale, query, mandateName, view, search, page,
               </thead>
               <tbody>
                 {rows.length === 0 ? (
-                  <tr><td colSpan={8}>{view === "renouvellements" ? c.emptyRenewals : n.noDocuments}</td></tr>
+                  <tr><td colSpan={8}>{sourceUnavailable(board,view==="renouvellements"?["OPERATIONS"]:["CRM","OPERATIONS"])?(locale==="ar"?"القراءة غير مكتملة؛ لا يمكن تأكيد عدم وجود عناصر.":"La lecture est incomplète ; l’absence d’éléments ne peut pas être confirmée."):view === "renouvellements" ? c.emptyRenewals : n.noDocuments}</td></tr>
                 ) : rows.map((row, index) => {
                   const sensitivity = documentSensitivity(row.kind, row.status, locale);
                   return (
@@ -1446,7 +1449,7 @@ export function DocumentsBoard({ locale, query, mandateName, view, search, page,
         <aside className="franchise-home-rail">
           <article className="client-card franchise-renewal-calendar">
             <header><h2>{c.upcomingRenewals}</h2></header>
-            <RenewalCalendar locale={locale} dueDates={dueDates} weekCount={Math.min(expiring, 1)} monthCount={expiring} nextCount={0} />
+            {sourceUnavailable(board,["OPERATIONS"])?<p role="alert">{locale==="ar"?"مواعيد الوثائق والعقود غير متاحة مؤقتاً.":"Les échéances documentaires et contractuelles sont temporairement indisponibles."}</p>:<RenewalCalendar locale={locale} dueDates={dueDates} />}
           </article>
           <article className="client-card">
             <header><h2>{c.documentDetail}</h2></header>
@@ -1475,6 +1478,7 @@ export function MessagesBoard({ locale, query, mandateName, view, search, page, 
   const c = franchiseCopy(locale);
   const n = libraryCopy(locale);
   const demo = resolveBoard({ locale, query, board });
+  if(sourceUnavailable(board,['OPERATIONS']))return <UnavailableSection locale={locale} query={query}/>;
   const needle = (search ?? "").trim().toLocaleLowerCase();
   const filteredThreads = demo.messages.filter((row) => !needle || `${row.title} ${row.meta}`.toLocaleLowerCase().includes(needle));
   const filteredNotices = demo.notifications.filter((row) => !needle || `${row.title} ${row.meta}`.toLocaleLowerCase().includes(needle));
@@ -1482,7 +1486,6 @@ export function MessagesBoard({ locale, query, mandateName, view, search, page, 
   const pagedNotices = paginate(filteredNotices, page);
   const threads = pagedThreads.rows;
   const notices = pagedNotices.rows;
-  const selected = threads[0] ?? null;
   const org = organizationIdFromQuery(query);
   return (
     <main className="client-page franchise-messages-page">
@@ -1515,82 +1518,9 @@ export function MessagesBoard({ locale, query, mandateName, view, search, page, 
           <FranchiseMandateRail locale={locale} name={mandateName} />
         </section>
       ) : (
-        <section className="franchise-messages-layout">
-          <article className="client-card franchise-thread-pane">
-            <header className="client-priority-head">
-              <h2>{c.conversations} <small dir="ltr">({filteredThreads.length})</small></h2>
-              <span className="franchise-tool franchise-tool-primary">{c.newMessage}</span>
-            </header>
-            <nav className="franchise-pill-tabs" aria-label={c.conversations}>
-              <span className="franchise-pill-tab" data-active="true"><span>{c.all}</span><em dir="ltr">{filteredThreads.length}</em></span>
-              <span className="franchise-pill-tab"><span>{c.unread}</span><em dir="ltr">{Math.min(filteredThreads.length, 3)}</em></span>
-              <span className="franchise-pill-tab"><span>{c.folders}</span></span>
-              <span className="franchise-pill-tab"><span>{c.netPeople}</span></span>
-              <span className="franchise-pill-tab"><span>{c.otherFilter}</span></span>
-            </nav>
-            {threads.length === 0 ? <p className="franchise-empty-panel">{n.noMessages}</p> : (
-              <ul className="franchise-thread-list">
-                {threads.map((row, index) => (
-                  <li key={row.id} data-selected={index === 0 ? "true" : undefined} data-unread={index > 0 && index < 3 ? "true" : undefined}>
-                    <span className="franchise-kpi-icon" data-tone={row.tone}>{row.title.slice(0, 2).toUpperCase()}</span>
-                    <span><strong>{row.title}</strong><small>{row.meta}</small></span>
-                    <span className="franchise-thread-dot" aria-hidden />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <PaginationNav path={`/${locale}/franchise/messages`} query={query} page={pagedThreads.page} pageCount={pagedThreads.pageCount} label={n.messagesTitle} />
-          </article>
-          <article className="client-card franchise-chat-pane">
-            <header className="client-priority-head">
-              {selected ? (
-                <>
-                  <span className="franchise-kpi-icon" data-tone={selected.tone}>{selected.title.slice(0, 2).toUpperCase()}</span>
-                  <span>
-                    <h2>{selected.title}</h2>
-                    <small>{selected.meta}</small>
-                  </span>
-                  <em className="client-status-chip" data-tone="mint">{locale === "ar" ? "مزود" : "Fournisseur"}</em>
-                </>
-              ) : <h2>{c.messageThread}</h2>}
-            </header>
-            {selected ? (
-              <>
-                <p className="franchise-chat-context" role="note">
-                  <strong>{selected.meta}</strong>
-                  <Cta href={selected.href} soft>{locale === "ar" ? "عرض الملف" : "Voir la demande"}</Cta>
-                </p>
-                <div className="franchise-chat-log">
-                  <p className="client-access-note" role="status">
-                    {locale === "ar"
-                      ? "المحادثة التفصيلية غير متاحة بعد على هذه الشاشة. افتحوا الملف المرتبط للمتابعة."
-                      : "La conversation détaillée n’est pas encore branchée ici. Ouvrez le dossier lié pour poursuivre."}
-                  </p>
-                </div>
-              </>
-            ) : <p>{n.emptyMessagesLead}</p>}
-          </article>
-          <aside className="client-card franchise-message-aside">
-            <header><h2>{c.linkedFolder}</h2></header>
-            {selected ? (
-              <dl className="franchise-props">
-                <div><small>{c.object}</small><span>{selected.meta}</span></div>
-              </dl>
-            ) : <p className="client-access-note">{c.scopeNote}</p>}
-            <h3>{c.authorizedParticipants}</h3>
-            <ul className="franchise-dot-list">
-              <li><span className="franchise-dot" data-tone="violet" /><strong>{locale === "ar" ? "صاحب الامتياز" : "Franchisé"}</strong></li>
-              <li><span className="franchise-dot" data-tone="mint" /><strong>Matricia</strong></li>
-              {selected ? <li><span className="franchise-dot" data-tone="sky" /><strong>{selected.title}</strong></li> : null}
-            </ul>
-            <h3>{c.sharedDocuments}</h3>
-            <ul className="client-feed">
-              {demo.documents.slice(0, 2).map((row) => (
-                <li key={row.id}><FileText className="size-4" aria-hidden /><span><strong>{row.title}</strong><small>{row.owner}</small></span></li>
-              ))}
-            </ul>
-            {demo.documents.length === 0 ? <p className="franchise-empty-panel">{n.noDocuments}</p> : null}
-          </aside>
+        <section className="client-card franchise-messages-layout space-y-4"><h2>{c.conversations}</h2><Link href={`/${locale}/franchise/messages${query}`} className="franchise-tool franchise-tool-primary">{c.newMessage}</Link>
+          {threads.length===0?<p>{n.noMessages}</p>:<ul className="client-feed">{threads.map((row)=><li key={row.id}><span><strong>{row.title}</strong><small>{row.meta}</small></span><Cta href={row.href} soft>{c.open}</Cta></li>)}</ul>}
+          <PaginationNav path={`/${locale}/franchise/messages`} query={query} page={pagedThreads.page} pageCount={pagedThreads.pageCount} label={n.messagesTitle}/>
         </section>
       )}
     </main>

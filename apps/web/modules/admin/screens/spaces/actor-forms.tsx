@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useMemo, useState, type ReactNode } from "react";
+import{ProductionReference}from"./production-reference";
+import { organizationRoleGates } from "@/modules/admin/data/spaces/role-preview";
+import { useActionState, useState, useId, type ReactNode } from "react";
 import Link from "next/link";
 import type { InvitationOrganization, InvitationRole } from "@/app/[locale]/invitations/actions";
 import { getInvitationMessages } from "@/app/[locale]/invitations/messages";
@@ -52,6 +54,9 @@ export function InviteUserForm({
   eligibleIds,
   defaultOrganizationId,
   defaultRole,
+  roleFamily,
+  franchises = [],
+  idempotencyKey,invitationExpiresAt,
 }: {
   locale: Locale;
   query: string;
@@ -59,14 +64,19 @@ export function InviteUserForm({
   eligibleIds: string[];
   defaultOrganizationId?: string;
   defaultRole?: string;
+  roleFamily?: "PROVIDER";
+  franchises?:Array<{id:string;organizationId:string;label:string}>;
+  idempotencyKey?:string;invitationExpiresAt?:string;
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
+  const formKey=useId();
   const inviteMessages = getInvitationMessages(locale);
   const [state, action, pending] = useActionState(submitActorInvitation, idleInvite);
   const [email, setEmail] = useState("");
   const [organizationId, setOrganizationId] = useState(defaultOrganizationId ?? organizations[0]?.id ?? "");
-  const [role, setRole] = useState(defaultRole && roles.includes(defaultRole as InvitationRole) ? defaultRole : "CLIENT_MEMBER");
+  const availableRoles = roleFamily ? roles.filter(role => role.startsWith(`${roleFamily}_`)) : roles;
+  const [role, setRole] = useState(defaultRole && availableRoles.includes(defaultRole as InvitationRole) ? defaultRole : roleFamily === "PROVIDER" ? "PROVIDER_VIEWER" : "CLIENT_MEMBER");
   const [perimeter, setPerimeter] = useState("organization");
   const [inviteLocale, setInviteLocale] = useState(locale);
   const [message, setMessage] = useState("");
@@ -76,8 +86,8 @@ export function InviteUserForm({
 
   return (
     <form action={action} className="admin-form-layout">
-      <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="canInvite" value={canInvite ? "yes" : "no"} />
+      <input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey??`admin-invite-${formKey}`} /><input type="hidden" name="invitationExpiresAt" value={invitationExpiresAt??""}/><input type="hidden" name="canInvite" value={canInvite ? "yes" : "no"} />
       <input type="hidden" name="roleCodes" value={role} />
       <input type="hidden" name="expiryDays" value="7" />
       <input type="hidden" name="reason" value="Invitation utilisateur soumise depuis l’administration Matricia." />
@@ -100,9 +110,10 @@ export function InviteUserForm({
             <Field id="invite-role" label={a.requestedRole} hint={a.roleHint} required>
               <select id="invite-role" name="roleCode" required value={role} onChange={(event) => setRole(event.target.value)}>
                 <option value="">{a.pickRole}</option>
-                {roles.map((item) => <option key={item} value={item}>{inviteMessages.roles[item]}</option>)}
+                {availableRoles.map((item) => <option key={item} value={item}>{inviteMessages.roles[item]}</option>)}
               </select>
             </Field>
+            {role.startsWith("FRANCHISE_")?<Field id="invite-franchise"label={locale==="ar"?"التفويض النشط للمؤسسة":"Mandat actif de l’organisation"}required><select id="invite-franchise"name="franchiseId"required><option value="">—</option>{franchises.filter((f)=>f.organizationId===organizationId).map((f)=><option key={f.id}value={f.id}>{f.label}</option>)}</select></Field>:null}
             <Field id="invite-perimeter" label={a.perimeter} hint={a.perimeterHint} required>
               <select id="invite-perimeter" name="perimeter" required value={perimeter} onChange={(event) => setPerimeter(event.target.value)}>
                 <option value="organization">{org?.displayName || a.pickPerimeter}</option>
@@ -124,10 +135,10 @@ export function InviteUserForm({
         </article>
         <div className="admin-form-foot">
           <Link href={`/${locale}/administration/utilisateurs${query}`} className="client-ghost-link">{c.cancel}</Link>
-          <button type="submit" name="intent" value="INVITE_DRAFT" className="admin-soft-cta" disabled={pending}>{c.saveDraft}</button>
-          <button type="submit" name="intent" value="INVITE_USER" className="admin-primary-cta" disabled={pending}>{pending ? "…" : a.sendInvite}</button>
+          {!roleFamily ? <button type="submit" name="intent" value="INVITE_DRAFT" className="admin-soft-cta" disabled={pending}>{c.saveDraft}</button> : null}
+          <button type="submit" name="intent" value="INVITE_USER" className="admin-primary-cta" disabled={pending}>{pending ? "…" : roleFamily && !canInvite ? (locale === "ar" ? "إرسال طلب الدعوة للمراجعة" : "Soumettre la demande d’invitation") : a.sendInvite}</button>
         </div>
-        <Feedback state={state} locale={locale} success={a.inviteSent} />
+        <Feedback state={state} locale={locale} success={"outcome" in state ? (locale === "ar" ? "تم تسجيل الطلب؛ الدعوة قيد المراجعة المستقلة ولم تُنفّذ بعد." : "Demande enregistrée ; l’invitation reste en attente de revue indépendante et n’est pas encore exécutée.") : a.inviteSent} />
       </div>
       <aside className="client-stack">
         <article className="client-card">
@@ -186,7 +197,7 @@ export function ActorIntentForm({
   const [state, action, pending] = useActionState(requestActorMutation, idle);
   return (
     <form action={action}>
-      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
       <input type="hidden" name="organizationId" value={organizationId ?? ""} />
       <input type="hidden" name="resourceId" value={resourceId} />
       <input type="hidden" name="resourceType" value={resourceType} />
@@ -205,6 +216,8 @@ export function EditUserRolesForm({
   organizationId,
   organizationName,
   currentRole,
+  roleAssignments = [],
+  franchises = [],
 }: {
   locale: Locale;
   query: string;
@@ -212,16 +225,20 @@ export function EditUserRolesForm({
   organizationId: string;
   organizationName: string;
   currentRole: string;
+  roleAssignments?:Array<{roleCode:string;franchiseId:string|null;franchiseLabel:string|null}>;
+  franchises?:Array<{id:string;label:string}>;
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
   const inviteMessages = getInvitationMessages(locale);
   const [state, action, pending] = useActionState(requestActorMutation, idle);
+  const[source,setSource]=useState(roleAssignments.length===0&&!currentRole?"add":"0");
+  const chosen=roleAssignments[Number(source)];
+  const sourceRole=source==="add"?"":chosen?.roleCode??currentRole;
+  const sourceFranchise=source==="add"?null:chosen?.franchiseId??null;
   const [newRole, setNewRole] = useState(currentRole);
   const [reason, setReason] = useState("");
-  const [selected, setSelected] = useState<string[]>(currentRole.includes("OWNER") || currentRole.includes("ADMIN")
-    ? ["seeUsers", "editUsers", "sendInvites", "seeOrgs", "readData", "auditLogs", "validateJourneys"]
-    : ["seeUsers", "seeOrgs", "readData"]);
+  const [selected, setSelected] = useState<string[]>([]);
   const elevated = /OWNER|ADMIN|MANAGER/.test(newRole) && !/OWNER|ADMIN|MANAGER/.test(currentRole);
   const labels: Record<string, string> = locale === "ar"
     ? {
@@ -242,41 +259,44 @@ export function EditUserRolesForm({
     };
   const groupTitles = { gUsers: a.gUsers, gOrgs: a.gOrgs, gData: a.gData, gAdmin: a.gAdmin, gBiz: a.gBiz, gOther: a.gOther };
   const allCaps = Object.values(capabilityGroups).flat();
-  const roleLabel = (roles as readonly string[]).includes(currentRole) ? inviteMessages.roles[currentRole as InvitationRole] : currentRole;
+  const roleLabel = (roles as readonly string[]).includes(currentRole) ? inviteMessages.roles[currentRole as InvitationRole] : currentRole || (locale==="ar"?"لا يوجد دور مسند":"Aucun rôle attribué");
 
-  const impact = useMemo(() => [
-    `${locale === "ar" ? "إضافة قدرات" : "Ajouter des capacités"} : ${selected.slice(0, 2).map((item) => labels[item]).join(", ")}`,
+  const impact = [
+    `${locale === "ar" ? "قدرات مطلوبة للمراجعة" : "Capacités demandées à examiner"} : ${selected.slice(0, 2).map((item) => labels[item]).join(", ")}`,
     `${locale === "ar" ? "تطبيق على" : "S’appliquer à"} : ${organizationName}`,
-  ], [labels, locale, organizationName, selected]);
+  ];
 
   return (
     <div className="admin-form-layout">
     <form action={action} className="client-stack">
-      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="locale" value={locale} /><ProductionReference locale={locale}/>
       <input type="hidden" name="userId" value={userId} />
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="resourceId" value={userId} />
       <input type="hidden" name="resourceType" value="MEMBERSHIP" />
       <input type="hidden" name="intent" value="CHANGE_CONFIGURATION" />
-      <input type="hidden" name="currentRole" value={currentRole} />
+      <input type="hidden" name="currentRole" value={sourceRole} />
+      <input type="hidden" name="currentFranchiseId" value={sourceFranchise??""}/>
       <div className="client-stack">
         <article className="client-card">
           <header><h2>{a.mainInfo}</h2></header>
           <div className="admin-form-grid" data-cols="3">
             <Field id="role-org" label={a.selectedOrg}><input id="role-org" readOnly value={organizationName} /></Field>
-            <Field id="role-current" label={a.currentRole}><input id="role-current" readOnly value={roleLabel} /></Field>
+            <Field id="role-current" label={a.currentRole}><select id="role-current"value={source}onChange={(event)=>{setSource(event.target.value);const role=roleAssignments[Number(event.target.value)]?.roleCode;if(role)setNewRole(role);}}>{roleAssignments.length?roleAssignments.map((assignment,index)=><option key={`${assignment.roleCode}:${assignment.franchiseId}`}value={String(index)}>{assignment.roleCode}{assignment.franchiseLabel?` · ${assignment.franchiseLabel}`:""}</option>):<option value="0">{roleLabel}</option>}<option value="add">{locale==="ar"?"إضافة دور مع الحفاظ على الأدوار الحالية":"Ajouter un rôle en conservant les rôles actuels"}</option></select></Field>
             <Field id="role-new" label={a.newRole} required>
               <select id="role-new" name="newRole" required value={newRole} onChange={(event) => setNewRole(event.target.value)}>
+                <option value="">{a.pickRole}</option>
                 {roles.map((item) => <option key={item} value={item}>{inviteMessages.roles[item]}</option>)}
               </select>
             </Field>
+            {newRole.startsWith("FRANCHISE_")?<Field id="role-franchise"label={locale==="ar"?"التفويض النشط للمؤسسة":"Mandat actif de l’organisation"}required><select key={`${source}:${newRole}`}id="role-franchise"name="franchiseId"required defaultValue={sourceFranchise??""}><option value="">—</option>{franchises.map((franchise)=><option key={franchise.id}value={franchise.id}>{franchise.label}</option>)}</select></Field>:null}
           </div>
         </article>
         <article className="client-card">
           <header className="client-priority-head">
             <div>
               <h2>{a.caps}</h2>
-              <p>{a.capsLead}</p>
+              <p>{locale === "ar" ? "الأذونات الفعلية يحددها الدور وسياسات قاعدة البيانات. تحفظ الاختيارات التالية كمقترح مراجعة ولا تمنح صلاحيات إضافية." : "Les droits effectifs proviennent du rôle et des politiques de la base. Les choix ci-dessous constituent une demande de revue et n’accordent pas de privilèges supplémentaires."}</p>
             </div>
             <button type="button" className="admin-select-all" onClick={() => setSelected([...allCaps])}>{a.selectAll}</button>
           </header>
@@ -324,7 +344,9 @@ export function EditUserRolesForm({
         </div>
         <div className="admin-two">
           <article className="client-card">
-            <header><h2>{a.impactSummary}</h2><p>{a.impactLead}</p></header>
+            <header><h2>{a.impactSummary}</h2><p>{locale === "ar" ? "معاينة بوابات الأوامر الفعلية للدور المقترح؛ يبقى نطاق المؤسسة والمصادقة الثنائية مطلوبين." : "Aperçu des commandes effectivement ouvertes par le rôle proposé ; le périmètre de l’organisation et la MFA restent obligatoires."}</p></header>
+            <ul>{organizationRoleGates(newRole).map((gate) => <li key={gate}>{({TENANT_MEMBERSHIP_READ:locale === "ar" ? "قراءة عضوية المؤسسة" : "Lecture au titre de membre actif",CLIENT_REQUEST_MANAGE:locale === "ar" ? "إدارة طلبات العميل" : "Gestion des demandes Client",PROVIDER_RFQ_RESPOND:locale === "ar" ? "الرد على استشارات مقدم الخدمة" : "Réponse aux consultations Prestataire",ORGANIZATION_INVITE:locale === "ar" ? "دعوة أعضاء المؤسسة" : "Invitation de membres de l’organisation",CLIENT_DOCUMENT_REUSE_AAL2:locale === "ar" ? "إعادة استخدام وثائق العميل بمصادقة ثنائية" : "Réutilisation des documents Client avec MFA"} as Record<string,string>)[gate]}</li>)}</ul>
+            {selected.length ? <p>{locale === "ar" ? "القدرات الإضافية: قيد الانتظار، للمراجعة من مسؤول ماتريسيا / مسؤول الامتثال. الحل عبر دور معتمد؛ لا يتم منحها تلقائياً." : "Capacités supplémentaires : EN ATTENTE, destinataires Matricia Admin / Conformité. Résolution via un rôle autorisé ; aucun octroi automatique."} <Link href={`/${locale}/administration/revues-capacites`}>{locale === "ar" ? "مسار المراجعة" : "Parcours de revue"}</Link></p> : null}
             <ul className="admin-impact">{impact.map((item) => <li key={item}>{item}</li>)}</ul>
           </article>
           {elevated ? (
@@ -336,7 +358,7 @@ export function EditUserRolesForm({
         </div>
         <div className="admin-form-foot">
           <Link href={`/${locale}/administration/utilisateurs/${userId}${query}`} className="client-ghost-link">{c.cancel}</Link>
-          <button type="submit" name="intent" value="CHANGE_CONFIGURATION" className="admin-soft-cta" disabled={pending}>{c.saveDraft}</button>
+          <button type="submit" name="intent" value="SAVE_DRAFT" className="admin-soft-cta" disabled={pending}>{c.saveDraft}</button>
           <button type="submit" className="admin-primary-cta" disabled={pending}>{pending ? "…" : a.submitChange}</button>
         </div>
         <Feedback state={state} locale={locale} success={locale === "ar" ? "طلب التعديل مسجَّل للمصادقة." : "Modification soumise à la validation à quatre yeux."} />

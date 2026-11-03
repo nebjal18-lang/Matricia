@@ -1,3 +1,4 @@
+import { withOperationalHeartbeat } from "@/modules/shared/lib/operations/heartbeat";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 
@@ -25,6 +26,8 @@ export async function runDomainSchedulerWorker(request: Request, dependencies:Sc
   return Response.json({ ...(data as Record<string, unknown>), pageCount, continuationRequired: outcome === "DOMAIN_AUTOMATIONS_PARTIAL" }, { status: outcome === "DOMAIN_AUTOMATIONS_PARTIAL" ? 202 : 200, headers: { ...headers, "x-correlation-id": correlationId } });
 }
 
-export async function POST(request:Request){const client=getSupabaseAdminClient();return runDomainSchedulerWorker(request,{rpc:async(name,args)=>{const result=await client.rpc(name,args);return{data:result.data,error:result.error}},env:process.env})}
+async function runCycle(request:Request){const client=getSupabaseAdminClient();return runDomainSchedulerWorker(request,{rpc:async(name,args)=>{const result=await client.rpc(name,args);return{data:result.data,error:result.error}},env:process.env})}
 
 export const GET = POST;
+
+export async function POST(request: Request) { return withOperationalHeartbeat("DOMAIN_SCHEDULERS", 180, () => runCycle(request)); }

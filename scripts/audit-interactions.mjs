@@ -8,6 +8,10 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { inventoryRows, validateInteractionProof } from "./release/interaction-proof.mjs";
+import { validateBrowserReport } from "./release/browser-report.mjs";
 
 const root = process.cwd();
 const appRoot = path.join(root, "apps", "web", "app");
@@ -187,6 +191,55 @@ for (const file of productionWebFiles.sort()) {
 }
 
 const generatedAt = new Date().toISOString();
+const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const groups = { routes, actions, interactions };
+const digestCache = new Map();
+for (const row of [...routes, ...actions, ...interactions]) {
+  if (!digestCache.has(row.file)) digestCache.set(row.file, createHash("sha256").update(await fs.readFile(path.join(root, row.file))).digest("hex"));
+  row.sourceSha256 = digestCache.get(row.file);
+}
+const inventory = inventoryRows(groups, commit);
+const inventoryIndex = process.argv.indexOf("--inventory-json");
+if (inventoryIndex >= 0) {
+  const output = process.argv[inventoryIndex + 1];
+  if (!output) throw new Error("INTERACTION_INVENTORY_OUTPUT_REQUIRED");
+  await fs.mkdir(path.dirname(path.resolve(output)), { recursive: true });
+  await fs.writeFile(output, JSON.stringify(inventory, null, 2) + "\n", { mode: 0o600 });
+}
+const proofIndex = process.argv.indexOf("--runtime-proof");
+if (proofIndex >= 0) {
+  const proofPath = process.argv[proofIndex + 1];
+  if (!proofPath) throw new Error("INTERACTION_RUNTIME_PROOF_REQUIRED");
+  const proof = JSON.parse(await fs.readFile(proofPath, "utf8"));
+  const failures = validateInteractionProof(proof, inventory);
+  for (const entry of proof.entries ?? []) {
+    try {
+      const test = await fs.realpath(path.resolve(root, entry.testSource));
+      const artifact = await fs.realpath(path.resolve(root, entry.artifact.path));
+      for (const target of [test, artifact]) if (path.relative(root, target).startsWith("..") || path.isAbsolute(path.relative(root, target))) throw new Error("PATH");
+      const bytes = await fs.readFile(artifact);
+      const actual = createHash("sha256").update(bytes).digest("hex");
+      if (actual !== entry.artifact.sha256) throw new Error("DIGEST");
+      const report = JSON.parse(bytes.toString("utf8"));
+      validateBrowserReport(report);
+      let scenarioFound = false;
+      const visit = (suite) => {
+        for (const spec of suite.specs ?? []) {
+          const file = path.isAbsolute(spec.file ?? "") ? path.relative(root, spec.file) : spec.file;
+          if (slash(file ?? "") === slash(entry.testSource) && spec.title === entry.scenario) scenarioFound = true;
+        }
+        for (const child of suite.suites ?? []) visit(child);
+      };
+      for (const suite of report.suites ?? []) visit(suite);
+      if (!scenarioFound) throw new Error("SCENARIO_NOT_EXECUTED");
+    } catch { failures.push("INTERACTION_ARTIFACT_INVALID:" + entry.id); }
+  }
+  if (failures.length) {
+    console.error(JSON.stringify({ status: "failed", failures }, null, 2));
+    process.exit(1);
+  }
+  console.log(JSON.stringify({ status: "passed", commit, runtimeVerified: inventory.entries.length }));
+}
 const routeUnclassified = routes.filter((row) => row.test.status === UNCLASSIFIED).length;
 const actionUnclassified = actions.filter((row) => row.test.status === UNCLASSIFIED).length;
 const interactionUnclassified = interactions.filter((row) => row.test.status === UNCLASSIFIED).length;
@@ -244,7 +297,7 @@ if (routeUnclassified + actionUnclassified + interactionUnclassified > 0 || inva
   console.error(JSON.stringify({ routeUnclassified, actionUnclassified, interactionUnclassified, invalidExclusions: invalidExclusions.length, invalidClassifications: invalidClassifications.length }, null, 2));
   process.exitCode = 1;
 } else if (checkOnly) {
-  console.log(JSON.stringify({ check: "PASS", routes: routes.length, actions: actions.length, interactions: interactions.length, runtimeValidationDebt: routeExcluded + actionExcluded + interactionExcluded }, null, 2));
+  console.log(JSON.stringify({ check: "PASS", claim: "STATIC_INVENTORY_ONLY", routes: routes.length, actions: actions.length, interactions: interactions.length, runtimeValidationDebt: routeExcluded + actionExcluded + interactionExcluded }, null, 2));
 } else {
   await fs.mkdir(path.dirname(routeOutput), { recursive: true });
   await fs.writeFile(routeOutput, routeDocument, "utf8");

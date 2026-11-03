@@ -1,0 +1,9 @@
+import {z} from "zod";
+export const subscriptionGrantInput=z.object({organizationId:z.string().uuid(),paymentEventId:z.string().regex(/^[1-9][0-9]{0,18}$/u).refine(v=>/^[1-9][0-9]{0,18}$/u.test(v)&&BigInt(v)<=BigInt("9223372036854775807")),monthIndex:z.coerce.number().int().min(1).max(12)});
+export const subscriptionGrantContextSchema=z.object({terms:z.object({payment_event_id:z.string(),subscription_cycle_id:z.string().uuid(),plan_version_id:z.string().uuid(),plan_content_hash:z.string(),grant_month_index:z.number().int(),grant_period_start:z.string(),grant_period_end:z.string(),quantity:z.string().regex(/^[0-9]+$/u),expires_at:z.string(),currency:z.string(),revenue_value_minor:z.literal("0"),core_allocation_basis_points:z.number().int().min(0).max(10000),benefit_pool_allocation_basis_points:z.number().int().min(0).max(10000),revenue_recognition:z.literal("ALREADY_RECOGNIZED_IN_SUBSCRIPTION_LEDGER"),source_reference:z.string(),rule_version:z.string(),terms_hash:z.string().regex(/^[a-f0-9]{64}$/u),rollover_policy:z.object({rollover_months:z.number().int()}).passthrough()}),wallet_id:z.string().uuid().nullable(),already_issued:z.boolean(),legacy_review_required:z.boolean(),can_issue:z.boolean(),blocked_reasons:z.array(z.string())});
+export const subscriptionGrantIssuedSchema=z.object({outcome:z.literal("CREDITS_ISSUED"),credit_lot_id:z.string().uuid()}).passthrough();
+export function subscriptionGrantCommand(input:unknown,context:unknown){
+ const value=subscriptionGrantInput.parse(input),review=subscriptionGrantContextSchema.parse(context);
+ if(!review.can_issue||review.already_issued||review.legacy_review_required||review.terms.payment_event_id!==value.paymentEventId||review.terms.grant_month_index!==value.monthIndex)throw Error("SUBSCRIPTION_GRANT_CONTEXT_MISMATCH");
+ return {p_organization_id:value.organizationId,p_payment_event_id:value.paymentEventId,p_month_index:value.monthIndex,p_expected_terms_hash:review.terms.terms_hash};
+}

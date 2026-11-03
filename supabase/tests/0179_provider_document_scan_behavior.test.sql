@@ -1,0 +1,29 @@
+begin;
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='transactional-scan-fixture-0179',configured_at=clock_timestamp()where singleton;
+
+set local search_path=public,private,extensions;
+select plan(12);
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values
+ ('f1790000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','provider-scan-test@example.invalid','',now(),'{}','{}',now(),now());
+insert into public.organizations(id,legal_name,display_name,status,created_by)values('f1791000-0000-4000-8000-000000000001','Test scan SARL','Test scan','ACTIVE','f1790000-0000-4000-8000-000000000001');
+insert into public.provider_profiles(provider_organization_id,activity_summary,team_size,years_experience,created_by)values('f1791000-0000-4000-8000-000000000001','Transaction scan qualification',2,1,'f1790000-0000-4000-8000-000000000001');
+insert into public.provider_document_families(id,provider_organization_id,document_kind,code,created_by)values('f1792000-0000-4000-8000-000000000001','f1791000-0000-4000-8000-000000000001','LEGAL','SCAN_TEST','f1790000-0000-4000-8000-000000000001');
+insert into public.provider_document_upload_reservations(id,provider_organization_id,actor_user_id,storage_object_path,declared_mime_type,declared_size_bytes)values('f1793000-0000-4000-8000-000000000001','f1791000-0000-4000-8000-000000000001','f1790000-0000-4000-8000-000000000001','f1791000-0000-4000-8000-000000000001/f1790000-0000-4000-8000-000000000001/f1793000-0000-4000-8000-000000000001.pdf','application/pdf',20);
+insert into storage.objects(bucket_id,name,metadata)values('provider-qualification','f1791000-0000-4000-8000-000000000001/f1790000-0000-4000-8000-000000000001/f1793000-0000-4000-8000-000000000001.pdf','{"mimetype":"application/pdf","size":20}');
+insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,storage_object_path,content_hash,metadata,change_reason,submitted_by)values('f1794000-0000-4000-8000-000000000001','f1792000-0000-4000-8000-000000000001','f1791000-0000-4000-8000-000000000001',1,'SUBMITTED','f1791000-0000-4000-8000-000000000001/f1790000-0000-4000-8000-000000000001/f1793000-0000-4000-8000-000000000001.pdf',repeat('a',64),'{"declared_mime_type":"application/pdf","declared_size_bytes":20}','Evidence initiale','f1790000-0000-4000-8000-000000000001');
+select is((select scan_status from public.provider_document_scan_jobs where document_version_id='f1794000-0000-4000-8000-000000000001'),'PENDING','binding a real Storage reservation enqueues pending scan');
+select is(private.provider_document_is_clean('f1791000-0000-4000-8000-000000000001/f1790000-0000-4000-8000-000000000001/f1793000-0000-4000-8000-000000000001.pdf',repeat('a',64)),false,'pending evidence cannot enable new opportunities');
+select throws_ok($$insert into public.provider_document_versions(family_id,provider_organization_id,version_number,status,storage_object_path,content_hash,metadata,change_reason,submitted_by,reviewed_by,reviewed_at,supersedes_version_id)values('f1792000-0000-4000-8000-000000000001','f1791000-0000-4000-8000-000000000001',2,'VERIFIED','f1791000-0000-4000-8000-000000000001/f1790000-0000-4000-8000-000000000001/f1793000-0000-4000-8000-000000000001.pdf',repeat('a',64),'{}','Human review','f1790000-0000-4000-8000-000000000001','f1790000-0000-4000-8000-000000000001',now(),'f1794000-0000-4000-8000-000000000001')$$,'55000','PROVIDER_DOCUMENT_SCAN_NOT_CLEAN','even a human review cannot verify pending evidence');
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+create temporary table scan_claim as select * from public.claim_provider_document_scan_jobs('f1795000-0000-4000-8000-000000000001',1,300);
+select is((select count(*) from scan_claim),1::bigint,'trusted worker claims the pending stored object');
+select is((select count(*) from public.claim_provider_document_scan_jobs('f1795000-0000-4000-8000-000000000002',1,300)),0::bigint,'second worker cannot take active lease');
+select throws_ok($$select public.complete_provider_document_scan_job(proof_id,'f1795000-0000-4000-8000-000000000003',worker_id,row_version,'CLEAN','SCAN_TEST','1',repeat('a',64),'scan-behavior-clean')from scan_claim$$,'55000','PROVIDER_DOCUMENT_SCAN_LEASE_INVALID','forged lease cannot publish verdict');
+select throws_ok($$select public.complete_provider_document_scan_job(proof_id,lease_token,worker_id,row_version,'CLEAN','SCAN_TEST','1',repeat('b',64),'scan-behavior-mismatch')from scan_claim$$,'22000','PROVIDER_DOCUMENT_SCAN_HASH_MISMATCH','clean verdict cannot authorize different bytes');
+select throws_ok($$select public.complete_provider_document_scan_job(proof_id,null,null,null,'CLEAN','SCAN_TEST','1',repeat('a',64),'scan-behavior-null')from scan_claim$$,'55000','PROVIDER_DOCUMENT_SCAN_LEASE_INVALID','NULL fencing cannot complete a claimed scan');
+select throws_ok($$select public.fail_provider_document_scan_job(proof_id,null,null,null,'SCANNER_UNAVAILABLE',repeat('a',64))from scan_claim$$,'55000','PROVIDER_DOCUMENT_SCAN_LEASE_INVALID','NULL fencing cannot fail a claimed scan');
+select is((select public.complete_provider_document_scan_job(proof_id,lease_token,worker_id,row_version,'CLEAN','SCAN_TEST','1',repeat('a',64),'scan-behavior-clean')->>'outcome'from scan_claim),'PROVIDER_DOCUMENT_SCAN_RECORDED','trusted matching clean verdict is recorded');
+select is(private.provider_document_is_clean('f1791000-0000-4000-8000-000000000001/f1790000-0000-4000-8000-000000000001/f1793000-0000-4000-8000-000000000001.pdf',repeat('a',64)),true,'only matching scanned bytes become usable');
+select throws_ok($$update private.provider_document_scan_results set result='INFECTED'$$,'55000',null,'scan evidence cannot be rewritten');
+select * from finish();
+rollback;

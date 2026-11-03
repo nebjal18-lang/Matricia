@@ -1,0 +1,20 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+const m=vi.hoisted(()=>({rpc:vi.fn(),client:vi.fn(),supervision:vi.fn(),providers:vi.fn(),governance:vi.fn()}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:m.client}));
+vi.mock("@/modules/admin/data/supervision/repository",()=>({loadAdminSupervisionDashboard:m.supervision}));
+vi.mock("@/modules/admin/data/providers/repository",()=>({loadAdminProviders:m.providers}));
+vi.mock("@/modules/admin/data/governance-disputes/repository",()=>({loadAdminGovernanceDashboard:m.governance}));
+vi.mock("./demo-overlay",()=>({canApplyAdminDemo:()=>false,buildDemoSpaceRows:vi.fn()}));
+import{loadAdminSpaceSnapshot}from"./space-data";
+const id="11111111-1111-4111-8111-111111111111";
+const primary={snapshotAt:"2026-11-02T10:00:00Z",complete:true,rows:[{id,title:"Prestataire autorisé",status:"ACTIVE",organizationId:id,cells:["Nom"],extras:{}}]};
+beforeEach(()=>{vi.resetAllMocks();m.client.mockResolvedValue({rpc:m.rpc});m.rpc.mockResolvedValue({data:primary,error:null});m.supervision.mockResolvedValue({status:"error",reason:"UNAVAILABLE"});m.providers.mockResolvedValue({status:"success",dashboard:{providers:[],documents:[],services:[]}});m.governance.mockResolvedValue({status:"success",value:{}});});
+describe("Admin queues preserve source/error states",()=>{
+ it("uses the provider projection without depending on unrelated supervision",async()=>{const r=await loadAdminSpaceSnapshot("fr","providers","");expect(r.rows).toHaveLength(1);expect(r.reason).toBeNull();expect(m.supervision).not.toHaveBeenCalled();});
+ it("keeps primary rows with an explicit partial state if details fail",async()=>{m.providers.mockResolvedValue({status:"error",reason:"QUERY_FAILED"});const r=await loadAdminSpaceSnapshot("fr","providers","");expect(r.rows).toHaveLength(1);expect(r.reason).toBeNull();expect(r.detailsReason).toBe("UNAVAILABLE");});
+ it.each([["42501","FORBIDDEN"],["PT401","UNAUTHENTICATED"],["PGRST202","UNAVAILABLE"]])("keeps %s distinct from empty",async(code,reason)=>{m.rpc.mockResolvedValue({data:null,error:{code}});const r=await loadAdminSpaceSnapshot("ar","qualification","");expect(r).toMatchObject({reason,rows:[],treat:[]});expect(m.providers).not.toHaveBeenCalled();});
+ it("does not label malformed data as a genuine empty projection",async()=>{m.rpc.mockResolvedValue({data:{rows:[],complete:false},error:null});expect(await loadAdminSpaceSnapshot("fr","territoires","")).toMatchObject({reason:"INVALID_RESPONSE",rows:[]});});
+ it("handles transport rejection with no invented records",async()=>{m.client.mockRejectedValue(Error("internal endpoint"));expect(await loadAdminSpaceSnapshot("fr","providers","")).toMatchObject({reason:"UNAVAILABLE",rows:[]});});
+ it("recognizes a genuine empty authorized special projection",async()=>{m.rpc.mockResolvedValue({data:{...primary,rows:[]},error:null});expect(await loadAdminSpaceSnapshot("ar","providers","")).toMatchObject({reason:null,rows:[],treat:[]});});
+ it.each(["diagnostics","demandes","matching","devis","contrats","avenants","missions","jalons","messagerie"]as const)("propagates errors for %s",async space=>{expect(await loadAdminSpaceSnapshot("fr",space,"?q=test")).toMatchObject({reason:"UNAVAILABLE",rows:[]});m.supervision.mockResolvedValue({status:"error",reason:"UNAUTHENTICATED"});expect(await loadAdminSpaceSnapshot("fr",space,"")).toMatchObject({reason:"UNAUTHENTICATED",rows:[]});});
+});

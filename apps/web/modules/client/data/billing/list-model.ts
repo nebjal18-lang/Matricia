@@ -1,0 +1,6 @@
+import { z } from "zod";
+const amount=z.string().regex(/^\d{1,19}$/u),uuid=z.string().uuid(),currency=z.string().regex(/^[A-Z]{3}$/u),date=z.string().datetime({offset:true});
+export const billingSourcesSchema=z.object({may_issue:z.boolean(),requires_mfa:z.boolean(),total:z.number().int().nonnegative(),sources:z.array(z.object({payment_event_id:z.string().regex(/^[1-9]\d{0,18}$/u),payment_reference:z.string().min(1),amount_minor:amount,currency,gateway:z.string().min(1),paid_at:date,invoice_id:uuid.nullable(),adjustments:z.array(z.object({id:uuid,event_type:z.enum(["REFUND_SUCCEEDED","PAYMENT_REVERSED"]),amount_minor:amount,currency,occurred_at:date,credit_note_id:uuid.nullable()}))})).max(21)});
+export const billingDocumentsSchema=z.object({total:z.number().int().nonnegative(),documents:z.array(z.object({id:uuid,kind:z.enum(["INVOICE","CREDIT_NOTE"]),document_number:z.string().min(8),payment_event_id:z.string().regex(/^\d+$/u),adjustment_id:uuid.nullable(),original_invoice_id:uuid.nullable(),issued_on:z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),currency,subtotal_minor:amount,tax_minor:amount,total_minor:amount,source_hash:z.string().regex(/^[0-9a-f]{64}$/u),render_status:z.enum(["READY","PENDING_PDF"])})).max(21)});
+export type BillingSources=z.infer<typeof billingSourcesSchema>;
+export type BillingDocuments=z.infer<typeof billingDocumentsSchema>;

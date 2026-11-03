@@ -1,0 +1,12 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { z } from "zod";
+import { isLocale } from "@/modules/shared/lib/i18n/locale";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { evidenceReference } from "@/modules/franchise/data/documents/model";
+export default async function EvidencePage({params,searchParams}:{params:Promise<{locale:string;documentId:string}>;searchParams:Promise<{franchiseId?:string;organizationId?:string}>}){
+ const[{locale,documentId},query]=await Promise.all([params,searchParams]);if(!isLocale(locale)||!z.string().uuid().safeParse(documentId).success||!z.string().uuid().safeParse(query.franchiseId).success)notFound();
+ const client=await getSupabaseServerClient();const response=await client.rpc("franchise_document_reference",{p_franchise_id:query.franchiseId,p_document_id:documentId,p_action:"VIEW"});const result=evidenceReference.safeParse(response.data);const ar=locale==="ar";
+ const suffix=`?franchiseId=${query.franchiseId}${query.organizationId?`&organizationId=${encodeURIComponent(query.organizationId)}`:""}`;
+ return <main className="client-page" dir={ar?"rtl":"ltr"}>{response.error||!result.success?<p role="alert">{ar?"هذه الوثيقة غير متاحة أو أن صلاحية الوصول انتهت.":"Ce document est indisponible ou votre autorisation a expiré."}</p>:<article className="client-card space-y-4"><h1>{result.data.code}</h1><p>{result.data.providerName} · v{result.data.version} · {result.data.status}</p><dl><dt>{ar?"تاريخ الانتهاء":"Expiration"}</dt><dd>{result.data.expiresOn??"—"}</dd><dt>SHA-256</dt><dd dir="ltr" className="break-all font-mono">{result.data.contentHash}</dd><dt>{ar?"الحجم بالبايت":"Taille en octets"}</dt><dd>{result.data.sizeBytes}</dd></dl><div className="flex flex-wrap gap-3"><a className="franchise-tool" href={`/${locale}/franchise/documents/${documentId}/telecharger${suffix}&mode=inline`} target="_blank" rel="noopener noreferrer">{ar?"معاينة خاصة":"Aperçu privé"}</a><a className="franchise-tool franchise-tool-primary" href={`/${locale}/franchise/documents/${documentId}/telecharger${suffix}`}>{ar?"تنزيل هذه النسخة":"Télécharger cette version"}</a></div><h2>{ar?"آخر عمليات الوصول":"Derniers accès"}</h2><ul>{result.data.accessHistory.map((event,index)=><li key={index}><time dateTime={event.at}>{event.at}</time> · {event.action} · {event.outcome}</li>)}</ul></article>}<Link className="franchise-tool" href={`/${locale}/franchise/documents${suffix}`}>{ar?"العودة إلى الوثائق":"Retour aux documents"}</Link></main>;
+}

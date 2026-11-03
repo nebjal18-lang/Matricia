@@ -1,9 +1,10 @@
+import { loadProviderInvoiceDossier } from "@/modules/provider/data/billing/dossier";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { loadProviderBilling } from "@/modules/provider/data/billing/repository";
 import { loadProviderMissions } from "@/modules/provider/data/missions/repository";
-import { loadConsultationSharedDocuments, loadProviderQuotes } from "@/modules/provider/data/quotes/repository";
+import { loadConsultationSharedDocuments, loadProviderQuotes, loadProviderQuoteHistory } from "@/modules/provider/data/quotes/repository";
 import { loadProviderDashboard } from "@/modules/provider/data/qualification/repository";
 import { mergeConsultationDocuments, type ProviderQuoteDashboard } from "@/modules/provider/data/quotes/model";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
@@ -89,7 +90,7 @@ export async function ProviderConsultationDetailPage({
     : null;
   if (!invitation) {
     return (
-      <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={w.consultDetailTitle} lead={w.outOfScopeLead}>
+      <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={w.consultDetailTitle} lead={w.outOfScopeLead}>
         <ProviderOutOfScope locale={locale as Locale} query={space.selectedQuery} />
       </ProviderAppShell>
     );
@@ -99,7 +100,7 @@ export async function ProviderConsultationDetailPage({
     ? await loadQuotePrefills(result.dashboard.organizationId, [{ invitationId: invitation.id, versionId: invitation.quote.currentVersionId }], locale as Locale)
     : {};
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={invitation?.description ?? w.consultDetailTitle} lead={w.consultDetailLead}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={invitation?.description ?? w.consultDetailTitle} lead={w.consultDetailLead}>
       <ConsultationDetailWorkbench
         locale={locale as Locale}
         query={space.selectedQuery}
@@ -128,7 +129,7 @@ export async function ProviderQuoteWorkbenchPage({
   const invitation = result.status === "success" ? findInvitation(result.dashboard, quoteId) : null;
   if (quoteId !== "nouveau" && !invitation) {
     return (
-      <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.outOfScope} lead={w.outOfScopeLead}>
+      <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.outOfScope} lead={w.outOfScopeLead}>
         <ProviderOutOfScope locale={locale as Locale} query={space.selectedQuery} />
       </ProviderAppShell>
     );
@@ -142,10 +143,14 @@ export async function ProviderQuoteWorkbenchPage({
     : result.status === "error"
       ? <Alert variant="destructive"><AlertTitle>{m.loadError}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
       : null;
+  const revisions = result.status === "success" && invitation?.quote ? await loadProviderQuoteHistory(result.dashboard.organizationId, invitation.quote.id) : [];
+  const revisionSnapshots:Record<string,import("@/modules/provider/screens/devis/prefill").QuotePrefill>={};
+  if(result.status==="success"&&revisions)for(let offset=0;offset<revisions.length;offset+=25)Object.assign(revisionSnapshots,await loadQuotePrefills(result.dashboard.organizationId,revisions.slice(offset,offset+25).map(item=>({invitationId:item.id,versionId:item.id})),locale as Locale));
+  const history=revisions?.map(item=>({...item,snapshot:revisionSnapshots[item.id]}))??null;
   const Workbench = mode === "revise" ? QuoteRevisionWorkbench : QuoteMultilineWorkbench;
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
-      <Workbench locale={locale as Locale} query={space.selectedQuery} quoteId={quoteId} invitation={invitation} quotePanel={panel} prefill={invitation ? prefills[invitation.id] : undefined} />
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
+      <Workbench history={history} locale={locale as Locale} query={space.selectedQuery} quoteId={quoteId} invitation={invitation} quotePanel={panel} prefill={invitation ? prefills[invitation.id] : undefined} />
     </ProviderAppShell>
   );
 }
@@ -165,7 +170,7 @@ export async function ProviderQuotePreviewPage({
   const invitation = result.status === "success" ? findInvitation(result.dashboard, quoteId) : null;
   if (!invitation) {
     return (
-      <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.outOfScope} lead={w.outOfScopeLead}>
+      <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.outOfScope} lead={w.outOfScopeLead}>
         <ProviderOutOfScope locale={locale as Locale} query={space.selectedQuery} />
       </ProviderAppShell>
     );
@@ -176,7 +181,7 @@ export async function ProviderQuotePreviewPage({
     : {};
   const identities = invitation ? quoteIdentities([invitation.id]) : {};
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.quotePreviewTitle} lead={w.quotePreviewLead}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.quotePreviewTitle} lead={w.quotePreviewLead}>
       <QuotePreviewWorkbench
         locale={locale as Locale}
         query={space.selectedQuery}
@@ -185,7 +190,7 @@ export async function ProviderQuotePreviewPage({
         prefill={invitation ? prefills[invitation.id] : undefined}
         organizationName={result.status === "success" ? result.dashboard.organizationName : space.organizationName ?? ""}
         submitPanel={result.status === "success" && invitation && result.dashboard.canManage
-          ? <QuoteSubmitForm item={invitation} locale={locale as Locale} m={m} identity={identities[invitation.id]!} />
+          ? <QuoteSubmitForm item={invitation} locale={locale as Locale} m={m} identity={identities[invitation.id]!} identityReview={result.status==="success"?result.dashboard.identityReview:undefined} organizationId={space.selectedOrganizationId??undefined} />
           : null}
       />
     </ProviderAppShell>
@@ -202,19 +207,19 @@ export async function ProviderMissionDeliveryPage({
   const [{ locale, missionId }, query] = await Promise.all([params, searchParams]);
   const space = await spaceOrRedirect(locale, query.organizationId);
   const w = workbenchCopy(locale as Locale);
-  const result = await loadProviderMissions(locale as Locale);
+  const result = await loadProviderMissions(locale as Locale, query.organizationId, missionId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
   const mission = result.status === "success" ? result.dashboard.missions.find((item) => item.id === missionId) ?? null : null;
   if (!mission) {
     return (
-      <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="missions" title={w.outOfScope} lead={w.outOfScopeLead}>
+      <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="missions" title={w.outOfScope} lead={w.outOfScopeLead}>
         <ProviderOutOfScope locale={locale as Locale} query={space.selectedQuery} />
       </ProviderAppShell>
     );
   }
   const messages = getProviderMissionMessages(locale as Locale);
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="missions" title={w.missionDeliveryTitle} lead={w.missionDeliveryLead}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="missions" title={w.missionDeliveryTitle} lead={w.missionDeliveryLead}>
       <MissionDeliveryWorkbench
         locale={locale as Locale}
         query={space.selectedQuery}
@@ -236,25 +241,27 @@ export async function ProviderInvoiceSettlementPage({
   const [{ locale, invoiceId }, query] = await Promise.all([params, searchParams]);
   const space = await spaceOrRedirect(locale, query.organizationId);
   const w = workbenchCopy(locale as Locale);
-  const result = await loadProviderBilling();
+  const result = await loadProviderBilling(query.organizationId, invoiceId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
   const invoice = result.status === "success" ? result.dashboard.invoices.find((item) => item.id === invoiceId || item.number === invoiceId) ?? null : null;
   if (!invoice) {
     return (
-      <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={w.outOfScope} lead={w.outOfScopeLead}>
+      <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={w.outOfScope} lead={w.outOfScopeLead}>
         <ProviderOutOfScope locale={locale as Locale} query={space.selectedQuery} />
       </ProviderAppShell>
     );
   }
   const m = getBillingMessages(locale as Locale);
   const missions = result.status === "success" ? await loadBillingMissionOptions(result.dashboard.organizationId, locale as Locale) : [];
+  const dossier = result.status === "success" ? await loadProviderInvoiceDossier(result.dashboard.organizationId,invoice.id) : null;
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={w.invoiceTitle} lead={w.invoiceLead}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={w.invoiceTitle} lead={w.invoiceLead}>
       <InvoiceSettlementWorkbench
         locale={locale as Locale}
         query={space.selectedQuery}
         invoiceId={invoiceId}
         invoice={invoice}
+        dossier={dossier}
         billingPanel={result.status === "success" ? <ProviderLiveBillingPanel dashboard={result.dashboard} missions={missions} locale={locale as Locale} m={m} keys={Array.from({ length: 6 }, () => randomUUID())} /> : null}
       />
     </ProviderAppShell>
@@ -293,7 +300,7 @@ export async function ProviderMessagesPage({
       }))
     : [];
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="messages" title={m.title} lead={m.description}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="messages" title={m.title} lead={m.description}>
       {result.status === "error" ? (
         <Alert variant="destructive"><AlertTitle>{m.loadError}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
       ) : (
@@ -350,10 +357,10 @@ export async function ProviderNestedPage({
   const space = await spaceOrRedirect(locale, query.organizationId);
   if (nested.kind === "documents") {
     const c = providerCopy(locale as Locale);
-    const documents = await loadProviderDashboard();
+    const documents = await loadProviderDashboard(query.organizationId);
     const view = query.vue === "qualification" ? "qualification" as const : "all" as const;
     return (
-      <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="documents" title={c.docsTitle} lead={c.docsLead}>
+      <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="documents" title={c.docsTitle} lead={c.docsLead}>
         <ProviderDocumentsBoard
           locale={locale as Locale}
           query={space.selectedQuery}
@@ -389,7 +396,7 @@ export async function ProviderCompanyPage({
     return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeStyle: "short" }).format(date);
   };
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="company" title={w.companyTitle} lead={w.companyLead} kicker={c.kicker}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="company" title={w.companyTitle} lead={w.companyLead} kicker={c.kicker}>
       <CompanySecurityWorkbench
         locale={locale as Locale}
         query={space.selectedQuery}

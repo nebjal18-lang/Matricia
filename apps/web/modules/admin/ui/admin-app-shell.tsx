@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Bell, Building2, ChevronDown, CircleHelp, Route, Search, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { adminActorLinks, adminParcoursLinks } from "@/modules/admin/data/spaces/admin-nav";
@@ -131,15 +132,17 @@ export function AdminAppShell({
             <span data-active={locale === "ar" ? "true" : undefined}>{c.langAr}</span>
           </Link>
           <Link href={`${p}/notifications${q}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}><Bell className="size-4" /></Link>
-          <Link href={`${p}/administration/operations${q}`} className="client-icon-btn" aria-label={c.help}><CircleHelp className="size-4" /></Link>
+          <Link href={`${p}/administration/operations${q}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشراف على العمليات" : "Supervision des opérations"} title={locale === "ar" ? "الإشراف على العمليات" : "Supervision des opérations"}><CircleHelp className="size-4" /></Link>
           <WorkspaceAccountMenu
             locale={locale}
             userEmail={userEmail}
-            returnTo={`${p}/administration/command-center${q}`}
+            returnTo={translateLocalPath(alternateHref, alternate, locale)}
             fallbackInitial="A"
             label={c.administrator}
+            workspace="administration"
           />
         </div>
+        {new URL(alternateHref, "https://matricia.invalid").searchParams.get("navigation") === "role-fallback" ? <p role="status" className="m-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">{locale === "ar" ? "الصفحة المطلوبة غير متاحة بصلاحياتكم. تم فتح مساحتكم المسموح بها." : "La page demandée ne correspond pas à vos habilitations. Votre espace autorisé a été ouvert."}</p> : null}
         {crumb ? <div className="admin-crumb">{crumb}</div> : null}
         {title ? (
           <header className="client-mast">

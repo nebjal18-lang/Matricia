@@ -9,6 +9,7 @@ export type AdminOrgRow = {
   name: string;
   legalName: string;
   type: string;
+  typeCodes?:string[];statusCode?:string;complianceCode?:"CURRENT"|"REVIEW"|"UNKNOWN";planCode?:string;
   status: string;
   statusTone: "mint" | "sky" | "peach" | "violet";
   compliance: string;
@@ -25,29 +26,46 @@ export type AdminTreatItem = {
   tone: "sky" | "peach" | "mint" | "violet";
 };
 
-function localizeStatus(status: string, locale: Locale) {
+export function localizeStatus(status: string, locale: Locale) {
   const c = adminCopy(locale);
   const key = status.toUpperCase();
   if (key === "ACTIVE") return c.statusActive;
   if (key === "PENDING") return c.statusPending;
-  if (key === "SUSPENDED" || key === "ARCHIVED") return c.statusSuspended;
+  if (key === "SUSPENDED") return c.statusSuspended;
+  if (key === "ARCHIVED") return locale==="ar"?"مؤرشفة":"Archivée";
   return status;
 }
 
 export function mapAdminOrgRows(orgs: AdminSupervisionDashboard["organizations"], locale: Locale): AdminOrgRow[] {
   const c = adminCopy(locale);
-  return orgs.map((org) => ({
+  return orgs.map((org) => {
+    const states:Array<boolean|null>=[];
+    if(org.role_codes?.includes("CLIENT"))states.push(org.client_compliance_status?org.client_compliance_status==="VERIFIED":null);
+    if(org.role_codes?.includes("PROVIDER"))states.push(org.provider_identity_verified??null);
+    const complianceCode: "CURRENT"|"REVIEW"|"UNKNOWN" = states.length&&states.every(v=>v===true)&&org.canonical_identity_verified===true?"CURRENT":states.some(v=>v!==null)?"REVIEW":"UNKNOWN";
+    return ({
     id: org.id,
     name: org.display_name,
     legalName: org.legal_name,
-    type: inferOrgType(`${org.display_name} ${org.legal_name}`, locale),
-    status: localizeStatus(org.status, locale),
+    type: inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes),
+    status: localizeStatus(org.status, locale),statusCode:org.status,typeCodes:org.role_codes??[],complianceCode,planCode:"UNKNOWN",
     statusTone: org.status.toUpperCase() === "ACTIVE" ? "mint" : org.status.toUpperCase() === "PENDING" ? "sky" : "peach",
-    compliance: org.open_disputes > 0 ? c.complianceReview : c.complianceOk,
-    complianceTone: org.open_disputes > 0 ? "peach" : "mint",
+    compliance: complianceCode==="CURRENT"?c.complianceOk:complianceCode==="REVIEW"?c.complianceReview:locale==="ar"?"غير متحقق":"Non vérifié",
+    complianceTone: complianceCode==="CURRENT"?"mint":"peach",
     plan: c.unknownPlan,
     lastAction: org.open_disputes > 0 ? c.lastDispute : org.open_requests > 0 ? c.lastOpenRequest : c.lastCreated,
-  }));
+  });});
+}
+
+export function filterAdminOrgRows(rows:AdminOrgRow[],filters:{type?:string;status?:string;compliance?:string;plan?:string},search?:string,includeArchived=false){
+ return rows.filter(row=>{
+  if(!includeArchived&&row.statusCode==="ARCHIVED")return false;
+  if(filters.type&&filters.type!=="all"&&!row.typeCodes?.includes(filters.type)&&row.type!==filters.type)return false;
+  if(filters.status&&filters.status!=="all"&&row.statusCode!==filters.status&&row.status!==filters.status)return false;
+  if(filters.compliance&&filters.compliance!=="all"&&row.complianceCode!==filters.compliance&&row.compliance!==filters.compliance)return false;
+  if(filters.plan&&filters.plan!=="all"&&row.planCode!==filters.plan&&row.plan!==filters.plan)return false;
+  return!search||`${row.name} ${row.legalName} ${row.type} ${row.status} ${row.id}`.toLocaleLowerCase().includes(search.toLocaleLowerCase());
+ });
 }
 
 export function mapAdminTreatQueue(input: {
@@ -84,7 +102,7 @@ export function mapAdminTreatQueue(input: {
   }));
 }
 
-export function demoAdminTreatQueue(_locale: Locale, _query: string): AdminTreatItem[] {
+export function demoAdminTreatQueue(): AdminTreatItem[] {
   return [];
 }
 

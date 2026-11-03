@@ -3,6 +3,14 @@ import { describe, expect, it } from "vitest";
 import { BillingBoard, ConsultationsBoard, ProviderDocumentsBoard, ProviderHomeBoard, ProviderMissionsBoard, QualificationBoard, QuotesBoard, ReputationBoard, ServicesBoard } from "./boards";
 
 describe("provider space boards", () => {
+  it.each(["fr", "ar"] as const)("describes actual private document access without promising public or discretionary sharing in %s", (locale) => {
+    const html = renderToStaticMarkup(<ProviderDocumentsBoard locale={locale} query="" documents={[]} />);
+    expect(html).toContain(locale === "ar" ? "وثائقكم خاصة" : "Vos documents sont privés");
+    expect(html).toContain(locale === "ar" ? "فرق Matricia المخولة" : "équipes Matricia habilitées");
+    expect(html).toContain(locale === "ar" ? "أصحاب الامتياز المفوضين" : "franchisés mandatés");
+    expect(html).not.toMatch(/acteurs publics|الفاعلين العموميين|Vous gardez le contrôle/u);
+  });
+
   it("compose le cycle prestataire sans exemple illustratif", () => {
     const html = [
       renderToStaticMarkup(<ProviderHomeBoard locale="fr" query="" />),

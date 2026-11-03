@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createClamAvTcpHealthCheck, createClamAvTcpScanner, readClamAvTcpConfig, type ClamAvTcpConfig } from "./clamav-tcp";
 
 const servers: ReturnType<typeof createServer>[] = [];
+const databaseFixtureDate=new Date().toUTCString();
 
 afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => new Promise<void>((resolve) => server.close(() => resolve()))));
@@ -31,7 +32,7 @@ function config(port: number, overrides: Partial<ClamAvTcpConfig> = {}): ClamAvT
   };
 }
 
-function receiveCommand(socket: Socket, onCommand: (command: string, content: Buffer) => void): void {
+function receiveCommand(socket: Socket, onCommand: (command: string, content: Buffer) => void,versionResponse=()=>`ClamAV 1.4.2/28000/${databaseFixtureDate}`): void {
   let pending = Buffer.alloc(0);
   let command: string | null = null;
   const content: Buffer[] = [];
@@ -42,6 +43,7 @@ function receiveCommand(socket: Socket, onCommand: (command: string, content: Bu
       if (end < 0) return;
       command = pending.subarray(0, end).toString("ascii");
       pending = pending.subarray(end + 1);
+      if (command === "zVERSION") {socket.end(`${versionResponse()}\0`);return;}
       if (command === "zPING") onCommand(command, Buffer.alloc(0));
     }
     if (command !== "zINSTREAM") return;
@@ -142,7 +144,7 @@ describe("ClamAV health check", () => {
       socket.end(Buffer.from("PONG\0"));
     }));
     await expect(createClamAvTcpHealthCheck(config(port)).check()).resolves.toEqual({
-      status: "up", engineCode: "CLAMAV_TCP", engineVersion: "1.4.2",
+      status: "up", engineCode: "CLAMAV_TCP", engineVersion: expect.stringMatching(/^1\.4\.2\/db:28000@/u),
     });
   });
 
@@ -153,4 +155,19 @@ describe("ClamAV health check", () => {
     await expect(createClamAvTcpHealthCheck(config(timeoutPort, { timeoutMs: 100 })).check())
       .rejects.toMatchObject({ code: "ANTIVIRUS_UNAVAILABLE" });
   });
+});
+
+describe("native ClamAV version and database freshness",()=>{
+ it.each(["ClamAV unknown","ClamAV 1.4.2/0/unknown",`ClamAV 9.9.9/28000/${new Date().toUTCString()}`])("refuses unverifiable VERSION %s",async version=>{
+  const port=await listen(socket=>receiveCommand(socket,()=>socket.end("stream: OK\0"),()=>version));await expect(createClamAvTcpScanner(config(port)).scan(Buffer.from("content"))).rejects.toMatchObject({code:"ANTIVIRUS_VERSION_UNVERIFIED",retryable:true});
+ });
+ it("refuses a stale database even if PING succeeds",async()=>{
+  let ping=false;const port=await listen(socket=>receiveCommand(socket,command=>{if(command==="zPING"){ping=true;socket.end("PONG\0");}},()=>`ClamAV 1.4.2/28000/${new Date(Date.now()-49*3600000).toUTCString()}`));await expect(createClamAvTcpHealthCheck(config(port)).check()).rejects.toMatchObject({code:"ANTIVIRUS_DATABASE_STALE",retryable:true});expect(ping).toBe(true);
+ });
+ it("does not send document bytes when VERSION says the database is stale",async()=>{
+  let streams=0;const port=await listen(socket=>receiveCommand(socket,()=>{streams++;socket.end("stream: OK\0");},()=>`ClamAV 1.4.2/28000/${new Date(Date.now()-49*3600000).toUTCString()}`));await expect(createClamAvTcpScanner(config(port)).scan(Buffer.from("content"))).rejects.toMatchObject({code:"ANTIVIRUS_DATABASE_STALE"});expect(streams).toBe(0);
+ });
+ it("refuses CLEAN when the native database changes during the scan",async()=>{
+  let versions=0;const date=new Date().toUTCString();const port=await listen(socket=>receiveCommand(socket,()=>socket.end("stream: OK\0"),()=>`ClamAV 1.4.2/${++versions===1?28000:28001}/${date}`));await expect(createClamAvTcpScanner(config(port)).scan(Buffer.from("content"))).rejects.toMatchObject({code:"ANTIVIRUS_VERSION_UNVERIFIED",retryable:true});
+ });
 });

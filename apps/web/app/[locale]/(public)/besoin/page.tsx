@@ -62,7 +62,7 @@ export default async function NeedPage({
       discoverAction={discoverPublicNeedScope}
     />
   );
-  if (!auth.data.user) return flow;
+  if (!auth.data.user || organizations.length === 0) return flow;
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") return flow;
   const c = spaceCopy(locale);

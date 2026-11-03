@@ -15,6 +15,7 @@ function query(data: unknown) {
 
 describe("notification repository", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     mocks.getUser.mockResolvedValue({ data: { user: { id: "11111111-1111-4111-8111-111111111111" } } });
     mocks.rpc.mockResolvedValue({ data: { preferences: [], notifications: [] }, error: null });
     mocks.from.mockImplementation((table: string) => {
@@ -24,10 +25,25 @@ describe("notification repository", () => {
     });
   });
 
+  it("does not fall back to another organization for an invalid explicit selection", async () => {
+    const result = await loadNotificationCenter("fr", "not-a-uuid");
+    expect(result).toEqual({ status: "error", reason: "FORBIDDEN" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it("classifies an expired session separately from a service failure", async () => {
+    mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: { status: 503 } });
+    expect(await loadNotificationCenter("fr")).toEqual({ status: "error", reason: "QUERY_FAILED" });
+    mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: { status: 401 } });
+    expect(await loadNotificationCenter("fr")).toEqual({ status: "error", reason: "UNAUTHENTICATED" });
+  });
   it("charge le centre Client sans dépendre de la table des rôles plateforme", async () => {
     const result = await loadNotificationCenter("fr");
     expect(result.status).toBe("success");
     expect(mocks.from).not.toHaveBeenCalledWith("platform_user_roles");
-    if (result.status === "success") expect(result.dashboard.canViewDeliveryOperations).toBe(false);
+    if (result.status === "success") {
+      expect(result.dashboard.canViewDeliveryOperations).toBe(false);
+      expect(result.dashboard.templates).toEqual([]);
+    }
+    expect(mocks.from).not.toHaveBeenCalledWith("notification_template_versions");
   });
 });

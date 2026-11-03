@@ -20,6 +20,13 @@ test("MAT-FUNC-007 dossier messaging is readable by a participant and denied to 
     if (await allowed.page.getByText("Sélectionnez une conversation pour lire les échanges.", { exact: true }).isVisible()) throw new Error("Messaging repository omitted the provisioned conversation");
     await expect(allowed.page.getByRole("region", { name: fixture.messaging.subject })).toBeVisible();
     await expect(allowed.page.getByText(fixture.messaging.message, { exact: true })).toBeVisible();
+    const sentMessage = `${fixture.messaging.message} — réponse persistée`;
+    const sendForm = allowed.page.locator('form').filter({ has: allowed.page.locator('textarea[name="body"]') });
+    await sendForm.locator('[name="body"]').fill(sentMessage);
+    await sendForm.getByRole("button", { name: "Envoyer", exact: true }).click();
+    await expect(allowed.page.getByText(sentMessage, { exact: true })).toBeVisible();
+    await allowed.page.reload();
+    await expect(allowed.page.getByText(sentMessage, { exact: true })).toBeVisible();
     await expect(allowed.page.locator("body")).not.toContainText(fixture.messaging.foreignMarker);
   } finally { await allowed.context.close(); }
   const denied = await pageFor(browser, fixture.foreignClientState);
@@ -27,10 +34,11 @@ test("MAT-FUNC-007 dossier messaging is readable by a participant and denied to 
     await denied.page.goto(`/fr/messagerie?fil=${fixture.messaging.threadId}`, { waitUntil: "domcontentloaded", timeout: 20_000 });
     await expect(denied.page.locator("body")).not.toContainText(fixture.messaging.subject);
     await expect(denied.page.locator("body")).not.toContainText(fixture.messaging.message);
+    await expect(denied.page.locator("body")).not.toContainText(`${fixture.messaging.message} — réponse persistée`);
   } finally { await denied.context.close(); }
 });
 
-test("MAT-FUNC-013 client comparison contains at least two quotes and excludes a foreign quote", async ({ browser }) => {
+test("MAT-FUNC-013 frozen comparison contains two selected quotes and denies a foreign client", async ({ browser }) => {
   const allowed = await pageFor(browser, fixture.clientState);
   try {
     await allowed.page.goto(`/fr/client/demandes/${fixture.comparison.requestId}/comparaison?rfq=${fixture.comparison.rfqId}`, { waitUntil: "domcontentloaded", timeout: 20_000 });
@@ -71,8 +79,8 @@ test("MAT-FUNC-020 provider capacity drives matching inclusion and exclusion thr
   const provider = await pageFor(browser, fixture.providerState);
   try {
     provider.page.setDefaultTimeout(10_000);
-    await provider.page.goto("/fr/sous-traitant/qualification", { waitUntil: "domcontentloaded", timeout: 20_000 });
-    await expect(provider.page.getByRole("heading", { level: 1, name: "Qualification et capacité" })).toBeVisible();
+    await provider.page.goto(`/fr/sous-traitant/qualification?organizationId=${fixture.providerQualification.organizationId}`, { waitUntil: "domcontentloaded", timeout: 20_000 });
+    await expect(provider.page.getByRole("heading", { level: 1, name: "Votre qualification" })).toBeVisible();
     if (await provider.page.getByText("Impossible de charger l’espace qualification.", { exact: true }).isVisible()) { const reason=await provider.page.getByRole("alert").getAttribute("data-error-reason");throw new Error(`Provider qualification repository rejected the provisioned fixture: ${reason??"UNKNOWN"}`); }
     if (await provider.page.getByText("Aucune organisation Prestataire active n’est associée à ce compte.", { exact: true }).isVisible()) throw new Error("Provider qualification membership was not resolved");
 

@@ -7,10 +7,19 @@ import { buttonVariants } from "@/modules/shared/ui/button";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { cn } from "@/modules/shared/lib/utils";
 import { getPublicSiteCopy } from "./public-copy";
+import type { WorkspaceNavigation } from "@/modules/shared/lib/auth/workspace-navigation";
+import { selectWorkspace } from "@/modules/shared/lib/auth/select-workspace";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
 
-export function PublicNavigation({ locale }: { locale: Locale }) {
+export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale; sessionNavigation?: WorkspaceNavigation }) {
   const copy = getPublicSiteCopy(locale);
+  const signedIn = sessionNavigation?.signedIn === true;
+  const workspaceLabels = locale === "ar" ? { client: "عميل", provider: "مقدم خدمات", franchise: "امتياز", administration: "الإدارة" } : { client: "Client", provider: "Prestataire", franchise: "Franchisé", administration: "Administration" };
+  const selected = sessionNavigation?.options.find(option => option.kind === sessionNavigation.landing);
+  const spaceHref = selected?.href ?? `/${locale}/tableau-de-bord`;
+  const spaceLabel = `${locale === "ar" ? "مساحتي" : "Mon espace"}${selected ? ` · ${workspaceLabels[selected.kind]}` : ""}`;
+  const switchLabel = locale === "ar" ? "تغيير المساحة" : "Changer d’espace";
+  const workspaceChoices = signedIn && (sessionNavigation?.options.length ?? 0) > 1 ? <details className="relative"><summary className="min-h-11 cursor-pointer rounded-md px-3 py-2 text-sm font-semibold">{switchLabel}</summary><div className="absolute end-0 z-50 min-w-48 rounded-lg border bg-white p-2 text-slate-950 shadow-lg">{sessionNavigation?.options.map(option => <form action={selectWorkspace} key={option.kind}><input type="hidden" name="locale" value={locale}/><input type="hidden" name="workspace" value={option.kind}/><button className="min-h-11 w-full rounded px-3 py-2 text-start hover:bg-slate-100" type="submit" aria-current={option.kind === sessionNavigation.landing ? "true" : undefined}>{workspaceLabels[option.kind]}</button></form>)}</div></details> : null;
   const journey = getPublicJourneyCopy(locale).nav;
   const alternate = locale === "fr" ? "ar" : "fr";
   const pathname = usePathname();
@@ -62,8 +71,7 @@ export function PublicNavigation({ locale }: { locale: Locale }) {
           <ul className="space-y-1">
             {links.map(link => <li key={link.href}><Link href={link.href} onClick={closeMenu} aria-current={isPublicNavLinkActive(pathname, link.href) ? "page" : undefined} className="premium-mobile-nav-link">{link.label}</Link></li>)}
             <li><Link href={alternatePath} onClick={preserveLocaleContext} hrefLang={alternate} lang={alternate} className="flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">{alternate === "ar" ? "العربية" : "Français"}</Link></li>
-            <li><Link href={`/${locale}/connexion`} onClick={closeMenu} className={cn(buttonVariants({ variant: "outline" }), "mt-1 min-h-11 w-full")}>{journey.login}</Link></li>
-            <li><Link href={`/${locale}/inscription`} onClick={closeMenu} className="premium-nav-action premium-nav-action-mobile">{journey.register}<ArrowRightIcon /></Link></li>
+            {signedIn ? <><li><Link href={spaceHref} onClick={closeMenu} className="premium-mobile-nav-link">{spaceLabel}</Link></li>{workspaceChoices ? <li>{workspaceChoices}</li> : null}</> : <><li><Link href={`/${locale}/connexion`} onClick={closeMenu} className={cn(buttonVariants({ variant: "outline" }), "mt-1 min-h-11 w-full")}>{journey.login}</Link></li><li><Link href={`/${locale}/inscription`} onClick={closeMenu} className="premium-nav-action premium-nav-action-mobile">{journey.register}<ArrowRightIcon /></Link></li></>}
           </ul>
         </nav> : null}
       </div>
@@ -81,10 +89,9 @@ export function PublicNavigation({ locale }: { locale: Locale }) {
           <span aria-hidden="true">|</span>
           <Link href={alternatePath} onClick={preserveLocaleContext} hrefLang={alternate} lang={alternate}>{alternate.toUpperCase()}</Link>
         </span>
-        <Link href={`/${locale}/connexion`} className="premium-nav-login">{journey.login}</Link>
-        <Link href={`/${locale}/inscription`} className="premium-nav-action">{journey.register}<ArrowRightIcon /></Link>
+        {signedIn ? <><Link href={spaceHref} className="premium-nav-login">{spaceLabel}</Link>{workspaceChoices}</> : <><Link href={`/${locale}/connexion`} className="premium-nav-login">{journey.login}</Link><Link href={`/${locale}/inscription`} className="premium-nav-action">{journey.register}<ArrowRightIcon /></Link></>}
       </nav>
-      <Link href={`/${locale}/connexion`} className="premium-nav-account lg:hidden" aria-label={journey.login}>
+      <Link href={signedIn ? spaceHref : `/${locale}/connexion`} className="premium-nav-account lg:hidden" aria-label={signedIn ? spaceLabel : journey.login}>
         <UserRound size={20} aria-hidden="true" />
       </Link>
     </div>

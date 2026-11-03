@@ -1,14 +1,16 @@
+import type { FranchiseSupervisionMetrics } from "./metrics";
+import type { ProviderDossier } from "../network/provider-dossier";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-export function canApplyFranchiseSpaceDemo(_organizationName?: string | null) {
-  return process.env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
+export function canApplyFranchiseSpaceDemo() {
+  return false;
 }
 
 export type Tone = "mint" | "peach" | "violet" | "sky";
 export type FolderActivity = { id: string; type: string; occurredAt: string; summary: string; evidence: string[] };
 export type FolderEvent = { id: string; from: string | null; to: string; reasonCode: string; occurredAt: string; evidence: string[] };
 export type MatchingRow = { id: string; name: string; status: string; href: string; tone: Tone };
-export type PersonRow = { id: string; name: string; services: string; status: string; next: string; tone: Tone; stage: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[] };
+export type PersonRow = { id: string; linkedOrganizationId?:string|null;createdAt?:string;dossier?:ProviderDossier; name: string; services: string; status: string; next: string; tone: Tone; stage: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[] };
 export type RequestRow = { id: string; title: string; stage: string; owner: string; flag: string; tone: Tone; stageCode?: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[]; matching?: MatchingRow[] };
 export type DocumentRow = { id: string; title: string; owner: string; status: string; href: string; kind: "evidence" | "renewal"; due?: string };
 export type MessageRow = { id: string; title: string; meta: string; href: string; tone: Tone };
@@ -16,7 +18,7 @@ export type NoticeRow = { id: string; title: string; meta: string; href: string 
 export type SupervisionRow = { id: string; title: string; status: string; meta?: string; href: string; tone?: Tone; rowVersion?: number };
 export type QualityRow = { id: string; title: string; type: string; status: string; next: string; tone: Tone; href?: string };
 export type FinanceKind = "statement" | "entryFee" | "payout" | "preStatement";
-export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string; kind?: FinanceKind };
+export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string; kind?: FinanceKind;href?:string };
 
 export function demoFranchiseSpaces(locale: Locale, query: string) {
   const fr = locale === "fr";
@@ -90,6 +92,9 @@ export function demoFranchiseSpaces(locale: Locale, query: string) {
       { id: "ph3", title: fr ? "Modification des droits d’accès" : "تعديل حقوق الوصول", detail: fr ? "Accès documents restreint au périmètre" : "الوصول للوثائق محصور بالنطاق" },
       { id: "ph4", title: fr ? "Validation d’une action" : "المصادقة على إجراء", detail: fr ? "Relance qualité validée" : "صودق على متابعة الجودة" },
     ],
+    metrics:null as FranchiseSupervisionMetrics|null,
+    unavailableSections:[] as string[],
+    providerDossiers: [] as ProviderDossier[],
     canWrite: false,
     people: [
       { id: "pr1", name: fr ? "Studio Atlas" : "ستوديو أطلس", services: fr ? "Identité et supports" : "هوية ودعائم", status: fr ? "Qualifié" : "مؤهل", next: fr ? "Suivi trimestriel" : "متابعة فصلية", tone: "mint" as const, stage: "VERIFIED", email: "atlas@example.invalid", source: "NETWORK", nextFollowupAt: "2026-12-01T00:00:00.000Z", activities: [{ id: "pa1", type: "INVITATION", occurredAt: "2026-09-10T10:00:00.000Z", summary: fr ? "Invitation envoyée au professionnel." : "أُرسلت الدعوة للمهني.", evidence: ["invite://atlas"] }], pipelineEvents: [{ id: "pe1", from: "SENT", to: "VERIFIED", reasonCode: "ELIGIBILITY_CONFIRMED", occurredAt: "2026-09-12T10:00:00.000Z", evidence: [] }] },

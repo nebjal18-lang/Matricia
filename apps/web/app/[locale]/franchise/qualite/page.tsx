@@ -5,10 +5,10 @@ import { franchiseCommandScope, franchiseMandateName, loadFranchiseSpaceFromLibr
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
-export default async function FranchiseQualityPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; q?: string; page?: string }> }) {
+export default async function FranchiseQualityPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string; q?: string; page?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId });
+  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const c = franchiseCopy(locale);
   const mandateName = franchiseMandateName(result);
   const board = await loadFranchiseSpaceFromLibrary({ locale, query: space.selectedQuery, result });

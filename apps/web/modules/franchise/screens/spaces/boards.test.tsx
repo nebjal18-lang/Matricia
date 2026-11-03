@@ -87,7 +87,8 @@ describe("franchise space boards", () => {
     expect(documents).toContain("invite://atlas");
     expect(documents).toContain("name=\"q\"");
     const messages = renderToStaticMarkup(<MessagesBoard locale="fr" query="" board={board} />);
-    expect(messages).toContain("Invitation envoyée");
+    expect(messages).not.toContain("Invitation envoyée");
+    expect(messages).toContain("Aucun message lié");
     expect(messages).not.toMatch(/50\s*%|Hatim Ahmitech|Jalil-NEOXA/i);
   });
 
@@ -219,6 +220,7 @@ describe("franchise space boards", () => {
     expect(incidents).toContain("Consigner l’instruction");
     const users = renderToStaticMarkup(<PerimeterBoard locale="fr" query={`?organizationId=${organizationId}`} board={board} view="utilisateurs" organizationId={organizationId} />);
     expect(users).toContain("Inviter un utilisateur du mandat");
+    board.people[0]!.dossier={organizationId:"21212121-2121-4212-8212-212121212121",name:"Studio Atlas",companyStatus:"VERIFIED",status:"ACTIVE",createdAt:"2026-01-01T00:00:00Z",teamSize:5,regions:[],capacities:[],documents:[],qualifications:[{id:"15151515-1515-4151-8151-151515151515",serviceId:libraryId,serviceCode:"IT_BACKUP",status:"PENDING",rowVersion:1}]};
     const folder = renderToStaticMarkup(<NetworkBoard locale="fr" query={`?organizationId=${organizationId}`} board={board} itemId="44444444-4444-4444-8444-444444444444" view="qualification" organizationId={organizationId} />);
     expect(folder).toContain("Décider la qualification de service");
     const volumeForm = renderToStaticMarkup(<FranchiseFinanceBoard locale="fr" query={`?organizationId=${organizationId}`} board={board} view="volume" libraryId={libraryId} organizationId={organizationId} />);
@@ -226,6 +228,14 @@ describe("franchise space boards", () => {
     expect(volumeForm).toContain("Le contrat-cadre est créé ensuite par l’administration");
     const ar = renderToStaticMarkup(<QualityBoard locale="ar" query={`?organizationId=${organizationId}`} board={board} view="definitions" libraryId={libraryId} organizationId={organizationId} />);
     expect(ar).toContain("تسجيل التعريف");
+  });
+
+  it("préserve les mesures et documents disponibles quand une autre source est en panne",()=>{
+    const board=buildFranchiseSpaceBoard({locale:"fr",query:"",unavailableSections:["CRM"]});
+    board.pipeline[1]!.detail="297";
+    board.documents.push({id:"22222222-2222-4222-8222-222222222223",title:"Attestation privée réelle",owner:"Prestataire du mandat",status:"VERIFIED",href:"/fr/franchise/documents/22222222-2222-4222-8222-222222222223",kind:"evidence"});
+    const home=renderToStaticMarkup(<FranchiseHomeBoard locale="fr" query="" board={board}/>);expect(home).toContain("297");expect(home).toContain("Certaines sections sont temporairement indisponibles");
+    const docs=renderToStaticMarkup(<DocumentsBoard locale="fr" query="" board={board}/>);expect(docs).toContain("Attestation privée réelle");expect(docs).toContain("Certaines sections sont temporairement indisponibles");
   });
 
   it("affiche un état vide hors démo sans inventer un réseau", () => {

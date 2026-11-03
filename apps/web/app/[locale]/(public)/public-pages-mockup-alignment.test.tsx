@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@/modules/shared/lib/auth/select-workspace", () => ({ selectWorkspace: vi.fn() }));
+vi.mock("@/modules/public/ui/site/public-navigation-server", () => ({ PublicNavigationServer: ({ locale }: { locale: "fr" | "ar" }) => <PublicNavigation locale={locale} /> }));
 vi.mock("next/navigation", () => ({
   notFound: vi.fn(() => { throw new Error("NOT_FOUND"); }),
   usePathname: () => "/fr",

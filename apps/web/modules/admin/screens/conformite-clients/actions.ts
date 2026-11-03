@@ -157,7 +157,7 @@ export type SafeComplianceCase = {
   questions: ComplianceQuestion[];
 };
 export type ComplianceReviewResult =
-  | { status: "success"; cases: SafeComplianceCase[] }
+  | { status: "success"; cases: SafeComplianceCase[]; page: number; hasNext: boolean; counts: Record<"all"|"check"|"complement"|"review"|"decided", number> }
   | { status: "error"; reason: "UNAUTHENTICATED" | "MFA_REQUIRED" | "FORBIDDEN" | "UNAVAILABLE" };
 export type ComplianceDecisionState =
   | { status: "idle" }
@@ -193,19 +193,18 @@ function safeOrganizationName(displayName: string | null, legalName: string | nu
   return value?.slice(0, 200) ?? null;
 }
 
-export async function listClientComplianceReviews(): Promise<ComplianceReviewResult> {
+export async function listClientComplianceReviews(options: {page?: number; filter?: string; caseId?: string} = {}): Promise<ComplianceReviewResult> {
   const context = await centralContext();
   if (context.status === "error") return context;
-  const { data: rawCases, error: casesError } = await context.supabase
-    .from("client_compliance_cases")
-    .select("id,organization_id,status,current_profile_version,submitted_at,decision_reason_public,created_at,updated_at")
-    .order("updated_at", { ascending: false })
-    .limit(50);
-  if (casesError) return { status: "error", reason: "UNAVAILABLE" };
-  const cases = z.array(caseRowSchema).safeParse(rawCases);
-  if (!cases.success) return { status: "error", reason: "UNAVAILABLE" };
+  const input = z.object({page: z.number().int().min(1).max(100000), filter: z.enum(["all","check","complement","review","decided"]), caseId: z.string().uuid().optional()}).safeParse({page: options.page ?? 1, filter: options.filter ?? "all", caseId: options.caseId});
+  if (!input.success) return {status: "error", reason: "UNAVAILABLE"};
+  const result = await context.supabase.rpc("get_admin_client_compliance_page_v1", {p_page: input.data.page, p_filter: input.data.filter, p_case_id: input.data.caseId ?? null});
+  const page = z.object({cases: z.array(caseRowSchema), page: z.number().int(), has_next: z.boolean(), counts: z.object({all:z.number().int(),check:z.number().int(),complement:z.number().int(),review:z.number().int(),decided:z.number().int()})}).safeParse(result.data);
+  if (result.error || !page.success) return {status: "error", reason: "UNAVAILABLE"};
+  const cases = {data: page.data.cases};
+  const pagination = {page: page.data.page, hasNext: page.data.has_next, counts: page.data.counts};
   const caseIds = cases.data.map((item) => item.id);
-  if (caseIds.length === 0) return { status: "success", cases: [] };
+  if (caseIds.length === 0) return { status: "success", cases: [], ...pagination };
 
   const [profilesResult, evidenceResult, anomaliesResult, questionsResult] = await Promise.all([
     context.supabase
@@ -248,6 +247,7 @@ export async function listClientComplianceReviews(): Promise<ComplianceReviewRes
 
   return {
     status: "success",
+    ...pagination,
     cases: cases.data.map((item) => {
       const currentProfile = profiles.data.find((profile) =>
         profile.compliance_case_id === item.id && profile.version === item.current_profile_version);

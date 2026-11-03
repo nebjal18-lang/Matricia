@@ -1,0 +1,452 @@
+{
+  "status": "REVIEW_CANDIDATE_NOT_CLIENT_RELEASE",
+  "date": "2026-11-02",
+  "branch": "codex/final-corrections-20261102",
+  "base": "1ebf3eab3e89a0043355e343df1f16cc8c6f9092",
+  "baseContainsDesignAndConsolidation": true,
+  "mergedByThisMission": false,
+  "productionDeployed": false,
+  "source": [
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "7287dc6a7a90c1243dba71452f0a5bdf12f0a292e5ac4872eb6856f0a2704b70"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/page.test.tsx",
+      "sha256": "26456485419303c2b8e06c78b16156764fe247acfe961ec0a92891565bfa506b"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/page.tsx",
+      "sha256": "fbee14f50168f63f464047a72681aa55dd3e71722b21c389137e4f49a0db6ae5"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/error.tsx",
+      "sha256": "da357d388d3d22f2c6bdde3ccef62a89e933fa9446cdad6765f8a2c1975bdcff"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/[userId]/actor-pages.test.tsx",
+      "sha256": "6615beab04345133757c95d9034b523df1f10925847996c7d93438760eb7028b"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/[userId]/page.tsx",
+      "sha256": "edd710af43088fe7ff610f83d86ba463f4a8c96ab35ba378b287caab6420c7c4"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/[userId]/roles/page.tsx",
+      "sha256": "5305d45cc3ae82b59321b6abbeeb515225413739acc72134a7a2483150973309"
+    },
+    {
+      "file": "apps/web/modules/admin/data/command-center/repository.test.ts",
+      "sha256": "38e6fdbd583cc4254118e8e0a38888a92f42266b561b2621d8f4c6d2c5475958"
+    },
+    {
+      "file": "apps/web/modules/admin/data/command-center/repository.ts",
+      "sha256": "4ed6bd9699716c1ff4978c8dd7b37fbb0f4dae040c8a9ed99f0ef1530b4d3b60"
+    },
+    {
+      "file": "apps/web/modules/admin/data/spaces/actors-repository.test.ts",
+      "sha256": "e41f3a6554dc004062c5db8fbb40048f6d534ac6960637988a393cb3cce11311"
+    },
+    {
+      "file": "apps/web/modules/admin/data/spaces/actors-repository.ts",
+      "sha256": "d69c9f45b48bd5103840738e15a91f8d4df69e98f1db0a0baeb0b5f0eafd774b"
+    },
+    {
+      "file": "apps/web/modules/admin/data/spaces/context.test.ts",
+      "sha256": "be20d94aed79305cebce36eec320c2edc3f8106dead4652e1d16dbebfe4e1e54"
+    },
+    {
+      "file": "apps/web/modules/admin/data/spaces/context.ts",
+      "sha256": "6ac721eee7487828adb75ec0243711e90cf3c4d8a86e5bd833514859c667696e"
+    },
+    {
+      "file": "apps/web/modules/admin/data/supervision/read-failures.test.ts",
+      "sha256": "5b561b1eeb61a1c84ba71ece9deb079964b4a39b0e5bb12aa49a14a8f54dafca"
+    },
+    {
+      "file": "apps/web/modules/admin/data/supervision/repository.ts",
+      "sha256": "f2d6f9d18193acc91fa4c35c3cef042f9c87d7c20e37836b2c820dae2a6deace"
+    },
+    {
+      "file": "apps/web/modules/admin/screens/spaces/actor-load-error.tsx",
+      "sha256": "782f809e86cd2328be9b3a969b9924020d6f6fade17f31cc8cbca859e1941b15"
+    },
+    {
+      "file": "apps/web/modules/admin/screens/spaces/boards.tsx",
+      "sha256": "cf5d5e76367bb171fa7f8d2acb37ef8dbda5bbce2ad59c6cf1341e26be845a5d"
+    },
+    {
+      "file": "apps/web/modules/admin/ui/admin-experience.css",
+      "sha256": "2120d6700823ec768ae6381b44e0cdbabb38c261ddabdb82e39ac16ac36a01f4"
+    },
+    {
+      "file": "apps/web/modules/admin/ui/admin-read-error.tsx",
+      "sha256": "bb193917e99aa762147a73ce5ca71331ba2eab2815a9955f8500fdb5592a3bcb"
+    },
+    {
+      "file": "apps/web/modules/client/ui/client-experience.css",
+      "sha256": "333aff0a561175edfc8edde3c33f1ee7d8d9812bbb83761a8f30ebb7789c2932"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/account-security/platform-access.test.ts",
+      "sha256": "6ff3a19d31970edbeef460082175d090ba95c1a0120a11ab7b6f88996b420caf"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/account-security/platform-access.ts",
+      "sha256": "a7594e318a1784525c2db8555629f6b4276cc5ec6d1fbdfdcad080bac4b0986e"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/auth/read-failure.ts",
+      "sha256": "0eb0b50281c519fed8c0a12b6657027a07731e8fdb774485385777f32954889f"
+    },
+    {
+      "file": "package.json",
+      "sha256": "989dbdb8c4c60af8554440c0281495e811717ce60d4c6bd1e6840d5ffe6ef0bf"
+    },
+    {
+      "file": "supabase/tests/0097_real_payment_gateways.test.sql",
+      "sha256": "104949b548bc778b374a2f6b2d36406afe571e8600a53150948fedd3cdf07b31"
+    },
+    {
+      "file": "supabase/tests/0104_contract_mission_checklist_snapshot.test.sql",
+      "sha256": "e4c9010f5bbe486af5676881d12eec634c75578a1203cbcb8e243ae8eeb56151"
+    },
+    {
+      "file": "supabase/tests/0183_delivery_integrations.test.sql",
+      "sha256": "ddc0bee4329e21aa50967b314d57fd1f802598d4f8ce7374dfa76510afceea23"
+    },
+    {
+      "file": "supabase/tests/0184_subscription_refunds.test.sql",
+      "sha256": "58ad9e1b8789abae03ac61c95550c350504534f1fd33214183dc6f2c0dc36e3e"
+    },
+    {
+      "file": "supabase/tests/0187_refund_native_reconciliation.test.sql",
+      "sha256": "1d69d3354a4750bb7252b078eb263579a45985df3d40c7470f0eeaaa96defa61"
+    },
+    {
+      "file": "supabase/tests/0202_subscription_financial_hold_guards.test.sql",
+      "sha256": "045dd38586b39403759fd65d872f59959d5def53bc028fec8d270c1a3bdafdac"
+    },
+    {
+      "file": "supabase/tests/0205_client_identity_operation_guards.test.sql",
+      "sha256": "714154b8bd2f8269498256b22be21514520437ff817c191a52fd6eda1e2148f9"
+    },
+    {
+      "file": "supabase/tests/0217_meta_media_durable_execution.test.sql",
+      "sha256": "9a554123e55d03b09c5e2bfce621cfdade8d2f8392ede6e21e20645cd8fbb8cf"
+    },
+    {
+      "file": "supabase/tests/0218_contract_signature_evidence_bridge.test.sql",
+      "sha256": "ee37283b889fa16764ab31febecec1517a6267bacf6e3c88b93e5129ef1b8085"
+    },
+    {
+      "file": "supabase/tests/0225_payment_trusted_environment.test.sql",
+      "sha256": "f7baad86c43d2f45aa9f7b4cc0e743ee1069c881a86752c17fdf1d7e8ad5bf3b"
+    },
+    {
+      "file": "supabase/tests/0245_subscription_funding_admission.test.sql",
+      "sha256": "b4ff22c12abec1339c142e444467e0b2dc0653e99dd3ead430b3136f3338254f"
+    },
+    {
+      "file": "supabase/tests/0246_credit_lot_canonical_funding.test.sql",
+      "sha256": "f64f100f224251b64637cb146786de2545d12f710b64941a169f0216fd34344e"
+    },
+    {
+      "file": "supabase/tests/0249_subscription_checkout_coordination.test.sql",
+      "sha256": "0cdc5c31b4beeabc7154747b2d596c386b7ebb896fb005422a204bfbdc7f164d"
+    },
+    {
+      "file": "supabase/tests/0254_benefit_admission_policies.test.sql",
+      "sha256": "9f0d0a3a1e2b3b30a30ce487e4b2190ee5c701d76d1d516fbfa60679da62b4cb"
+    },
+    {
+      "file": "supabase/tests/0262_subscription_refund_frozen_posting_accounts.test.sql",
+      "sha256": "af4f0bef2026038678e4e9948eaf669fa8636e1111a50bd287d2fb4b845c741b"
+    },
+    {
+      "file": "supabase/tests/helpers/run-isolated-fixtures.mjs",
+      "sha256": "51a3f4b15132a69a89938c508b570e91f930042ab1cd8eb7f86397e5c72e3182"
+    },
+    {
+      "file": "tests/e2e/helpers/final-admin-acceptance.mjs",
+      "sha256": "a88bba34a4bc4062ba1d8bcd0d27b36b01f95feb54bc23fed68f6c36718b8ca5"
+    }
+  ],
+  "quality": {
+    "types": "PASSED",
+    "lint": "PASSED (global plus final changed sources)",
+    "build": "PASSED Next16.4.1 final candidate",
+    "webUnitPassed": 2150,
+    "webUnitSkipped": 1,
+    "workerUnitPassed": 102,
+    "libraryUnitPassed": 137,
+    "totalUnitPassed": 2389,
+    "defaultStorageOptInSkipped": true,
+    "integration": "PASSED",
+    "tooling": "PASSED",
+    "phase00Structure": "PASSED",
+    "initialResourceContention": {
+      "timeouts": 4,
+      "testTimeoutMs": 5000,
+      "assertionsUnchanged": true,
+      "serialWorkspaceConcurrency": 1,
+      "vitestWorkers": 2,
+      "finalSerialSuitePassed": true,
+      "ciConcurrencyBounded": true
+    }
+  },
+  "nativeM01": {
+    "scope": "LOCAL_SYNTHETIC_NATIVE_AUTH_AND_ORGANIZATION_ACCEPTANCE",
+    "runId": "2c7361f6-7137-48e7-8623-5a1d5148d7be",
+    "roleBootstrap": "TEST_ONLY_NOT_GOVERNED_ROLE_ASSIGNMENT_PROOF",
+    "provenance": {
+      "harnessSha256": "a88bba34a4bc4062ba1d8bcd0d27b36b01f95feb54bc23fed68f6c36718b8ca5",
+      "buildId": "vpnoUl-uye9pyhnzPKCJH"
+    },
+    "rpc": [
+      {
+        "actor": "admin",
+        "authenticatedAal2": true,
+        "code": null,
+        "organizationCount": 100,
+        "schemaValid": true
+      },
+      {
+        "actor": "ordinary",
+        "authenticatedAal2": true,
+        "code": "42501",
+        "organizationCount": null,
+        "schemaValid": false
+      }
+    ],
+    "browser": [
+      {
+        "locale": "fr",
+        "width": 360,
+        "realSearchAndSelection": true,
+        "ownOrganizationHeadingVerified": true
+      },
+      {
+        "locale": "fr",
+        "width": 1280,
+        "realSearchAndSelection": true,
+        "ownOrganizationHeadingVerified": true
+      },
+      {
+        "locale": "ar",
+        "width": 360,
+        "realSearchAndSelection": true,
+        "ownOrganizationHeadingVerified": true
+      },
+      {
+        "locale": "ar",
+        "width": 1280,
+        "realSearchAndSelection": true,
+        "ownOrganizationHeadingVerified": true
+      }
+    ],
+    "cleanup": {
+      "verified": true,
+      "actors": 2,
+      "organizations": 1,
+      "immutableEvidenceRetained": true
+    },
+    "status": "PASSED"
+  },
+  "publicBrowser": {
+    "passed": 18,
+    "skipped": 0,
+    "flaky": 0,
+    "logSha256": "17c45274c183328205b1e5fd4e67fdfdd9ee76399dfad18ed25445a1a8ce7548"
+  },
+  "sql": {
+    "freshMigrations": 417,
+    "executedContracts": 225,
+    "passedAssertions": 4926,
+    "failedExecutedContracts": 0,
+    "excludedContracts": [
+      "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+      "supabase/tests/0071_rewards_referral_audience_hardening.test.sql",
+      "supabase/tests/0083_franchise_digest_role_hardening.test.sql",
+      "supabase/tests/0089_franchise_digest_scope_hardening.test.sql",
+      "supabase/tests/0092_franchise_digest_scheduler_bounding.test.sql",
+      "supabase/tests/0101_quote_tax_authority_hardening.test.sql",
+      "supabase/tests/0102_provider_quote_exact_amount_projection.test.sql",
+      "supabase/tests/0106_client_project_contract_calendar_completeness.test.sql",
+      "supabase/tests/0107_client_calendar_unlinked_mission_regression.test.sql",
+      "supabase/tests/0132_marketing_weekly_trends.test.sql",
+      "supabase/tests/0134_client_provider_completion.test.sql",
+      "supabase/tests/0135_transversal_approval_accrual_completion.test.sql",
+      "supabase/tests/0137_reputation_badges_checklists_authoritative.test.sql",
+      "supabase/tests/0154_messaging_comparison_functional.test.sql",
+      "supabase/tests/0155_matching_rotation_behavioral.test.sql",
+      "supabase/tests/0167_provider_overdue_opportunity_hold.test.sql",
+      "supabase/tests/0168_provider_credit_notes_collection.test.sql",
+      "supabase/tests/0192_franchise_messaging_delivery.test.sql",
+      "supabase/tests/0193_admin_approved_consultation.test.sql",
+      "supabase/tests/0193_franchise_provider_bridge_delivery.test.sql",
+      "supabase/tests/0194_admin_canonical_identity_review.test.sql",
+      "supabase/tests/0194_franchise_metrics_delivery.test.sql",
+      "supabase/tests/0196_franchise_private_exports_delivery.test.sql",
+      "supabase/tests/0198_admin_consistent_snapshot_history.test.sql",
+      "supabase/tests/0198_franchise_network_contract_calendar.test.sql",
+      "supabase/tests/0199_client_manual_canonical_identity_review.test.sql",
+      "supabase/tests/0199_franchise_catalog_server_pages.test.sql",
+      "supabase/tests/0200_franchise_question_editor.test.sql",
+      "supabase/tests/0201_client_delivery_workflows.test.sql",
+      "supabase/tests/0201_franchise_review_version_diff.test.sql",
+      "supabase/tests/0202_internal_message_server_search.test.sql",
+      "supabase/tests/0203_client_complete_history_search.test.sql",
+      "supabase/tests/0203_franchise_questionnaire_bundle_review.test.sql",
+      "supabase/tests/0204_client_commercial_documents.test.sql",
+      "supabase/tests/0206_client_request_intervention_mode.test.sql",
+      "supabase/tests/0207_internal_message_history_pages.test.sql",
+      "supabase/tests/0208_client_diagnostic_service_scope.test.sql",
+      "supabase/tests/0209_client_published_diagnostic_engine.test.sql",
+      "supabase/tests/0210_current_contract_amendment.test.sql",
+      "supabase/tests/0212_provider_quote_identity_anchors.test.sql",
+      "supabase/tests/0212_unused_organization_merge.test.sql",
+      "supabase/tests/0213_client_request_tax_origins.test.sql",
+      "supabase/tests/0214_client_request_catalog_authority.test.sql",
+      "supabase/tests/0216_signature_trusted_deployment.test.sql",
+      "supabase/tests/0220_canonical_selected_quote_contracts.test.sql",
+      "supabase/tests/0227_internal_message_attachment_pipeline.test.sql",
+      "supabase/tests/0228_signature_policy_governance.test.sql",
+      "supabase/tests/0231_admin_complete_identity_revision.test.sql",
+      "supabase/tests/0235_contract_amendment_core_bounds.test.sql",
+      "supabase/tests/0237_provider_canonical_quote_address.test.sql",
+      "supabase/tests/0238_selected_quote_identity_refresh.test.sql",
+      "supabase/tests/0241_signature_canonical_source_archives.test.sql",
+      "supabase/tests/0244_delivery_proof_storage_scope.test.sql",
+      "supabase/tests/0247_credit_revenue_economic_allocation.test.sql",
+      "supabase/tests/0250_mission_frozen_catalog_source.test.sql",
+      "supabase/tests/0275_credit_economic_profit_close_readiness.test.sql"
+    ],
+    "all281Certified": false,
+    "classification": "GUARD_SAFE_SUBSET_OF_SYNTHETIC_SQL_CONTRACTS",
+    "runtimeSecurity": {
+      "publicTables": 608,
+      "tablesWithoutRls": 0,
+      "pgtapApiExecutable": false
+    },
+    "cloneCleanup": "PASSED",
+    "futureExpiredCreditCycleNotCertified": true
+  },
+  "cleanup": {
+    "nativeCohorts": [
+      {
+        "run": "124ab009-8d2c-4041-8869-b9f1999d1d48",
+        "status": "FAILED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      },
+      {
+        "run": "2c7361f6-7137-48e7-8623-5a1d5148d7be",
+        "status": "PASSED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      },
+      {
+        "run": "3fc60887-6d1d-4512-9587-2e87cea30cee",
+        "status": "FAILED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      },
+      {
+        "run": "c1ef4a82-2b24-49c1-87c3-206f1e8bee26",
+        "status": "PASSED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      },
+      {
+        "run": "d92b48a4-df0d-483a-9c85-aa7b1b01e483",
+        "status": "FAILED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      },
+      {
+        "run": "ee448dc2-1937-4897-b668-9b65aaf2d32e",
+        "status": "PASSED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      },
+      {
+        "run": "f7d3a203-9019-4d20-9d56-07072a62ba06",
+        "status": "PASSED",
+        "cleanup": {
+          "verified": true,
+          "actors": 2,
+          "organizations": 1,
+          "immutableEvidenceRetained": true
+        }
+      }
+    ],
+    "actorsNeutralized": 14,
+    "organizationsArchived": 7,
+    "allVerified": true,
+    "ownedAcceptanceServerStopped": true
+  },
+  "independentAudit": {
+    "agent": "audit_release_scope",
+    "source": "ACK bounded source review including final Auth503, Next and explicit multi-organization selection fixes",
+    "scope": "Does not certify all APIs or all tenant isolation policies",
+    "evidence": "ACK source fingerprints, native helper/build provenance, 225 SQL hashes and complete fixture cleanup; final logs attached"
+  },
+  "releaseGate": {
+    "status": "REFUSED",
+    "unsatisfiedConditions": 74,
+    "verifiedRequirements": 5,
+    "totalRequirements": 76
+  },
+  "pullRequest": {
+    "created": false,
+    "reason": "GitHub API GraphQL Forbidden; api.github.com absent from environment allowlist",
+    "base": "codex/bootstrap-foundation",
+    "head": "codex/final-corrections-20261102"
+  },
+  "limits": [
+    "M02 report incomplete (nine routes not identified); M03–M30 descriptions not supplied",
+    "56 SQL files excluded by the conservative bypass-reference filter, not reported as passing",
+    "Actual expired credit-cycle and already-due annual-month scenarios not certified by revised 0246",
+    "Original exact Admin demo account not reused: native own synthetic Admin AAL2 session tested on verified local environment",
+    "No hosted staging, production deployment, full assistive-technology audit or signed client acceptance"
+  ],
+  "finalAcceptanceLogs": [
+    {
+      "file": "work/final-candidate/final-acceptance/web-unit.log",
+      "sha256": "b1e582ab2d21a516086d9e4b3fd543ee44280a6369b4a576f40322a793dfc920"
+    },
+    {
+      "file": "work/final-candidate/final-acceptance/public-browser.log",
+      "sha256": "17c45274c183328205b1e5fd4e67fdfdd9ee76399dfad18ed25445a1a8ce7548"
+    },
+    {
+      "file": "work/final-candidate/final-acceptance/build.log",
+      "sha256": "ef0ac4e0efd00e9a9c1c0c61f8f23d14e3dd4dc4ec33da246e828f4e028f0117"
+    }
+  ]
+}

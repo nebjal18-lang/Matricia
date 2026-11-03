@@ -1,0 +1,15 @@
+import{describe,it,expect}from"vitest";
+import{boxApprovalCommand,currentBoxApproval,planBoxRuleFromChoice,boxApprovalContextSchema}from"./box-approval-model";
+const id="d2560000-0000-4000-8000-000000000001",other="d2560000-0000-4000-8000-000000000002",hash="a".repeat(64),oldHash="b".repeat(64);
+const context={source:{schema_version:1,rule_id:id,plan_version_id:id,box_version_id:id,box_hash:hash,box_creator:id,rule_creator:other,box_type:"SEMI_CUSTOM",name_fr:"TEST",name_ar:"اختبار",version:1,credit_budget:"9007199254740993",currency:"MAD",rollover_months:2,rule:{schema_version:1,period_unit:"SUBSCRIPTION_CYCLE",budget_rule:"AT_MOST"},rule_effective_from:"2026-11-01",rule_effective_to:null,box_effective_from:"2026-11-01",box_effective_to:null,slots:[{slot_code:"CORE",slot_kind:"MANDATORY",minimum_selections:1,maximum_selections:1,benefits:[{id,content_hash:hash,name_fr:"TEST",name_ar:"اختبار",credit_cost:"9007199254740993",currency:"MAD",library_id:null}]}]},source_hash:hash,approved:false,approval_id:null,approved_at:null,approval_source_hash:null,approval_current:false,can_approve:true};
+describe("independent exact box configuration approval",()=>{
+ it("sends only server source hash, exact rule and reviewed reason",()=>expect(boxApprovalCommand(id,context,"TEST independent review of all slots",true)).toEqual({p_plan_box_rule_id:id,p_expected_source_hash:hash,p_reason:"TEST independent review of all slots"}));
+ it("preserves exact large budget and benefit costs",()=>{const c=boxApprovalContextSchema.parse(context);expect(c.source.credit_budget).toBe("9007199254740993");expect(c.source.slots[0].benefits[0].credit_cost).toBe("9007199254740993");});
+ it.each([{...context,can_approve:false},{...context,source:{...context.source,rule_id:other}}])("refuses self or mismatched source authority",c=>expect(()=>boxApprovalCommand(id,c,"TEST independent review",true)).toThrow());
+ it("requires explicit review confirmation",()=>expect(()=>boxApprovalCommand(id,context,"TEST independent review",false)).toThrow());
+ it("does not call a historical approval current",()=>expect(currentBoxApproval(boxApprovalContextSchema.parse({...context,approved:true,approval_id:other,approval_source_hash:oldHash,approval_current:false}))).toBe(false));
+ it("does not invent current approval if old API omits its source hash",()=>expect(currentBoxApproval(boxApprovalContextSchema.parse({...context,approved:true,approval_source_hash:undefined,approval_current:undefined}))).toBe(false));
+ it("recognizes the exact independently approved source",()=>expect(currentBoxApproval(boxApprovalContextSchema.parse({...context,approved:true,approval_source_hash:hash,approval_current:true}))).toBe(true));
+ it.each(["","PLAN_BOX_V1","FREE_JSON"])("requires an explicit typed budget choice %s",v=>expect(()=>planBoxRuleFromChoice(v)).toThrow());
+ it.each(["AT_MOST","EXACT"])("builds the typed cycle rule %s",v=>expect(planBoxRuleFromChoice(v)).toEqual({schema_version:1,period_unit:"SUBSCRIPTION_CYCLE",budget_rule:v}));
+});

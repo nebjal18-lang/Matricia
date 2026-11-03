@@ -1,0 +1,155 @@
+[
+  {
+    "id": "M01",
+    "status": "CORRECTED_AND_VERIFIED_ON_CURRENT_LOCAL_CANDIDATE",
+    "route": "/fr/administration/entreprises + /ar/administration/entreprises",
+    "evidence": "nativeM01 in docs/evidence/final-candidate-20261102.json",
+    "originalBackendUnavailableReproduced": false,
+    "notes": "Original RPC UNAVAILABLE not reproduced with native Admin AAL2. Forbidden-as-empty, transport/Auth503 classification and inaccessible mobile actions reproduced and corrected; real search, menu and own organization heading verified."
+  },
+  {
+    "id": "M02",
+    "status": "INCOMPLETE_REPORT",
+    "notes": "Nine Admin screens mentioned, but route list and complete reproduction not supplied. Shared causes corrected; this identifier is not declared closed."
+  },
+  {
+    "id": "M03",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M04",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M05",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M06",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M07",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M08",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M09",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M10",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M11",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M12",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M13",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M14",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M15",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M16",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M17",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M18",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M19",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M20",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M21",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M22",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M23",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M24",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M25",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M26",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M27",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M28",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M29",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  },
+  {
+    "id": "M30",
+    "status": "DESCRIPTION_NOT_SUPPLIED",
+    "notes": "No observed behavior or acceptance criteria provided; no invented closure."
+  }
+]

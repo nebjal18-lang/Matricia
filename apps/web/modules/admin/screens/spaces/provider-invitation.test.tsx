@@ -1,0 +1,21 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+const m=vi.hoisted(()=>({list:vi.fn()}));
+vi.mock("server-only",()=>({}));
+vi.mock("next/navigation",async importOriginal=>({...await importOriginal<typeof import("next/navigation")>(),redirect:(url:string)=>{throw Error(`REDIRECT:${url}`);}}));
+vi.mock("@/app/[locale]/invitations/actions",()=>({listInvitations:m.list}));
+vi.mock("./actor-actions",()=>({requestActorMutation:async()=>({status:"idle"}),submitActorInvitation:async()=>({status:"idle"})}));
+import { ProviderInvitationWorkspace } from "./provider-invitation";
+import type { SpaceSnapshot } from "@/modules/admin/data/spaces/space-data";
+const snapshot:SpaceSnapshot={reason:null,rows:[{id:"provider",organizationId:"org",href:"",title:"Provider Org",status:"ACTIVE",cells:[],tone:"mint"}],treat:[],supervision:null,providers:null,governance:null};
+beforeEach(()=>{m.list.mockReset().mockResolvedValue({status:"success",organizations:[{id:"org",displayName:"Provider Org"}],invitations:[]});});
+describe("Provider invitation recipient and perimeter",()=>{
+ it("rethrows the actual Next redirect control signal instead of converting it to an unavailable invitation",async()=>{const signal=Object.assign(Error("NEXT_REDIRECT"),{digest:"NEXT_REDIRECT;replace;/fr/securite/compte;307;"});m.list.mockRejectedValue(signal);await expect(ProviderInvitationWorkspace({locale:"fr",query:"",snapshot})).rejects.toBe(signal);});
+ it("rethrows the actual Next not-found control signal",async()=>{const signal=Object.assign(Error("NEXT_HTTP_ERROR_FALLBACK"),{digest:"NEXT_HTTP_ERROR_FALLBACK;404"});m.list.mockRejectedValue(signal);await expect(ProviderInvitationWorkspace({locale:"fr",query:"",snapshot})).rejects.toBe(signal);});
+ it.each(["fr","ar"] as const)("uses the canonical email/role/organization invitation form in %s",async locale=>{const html=renderToStaticMarkup(await ProviderInvitationWorkspace({locale,query:"?organizationId=org",snapshot}));expect(html).toContain('name="invitedEmail"');expect(html).toContain('type="email"');expect(html).toContain('name="organizationId"');expect(html).toContain('value="org" selected=""');expect(html).toContain('value="PROVIDER_VIEWER" selected=""');expect(html).not.toContain('value="CLIENT_OWNER"');expect(html).not.toContain('value="FRANCHISE_OWNER"');expect(html).not.toContain('value="INVITE_DRAFT"');});
+ it("does not choose an organization implicitly",async()=>{const html=renderToStaticMarkup(await ProviderInvitationWorkspace({locale:"fr",query:"",snapshot}));expect(html).toContain('value="" selected=""');expect(html).toContain("Soumettre la demande d’invitation");});
+ it("offers a governed review when direct invitation is not allowed",async()=>{m.list.mockResolvedValue({status:"success",organizations:[],invitations:[]});const html=renderToStaticMarkup(await ProviderInvitationWorkspace({locale:"fr",query:"?organizationId=org",snapshot}));expect(html).toContain('name="canInvite" value="no"');expect(html).toContain("Soumettre la demande d’invitation");});
+ it("never fabricates an organization for an empty provider list",async()=>{const html=renderToStaticMarkup(await ProviderInvitationWorkspace({locale:"fr",query:"",snapshot:{...snapshot,rows:[]}}));expect(html).not.toContain('name="invitedEmail"');expect(html).toContain("Créez et vérifiez l’organisation");});
+ it("hides the form after a failed invitation authorization read",async()=>{m.list.mockRejectedValue(Error("internal secret"));const html=renderToStaticMarkup(await ProviderInvitationWorkspace({locale:"ar",query:"?organizationId=org",snapshot}));expect(html).not.toContain('name="invitedEmail"');expect(html).not.toContain("internal secret");expect(html).toContain("إعادة المحاولة");});
+ it("redirects authentication loss with the target scope",async()=>{m.list.mockResolvedValue({status:"error",reason:"UNAUTHENTICATED"});await expect(ProviderInvitationWorkspace({locale:"fr",query:"?organizationId=org",snapshot})).rejects.toThrow(/organizationId%3Dorg/);});
+});

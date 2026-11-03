@@ -7,6 +7,8 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
 import { canonicalizePublicNeedClassification, formatNeedScoreBasisPoints, publicNeedRequestHref, rankPublicNeedServices, type NeedDiscovery, type PublicNeedClassification } from "@/modules/public/data/need-intent/model";
 import { getPublicProviderTaxonomy } from "@/modules/public/data/provider-intent/model";
+import { publicCatalogueTranslationNotice } from "@/modules/public/data/catalogue/localized-label";
+import { getNeedStages, needRecapStep, needStageForStep, needStageIds } from "@/modules/public/data/journey/need-stages";
 
 type Draft = {
   version: 3;
@@ -54,11 +56,7 @@ const blank = (initialNeed = "", classification: PublicNeedClassification | null
 const unavailable = async (): Promise<SaveNeedState> => ({ status: "error", reason: "UNAVAILABLE" });
 
 export function needComposerSection(step: number) {
-  if (step >= 4) return "recap" as const;
-  if (step <= 0) return "describe" as const;
-  if (step === 1) return "understand" as const;
-  if (step === 2) return "questions" as const;
-  return "complete" as const;
+  return needStageForStep(step);
 }
 
 export function needProgressPercent(stageCurrent: number, stageTotal: number) {
@@ -131,7 +129,7 @@ export function parseNeedDraft(
       status: "valid",
       draft: {
         version: 3,
-        step: Math.min(4, Math.max(0, Number.isInteger(value.step) ? (value.step as number) : 0)),
+        step: Math.min(needRecapStep, Math.max(0, Number.isInteger(value.step) ? (value.step as number) : 0)),
         need: (value.need as string) || initialNeed,
         location: value.location as string,
         timing: value.timing as string,
@@ -218,7 +216,7 @@ export function NeedFlow({
   }, []);
 
   const goRecap = useCallback(() => {
-    setDraft((current) => ({ ...current, step: 4, confirmed: false, expiresAt: Date.now() + retentionMs }));
+    setDraft((current) => ({ ...current, step: needRecapStep, confirmed: false, expiresAt: Date.now() + retentionMs }));
   }, []);
 
   if (!loaded) {
@@ -227,14 +225,14 @@ export function NeedFlow({
         <section className="journey-card">
           <p className="journey-eyebrow">{copy.eyebrow}</p>
           <h1>{copy.title}</h1>
-          <NeedStageProgress authenticated={authenticated} stageCurrent={1} stageTotal={copy.stages.length} />
+          <NeedStageProgress authenticated={authenticated} stageCurrent={1} stageTotal={needStageIds.length} />
           <p role="status">{locale === "fr" ? "Reprise de votre brouillon…" : "جارٍ استعادة مسودتكم…"}</p>
         </section>
       </main>
     );
   }
 
-  if (draft.step >= 4) {
+  if (draft.step >= needRecapStep) {
     return (
       <NeedResult
         locale={locale}
@@ -247,6 +245,7 @@ export function NeedFlow({
         invalidSelection={invalidSelection}
         erase={erase}
         edit={() => setDraft((current) => ({ ...current, step: 0, confirmed: false }))}
+        back={() => setDraft((current) => ({ ...current, step: needRecapStep - 1, confirmed: false }))}
         confirm={() => setDraft((current) => ({ ...current, confirmed: true, expiresAt: Date.now() + retentionMs }))}
         updateClassification={(classification) =>
           setDraft((current) => ({ ...current, classification, confirmed: false, expiresAt: Date.now() + retentionMs }))
@@ -271,7 +270,7 @@ export function NeedFlow({
   );
 }
 
-function NeedComposer({
+export function NeedComposer({
   locale,
   draft,
   setDraft,
@@ -297,9 +296,14 @@ function NeedComposer({
   const copy = getPublicJourneyCopy(locale).need;
   const taxonomy = useMemo(() => getPublicProviderTaxonomy(locale), [locale]);
   const [customTag, setCustomTag] = useState("");
-  const [organizationId, setOrganizationId] = useState(organizations[0]?.id ?? "");
-  const [discovery, setDiscovery] = useState<NeedDiscovery | null>(null);
-  const [discovering, setDiscovering] = useState(false);
+  const [selectedOrganizationId, setOrganizationId] = useState("");
+  const organizationId = organizations.some((item) => item.id === selectedOrganizationId) ? selectedOrganizationId : organizations[0]?.id ?? "";
+  const discoveryText = draft.need.trim();
+  const discoveryKey = JSON.stringify([locale, organizationId, discoveryText]);
+  const canDiscover = authenticated && Boolean(discoverAction) && Boolean(organizationId) && discoveryText.length >= 10;
+  const [discoveryResult, setDiscoveryResult] = useState<{ key: string; value: NeedDiscovery | null } | null>(null);
+  const discovery = canDiscover && discoveryResult?.key === discoveryKey ? discoveryResult.value : null;
+  const discovering = canDiscover && discoveryResult?.key !== discoveryKey;
   const tooShort = draft.need.length > 0 && draft.need.trim().length < 10;
   const canContinue = draft.need.trim().length >= 10;
   const libraryCode = draft.classification?.libraryCode ?? "";
@@ -316,8 +320,9 @@ function NeedComposer({
   const missingQuestions = (discovery?.questions ?? []).filter((item) => !selectedServiceId || item.serviceId === selectedServiceId);
   const unansweredRequired = missingQuestions.filter((item) => item.requiredForQuote && !draft.answers[item.dataKey]?.trim() && !["FILE", "MULTI_FILE", "IMAGE", "TABLE", "REPEATER"].includes(item.answerType));
   const section = needComposerSection(draft.step);
-  const stageIndex = section === "complete" ? 3 : section === "questions" ? 2 : section === "understand" ? 1 : 0;
-  const stageTotal = copy.stages.length;
+  const stages = getNeedStages(locale);
+  const stageIndex = stages.findIndex((stage) => stage.id === section);
+  const stageTotal = stages.length;
   const stageCurrent = stageIndex + 1;
   const missing = [
     draft.need.trim() ? null : locale === "ar" ? "وصف الاحتياج" : "Description du besoin",
@@ -327,55 +332,39 @@ function NeedComposer({
   ].filter(Boolean);
 
   useEffect(() => {
-    if (organizationId || !organizations[0]) return;
-    setOrganizationId(organizations[0].id);
-  }, [organizationId, organizations]);
-
-  useEffect(() => {
-    const text = draft.need.trim();
-    if (!authenticated || !discoverAction || !organizationId || text.length < 10) {
-      setDiscovery(null);
-      setDiscovering(false);
-      return;
-    }
+    if (!canDiscover || !discoverAction) return;
     let cancelled = false;
-    setDiscovering(true);
     const timer = window.setTimeout(() => {
-      void discoverAction({ locale, organizationId, inputText: text }).then((result) => {
+      void discoverAction({ locale, organizationId, inputText: discoveryText }).then((result) => {
         if (cancelled) return;
-        setDiscovering(false);
-        setDiscovery(result.status === "success" ? result.value : null);
+        const value = result.status === "success" ? result.value : null;
+        setDiscoveryResult({ key: discoveryKey, value });
+        if (!value) return;
+        setDraft((current) => {
+          const answers = { ...current.answers };
+          let changed = false;
+          let location = current.location;
+          if (!location.trim() && value.locationPrefill) {
+            location = value.locationPrefill;
+            changed = true;
+          }
+          for (const question of value.questions) {
+            if (question.prefill && !answers[question.dataKey]) {
+              answers[question.dataKey] = question.prefill.value;
+              changed = true;
+            }
+          }
+          return changed ? { ...current, answers, location, expiresAt: Date.now() + retentionMs } : current;
+        });
       }).catch(() => {
-        if (cancelled) return;
-        setDiscovering(false);
-        setDiscovery(null);
+        if (!cancelled) setDiscoveryResult({ key: discoveryKey, value: null });
       });
     }, 400);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [authenticated, discoverAction, draft.need, locale, organizationId]);
-
-  useEffect(() => {
-    if (!discovery) return;
-    setDraft((current) => {
-      const answers = { ...current.answers };
-      let changed = false;
-      let location = current.location;
-      if (!location.trim() && discovery.locationPrefill) {
-        location = discovery.locationPrefill;
-        changed = true;
-      }
-      for (const question of discovery.questions) {
-        if (question.prefill && !answers[question.dataKey]) {
-          answers[question.dataKey] = question.prefill.value;
-          changed = true;
-        }
-      }
-      return changed ? { ...current, answers, location, expiresAt: Date.now() + retentionMs } : current;
-    });
-  }, [discovery, setDraft]);
+  }, [canDiscover, discoverAction, discoveryKey, discoveryText, locale, organizationId, setDraft]);
 
   function patch(next: Partial<Draft>) {
     setDraft((current) => ({ ...current, ...next, confirmed: false, expiresAt: Date.now() + retentionMs }));
@@ -419,6 +408,14 @@ function NeedComposer({
     patch({ answers: { ...draft.answers, [dataKey]: value.slice(0, 1200) } });
   }
 
+  function continueToNextStep() {
+    if (needStageForStep(draft.step + 1) === "recap") goRecap();
+    else patch({ step: draft.step + 1 });
+  }
+  const continueLabel = needStageForStep(draft.step + 1) === "recap"
+    ? locale === "fr" ? "Voir le récapitulatif" : "عرض الملخص"
+    : copy.continue;
+
   return (
     <main id="contenu-principal" className={authenticated ? "client-page client-need-shell" : "journey-shell"} dir={locale === "ar" ? "rtl" : "ltr"}>
       {authenticated ? null : (
@@ -452,8 +449,8 @@ function NeedComposer({
           {authenticated ? null : <h1>{copy.title}</h1>}
           {authenticated ? null : <p className="journey-intro">{copy.intro}</p>}
           <ol className="journey-need-stages" aria-label={copy.title}>
-            {copy.stages.map(([title, detail], index) => (
-              <li key={title} data-state={index === stageIndex ? "current" : index < stageIndex ? "done" : "todo"}>
+            {stages.map(({ id, title, detail }, index) => (
+              <li key={id} aria-current={index === stageIndex ? "step" : undefined} data-state={index === stageIndex ? "current" : index < stageIndex ? "done" : "todo"}>
                 <span>{index + 1}</span>
                 <strong>{title}</strong>
                 <em>{detail}</em>
@@ -461,12 +458,12 @@ function NeedComposer({
             ))}
           </ol>
           <NeedStageProgress authenticated={authenticated} stageCurrent={stageCurrent} stageTotal={stageTotal} />
+          <h2 id="need-step-title">{stageCurrent}. {stages[stageIndex]!.title}</h2>
           {section === "describe" ? (
           <>
-          <h2 id="need-question">1. {copy.title}</h2>
           <p id="need-help" className="journey-intro">{copy.help}</p>
           <textarea
-            aria-labelledby="need-question"
+            aria-labelledby="need-step-title"
             aria-describedby={["need-help", "need-example", tooShort ? "need-guidance" : null].filter(Boolean).join(" ")}
             className="journey-textarea"
             autoFocus
@@ -498,8 +495,8 @@ function NeedComposer({
 
           {section === "understand" ? (
           <>
-          <h2>2. {copy.suggestTitle}</h2>
           <p className="public-muted">{copy.suggestLead}</p>
+          {locale === "ar" ? <p className="journey-field-help" role="note">{publicCatalogueTranslationNotice.ar}</p> : null}
           {discovering ? <p role="status" className="journey-field-help">{copy.discovering}</p> : null}
           {canContinue && !suggestions.length && !discovering ? <p className="journey-field-help">{copy.suggestEmpty}</p> : null}
           {suggestions.length ? (
@@ -507,7 +504,7 @@ function NeedComposer({
               {suggestions.map((item) => (
                 <li key={item.serviceCode}>
                   <button type="button" aria-pressed={draft.classification?.serviceCode === item.serviceCode} onClick={() => confirmSuggestion(item.libraryCode, item.serviceCode)}>
-                    <strong lang="fr">{item.serviceName}</strong>
+                    <strong lang={locale}>{item.serviceName}</strong>
                     <small>{item.libraryName} · {copy.suggestScore} {formatNeedScoreBasisPoints(item.scoreBasisPoints, locale)}</small>
                   </button>
                 </li>
@@ -523,8 +520,8 @@ function NeedComposer({
           <div className="journey-need-taxonomy">
             <label>
               {locale === "ar" ? "المجال" : "Domaine"}
-              <select value={libraryCode} onChange={(event) => setLibrary(event.target.value)}>
-                <option value="">{locale === "ar" ? "بحث عن مجال…" : "Rechercher un domaine…"}</option>
+              <select id="need-library" value={libraryCode} onChange={(event) => setLibrary(event.target.value)}>
+                <option value="">{locale === "ar" ? "اختيار مجال…" : "Choisir un domaine…"}</option>
                 {taxonomy.libraries.map((item) => (
                   <option key={item.code} value={item.code}>{item.name}</option>
                 ))}
@@ -532,19 +529,19 @@ function NeedComposer({
             </label>
             <label>
               {locale === "ar" ? "الفئة" : "Catégorie"}
-              <select value={draft.categoryCode} onChange={(event) => setCategory(event.target.value)} disabled={!libraryCode}>
-                <option value="">{locale === "ar" ? "بحث عن فئة…" : "Rechercher une catégorie…"}</option>
+              <select id="need-category" value={draft.categoryCode} onChange={(event) => setCategory(event.target.value)} disabled={!libraryCode}>
+                <option value="">{locale === "ar" ? "اختيار فئة…" : "Choisir une catégorie…"}</option>
                 {categories.map((item) => (
-                  <option key={item.code} value={item.code} lang="fr">{item.name}</option>
+                  <option key={item.code} value={item.code} lang={locale}>{item.name}</option>
                 ))}
               </select>
             </label>
             <label>
               {locale === "ar" ? "الخدمة" : "Service"}
-              <select value={draft.classification?.serviceCode ?? ""} onChange={(event) => setService(event.target.value)} disabled={!libraryCode}>
-                <option value="">{locale === "ar" ? "بحث عن خدمة…" : "Rechercher un service…"}</option>
+              <select id="need-service" value={draft.classification?.serviceCode ?? ""} onChange={(event) => setService(event.target.value)} disabled={!libraryCode}>
+                <option value="">{locale === "ar" ? "اختيار خدمة…" : "Choisir un service…"}</option>
                 {services.map((item) => (
-                  <option key={item.code} value={item.code} lang="fr">{item.name}</option>
+                  <option key={item.code} value={item.code} lang={locale}>{item.name}</option>
                 ))}
               </select>
             </label>
@@ -561,7 +558,6 @@ function NeedComposer({
 
           {section === "questions" ? (
           <>
-          <h2>3. {copy.questionsTitle}</h2>
           <p className="public-muted">{copy.questionsLead}</p>
           {!draft.classification && !draft.unlisted ? <p className="journey-field-help">{copy.questionsWait}</p> : null}
           {draft.classification || draft.unlisted ? (
@@ -608,7 +604,7 @@ function NeedComposer({
 
           {section === "complete" ? (
           <>
-          <h2>4. {locale === "ar" ? "عناصر تكميلية (اختياري)" : "Sélectionnez des éléments complémentaires (optionnel)"}</h2>
+          <h3>{locale === "ar" ? "عناصر تكميلية (اختياري)" : "Sélectionnez des éléments complémentaires (optionnel)"}</h3>
           <div className="journey-need-tags">
             {tags.map((tag) => (
               <button key={tag} type="button" className={draft.tags.includes(tag) ? "is-selected" : undefined} aria-pressed={draft.tags.includes(tag)} onClick={() => toggleTag(tag)}>
@@ -621,7 +617,7 @@ function NeedComposer({
             <input id="need-custom-tag" value={customTag} maxLength={80} onChange={(event) => setCustomTag(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustomTag(); } }} />
             <button type="button" onClick={addCustomTag}>{locale === "ar" ? "إضافة" : "Ajouter"}</button>
           </div>
-          <h2>5. {copy.docsStepTitle}</h2>
+          <h3>{copy.docsStepTitle}</h3>
           <p className="journey-intro">{copy.docsStepLead}</p>
           {authenticated ? <Link className="client-text-link" href={`/${locale}/client/documents`}>{locale === "fr" ? "Ouvrir Documents" : "فتح الوثائق"}</Link> : null}
           <p className="journey-login-note">
@@ -639,8 +635,8 @@ function NeedComposer({
               <button className="journey-secondary" type="button" onClick={() => patch({ step: Math.max(0, draft.step - 1) })}>{copy.back}</button>
             )}
             <button className="journey-secondary" type="button" onClick={() => patch({})}>{copy.saveDraft}</button>
-            <button className="journey-primary" type="button" disabled={section === "describe" && !canContinue} onClick={() => (section === "complete" ? goRecap() : patch({ step: draft.step + 1 }))}>
-              {section === "complete" ? (locale === "fr" ? "Voir le récapitulatif" : "عرض الملخص") : copy.continue}
+            <button className="journey-primary" type="button" disabled={section === "describe" && !canContinue} onClick={continueToNextStep}>
+              {continueLabel}
               <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
             </button>
           </div>
@@ -671,8 +667,8 @@ function NeedComposer({
             <button className="journey-secondary" type="button" onClick={() => patch({ step: 0, confirmed: false })}>
               <Pencil size={16} aria-hidden="true" /> {locale === "fr" ? "Modifier" : "تعديل"}
             </button>
-            <button className="journey-primary" type="button" disabled={!canContinue} onClick={goRecap}>
-              {locale === "fr" ? "Valider" : "تأكيد"}
+            <button className="journey-primary" type="button" disabled={!canContinue} onClick={continueToNextStep}>
+              {continueLabel}
             </button>
           </div>
         </aside>}
@@ -681,7 +677,7 @@ function NeedComposer({
   );
 }
 
-function NeedResult({
+export function NeedResult({
   locale,
   draft,
   authenticated,
@@ -692,6 +688,7 @@ function NeedResult({
   invalidSelection,
   erase,
   edit,
+  back = edit,
   confirm,
   updateClassification,
 }: {
@@ -705,10 +702,12 @@ function NeedResult({
   invalidSelection: boolean;
   erase: () => void;
   edit: () => void;
+  back?: () => void;
   confirm: () => void;
   updateClassification: (classification: PublicNeedClassification | null) => void;
 }) {
   const copy = getPublicJourneyCopy(locale).need;
+  const stages = getNeedStages(locale);
   const [state, action, pending] = useActionState(saveAction ?? unavailable, { status: "idle" } as SaveNeedState);
   useEffect(() => {
     if (state.status === "success") erase();
@@ -751,17 +750,20 @@ function NeedResult({
       <section className={authenticated ? "client-card journey-result" : "journey-card journey-result"}>
         {authenticated ? null : <p className="journey-eyebrow">{copy.eyebrow}</p>}
         <ol className="journey-need-stages" aria-label={copy.connectedTitle}>
-          {copy.stages.map(([title, detail], index) => (
-            <li key={title} data-state={index === 4 ? "current" : index < 4 ? "done" : "todo"}>
+          {stages.map(({ id, title, detail }, index) => (
+            <li key={id} aria-current={id === "recap" ? "step" : undefined} data-state={id === "recap" ? "current" : "done"}>
               <span>{index + 1}</span>
               <strong>{title}</strong>
               <em>{detail}</em>
             </li>
           ))}
         </ol>
+        <NeedStageProgress authenticated={authenticated} stageCurrent={needRecapStep + 1} stageTotal={stages.length} />
         <h1>{copy.readyTitle}</h1>
+        <h2>{needRecapStep + 1}. {stages[needRecapStep]!.title}</h2>
         <p className="journey-intro">{copy.readyText}</p>
         <p className="journey-field-help">{labels.understood}</p>
+        {locale === "ar" ? <p className="journey-field-help" role="note">{publicCatalogueTranslationNotice.ar}</p> : null}
         <div className="grid gap-3 rounded-xl border bg-blue-50 p-4">
           <label className="grid gap-2">
             <strong>{labels.domain}</strong>
@@ -777,7 +779,7 @@ function NeedResult({
             <select className="min-h-11 rounded-md border bg-white px-3" value={draft.classification?.serviceCode ?? ""} onChange={(event) => setService(event.target.value)} disabled={!libraryCode || (draft.confirmed && authenticated)}>
               <option value="">{labels.none}</option>
               {services.map((service) => (
-                <option key={service.code} value={service.code} lang="fr">{service.name}</option>
+                <option key={service.code} value={service.code} lang={locale}>{service.name}</option>
               ))}
             </select>
           </label>
@@ -836,6 +838,7 @@ function NeedResult({
         ) : null}
         {!draft.confirmed ? (
           <div className="journey-actions">
+            <button className="journey-secondary" type="button" onClick={back}>{copy.back}</button>
             <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
             <button className="journey-primary" type="button" onClick={confirm}>
               {locale === "fr" ? "Valider" : "تأكيد"}

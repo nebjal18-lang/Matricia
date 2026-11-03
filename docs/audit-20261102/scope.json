@@ -1,0 +1,187 @@
+{
+  "auditedUrl": "https://matricia-git-codex-consoli-b22c97-epitaphemarket-5584s-projects.vercel.app/fr/administration/entreprises/nouvelle",
+  "baselineAvailable": "39552d7",
+  "sourceDeploymentSha": "UNCONFIRMED_REQUIRES_DEPLOYMENT_METADATA",
+  "findings": [
+    {
+      "id": "M01",
+      "priority": "P1",
+      "title": "Admin organisations",
+      "acceptance": "/administration/entreprises : Chargement indisponible UNAVAILABLE, impossible sélectionner. Tester après revisite, droits et requête séparément. Liste réelle/refus précis/reprise, recherche et sélection."
+    },
+    {
+      "id": "M02",
+      "priority": "P1",
+      "title": "Neuf files Admin",
+      "acceptance": "/administration/diagnostics ; demandes ; matching ; devis ; contrats ; avenants ; missions ; jalons ; messagerie : Indisponible, notamment Diagnostics après retour. Rendre files autorisées consultables, recette diagnostic→mission données test cohérentes."
+    },
+    {
+      "id": "M03",
+      "priority": "P1",
+      "title": "Modules Client",
+      "acceptance": "/client/demandes ; /client/documents ; /messagerie ; /client/finances ; /client/credits ; /client/favoris (QUERY_FAILED). Un détail via dashboard marche. Même organisation listes/détails, contexte/droits/projections."
+    },
+    {
+      "id": "M04",
+      "priority": "P1",
+      "title": "Prestataire",
+      "acceptance": "/sous-traitant/qualification : chargement échoue ; consultations et devis consultations indisponibles ; documents coffre impossible. Fournir qualification exploitable et consultation/devis test autorisés, vérifier documents/contextes/droits."
+    },
+    {
+      "id": "M05",
+      "priority": "P1",
+      "title": "Franchise mandat",
+      "acceptance": "/franchise/accueil ; bibliotheque ; services ; questionnaires ; regles ; validations ; documents : bibliothèque mandatée temporairement indisponible. Périmètre/gouvernance mandat non renseigné. Mandat/bibliothèque test valides OU absence explicite et marche à suivre, puis recette éditoriale."
+    },
+    {
+      "id": "M06",
+      "priority": "P1",
+      "title": "Etats faux vides",
+      "acceptance": "Admin Diagnostics/Demandes/Clients/Prestataires : indisponible/restriction puis zéro/aucun élément prioritaire/statut rassurant. Provider planning indisponibilité partielle +aucune échéance. Franchise gouvernance mandat actif +QUERY_FAILED. Séparer loading/succès vide/partiel/refus/erreur ; ne pas affirmer zéro ou à jour quand chargement échoue."
+    },
+    {
+      "id": "M07",
+      "priority": "P1",
+      "title": "Importer document",
+      "acceptance": "/administration/documents/nouvelle : Importer ouvre destinataire/motif partage/vue/justification, pas fichier. Brancher véritable upload type/contexte/contrôles/résultat OU renommer si uniquement partage contrôlé."
+    },
+    {
+      "id": "M08",
+      "priority": "P1",
+      "title": "Invitation Provider",
+      "acceptance": "/administration/providers/nouvelle : Objet/Vue/Justification sans e-mail/personne. Ajouter destinataire et périmètre/informations invitation OU demande interne explicitement nommée avec suite cible."
+    },
+    {
+      "id": "M09",
+      "priority": "P1",
+      "title": "Créations génériques",
+      "acceptance": "/administration/devis/nouvelle ; contrats/nouvelle ; missions/nouvelle ; jalons/nouvelle ; territoires/nouvelle : Objet/Vue/Justification sans lien dossier/montants/mission/échéance. Définir contrat de chaque action ; si gouvernance la nommer et relier demande à création structurée."
+    },
+    {
+      "id": "M10",
+      "priority": "P1",
+      "title": "Catalogue contexte",
+      "acceptance": "/administration/catalogue : library/service choisis puis Questions mène /catalogue#questions et perd params/formulaires. Préserver query ou ancre relative et contexte après navigation."
+    },
+    {
+      "id": "M11",
+      "priority": "P1",
+      "title": "Recherche Admin",
+      "acceptance": "/administration/command-center : champ page/dossier/action, saisir missions+Entrée ne filtre/propose rien. Recherche fonctionnelle accessible clavier OU libellé conforme ; résultat absent testé."
+    },
+    {
+      "id": "M12",
+      "priority": "P1",
+      "title": "Diagnostic labels",
+      "acceptance": "/diagnostic huitquestions : BTP, équipe1–9, maîtrise coûts ; suivi ventes intitulé Accompagnement, restauration sauvegardes Horizon, récap Horizon=Non concerné. Associer chaque question à sa vraie donnée et vrais intitulés puis règles résultat."
+    },
+    {
+      "id": "M13",
+      "priority": "P1",
+      "title": "Diagnostic explication",
+      "acceptance": "/diagnostic/resultat >Voir détail priorité Mieux structurer suivi priorités : lié à votre réponse cite constats/bénéfices/action et non saisies. Afficher question+réponse réelles puis constat/recommandation séparés ; tracer déclencheurs."
+    },
+    {
+      "id": "M14",
+      "priority": "P1",
+      "title": "Services AR",
+      "acceptance": "/ar/besoin après besoinBTPFR : domaines/récap AR mais services rénovation/étude structure/conception architecturale FR et non textes libres utilisateur. Labels AR approuvés, manquants explicitement signalés, rechercheFRAR."
+    },
+    {
+      "id": "M15",
+      "priority": "P2",
+      "title": "Menu compte",
+      "acceptance": "/administration/command-center menu D Administrateur sous contenu/sous-titre/Créer Modifier Exporter, déconnexion cachée. Stacking context/zindex, ouvrir/fermer/clic/Tab à plusieurs tailles."
+    },
+    {
+      "id": "M16",
+      "priority": "P2",
+      "title": "Retour connexion",
+      "acceptance": "/connexion?next=...entreprises/nouvelle : lien profond conservé initialement puis bouton Admin démo mènecommandcenter. Respecter next autorisé selon rôle/fallbackexplicite, tester démo etOTP. OTP non exécuté audit."
+    },
+    {
+      "id": "M17",
+      "priority": "P2",
+      "title": "Navigation sécurité",
+      "acceptance": "/securite/compte ; /securite/sessions depuisAdmin affiche navclient/langueAR→/ar/organisation ; /administration/signatures MFA sanscadre. Garder rôle/chemin/retour mêmeMFAnécessaire ; ne pasrévoquer/modifier facteurs pour repro."
+    },
+    {
+      "id": "M18",
+      "priority": "P2",
+      "title": "Messages accès",
+      "acceptance": "Admin Confidentialité/Revues/Politiques/Fiscalité/sensible : messages mélange refus/indisponibilité/MFA, manque lien configMFA alorsClientslefait. Etatsréauth/MFA/habilitation/retrydistincts+refassistance sansdétail sensible."
+    },
+    {
+      "id": "M19",
+      "priority": "P2",
+      "title": "Notifications techniques",
+      "acceptance": "/notifications Client/Provider/Franchise : Modèles actifsFRAR événements/variables/hashes. Pas fuite secretprouvée ; réserverinspectiontemplatesAdmin, membre notifications/préférences/categories obligatoires simples."
+    },
+    {
+      "id": "M20",
+      "priority": "P2",
+      "title": "Portefeuille technique",
+      "acceptance": "/client/portefeuille Enregistrer allocation : codes COMMITMENT/PROJECT_TASK, identifiant exact, hashSHA256justificatif. Libellés métier+sélection dossierautorisé, hashcalculédepuisfichierpasdemandé."
+    },
+    {
+      "id": "M21",
+      "priority": "P2",
+      "title": "Légal incomplet",
+      "acceptance": "/mentions-legales ; /confidentialite ; /conditions ; /cookies : informations complètes envalidation ; paséditeurcomplet/hébergeurnommé/contactsiègepublic. Pasconclusionjuridique. Seulementvraiesdonnéesapprouvées, cohérenceFRAR/liensdroits ; identifierexactementdonnéesàfournir."
+    },
+    {
+      "id": "M22",
+      "priority": "P2",
+      "title": "Abonnements sansoffre",
+      "acceptance": "/abonnements : formulesadaptées sansprix/table/limites comparables, renvoiContact, FAQmarche. Offresréellementpubliées OUvente-sur-devisclaire ; fonctionnalités/limites/essai/crédits/coûtprestation, aucunprixinventé."
+    },
+    {
+      "id": "M23",
+      "priority": "P2",
+      "title": "Plan 3fois",
+      "acceptance": "/diagnostic/resultat >détailOrganisation : Clarifier etformaliser /Mettreenplace suivi /Ajusterpérenniser répètentmêmerecommandationtableau. Troisactionsdistinctes livrable/responsable/critère achèvement cohérentsréponsespriorité."
+    },
+    {
+      "id": "M24",
+      "priority": "P2",
+      "title": "Etapes besoin",
+      "acceptance": "/besoin : plan Périmètre Contraintes Documents Récapitulatif vs Servicesproposés Questionsmanquantes élémentscomplémentaires section5Documentsquandprogress4/5. Une définitionunique plan/titres/progress/back/récap ; brouillonpréservé."
+    },
+    {
+      "id": "M25",
+      "priority": "P2",
+      "title": "Marketing franchisé",
+      "acceptance": "/franchise/marketing : sélectionorganisation demandée2fois sanssélecteur. Sélectionautorisée oucontexte mandat repris ; siaucunpérimètre explication+lienderégularisationconcret."
+    },
+    {
+      "id": "M26",
+      "priority": "P2",
+      "title": "Confidentialité Provider",
+      "acceptance": "/sous-traitant/documents : partageseulementacteurs publics ambigu vséquipes/partiesautoriséesqualificationmission. Vérifiercontrats/RLSdestinataires avanttexteFRAR, aucune promessenonprouvée."
+    },
+    {
+      "id": "M27",
+      "priority": "P2",
+      "title": "Candidature sens",
+      "acceptance": "/franchise/candidature : initiativeculturelle/éducative bibliothèquessavoir alors /franchise catalogueproservices. AlignerFRARsurcataloguemétier/réseauprofessionnels/territoire/mandat."
+    },
+    {
+      "id": "M28",
+      "priority": "P2",
+      "title": "Identifiant15",
+      "acceptance": "/administration/entreprises/nouvelle : Identifiantimmatriculation pattern[0-9]{15}/min15 sansaide ; validationnativevideOK. NommerICEattendu, expliquer15chiffres/aideFRAR alignéeserveur."
+    },
+    {
+      "id": "M29",
+      "priority": "P2",
+      "title": "Aide mauvaislien",
+      "acceptance": "Admin icôneAide→Opérations ; détailprédiagnosticcentreaide→Àpropos. Aidecontextuelle OUrenommer selonvraiedestination, assistance adaptée rôle/dossier."
+    },
+    {
+      "id": "M30",
+      "priority": "P2",
+      "title": "Session vitrine",
+      "acceptance": "/fr/public pendantdémoAdminouClienttoujoursSeconnecterCréercompte sansretourespace. MonEspace/rôlecourant etchangementrôle ; testertransitionssanscasserconnexion."
+    }
+  ]
+}

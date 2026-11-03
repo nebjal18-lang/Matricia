@@ -12,6 +12,8 @@ export function adminActorLinks(locale: Locale, q: string): AdminLink[] {
     { id: "orgs", href: `${p}/administration/entreprises${q}`, label: t(locale, "Organisations", "المؤسسات") },
     { id: "users", href: `${p}/administration/utilisateurs${q}`, label: t(locale, "Utilisateurs, rôles & invitations", "المستخدمون والأدوار والدعوات") },
     { id: "clients", href: `${p}/administration/clients${q}`, label: t(locale, "Clients", "العملاء") },
+    { id: "capability-reviews", href: `${p}/administration/revues-capacites${q}`, label: t(locale, "Revues de capacités", "مراجعات القدرات") },
+    { id: "privacy", href: `${p}/administration/confidentialite${q}`, label: t(locale, "Confidentialité & droits", "الخصوصية والحقوق") },
     { id: "compliance", href: `${p}/administration/conformite-clients${q}`, label: t(locale, "Conformité clients", "امتثال العملاء") },
     { id: "providers", href: `${p}/administration/providers${q}`, label: t(locale, "Prestataires", "مقدمو الخدمات") },
     { id: "qualification", href: `${p}/administration/qualification${q}`, label: t(locale, "Qualification prestataires", "تأهيل مقدمي الخدمات") },

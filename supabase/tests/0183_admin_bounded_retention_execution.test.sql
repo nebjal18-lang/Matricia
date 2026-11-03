@@ -1,0 +1,50 @@
+begin;
+set local search_path=public,extensions;
+grant usage on schema extensions to authenticated,service_role;
+select plan(11);
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT'where singleton;
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
+select ('a1810000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'00000000-0000-0000-0000-000000000000','authenticated','authenticated','delivery-admin-'||i||'@example.invalid','',now(),'{}','{}',now(),now()from generate_series(1,4)i;
+insert into public.platform_user_roles(user_id,role_code)select ('a1810000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,case when i=4 then'SUPPORT_AGENT'else'MATRICIA_ADMIN'end from generate_series(1,4)i;
+insert into public.organizations(id,legal_name,display_name,status,created_by)values('b1810000-0000-4000-8000-000000000001','Delivery Test','Delivery Test','ACTIVE','a1810000-0000-4000-8000-000000000001');
+insert into public.organization_memberships(id,organization_id,user_id,status)values('c1810000-0000-4000-8000-000000000001','b1810000-0000-4000-8000-000000000001','a1810000-0000-4000-8000-000000000004','ACTIVE');
+insert into public.organization_member_roles(membership_id,role_code)values('c1810000-0000-4000-8000-000000000001','CLIENT_OWNER'),('c1810000-0000-4000-8000-000000000001','PROVIDER_OWNER');
+
+update public.platform_user_roles set revoked_at=clock_timestamp()where user_id='a1810000-0000-4000-8000-000000000004';
+update public.organization_memberships set status='REVOKED'where user_id='a1810000-0000-4000-8000-000000000004';
+insert into public.user_profiles(id,display_name,updated_at)values('a1810000-0000-4000-8000-000000000004','Nom Personnel',now()-interval'40 days')on conflict(id)do update set display_name='Nom Personnel',updated_at=now()-interval'40 days';
+
+
+insert into public.client_assistance_requests(id,organization_id,created_by,subject,body,status,consented_at,idempotency_key,request_hash,created_at,updated_at)values('f1850000-0000-4000-8000-000000000001','b1810000-0000-4000-8000-000000000001','a1810000-0000-4000-8000-000000000004','Assistance privée','Texte personnel à effacer dans la fixture','CLOSED',now()-interval'60 days','fixture-assistance-185',repeat('a',64),now()-interval'60 days',now()-interval'60 days');
+insert into public.client_assistance_messages(id,request_id,actor_user_id,body,idempotency_key,created_at)values('f1850000-0000-4000-8000-000000000002','f1850000-0000-4000-8000-000000000001','a1810000-0000-4000-8000-000000000001','Réponse personnelle de fixture','fixture-assistance-message185',now()-interval'50 days');
+insert into public.processing_activities(id,organization_id,activity_key,name_fr,name_ar,controller_role,systems,countries_regions,cndp_formality_status,created_by)values('f1830000-0000-4000-8000-000000000001','b1810000-0000-4000-8000-000000000001','profile-retention','Rétention profils','الاحتفاظ بالملفات','CONTROLLER',array['SUPABASE'],array['MA'],'NOT_REQUIRED','a1810000-0000-4000-8000-000000000001');
+insert into public.data_categories(id,organization_id,processing_activity_id,category_key,label_fr,label_ar,data_subject_types,sensitivity,created_by)values('f1830000-0000-4000-8000-000000000002','b1810000-0000-4000-8000-000000000001','f1830000-0000-4000-8000-000000000001','user-profile','Profil utilisateur','ملف المستخدم',array['USER'],'PERSONAL','a1810000-0000-4000-8000-000000000001');
+insert into public.retention_policies(id,organization_id,data_category_id,version,status,retention_days,trigger_event,disposition,legal_basis_reference,effective_from,created_by)values('f1830000-0000-4000-8000-000000000003','b1810000-0000-4000-8000-000000000001','f1830000-0000-4000-8000-000000000002',1,'ACTIVE',0,'ACCOUNT_REVOKED','ANONYMIZE','fixture-legal-policy-183',current_date-60,'a1810000-0000-4000-8000-000000000001');
+insert into public.data_subject_requests(id,organization_id,request_type,subject_reference_hash,identity_verification_level,locale,status,due_at,verified_at,correlation_id,created_by)values('f1830000-0000-4000-8000-000000000004','b1810000-0000-4000-8000-000000000001','ERASURE',encode(extensions.digest(convert_to('b1810000-0000-4000-8000-000000000001:a1810000-0000-4000-8000-000000000004','UTF8'),'sha256'),'hex'),'ENHANCED','fr-MA','IN_REVIEW',now()+interval'1 day',now()-interval'1 day',extensions.gen_random_uuid(),'a1810000-0000-4000-8000-000000000001');
+insert into public.privacy_retention_actions(id,organization_id,retention_policy_id,subject_reference_hash,action_type,idempotency_key,correlation_id,requested_by)select 'f1830000-0000-4000-8000-000000000005',organization_id,'f1830000-0000-4000-8000-000000000003',subject_reference_hash,'ANONYMIZE','fixture183-retention',extensions.gen_random_uuid(),'a1810000-0000-4000-8000-000000000001'from public.data_subject_requests where id='f1830000-0000-4000-8000-000000000004';
+insert into public.admin_operational_action_requests(id,organization_id,action_type,target_environment,resource_type,resource_id,request_payload_hash,redacted_summary,reason,approvals_required,status,requested_by)values
+('e1830000-0000-4000-8000-000000000001','b1810000-0000-4000-8000-000000000001','MANUAL_EXCEPTION','DEVELOPMENT','PRIVACY_RETENTION_POLICY','f1830000-0000-4000-8000-000000000003',repeat('a',64),jsonb_build_object('policyId','f1830000-0000-4000-8000-000000000003','policyHash',private.retention_policy_execution_hash_v1('f1830000-0000-4000-8000-000000000003'),'legalApprovalReference','fixture-legal-approval-183'),'Approuver la politique limitée de test',2,'AUTHORIZED','a1810000-0000-4000-8000-000000000001');
+insert into public.admin_operational_action_decisions(action_request_id,decision,reason,request_payload_hash,decided_by)select 'e1830000-0000-4000-8000-000000000001','APPROVE','Approbation indépendante de fixture',repeat('a',64),id from auth.users where id in('a1810000-0000-4000-8000-000000000002','a1810000-0000-4000-8000-000000000003');
+set local role service_role;select set_config('request.jwt.claims','{"role":"service_role"}',true);select set_config('request.jwt.claim.sub','',true);
+select lives_ok($$select public.execute_admin_operational_action_v1('e1830000-0000-4000-8000-000000000001',extensions.gen_random_uuid())$$,'an approved legal snapshot enables only a bounded disposition');
+reset role;
+insert into public.admin_operational_action_requests(id,organization_id,action_type,target_environment,resource_type,resource_id,request_payload_hash,redacted_summary,reason,approvals_required,status,requested_by)select 'e1830000-0000-4000-8000-000000000002','b1810000-0000-4000-8000-000000000001','MANUAL_EXCEPTION','DEVELOPMENT','PRIVACY_RETENTION_ACTION','f1830000-0000-4000-8000-000000000005',repeat('a',64),jsonb_build_object('policyApprovalId',id,'dsrId','f1830000-0000-4000-8000-000000000004','subjectUserId','a1810000-0000-4000-8000-000000000004'),'Exécuter une disposition bornée de test',2,'AUTHORIZED','a1810000-0000-4000-8000-000000000001'from public.privacy_retention_execution_approvals_v1 where action_request_id='e1830000-0000-4000-8000-000000000001';
+insert into public.admin_operational_action_decisions(action_request_id,decision,reason,request_payload_hash,decided_by)select 'e1830000-0000-4000-8000-000000000002','APPROVE','Second contrôle de fixture',repeat('a',64),id from auth.users where id in('a1810000-0000-4000-8000-000000000002','a1810000-0000-4000-8000-000000000003');
+insert into public.privacy_legal_holds(organization_id,subject_reference_hash,reason_code,status,starts_at,created_by)select organization_id,subject_reference_hash,'FIXTURE_DISPUTE','ACTIVE',now(),'a1810000-0000-4000-8000-000000000001'from public.data_subject_requests where id='f1830000-0000-4000-8000-000000000004';
+-- Direct owner invocation exercises the same helper without recording an action
+-- failure, allowing the hold-removal and success paths in one fixture transaction.
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+select throws_ok($$select private.execute_admin_privacy_retention_v1('e1830000-0000-4000-8000-000000000002',extensions.gen_random_uuid())$$,'55000','PRIVACY_LEGAL_HOLD_ACTIVE','legal hold prevents even approved anonymization');
+select is((select display_name from public.user_profiles where id='a1810000-0000-4000-8000-000000000004'),'Nom Personnel','a blocked disposition preserves the profile');
+update public.privacy_legal_holds set status='RELEASED',ends_at=clock_timestamp()where reason_code='FIXTURE_DISPUTE';
+set local role service_role;
+select lives_ok($$select public.execute_admin_operational_action_v1('e1830000-0000-4000-8000-000000000002',extensions.gen_random_uuid())$$,'verified scoped disposition executes after hold release');
+select lives_ok($$select public.execute_admin_operational_action_v1('e1830000-0000-4000-8000-000000000002',extensions.gen_random_uuid())$$,'retry returns the recorded effect without repeating mutation');
+reset role;
+select is((select display_name from public.user_profiles where id='a1810000-0000-4000-8000-000000000004'),'Utilisateur anonymisé','allowlisted profile field is actually anonymized');
+select is((select status from public.data_subject_requests where id='f1830000-0000-4000-8000-000000000004'),'IN_REVIEW','partial disposition never falsely fulfills the DSR');
+select is((select count(*)from public.privacy_retention_execution_jobs_v1 where action_request_id='e1830000-0000-4000-8000-000000000002'),1::bigint,'one immutable execution proof exists');
+select ok(exists(select 1 from auth.users where id='a1810000-0000-4000-8000-000000000004'),'identity and financial foreign-key references remain intact');
+select throws_ok($$update public.client_assistance_messages set body='Tentative de modification hors commande approuvée'$$,'55000','CLIENT_HISTORY_IMMUTABLE','normal message updates remain immutable');
+select ok(not has_table_privilege('service_role','private.assistance_retention_write_capabilities_v1','INSERT'),'worker cannot forge an immutable-message write capability');
+select*from finish();rollback;

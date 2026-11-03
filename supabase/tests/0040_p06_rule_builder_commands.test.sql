@@ -39,7 +39,7 @@ select is((select priority from public.question_rule_versions where id=(select(v
 select is((select priority from public.question_rule_versions where id=(select(value->>'version_id')::uuid from p06_rule_observed where key='created')),10,'version one remains immutable');
 
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"f6100000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal1"}',true);
-select throws_ok($$select public.create_catalog_rule('f6120000-0000-0000-0000-000000000001','P06_SENSITIVE',(select value||'{"sensitive":true}'::jsonb from p06_rule_payload),'Règle sensible','rule-sensitive-0001')$$,'42501'::char(5),'CATALOG_SENSITIVE_MFA_REQUIRED','sensitive rule authoring requires AAL2');
+select throws_ok($$select public.create_catalog_rule('f6120000-0000-0000-0000-000000000001','P06_SENSITIVE',(select value||'{"sensitive":true}'::jsonb from p06_rule_payload),'Règle sensible','rule-sensitive-0001')$$,'42501'::char(5),'CATALOG_SCOPE_DENIED','sensitive rule authoring requires AAL2');
 reset role;
 
 select * from finish();

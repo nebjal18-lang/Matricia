@@ -1,0 +1,4 @@
+"use server";
+import {z} from "zod";
+import {getSupabaseServerClient} from "@/modules/shared/lib/supabase/server";
+export async function readSubscriptionPaymentStatus(organizationId:string,paymentIntentId:string){const input=z.object({organizationId:z.string().uuid(),paymentIntentId:z.string().uuid()}).safeParse({organizationId,paymentIntentId});if(!input.success)return null;const c=await getSupabaseServerClient();const{data:auth}=await c.auth.getUser();if(!auth.user)return null;const r=await c.rpc("get_client_subscription_payment_status_v1",{p_organization_id:organizationId,p_payment_intent_id:paymentIntentId});if(r.error)return null;const parsed=z.object({paymentIntentId:z.literal(paymentIntentId),status:z.enum(["CONFIRMED","PENDING_WEBHOOK","PENDING_NATIVE_REVIEW","REQUIRES_CONFIRMATION"])}).safeParse(r.data);return parsed.success?parsed.data:null;}

@@ -1,5 +1,6 @@
 "use server";
 
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -76,7 +77,9 @@ function effectiveStatus(status: InvitationStatus, expiresAt: string): Invitatio
 export async function listInvitations(): Promise<InvitationsQueryResult> {
   const supabase = await getSupabaseServerClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) return { status: "error", reason: "UNAUTHENTICATED" };
+  const authFailure = classifyAuthReadFailure(userError);
+  if (authFailure) return { status: "error", reason: authFailure };
+  if (!user) return { status: "error", reason: "UNAUTHENTICATED" };
 
   const { data: rawMemberships, error: membershipsError } = await supabase
     .from("organization_memberships")
@@ -173,7 +176,9 @@ export async function createInvitation(
 
   const supabase = await getSupabaseServerClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) return { status: "error", reason: "UNAUTHENTICATED" };
+  const authFailure = classifyAuthReadFailure(userError);
+  if (authFailure) return { status: "error", reason: authFailure };
+  if (!user) return { status: "error", reason: "UNAUTHENTICATED" };
   if (parsed.data.invitedEmail === user.email?.toLowerCase()) return { status: "error", reason: "VALIDATION" };
 
   const expiresAt = new Date(Date.now() + Number(parsed.data.expiryDays) * 86_400_000).toISOString();
@@ -203,7 +208,9 @@ async function decideInvitation(
   if (!parsed.success) return { status: "error", reason: "VALIDATION" };
   const supabase = await getSupabaseServerClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) return { status: "error", reason: "UNAUTHENTICATED" };
+  const authFailure = classifyAuthReadFailure(userError);
+  if (authFailure) return { status: "error", reason: authFailure };
+  if (!user) return { status: "error", reason: "UNAUTHENTICATED" };
   const { error } = await supabase.rpc(rpc, {
     p_invitation_id: parsed.data.invitationId,
     p_correlation_id: randomUUID(),

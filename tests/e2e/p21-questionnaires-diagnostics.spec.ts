@@ -5,10 +5,10 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 type Locale = "fr" | "ar";
 const surfaces = [
   { route: "client/questionnaires", heading: { fr: "Mes questionnaires", ar: "استبياناتي" } },
-  { route: "client/diagnostics", heading: { fr: "Comprendre vos priorités", ar: "فهم أولوياتكم" } },
-  { route: "client/diagnostics/assistance", heading: { fr: "Assistance contextuelle", ar: "المساعدة السياقية" } },
-  { route: "client/diagnostics/solutions", heading: { fr: "Solutions recommandées", ar: "الحلول المقترحة" } },
-  { route: "client/diagnostics/evolution", heading: { fr: "Évolution des diagnostics", ar: "تطور التشخيصات" } },
+  { route: "client/diagnostics", heading: { fr: "Mes diagnostics", ar: "تشخيصاتي" } },
+  { route: "client/diagnostics/assistance", heading: { fr: "Demander une assistance", ar: "طلب مساعدة" } },
+  { route: "client/diagnostics/solutions", heading: { fr: "Solutions adaptées à vos priorités", ar: "حلول مناسبة لأولوياتكم" } },
+  { route: "client/diagnostics/evolution", heading: { fr: "Évolution de mes diagnostics", ar: "تطور تشخيصاتي" } },
 ] as const;
 
 async function accessibleReflow(page: Page, locale: Locale) {

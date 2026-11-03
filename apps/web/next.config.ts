@@ -44,6 +44,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  serverExternalPackages:["pdfmake","@fontsource/noto-sans-arabic"],
+  outputFileTracingIncludes:{
+    "/api/**":["./node_modules/@fontsource/noto-sans-arabic/package.json","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-latin-400-normal.woff","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-400-normal.woff"],
+  },
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   experimental: {
     optimizePackageImports: ["lucide-react", "radix-ui", "date-fns", "recharts"],

@@ -1,0 +1,14 @@
+import {beforeEach,describe,it,expect,vi}from"vitest";
+const mocks=vi.hoisted(()=>({rpc:vi.fn(),archive:vi.fn()}));
+vi.mock("@/modules/shared/lib/supabase/admin",()=>({getSupabaseAdminClient:()=>({rpc:mocks.rpc})}));
+vi.mock("./artifacts",()=>({archiveProviderBillingDocument:mocks.archive}));
+import{consumeProviderBillingIssued}from"./issued-consumer";
+const id="11111111-1111-4111-8111-111111111111";
+beforeEach(()=>{vi.resetAllMocks();mocks.archive.mockResolvedValue({ok:true,artifact:{storage_path:"immutable.pdf",pdf_sha256:"a".repeat(64)}});mocks.rpc.mockImplementation((name:string)=>Promise.resolve({data:name==="get_provider_billing_source_policy"?{recipient_concordance:"OK"}:{outcome:"PROVIDER_BILLING_DOCUMENTS_READY"},error:null}));});
+describe("financial issuance PDF consumer",()=>{
+ it("archives both real translations before durable notification readiness",async()=>{expect(await consumeProviderBillingIssued("invoice",id)).toEqual({ok:true,code:"PROVIDER_BILLING_DOCUMENTS_READY"});expect(mocks.archive).toHaveBeenNthCalledWith(1,expect.anything(),expect.anything(),"invoice",id,"fr");expect(mocks.archive).toHaveBeenNthCalledWith(2,expect.anything(),expect.anything(),"invoice",id,"ar");expect(mocks.rpc).toHaveBeenCalledWith("complete_provider_billing_document_issue",{p_kind:"invoice",p_source_id:id});});
+ it("runs credit note translations through the same immutable pipeline",async()=>{expect((await consumeProviderBillingIssued("credit_note",id)).ok).toBe(true);expect(mocks.archive).toHaveBeenNthCalledWith(1,expect.anything(),expect.anything(),"credit_note",id,"fr");expect(mocks.rpc).toHaveBeenCalledWith("complete_provider_billing_document_issue",{p_kind:"credit_note",p_source_id:id});});
+ it("does not notify when legal identity or one translation is unavailable",async()=>{mocks.archive.mockResolvedValueOnce({ok:true}).mockResolvedValueOnce({ok:false,code:"BILLING_POLICY_REQUIRED"});expect(await consumeProviderBillingIssued("statement",id)).toEqual({ok:false,code:"BILLING_POLICY_REQUIRED"});expect(mocks.rpc).not.toHaveBeenCalledWith("complete_provider_billing_document_issue",expect.anything());});
+ it("retains a canceled original without generating another PDF or sending another readiness event",async()=>{mocks.rpc.mockResolvedValue({data:{recipient_concordance:"CORRECTED"},error:null});expect(await consumeProviderBillingIssued("invoice",id)).toEqual({ok:true,code:"BILLING_ORIGINAL_RETAINED_BY_CORRECTION"});expect(mocks.archive).not.toHaveBeenCalled();expect(mocks.rpc).not.toHaveBeenCalledWith("complete_provider_billing_document_issue",expect.anything());});
+ it("fails rather than acknowledging readiness when the durable write fails",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{code:"08006"}});expect((await consumeProviderBillingIssued("invoice",id)).ok).toBe(false);});
+});

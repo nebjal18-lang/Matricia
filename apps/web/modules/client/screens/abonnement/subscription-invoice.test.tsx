@@ -35,11 +35,11 @@ describe("SubscriptionInvoice", () => {
     const html = renderToStaticMarkup(
       <SubscriptionInvoice locale="fr" query="?organizationId=org" organizationName="Atelier Nord" cycle={cycle} />,
     );
-    expect(html).toContain("Facture d’abonnement");
+    expect(html).toContain("Détail du cycle d’abonnement");
     expect(html).toContain("Atelier Nord");
     expect(html).toContain("GOLD · v3");
     expect(html).toContain("ORDER-97000001");
-    expect(html).toContain("/fr/client/abonnement?organizationId=org#factures");
+    expect(html).toContain("/fr/client/finances?organizationId=org#documents-commerciaux");
     expect(html).not.toMatch(/payment_proof|TODO|FIXME/);
   });
 });

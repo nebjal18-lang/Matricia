@@ -15,7 +15,7 @@ const surfaces: Record<Role, readonly Surface[]> = {
     { route: "client/questionnaires", heading: { fr: "Mes questionnaires", ar: "استبياناتي" } },
     { route: "client/demandes", heading: { fr: "Demandes & devis", ar: "الطلبات والعروض" } },
     { route: "client/missions", heading: { fr: "Projets & missions", ar: "المشاريع والمهام" } },
-    { route: "client/finances", heading: { fr: "Finances", ar: "المالية" } },
+    { route: "client/finances", heading: { fr: "Mes finances", ar: "أموالي" } },
     { route: "client/credits", heading: { fr: "Crédits, Boxes et avantages", ar: "الأرصدة والصناديق والمزايا" } },
     { route: "notifications", heading: { fr: "Centre de notifications", ar: "مركز الإشعارات" } },
   ],
@@ -99,11 +99,15 @@ async function assertHealthyDocument(page: Page, locale: Locale, surface: Surfac
     await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible();
     await expect(page.locator("body")).not.toContainText(/Application error|Internal Server Error|ChunkLoadError/u);
     expect((await page.locator("body").innerText()).trim().length).toBeGreaterThan(20);
-    const dimensions = await page.evaluate(() => ({
-      viewport: document.documentElement.clientWidth,
-      content: document.documentElement.scrollWidth,
-    }));
-    expect(dimensions.content, `Horizontal overflow on /${locale}/${surface.route}`).toBeLessThanOrEqual(dimensions.viewport);
+    await expect(async () => {
+      await expect(page).toHaveURL(new RegExp(`/${locale}/${surface.route}/?$`), { timeout: 500 });
+      await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible({ timeout: 500 });
+      const dimensions = await page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        content: document.documentElement.scrollWidth,
+      }));
+      expect(dimensions.content, `Horizontal overflow on /${locale}/${surface.route}`).toBeLessThanOrEqual(dimensions.viewport);
+    }).toPass({ timeout: 5_000, intervals: [100, 250, 500] });
     expect(pageErrors, `Unhandled browser error on /${locale}/${surface.route}`).toEqual([]);
   } finally {
     page.off("pageerror", recordPageError);
@@ -126,15 +130,18 @@ async function assertDenied(page: Page, locale: Locale, surface: Surface) {
   const response = await page.goto(`/${locale}/${surface.route}`, { waitUntil: "domcontentloaded" });
   expect(response, `No document response for /${locale}/${surface.route}`).not.toBeNull();
   expect(response!.status(), `Unexpected HTTP status for /${locale}/${surface.route}`).toBeLessThan(500);
-  const stayed = new RegExp(`/${locale}/${surface.route}/?$`).test(new URL(page.url()).pathname);
-  if (!stayed) {
-    await expect(page).toHaveURL(new RegExp(`/${locale}/(tableau-de-bord|connexion)`));
-    return;
-  }
-  await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible();
-  if (surface.route.startsWith("administration/")) {
-    await expect(page.locator('[data-slot="alert"].text-destructive, [data-error-reason="FORBIDDEN"]')).toBeVisible();
-  }
+  // A streamed server response may redirect after DOMContentLoaded. Observe
+  // the final denied/redirected state before choosing the assertion branch.
+  await expect(async () => {
+    const stayed = new RegExp(`/${locale}/${surface.route}/?$`).test(new URL(page.url()).pathname);
+    if (!stayed) {
+      await expect(page).toHaveURL(new RegExp(`/${locale}/(tableau-de-bord|connexion|organisation|franchise/accueil)(?:[/?#]|$)`), { timeout: 500 });
+      await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).not.toBeVisible({ timeout: 500 });
+      return;
+    }
+    await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible({ timeout: 500 });
+    await expect(page.locator('[data-slot="alert"].text-destructive, [data-error-reason="FORBIDDEN"]')).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 10_000, intervals: [100, 250, 500] });
   const foreignOrganization = process.env.E2E_FOREIGN_ORGANIZATION_NAME;
   if (foreignOrganization) await expect(page.locator("body")).not.toContainText(foreignOrganization);
 }

@@ -1,0 +1,88 @@
+groups:
+  - name: matricia-delivery
+    rules:
+      - alert: MatriciaMetricsUnavailable
+        expr: up{job="matricia-delivery"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "Collecte Matricia inaccessible", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaServiceUnavailable
+        expr: matricia_service_healthy == 0
+        for: 1m
+        labels: { severity: critical }
+        annotations: { summary: "Dépendance indisponible ou heartbeat périmé", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaWorkerMissing
+        expr: absent(matricia_service_healthy{service="MATRICIA_WORKER"})
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "Aucune preuve de vie du worker", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaDeadLetters
+        expr: sum(matricia_outbox_events{status="DEAD_LETTER"}) > 0
+        for: 1m
+        labels: { severity: critical }
+        annotations: { summary: "Événements Matricia en DLQ", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaOutboxLag
+        expr: max(matricia_outbox_oldest_seconds{status="PENDING"}) > 900
+        for: 2m
+        labels: { severity: warning }
+        annotations: { summary: "Retard Outbox supérieur à quinze minutes", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaUnknownExternalEffect
+        expr: sum(matricia_queue_items{status=~"RECONCILIATION_REQUIRED|UNKNOWN"}) > 0
+        for: 1m
+        labels: { severity: warning }
+        annotations: { summary: "Résultat externe à réconcilier avant toute reprise", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaNotificationDeadLetters
+        expr: sum(matricia_queue_items{queue="notifications",status="DEAD_LETTER"}) > 0
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "Notifications à traiter ou boîtes invalides", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaScannerHttpMissing
+        expr: absent(matricia_service_healthy{service="SCANNER_HTTP"})
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "Aucune preuve de disponibilité de la passerelle antivirus", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaMessageAttachmentScanDeadLetters
+        expr: sum(matricia_queue_items{queue="message_attachments",status="DEAD_LETTER"}) > 0
+        for: 2m
+        labels: { severity: warning }
+        annotations: { summary: "Pièces de messagerie en échec définitif : corriger le scanner puis remplacer la pièce", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaMessageAttachmentScanLag
+        expr: max(matricia_queue_oldest_seconds{queue="message_attachments",status=~"PENDING|RETRY_PENDING"}) > 1800
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "Analyse des pièces de messagerie en attente depuis plus de trente minutes", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaMessageAttachmentScannerMissing
+        expr: absent(matricia_service_healthy{service="INTERNAL_MESSAGE_ATTACHMENT_SCANNER"})
+        for: 10m
+        labels: { severity: critical }
+        annotations: { summary: "Aucune preuve de vie du scanner de pièces de messagerie", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaPrivacyFileScanDeadLetters
+        expr: sum(matricia_queue_items{queue="privacy_files",status="DEAD_LETTER"}) > 0
+        for: 2m
+        labels: { severity: warning }
+        annotations: { summary: "Fichiers DSR bloqués : vérifier le scanner et les capacités d’archive avant reprise", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaPrivacyFileScanLag
+        expr: max(matricia_queue_oldest_seconds{queue="privacy_files",status=~"PENDING|RETRY_PENDING"}) > 1800
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "Fichiers DSR en attente depuis plus de trente minutes", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaPrivacyFileScannerMissing
+        expr: absent(matricia_service_healthy{service="PRIVACY_FILE_SCANNER"})
+        for: 10m
+        labels: { severity: critical }
+        annotations: { summary: "Aucune preuve de vie du scanner de fichiers DSR", runbook: "docs/audit-livraison/integrations-mise-en-service-2026-10-31.md" }
+      - alert: MatriciaSubscriptionCreditDeadLetters
+        expr: sum(matricia_queue_items{queue="subscription_credits",status="DEAD_LETTER"}) > 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "Crédits mensuels non émis : examiner la source, puis demander une reprise à quatre yeux", runbook: "docs/audit-livraison/credits-abonnement-worker-268081.md" }
+      - alert: MatriciaSubscriptionCreditLag
+        expr: max(matricia_queue_oldest_seconds{queue="subscription_credits",status=~"PENDING|RETRY_PENDING|RUNNING"}) > 1800
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "Échéances de crédits dues depuis plus de trente minutes", runbook: "docs/audit-livraison/credits-abonnement-worker-268081.md" }
+      - alert: MatriciaSubscriptionCreditWorkerMissing
+        expr: absent(matricia_service_healthy{service="SUBSCRIPTION_CREDIT_GRANTS"})
+        for: 10m
+        labels: { severity: critical }
+        annotations: { summary: "Aucune preuve de vie du worker de crédits mensuels", runbook: "docs/audit-livraison/credits-abonnement-worker-268081.md" }
