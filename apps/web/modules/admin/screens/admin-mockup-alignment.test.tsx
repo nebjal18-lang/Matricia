@@ -148,7 +148,7 @@ describe("admin dashboard mockups", () => {
     expect(operations).toContain('id="parametres"');
     expect(parcours).toContain("AdminHubBoard");
     expect(parcours).toContain('groupId="parcours"');
-    expect(commandCenter.indexOf("<AdminDirectoryBoard")).toBeLessThan(commandCenter.indexOf("<CommandCenterPanel"));
+    expect(commandCenter.indexOf("<CommandCenterPanel")).toBeLessThan(commandCenter.indexOf("<AdminDirectoryBoard"));
     expect(commandCenter).toContain('title={c.space}');
     expect(commandCenter).toContain("id=\"command-today\"");
   });

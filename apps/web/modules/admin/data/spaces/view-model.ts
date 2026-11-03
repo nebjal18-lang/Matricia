@@ -1,3 +1,4 @@
+import { summarizeAdminWork } from "@/modules/admin/data/command-center/view-model";
 import type { AdminWorkItem } from "@/modules/admin/data/command-center/model";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -77,11 +78,11 @@ export function mapAdminTreatQueue(input: {
 }): AdminTreatItem[] {
   const { locale, query, organizations, requests, workItems } = input;
   const tones = ["sky", "peach", "mint", "violet"] as const;
-  const fromWork = workItems.slice(0, 6).map((item, index) => ({
+  const fromWork = summarizeAdminWork(workItems, new Date().toISOString()).ordered.slice(0, 6).map((item, index) => ({
     id: item.id,
     title: locale === "ar" ? item.titleAr : item.titleFr,
     detail: item.resourceType,
-    href: item.organizationId ? `/${locale}/administration/entreprises/${item.organizationId}${query}` : `/${locale}/administration/parcours${query}`,
+    href: `/${locale}/administration/command-center${query}#work-${encodeURIComponent(item.id)}`,
     tone: tones[index % tones.length]!,
   }));
   if (fromWork.length > 0) return fromWork;
@@ -89,7 +90,7 @@ export function mapAdminTreatQueue(input: {
     id: item.id,
     title: item.organization_name,
     detail: item.status,
-    href: `/${locale}/administration/entreprises/${item.organization_id}${query}`,
+    href: `/${locale}/administration/demandes/${item.id}${query}`,
     tone: tones[index % tones.length]!,
   }));
   if (fromRequests.length > 0) return fromRequests;
@@ -108,13 +109,25 @@ export function demoAdminTreatQueue(): AdminTreatItem[] {
 
 export function organizationJourney(fiche: AdminOrganizationFiche, locale: Locale) {
   const c = adminCopy(locale);
-  const pending = c.pendingStep;
+  const org = fiche.organization;
+  // A dispute says nothing about the current identity verification. A stale
+  // client case must also override an old VERIFIED label in the projection.
+  const row = mapAdminOrgRows([{
+    ...org,
+    client_compliance_status: org.client_compliance_snapshot
+      ? org.client_compliance_snapshot.currently_verified ? "VERIFIED" : "PENDING"
+      : org.client_compliance_status,
+    member_count: fiche.memberships.length,
+    open_requests: fiche.requests.length,
+    open_disputes: fiche.disputes.length,
+  }], locale)[0]!;
+  const recorded = (count: number) => locale === "ar" ? `${count} سجل` : `${count} enregistrement(s)`;
   return [
-    { id: "signup", label: c.signIn, detail: pending, state: "done" as const },
-    { id: "org", label: c.orgStep, detail: pending, state: "done" as const },
-    { id: "compliance", label: c.compliance, detail: pending, state: fiche.disputes.some((item) => item.status !== "CLOSED") ? "current" as const : "done" as const },
-    { id: "diag", label: c.diag, detail: pending, state: fiche.diagnostics.length > 0 ? "done" as const : "pending" as const },
-    { id: "requests", label: c.requests, detail: pending, state: fiche.requests.length > 0 ? "done" as const : "pending" as const },
-    { id: "missions", label: c.missions, detail: pending, state: fiche.missions.length > 0 ? "done" as const : "pending" as const },
+    { id: "org", label: c.orgStep, detail: org.created_at, state: "done" as const },
+    { id: "compliance", label: c.compliance, detail: row.compliance,
+      state: row.complianceCode === "CURRENT" ? "done" as const : row.complianceCode === "REVIEW" ? "current" as const : "pending" as const },
+    { id: "diag", label: c.diag, detail: recorded(fiche.diagnostics.length), state: fiche.diagnostics.length > 0 ? "current" as const : "pending" as const },
+    { id: "requests", label: c.requests, detail: recorded(fiche.requests.length), state: fiche.requests.length > 0 ? "current" as const : "pending" as const },
+    { id: "missions", label: c.missions, detail: recorded(fiche.missions.length), state: fiche.missions.length > 0 ? "current" as const : "pending" as const },
   ];
 }

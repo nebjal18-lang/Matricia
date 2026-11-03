@@ -1,3 +1,11 @@
+## 2026-11-03 — Corrections administration : faits, urgences et navigation
+
+- Branche `codex/admin-corrections-20261103`, base GitHub `nebjal18-lang/Matricia` `d481bb6`. Conformité de la fiche fondée sur les preuves Client/Provider et l’identité canonique courantes ; retrait des validations déduites de l’absence de litige ou de la simple présence d’un brouillon.
+- Tri gravité puis échéance ; file ouverte avant l’annuaire et raccourcis vers la tâche exacte. Gestion des membres filtrée sur l’organisation du dossier ; invitations limitées à INVITED ; activité/IF/RC réels, compteurs correctement nommés et indisponibilité explicite des Boxes/crédits sans projection.
+- Suite Admin **567/567 PASS dans 94 fichiers**, sans test ignoré ; TypeScript web et lint web PASS ; validateur Server Actions PASS (1 951 sources) ; **8/8 contrôles Chromium synthétiques** du menu compte FR/AR à 375/390/768/1440 px PASS. Revue indépendante effectuée, deux remarques de navigation corrigées et revues.
+- La compilation du code et TypeScript Next passent avec une configuration locale synthétique ; la collecte complète des pages est vérifiée séparément. Aucun changement SQL/RLS, financier ou de production. La recette Admin AAL2 native et les RPC sur base de test ne sont pas certifiés par ces preuves.
+- Périmètre et limites : `docs/recette/admin-corrections-2026-11-03.md`. Suite : recette authentifiée intégrée, puis traitements de confidentialité et exports volumineux déjà recensés. Aucun visa global de livraison n’est annoncé.
+
 ## 2026-11-02 — Corrections de l’audit complet M01–M30
 
 - Audit complet reçu après l’instantané ci-dessous : les trente identifiants sont maintenant traités dans le code et documentés dans `docs/audit-20261102/REPORT.md`. Branche dédiée `codex/audit-m01-m30-20261102`, base `39552d7` préservée, consolidation/fusion amont `1ebf3ea`. Le déploiement audité précède cette fusion selon le demandeur ; son SHA exact reste inconnu et son URL est refusée CONNECT403. Aucun projet distant substitué.
