@@ -1,0 +1,50 @@
+{
+  "synthetic": true,
+  "nativeAuthentication": false,
+  "proofs": [
+    {
+      "locale": "fr",
+      "width": 360,
+      "status": "PASS",
+      "approvalFilterPreserved": true,
+      "paginationReset": true,
+      "quoteRouteCorrect": true,
+      "organizationPreserved": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "status": "PASS",
+      "approvalFilterPreserved": true,
+      "paginationReset": true,
+      "quoteRouteCorrect": true,
+      "organizationPreserved": true
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "status": "PASS",
+      "approvalFilterPreserved": true,
+      "paginationReset": true,
+      "quoteRouteCorrect": true,
+      "organizationPreserved": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "status": "PASS",
+      "approvalFilterPreserved": true,
+      "paginationReset": true,
+      "quoteRouteCorrect": true,
+      "organizationPreserved": true
+    }
+  ],
+  "date": "2026-11-03",
+  "browser": "Chromium /usr/bin/chromium",
+  "scope": "Static server rendering of the actual CommandCenterPanel; server actions inert; Next Link replaced by an anchor. Native HTML filter submission and dossier link clicks in Chromium. No authenticated session or remote RPC.",
+  "sourceSha256": {
+    "apps/web/modules/admin/data/command-center/view-model.ts": "c7ffef84351b56d5e4f5076833df7816313a2f92d2614dc03af9253415a88c92",
+    "apps/web/modules/admin/screens/command-center/command-center-panel.tsx": "65a0edcef3457d2392db079853a788a1be62cd7248a7f65cfcbfab19380f6b2f",
+    "apps/web/modules/admin/screens/command-center/actions.ts": "dc1f7f27b80ada3c33066b466f1d60b78990a72eb8098709a1c0498e611ea9e3"
+  }
+}

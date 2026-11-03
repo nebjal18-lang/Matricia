@@ -12,3 +12,10 @@ describe("Admin command search",()=>{
  it("keeps page suggestions when cases fail, with an explicit partial state",()=>{const html=renderToStaticMarkup(<AdminSearchResults locale="fr" query="missions" organizationQuery="" dashboard={null}/>);expect(html).toContain('/fr/administration/missions');expect(html).toContain("seuls les liens de pages");});
  it("ignores a whitespace query",()=>expect(searchAdminLoadedContent("fr","  ","",dashboard)).toEqual([]));
 });
+
+it.each(["fr", "ar"] as const)("uses the same typed quote link and context as the work card in %s", locale => {
+  const result = searchAdminLoadedContent(locale, "devis-test", "?organizationId=org&q=discard&actionPage=2", {
+    ...dashboard, actions: [], workItems: [{ ...dashboard.workItems[0]!, resourceType: "QUOTE", resourceId: "quote-123", titleFr: "devis-test", titleAr: "devis-test" }],
+  });
+  expect(result).toEqual([expect.objectContaining({ href: `/${locale}/administration/devis/quote-123?organizationId=org`, kind: "dossier" })]);
+});
