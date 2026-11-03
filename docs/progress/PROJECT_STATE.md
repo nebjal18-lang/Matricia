@@ -5,6 +5,14 @@
 - Rejeu neuf **562 migrations PASS**, nettoyage PASS ; **347 fichiers SQL/RLS PASS par segments**, quatre courses officielles à deux connexions PASS ; **3 892 tests unitaires PASS**, un Storage opt-in ignoré existant ; intégration3/tooling33, lint/typecheck/build, phase00/frontières/no-placeholders PASS. Budget du job SQL : 40 minutes. Revue indépendante sans bloquant.
 - Passage CI unique GitHub Actions à confirmer après publication. Preuves et limites : `docs/recette/ci-repair-2026-11-03.md` et `docs/evidence/ci-repair-20261103.json`. Aucun visa global de livraison ni fusion annoncé.
 
+## 2026-11-03 — Administration lot 3 : vraie recette AAL2 et reprise de pagination
+
+- Branche `codex/admin-lot3-20261103`, après PR #5 ; code candidat `e37e76e`. La recette native a reproduit un centre inutilisable sur une page d’approbations dépassant les résultats : HTTP416/PGRST103. Reprise page1 sous le même filtre/RLS uniquement pour cet état ; autres erreurs conservées.
+- **19 étapes natives PASS** sur serveur compilé possédé : GoTrue/TOTP réels, trois profils de refus en RPC et navigateur FR/AR, auto-approbation refusée, filtre/contexte, claim/resolve sans rechargement manuel et version périmée refusée, rejet par un second Admin sans rechargement manuel. FR360 / AR1280 pour le workflow des tâches ; décision FR1280.
+- Nettoyage vérifié : **4 acteurs / 1 organisation**, zéro rôle/session/tâche ouverte/approbation en attente des fixtures ; faits immuables conservés et serveur arrêté. Bootstrap des rôles local seulement ; aucune preuve de nomination gouvernée n’est extrapolée.
+- **649 tests Admin PASS**, **35 outillage PASS** ; lint ciblé et build Next complet / TypeScript PASS. Harness historique : statut PROBE_PASSED distinct et nettoyage poursuivi malgré une erreur de fermeture. Revue indépendante sans bloquant.
+- Preuves et limites : `docs/recette/admin-lot3-2026-11-03.md`, `docs/evidence/admin-lot3-native-20261103.json`. Base locale229 versions enregistrées, pas de visa de rejeu neuf/staging/production. Confidentialité, gros exports et projections Boxes/crédits restent ouverts.
+
 ## 2026-11-03 — Administration lot 2 : dossiers et suivi des actions
 
 - Branche `codex/admin-lot2-20261103`, base `2075da4` du lot 1 / PR #4. Mapping des ressources vers leurs vraies collections de détail ; aucune réinterprétation d’un identifiant de RFQ/livrable/version comme identifiant parent. Segments encodés, cibles vides/dot refusées, contexte organisation commun aux cartes et à la recherche.

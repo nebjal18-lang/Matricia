@@ -90,3 +90,43 @@ describe("loadAdminCommandCenter", () => {
     await expect(loadAdminCommandCenter()).resolves.toEqual({ status: "error", reason: "FORBIDDEN" });
   });
 });
+
+describe("approval pagination recovery", () => {
+  beforeEach(() => {
+    mocks.getUser.mockReset().mockResolvedValue({ data: { user: { id: userId } } });
+    mocks.rpc.mockReset().mockResolvedValue({ data: [{ requirement_satisfied: true, matched_role_codes: ["MATRICIA_ADMIN"] }], error: null });
+  });
+
+it("recovers an expired approval page without hiding the work queue or changing its status filter", async () => {
+  let actionReads = 0;
+  const ranges: number[][] = [];
+  const filters: string[][] = [];
+  mocks.from.mockImplementation((table: string) => {
+    if (table === "admin_operational_action_requests") {
+      const result = actionReads++ === 0
+        ? { data: null, error: { code: "PGRST103" }, count: null }
+        : { data: [], error: null, count: 0 };
+      const chain = thenable(result);
+      chain.eq = (column: string, value: string) => { filters.push([column, value]); return chain; };
+      chain.range = (from: number, to: number) => { ranges.push([from, to]); return chain; };
+      return chain;
+    }
+    return thenable({ data: [], error: null });
+  });
+  const result = await loadAdminCommandCenter(2, "PENDING_APPROVAL");
+  expect(result).toMatchObject({ status: "success", dashboard: { actionPage: 1, actionStatus: "PENDING_APPROVAL", actions: [], hasMoreActions: false } });
+  expect(ranges).toEqual([[100, 199], [0, 99]]);
+  expect(filters).toEqual([["status", "PENDING_APPROVAL"], ["status", "PENDING_APPROVAL"]]);
+});
+
+it.each(["42501", "PGRST200", "XX000"])("does not retry or disguise a %s query failure as a missing page", async code => {
+  let actionReads = 0;
+  mocks.from.mockImplementation((table: string) => {
+    if (table === "admin_operational_action_requests") { actionReads++; return thenable({ data: null, error: { code } }); }
+    return thenable({ data: [], error: null });
+  });
+  expect(await loadAdminCommandCenter(2)).toEqual({ status: "error", reason: "QUERY_FAILED" });
+  expect(actionReads).toBe(1);
+});
+
+});
