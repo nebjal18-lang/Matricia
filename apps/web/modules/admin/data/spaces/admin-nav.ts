@@ -26,6 +26,7 @@ export function adminActorLinks(locale: Locale, q: string): AdminLink[] {
 export function adminParcoursLinks(locale: Locale, q: string): AdminLink[] {
   const p = `/${locale}`;
   return [
+    { id: "franchise-applications", href: `${p}/administration/candidatures-franchise${q}`, label: t(locale, "Candidatures franchise", "ترشيحات الامتياز") },
     { id: "diagnostics", href: `${p}/administration/diagnostics${q}`, label: t(locale, "Diagnostics", "التشخيصات") },
     { id: "demandes", href: `${p}/administration/demandes${q}`, label: t(locale, "Besoins & demandes", "الحاجات والطلبات") },
     { id: "matching", href: `${p}/administration/matching${q}`, label: t(locale, "Matching & consultations", "المطابقة والاستشارات") },

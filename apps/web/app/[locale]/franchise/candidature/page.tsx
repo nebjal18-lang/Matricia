@@ -1,4 +1,7 @@
+import { randomUUID } from "node:crypto";
 import Link from "next/link";
+import { loadMyFranchiseApplications } from "@/modules/franchise/data/candidature/repository";
+import { MyFranchiseApplications } from "@/modules/franchise/screens/candidature/my-applications";
 import { getFranchisePresentation } from "@/modules/public/data/franchise-presentation";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -15,6 +18,8 @@ export default async function FranchiseCandidaturePage({ params }: { params: Pro
   const fr = locale === "fr";
   const presentation = getFranchisePresentation(locale);
   const steps = presentation.steps;
+  const mine = await loadMyFranchiseApplications();
+  const keys = mine.status === "success" ? Object.fromEntries(mine.applications.map((application) => [application.id, randomUUID()])) : {};
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="public-root flex min-h-dvh flex-col text-[var(--mat-navy)]">
@@ -53,11 +58,16 @@ export default async function FranchiseCandidaturePage({ params }: { params: Pro
             </p>
           </aside>
         </section>
-        <p className="public-wrap mt-6">
-          <Link className="journey-known" href={`/${locale}/connexion?next=${encodeURIComponent(`/${locale}/franchise/candidature`)}`}>
-            {fr ? "J’ai déjà commencé une candidature" : "لقد بدأت ترشيحاً بالفعل"}
-          </Link>
-        </p>
+        {mine.status === "success" ? <MyFranchiseApplications locale={locale} applications={mine.applications} organizations={mine.ownedOrganizations} idempotencyKeys={keys} /> : null}
+        {mine.status === "error" ? <p role="alert" className="public-wrap mt-6">{fr ? "Vos dossiers de candidature sont momentanément indisponibles." : "ملفات ترشيحكم غير متاحة مؤقتاً."}</p> : null}
+        {mine.status === "anonymous" ? (
+          <p className="public-wrap mt-6">
+            <Link className="journey-known" href={`/${locale}/connexion?next=${encodeURIComponent(`/${locale}/franchise/candidature`)}`}>
+              {fr ? "J’ai déjà commencé une candidature" : "لقد بدأت ترشيحاً بالفعل"}
+            </Link>
+          </p>
+        ) : null}
+        {mine.status === "success" && !mine.applications.length ? <p className="public-wrap mt-6 text-sm text-slate-600">{fr ? "Aucune candidature n’est associée à l’adresse de ce compte." : "لا يوجد ترشيح مرتبط بعنوان هذا الحساب."}</p> : null}
       </main>
       <PublicFooter locale={locale} />
     </div>

@@ -88,6 +88,7 @@ export function adminDirectoryGroups(locale: Locale, q: string): AdminDirectoryG
       title: fr ? "Opérations, sécurité & configuration" : "التشغيل والأمن والإعداد",
       tone: "plum",
       links: [
+        { href: `${p}/administration/preparation${q}`, label: fr ? "Préparation de la livraison" : "إعداد التسليم" },
         { href: `${p}/administration/operations${q}#operations-summary`, label: fr ? "Opérations & files de traitement" : "التشغيل وطوابير المعالجة" },
         { href: `${p}/administration/operations${q}#outbox`, label: fr ? "Event Outbox & workers" : "صندوق الأحداث والعاملون" },
         { href: `${p}/administration/operations${q}#webhooks`, label: fr ? "Webhooks & intégrations" : "الويب هوك والتكاملات" },

@@ -51,6 +51,7 @@ export type DocumentOption = {
 };
 export type QuestionnaireOption = { id: string; version: number; titleFr: string; titleAr: string; descriptionFr: string; descriptionAr: string };
 export type SessionSummary = { id: string; organizationId: string; questionnaireVersionId: string; status: z.infer<typeof sessionStatus>; locale: z.infer<typeof databaseLocale>; updatedAt: string; submittedAt: string | null; rowVersion: number; titleFr: string; titleAr: string };
+export type QuestionChoice = { value: string; labelFr: string; labelAr: string };
 export type Question = {
   id: string;
   sectionId: string;
@@ -64,7 +65,7 @@ export type Question = {
   type: z.infer<typeof answerType>;
   required: boolean;
   nullable: boolean;
-  options: string[];
+  options: QuestionChoice[];
   validation: Record<string, unknown>;
   structured: Record<string, unknown> | null;
   answer: { value: unknown; rowVersion: number; answeredAt: string; expiresAt: string | null; requiresRevalidation: boolean; prefilled?: boolean; source?: string } | null;
