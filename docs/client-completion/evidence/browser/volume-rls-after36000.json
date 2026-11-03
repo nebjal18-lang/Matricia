@@ -1,0 +1,13 @@
+{
+  "scope": "NATIVE_CLIENT_VOLUME_RESERVATIONS_RLS",
+  "appTree": "c7092168ac05d4765220892029cf5f7eaf6c8e4b",
+  "actor": "GENUINE_GOTRUE_AAL2_CLIENT_OWNER",
+  "currentLevel": "aal2",
+  "organizationId": "c0b406b7-b8e2-4e62-b5fb-0003d2cd0562",
+  "http": 200,
+  "error": null,
+  "rows": 0,
+  "foreignFilterReturnsNoRows": true,
+  "populatedForeignRowsCertified": false,
+  "status": "PASSED"
+}

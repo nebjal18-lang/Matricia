@@ -1,0 +1,44 @@
+{
+  "scope": "PROVIDER_SHARED_LEGAL_IDENTITY_FOCUSED_VERIFICATION",
+  "base": "7e01276",
+  "sql": {
+    "assertions": 28,
+    "status": "PASSED",
+    "execution": "Application commands run under SET ROLE authenticated; explicit synthetic SQL claims and TEST storage/scanner port; no external onboarding certification",
+    "target": "Owned isolated Client e3ea17e3-1a4a-4a50-bdee-1b55bf272960 canonical458 source schema",
+    "commitSent": false,
+    "rollbackVerified": {
+      "providerTableAbsent": true,
+      "privateCoreAbsent": true,
+      "clientCommandRestored": true,
+      "testActorsAbsent": true
+    },
+    "freshReplay": false
+  },
+  "unit": {
+    "files": 4,
+    "tests": 37,
+    "status": "PASSED",
+    "scope": "Provider actions and FR/AR forms; existing Client onboarding actions; existing Admin Provider identity actions"
+  },
+  "lint": {
+    "status": "PASSED",
+    "scope": "All changed TS/TSX files"
+  },
+  "typecheck": {
+    "status": "NOT_COMPLETED_STOPPED_FOR_COMMON_INTEGRATION_CHECK",
+    "reason": "Cold global tsc remained active without diagnostics under parallel-domain contention; stopped at orchestrator request. No successful typecheck claimed."
+  },
+  "files": [
+    {
+      "file": "supabase/migrations/20261102043000_provider_common_legal_identity.sql",
+      "sha256": "76eabc09b13dc8e838ac4218de2330244e9e83c7ddc6389400d840f7fcdce33b"
+    },
+    {
+      "file": "supabase/tests/0350_provider_common_legal_identity.test.sql",
+      "sha256": "a5558a61f2a6fd8f1bcae854ce5bfe5d0320906da245387109550de5b504ac98"
+    }
+  ],
+  "productionTouched": false,
+  "browserAcceptance": "Assigned to independent integrated browser lot"
+}

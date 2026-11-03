@@ -8,7 +8,7 @@ export function MilestoneDecisions({ dashboard, locale, messages }: {
   locale: Locale;
   messages: MissionMessages;
 }) {
-  const submitted = dashboard.missions.flatMap((mission) => mission.milestones.filter((milestone) => milestone.status === "SUBMITTED"));
+  const submitted = dashboard.missions.filter(mission=>!mission.scopeReconciliationRequired).flatMap((mission) => mission.milestones.filter((milestone) => !milestone.retired&&milestone.status === "SUBMITTED"));
   if (submitted.length === 0) return null;
   return <section aria-labelledby="milestone-decisions-title" className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
     <h2 id="milestone-decisions-title" className="text-xl font-semibold">{locale === "ar" ? "مراحل تنتظر قرارك" : "Jalons en attente de décision"}</h2>

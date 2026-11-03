@@ -1,0 +1,15 @@
+import { requireDevelopment, loadOwnState } from './safety.mjs';
+requireDevelopment();
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
+const state=await loadOwnState(),actors=JSON.parse(await readFile(resolve(state.directory,'actors.private.json'))),owner=actors.find(actor=>actor.label==='owner'),foreign=actors.find(actor=>actor.label==='foreign');
+const {createClient}=createRequire(resolve('apps/web/package.json'))('@supabase/supabase-js'),client=createClient(`http://127.0.0.1:${state.gatewayPort}`,state.anonKey,{auth:{persistSession:false,autoRefreshToken:false}});
+if((await client.auth.setSession(owner.session)).error)throw new Error('NATIVE_OWNER_SESSION_REQUIRED');
+const assurance=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assurance.error||assurance.data?.currentLevel!=='aal2')throw new Error('NATIVE_OWNER_AAL2_REQUIRED');
+const result=await client.from('service_reservations').select('id,pool_id,client_organization_id,benefit_reference,reserved_units::text,consumed_units::text,released_units::text,status,expires_at').eq('client_organization_id',owner.organizationId).order('created_at',{ascending:false}).limit(100);
+const foreignResult=await client.from('service_reservations').select('id').eq('client_organization_id',foreign.organizationId);
+const proof={scope:'NATIVE_CLIENT_VOLUME_RESERVATIONS_RLS',appTree:execFileSync('git',['rev-parse','HEAD:apps/web'],{encoding:'utf8'}).trim(),actor:'GENUINE_GOTRUE_AAL2_CLIENT_OWNER',currentLevel:assurance.data.currentLevel,organizationId:owner.organizationId,http:result.status,error:result.error?{code:result.error.code,message:result.error.message}:null,rows:result.data?.length??null,foreignFilterReturnsNoRows:!foreignResult.error&&foreignResult.data.length===0,populatedForeignRowsCertified:false};
+proof.status=!proof.error&&proof.foreignFilterReturnsNoRows?'PASSED':'FAILED';if(proof.status==='FAILED')process.exitCode=1;
+const directory=resolve(state.directory,'volume-rls');await mkdir(directory,{recursive:true});await writeFile(resolve(directory,'after36000.json'),JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));

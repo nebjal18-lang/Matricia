@@ -1,0 +1,92 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041000_provider_versioned_receipts_assignments.sql",
+      "sha256": "a44897f33d19b092f3442d47e777011bf732f024ca811f2eb3626a3cd94220e2"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041200_provider_structured_amendment_proposals.sql",
+      "sha256": "29f23abb35694b4ef346c50e854ee0dc81fdd12ee3e80f972d9c53b02e027fe5"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041300_provider_mission_search.sql",
+      "sha256": "be6db42d3508c65bf0edf10e4bf0909613ebecf0954869ca3fd2960cd3216d74"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041400_provider_milestone_decision_history.sql",
+      "sha256": "cc44736733b83a2564eab78c935de8467762b7bacd55135e9603fecfd58213fb"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041500_provider_mission_execution_authority.sql",
+      "sha256": "8412d90f9392ebb9299653d362758eed13ac8ae524e60868b78a67dcd288df77"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041600_signed_amendment_mission_execution.sql",
+      "sha256": "28580dcc2fb3545b0b20e3eafaebba52f0dae7d10bdd40c8365b222ef644c0af"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041700_provider_delivery_receipt_recovery.sql",
+      "sha256": "143f0d42f55855810b02b53fef38143d20fd358b50adde7e64141d3efbfdc018"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041800_client_delivery_receipt_recovery.sql",
+      "sha256": "431e5de160b5b93b68990aece893a0336029e5fae1ce7dae9a518cca402f23a3"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041820_provider_mission_read_roles.sql",
+      "sha256": "58a25c0ed9bd72c0814273c3dd21d5d9d62ec6e2c7687e70bafe4dff0d78d99c"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041830_provider_mission_query_authorization.sql",
+      "sha256": "3485ffa4f78704c1847fa4bb9117e3a317731bf0895849c993babb24718efe12"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041900_signed_scope_reconciliation_exceptions.sql",
+      "sha256": "a7f1fdc5ca077ee9e7bb63ce1facfbbd0b038b7710b3275982bdb619c01dc35f"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041950_signed_scope_generations.sql",
+      "sha256": "ee1d7b253d7f0aea526230bc68ec2e037e2dd5aa569527f2e1362b72c16d1771"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-scope-reconciliation/supabase/migrations/20261102041960_provider_structured_scope_proposals.sql",
+      "sha256": "9ead9ea5bb59d7624480d76d2cd35ca6b711fb10bfdd148e7365b272240ac978"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-scope-reconciliation/supabase/tests/0355_signed_scope_generations.test.sql",
+      "sha256": "269dac898f7539437eb3d89a953426521533a8f942cc19b3859d14136da659a8"
+    }
+  ],
+  "status": "PASSED",
+  "assertions": 170,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

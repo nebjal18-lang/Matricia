@@ -21,21 +21,21 @@ export default async function ProviderMissionsPage({ params, searchParams }: { p
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/missions` }));
   const messages = getProviderMissionMessages(locale);
   const c = providerCopy(locale);
-  const [result, amendments] = await Promise.all([loadProviderMissions(locale, query.organizationId,undefined,/^\d{1,6}$/.test(query.page??"")?Number(query.page):1), loadProviderAmendments(query.organizationId)]);
+  const [result, amendments] = await Promise.all([loadProviderMissions(locale, query.organizationId,undefined,/^\d{1,6}$/.test(query.page??"")?Number(query.page):1,query.q??""), loadProviderAmendments(query.organizationId)]);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/missions` }));
   const boardQuery = providerSearchQuery(space.selectedQuery, { q: query.q });
   return (
-    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="missions" title={c.misTitle} lead={c.misLead} kicker={c.kicker} actions={<ProviderActions href="#missions-operation" label={c.openMission} />}>
+    <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="missions" title={c.misTitle} lead={c.misLead} languagePath={`/${locale}/sous-traitant/missions?${new URLSearchParams({...Object.fromEntries(Object.entries(query).filter((entry):entry is [string,string]=>typeof entry[1]==="string"))})}`} kicker={c.kicker} actions={<ProviderActions href="#missions-operation" label={c.openMission} />}>
       {result.status==="success"?<ProviderListPagination locale={locale} path={`/${locale}/sous-traitant/missions`} query={boardQuery} page={result.dashboard.listPage??1} hasMore={Boolean(result.dashboard.hasMoreMissions)}/>:null}
-      <ProviderMissionsBoard locale={locale} query={boardQuery} rows={result.status === "success" ? filterListRows(missionRowsFromDashboard(result.dashboard, locale, space.selectedQuery), query.q ?? "") : []} />
+      {result.status==="success"?<ProviderMissionsBoard locale={locale} query={boardQuery} rows={result.status === "success" ? filterListRows(missionRowsFromDashboard(result.dashboard, locale, space.selectedQuery), query.q ?? "") : []} />:null}
       <details id="missions-operation" className="client-ops">
         <summary>{c.opsMissions}</summary>
         {result.status === "error" ? (
-          <Alert variant={result.reason === "NO_PROVIDER_ORGANIZATION" ? "default" : "destructive"}><AlertTitle>{result.reason === "NO_PROVIDER_ORGANIZATION" ? messages.noProvider : messages.loadError}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
+          <Alert variant={result.reason === "NO_PROVIDER_ORGANIZATION" ? "default" : "destructive"}><AlertTitle>{result.reason === "NO_PROVIDER_ORGANIZATION" ? messages.noProvider : messages.loadError}</AlertTitle><AlertDescription>{result.reason==="NO_PROVIDER_ORGANIZATION"?messages.noProvider:locale==="ar"?"لم يتم تأكيد عدم وجود مهام. تحقق من المؤسسة والصلاحيات ثم أعد المحاولة.":"L’absence de missions n’est pas confirmée. Vérifiez l’organisation et vos droits, puis réessayez."}<a className="ms-2 underline" href={`/${locale}/sous-traitant/missions${space.selectedQuery}`}>{locale==="ar"?"إعادة المحاولة":"Réessayer"}</a></AlertDescription></Alert>
         ) : (
           <>
             <MissionsPanel dashboard={result.dashboard} locale={locale} messages={messages} />
-            {amendments.status === "success" ? <ProviderAmendmentPanel d={amendments.value} locale={locale} /> : null}
+            {amendments.status === "success" ? <ProviderAmendmentPanel d={amendments.value} locale={locale} /> : <p role="alert">{locale==="ar"?"تعذر تحميل الملاحق؛ لم يتم تأكيد غيابها.":"Le chargement des avenants est indisponible ; leur absence n’est pas confirmée."}</p>}
           </>
         )}
       </details>

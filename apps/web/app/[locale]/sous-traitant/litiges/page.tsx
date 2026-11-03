@@ -1,3 +1,5 @@
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
@@ -18,14 +20,17 @@ export default async function ProviderDisputesPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/litiges` }));
-  const repository = await createServerDisputesRepository(space.selectedOrganizationId ?? query.organizationId, "provider");
+  const m = getProviderDisputeMessages(locale);
+  const retryHref = `/${locale}/sous-traitant/litiges${space.selectedQuery || (query.organizationId ? `?organizationId=${encodeURIComponent(query.organizationId)}` : "")}`;
+  const blocked = providerContextReadState(space, query.organizationId);
+  if (blocked) return <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="disputes" title={m.title} lead={m.intro}><ProviderReadState locale={locale} state={blocked} retryHref={retryHref} /></ProviderAppShell>;
+  const repository = await createServerDisputesRepository(space.selectedOrganizationId!, "provider");
   const result = await repository.list();
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/litiges` }));
-  const m = getProviderDisputeMessages(locale);
   if (result.status === "error") {
     return (
       <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="disputes" title={m.title} lead={m.intro}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل النزاعات." : "Impossible de charger les litiges."}</p></main>
+        <ProviderReadState locale={locale} state={result.reason === "FORBIDDEN" ? "forbidden" : "unavailable"} retryHref={retryHref} />
       </ProviderAppShell>
     );
   }
@@ -34,6 +39,7 @@ export default async function ProviderDisputesPage({
   if (selected.status === "error" && selected.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/litiges` }));
   return (
     <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="disputes" title={m.title} lead={m.intro}>
+      {selected.status === "error" ? <ProviderReadState locale={locale} state="unavailable" retryHref={retryHref} /> : null}
       <DisputesBoard
         locale={locale}
         query={space.selectedQuery}

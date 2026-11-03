@@ -1,0 +1,49 @@
+{
+  "scope": "NATIVE_CLIENT_PORTFOLIO_SERVER_ACTIONS",
+  "appTree": "c7092168ac05d4765220892029cf5f7eaf6c8e4b",
+  "candidate": "b96cb8660489c8f265494e12eda75a41370712f0",
+  "status": "PASSED",
+  "nativeOnboardingCertified": false,
+  "physicalScanningCertified": false,
+  "independentBudgetApprovalCertified": false,
+  "steps": [
+    {
+      "step": "native_ui_site_creation_and_scoped_readback",
+      "passed": true
+    },
+    {
+      "step": "native_ui_project_links_same_organization_site",
+      "passed": true
+    },
+    {
+      "step": "native_ui_task_links_authorized_project",
+      "passed": true
+    },
+    {
+      "step": "native_ui_MAD_budget_decimal_is_exact_minor_and_remains_draft",
+      "passed": true
+    },
+    {
+      "step": "native_AR_reload_uses_entered_AR_labels_without_overflow",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "lastForm": {
+    "$ACTION_REF_13": "",
+    "$ACTION_13:0": "{\"id\":\"60b7ddd72c47684f591304ab3fa354f582a1d9652c\",\"bound\":\"$@1\"}",
+    "$ACTION_13:1": "[{\"status\":\"idle\"}]",
+    "$ACTION_KEY": "k38f745e365ff781e8c5b1ab6714d2278",
+    "locale": "fr",
+    "organizationId": "c0b406b7-b8e2-4e62-b5fb-0003d2cd0562",
+    "idempotencyKey": "acb825ee-7cc5-436e-b656-9a682e996b32",
+    "fiscalYear": "2026",
+    "currency": "MAD",
+    "libraryId": "",
+    "siteId": "",
+    "projectId": "8f473d84-d2a8-4058-a1cc-e4772591c939",
+    "amount": "1250,50",
+    "rationale": "TEST Budget brouillon : aucune approbation indépendante simulée",
+    "approve": "no"
+  }
+}

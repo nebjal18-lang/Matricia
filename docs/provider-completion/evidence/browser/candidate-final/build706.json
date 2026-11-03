@@ -1,0 +1,12 @@
+{
+  "scope": "COMPLETE_OPTIMIZED_NEXT_WEBPACK_BUILD_FINAL_DOCUMENT_LOCALE_AND_PROVIDER_RUNTIME",
+  "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "appTree": "c43980c6da4345d8da6260ffb264b5089becf2f2",
+  "status": "PASSED",
+  "typescriptCompleted": true,
+  "typescriptSkipped": false,
+  "serverStarted": true,
+  "productionDeployment": false,
+  "logSha256": "f6d52960ad2bd2516df433a9f250a634dcf2f88526c431adf5b1b4edb6e509aa",
+  "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/run-app.mjs --coordinated --production --candidate=706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+}

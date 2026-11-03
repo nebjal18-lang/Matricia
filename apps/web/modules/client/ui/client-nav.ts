@@ -32,6 +32,7 @@ export type ClientNavKey =
   | "contracts"
   | "portfolio"
   | "credits"
+  | "memberBoxes"
   | "favorites";
 
 export type ClientNavItem = {
@@ -78,6 +79,7 @@ export function buildClientUtilityNav(input: { locale: Locale; selectedQuery: st
     { key: "contracts", href: `/${input.locale}/client/contrats${q}`, label: c.navContracts, icon: ScrollText, group: "utility" },
     { key: "portfolio", href: `/${input.locale}/client/portefeuille${q}`, label: c.navPortfolio, icon: Briefcase, group: "utility" },
     { key: "credits", href: `/${input.locale}/client/credits${q}`, label: c.navCredits, icon: CreditCard, group: "utility" },
+    { key: "memberBoxes", href: `/${input.locale}/client/boxes/mon-enveloppe${q}`, label: input.locale === "ar" ? "مخصصاتي في الصندوق" : "Mon enveloppe Box", icon: Gift, group: "utility" },
     { key: "favorites", href: `/${input.locale}/client/favoris${q}`, label: c.navFavorites, icon: Star, group: "utility" },
   ];
 }

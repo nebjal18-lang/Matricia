@@ -1,0 +1,68 @@
+
+ok 1 - legacy caller cannot relabel an independently approved STANDARD mandate as IT
+ok 2 - operator comes from the approved mandate, not the form
+ok 3 - two territories sharing an operator and library require an explicit mandate
+ok 4 - a proposed but unapproved mandate cannot back an economic book
+ok 5 - opening pins the exact independent mandate hash
+ok 6 - a correct-looking book cannot select the IT finance rule for a STANDARD economic mandate
+ok 7 - a STANDARD rule with different shares cannot replace the approved economic version
+ok 8 - an administratively active but already elapsed finance rule cannot back a newer approved mandate
+ok 9 - two authorized territories receive distinct books despite the same organization and library
+ok 10 - opening retries return the exact stored binding receipts
+ok 11 - exactly one immutable binding exists for each successful explicit opening
+ok 12 - runtime Finance cannot write a fabricated binding registry row directly
+ok 13 - the approved IT mandate can prepare its actual zero entry fee before activation
+ok 14 - a valid schedule format cannot replace the fee approved in the mandate
+ok 15 - the approved standard amount is linked to its exact book before activation
+ok 16 - pre-activation TEST fee carries a server-attested non-contractual mode
+
+ok 17 - central approval alone cannot create a production entry debt without exact signed mandate proof
+ok 18 - the production prerequisite failure leaves neither a schedule nor a due entry
+
+ok 19 - a three-month schedule cannot replace the exact approved six-month payment terms
+ok 20 - the approved six-month installment schedule is accepted explicitly in non-contractual TEST mode
+
+ok 21 - even a stored opening receipt requires current AAL2
+
+ok 22 - JSON-null assurance fails closed at the explicit boundary
+
+ok 23 - an unrelated identity cannot use the public explicit command
+ok 24 - an internal writer also cannot freeze a made-up binding snapshot
+
+ok 25 - an inconsistent existing book is not silently rebound or overwritten
+ok 26 - an old unbound book cannot be certified by closing an otherwise empty period
+ok 27 - even an internal malformed payout insert cannot bypass an unbound book
+ok 28 - inconsistent historical book is explicitly marked for reconciliation
+ok 29 - failed recovery leaves no manufactured binding
+ok 30 - even maintenance cannot rewrite an accepted immutable book basis
+ok 31 - the activation clone has a distinct identity
+ok 32 - the registry follows only the verified approved-to-active clone with matching terms
+ok 33 - activation does not duplicate or rewrite the opening basis
+
+ok 34 - the selected mandate projects its own book, not its sibling territory
+ok 35 - the sibling book is excluded even for a Finance actor authorized to both
+
+ok 36 - a coherent existing historical book is bound explicitly without rewriting it
+ok 37 - expiration and termination do not invalidate the source for an eligible historical period
+ok 38 - the historical mandate cannot back operations after its own effective window
+ok 39 - a valid historical mandate alone never manufactures an earned distribution without a sourced closure
+ok 40 - historical recovery does not reactivate the franchise
+ok 41 - no browser or service receives a direct binding write grant
+
+ok 42 - the native opening selector contains only the selected approved mandate and compatible rule
+ok 43 - the selector returns the already bound book without exposing a sibling territory
+
+ok 44 - the purpose-scoped selector requires current AAL2 too
+
+ok 45 - the selector is not an unprotected cross-organization discovery endpoint
+ok 46 - the corrected dashboard remains SECURITY INVOKER
+ok 47 - dashboard repair adds no private-schema USAGE
+
+ok 48 - a real assigned franchise owner reads their own exact book binding
+ok 49 - a scoped reader cannot substitute a sibling territory even when assigned to both
+
+ok 50 - the public boolean boundary does not expose another organization binding state
+
+ok 51 - a central financial reader retains their actual MFA prerequisite
+ok 52 - ambiguous activation evidence cannot select the first row and certify a financial source
+1..52

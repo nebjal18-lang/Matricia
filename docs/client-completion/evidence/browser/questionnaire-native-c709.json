@@ -1,0 +1,61 @@
+{
+  "scope": "NATIVE_CLIENT_CONDITIONAL_QUESTIONNAIRE",
+  "appTree": "c7092168ac05d4765220892029cf5f7eaf6c8e4b",
+  "candidate": "b96cb8660489c8f265494e12eda75a41370712f0",
+  "sourceArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [],
+  "status": "PASSED",
+  "nativeAuthAal2": true,
+  "historicalFixtureSetup": true,
+  "nativeOnboardingCertified": false,
+  "physicalScanningCertified": false,
+  "pageErrors": [],
+  "steps": [
+    {
+      "step": "native_ui_start",
+      "passed": true
+    },
+    {
+      "step": "answer_triggers_required_detail",
+      "passed": true
+    },
+    {
+      "step": "server_refuses_missing_required",
+      "passed": true
+    },
+    {
+      "step": "offline_answer_is_queued_without_success_claim",
+      "passed": true
+    },
+    {
+      "step": "reconnect_automatically_saves_queued_answer_then_native_reload",
+      "passed": true
+    },
+    {
+      "step": "arabic_retains_user_free_text",
+      "passed": true
+    },
+    {
+      "step": "changed_answer_hides_irrelevant_detail",
+      "passed": true
+    },
+    {
+      "step": "native_reload_retains_answer_and_visibility",
+      "passed": true
+    },
+    {
+      "step": "diagnostic_hub_resumes_exact_draft",
+      "passed": true
+    },
+    {
+      "step": "keyboard_filter_preserves_tenant",
+      "passed": true
+    },
+    {
+      "step": "submitted_session_is_read_only",
+      "passed": true
+    }
+  ],
+  "verifiedCurrentLevel": "aal2",
+  "sessionId": "78b6cb0e-6faf-4abc-9312-fbe9e6160e0d"
+}

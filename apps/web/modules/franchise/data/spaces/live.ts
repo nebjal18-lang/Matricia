@@ -1,3 +1,5 @@
+import { networkStateLabel } from "@/modules/franchise/data/network/filters";
+import { franchiseInvitationLabel } from "@/modules/franchise/data/network/invitation-label";
 import type { FranchiseCrmDashboard } from "@/modules/franchise/data/crm/model";
 import type { FranchiseDigestDashboard } from "@/modules/franchise/data/digest/model";
 import type { FollowupDashboard } from "@/modules/franchise/data/followups/model";
@@ -136,14 +138,17 @@ export function buildFranchiseSpaceBoard(input: {
     type: item.libraryCode,
     status: mandate.status,
   })));
-  const people: PersonRow[] = providers.map((item) => ({
+  const providerByOrganization=new Map((input.operations?.providerDossiers??[]).map(dossier=>[dossier.organizationId,dossier]));
+  const people: PersonRow[] = providers.map((item) => {
+    const dossier=providerByOrganization.get(item.linkedOrganizationId??"");
+    return ({
     id: item.id,
     name: item.organizationName || item.displayName,
     linkedOrganizationId:item.linkedOrganizationId,
     createdAt:item.createdAt,
-    dossier:input.operations?.providerDossiers?.find((d)=>d.organizationId===item.linkedOrganizationId),
-    services:input.operations?.providerDossiers?.find((d)=>d.organizationId===item.linkedOrganizationId)?.qualifications.map((q)=>q.serviceCode).join(", ")??(locale==="ar"?"خدمات غير موثقة":"Services non renseignés"),
-    status: input.operations?.providerDossiers?.find((d)=>d.organizationId===item.linkedOrganizationId)?.status??franchiseStageLabel(item.stage, locale),
+    dossier,
+    services:dossier?.qualifications.map((q)=>q.serviceCode).join(", ")??(locale==="ar"?"خدمات غير موثقة":"Services non renseignés"),
+    status: [dossier?networkStateLabel(dossier.status,locale):franchiseStageLabel(item.stage, locale),franchiseInvitationLabel(item.invitation,locale)].filter(Boolean).join(" · "),
     next: item.nextFollowupAt ? item.nextFollowupAt.slice(0, 10) : franchiseStageLabel(item.stage, locale),
     tone: providerTone(item.stage),
     stage: item.stage,
@@ -153,14 +158,11 @@ export function buildFranchiseSpaceBoard(input: {
     nextFollowupAt: item.nextFollowupAt,
     activities: folderActivities(item),
     pipelineEvents: folderEvents(item),
-  }));
-  const matching = people.filter((item) => item.stage === "VERIFIED" || item.stage === "CONTRACT_SIGNED").map((item) => ({
-    id: item.id,
-    name: item.name,
-    status: item.status,
-    href: `/${locale}/franchise/fournisseurs/${item.id}${q}`,
-    tone: item.tone,
-  }));
+  });});
+  for(const dossier of input.operations?.providerDossiers??[]){
+    if(people.some(row=>row.linkedOrganizationId===dossier.organizationId))continue;
+    people.push({id:dossier.organizationId,linkedOrganizationId:dossier.organizationId,createdAt:dossier.createdAt,dossier,name:dossier.name,services:dossier.qualifications.map(q=>q.serviceCode).join(", "),status:networkStateLabel(dossier.status,locale),next:locale==="ar"?"ملف مقدم الخدمة":"Dossier prestataire",tone:dossier.status==="ACTIVE"?"mint":"sky",stage:dossier.status,source:"PROVIDER_PROFILE",activities:[],pipelineEvents:[]});
+  }
   const operationalMatching = (input.operations?.matching ?? []).map((item) => ({
     id: item.id,
     name: item.eligible
@@ -176,7 +178,7 @@ export function buildFranchiseSpaceBoard(input: {
     title: item.organizationName || item.displayName,
     stage: franchiseStageLabel(item.stage, locale),
     owner: item.displayName,
-    flag: item.nextFollowupAt ? item.nextFollowupAt.slice(0, 10) : item.sourceCode,
+    flag: [item.nextFollowupAt ? item.nextFollowupAt.slice(0, 10) : item.sourceCode,franchiseInvitationLabel(item.invitation,locale)].filter(Boolean).join(" · "),
     tone: providerTone(item.stage),
     stageCode: item.stage,
     email: item.contactEmail ?? undefined,
@@ -185,7 +187,7 @@ export function buildFranchiseSpaceBoard(input: {
     nextFollowupAt: item.nextFollowupAt,
     activities: folderActivities(item),
     pipelineEvents: folderEvents(item),
-    matching,
+    matching: [], // A CRM prospect is not a service request or a matching run.
   }));
   const operationalRequests = (input.operations?.requests ?? []).map((item) => ({
     id: item.id,
@@ -199,18 +201,7 @@ export function buildFranchiseSpaceBoard(input: {
   }));
   const requests = [...operationalRequests, ...crmRequests];
   const documents = [
-    ...[...providers, ...clients].flatMap((item) => {
-      const href = item.type === "PROVIDER" ? `/${locale}/franchise/fournisseurs/${item.id}/documents${q}` : `/${locale}/franchise/demandes/${item.id}/consultation${q}`;
-      const owner = item.organizationName || item.displayName;
-      return [...folderActivities(item), ...folderEvents(item)].flatMap((entry) => entry.evidence.map((ref, index) => ({
-        id: `${entry.id}-${index}`,
-        title: ref,
-        owner,
-        status: franchiseStageLabel(item.stage, locale),
-        href,
-        kind: "evidence" as const,
-      })));
-    }),
+    // CRM references remain in the folder timeline; only native documents enter the private vault.
     ...(input.operations?.providerDossiers??[]).flatMap((provider)=>provider.documents.map((item)=>({id:item.id,title:item.code,owner:provider.name,status:item.expiresOn&&item.expiresOn<new Date().toISOString().slice(0,10)?"EXPIRED":item.status,href:`/${locale}/franchise/documents/${item.id}${q}`,kind:"evidence"as const,due:item.expiresOn??undefined}))),
   ];
   const renewals: FranchiseSpaceBoardData["renewals"] = (input.operations?.providerDossiers??[]).flatMap((provider)=>[...provider.documents.filter((d)=>d.expiresOn).map((d)=>({id:d.id,title:d.code,owner:provider.name,status:d.expiresOn!<new Date().toISOString().slice(0,10)?"EXPIRED":d.status,href:`/${locale}/franchise/documents/${d.id}${q}`,kind:"renewal"as const,due:d.expiresOn!})),...(provider.partnerContract?.expiresAt?[{id:provider.partnerContract.id,title:locale==="ar"?"عقد الشراكة · نسخة "+provider.partnerContract.version:"Contrat partenaire · v"+provider.partnerContract.version,owner:provider.name,status:provider.partnerContract.status,href:`/${locale}/franchise/fournisseurs/contrats/${provider.partnerContract.id}${q}`,kind:"renewal"as const,due:provider.partnerContract.expiresAt}]:[])]).sort((a,b)=>a.due.localeCompare(b.due));
@@ -254,7 +245,9 @@ export function buildFranchiseSpaceBoard(input: {
       id: item.id,
       title: locale === "ar" ? item.explanationAr : item.explanationFr,
       type: item.type,
-      status: item.severity,
+      severity:item.severity,
+      status: item.status,
+      evidence:evidenceLabels(item.evidenceRefs),
       next: item.metricCode ?? item.status,
       tone: item.severity === "CRITICAL" ? "peach" as const : item.severity === "WARNING" ? "violet" as const : "sky" as const,
       href: `/${locale}/franchise/qualite${q}`,
@@ -263,7 +256,8 @@ export function buildFranchiseSpaceBoard(input: {
       id: item.id,
       title: locale === "ar" ? item.titleAr : item.titleFr,
       type: c.anomalies,
-      status: item.severity,
+      severity:item.severity,
+      status: item.status,
       next: item.status,
       tone: item.severity === "CRITICAL" || item.severity === "HIGH" ? "peach" as const : "violet" as const,
       href: `/${locale}/franchise/qualite/anomalies${q}`,
@@ -319,9 +313,15 @@ export function buildFranchiseSpaceBoard(input: {
     title: item.requestType,
     actor: item.decision?.decision ?? item.status,
   }));
+  const governanceBinding=input.governance&&"bookBindingReviewRequired"in input.governance?input.governance.bookBindingReviewRequired:null;
+  const financeBindingStatus:FranchiseSpaceBoardData["financeBindingStatus"]=governanceBinding!==true&&governanceBinding!==false?"UNAVAILABLE":governanceBinding===true?"REVIEW_REQUIRED":(input.governance?.books??[]).some(book=>!("bindingReviewRequired"in book)||book.bindingReviewRequired!==false)?"UNAVAILABLE":"READY";
   const finance: FinanceRow[] = [
-    ...(input.governance?.books ?? []).flatMap((book) => {
+    ...(input.governance?.books ?? []).filter(book=>"bindingReviewRequired"in book&&book.bindingReviewRequired===false).flatMap((book) => {
       const beneficiary = franchiseeBeneficiaryCode(book.type);
+      const executionMode=book.entryFee&&"executionMode"in book.entryFee?book.entryFee.executionMode:null;
+      const executionEnvironment=book.entryFee&&"executionEnvironment"in book.entryFee?book.entryFee.executionEnvironment:null;
+      const environmentLabel=executionEnvironment==="DEVELOPMENT"?(locale==="ar"?"التطوير":"développement"):executionEnvironment==="STAGING"?(locale==="ar"?"الاختبار المرحلي":"staging"):executionEnvironment==="PRODUCTION"?(locale==="ar"?"الإنتاج":"production"):null;
+      const executionNotice=executionMode==="NON_CONTRACTUAL_DEMO"&&environmentLabel?(locale==="ar"?`محاكاة غير تعاقدية · ${environmentLabel}`:`Simulation non contractuelle · ${environmentLabel}`):executionMode==="CONTRACTUAL"&&environmentLabel?(locale==="ar"?`تنفيذ تعاقدي · ${environmentLabel}`:`Exécution contractuelle · ${environmentLabel}`):(locale==="ar"?"الأساس التعاقدي غير معتمد · يلزم تحقق الإدارة":"Base contractuelle non certifiée · validation administrative requise");
       const fee = book.entryFee
         ? [{
           id: `${book.id}-entry`,
@@ -332,6 +332,7 @@ export function buildFranchiseSpaceBoard(input: {
           tone: "sky" as const,
           amount: formatMinor(book.entryFee.principalMinor, book.currency, locale),
           kind: "entryFee" as const,
+          executionNotice,
         }]
         : [];
       const feeLedger = (book.entryFeeLedger ?? []).map((entry) => ({
@@ -343,21 +344,21 @@ export function buildFranchiseSpaceBoard(input: {
         tone: entry.entryType === "PAYMENT" ? "mint" as const : "sky" as const,
         amount: formatMinor(entry.amountMinor, book.currency, locale),
         kind: "entryFee" as const,
+        executionNotice,
       }));
-      const closures = book.closures.flatMap((closure, index) => {
+      const closures = book.closures.flatMap((closure) => {
         const share = franchiseeAllocation(book.type, closure.allocations);
         if (!share) return [];
-        const isLatest = index === 0;
         return [{
           id: closure.id,
           href:`/${locale}/franchise/finance/releves/${closure.id}${q}`,
-          title: isLatest ? c.preStatement : (locale === "ar" ? `كشف ${closure.periodStart} — ${closure.periodEnd}` : `Relevé ${closure.periodStart} — ${closure.periodEnd}`),
+          title: (locale === "ar" ? `كشف ${closure.periodStart} — ${closure.periodEnd}` : `Relevé ${closure.periodStart} — ${closure.periodEnd}`),
           object: c.yourShare,
           status: c.periodClosed,
           auth: formatMinor(share.amountMinor, book.currency, locale),
           tone: "mint" as const,
           amount: formatMinor(share.amountMinor, book.currency, locale),
-          kind: isLatest ? "preStatement" as const : "statement" as const,
+          kind: "statement" as const,
         }];
       });
       const payouts = book.ledgerEntries
@@ -564,6 +565,8 @@ export function buildFranchiseSpaceBoard(input: {
       mandate: franchise && "operatorCode" in franchise ? franchise.operatorCode : empty.perimeter.mandate,
       status: input.governance?.franchises[0]?.status ?? (franchise ? "ACTIVE" : empty.perimeter.status),
     },
+    franchiseId:franchise?.id??null,
+    permissions:input.operations?.permissions??empty.permissions,
     canWrite: Boolean(input.crm?.canWrite),
     people,
     requests,
@@ -578,6 +581,7 @@ export function buildFranchiseSpaceBoard(input: {
     decisions,
     mandates,
     govHistory,
+    financeBindingStatus,
     finance,
     corrective,
     quotes,

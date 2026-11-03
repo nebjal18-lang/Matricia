@@ -1,0 +1,39 @@
+{
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "cohort": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "mode": "apply",
+  "network": "existing-owned-internal",
+  "production": false,
+  "rollbackTests": false,
+  "status": "passed",
+  "results": [
+    {
+      "file": "supabase/migrations/20261103450000_provider_finance_due_civil_calendar.sql",
+      "sha256": "efc457229f0b2c29b1481d795e04f0148207b1a1a955b7815df0d9f8889ab1c1",
+      "passed": true
+    },
+    {
+      "file": "supabase/migrations/20261103451000_franchise_catalog_archive_projection.sql",
+      "sha256": "d5bc5a756516309707e8eed86fe7052531b48a8f95ab9da151296fe95f194531",
+      "passed": true
+    },
+    {
+      "file": "supabase/migrations/20261103452000_franchise_selected_operational_scope.sql",
+      "sha256": "b880dbcc86a148ec471a3c04d0b64e35ca512436709fce8a959a284f6989ea55",
+      "passed": true
+    },
+    {
+      "file": "supabase/migrations/20261103452100_franchise_finance_canonical_replay.sql",
+      "sha256": "b853eb433bdca9a0bd92e40247c71987303017a0db351cb0ebbbc882032ab642",
+      "passed": true
+    },
+    {
+      "file": "supabase/migrations/20261103455000_franchise_activation_prerequisite_errors.sql",
+      "sha256": "edf98ad182b36e2e446839bdb3c3dc8cbb203f2bd93b43f903aee5e17dc48277",
+      "passed": true
+    }
+  ],
+  "sourceBase": "df67da4",
+  "freshReplay": false,
+  "stagingCertification": false
+}

@@ -1,0 +1,15 @@
+
+> matricia@0.1.0 test:integration /workspace/franchise-completion
+> node --experimental-strip-types --test tests/integration/*.test.mjs
+
+✔ outbox HTTP integration preserves envelope, authorization and correlation before acknowledgement (63.91567ms)
+✔ HTTP rejection records failure without publication; explicit retry keeps the same event identity (35.042089ms)
+✔ HTTP 202 without the required consumer acknowledgement never publishes the event (11.907908ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1040.920935

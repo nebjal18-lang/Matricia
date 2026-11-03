@@ -43,3 +43,19 @@ it("resumes a registered order by native GET, never POST create",async()=>{mocks
 it("returns only the matching historical activation without contacting the PSP",async()=>{mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"12345",currency:"EUR",create_authorized:false,payment_intent_id:"66666666-6666-4666-8666-666666666666",payment_result:{outcome:"SUBSCRIPTION_ACTIVATED",payment_intent_id:"66666666-6666-4666-8666-666666666666"}},error:null});expect((await POST(request())).status).toBe(200);expect(mocks.create).not.toHaveBeenCalled();expect(mocks.lookup).not.toHaveBeenCalled();});
 
 it("returns the database MFA requirement before any external creation",async()=>{mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"42501",message:"PAYMENT_CUSTOMER_MFA_REQUIRED"}});const response=await POST(request());expect(response.status).toBe(403);expect(await response.json()).toEqual({error:"PAYMENT_CUSTOMER_MFA_REQUIRED"});expect(mocks.create).not.toHaveBeenCalled();expect(mocks.register).not.toHaveBeenCalled();});
+
+it("uses the quote-bound server target for an approved upgrade, ignoring browser plan fields",async()=>{
+ const quoteId="77777777-7777-4777-8777-777777777777",target="88888888-8888-4888-8888-888888888888",hash="a".repeat(64);
+ mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"24690",currency:"EUR",create_authorized:true,plan_version_id:target,billing_interval:"ANNUAL",organization_id:input.organizationId,upgrade_quote_id:quoteId,upgrade_hash:hash},error:null});
+ mocks.create.mockResolvedValueOnce({gateway:"PAYPAL",providerEnvironment:"SANDBOX",providerIntentId:"UPGRADE-ORDER-123456",status:"REQUIRES_CONFIRMATION",amountMinor:"24690",currency:"EUR",confirmation:null});
+ mocks.register.mockResolvedValueOnce({data:{payment_intent_id:"66666666-6666-4666-8666-666666666666"},error:null});
+ const r=new Request("https://app.example.com/api/payments/intents",{method:"POST",headers:{origin:"https://app.example.com","content-type":"application/json"},body:JSON.stringify({...input,upgrade:{quoteId,acceptedHash:hash,consent:true}})});
+ expect((await POST(r)).status).toBe(201);expect(mocks.rpc).toHaveBeenCalledWith("prepare_client_subscription_upgrade_payment_v1",expect.objectContaining({p_quote_id:quoteId,p_accepted_hash:hash,p_consent:true}));
+ expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({planVersionId:target,billingInterval:"ANNUAL",amountMinor:"24690"}));
+});
+it("requires upgrade consent and a response bound to exactly the accepted quote before any PSP call",async()=>{
+ const quoteId="77777777-7777-4777-8777-777777777777",hash="a".repeat(64),requestFor=(consent:boolean)=>new Request("https://app.example.com/api/payments/intents",{method:"POST",headers:{origin:"https://app.example.com","content-type":"application/json"},body:JSON.stringify({...input,upgrade:{quoteId,acceptedHash:hash,consent}})});
+ expect((await POST(requestFor(false))).status).toBe(400);expect(mocks.rpc).not.toHaveBeenCalled();
+ mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"24690",currency:"EUR",create_authorized:true},error:null});
+ expect((await POST(requestFor(true))).status).toBe(503);expect(mocks.create).not.toHaveBeenCalled();
+});

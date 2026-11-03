@@ -1,0 +1,13 @@
+{
+  "scope": "COMPLETE_NEXT_WEBPACK_PRODUCTION_BUILD_IN_OWNED_DEVELOPMENT_ENVIRONMENT",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "PASSED",
+  "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/run-app.mjs --coordinated --production --candidate=e929f99135953bf05301c45b34f062fb5884c156",
+  "typescriptCompleted": true,
+  "typescriptSkipped": false,
+  "serverStarted": true,
+  "origin": "http://127.0.0.1:19273",
+  "logSha256": "1e5b41e996b9f8275a78d99acf3e5c2651d4a516a737315cad4dec240ef0d592",
+  "productionDeployment": false
+}

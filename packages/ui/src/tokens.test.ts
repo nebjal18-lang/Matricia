@@ -29,6 +29,8 @@ describe("Design Authority A tokens", () => {
     expect(contrast(designTokens.color.text, designTokens.color.surface)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(designTokens.color.textMuted, designTokens.color.canvas)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(designTokens.color.surface, designTokens.color.brand)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(designTokens.color.surface, designTokens.color.accent)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(designTokens.color.accent, designTokens.color.accentMuted)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("expose des variables CSS partagées sans direction physique", () => {

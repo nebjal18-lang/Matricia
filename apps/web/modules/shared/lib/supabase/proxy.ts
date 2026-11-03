@@ -1,4 +1,5 @@
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPublicEnvironment } from "@/modules/shared/lib/env";
@@ -17,6 +18,7 @@ const PUBLIC_EXACT_SEGMENTS = new Set([
   "fournisseur",
   "franchise",
   "mentions-legales",
+  "indisponible",
 ]);
 
 function isPublicPath(pathname: string, locale: string): boolean {
@@ -54,7 +56,16 @@ export async function refreshSupabaseSession(request: NextRequest) {
       },
     },
   });
-  const { data: { user } } = await supabase.auth.getUser();
+  let authenticated = false;
+  let sessionUnavailable = false;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    const failure = classifyAuthReadFailure(error);
+    sessionUnavailable = failure === "UNAVAILABLE";
+    authenticated = !failure && Boolean(data.user);
+  } catch {
+    sessionUnavailable = true;
+  }
   const isLogin = request.nextUrl.pathname === `/${locale}/connexion`;
   const protectedPrefixes = [
     "tableau-de-bord",
@@ -72,11 +83,24 @@ export async function refreshSupabaseSession(request: NextRequest) {
     request.nextUrl.pathname === `/${locale}/${prefix}`
     || request.nextUrl.pathname.startsWith(`/${locale}/${prefix}/`)
   );
-  if (!user && isProtected) {
+  if (sessionUnavailable && isProtected) {
+    const recovery = new URL(`/${locale}/indisponible`, request.url);
+    recovery.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+    // A failed identity check never forwards the request to protected content.
+    // Keep refresh cookies and the original return path for a later retry.
+    const unavailable = NextResponse.rewrite(recovery, { status: 503, request: { headers: requestHeaders } });
+    for (const cookie of response.cookies.getAll()) unavailable.cookies.set(cookie);
+    unavailable.headers.set("Cache-Control", "private, no-store");
+    unavailable.headers.set("Retry-After", "5");
+    return withLocaleCookie(unavailable, request, locale);
+  }
+  if (!authenticated && isProtected) {
     const login = new URL(`/${locale}/connexion`, request.url);
     login.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(login);
   }
-  if (user && isLogin) return NextResponse.redirect(new URL(safeReturnPath(request.nextUrl.searchParams.get("next"),locale) ?? `/${locale}/tableau-de-bord`, request.url));
+  // POST login actions still have to enforce role routing and MFA themselves.
+  // A middleware 307 is not a valid Server Action response after OTP verification.
+  if (authenticated && isLogin && (request.method === "GET" || request.method === "HEAD")) return NextResponse.redirect(new URL(safeReturnPath(request.nextUrl.searchParams.get("next"),locale) ?? `/${locale}/tableau-de-bord`, request.url));
   return withLocaleCookie(response, request, locale);
 }

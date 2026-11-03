@@ -29,7 +29,7 @@
   --card-foreground: var(--mat-color-text);
   --popover: var(--mat-color-surface);
   --popover-foreground: var(--mat-color-text);
-  --primary: var(--mat-violet);
+  --primary: var(--mat-color-accent);
   --primary-foreground: #ffffff;
   --secondary: var(--mat-color-surface-muted);
   --secondary-foreground: var(--mat-color-brand-strong);

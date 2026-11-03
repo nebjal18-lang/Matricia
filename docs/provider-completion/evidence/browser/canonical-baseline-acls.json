@@ -1,0 +1,184 @@
+{
+  "scope": "OWNED_CLONE_ACL_FIDELITY_NOT_APPLICATION_CERTIFICATION",
+  "sourcePurpose": "CANONICAL_ACL_SETUP_SOURCE_ONLY",
+  "sourceStatus": "retained-setup-source",
+  "migrationCount": 458,
+  "pendingCandidateMigrations": 14,
+  "canonicalObjects": 3915,
+  "observedObjects": 3915,
+  "definitionMismatches": [],
+  "sourceOnly": [],
+  "targetOnly": [],
+  "changes": [
+    {
+      "kind": "SCHEMA",
+      "object": "graphql",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "anon",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "authenticated",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "service_role",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql_public",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql_public",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "anon",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql_public",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "authenticated",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "SCHEMA",
+      "object": "graphql_public",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "service_role",
+      "privilege": "USAGE"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "DELETE"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "INSERT"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "MAINTAIN"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "REFERENCES"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "SELECT"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "TRIGGER"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "TRUNCATE"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.pg_all_foreign_keys",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "UPDATE"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "DELETE"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "INSERT"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "MAINTAIN"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "REFERENCES"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "SELECT"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "TRIGGER"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "TRUNCATE"
+    },
+    {
+      "kind": "TABLE",
+      "object": "extensions.tap_funky",
+      "operation": "MATCH_CANONICAL_GRANT",
+      "role": "postgres",
+      "privilege": "UPDATE"
+    }
+  ],
+  "status": "MATCHED_CANONICAL_ACLS",
+  "remainingDifferences": []
+}

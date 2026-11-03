@@ -13,6 +13,7 @@ describe("ClientOfferDetailView", () => {
       organizationQuery: "?organizationId=org-1",
       rfqId: "22222222-2222-4222-8222-222222222222",
     });
+    detail.revisionInProgress=true;detail.displayedVersionNumber=1;detail.publishedVersions=[{id:"77777777-7777-4777-8777-777777777777",version:1,submittedAt:"2026-11-02T00:00:00Z"}];detail.options=[{id:"opt1",label:"Suivi optionnel conservé",amountMinor:"125050"}];
     const html = renderToStaticMarkup(
       <ClientOfferDetailView locale="fr" selectedQuery="?organizationId=org-1" detail={detail} />,
     );
@@ -32,5 +33,6 @@ describe("ClientOfferDetailView", () => {
     expect(html).toContain("/fr/client/demandes/11111111-1111-4111-8111-111111111111/offres?rfq=22222222-2222-4222-8222-222222222222");
     expect(html).toContain("/fr/messagerie?organizationId=org-1");
     expect(html).not.toMatch(/exemple illustratif/i);
+    expect(html).toContain("Révision du devis en cours");expect(html).toContain("Versions publiées du devis");expect(html).toContain("Options hors total de base");expect(html).toContain("Suivi optionnel conservé");
   });
 });

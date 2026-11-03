@@ -1,0 +1,57 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-context/supabase/migrations/20261102041000_provider_versioned_receipts_assignments.sql",
+      "sha256": "a44897f33d19b092f3442d47e777011bf732f024ca811f2eb3626a3cd94220e2"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-context/supabase/migrations/20261102041500_provider_mission_execution_authority.sql",
+      "sha256": "8cb16ae6a5c499110c1c95198c0ccb56e48e02167ce3005721652ec94bc887de"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-context/supabase/migrations/20261102042000_internal_message_explicit_organization_history.sql",
+      "sha256": "7d43ea043bbe07adb095dd6134445095092f42b1d9c8f16625aa476fc8ee3219"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-context/supabase/migrations/20261102042010_contract_message_continuity.sql",
+      "sha256": "035771cd26618748ae3ad57aa29ae49d9b1aa638ea62853adbfb5f59541678c1"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-context/supabase/migrations/20261102042020_provider_message_direct_resume.sql",
+      "sha256": "48af3ad6304dcd57c40580dc167152a19e52f4c164052cb2c3b37054dabde722"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-context/supabase/migrations/20261102042030_message_execution_capability.sql",
+      "sha256": "8a6a3ab49c09c1e2f4f68bac426848613658656f8946f228d123bccfd1f9ebf0"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-context/supabase/tests/0352_provider_contract_message_continuity.test.sql",
+      "sha256": "1cbc2b56ae68deefe7c59fe7303c1c947b101b0a0d18daf6406f0988d64f3e89"
+    }
+  ],
+  "status": "FAILED",
+  "assertions": 68,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

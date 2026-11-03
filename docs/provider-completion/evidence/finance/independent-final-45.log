@@ -1,0 +1,594 @@
+BEGIN
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+GRANT
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+INSERT 0 2
+REVOKE
+GRANT
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE VIEW
+CREATE FUNCTION
+CREATE TABLE
+ALTER TABLE
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+DO
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+DROP POLICY
+CREATE POLICY
+NOTIFY
+DO
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+INSERT 0 4
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE TRIGGER
+ALTER TABLE
+CREATE FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+CREATE TRIGGER
+NOTIFY
+ALTER TABLE
+ALTER TABLE
+DO
+NOTIFY
+REVOKE
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+DO
+NOTIFY
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+NOTIFY
+REVOKE
+NOTIFY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+DO
+NOTIFY
+DO
+SET
+ no_plan
+---------
+(0 rows)
+
+GRANT
+UPDATE 1
+INSERT 0 4
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 4
+CREATE TABLE
+GRANT
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+RESET
+INSERT 0 1
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                                                   record_provider_payment_proof_scan_result
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"result": "CLEAN", "outcome": "PROVIDER_PAYMENT_PROOF_SCAN_RECORDED", "scan_id": "8c98bb9f-2b8b-4670-992c-8929ee84ae46", "proof_id": "5c749c97-6022-4c14-9e74-8f220c3a2e10"}
+(1 row)
+
+RESET
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                            is
+----------------------------------------------------------
+ ok 1 - native Provider creates a declaration, never cash
+(1 row)
+
+                    is
+------------------------------------------
+ ok 2 - a CLEAN file does not settle debt
+(1 row)
+
+                     throws_ok
+----------------------------------------------------
+ ok 3 - Provider cannot approve its own declaration
+(1 row)
+
+                        throws_ok
+----------------------------------------------------------
+ ok 4 - Provider cannot allocate its own declared payment
+(1 row)
+
+RESET
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+(1 row)
+
+SET
+                    throws_ok
+-------------------------------------------------
+ ok 5 - Finance without MFA cannot validate cash
+(1 row)
+
+RESET
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                       is
+-------------------------------------------------
+ ok 6 - independent native Finance confirms cash
+(1 row)
+
+                 is
+------------------------------------
+ ok 7 - review replay is idempotent
+(1 row)
+
+                   is
+----------------------------------------
+ ok 8 - one immutable confirmed payment
+(1 row)
+
+                        throws_ok
+----------------------------------------------------------
+ ok 9 - opposite Finance decision is an explicit conflict
+(1 row)
+
+SET CONSTRAINTS
+SET CONSTRAINTS
+INSERT 0 1
+                            throws_ok
+-----------------------------------------------------------------
+ ok 10 - policy author cannot publish its own execution settings
+(1 row)
+
+RESET
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                             is
+------------------------------------------------------------
+ ok 11 - independent Finance approves closing configuration
+(1 row)
+
+                           is
+---------------------------------------------------------
+ ok 12 - same policy approval replays persisted decision
+(1 row)
+
+                                throws_ok
+--------------------------------------------------------------------------
+ ok 13 - opposite policy approval is rejected rather than falsely audited
+(1 row)
+
+                         is
+-----------------------------------------------------
+ ok 14 - one immutable policy decision has one audit
+(1 row)
+
+                     throws_ok
+---------------------------------------------------
+ ok 15 - user JWT cannot run the service scheduler
+(1 row)
+
+RESET
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                              is
+--------------------------------------------------------------
+ ok 16 - service scheduler generates the contradictory period
+(1 row)
+
+                is
+----------------------------------
+ ok 17 - scheduler replay is safe
+(1 row)
+
+RESET
+                              is
+---------------------------------------------------------------
+ ok 18 - period generation is unique per tenant/currency/month
+(1 row)
+
+                                  is
+----------------------------------------------------------------------
+ ok 19 - no invented statement or invoice from an empty pre-statement
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 1
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                     is
+----------------------------------------------------------------------------
+ ok 20 - native Provider reads its real security-invoker invoice projection
+(1 row)
+
+INSERT 0 1
+                                           is
+----------------------------------------------------------------------------------------
+ ok 21 - request replay returns the original plan rather than PAYMENT_PLAN_ALREADY_OPEN
+(1 row)
+
+RESET
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+(1 row)
+
+                 throws_ok
+--------------------------------------------
+ ok 22 - Finance AAL1 cannot approve a plan
+(1 row)
+
+RESET
+INSERT 0 1
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                       throws_ok
+--------------------------------------------------------
+ ok 23 - ProviderOwner plus Finance cannot self-approve
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+                                  is
+----------------------------------------------------------------------
+ ok 24 - plan approval remains replayable after its status transition
+(1 row)
+
+                              throws_ok
+---------------------------------------------------------------------
+ ok 25 - a respected approved plan cannot be defaulted by collection
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+(1 row)
+
+                  throws_ok
+----------------------------------------------
+ ok 26 - Finance AAL1 cannot begin collection
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+                             is
+-------------------------------------------------------------
+ ok 27 - allocation replay returns the same immutable result
+(1 row)
+
+                     throws_ok
+---------------------------------------------------
+ ok 28 - a batch cannot duplicate the same invoice
+(1 row)
+
+                            is
+-----------------------------------------------------------
+ ok 29 - partial payment never postpones original due date
+(1 row)
+
+SET CONSTRAINTS
+RESET
+                      is
+-----------------------------------------------
+ ok 30 - paid first installment is not overdue
+(1 row)
+
+                                   is
+------------------------------------------------------------------------
+ ok 31 - unpaid final installment becomes overdue despite approved plan
+(1 row)
+
+                             is
+-------------------------------------------------------------
+ ok 32 - invoice produces durable J4 J6 J7 and overdue tasks
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                            is
+----------------------------------------------------------
+ ok 33 - foreign native actor reads no invoice projection
+(1 row)
+
+                         throws_ok
+------------------------------------------------------------
+ ok 34 - read wrapper cannot expose a known foreign invoice
+(1 row)
+
+                             is
+------------------------------------------------------------
+ ok 35 - unrelated actor cannot read financial declarations
+(1 row)
+
+                      throws_ok
+-----------------------------------------------------
+ ok 36 - unrelated actor cannot read Finance context
+(1 row)
+
+RESET
+                                           ok
+-----------------------------------------------------------------------------------------
+ ok 37 - runtime cannot bypass independent review through the old accrual implementation
+(1 row)
+
+                         ok
+----------------------------------------------------
+ ok 38 - runtime cannot bypass allocation authority
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                                is
+-------------------------------------------------------------------
+ ok 39 - second partial allocation has an immutable replay receipt
+(1 row)
+
+                                   is
+-------------------------------------------------------------------------
+ ok 40 - two independent batches may finish the same payment and invoice
+(1 row)
+
+                                is
+------------------------------------------------------------------
+ ok 41 - incremental allocations settle exactly the invoice total
+(1 row)
+
+                        throws_ok
+----------------------------------------------------------
+ ok 42 - cumulative allocations cannot exceed the invoice
+(1 row)
+
+SET CONSTRAINTS
+RESET
+INSERT 0 2
+INSERT 0 2
+INSERT 0 6
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 2
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f3470000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+        decide_provider_closing_policy_v1
+-------------------------------------------------
+ {"outcome": "PROVIDER_CLOSING_POLICY_REVIEWED"}
+ {"outcome": "PROVIDER_CLOSING_POLICY_REVIEWED"}
+(2 rows)
+
+RESET
+INSERT 0 1
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+(1 row)
+
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 1, "period_end": "2026-10-31"}
+(1 row)
+
+RESET
+                                 ok
+--------------------------------------------------------------------
+ ok 43 - first provider remains an explicit issuer-policy exception
+(1 row)
+
+                                    is
+--------------------------------------------------------------------------
+ ok 44 - second clean provider progresses on the next bounded worker call
+(1 row)
+
+                                   is
+-------------------------------------------------------------------------
+ ok 45 - failed and successful attempts are both remembered for fairness
+(1 row)
+
+ finish
+--------
+ 1..45
+(1 row)
+
+ROLLBACK

@@ -1,0 +1,22 @@
+ok 1 - complete bilingual catalogue deliverables are accepted
+ok 2 - legacy and bilingual deliverables coexist without losing other fulfillment data
+ok 3 - normalization preserves both labels and evidence exactly
+ok 4 - invalid deliverable rejected: missing Arabic
+ok 5 - invalid deliverable rejected: missing French
+ok 6 - invalid deliverable rejected: blank Arabic
+ok 7 - invalid deliverable rejected: non-string Arabic
+ok 8 - invalid deliverable rejected: unknown key
+ok 9 - invalid deliverable rejected: null element
+ok 10 - invalid deliverable rejected: numeric element
+ok 11 - invalid deliverable rejected: object instead of array
+ok 12 - invalid deliverable rejected: empty legacy string
+ok 13 - invalid deliverable rejected: oversized label
+ok 14 - other fulfillment arrays retain their original string-only contract
+ok 15 - bilingual delivery support does not admit unknown configuration keys
+ok 16 - normalizer fails closed for incomplete bilingual output
+ok 17 - the internal validator does not add an application-facing capability
+authenticated|a3750000-0000-4000-8000-000000000001|{"sub":"a3750000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 18 - native draft creation accepts bilingual deliverables without omitting them
+ok 19 - native immutable draft retains both catalogue labels and evidence
+ok 20 - supporting bilingual values does not fabricate independent translation approval
+1..20

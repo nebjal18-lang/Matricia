@@ -1,4 +1,6 @@
 import Link from "next/link";
+import {ProviderReadState}from"@/modules/provider/ui/provider-read-state";
+import{providerContextReadState}from"@/modules/provider/data/spaces/organization-context";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { loadProviderDashboard } from "@/modules/provider/data/qualification/repository";
@@ -75,13 +77,14 @@ export default async function ProviderCertificationsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string }>;
+  searchParams: Promise<{ organizationId?: string;page?:string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/qualification/certifications` }));
-  const result = await loadProviderDashboard(query.organizationId);
+  const contextState=providerContextReadState(space,query.organizationId);
+  const result = contextState?{status:"error" as const,reason:"NO_PROVIDER_ORGANIZATION" as const}:await loadProviderDashboard(space.selectedOrganizationId??undefined,/^\d{1,6}$/.test(query.page??"")?Number(query.page):1,{kinds:[...CERT_KINDS,...REF_KINDS]});
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/qualification/certifications` }));
   const documents = result.status === "success" ? result.dashboard.documents : [];
   const copy = locale === "ar"
@@ -99,10 +102,10 @@ export default async function ProviderCertificationsPage({
       lead={copy.lead}
       kicker={result.status === "error" ? copy.error : undefined}
     >
-      <main className="client-page">
+      <main className="client-page">{result.status==="error"?<ProviderReadState locale={locale}state={contextState??"unavailable"}retryHref={`/${locale}/sous-traitant/qualification/certifications${space.selectedQuery}`}/>:<><nav aria-label={locale==="ar"?"صفحات الشهادات":"Pages des certifications"}>{(result.dashboard.documentPage??1)>1?<Link className="client-ghost-link" href={`/${locale}/sous-traitant/qualification/certifications${space.selectedQuery}&page=${(result.dashboard.documentPage??1)-1}`}>{locale==="ar"?"السابق":"Précédente"}</Link>:null}<span>{result.dashboard.documentPage??1}</span>{result.dashboard.documentsHasMore?<Link className="client-ghost-link" href={`/${locale}/sous-traitant/qualification/certifications${space.selectedQuery}&page=${(result.dashboard.documentPage??1)+1}`}>{locale==="ar"?"التالي":"Suivante"}</Link>:null}</nav>
         <Table locale={locale} title={copy.certs} empty={copy.emptyCerts} rows={documents.filter((item) => CERT_KINDS.has(item.kind))} query={space.selectedQuery} />
         <Table locale={locale} title={copy.refs} empty={copy.emptyRefs} rows={documents.filter((item) => REF_KINDS.has(item.kind))} query={space.selectedQuery} />
-      </main>
+      </>}</main>
     </ProviderAppShell>
   );
 }

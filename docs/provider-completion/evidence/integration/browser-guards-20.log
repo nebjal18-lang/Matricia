@@ -1,0 +1,28 @@
+✔ historical fixture keeps catalogue facts separate from native Provider and auth state (10.402042ms)
+✔ fixture extraction refuses a source layout drift rather than importing another block (2.516462ms)
+✔ fixture cannot silently adopt another staff actor or inject business-state SQL (12.870752ms)
+✔ Provider setup cannot adopt a Client, shared, remote or differently owned target (2.930505ms)
+✔ source must remain the explicit no-network setup source, never a live linked project (5.046462ms)
+✔ native actor separation and complete acceptance coverage are explicit (1.406294ms)
+✔ build/setup cannot silently target an unpinned branch or symbolic HEAD (0.496173ms)
+✔ only the exact labelled no-network replay may be the read-only source (7.241397ms)
+✔ production and undeclared environments are refused before setup (2.213276ms)
+✔ fixture writes and cleanup reject shared containers and paths (2.816242ms)
+✔ canonical ACL references cannot be old debug targets or green receipt substitutes (0.450817ms)
+✔ restore never resets a populated or unclassified owned database (0.898436ms)
+✔ upgrade preserves applied schema and selects only exact new migrations (8.916347ms)
+✔ changed, removed or duplicate applied migrations never silently replay (1.184554ms)
+✔ interleaved suffix additions require explicit coordination and are reported (0.526781ms)
+✔ production is refused before opening test state or running Docker (502.826735ms)
+✔ a target token must be explicitly provided (421.955467ms)
+✔ a malformed target token is refused before state access (166.328699ms)
+✔ a receipt cannot be written outside ignored work output (299.44181ms)
+✔ pgTAP files cannot accidentally share a session plan (110.286271ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2300.140349

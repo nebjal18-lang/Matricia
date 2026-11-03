@@ -60,7 +60,9 @@ async function commandLog(file, command) {
 }
 try {
   const space = await statfs(root, { bigint: true });
-  if (space.bavail * space.bsize < 4n * 1024n ** 3n) throw new Error('LOCAL_REPLAY_NEEDS_4_GIB_FREE');
+  // VFS creates temporary writable layers for database, Auth and Storage.
+  // A 4-GiB reserve was exhausted during Storage bootstrap before app SQL.
+  if (space.bavail * space.bsize < 8n * 1024n ** 3n) throw new Error('LOCAL_REPLAY_NEEDS_8_GIB_FREE');
   for (const image of Object.values(images)) docker(['image', 'inspect', image, '--format', '{{.Id}}']);
   const migrations = await snapshot('supabase/migrations');
   const requestedTests = args.filter(arg => arg.startsWith('--test=')).map(arg => arg.slice(7));
@@ -83,9 +85,9 @@ try {
     `ANON_KEY=${secret}`, `SERVICE_KEY=${secret}`, 'POSTGREST_URL=http://127.0.0.1:3000',
     'REGION=local', 'TENANT_ID=local', '',
   ].join('\n'), { mode: 0o600 });
-  docker(['run', '--detach', '--pull=never', '--name', name, '--label', label,
+  await commandLog('database-bootstrap.log', () => docker(['run', '--detach', '--pull=never', '--name', name, '--label', label,
     '--network', 'none', '--env-file', environmentFile, images.database,
-    'postgres', '-D', '/etc/postgresql', '-c', 'shared_preload_libraries=pg_cron', '-c', 'cron.database_name=postgres']);
+    'postgres', '-D', '/etc/postgresql', '-c', 'shared_preload_libraries=pg_cron', '-c', 'cron.database_name=postgres'], { timeout: 300_000 }));
   created = true;
   let ready = false;
   for (let attempt = 0; attempt < 30; attempt++) {
@@ -97,10 +99,10 @@ try {
   if (!ready) throw new Error('LOCAL_REPLAY_POSTGRES_UNAVAILABLE');
   sql(`alter role supabase_auth_admin password '${secret}'; alter role supabase_storage_admin password '${secret}';`);
   await commandLog('auth-bootstrap.log', () => docker(['run', '--rm', '--pull=never', '--label', label,
-    '--network', `container:${name}`, '--env-file', environmentFile, images.auth, 'auth', 'migrate']));
+    '--network', `container:${name}`, '--env-file', environmentFile, images.auth, 'auth', 'migrate'], { timeout: 300_000 }));
   await commandLog('storage-bootstrap.log', () => docker(['run', '--rm', '--pull=never', '--label', label,
     '--network', `container:${name}`, '--env-file', environmentFile, '--entrypoint', 'node',
-    images.storage, 'dist/scripts/migrate-call.js']));
+    images.storage, 'dist/scripts/migrate-call.js'], { timeout: 300_000 }));
   for (const migration of migrations) {
     await commandLog(`migration-${migration.file}.log`, () => sql(migration.bytes));
     summary.migrations.push({ file: migration.file, sha256: migration.sha256, passed: true });
@@ -138,7 +140,7 @@ try {
   if (summary.sql.some(test => !test.passed)) throw new Error('LOCAL_REPLAY_SQL_TESTS_FAILED');
   summary.status = 'passed';
 } catch (error) {
-  summary.failure = /^LOCAL_REPLAY_[A-Z_]+(?::[a-zA-Z0-9_.-]+)?$/.test(error.message) ? error.message : 'LOCAL_REPLAY_FAILED';
+  summary.failure = /^LOCAL_REPLAY_[A-Z0-9_]+(?::[a-zA-Z0-9_.-]+)?$/.test(error.message) ? error.message : 'LOCAL_REPLAY_FAILED';
   process.exitCode = 1;
 } finally {
   try {

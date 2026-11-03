@@ -1,0 +1,6 @@
+import{createHash}from"node:crypto";
+import{z}from"zod";
+import{getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
+export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
+ const{id}=await params;if(!z.string().uuid().safeParse(id).success)return new Response(null,{status:404});const c=await getSupabaseServerClient(),{data:a}=await c.auth.getUser();if(!a.user)return new Response(null,{status:401});const r=await c.rpc("get_provider_declaration_proof_v1",{p_declaration_id:id}),proof=z.object({bucket:z.literal("provider-qualification"),path:z.string(),mime:z.enum(["application/pdf","image/jpeg","image/png"]),sha256:z.string().regex(/^[0-9a-f]{64}$/)}).safeParse(r.data);if(r.error||!proof.success)return new Response(null,{status:404});const file=await c.storage.from(proof.data.bucket).download(proof.data.path);if(file.error||!file.data)return new Response(null,{status:503});const bytes=Buffer.from(await file.data.arrayBuffer());if(createHash("sha256").update(bytes).digest("hex")!==proof.data.sha256)return new Response(null,{status:503});return new Response(new Uint8Array(bytes),{headers:{"Content-Type":proof.data.mime,"Content-Disposition":'attachment; filename="financial-proof"',"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}});
+}

@@ -12,6 +12,10 @@ import {
 } from "./workbenches";
 
 describe("provider nested workbenches 09-15", () => {
+  it("keeps unavailable team, sessions and security distinct from empty and verified states",()=>{
+    const html=renderToStaticMarkup(<CompanySecurityWorkbench locale="fr" query="" membersUnavailable sessionsUnavailable securityUnavailable />);
+    expect(html).toContain("Chargement de l’équipe indisponible");expect(html).toContain("Chargement des sessions indisponible");expect(html).toContain("État de protection du compte indisponible");expect(html).not.toContain("Aucun membre visible");expect(html).not.toContain("Aucune session");
+  });
   it("compose les écrans de détail sans exemple illustratif ni devis concurrent", () => {
     const html = [
       renderToStaticMarkup(<ConsultationDetailWorkbench locale="fr" query="" consultationId="cr1" />),
@@ -130,4 +134,15 @@ describe("provider nested workbenches 09-15", () => {
     expect(html).not.toMatch(/client-feed-download/);
     expect(html).not.toContain("TVA (20 %)");
   });
+  it.each(["fr", "ar"] as const)("translates both selected quote status labels while preserving free text in %s", locale => {
+    const id="ab970000-0000-4000-8000-000000000001";
+    const invitation={id,status:"ACCEPTED" as const,rowVersion:1,rfqId:id,deadline:"2026-11-03T23:50:00Z",requestId:id,description:"SELECTED saisi librement par le client",regionCode:"CASABLANCA_SETTAT",currency:"MAD",taxCategoryCode:null,quote:{id,status:"SELECTED",currentVersionId:id,versionNumber:2,currency:"MAD",subtotalMinor:"175050",taxMinor:"35010",totalMinor:"210060",createdAt:"2026-11-02T12:00:00Z",validUntil:"2026-12-02T12:00:00Z"}};
+    const html=renderToStaticMarkup(<QuoteMultilineWorkbench locale={locale} query={`?organizationId=${id}`} quoteId={id} invitation={invitation}/>);
+    const label=locale==="ar"?"مختار":"Sélectionné";
+    expect(html).toContain(`class="client-status-chip" data-tone="mint">${label}</span>`);
+    expect(html).toContain(`${locale==="ar"?"حالة النسخة المحفوظة":"État de la version enregistrée"} : ${label}`);
+    expect(html).toContain(invitation.description);expect(html.match(/\bSELECTED\b/gu)).toHaveLength(1);
+    expect(invitation.quote.status).toBe("SELECTED");expect(invitation.quote.totalMinor).toBe("210060");
+  });
+
 });

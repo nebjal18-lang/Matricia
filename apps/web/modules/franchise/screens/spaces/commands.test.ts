@@ -123,7 +123,9 @@ describe("franchise remaining command actions", () => {
       qualificationId: id,
       status: "APPROVED",
       questionnaireSessionId: id,
-      scoreBasisPoints: "8000",
+      scorePercent:"80",
+      reviewedManifestHash:"c".repeat(64),
+      evidenceConfirmed:"yes",
       rationale: "Dossier complet et contrôles passés.",
       ruleVersion: "QUAL-FR-001",
       mandatoryPassed: "yes",
@@ -160,6 +162,7 @@ describe("franchise remaining command actions", () => {
     const result = await proposeFranchiseVolumePurchase(idle, form({
       libraryId: id,
       skuId: id,
+      franchiseId:id,
       forecastUnits: "100",
       minimumCommitmentUnits: "20",
       maximumUnits: "200",
@@ -169,10 +172,11 @@ describe("franchise remaining command actions", () => {
       rationale: "Prévision de consommation sur le SKU sauvegarde.",
     }));
     expect(result.status).toBe("success");
-    expect(mocks.rpc).toHaveBeenCalledWith("propose_franchise_volume_purchase", expect.objectContaining({
+    expect(mocks.rpc).toHaveBeenCalledWith("propose_franchise_volume_purchase_for_mandate_v1", expect.objectContaining({
+      p_franchise_id:id,
       p_sku_id: id,
       p_payment_model: "PAY_PER_USE",
-      p_forecast_units: 100,
+      p_forecast_units: "100",
     }));
   });
 
@@ -201,4 +205,38 @@ describe("franchise remaining command actions", () => {
     if (result.status === "error") expect(result.reason).toBe("VALIDATION");
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
+});
+
+describe("franchise command auth prerequisites", () => {
+  const validDefinition = () => form({ libraryId: id, definitionKey: "TEST_SIGNAL", severity: "INFO", titleFr: "Signal test", titleAr: "إشارة اختبار", descriptionFr: "Description de test", descriptionAr: "وصف خاص بالاختبار", blocking: "no", evidenceRequired: "no", changeReason: "Recette du formulaire" });
+  it("does not run a mutation while Auth is unavailable, even with a cached user", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id } }, error: { status: 503 } });
+    expect(await upsertFranchiseAnomalyDefinition(idle, validDefinition())).toEqual({ status: "error", reason: "FAILED" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it("distinguishes a known invalid session from missing permissions", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id } }, error: { status: 401 } });
+    expect(await upsertFranchiseAnomalyDefinition(idle, validDefinition())).toEqual({ status: "error", reason: "UNAUTHENTICATED" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it.each(["MFA_REQUIRED", "AAL2_REQUIRED", "FRANCHISE_MFA_REQUIRED", "FRANCHISE_AAL2_REQUIRED"])("distinguishes %s from permission denial", async (message) => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "42501", message } });
+    expect(await upsertFranchiseAnomalyDefinition(idle, validDefinition())).toEqual({ status: "error", reason: "MFA_REQUIRED" });
+  });
+  it("does not reinterpret an unrelated permission denial as MFA", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "42501", message: "FRANCHISE_SCOPE_DENIED" } });
+    expect(await upsertFranchiseAnomalyDefinition(idle, validDefinition())).toEqual({ status: "error", reason: "FORBIDDEN" });
+  });
+  it("refuse une approbation franchise sans la preuve de lecture figée",async()=>{
+    const data=form({qualificationId:id,status:"APPROVED",questionnaireSessionId:id,scorePercent:"80",rationale:"TEST revue indépendante",expectedRowVersion:"1",evidenceConfirmed:"yes"});
+    expect(await decideFranchiseProviderQualification(idle,data)).toEqual({status:"error",reason:"VALIDATION"});
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it("transmet le score humain exact et le hash de la projection lue au garde natif",async()=>{
+    const data=form({qualificationId:id,status:"APPROVED",questionnaireSessionId:id,scorePercent:"80,81",reviewedManifestHash:"c".repeat(64),evidenceConfirmed:"yes",rationale:"TEST revue indépendante",expectedRowVersion:"2"});
+    mocks.rpc.mockResolvedValue({data:{outcome:"PROVIDER_QUALIFICATION_DECIDED"},error:null});
+    expect((await decideFranchiseProviderQualification(idle,data)).status).toBe("success");
+    expect(mocks.rpc).toHaveBeenCalledWith("decide_provider_qualification",expect.objectContaining({p_score_basis_points:8081,p_rule_version:"PROVIDER-QUALIFICATION-V1",p_mandatory_checks:expect.arrayContaining([expect.objectContaining({check:"HUMAN_EVIDENCE_REVIEW",review_context_hash:"c".repeat(64)})])}));
+  });
+
 });

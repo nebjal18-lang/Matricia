@@ -1,0 +1,17 @@
+import{requireDevelopment,loadOwnState}from'./safety.mjs';requireDevelopment();
+import{nativeBrowserActor,safeError}from'./browser-session.mjs';import{readFile,writeFile}from'node:fs/promises';import{resolve}from'node:path';import{randomUUID}from'node:crypto';
+const s=await loadOwnState(),fixture=JSON.parse(await readFile(resolve(s.directory,'fixtures.safe.json'))),proof={scope:'GENUINE_PROVIDER_ROLE_AND_ASSIGNMENT_BOUNDARIES',status:'RUNNING',candidate:s.candidate?.commit,appTree:s.candidate?.appTree,checks:[]};if(s.status!=='FIXTURE_READY'||fixture.scope!=='ISOLATED_TEST_NATIVE_PROVIDER_FIXTURE')throw Error('NATIVE_PROVIDER_CANONICAL_FIXTURE_REQUIRED');
+async function denied(actor,name,args,id){const result=await actor.client.rpc(name,args);const ok=result.error?.code==='42501';proof.checks.push({actor:actor.actor.label,case:id,rpc:name,sqlstate:result.error?.code??null,denied:ok});if(!ok)throw Error('PROVIDER_BOUNDARY_NOT_DENIED:'+id);}
+try{
+ const viewer=await nativeBrowserActor(s,'provider-viewer'),technician=await nativeBrowserActor(s,'technician-unassigned'),owner=await nativeBrowserActor(s,'provider-owner'),foreign=await nativeBrowserActor(s,'foreign-provider');
+ await denied(viewer,'submit_provider_profile',{p_provider_organization_id:fixture.providerOrganizationId,p_profile:{activity_summary:'TEST viewer mutation must fail',team_size:1,years_experience:0},p_expected_row_version:0,p_idempotency_key:randomUUID()},'viewer_cannot_edit_company');
+ await denied(viewer,'begin_provider_document_upload_v2',{p_provider_organization_id:fixture.providerOrganizationId,p_declared_mime_type:'application/pdf',p_declared_size_bytes:20,p_expected_content_hash:'a'.repeat(64),p_operation_key:randomUUID()},'viewer_cannot_reserve_upload');
+ await denied(viewer,'get_my_provider_legal_identity_v1',{p_organization_id:fixture.providerOrganizationId},'viewer_cannot_read_representative');
+ await denied(owner,'list_admin_supervision_page_v1',{p_limit:25,p_offset:0},'provider_cannot_admin');
+ await denied(foreign,'get_my_provider_legal_identity_v1',{p_organization_id:fixture.providerOrganizationId},'foreign_provider_cannot_read_legal_profile');
+ if(!fixture.deliverableId||!fixture.milestoneId||!fixture.deliveryProofId)throw Error('CANONICAL_ASSIGNED_MISSION_FIXTURE_REQUIRED');
+ await denied(technician,'submit_delivery',{p_deliverable_id:fixture.deliverableId,p_description:'TEST unassigned technician mutation must fail',p_links:[],p_proofs:[{type:'URL',evidence_hash:'a'.repeat(64),url:'https://example.invalid/test-only',metadata:{note:'TEST denial probe'}}],p_idempotency_key:randomUUID()},'unassigned_technician_cannot_submit_delivery');
+ await denied(viewer,'assign_provider_mission_v1',{p_mission_id:fixture.missionId,p_user_id:technician.actor.userId,p_assigned:true,p_reason:'TEST viewer assignment must fail',p_idempotency_key:randomUUID()},'viewer_cannot_assign_technician');
+ for(const actor of[foreign,viewer]){const rows=await actor.client.from('missions').select('id').eq('id',fixture.missionId);if(actor===foreign){const ok=!rows.error&&rows.data.length===0;proof.checks.push({actor:actor.actor.label,case:'foreign_mission_rls',denied:ok});if(!ok)throw Error('FOREIGN_PROVIDER_MISSION_VISIBLE');}}
+ proof.status='PASSED';
+}catch(error){proof.status='FAILED';proof.failure=safeError(error.message);process.exitCode=1;}finally{await writeFile(resolve(s.directory,'boundaries.json'),JSON.stringify(proof,null,2));console.log(JSON.stringify({status:proof.status,checks:proof.checks.length,failure:proof.failure}));}

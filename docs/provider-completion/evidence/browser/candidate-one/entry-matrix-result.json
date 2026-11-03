@@ -1,0 +1,26 @@
+{
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "PASSED",
+  "pages": 40,
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "widths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "axeScans": 64,
+  "violations": 0,
+  "incompleteRules": 64,
+  "incompleteRuleIds": [
+    "color-contrast"
+  ],
+  "ruleExclusions": [],
+  "manualContrastVerified": false,
+  "fullWcagCertified": false,
+  "privateContextsOnly": true
+}

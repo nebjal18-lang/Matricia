@@ -1,4 +1,6 @@
 "use client";
+import { namespacedCommandUuid } from "@/modules/shared/lib/catalogue-builder/namespaced-command-uuid";
+import { editorialFailureMessage } from "./command-errors";
 
 import { useActionState, useId,useRef,useState,type ChangeEvent } from "react";
 import{useDraftAutosave,DraftAutosaveControl}from"./use-draft-autosave";
@@ -51,7 +53,7 @@ export function FranchiseServiceDraftForm({
   const prefix = useId();
   const subcategories = workspace.categories.flatMap((category) => category.children.map((child) => ({ ...child, category: category.title })));
   const error = state.status === "error"
-    ? state.reason === "VALIDATION" ? (locale === "ar" ? "تحققوا من الحقول الإلزامية بالفرنسية والعربية." : "Complétez les champs obligatoires en FR et AR.")
+    ? state.reason === "MANDATE_REQUIRED" || state.reason === "UNAUTHENTICATED" ? editorialFailureMessage(state.reason,locale) : state.reason === "VALIDATION" ? (locale === "ar" ? "تحققوا من الحقول الإلزامية بالفرنسية والعربية." : "Complétez les champs obligatoires en FR et AR.")
       : state.reason === "FORBIDDEN" ? c.forbidden
         : c.unavailable
     : null;
@@ -60,6 +62,7 @@ export function FranchiseServiceDraftForm({
     <form action={action} className="franchise-props-form" aria-describedby={`${prefix}-status`}>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="libraryId" value={workspace.mandate.libraryId} />
+      <input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId} />
       {organizationId ? <input type="hidden" name="organizationId" value={organizationId} /> : null}
       <input type="hidden" name="idempotencyKey" defaultValue={commandIdentity.idempotencyKey} />
       <input type="hidden" name="correlationId" defaultValue={commandIdentity.correlationId} />
@@ -107,6 +110,7 @@ export function FranchiseServiceDraftForm({
 function actionMessage(state: FranchiseServiceActionState, locale: Locale, success: string) {
   const c = libraryCopy(locale);
   if (state.status === "error") {
+    if (state.reason === "MANDATE_REQUIRED" || state.reason === "UNAUTHENTICATED") return editorialFailureMessage(state.reason,locale);
     if (state.reason === "VALIDATION") return locale === "ar" ? "تحققوا من الحقول الإلزامية بالفرنسية والعربية." : "Complétez les champs obligatoires en FR et AR.";
     if (state.reason === "FORBIDDEN") return c.forbidden;
     if (state.reason === "CONFLICT") return c.conflict;
@@ -150,6 +154,7 @@ export function FranchiseServiceCommandForms({
     <>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="libraryId" value={workspace.mandate.libraryId} />
+      <input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId} />
       {organizationId ? <input type="hidden" name="organizationId" value={organizationId} /> : null}
       <input type="hidden" name="serviceId" value={service.id} />
       <input type="hidden" name="draftVersionId" value={revision?.draftVersionId??command.draftVersionId} />
@@ -198,7 +203,7 @@ export function FranchiseServiceCommandForms({
       </form>
       <form action={simAction} className="franchise-props-form">
         {hidden}
-        <input type="hidden" name="idempotencyKey" defaultValue={`${commandIdentity.idempotencyKey.slice(0, 14)}a${commandIdentity.idempotencyKey.slice(15)}`} />
+        <input type="hidden" name="idempotencyKey" value={namespacedCommandUuid(saveKey, "service-impact")} />
         <input type="hidden" name="correlationId" defaultValue={commandIdentity.correlationId} />
         <Button type="submit" disabled={simPending} className="min-h-11" variant="outline">{c.runSimulation}</Button>
         <div role={simState.status === "error" ? "alert" : "status"} aria-live="polite">{actionMessage(simState, locale, c.impactSimulated)}</div>
@@ -206,7 +211,7 @@ export function FranchiseServiceCommandForms({
       {draft ? (
         <form action={submitAction} className="franchise-props-form">
           {hidden}
-          <input type="hidden" name="idempotencyKey" defaultValue={`${commandIdentity.idempotencyKey.slice(0, 14)}b${commandIdentity.idempotencyKey.slice(15)}`} />
+          <input type="hidden" name="idempotencyKey" value={namespacedCommandUuid(saveKey, "service-submit")} />
           <input type="hidden" name="correlationId" defaultValue={commandIdentity.correlationId} />
           <label className="flex min-h-11 items-start gap-3 rounded-lg border p-3 text-sm">
             <input className="mt-0.5 size-5" type="checkbox" name="confirmed" value="yes" required />

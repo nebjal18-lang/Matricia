@@ -1,0 +1,12 @@
+ERROR:  42702: column reference "objectives" is ambiguous
+LINE 5: ...and not exists(select 1 from jsonb_array_elements(objectives...
+                                                             ^
+DETAIL:  It could refer to either a PL/pgSQL variable or a table column.
+QUERY:  jsonb_array_length(objectives)>0 and not exists(
+  select 1 from public.franchise_control_plan_proposals_v1 p join public.franchise_control_reports_v1 prior on prior.id=p.report_id
+  where p.franchise_id=f.id and prior.model_id=m.id and p.due_on>=(statement_timestamp()at time zone 'Africa/Casablanca')::date
+  and not exists(select 1 from public.franchise_control_plan_events_v1 e where e.plan_id=p.id and e.kind in('REJECTED','COMPLETED'))
+  and not exists(select 1 from jsonb_array_elements(objectives)n where not exists(select 1 from jsonb_array_elements(p.objectives)o where o->>'axis'=n->>'axis'and(o->>'targetScoreBps')::integer>=(n->>'targetScoreBps')::integer))
+ )
+CONTEXT:  PL/pgSQL function private.generate_franchise_control_report_v1(uuid,text,date,date) line 26 at IF
+LOCATION:  plpgsql_post_column_ref, pl_comp.c:1133

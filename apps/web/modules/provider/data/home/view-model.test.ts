@@ -39,6 +39,10 @@ const base: Item = {
 };
 
 describe("provider-home view-model", () => {
+  it("does not count accepted milestones or obligations of completed missions as due",()=>{
+    const counts=computeProviderHomeCounts({now:"2026-11-02T00:00:00Z",actionItems:[],missions:[{status:"IN_PROGRESS",milestones:[{status:"ACCEPTED",dueAt:"2026-11-01T00:00:00Z"}],deliverables:[]},{status:"COMPLETED",milestones:[{status:"PENDING",dueAt:"2026-11-01T00:00:00Z"}],deliverables:[{status:"PENDING"}]}]});
+    expect(counts.deliverablesDue).toBe(0);expect(counts.activeMissions).toBe(1);
+  });
   it("n’invente pas de zéro si le snapshot est indisponible", () => {
     const counts = computeProviderHomeCounts({ actionItems: [], now: "2026-09-16T10:00:00Z", snapshotUnavailable: true });
     expect(counts.consultationsDue).toBeNull();
@@ -80,3 +84,10 @@ describe("provider-home view-model", () => {
     expect(blockers[0]?.serviceLabel).toBe("Audit");
   });
 });
+
+describe("signed scope reconciliation counts",()=>{it("keeps a pending scope workload unavailable instead of claiming zero",()=>{const counts=computeProviderHomeCounts({missions:[{status:"COMPLETED",scopeReconciliationRequired:true,milestones:[],deliverables:[]}],actionItems:[],now:"2026-11-02T12:00:00Z"});expect(counts.deliverablesDue).toBeNull();expect(counts.activeMissions).toBe(0)})});
+
+ it("excludes retired obligations from the current workload without deleting history", () => {
+   const counts = computeProviderHomeCounts({now:"2026-11-02T12:00:00Z",actionItems:[],missions:[{status:"IN_PROGRESS",deliverables:[{status:"PENDING",retirement:{operation:"REMOVE"}},{status:"CORRECTION_REQUIRED"}],milestones:[{status:"PENDING",dueAt:"2026-11-03T00:00:00Z",retired:true},{status:"PENDING",dueAt:"2026-11-03T00:00:00Z"}]}]});
+   expect(counts.deliverablesDue).toBe(2);
+ });

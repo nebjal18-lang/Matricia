@@ -51,6 +51,7 @@ const crm: FranchiseCrmDashboard = {
 };
 
 const governance = {
+  bookBindingReviewRequired:false,
   canApprove: false,
   canManageFinance: false,
   franchises: [],
@@ -58,6 +59,7 @@ const governance = {
   invitations: [],
   rules: [],
   books: [{
+    bindingReviewRequired:false,
     id: "99999999-9999-4999-8999-999999999999",
     libraryId: "22222222-2222-4222-8222-222222222222",
     organizationId: "22222222-2222-4222-8222-222222222222",
@@ -102,10 +104,12 @@ describe("franchise space live board", () => {
     expect(board.perimeter.territory).toBe("Casablanca-Settat");
     expect(board.quality[0]?.title).toBe("Couverture du réseau");
     expect(board.finance[0]?.object).toBe("Votre part");
+    expect(board.finance[0]?.kind).toBe("statement");
+    expect(board.finance[0]?.title).toBe("Relevé 2026-09-01 — 2026-09-30");
     expect(board.finance[0]?.amount).toContain("40,00");
     expect(board.people[0]?.activities?.[0]?.evidence).toContain("invite://atlas");
-    expect(board.requests[0]?.matching?.map((item) => item.name)).toContain("Studio Atlas");
-    expect(board.documents.map((item) => item.title)).toEqual(expect.arrayContaining(["invite://atlas", "rfq://conseil"]));
+    expect(board.requests[0]?.matching).toEqual([]);
+    expect(board.documents).toEqual([]); // Textual CRM references are not private uploaded files.
     expect(board.messages).toEqual([]); // CRM activity is never presented as an actual conversation.
     expect(JSON.stringify(board)).not.toMatch(/50\s*%|Hatim Ahmitech|Jalil-NEOXA|NEOXA_JALIL|ASMA_MATRICIA/);
   });
@@ -166,5 +170,17 @@ describe("franchise space live board", () => {
     expect(board.requests).toEqual([]);
     expect(board.finance).toEqual([]);
     if (previous) process.env.MATRICIA_DEMO_ACCESS_ENABLED = previous;
+  });
+});
+
+
+describe("entry fee execution evidence",()=>{
+  it.each(["fr","ar"]as const)("marks test-only fees and missing legal evidence explicitly in %s",locale=>{
+    const entryFee={mode:"UPFRONT",principalMinor:"100000",depositMinor:"0",startsOn:"2026-10-01",dueOn:"2026-10-31"};
+    const book={...governance.books[0]!,entryFee};
+    const unknown=buildFranchiseSpaceBoard({locale,query:"",crm,libraryName:"TEST",governance:{...governance,books:[book]}}).finance.find(row=>row.kind==="entryFee");
+    expect(unknown?.executionNotice).toContain(locale==="ar"?"غير معتمد":"non certifiée");
+    const simulation=buildFranchiseSpaceBoard({locale,query:"",crm,libraryName:"TEST",governance:{...governance,books:[{...book,entryFee:{...entryFee,executionMode:"NON_CONTRACTUAL_DEMO",executionEnvironment:"DEVELOPMENT"}}]}}).finance.find(row=>row.kind==="entryFee");
+    expect(simulation?.executionNotice).toContain(locale==="ar"?"محاكاة غير تعاقدية":"Simulation non contractuelle");
   });
 });

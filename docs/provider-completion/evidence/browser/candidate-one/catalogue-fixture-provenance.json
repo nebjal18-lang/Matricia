@@ -1,0 +1,22 @@
+{
+  "scope": "HISTORICAL_SQL_TEST_PRECONDITION",
+  "fixture": "PUBLISHED_TEST_CATALOGUE_AND_PROVIDER_QUESTIONNAIRE_ONLY",
+  "catalogueSourceSha256": "25534f159c449c7cd576f8cb5e2426be789b85384c277b60050ded5da190b3a8",
+  "questionnaireSourceSha256": "6b25d99306351d8c17f58fd09ddb76ed39fe74cd744872ecd90f5b1ce93d02db",
+  "appliedSqlSha256": "b9b3691e6c689f574cc2f4b3e083881898de838b9596dea4756408779a6bbf6e",
+  "governedCataloguePublicationCertified": false,
+  "nativeAuthenticationAltered": false,
+  "nativeProviderQualificationAltered": false,
+  "ids": {
+    "libraryId": "a5ede8ae-6bc2-43f2-b2c6-9ea0ebbf3156",
+    "serviceA": "7c7c964d-6137-4949-89a2-a346b354003a",
+    "serviceB": "59beb511-1b37-4c31-bd4b-68fe615897d6",
+    "serviceVersionA": "3266e397-e245-4cea-b14a-876247765440",
+    "serviceVersionB": "3e7063a4-9023-4618-9a0b-5ea839ea1c6b",
+    "questionnaireVersion": "309eaade-7e34-47e3-8cb9-4d648217ba35",
+    "booleanQuestion": "0c562958-6d50-4a5f-8df7-fe4042e787af",
+    "detailQuestion": "8c0e83e6-a038-46af-a890-63034495f0eb"
+  },
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185"
+}

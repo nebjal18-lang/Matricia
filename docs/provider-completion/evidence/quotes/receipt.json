@@ -1,0 +1,42 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-quotes/supabase/migrations/20261102039000_provider_quote_versions_options_attachments.sql",
+      "sha256": "647c570a6218347d610ad5cb796bb6eddadb9751fa8875adb6aca19be5ffd781"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-quotes/supabase/migrations/20261102039100_provider_quote_search_pages.sql",
+      "sha256": "77734580b4a453d75742431661faf17920ed5fb601e6bbf69a733db730f11547"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-quotes/supabase/migrations/20261102039200_quote_published_history_during_revision.sql",
+      "sha256": "2f0e3f566c7a6732af698e8d18d6bf9addd0af52aefa016d74237520bece4e6d"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-quotes/supabase/tests/0346_provider_quote_completion.test.sql",
+      "sha256": "8f39acb6fcb48b705d011a72f6b18da42da901470b8a827c5f314f76148ca850"
+    }
+  ],
+  "status": "PASSED",
+  "assertions": 41,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

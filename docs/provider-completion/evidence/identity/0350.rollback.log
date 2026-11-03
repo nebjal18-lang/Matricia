@@ -1,0 +1,264 @@
+BEGIN
+ALTER FUNCTION
+ALTER FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+ALTER POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+DO
+SET
+ plan  
+-------
+ 1..28
+(1 row)
+
+GRANT
+UPDATE 1
+INSERT 0 5
+INSERT 0 2
+INSERT 0 2
+INSERT 0 3
+INSERT 0 3
+INSERT 0 2
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+ actor 
+-------
+ 
+(1 row)
+
+SET
+                  throws_ok                  
+---------------------------------------------
+ ok 1 - Provider cannot enter Client command
+(1 row)
+
+                    throws_ok                    
+-------------------------------------------------
+ ok 2 - Shared validator requires representative
+(1 row)
+
+                         is                          
+-----------------------------------------------------
+ ok 3 - Provider Owner creates the canonical profile
+(1 row)
+
+                      is                      
+----------------------------------------------
+ ok 4 - Exact replay returns the same version
+(1 row)
+
+RESET
+                is                 
+-----------------------------------
+ ok 5 - No Client trial is created
+(1 row)
+
+                 is                 
+------------------------------------
+ ok 6 - No Client role is activated
+(1 row)
+
+SET
+                                is                                 
+-------------------------------------------------------------------
+ ok 7 - Authorized workspace returns the real saved representative
+(1 row)
+
+             throws_ok              
+------------------------------------
+ ok 8 - Foreign organization denied
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+                   throws_ok                   
+-----------------------------------------------
+ ok 9 - Viewer cannot read representative data
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+                        is                        
+--------------------------------------------------
+ ok 10 - Provider Manager can read shared profile
+(1 row)
+
+                      throws_ok                       
+------------------------------------------------------
+ ok 11 - Stale draft cannot overwrite a newer version
+(1 row)
+
+                         throws_ok                          
+------------------------------------------------------------
+ ok 12 - Submission requires Provider qualification profile
+(1 row)
+
+                                                                                             submit_provider_profile                                                                                             
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"status": "UNDER_REVIEW", "outcome": "PROVIDER_PROFILE_SUBMITTED", "command_id": "5d54ea85-b6f3-45a1-a857-d886b2209fd4", "row_version": 1, "provider_organization_id": "a3501000-0000-4000-8000-000000000001"}
+(1 row)
+
+                        throws_ok                         
+----------------------------------------------------------
+ ok 13 - Submission requires all three Provider documents
+(1 row)
+
+RESET
+DO
+ actor 
+-------
+ 
+(1 row)
+
+SET
+                           is                            
+---------------------------------------------------------
+ ok 14 - Exact canonical version and documents submitted
+(1 row)
+
+                is                
+----------------------------------
+ ok 15 - Submission is idempotent
+(1 row)
+
+                is                
+----------------------------------
+ ok 16 - One immutable submission
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+DO
+                                                                                                                                                             decide_provider_company                                                                                                                                                              
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "af766493-78a0-4801-9326-0459c83df73d", "row_version": 8, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "f06305f8-2fe1-4b91-a5e1-7cc4cf9d3040", "partner_contract_status": "NOT_SIGNED", "provider_organization_id": "a3501000-0000-4000-8000-000000000001"}
+(1 row)
+
+RESET
+CREATE FUNCTION
+ actor 
+-------
+ 
+(1 row)
+
+SET
+                                     throws_ok                                     
+-----------------------------------------------------------------------------------
+ ok 17 - A platform reviewer who authored/submitted this profile cannot approve it
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+             throws_ok             
+-----------------------------------
+ ok 18 - Admin AAL1 cannot approve
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+                                    is                                     
+---------------------------------------------------------------------------
+ ok 19 - Existing AAL2 independent identity command verifies exact profile
+(1 row)
+
+RESET
+                          is                          
+------------------------------------------------------
+ ok 20 - Provider-only organization can become active
+(1 row)
+
+                         is                          
+-----------------------------------------------------
+ ok 21 - Provider activation creates no Client trial
+(1 row)
+
+                     ok                      
+---------------------------------------------
+ ok 22 - Current shared identity is verified
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+SET
+                         is                         
+----------------------------------------------------
+ ok 23 - Manager creates canonical address revision
+(1 row)
+
+RESET
+                          ok                          
+------------------------------------------------------
+ ok 24 - Old attestation cannot approve a new address
+(1 row)
+
+ actor 
+-------
+ 
+(1 row)
+
+SET
+                        throws_ok                        
+---------------------------------------------------------
+ ok 25 - Unsubmitted current revision cannot be approved
+(1 row)
+
+                      is                      
+----------------------------------------------
+ ok 26 - No second verification is fabricated
+(1 row)
+
+RESET
+                      ok                       
+-----------------------------------------------
+ ok 27 - Runtime cannot bypass domain wrappers
+(1 row)
+
+                        ok                        
+--------------------------------------------------
+ ok 28 - Service role cannot impersonate Provider
+(1 row)
+
+ finish 
+--------
+(0 rows)
+
+ROLLBACK

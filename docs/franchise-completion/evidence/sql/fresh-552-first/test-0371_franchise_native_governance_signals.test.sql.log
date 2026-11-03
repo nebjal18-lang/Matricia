@@ -1,0 +1,7 @@
+{"role":"service_role"}
+ok 1 - native report and facts collectors complete independently without hidden query errors
+ok 2 - daily monthly and quarterly facts are collected from native sources
+
+ERROR:  syntax error at or near "from"
+LINE 1: ... signal_observed371 values('snapshot',to_jsonb(s))from publi...
+                                                             ^

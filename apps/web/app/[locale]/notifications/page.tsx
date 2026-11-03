@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { readWorkspaceNavigation } from "@/modules/shared/lib/auth/workspace-navigation-server";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
@@ -12,23 +14,29 @@ export default async function NotificationsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; workspace?: string }>;
+  searchParams: Promise<{ organizationId?: string; workspace?: string; q?: string; unread?: string; before?: string; beforeId?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const m = getNotificationMessages(locale);
+  const preferredWorkspace = query.workspace ?? (await cookies()).get("matricia.workspace")?.value;
+  const navigation = await readWorkspaceNavigation(locale, query.organizationId, preferredWorkspace);
+  const landing = navigation.status === "ok" ? navigation.navigation.landing : undefined;
+  const option = navigation.status === "ok" ? navigation.navigation.options.find(item => item.kind === landing) : undefined;
+  const selectedOrganizationId = query.organizationId ?? (option ? new URL(option.href, "https://matricia.invalid").searchParams.get("organizationId") ?? undefined : undefined);
   const contextQuery = new URLSearchParams();
-  if (query.organizationId) contextQuery.set("organizationId", query.organizationId);
-  if (query.workspace) contextQuery.set("workspace", query.workspace);
+  if (selectedOrganizationId) contextQuery.set("organizationId", selectedOrganizationId);
+  if (landing ?? query.workspace) contextQuery.set("workspace", (landing ?? query.workspace)!);
+  for (const key of ["q", "unread", "before", "beforeId"] as const) if (query[key]) contextQuery.set(key, query[key]!);
   const selfPath = `/${locale}/notifications${contextQuery.size ? `?${contextQuery}` : ""}`;
-  const result = await loadNotificationCenter(locale, query.organizationId);
+  const result = navigation.status === "error" ? navigation : await loadNotificationCenter(locale, selectedOrganizationId, { q: query.q, unread: query.unread === "1", before: query.before, beforeId: query.beforeId });
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: selfPath }));
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      organizationId={selectedOrganizationId}
       currentPath={selfPath}
-      workspace={query.workspace}
+      workspace={landing ?? query.workspace}
       title={m.title}
       lead={m.description}
       clientActive="messages"
@@ -38,7 +46,7 @@ export default async function NotificationsPage({
       {result.status === "error" ? (
         <WorkspaceFailure locale={locale} reason={result.reason} returnPath={selfPath} />
       ) : (
-        <NotificationsPanel dashboard={result.dashboard} locale={locale} m={m} />
+        <NotificationsPanel dashboard={result.dashboard} locale={locale} workspace={landing ?? query.workspace} m={m} />
       )}
     </ConnectedAppShell>
   );

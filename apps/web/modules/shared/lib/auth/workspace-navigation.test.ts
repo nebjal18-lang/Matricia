@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { availableWorkspaces, authorizedReturnPath, translateLocalPath } from "./workspace-navigation";
+import { availableWorkspaces, authorizedReturnPath, translateLocalPath, withDashboardWorkspaceHint } from "./workspace-navigation";
 
 describe("authorized workspace navigation", () => {
   it("only recognizes declared membership and platform roles", () => {
@@ -25,5 +25,19 @@ describe("authorized workspace navigation", () => {
     expect(result.searchParams.get("next")).toBe("/ar/administration/entreprises/nouvelle?organizationId=org");
     expect(result.searchParams.get("organizationId")).toBe("org");
     expect(result.searchParams.get("workspace")).toBe("administration");
+  });
+});
+
+describe("explicit Client and Provider dashboard hints",()=>{
+  it.each(["fr","ar"] as const)("replaces repeated false hints and preserves tenant, filters and hash in %s",locale=>{
+    const path=`/${locale}/tableau-de-bord?organizationId=selected&q=suivi+des+missions&page=3&workspace=client&workspace=administration#priorities`;
+    for(const workspace of ["provider","client"] as const){
+      const url=new URL(withDashboardWorkspaceHint(path,locale,workspace),"https://matricia.invalid");
+      expect(url.searchParams.getAll("workspace")).toEqual([workspace]);expect(url.searchParams.get("organizationId")).toBe("selected");expect(url.searchParams.get("q")).toBe("suivi des missions");expect(url.searchParams.get("page")).toBe("3");expect(url.hash).toBe("#priorities");
+    }
+  });
+  it.each(["fr","ar"] as const)("only forces the exact common dashboard and preserves detail destinations in %s",locale=>{
+    for(const path of [`/${locale}/sous-traitant/missions/test?organizationId=selected&workspace=client#proofs`,`/${locale}/tableau-de-bord/details?organizationId=selected&workspace=client`])expect(withDashboardWorkspaceHint(path,locale,"provider")).toBe(path);
+    expect(withDashboardWorkspaceHint("https://foreign.invalid/",locale,"provider")).toBe(`/${locale}/tableau-de-bord?workspace=provider`);
   });
 });

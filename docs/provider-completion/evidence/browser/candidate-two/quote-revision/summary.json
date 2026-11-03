@@ -1,0 +1,39 @@
+{
+  "scope": "NATIVE_CLIENT_REVISION_REQUEST_AND_PROVIDER_UI_REPLACEMENT",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "PASSED",
+  "quoteId": "357d43c8-4db4-423c-854c-130c70a3850b",
+  "originalVersionId": "2e5dc1e2-38a2-4f99-8faf-a52fda875b1c",
+  "steps": [
+    {
+      "step": "actual_counterparty_client_requests_exact_published_revision_via_native_command",
+      "passed": true
+    },
+    {
+      "step": "keyboard_provider_creates_new_private_version_old_publication_stays_immutable_and_client_can_read_history_only",
+      "passed": true
+    },
+    {
+      "step": "touch_confirmed_republication_restores_current_comparison_without_erasing_published_history",
+      "passed": true
+    }
+  ],
+  "idempotencyKey": "d63f1f9b-62af-42d3-a181-e51b6eb4dd46",
+  "revisionRequest": {
+    "outcome": "QUOTE_REVISION_REQUESTED",
+    "quote_id": "357d43c8-4db4-423c-854c-130c70a3850b",
+    "quote_version_id": "2e5dc1e2-38a2-4f99-8faf-a52fda875b1c",
+    "revision_request_id": "242b69a2-cf45-4bf5-a62f-efbf0f94ae87"
+  },
+  "revisedVersionId": "ec232501-590b-4da4-b1b4-1138ab9eb8b6",
+  "originalSnapshot": {
+    "id": "2e5dc1e2-38a2-4f99-8faf-a52fda875b1c",
+    "version_number": 1,
+    "solution_fr": "TEST offre de maintenance — نص أصلي à conserver",
+    "total_minor": 210060,
+    "content_hash": "eb4ea00da8a693289d4d2db82fb05d4c1da6ef7ff4a79d30cf46b8b71b56c785"
+  },
+  "nativePrivateVersionRecovered": true,
+  "browserFormLineEndingNormalization": "HTML_FORM_CRLF_ONLY_NO_TRANSLATION"
+}

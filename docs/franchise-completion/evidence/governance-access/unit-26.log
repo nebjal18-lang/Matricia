@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 /workspace/franchise-ci/apps/web
+
+
+ Test Files  3 passed (3)
+      Tests  26 passed (26)
+   Start at  06:58:44
+   Duration  2.37s (import 48%, transform 33%, tests 18%, worker 2%)
+

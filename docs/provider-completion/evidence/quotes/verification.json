@@ -1,0 +1,72 @@
+{
+  "scope": "LOCAL_QUOTE_DOMAIN_NOT_INTEGRATED_COMMERCIAL_RELEASE",
+  "codeCommit": "f46edf5b2fb425290308aefad537ac50e7727489",
+  "transactionBoundaryCommit": "c44ec1c37ab5e3ef36a1d4f1e701d55e63ad012c",
+  "appTree": "6901090b7fb7fecc89ef0d05a90d3da429e834d9",
+  "sql": {
+    "status": "PASSED",
+    "assertions": 41,
+    "receipt": "receipt.json",
+    "transactionLog": "0346.rollback.log",
+    "commitSent": false,
+    "freshReplay": false
+  },
+  "logs": [
+    {
+      "name": "quotes-client-regressions",
+      "localPath": "/tmp/provider-quotes-f46-regressions.log",
+      "sha256": "2ec37076e2a8ccb4939d6fd1f8cd3277f810bf020ff3fbb8f550efcbe521e263",
+      "status": "PASSED",
+      "files": 19,
+      "tests": 123
+    },
+    {
+      "name": "draft-pdf",
+      "localPath": "/tmp/provider-quotes-f46-pdf.log",
+      "sha256": "193b6b013a3af2f2ecfc2719ea3dc7dbf0b2532f218c9b7b2027baeebb5a6321",
+      "status": "PASSED",
+      "files": 1,
+      "tests": 4
+    },
+    {
+      "name": "targeted-lint",
+      "localPath": "/tmp/provider-quotes-f46-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASSED"
+    },
+    {
+      "name": "quotes-regressions-after-environment-restart",
+      "localPath": "/tmp/provider-quotes-resumed-tests.log",
+      "sha256": "2e10bbf26a22ebae610421a1310c1ddde09213d61479bf68d4a0a20330552100",
+      "status": "PASSED",
+      "files": 19,
+      "tests": 123
+    },
+    {
+      "name": "draft-pdf-after-environment-restart",
+      "localPath": "/tmp/provider-quotes-resumed-pdf.log",
+      "sha256": "92f38f6c73c0ac7dbbc3c33547518bda6bee8d6cdfb9ea688f127fe4fb574f36",
+      "status": "PASSED",
+      "files": 1,
+      "tests": 4
+    },
+    {
+      "name": "quote-domain-lint-after-environment-restart",
+      "localPath": "/tmp/provider-quotes-resumed-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASSED"
+    },
+    {
+      "name": "p23-test-discovery-only",
+      "localPath": "/tmp/provider-quotes-p23-list.log",
+      "sha256": "7c116bd5b7621e4a78ac1dd61aeaf6d25ecc297264e6136f12778ffde48b96ac",
+      "status": "PASSED",
+      "listedTests": 4,
+      "executedTests": 0
+    }
+  ],
+  "finalIntegratedTypecheck": "NOT_COMPLETED",
+  "finalIntegratedBuild": "NOT_RUN",
+  "nativeAuthenticatedBrowserEndToEnd": "NOT_RUN",
+  "productionDeployed": false
+}

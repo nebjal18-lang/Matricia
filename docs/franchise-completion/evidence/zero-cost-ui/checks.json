@@ -1,0 +1,66 @@
+{
+  "sourceBase": "4b2529541461913c2a8cce467edbf8208b5cc193",
+  "environment": "development-local-unit-and-SSR",
+  "tests": {
+    "files": 3,
+    "passed": 52,
+    "command": "pnpm --filter @matricia/web exec vitest run modules/shared/lib/finance-cost-proofs modules/admin/screens/pnl --maxWorkers=1"
+  },
+  "lint": {
+    "passed": true,
+    "command": "pnpm --filter @matricia/web exec eslint modules/shared/lib/finance-cost-proofs modules/admin/screens/pnl"
+  },
+  "types": {
+    "passed": true,
+    "scope": "Isolated TypeScript import graph for the two new directories; no global build or SQL result claimed",
+    "command": "pnpm exec tsc -p work/finance-zero-ui/tsconfig.json",
+    "config": {
+      "extends": "../../apps/web/tsconfig.json",
+      "compilerOptions": {
+        "incremental": false,
+        "plugins": []
+      },
+      "include": [
+        "../../apps/web/modules/shared/lib/finance-cost-proofs/**/*.ts",
+        "../../apps/web/modules/admin/screens/pnl/**/*.ts",
+        "../../apps/web/modules/admin/screens/pnl/**/*.tsx"
+      ],
+      "exclude": [
+        "../../node_modules"
+      ]
+    }
+  },
+  "backendSqlExecuted": false,
+  "nativeBrowserExecuted": false,
+  "productionModified": false,
+  "files": [
+    {
+      "file": "apps/web/modules/admin/screens/pnl/finance-cost-proof-copy.ts",
+      "sha256": "47beb2484032819cf64ee90a619b2c8274e17751dc5abb00bd948ff1b3e59bc4"
+    },
+    {
+      "file": "apps/web/modules/admin/screens/pnl/finance-cost-proof-panel.test.tsx",
+      "sha256": "d6026e455ee0b814c455ea430a97b2c3c1aff0a34ed2f0c107917de4a102348e"
+    },
+    {
+      "file": "apps/web/modules/admin/screens/pnl/finance-cost-proof-panel.tsx",
+      "sha256": "388b6b350f2bf0446df3cacf764b7c9b0ea22533f6839a6f64ea141d7e128ae1"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/finance-cost-proofs/browser-upload.test.ts",
+      "sha256": "bd9b224b7b8b9ba1542160fdb5d2f1369b03e598823f250b6dbf828ac9b0a9fc"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/finance-cost-proofs/browser-upload.ts",
+      "sha256": "98f6d3dbc611f45be2992c859d6edb5ec8a0017abb2d1d76cb1a9c5f4173a48e"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/finance-cost-proofs/review-commands.test.ts",
+      "sha256": "d507f7182416a85bb1860826be5d2635b8ba53c43049b617c7652927a4661497"
+    },
+    {
+      "file": "apps/web/modules/shared/lib/finance-cost-proofs/review-commands.ts",
+      "sha256": "a03f56608df354daa52cbf3df20324454a4303279127806e9bef40daac0a9325"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scope": "FRANCHISE_NATIVE_EXPLICIT_TEST_ACTIVATION",
+  "candidate": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+  "label": "FIRST",
+  "status": "FAILED",
+  "legalSignatureCertified": false,
+  "selfApprovalDenied": true,
+  "steps": [
+    {
+      "id": "CONTRACTUAL_PREREQUISITE_DENIED",
+      "status": "PASS",
+      "code": "42501",
+      "guard": "FRANCHISE_ACTIVATION_MFA_REQUIRED",
+      "verifiedAal2": true,
+      "organizationStatus": "PENDING",
+      "signatureGuardReached": false
+    }
+  ],
+  "failure": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:19273/fr/franchise/invitations/ddad2243-54d8-4016-b5ce-d7d9266ff546\", waiting until \"networkidle\"\u001b[22m\n"
+}

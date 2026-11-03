@@ -28,11 +28,15 @@ export function RewardsBoard({
 }) {
   const c = spaceCopy(locale);
   const conversions = dashboard.conversions;
-  const link = dashboard.links.find((item) => item.status === "ACTIVE") ?? dashboard.links[0];
+  const link = dashboard.links.find((item) => item.status === "ACTIVE" && item.audience_type === "CLIENT");
   const snapshot = dashboard.roiSnapshots[0];
+  const stageLabels = locale === "ar" ? {REGISTERED:"مسجّل",PROFILE_STARTED:"الملف قيد الإعداد",VERIFIED:"تم التحقق",ACTIVE:"مفعّل",REJECTED:"مرفوض",CANCELLED:"ملغى"} : {REGISTERED:"Inscrit",PROFILE_STARTED:"Dossier en préparation",VERIFIED:"Vérifié",ACTIVE:"Activé",REJECTED:"Refusé",CANCELLED:"Annulé"};
+  const stageLabel = (value:string) => stageLabels[value as keyof typeof stageLabels] ?? (locale === "ar" ? "حالة غير معروفة" : "État non reconnu");
   const inviteHref = `/${locale}/client/recompenses${query}#regles`;
   const ambassador = conversions.some((item) => item.conversion_stage === "ACTIVE");
   const engaged = dashboard.grants.length > 0;
+  const referralGranted = dashboard.referralRewardStatuses?.some((item) => item.state === "GRANTED") ?? false;
+  const referralPending = dashboard.referralRewardStatuses?.some((item) => item.state === "APPROVED_PENDING_EXECUTION") ?? false;
   return (
     <main className="client-page">
       <section className="client-board client-board-compare">
@@ -58,13 +62,14 @@ export function RewardsBoard({
             <li data-state={link ? "done" : "current"}><span>1</span><small>{locale === "ar" ? "مدعو" : "Invité"}</small></li>
             <li data-state={conversions.some((item) => item.conversion_stage !== "REGISTERED") ? "done" : conversions.length > 0 ? "current" : "todo"}><span>2</span><small>{locale === "ar" ? "مسجّل" : "Inscrit"}</small></li>
             <li data-state={conversions.some((item) => item.conversion_stage === "VERIFIED" || item.conversion_stage === "ACTIVE") ? "current" : "todo"}><span>3</span><small>{locale === "ar" ? "مؤهل" : "Éligible"}</small></li>
-            <li data-state={ambassador ? "done" : "todo"}><span>4</span><small>{locale === "ar" ? "مكافأة" : "Récompense"}</small></li>
+            <li data-state={referralGranted ? "done" : referralPending ? "current" : "todo"}><span>4</span><small>{locale === "ar" ? "مكافأة" : "Récompense"}</small></li>
           </ol>
+          {referralPending ? <p role="status" className="client-access-note">{locale === "ar" ? "تمت الموافقة على المكافأة؛ إصدار الرصيد ينتظر معالجة فريق المالية." : "Récompense approuvée ; émission des crédits en attente de traitement par la finance."}</p> : null}
           <p><Link2 className="size-4" aria-hidden /> {c.inviteLink}</p>
-          <p dir="ltr">{link ? link.referral_code : (locale === "ar" ? "يُنشأ الرابط بعد تفعيل رمز إحالة." : "Le lien apparaît après création d’un code d’invitation.")}</p>
+          <p dir="ltr">{link ? <Link className="underline break-all" href={`/${locale}/invitation/${encodeURIComponent(link.referral_code)}`}>{`/${locale}/invitation/${link.referral_code}`}</Link> : (locale === "ar" ? "يُنشأ الرابط بعد تفعيل رمز إحالة." : "Le lien apparaît après création d’un code d’invitation.")}</p>
           {link ? (
             <p className="client-access-note" role="status">
-              {locale === "ar" ? "شاركوا رمز الإحالة أعلاه مع جهة الاتصال." : "Partagez le code d’invitation ci-dessus avec votre contact."}
+              {locale === "ar" ? "شاركوا رابط الدعوة أعلاه مع جهة الاتصال." : "Partagez le lien d’invitation ci-dessus avec votre contact."}
             </p>
           ) : (
             <Link href={inviteHref} className="client-cta"><Share2 className="size-4" aria-hidden />{c.inviteContact}</Link>
@@ -84,8 +89,8 @@ export function RewardsBoard({
                 <tbody>
                   {conversions.slice(0, 6).map((item) => (
                     <tr key={item.id}>
-                      <td>{item.conversion_stage}</td>
-                      <td><span className="client-status-chip" data-tone="mint">{item.conversion_stage}</span></td>
+                      <td>{stageLabel(item.conversion_stage)}</td>
+                      <td><span className="client-status-chip" data-tone="mint">{stageLabel(item.conversion_stage)}</span></td>
                       <td><span className="client-access-note" dir="ltr">{item.id.slice(0, 8)}</span></td>
                     </tr>
                   ))}

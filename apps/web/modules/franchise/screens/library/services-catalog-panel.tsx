@@ -22,6 +22,7 @@ export function ServicesCatalogPanel({
   services,
   selectedId,
   libraryId,
+  franchiseId,
   organizationId,
   commandIdentity,
   serverPage,
@@ -33,6 +34,7 @@ export function ServicesCatalogPanel({
   services: FranchiseCatalogRow[];
   selectedId: string | null;
   libraryId: string;
+  franchiseId?: string;
   organizationId: string | null;
   commandIdentity: { idempotencyKey: string; correlationId: string };
 }) {
@@ -74,11 +76,11 @@ export function ServicesCatalogPanel({
         )}
         <details className="franchise-builder" open={categories.length === 0}>
           <summary>{c.createCategory}</summary>
-          <FranchiseCategoryCreateForm locale={locale} libraryId={libraryId} organizationId={organizationId} commandIdentity={commandIdentity} />
+          <FranchiseCategoryCreateForm locale={locale} libraryId={libraryId} franchiseId={franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
         </details>
         <details className="franchise-builder">
           <summary>{c.createSubcategory}</summary>
-          <FranchiseSubcategoryCreateForm locale={locale} libraryId={libraryId} organizationId={organizationId} commandIdentity={commandIdentity} categories={categories} />
+          <FranchiseSubcategoryCreateForm locale={locale} libraryId={libraryId} franchiseId={franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} categories={categories} />
         </details>
       </article>
       <article className="client-card">
@@ -119,7 +121,7 @@ export function ServicesCatalogPanel({
           </label>
         </div>
         {rows.length === 0 ? <p>{c.emptyServices}</p> : (
-          <div className="client-table-wrap client-compare">
+          <div className="client-table-wrap client-compare" role="region" aria-label={c.filterServices} tabIndex={0}>
             <table className="client-space-table">
                 <thead>
                   <tr>
@@ -145,7 +147,7 @@ export function ServicesCatalogPanel({
                     <td>{item.versionLabel ?? "—"}</td>
                     <td><LanguageMarks item={item} /></td>
                     <td>
-                      <span className="franchise-complete" aria-label={`${completeness(item)}%`}><span style={{ width: `${completeness(item)}%` }} /></span>
+                      <span className="franchise-complete" aria-hidden="true"><span style={{ width: `${completeness(item)}%` }} /></span>
                       <small dir="ltr">{completeness(item)}%</small>
                     </td>
                     <td><StatusChip status={item.status} locale={locale} /></td>

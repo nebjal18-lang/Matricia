@@ -1,0 +1,168 @@
+ok 1 - one published service version is available for the isolated fixture
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+{"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "fceabd58-c562-43e9-8137-692b07228b75", "row_version": 2, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "19c0e1e3-51aa-4a19-9daa-d529781818ed", "partner_contract_status": "SIGNED", "provider_organization_id": "fd110000-0000-4000-8000-000000000002"}
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+fd100000-0000-4000-8000-000000000005
+{"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+{"outcome": "CONTRACT_POLICY_VERSION_DECIDED", "decision": "APPROVE", "content_hash": "d99f1d3a29d952e768e94c88733a1171427b565a8fa114b54e13b05eacbe0d92", "policy_version_id": "d265eaca-3a5e-423e-ba9d-95b6570d925c"}
+{"outcome": "SIGNATURE_POLICY_PROPOSED", "environment": "DEVELOPMENT", "proposal_id": "e520022b-853a-4ec2-bd29-efcec1b82c1d", "content_hash": "c1491f5ca8757e104151b6d3ec7c8e2fc21171d8a1768e81f2ad023c374619c1", "development_mock": true}
+{"mode": "NON_CONTRACTUAL_DEMO", "outcome": "SIGNATURE_ENVELOPE_SIGNED", "replayed": false, "final_hash": "ac6052a496c32964c9d0e6c366999bafac9952f3014a252d3c21e9ae0414ef54", "envelope_id": "0cd72f85-2239-4e15-8a38-85ef8c52637c", "achieved_level": "SIMPLE", "development_mock": true, "evidence_package_id": "a3fa692f-0e43-4e8e-ac4b-017de1b36afc"}
+ok 2 - contract is sealed by real native governed DEV-mock flow, not forged signature validation
+fd100000-0000-4000-8000-000000000001
+{"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 3 - Client preparation uses signed deliverable key
+ok 4 - signed deliverable label is preserved
+ok 5 - user-authored source is preserved verbatim
+ok 6 - criteria come from frozen governed checklist
+ok 7 - stale checklist hash is refused before writing
+ok 8 - Client cannot invent a signed deliverable
+ok 9 - Client cannot invent checklist criterion
+ok 10 - responsibility cannot be assigned outside contract parties
+ok 11 - mission replay has exact stable response
+ok 12 - native mission command creates only one mission
+ok 13 - real mission preserves signed label, party responsibility and own milestone link
+ok 14 - actual acceptance uses chosen governed criterion
+ok 15 - mission freezes exact bilingual checklist items
+
+{}
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+fd100000-0000-4000-8000-000000000005
+{"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+{"status": "ACTIVE", "outcome": "MOROCCO_TAX_RULE_ACTIVATED", "row_version": 2, "tax_rule_version_id": "14cf3cd2-f995-40c9-b24d-daf8a164a47f"}
+fd100000-0000-4000-8000-000000000002
+{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+
+{"role":"service_role"}
+fd100000-0000-4000-8000-000000000002
+{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 16 - Provider receipt declarations do not accrue unconfirmed commission
+f347dd00-0000-4000-8000-000000000001
+{"sub":"f347dd00-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 17 - Client projection explicitly refuses confirmation by another Provider member
+ok 18 - another Provider member with Client role cannot auto-confirm the counterparty receipt
+
+{"role":"service_role"}
+{"processed": 3}
+ok 19 - receipt reminders never solicit a conflicted Provider member
+ok 20 - receipt reminders target the genuine independent Client
+fd100000-0000-4000-8000-000000000001
+{"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 21 - legitimate Client gets the three scoped confirmable declarations
+ok 22 - Client receipt projection refuses a known foreign organization
+{"outcome": "CLIENT_RECEIPT_CONFIRMED", "declaration_id": "14cad0a6-f9f9-493a-a28e-a3142839156b"}
+{"outcome": "CLIENT_RECEIPT_CONFIRMED", "declaration_id": "b7ad0d93-6ade-4265-abb7-23798bd64573"}
+{"outcome": "CLIENT_RECEIPT_CONFIRMED", "declaration_id": "e50e8a24-c2aa-49b9-834e-597bbb80fd56"}
+ok 23 - Client contradictory confirmation is a conflict
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 24 - confirmed and independently reviewed receipts create exact accruals
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+fd100000-0000-4000-8000-000000000005
+{"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+{"outcome": "PROVIDER_BILLING_RECIPIENT_REVIEW_APPROVED", "review_id": "a60e80cc-020c-489b-81f5-819fc5136f78"}
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+fd100000-0000-4000-8000-000000000005
+{"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+{"outcome": "PROVIDER_CLOSING_POLICY_REVIEWED"}
+{"outcome": "CLIENT_BILLING_POLICY_APPROVED", "policy_id": "543d89ec-2068-4ee2-ac1b-05061193de19"}
+
+{"role":"service_role"}
+{"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 1, "period_end": "2026-10-31"}
+# []
+ok 25 - monthly scheduler freezes every eligible commission line
+ok 26 - contradictory window precedes invoice emission
+fd100000-0000-4000-8000-000000000002
+{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+{"outcome": "PROVIDER_BILLING_LINE_DISPUTED", "dispute_id": "5053d1be-4b7e-4cab-8565-4b8d796bc74d"}
+fd100000-0000-4000-8000-000000000005
+{"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+ok 27 - independent Finance cannot bypass a contested period through a legacy statement ABI
+ok 28 - grouped ordinary issuance is not an alternate runtime authority
+ok 29 - independent Finance cannot bypass a contested period with grouped statements
+ok 30 - legacy invoice ABI cannot manufacture a contradictory-period invoice
+{"outcome": "PROVIDER_BILLING_DISPUTE_RESOLVED"}
+{"outcome": "PROVIDER_BILLING_DISPUTE_RESOLVED"}
+ok 31 - opposite line decision cannot report a false success
+ok 32 - resolution replay and conflict create no false additional audit
+
+{"role":"service_role"}
+{"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 1, "period_end": "2026-10-31"}
+{"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+ok 33 - elapsed clean lines produce exactly one invoice on repeated scheduler calls
+ok 34 - contested line is carried while two clean lines close
+ok 35 - line-specific dispute never enters an issued statement
+ok 36 - approved standard payment deadline is seven calendar days
+ok 37 - official statement and invoice each retain their frozen approved issuer binding
+ok 38 - automated invoices remain exactly double-entry balanced
+ok 39 - native closing created a real divisible invoice
+ok 40 - private calendar helper is not exposed to runtime
+ok 41 - private amount calculator remains private
+ok 42 - invoice projection remains an invoker view
+Etc/GMT+12
+ok 43 - test connection date differs from the Morocco financial date
+fd100000-0000-4000-8000-000000000002
+{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 44 - Morocco current day is never accepted as a future installment, regardless of connection zone
+ok 45 - same plan intent returns the original receipt
+UTC
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal1"}
+ok 46 - AAL1 cannot approve the native invoice payment plan
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated"}
+ok 47 - known Finance with missing aal cannot approve a native payment plan
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":null}
+ok 48 - known Finance with null aal cannot approve a native payment plan
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 49 - nothing is overdue on the first due day
+ok 50 - only the elapsed first installment becomes due before payment
+fd100000-0000-4000-8000-000000000002
+{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 51 - actual future business date remains refused
+
+{"role":"service_role"}
+{"result": "CLEAN", "outcome": "PROVIDER_PAYMENT_PROOF_SCAN_RECORDED", "scan_id": "fda630a4-4d19-4dc8-804c-7b3eeac4957a", "proof_id": "00bc89fd-0f0d-4750-b44d-efa134ed7e22"}
+fd100000-0000-4000-8000-000000000002
+{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 52 - a scanned declaration is not yet a payment
+ok 53 - Provider cannot approve its own settlement
+fd100000-0000-4000-8000-000000000004
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated"}
+ok 54 - known Finance with missing aal cannot approve an actual pending payment
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":null}
+ok 55 - known Finance with null aal cannot approve an actual pending payment
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 56 - approval replay preserves the same immutable payment
+ok 57 - opposite settlement review is denied
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated"}
+ok 58 - known Finance with missing aal cannot allocate the real confirmed payment
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":null}
+ok 59 - known Finance with null aal cannot allocate the real confirmed payment
+{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 60 - first allocation reduces exactly one minor unit
+ok 61 - second partial allocation has an exact receipt replay
+ok 62 - fully allocated confirmed payment cannot fund another minor unit
+ok 63 - native closed invoice is settled through the actual financial commands
+ok 64 - settlement leaves exactly zero outstanding
+ok 65 - replays create exactly one confirmed payment
+ok 66 - two partial batches settle the same actual invoice without duplicate rows
+ok 67 - payment, plans and allocation never rewrite any invoice field or original date
+ok 68 - all native issue and settlement journals balance exactly
+ok 69 - only one issue journal and one independently reviewed cash journal exist
+ok 70 - issuance and reviewed settlement retain durable events
+
+{"role":"service_role"}
+{"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+{"processed": 0}
+ok 71 - scheduler retry after settlement does not emit a second invoice
+ok 72 - a fully settled native invoice receives no collection reminder
+fd100000-0000-4000-8000-000000000003
+{"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 73 - foreign organization cannot read the paid invoice
+ok 74 - foreign organization cannot read the settlement
+1..74

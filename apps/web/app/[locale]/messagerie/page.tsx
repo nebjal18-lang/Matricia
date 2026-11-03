@@ -24,9 +24,10 @@ function date(value: string, locale: Locale) {
 function ConversationPanel({
   locale,
   m,
-  result,historyNavigation,
+  result,historyNavigation,organizationId,
 }: {
   historyNavigation?:ReactNode;
+  organizationId?:string;
   locale: Locale;
   m: ReturnType<typeof getMessagingMessages>;
   result: Awaited<ReturnType<Awaited<ReturnType<typeof createInternalMessagingRepository>>["load"]>>;
@@ -54,20 +55,20 @@ function ConversationPanel({
           ))}
         </ol>
         {historyNavigation}
-        <SendMessageForm
+        {result.value.conversation.thread.can_send !== true && result.value.conversation.thread.status !== "LOCKED" ? <p role="status">{result.value.conversation.thread.can_send === false ? (locale === "ar" ? "هذه المحادثة للقراءة فقط بحسب دوركم أو إسناد المهمة إليكم." : "Cette conversation est en lecture seule pour votre rôle ou votre affectation.") : (locale === "ar" ? "صلاحيات الإرسال غير متاحة. أعد تحميل المحادثة." : "Les droits d’envoi sont indisponibles. Rechargez cette conversation.")}</p> : <SendMessageForm
           threadId={result.value.conversation.thread.id}
           senderOrganizationId={result.value.conversation.thread.participant_organization_id}
           locale={locale}
           m={m}
           locked={result.value.conversation.thread.status === "LOCKED"}
-        />
-        {result.value.conversation.thread.status !== "LOCKED" ? <InternalMessageAttachments threadId={result.value.conversation.thread.id} senderOrganizationId={result.value.conversation.thread.participant_organization_id} locale={locale} /> : null}
+        />}
+        {result.value.conversation.thread.status !== "LOCKED" && result.value.conversation.thread.can_send === true ? <InternalMessageAttachments threadId={result.value.conversation.thread.id} senderOrganizationId={result.value.conversation.thread.participant_organization_id} locale={locale} /> : null}
       </div>
     );
   }
   return (
     <div className="space-y-4">
-      <OpenThreadForm options={result.value.options} locale={locale} m={m} />
+      <OpenThreadForm options={result.value.options} locale={locale} m={m} organizationId={organizationId} />
       <p>{m.choose}</p>
     </div>
   );
@@ -81,10 +82,10 @@ export default async function MessagingPage({ params, searchParams }: { params: 
   const repository=await createInternalMessagingRepository(),page=Math.min(100000,Math.max(1,Number.parseInt(query.page??"1",10)||1)),needle=(query.q??"").trim().slice(0,200);
   const cursor=parseMessageCursor(query);if(!cursor.valid)notFound();
   const [options, workspaceShell,inbox,history] = await Promise.all([
-    repository.load(undefined,{skipInbox:true}),
+    repository.load(undefined,{skipInbox:true,organizationId:space.selectedOrganizationId??undefined}),
     resolveWorkspaceShell(space.selectedOrganizationId),
     repository.search(needle,space.selectedOrganizationId??undefined,page),
-    query.fil?repository.history(query.fil,cursor.cursor):Promise.resolve(null),
+    query.fil?repository.history(query.fil,cursor.cursor,space.selectedOrganizationId??undefined):Promise.resolve(null),
   ]);
   const result=options.status==="error"?options:history?.status==="error"?history:{status:"success"as const,value:{...options.value,conversation:history?.status==="success"?history.value:null}};
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/messagerie` }));
@@ -103,7 +104,7 @@ export default async function MessagingPage({ params, searchParams }: { params: 
   const pageHref=(next:number)=>`/${locale}/messagerie?${new URLSearchParams({q:needle,page:String(next),...(query.fil?{fil:query.fil}:{}),...(space.selectedOrganizationId?{organizationId:space.selectedOrganizationId}:{})})}`;
   const board = (
     <MessagesBoard serverFiltered inboxError={inbox.status==="error"} inboxFooter={inbox.status==="success"?<><p>{inbox.value.total} {locale==="fr"?"fil(s) correspondant(s)":"محادثة مطابقة"}</p><nav className="flex gap-4" aria-label={locale==="fr"?"Pages des conversations":"صفحات المحادثات"}>{page>1?<Link className="min-h-11 underline" href={pageHref(page-1)}>{locale==="fr"?"Précédent":"السابق"}</Link>:null}{inbox.value.total>page*inbox.value.pageSize?<Link className="min-h-11 underline" href={pageHref(page+1)}>{locale==="fr"?"Suivant":"التالي"}</Link>:null}</nav></>:null} locale={locale} query={space.selectedQuery} search={needle} threads={threads} organizationName={space.organizationName}>
-      <ConversationPanel locale={locale} m={m} result={result} historyNavigation={history?.status==="success"?<nav className="flex flex-wrap items-center gap-4" aria-label={locale==="fr"?"Historique des messages":"سجل الرسائل"}><p>{history.value.total} {locale==="fr"?"message(s) au total":"رسالة إجمالاً"}</p>{history.value.hasMore&&history.value.nextCursor?<Link className="inline-flex min-h-11 items-center underline" href={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined},history.value.nextCursor)}>{locale==="fr"?"Messages plus anciens":"رسائل أقدم"}</Link>:null}{cursor.cursor?<Link className="inline-flex min-h-11 items-center underline" href={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined})}>{locale==="fr"?"Messages récents":"الرسائل الحديثة"}</Link>:null}</nav>:null}/>
+      <ConversationPanel locale={locale} m={m} result={result} organizationId={space.selectedOrganizationId??undefined} historyNavigation={history?.status==="success"?<nav className="flex flex-wrap items-center gap-4" aria-label={locale==="fr"?"Historique des messages":"سجل الرسائل"}><p>{history.value.total} {locale==="fr"?"message(s) au total":"رسالة إجمالاً"}</p>{history.value.hasMore&&history.value.nextCursor?<Link className="inline-flex min-h-11 items-center underline" href={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined},history.value.nextCursor)}>{locale==="fr"?"Messages plus anciens":"رسائل أقدم"}</Link>:null}{cursor.cursor?<Link className="inline-flex min-h-11 items-center underline" href={messageHistoryHref(locale,{...query,q:needle,page:String(page),organizationId:space.selectedOrganizationId??undefined})}>{locale==="fr"?"Messages récents":"الرسائل الحديثة"}</Link>:null}</nav>:null}/>
 
     </MessagesBoard>
   );

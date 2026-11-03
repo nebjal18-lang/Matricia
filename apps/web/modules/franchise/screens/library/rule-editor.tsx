@@ -1,4 +1,5 @@
 "use client";
+import { editorialFailureMessage } from "./command-errors";
 import{useDraftAutosave,DraftAutosaveControl}from"./use-draft-autosave";
 import{CatalogBankSearch}from"./bank-search";
 import { useActionState, useRef, useState } from "react";
@@ -23,7 +24,7 @@ export function FranchiseRuleEditor({locale,workspace,selected,organizationId}:{
  return <form ref={formRef} action={action} className="client-card space-y-4">
   <h2>{ar?"شروط القاعدة وإجراءاتها":"Conditions et actions de la règle"}</h2>
   <p>{ar?"تُحفظ كل مراجعة كمسودة مستقلة. تُراجع المراجع والإجراءات في الخادم قبل الحفظ. يمكن تحرير المجموعات AND وOR والمقارنات والأوزان في تعريف القاعدة.":"Chaque révision crée un brouillon distinct. Les références et les actions sont validées avant l’enregistrement. Le contrat permet les groupes AND/OR, comparaisons, scores et dépendances."}</p>
-  <DraftAutosaveControl autosave={autosave} locale={locale}/><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId??""}/><input type="hidden" name="libraryId" value={workspace.mandate.libraryId}/><input type="hidden" name="ruleId" value={revision.ruleId}/><input type="hidden" name="versionId" value={revision.versionId}/><input type="hidden" name="identityRowVersion" value={revision.identityRowVersion}/><input type="hidden" name="versionRowVersion" value={revision.versionRowVersion}/><input type="hidden" name="idempotencyKey" value={key}/>
+  <DraftAutosaveControl autosave={autosave} locale={locale}/><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId??""}/><input type="hidden" name="libraryId" value={workspace.mandate.libraryId}/><input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId}/><input type="hidden" name="ruleId" value={revision.ruleId}/><input type="hidden" name="versionId" value={revision.versionId}/><input type="hidden" name="identityRowVersion" value={revision.identityRowVersion}/><input type="hidden" name="versionRowVersion" value={revision.versionRowVersion}/><input type="hidden" name="idempotencyKey" value={key}/>
   <fieldset disabled={pending} className="space-y-4">
    <label className="franchise-field">{ar?"رمز القاعدة":"Code de la règle"}<input name="ruleKey" value={ruleKey} onChange={(e)=>{setRuleKey(e.target.value);setDirty(true);}} required pattern="[A-Z][A-Z0-9_.-]{1,119}" maxLength={120} dir="ltr" readOnly={!!revision.ruleId}/></label>
    <CatalogBankSearch franchiseId={workspace.mandate.franchiseId} kind="QUESTION" ar={ar} onResults={items=>setBank(previous=>[...previous.filter(q=>!items.some(i=>i.id===q.id)),...items.map(i=>({id:i.id,questionId:i.objectId,labelFr:i.labelFr,labelAr:i.labelAr,answerType:i.answerType??"SHORT_TEXT",status:i.status}))])}/><FranchiseVisualRuleControls raw={payload} bank={bank} ar={ar} onChange={(value)=>{setPayload(value);setDirty(true);}}/>
@@ -32,7 +33,7 @@ export function FranchiseRuleEditor({locale,workspace,selected,organizationId}:{
    <label className="franchise-field">{ar?"سبب التعديل":"Motif de la révision"}<input name="changeReason" value={reason} onChange={(e)=>{setReason(e.target.value);setDirty(true);}} required minLength={3} maxLength={500}/></label>
    <button className="franchise-tool franchise-tool-primary" type="submit">{pending?(ar?"جارٍ الحفظ…":"Enregistrement…"):(ar?"حفظ المسودة":"Enregistrer le brouillon")}</button>
   </fieldset>
-  <p role={state.status==="error"?"alert":"status"}>{state.status==="error"?(state.reason==="CONFLICT"?(ar?"تغير الإصدار. أعيدوا تحميل الصفحة.":"La version a changé. Rechargez la page."):state.reason==="VALIDATION"?(ar?"تحققوا من تعريف القاعدة ومراجعها وإجراءاتها.":"Complétez les conditions, les paramètres des actions et vérifiez les dépendances."):(ar?"تعذر حفظ القاعدة. احتُفظ بمحتواكم هنا.":"La règle n’a pas pu être enregistrée. Votre saisie est conservée ici.")):dirty?(ar?"تغييرات غير محفوظة":"Modifications non enregistrées"):state.status==="success"?(ar?"تم حفظ مسودة مستقلة في الخادم":"Un nouveau brouillon a été enregistré sur le serveur"):null}</p>
+  <p role={state.status==="error"?"alert":"status"}>{state.status==="error"?editorialFailureMessage(state.reason,locale):dirty?(ar?"تغييرات غير محفوظة":"Modifications non enregistrées"):state.status==="success"?(ar?"تم حفظ مسودة مستقلة في الخادم":"Un nouveau brouillon a été enregistré sur le serveur"):null}</p>
  {savedAt&&!dirty?<time dateTime={savedAt}>{new Intl.DateTimeFormat(ar?"ar-MA":"fr-MA",{timeStyle:"medium"}).format(new Date(savedAt))}</time>:null}
  </form>;
 }

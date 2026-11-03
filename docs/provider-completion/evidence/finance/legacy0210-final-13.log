@@ -1,0 +1,298 @@
+BEGIN
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+GRANT
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+INSERT 0 2
+REVOKE
+GRANT
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE VIEW
+CREATE FUNCTION
+CREATE TABLE
+ALTER TABLE
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+DO
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+DROP POLICY
+CREATE POLICY
+NOTIFY
+DO
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+INSERT 0 4
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE TRIGGER
+ALTER TABLE
+CREATE FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+CREATE TRIGGER
+NOTIFY
+ALTER TABLE
+ALTER TABLE
+DO
+NOTIFY
+REVOKE
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+DO
+NOTIFY
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+NOTIFY
+REVOKE
+NOTIFY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+DO
+NOTIFY
+DO
+UPDATE 1
+SET
+ plan
+-------
+ 1..13
+(1 row)
+
+INSERT 0 2
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f2100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+CREATE TABLE
+GRANT
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+                                     is
+-----------------------------------------------------------------------------
+ ok 1 - replaying a saved financial intent returns the same durable identity
+(1 row)
+
+                            is
+-----------------------------------------------------------
+ ok 2 - new file does not move money while scan is pending
+(1 row)
+
+                    is
+------------------------------------------
+ ok 3 - no financial payment before CLEAN
+(1 row)
+
+                                       is
+--------------------------------------------------------------------------------
+ ok 4 - a fresh request recovers the saved intent without a browser actionstate
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f2100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                            throws_ok
+------------------------------------------------------------------
+ ok 5 - another accountant cannot resume the original actor proof
+(1 row)
+
+SET
+INSERT 0 1
+RESET
+                            is
+-----------------------------------------------------------
+ ok 6 - RLS hides the other actor private financial drafts
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f2100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                        throws_ok
+---------------------------------------------------------
+ ok 7 - same key cannot be reused for a different amount
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+                                                                   record_provider_payment_proof_scan_result
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"result": "CLEAN", "outcome": "PROVIDER_PAYMENT_PROOF_SCAN_RECORDED", "scan_id": "f231fae5-e6f4-46a2-a151-1d614dde4d0b", "proof_id": "da26cea4-b2d6-4f49-8ccd-62306ec5b903"}
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f2100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+                                        is
+-----------------------------------------------------------------------------------
+ ok 8 - trusted CLEAN finalizes a durable declaration awaiting independent Finance
+(1 row)
+
+                            is
+-----------------------------------------------------------
+ ok 9 - double click returns the archived financial result
+(1 row)
+
+                                       is
+---------------------------------------------------------------------------------
+ ok 10 - a scanned declaration creates no cash journal before independent review
+(1 row)
+
+                                is
+------------------------------------------------------------------
+ ok 11 - one immutable declaration survives a finalization replay
+(1 row)
+
+                                 throws_ok
+----------------------------------------------------------------------------
+ ok 12 - a completed payment cannot be cancelled through draft cancellation
+(1 row)
+
+                                   is
+-------------------------------------------------------------------------
+ ok 13 - completed intent no longer appears in the refresh recovery list
+(1 row)
+
+SET CONSTRAINTS
+ finish
+--------
+(0 rows)
+
+ROLLBACK

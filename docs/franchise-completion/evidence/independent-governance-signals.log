@@ -1,0 +1,12 @@
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  08:53:19
+   Duration  4.20s (import 49%, transform 34%, tests 16%, worker 1%)
+
+    Isolate  3 workers spawned · ~546ms startup each (spawn + environment, per file)
+             at least ~273ms faster with isolate: false — reuses workers across files instead of one per file
+

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { ArrowLeft, ArrowRight, FileText, Info, Scale } from "lucide-react";
 import { formatMinorExact, type QuoteComparison, type QuoteComparisonRow } from "@/modules/client/data/rfq/model";
 import { canApplyDemoOffer } from "@/modules/client/data/rfq/quote-detail-demo";
@@ -26,7 +26,6 @@ const WEIGHTS = [
   { id: "payment", key: "weighPayment", value: 10 },
 ] as const;
 
-type WeightKey = (typeof WEIGHTS)[number]["id"];
 
 function letterFor(index: number, locale: Locale) {
   const letters = locale === "ar" ? ["أ", "ب", "ج", "د", "هـ"] : ["A", "B", "C", "D", "E"];
@@ -55,11 +54,15 @@ type CompareColumn = {
   exclusions: string[];
   guarantees: string;
   maintenance: string;
+  corrections: string;
+  recurring: string[];
+  recurringSubtotal: string;
   payment: string;
   why: string;
   expired: boolean;
   selectable: boolean;
   completeness: QuoteCompleteness | null;
+  revisionInProgress?:boolean;
 };
 
 export function ComparisonPanel({
@@ -78,6 +81,7 @@ export function ComparisonPanel({
   organizationName,
   offerFacts = {},
   assistanceHref,
+  revisingQuoteIds=[],
 }: {
   locale: Locale;
   requestId: string;
@@ -94,21 +98,14 @@ export function ComparisonPanel({
   organizationName?: string | null;
   offerFacts?: Record<string, ComparisonOfferFacts>;
   assistanceHref?: string;
+  revisingQuoteIds?:string[];
 }) {
   const [state, action, pending] = useActionState(compareQuotesAction, compareIdle);
-  const [weights, setWeights] = useState<Record<WeightKey, number>>({
-    price: 30,
-    delay: 20,
-    scope: 20,
-    warranty: 10,
-    maintenance: 10,
-    payment: 10,
-  });
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, selectedQuery);
   const rows = state.status === "success" ? state.rows : initialComparison?.rows ?? [];
   const preferDemo = canApplyDemoOffer(organizationName ?? null) && rows.length === 0;
-  const columns: CompareColumn[] = preferDemo
+  const columns: CompareColumn[] = (preferDemo
     ? demo.compareOffers.map((offer, index) => {
         const quoteId = offer.slot === "c" ? `demo:${requestId}:c` : `${requestId}-${offer.slot}`;
         return {
@@ -125,6 +122,7 @@ export function ComparisonPanel({
           exclusions: offer.exclusions,
           guarantees: offer.guarantees,
           maintenance: offer.maintenance,
+          corrections:"",recurring:[],recurringSubtotal:formatMinorExact("0","MAD",locale),
           payment: offer.payment,
           why: offer.why,
           expired: false,
@@ -132,7 +130,7 @@ export function ComparisonPanel({
           completeness: null,
         };
       })
-    : rows.map((row, index) => mapRow(row, index, locale, c, messages, nowIso, offerFacts[row.quoteVersionId]));
+    : rows.map((row, index) => mapRow(row, index, locale, c, messages, nowIso, offerFacts[row.quoteVersionId]))).map(column=>({...column,revisionInProgress:revisingQuoteIds.includes(column.quoteId),selectable:column.selectable&&!revisingQuoteIds.includes(column.quoteId)}));
   const snapshotId = state.status === "success" ? state.snapshotId : initialComparison?.snapshotId ?? "";
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
   const askHref = `/${locale}/messagerie${selectedQuery}`;
@@ -149,7 +147,7 @@ export function ComparisonPanel({
           <span className="client-feed-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span>
           <div>
             <p>{c.need} : <strong>{requestTitle}</strong></p>
-            <small>{c.sameScope} · {columns.length} {locale === "ar" ? "عروض" : "offres"}</small>
+            <small>{c.sameScope} · {columns.length} {locale === "ar" ? "عروض في المقارنة" : "offres dans la comparaison"}{revisingQuoteIds.length?` · ${revisingQuoteIds.length} ${locale==="ar"?"مراجعات قيد الإعداد":"révisions en préparation"}`:""}</small>
           </div>
         </div>
         <Link href={requestHref} className="client-soft-link">{c.seeRequest}</Link>
@@ -198,29 +196,11 @@ export function ComparisonPanel({
           </div>
           <aside className="client-card client-weight-aside">
             <header>
-              <h2><Scale className="size-4" aria-hidden />{c.weighCriteria}</h2>
+              <h2><Scale className="size-4" aria-hidden />{locale==="ar"?"معايير المقارنة":"Critères de comparaison"}</h2>
             </header>
-            <p>{c.weighLead}</p>
-            <ul className="client-weight-list">
-              {WEIGHTS.map((item) => (
-                <li key={item.id}>
-                  <label>
-                    <span>{c[item.key]}</span>
-                    <strong dir="ltr">{weights[item.id]} %</strong>
-                    <input
-                      type="range"
-                      min={0}
-                      max={50}
-                      step={5}
-                      value={weights[item.id]}
-                      aria-valuetext={`${weights[item.id]} %`}
-                      onChange={(event) => setWeights((current) => ({ ...current, [item.id]: Number(event.target.value) }))}
-                    />
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <p className="client-weight-note"><Info className="size-4" aria-hidden />{c.weighNote}</p>
+            <p>{locale==="ar"?"قارنوا السعر والأجل والنطاق والشروط قبل الاختيار. الترتيب المعروض يعتمد على السعر فقط.":"Comparez le prix, le délai, le périmètre et les conditions avant de choisir. Le classement affiché porte uniquement sur le prix."}</p>
+            <ul className="client-weight-list">{WEIGHTS.map(item=><li key={item.id}>{c[item.key]}</li>)}</ul>
+            <p className="client-weight-note"><Info className="size-4" aria-hidden />{locale==="ar"?"لا يشكل أقل سعر توصية بالجودة. اطلبوا توضيح أي شرط غير محدد.":"Le prix le plus bas ne constitue pas une recommandation de qualité. Demandez une clarification pour toute condition non renseignée."}</p>
           </aside>
         </section>
       )}
@@ -239,22 +219,25 @@ function mapRow(
 ): CompareColumn {
   const expired = Date.parse(row.validUntil) <= Date.parse(nowIso);
   const taxZero = row.taxMinor === "0";
-  const complete = !facts || facts.completeness.basisPoints === 10_000;
+  const complete = Boolean(facts && facts.completeness.basisPoints === 10_000);
   return {
     key: row.quoteVersionId,
     quoteId: row.quoteId,
     quoteVersionId: row.quoteVersionId,
     letter: letterFor(index, locale),
-    tagline: `${messages.rank} ${row.priceRank}`,
-    recommended: row.priceRank === 1,
+    tagline: locale==="ar"?`ترتيب السعر ${row.priceRank}`:`Rang de prix ${row.priceRank}`,
+    recommended: false,
     price: formatMinorExact(row.totalMinor, row.currency, locale),
     taxBase: taxZero ? c.taxIncl : c.taxExcl,
     duration: formatDuration(row.durationDays, locale),
     deliverables: facts?.deliverables.length ? facts.deliverables : [`${row.deliverablesCount} ${messages.deliverables}`],
     exclusions: facts?.exclusions ?? [],
     guarantees: facts?.warranty ?? "",
-    maintenance: "",
-    payment: "",
+    maintenance: facts?.maintenanceTerms??"",
+    corrections: facts?.corrections ?? "",
+    recurringSubtotal: formatMinorExact(row.recurringSubtotalMinor, row.currency, locale),
+    recurring: facts?.recurringLines?.map(line=>`${line.label} : ${formatMinorExact(line.subtotalMinor,row.currency,locale)} / ${{MONTH:locale==="ar"?"شهر":"mois",QUARTER:locale==="ar"?"ربع سنة":"trimestre",YEAR:locale==="ar"?"سنة":"an"}[line.interval]}`) ?? [],
+    payment: facts?.paymentTerms || (locale==="ar"?"غير محددة في العرض — اطلب توضيحاً قبل الاختيار.":"Non renseignées dans le devis — demander une clarification avant de choisir."),
     why: "",
     expired,
     selectable: complete,
@@ -287,7 +270,7 @@ function QuoteColumn({
 }) {
   const [state, action, pending] = useActionState(selectQuoteAction, actionIdle);
   const c = spaceCopy(locale);
-  const detailHref = `/${locale}/client/demandes/${requestId}/offres/${column.quoteId}${selectedQuery}`;
+  const detailHref = `/${locale}/client/demandes/${requestId}/offres/${column.quoteId}?${new URLSearchParams({...Object.fromEntries(new URLSearchParams(selectedQuery.replace(/^\?/,""))),versionId:column.quoteVersionId})}`;
   const canSelect = column.selectable && canManage && !column.expired && Boolean(snapshotId);
   return (
     <article className="client-card client-offer-col" data-recommended={column.recommended ? "true" : undefined}>
@@ -301,6 +284,7 @@ function QuoteColumn({
         <div><dt>{c.priceMad}</dt><dd className="client-offer-price" dir="ltr">{column.price}</dd></div>
         <div><dt>{c.taxBase}</dt><dd>{column.taxBase}</dd></div>
         <div><dt>{c.durationLabel}</dt><dd>{column.duration}</dd></div>
+        <div><dt>{locale==="ar"?"التكاليف المتكررة دون ضريبة":"Coûts récurrents hors taxes"}</dt><dd>{column.recurring.length ? <ul>{column.recurring.map((line,index)=><li key={index} dir="auto">{line}</li>)}</ul> : <><span dir="ltr">{column.recurringSubtotal}</span><span className="block text-sm">{locale==="ar"?"راجع دورية البنود في تفاصيل العرض؛ لا يتم افتراض مدة إجمالية.":"Voir la périodicité des lignes dans le détail ; aucune durée totale n’est supposée."}</span></>}</dd></div>
         {column.completeness ? (
           <div>
             <dt>{messages.completeness}</dt>
@@ -320,7 +304,8 @@ function QuoteColumn({
           </dd>
         </div>
         <div><dt>{c.guarantees}</dt><dd>{column.guarantees || dash}</dd></div>
-        <div><dt>{c.maintenance}</dt><dd>{column.maintenance || dash}</dd></div>
+        <div><dt>{c.maintenance}</dt><dd>{column.maintenance || (locale==="ar"?"غير محددة في العرض":"Non renseignée dans le devis")}</dd></div>
+        <div><dt>{locale==="ar"?"شروط التصحيح":"Conditions de correction"}</dt><dd>{column.corrections || dash}</dd></div>
         <div><dt>{c.paymentTerms}</dt><dd>{column.payment || dash}</dd></div>
         {column.why ? <div><dt>{c.whyCompatible}</dt><dd>{column.why}</dd></div> : null}
       </dl>
@@ -349,9 +334,12 @@ function QuoteColumn({
           </form>
         ) : null}
       </div>
+      {column.revisionInProgress?<p role="status" className="client-access-note">{locale==="ar"?"المراجعة قيد الإعداد؛ هذه النسخة المنشورة محفوظة للاطلاع ولا يمكن اختيارها.":"Révision en préparation ; cette version publiée reste consultable et ne peut pas être sélectionnée."}</p>:null}
+      {!column.completeness ? <p role="alert" className="client-access-note">{locale==="ar"?"تفاصيل المقارنة غير متاحة. أعد تحميل الصفحة قبل الاختيار.":"Les détails nécessaires à la comparaison sont indisponibles. Rechargez la page avant de choisir."}</p>:null}
       {column.completeness && column.completeness.basisPoints < 10_000 ? <p role="status" className="client-access-note">{messages.incompleteQuote}</p> : null}
       {column.expired ? <p role="status" className="client-access-note">{messages.expiredQuote}</p> : null}
       {state.status === "error" ? <p role="alert" className="client-access-note">{state.reason === "VALIDATION" ? messages.validation : messages.actionError}</p> : null}
+      {state.status === "approval_required" ? <p role="status" className="client-access-note">{state.approvalStatus==="REJECTED"?(locale==="ar"?"تم رفض طلب الموافقة. راجع القرار قبل المحاولة.":"La demande d’approbation a été refusée. Consultez la décision avant de réessayer."):(locale==="ar"?"أُرسل الطلب إلى المعتمدين. لم يتم اختيار العرض بعد.":"Demande transmise aux approbateurs. Le devis n’est pas encore retenu.")} <Link href={`/${locale}/client/actions${selectedQuery}`}>{locale==="ar"?"عرض الإجراءات":"Consulter les actions"}</Link></p>:null}
       {state.status === "success" ? <p role="status" className="client-access-note">{messages.selected}</p> : null}
     </article>
   );

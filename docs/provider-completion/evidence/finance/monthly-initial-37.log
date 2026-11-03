@@ -1,0 +1,884 @@
+BEGIN
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+GRANT
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+INSERT 0 2
+REVOKE
+GRANT
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE VIEW
+CREATE FUNCTION
+CREATE TABLE
+ALTER TABLE
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+DO
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+DROP POLICY
+CREATE POLICY
+NOTIFY
+DO
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+INSERT 0 4
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE TRIGGER
+ALTER TABLE
+CREATE FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+DO
+SET
+ no_plan
+---------
+(0 rows)
+
+GRANT
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+SELECT 1
+                                     ok
+----------------------------------------------------------------------------
+ ok 1 - one published service version is available for the isolated fixture
+(1 row)
+
+INSERT 0 1
+SELECT 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                                                                                           decide_provider_company
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "6861978b-0902-489e-ae1f-3b887f6103d0", "row_version": 2, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "bab9eb4a-07f3-49d9-a93b-f0558f87f26e", "partner_contract_status": "SIGNED", "provider_organization_id": "fd110000-0000-4000-8000-000000000002"}
+(1 row)
+
+INSERT 0 3
+DO
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DO
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+CREATE TABLE
+GRANT
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                           decide_contract_policy_version_v1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "CONTRACT_POLICY_VERSION_DECIDED", "decision": "APPROVE", "content_hash": "4c294a6b9852cb81f1a24152df94e44f2e88251e89951348e6cd6df89d6bd4fa", "policy_version_id": "a8060bbf-3b50-4f85-8c68-249a76b806c0"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+CREATE FUNCTION
+CREATE FUNCTION
+                                                                                                       prepare_governed_mock_policy_v1
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "SIGNATURE_POLICY_PROPOSED", "environment": "DEVELOPMENT", "proposal_id": "d11ed6b9-371a-4452-88b5-19036160f5ff", "content_hash": "b74b889519e08c474d28c70e465655cdec99f8831849096482d83bb5e3ddc2b3", "development_mock": true}
+(1 row)
+
+                                                                                                                                                            complete_governed_mock_contract_v1
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"mode": "NON_CONTRACTUAL_DEMO", "outcome": "SIGNATURE_ENVELOPE_SIGNED", "replayed": false, "final_hash": "f2b8c58c9f7665fb00531bb697cd0904ebf409c0b9ac3f080c856b322fdfb4be", "envelope_id": "c7f3de05-cda9-4652-976e-541f3529627c", "achieved_level": "SIMPLE", "development_mock": true, "evidence_package_id": "42350558-d0cc-4d4c-9245-50b5d0f43ce7"}
+(1 row)
+
+                                                ok
+--------------------------------------------------------------------------------------------------
+ ok 2 - contract is sealed by real native governed DEV-mock flow, not forged signature validation
+(1 row)
+
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                          is
+-------------------------------------------------------
+ ok 3 - Client preparation uses signed deliverable key
+(1 row)
+
+                      is
+----------------------------------------------
+ ok 4 - signed deliverable label is preserved
+(1 row)
+
+                        is
+---------------------------------------------------
+ ok 5 - user-authored source is preserved verbatim
+(1 row)
+
+                         is
+-----------------------------------------------------
+ ok 6 - criteria come from frozen governed checklist
+(1 row)
+
+CREATE FUNCTION
+                       throws_ok
+-------------------------------------------------------
+ ok 7 - stale checklist hash is refused before writing
+(1 row)
+
+                    throws_ok
+--------------------------------------------------
+ ok 8 - Client cannot invent a signed deliverable
+(1 row)
+
+                    throws_ok
+-------------------------------------------------
+ ok 9 - Client cannot invent checklist criterion
+(1 row)
+
+                             throws_ok
+--------------------------------------------------------------------
+ ok 10 - responsibility cannot be assigned outside contract parties
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                        is
+--------------------------------------------------
+ ok 11 - mission replay has exact stable response
+(1 row)
+
+RESET
+                           is
+---------------------------------------------------------
+ ok 12 - native mission command creates only one mission
+(1 row)
+
+                                            ok
+------------------------------------------------------------------------------------------
+ ok 13 - real mission preserves signed label, party responsibility and own milestone link
+(1 row)
+
+                            is
+----------------------------------------------------------
+ ok 14 - actual acceptance uses chosen governed criterion
+(1 row)
+
+                           is
+---------------------------------------------------------
+ ok 15 - mission freezes exact bilingual checklist items
+(1 row)
+
+RESET
+ set_config
+------------
+
+(1 row)
+
+ set_config
+------------
+ {}
+(1 row)
+
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+CREATE TABLE
+GRANT
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+DO
+INSERT 0 1
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                                            decide_morocco_tax_rule
+------------------------------------------------------------------------------------------------------------------------------------------------
+ {"status": "ACTIVE", "outcome": "MOROCCO_TAX_RULE_ACTIVATED", "row_version": 2, "tax_rule_version_id": "f3923dc0-c3a7-415d-bd57-d486417c1f61"}
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+DO
+RESET
+INSERT 0 3
+ set_config
+------------
+
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+DO
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+DO
+                                     is
+----------------------------------------------------------------------------
+ ok 16 - Provider receipt declarations do not accrue unconfirmed commission
+(1 row)
+
+RESET
+INSERT 0 1
+INSERT 0 2
+INSERT 0 3
+              set_config
+--------------------------------------
+ f347dd00-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f347dd00-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                           throws_ok
+-----------------------------------------------------------------------------------------------
+ ok 17 - another Provider member with Client role cannot auto-confirm the counterparty receipt
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                              confirm_provider_receipt_declaration_v1
+---------------------------------------------------------------------------------------------------
+ {"outcome": "CLIENT_RECEIPT_CONFIRMED", "declaration_id": "65aa9983-7302-44fa-941d-7034075f7902"}
+ {"outcome": "CLIENT_RECEIPT_CONFIRMED", "declaration_id": "890029b6-ab65-4c66-bcef-9865df9a63a7"}
+ {"outcome": "CLIENT_RECEIPT_CONFIRMED", "declaration_id": "71c21fe1-0bab-437c-966b-7ab9799ac2f4"}
+(3 rows)
+
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 3
+                                     is
+-----------------------------------------------------------------------------
+ ok 18 - confirmed and independently reviewed receipts create exact accruals
+(1 row)
+
+RESET
+INSERT 0 3
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                  decide_provider_billing_recipient_review_v1
+----------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_RECIPIENT_REVIEW_APPROVED", "review_id": "48dc36a3-b908-4bc5-a37f-c0a25cf04e6b"}
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+INSERT 0 1
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+        decide_provider_closing_policy_v1
+-------------------------------------------------
+ {"outcome": "PROVIDER_CLOSING_POLICY_REVIEWED"}
+(1 row)
+
+                                  approve_client_billing_policy_v1
+----------------------------------------------------------------------------------------------------
+ {"outcome": "CLIENT_BILLING_POLICY_APPROVED", "policy_id": "2df0d07d-3b37-4155-816c-fbc757d1f4c9"}
+(1 row)
+
+RESET
+ set_config
+------------
+
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 1, "period_end": "2026-10-31"}
+(1 row)
+
+RESET
+ diag
+------
+ # []
+(1 row)
+
+                                is
+------------------------------------------------------------------
+ ok 19 - monthly scheduler freezes every eligible commission line
+(1 row)
+
+                           is
+--------------------------------------------------------
+ ok 20 - contradictory window precedes invoice emission
+(1 row)
+
+INSERT 0 1
+INSERT 0 3
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                  dispute_provider_billing_line_v1
+-----------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_LINE_DISPUTED", "dispute_id": "8633c5e7-22af-4788-90b4-316915790e0f"}
+(1 row)
+
+RESET
+ set_config
+------------
+
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 1, "period_end": "2026-10-31"}
+(1 row)
+
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+(1 row)
+
+RESET
+                                         is
+-------------------------------------------------------------------------------------
+ ok 21 - elapsed clean lines produce exactly one invoice on repeated scheduler calls
+(1 row)
+
+                              is
+---------------------------------------------------------------
+ ok 22 - contested line is carried while two clean lines close
+(1 row)
+
+                               ok
+----------------------------------------------------------------
+ ok 23 - line-specific dispute never enters an issued statement
+(1 row)
+
+                                ok
+-------------------------------------------------------------------
+ ok 24 - approved standard payment deadline is seven calendar days
+(1 row)
+
+                                           is
+-----------------------------------------------------------------------------------------
+ ok 25 - official statement and invoice each retain their frozen approved issuer binding
+(1 row)
+
+                               ok
+-----------------------------------------------------------------
+ ok 26 - automated invoices remain exactly double-entry balanced
+(1 row)
+
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+DO
+INSERT 0 1
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                                            decide_morocco_tax_rule
+------------------------------------------------------------------------------------------------------------------------------------------------
+ {"status": "ACTIVE", "outcome": "MOROCCO_TAX_RULE_ACTIVATED", "row_version": 2, "tax_rule_version_id": "0ea5edba-7e22-4b79-8f09-cc5c48199117"}
+(1 row)
+
+RESET
+INSERT 0 5
+INSERT 0 5
+INSERT 0 5
+INSERT 0 5
+INSERT 0 1
+INSERT 0 1
+ set_config
+------------
+
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+(1 row)
+
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+(1 row)
+
+RESET
+                                               is
+-------------------------------------------------------------------------------------------------
+ ok 27 - only final non-reversed consequences accrue once; open appeal and deadline are excluded
+(1 row)
+
+                                        ok
+----------------------------------------------------------------------------------
+ ok 28 - penalty resolves its own approved fiscal category without commission VAT
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+ set_config
+------------
+
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 1, "period_end": "2026-10-31"}
+(1 row)
+
+RESET
+                            ok
+-----------------------------------------------------------
+ ok 29 - reversal after accrual is excluded before invoice
+(1 row)
+
+                           is
+--------------------------------------------------------
+ ok 30 - only the final contractual penalty is invoiced
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+ set_config
+------------
+
+(1 row)
+
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+                                run_provider_billing_scheduler_v1
+-------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED", "processed": 0, "period_end": "2026-10-31"}
+(1 row)
+
+RESET
+                                 ok
+---------------------------------------------------------------------
+ ok 31 - post-issue reversal opens an explicit credit-note exception
+(1 row)
+
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                            throws_ok
+------------------------------------------------------------------
+ ok 32 - decision author cannot validate its own financial credit
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                                  is
+----------------------------------------------------------------------
+ ok 33 - credit-note replay creates one immutable correcting document
+(1 row)
+
+RESET
+                                    is
+--------------------------------------------------------------------------
+ ok 34 - correcting credit uses the exact original penalty amount and tax
+(1 row)
+
+                          is
+-------------------------------------------------------
+ ok 35 - issued invoice is never rewritten by reversal
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+              set_config
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                 throws_ok
+---------------------------------------------------------------------------
+ ok 36 - legacy admission excludes Finance who belongs to the Client party
+(1 row)
+
+RESET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+              set_config
+--------------------------------------
+ f347ee00-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config
+------------------------------------------------------------------------------------
+ {"sub":"f347ee00-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                                   is
+--------------------------------------------------------------------------------------------------------
+ ok 37 - outside Finance may review while membership in an unrelated audit organization remains allowed
+(1 row)
+
+RESET
+SET CONSTRAINTS
+ finish
+--------
+ 1..37
+(1 row)
+
+ROLLBACK

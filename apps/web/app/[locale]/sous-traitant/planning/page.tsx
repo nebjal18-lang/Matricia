@@ -63,9 +63,11 @@ export default async function ProviderPlanningPage({
     >
       {partialFail?<p role="alert">{copy.unavailable}</p>:null}
       {planning.status==="success"&&!planning.billingVisible?<p>{locale==="ar"?"المواعيد المالية متاحة لأدوار المالك والمحاسبة فقط.":"Les échéances financières nécessitent un rôle propriétaire ou comptable."}</p>:null}
+      {planning.status === "success" && planning.operationalScopeIncomplete ? <p role="status" className="client-card">{locale === "ar" ? "التخطيط جزئي: توجد مهام مقروءة ينتظر نطاقها التشغيلي التوفيق مع الملحق الموقّع. تظل المواعيد المعروفة معروضة، ولا يمكن تأكيد خلو الأسبوع من المواعيد." : "Planning partiel : le périmètre opérationnel de certaines missions accessibles doit être réconcilié avec l’avenant signé. Les échéances connues restent affichées ; l’absence d’autres échéances ne peut pas être confirmée."} <Link href={`/${locale}/sous-traitant/missions${org}`}>{locale === "ar" ? "مراجعة المهام" : "Consulter les missions"}</Link></p> : null}
       {planning.status === "success" ? <PlanningWeekBoard
         locale={locale}
         events={events}
+        incomplete={planning.operationalScopeIncomplete}
         days={days}
         today={today}
         prevHref={`/${locale}/sous-traitant/planning${weekQuery(addCalendarDays(monday, -7))}`}

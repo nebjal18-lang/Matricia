@@ -1,0 +1,31 @@
+{"role":"service_role"}
+ok 1 - native report and facts collectors complete independently without hidden query errors
+ok 2 - daily monthly and quarterly facts are collected from native sources
+ok 3 - no missions means unknown concentration rather than a reassuring zero
+ok 4 - no qualification decision means an unmeasured delay
+ok 5 - native review interval is measured without an invented speed threshold
+ok 6 - no approved threshold produces no risk verdict
+ok 7 - missing approved configuration is explicit
+ok 8 - member summary does not expose the private declaration or reviewer details
+ok 9 - the independent collector freezes the actual declared conflict
+ok 10 - a declared fact queues one human examination without asserting fault
+{"sub":"a3650000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+ok 11 - ordinary members do not receive sensitive inter-franchise comparisons
+ok 12 - member read access does not remove the step-up requirement for a new review request
+ok 13 - private inspection preserves the second factor
+{"sub":"a3650000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 14 - even an AAL2 franchise manager cannot inspect private conflicts
+{"sub":"a3650000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 15 - authorized inspection still requires an explicit purpose
+ok 16 - authorized purpose-bound inspection reaches the immutable source
+ok 17 - Admin comparisons are masked below five distinct peers
+ok 18 - one reviewer cannot complete a four-eyes examination alone
+{"sub":"a3650000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 19 - approval retries preserve the first human decision
+ok 20 - the private source read has its own purpose audit
+ok 21 - neither the flag nor the review sanctions or suspends the mandate
+ok 22 - an approved further examination creates one real successor case and task despite retries
+ok 23 - the real central review task is completed through Admin workflow commands
+{"role":"service_role"}
+ok 24 - scheduled retries do not duplicate native facts or human review requests
+1..24

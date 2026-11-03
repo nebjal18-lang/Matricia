@@ -1,0 +1,25 @@
+{
+  "scope": "NATIVE_GOVERNED_TEST_COMMISSION_TAX_REFERENCE_FROM0347_NOT_PROFESSIONAL_APPROVAL",
+  "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "appTree": "46cb561cf9d17a69c5b6b5517d3506d2c3a3a1b4",
+  "status": "READY",
+  "source": "supabase/tests/0347_provider_monthly_closing.test.sql",
+  "sourceSha256": "236664c18e1f27a4ddc30164bc0a3cd53a8a1e5d5a19ecf0ee265400165ff9f9",
+  "productionFiscalApprovalCertified": false,
+  "professionalAccountantValidationCertified": false,
+  "referenceRateBasisPoints": 2000,
+  "category": "PROVIDER_COMMISSION",
+  "idempotencyKey": "629fa3c4-f819-4a02-a7c6-3f7cea11f627",
+  "proposal": {
+    "outcome": "MOROCCO_TAX_RULE_PROPOSED",
+    "version": 2,
+    "content_hash": "6fb0aac045253c3b5ccc1784d3bb29e04da53f99532a8284535663714015dee2",
+    "tax_rule_version_id": "fa7c262a-bde4-48f7-92f9-06b6c9463a4f"
+  },
+  "decision": {
+    "status": "ACTIVE",
+    "outcome": "MOROCCO_TAX_RULE_ACTIVATED",
+    "row_version": 2,
+    "tax_rule_version_id": "fa7c262a-bde4-48f7-92f9-06b6c9463a4f"
+  }
+}

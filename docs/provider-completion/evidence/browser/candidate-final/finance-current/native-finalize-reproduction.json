@@ -1,0 +1,17 @@
+{
+  "scope": "GENUINE_NATIVE_AAL2_ACCOUNTING_CURRENT_RECEIPT_FINALIZE_REPRODUCTION",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "intentId": "32b54e5a-0488-4053-b680-5ca55096434f",
+  "errorCode": "22023",
+  "errorMessage": "INVALID_RECEIPT_DECLARATION",
+  "response": null,
+  "timing": {
+    "utcDate": "2026-11-02",
+    "businessDate": "2026-11-03",
+    "occurredOn": "2026-11-03",
+    "status": "PENDING",
+    "scanStatus": "CLEAN",
+    "declarationCount": 0
+  }
+}

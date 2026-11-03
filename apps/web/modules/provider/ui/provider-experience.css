@@ -4,7 +4,7 @@
 
 .provider-workspace .provider-brand-space {
   max-width: 11rem;
-  color: var(--client-muted);
+  color: var(--client-ink);
   font-size: 0.68rem;
   font-weight: 750;
   letter-spacing: 0.12em;

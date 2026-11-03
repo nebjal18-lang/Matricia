@@ -1,0 +1,16 @@
+{
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appBuildCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "scope": "NATIVE_UI_SERVICE_CREATION_PAYLOAD_REJECTED",
+  "status": "REPRODUCED",
+  "rpc": "create_catalog_service",
+  "rpcHttp": 400,
+  "rpcCode": "22023",
+  "rpcMessage": "INVALID_CATALOG_SERVICE",
+  "createdServiceRows": 0,
+  "frontendPayload": "serviceDetails emits paired label_fr/label_ar objects under fulfillmentConfig.deliverables",
+  "databaseContract": "private.is_valid_service_fulfillment_config accepts only string items in all deliverables arrays",
+  "independentKeyDefect": "operation keys overwrite UUID version nibble at position14 with a/b/c/d/e/f/s; Zod .uuid rejects these derived values",
+  "manualGrantOrSuccessfulMockUsed": false
+}

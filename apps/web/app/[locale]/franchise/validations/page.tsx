@@ -9,11 +9,11 @@ import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 export default async function FranchiseValidationsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string;page?:string;q?:string;type?:string;category?:string;selected?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId,catalog:{kind:query.type==="SERVICE"||query.type==="QUESTIONNAIRE"||query.type==="RULE"?query.type:"ALL",page:query.page,search:query.q,categoryId:query.category,status:"DRAFT",objectId:query.selected} });
+  const { space, result } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/validations`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId,catalog:{kind:query.type==="SERVICE"||query.type==="QUESTIONNAIRE"||query.type==="RULE"?query.type:"ALL",page:query.page,search:query.q,categoryId:query.category,status:"DRAFT",objectId:query.selected} });
   const c = libraryCopy(locale);
   const mandateName = franchiseMandateName(result);
   return (
-    <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="validations" title={c.validationsTitle} lead={c.validationsLead} kicker={c.scope} mandateName={mandateName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="validations" title={c.validationsTitle} lead={c.validationsLead} kicker={c.scope} mandateName={mandateName}>
       <FranchiseOrganizationSelector locale={locale} organizations={space.organizations} selectedOrganizationId={space.selectedOrganizationId} returnPath={`/${locale}/franchise/validations`} />
       {result.status === "error" ? (
         <FranchiseAccessState locale={locale} reason={result.reason} returnPath={`/${locale}/franchise/validations${space.selectedQuery}`} />

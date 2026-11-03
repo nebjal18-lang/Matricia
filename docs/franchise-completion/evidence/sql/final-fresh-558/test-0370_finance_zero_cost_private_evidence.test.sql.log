@@ -1,0 +1,219 @@
+
+{"status": "ACTIVE", "outcome": "CREDIT_PACK_ACTIVE", "pack_version_id": "96895552-1284-4689-a0b9-58bfa3cde2a9"}
+
+ok 1 - checkout refuses before PSP when no approved posting mapping exists
+
+ok 2 - mapping maker cannot approve its own proposal
+
+ok 3 - review pins the exact policy request hash
+
+ok 4 - only first preparation authorizes provider CREATE
+ok 5 - same-key ambiguity never authorizes a second provider CREATE
+ok 6 - unregistered attempt remains explicitly unknown
+ok 7 - another key cannot order twice while creation is ambiguous
+
+
+
+ok 8 - verified native order reference resolves the pack domain
+ok 9 - native DEMO capture creates the paid pack fact
+ok 10 - one immutable native capture exists
+ok 11 - capture posts one balanced cash/suspense journal
+ok 12 - non-MAD pack retains its actual paid currency in the lot
+ok 13 - pack quantity is pinned to the frozen offer
+ok 14 - captured pack is funded even while fiscal valuation is pending
+ok 15 - gross capture is retained exactly in the pending economic ledger
+ok 16 - missing fiscal context never invents a net revenue classification
+ok 17 - missing fiscal context never announces library income
+ok 18 - posting policy was actually revoked before the paid callback
+
+ok 19 - same verified body with new transmission fingerprint replays without another cash journal
+ok 20 - wrong paid amount cannot mutate the captured fact
+ok 21 - same provider event cannot change its verified payload
+ok 22 - duplicate callback creates no second journal
+ok 23 - duplicate callback creates no second credit grant
+ok 24 - same native order cannot be routed to subscription and pack
+
+ok 25 - an admin free-text reference cannot fabricate paid credits
+
+ok 26 - paid preparation replay never authorizes another provider order
+ok 27 - paid preparation replay returns its exact canonical capture
+ok 28 - revoked mapping blocks a new order before external money calls
+
+ok 29 - sibling organization cannot initiate another tenant purchase
+ok 30 - sibling tenant cannot read the native payment capture
+
+{"sub":"a2750000-0000-4000-8000-000000000003","role":"authenticated"}
+ok 31 - known Finance actor with absent aal cannot propose
+ok 32 - known Finance actor with absent aal cannot decide or replay
+ok 33 - known Finance actor with absent aal cannot reconcile
+ok 34 - missing aal cannot inspect sensitive reconciliation
+
+ok 35 - known Finance actor with explicit null aal cannot propose
+ok 36 - known Finance actor with explicit null aal cannot decide or replay
+ok 37 - known Finance actor with explicit null aal cannot reconcile
+ok 38 - null aal cannot inspect sensitive reconciliation
+
+ok 39 - combined read-only auditor remains unable to mutate finance policy
+ok 40 - DEMO capture cannot fund credits after retag to production
+ok 41 - retag never rewrites immutable payment provenance
+ok 42 - browser cannot post a journal through the private payment constructor
+ok 43 - browser cannot impersonate the verified callback
+ok 44 - captured payment cannot be rewritten
+
+ok 45 - client cannot classify its own captured money
+
+ok 46 - captured gross never becomes revenue without an approved fiscal context
+
+{"outcome": "CLIENT_BILLING_POLICY_APPROVED", "policy_id": "f8890918-e50d-428c-b7db-8f0b93da13b1"}
+
+
+{"outcome": "CREDIT_REVENUE_POLICY_APPROVED", "operation": "ACTIVATE", "request_id": "650e77e0-1e46-4e5d-8079-d6dd0cae3b60", "source_hash": "9f5c51504ac3021aeda4166290a5cf810529f7c02eb13be073a2df98bb24e5a9", "policy_version_id": "c7e8265e-3856-4dfe-95c9-780f46ac0ac3"}
+ok 47 - approved fiscal context does not invent an allocation policy
+
+
+{"outcome": "CREDIT_REVENUE_POLICY_APPROVED", "operation": "ACTIVATE", "request_id": "dc6138fe-2484-49b6-acd1-d405eb976086", "source_hash": "258b05e8de305b77058137f3d4e4c4d708a75b08d0cab958bf393e3e8ee5637a", "policy_version_id": "a10a66a7-99d5-47c5-8f8b-29fcf5a04451"}
+ok 48 - governed fiscal and allocation policies classify the verified purchase
+ok 49 - gross-to-net derives only from the approved synthetic tax context
+ok 50 - half-up tax remainder conserves the paid gross exactly
+ok 51 - net purchased value waits for actual library consumption
+ok 52 - classification clears the gross waiting economic balance
+ok 53 - unconsumed purchased value is not franchise profit
+ok 54 - fiscal recognition never posts a second cash journal
+ok 55 - recognition journal balances liability to revenue and tax without cash
+
+ok 56 - classification retry reuses the immutable source
+ok 57 - classification is appended once
+
+
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "2b592716-4bc4-422f-a9c0-7a22949d1dcf", "approval_request_id": "7af1bbe0-df90-44aa-8cd6-05bfb28dccf6"}
+
+ok 58 - allocation fixture never claims a legally signed real franchise
+
+
+{"outcome": "BENEFIT_VERSION_ACTIVATED", "version": 1, "benefit_id": "b3672fb6-283f-4b12-a96f-e5f33c4b6c36", "benefit_version_id": "2e660704-0bc7-4d96-b29e-40eea164a3d9"}
+
+
+{"outcome": "BENEFIT_ADMISSION_POLICY_REVIEWED", "decision": "APPROVE"}
+
+
+{"status": "SCHEDULED", "outcome": "BENEFIT_SCHEDULED", "step_id": "ac9b488a-8041-41c9-ad32-6c1e4808619f", "row_version": "2", "redemption_id": "c7c59d1c-6fac-434b-bae5-fc3dad4fa1ca"}
+{"status": "IN_PROGRESS", "outcome": "BENEFIT_STARTED", "step_id": "46ff3e7c-d84f-43e8-a389-43e05dcf8847", "row_version": "3", "redemption_id": "c7c59d1c-6fac-434b-bae5-fc3dad4fa1ca"}
+
+{"outcome": "BENEFIT_CONSUMED", "redemption_id": "c7c59d1c-6fac-434b-bae5-fc3dad4fa1ca", "consume_entry_id": 92, "consumed_credits": 1}
+ok 59 - public consumption appends its real canonical movement and independent receipt
+ok 60 - no arbitrary first book is selected without an approved library route
+ok 61 - unreviewed route cannot create library income
+
+
+{"outcome": "CREDIT_REVENUE_POLICY_APPROVED", "operation": "ACTIVATE", "request_id": "00bd5dcf-a61c-4fa0-a558-a85bbe170bcd", "source_hash": "86403371258a692a9c3f366d1ce8eb4d150147cd62693ffbbb14088e1b401645", "policy_version_id": "5d2b890a-b24b-4257-a939-e06bbf014dd0"}
+ok 62 - one of three purchased credits attributes its exact net share to the consumed library
+ok 63 - canonical library attribution reaches the real P&L without invented cash
+ok 64 - unspent purchased credits retain the remaining net value
+
+{"items": [{"status": "READY", "allocation_id": "a228ecdf-b309-4bbc-81b3-d6c1413bfb66", "consumption_fact_id": "73725a0f-c5fc-4922-a50f-20f50afae647"}], "redemption_id": "c7c59d1c-6fac-434b-bae5-fc3dad4fa1ca"}
+ok 65 - consumption reconciliation never duplicates the P&L revenue
+
+ok 66 - foreign Client cannot allocate another tenant consumption
+
+ok 67 - Finance needs current MFA for an economic allocation
+
+ok 68 - browser cannot forge a canonical analytical allocation
+ok 69 - reserved P&L source cannot be replayed through an unrelated writer
+
+ok 70 - Finance selects actual capture and actual received-service targets without entering a UUID
+ok 71 - independent Finance AAL2 has a strict actual upload capability
+ok 72 - Arabic selection uses the real approved Arabic benefit label
+ok 73 - a successful unmatched search returns a genuine empty target page
+ok 74 - target pagination does not imply unseen matches for an empty search
+
+ok 75 - Finance plus read-only Auditor remains unable to upload evidence
+
+ok 76 - Client cannot enumerate Finance targets
+
+ok 77 - known Finance with null assurance receives MFA instead of an empty page
+
+ok 78 - same file/target reservation survives a response loss without a second path
+ok 79 - same key cannot change its frozen file
+ok 80 - an unscanned file cannot be read as proof
+ok 81 - zero cannot be asserted before a trusted scan
+{"sub":"a2750000-0000-4000-8000-000000000002","role":"authenticated"}
+ok 82 - known Finance without aal cannot reserve financial evidence
+
+ok 83 - known Finance with null aal cannot reserve financial evidence
+
+
+{"outcome": "FINANCE_COST_DOCUMENT_UPLOADED", "upload_id": "5fa2765f-b7c5-4f99-baee-a1b7c3c3a3f2", "scan_status": "PENDING"}
+{"outcome": "FINANCE_COST_DOCUMENT_UPLOADED", "upload_id": "a06345cf-5ada-4373-80a7-a7f1ca45d41a", "scan_status": "PENDING"}
+ok 84 - a Finance user cannot obtain the scanner EXECUTE privilege
+
+ok 85 - a competing worker cannot claim an active lease
+ok 86 - wrong lease cannot mark financial evidence clean
+ok 87 - missing computed byte identity cannot become CLEAN
+{"outcome": "FINANCE_COST_DOCUMENT_SCAN_RECORDED", "upload_id": "5fa2765f-b7c5-4f99-baee-a1b7c3c3a3f2", "scan_status": "CLEAN"}
+{"outcome": "FINANCE_COST_DOCUMENT_SCAN_RECORDED", "upload_id": "a06345cf-5ada-4373-80a7-a7f1ca45d41a", "scan_status": "CLEAN"}
+
+ok 88 - even CLEAN files have no direct unaudited authenticated Storage SELECT
+ok 89 - document/proposal author cannot self-certify zero
+
+ok 90 - even independent Finance cannot approve without verified document retrieval
+ok 91 - browser lacks EXECUTE permission for verified download receipts
+
+{"outcome": "FINANCE_COST_DOCUMENT_READ_RECORDED", "upload_id": "5fa2765f-b7c5-4f99-baee-a1b7c3c3a3f2"}
+{"outcome": "FINANCE_COST_DOCUMENT_READ_RECORDED", "upload_id": "a06345cf-5ada-4373-80a7-a7f1ca45d41a"}
+
+ok 92 - same zero-evidence approval has an exact immutable replay
+ok 93 - opposite zero-evidence approval cannot overwrite history
+{"book_id": "71d97d1a-5b8f-4649-bc67-364745af4f74", "outcome": "CREDIT_ECONOMIC_PROFIT_RECONCILED", "new_attributions": 2}
+ok 94 - two independently proved real zero costs make the current source ready
+ok 95 - proved zero is distinct from unavailable cost
+ok 96 - fulfillment zero is a separate proved component
+ok 97 - zero evidence creates no zero journal, cash entry or balance
+ok 98 - document-proved zero uses immutable analytical facts, never fake money entries
+ok 99 - both zero evidence components have an actual attribution record
+
+ok 100 - document author cannot act as independent evidence reviewer
+
+{"outcome": "FINANCE_COST_DOCUMENT_REVOKED", "upload_id": "5fa2765f-b7c5-4f99-baee-a1b7c3c3a3f2"}
+ok 101 - revoked evidence immediately blocks new financial readiness
+ok 102 - revocation blocks a new reconciliation without rewriting old amounts
+ok 103 - revocation preserves both historical accepted evidence records
+ok 104 - revocation never deletes or reverses the former zero evidence
+
+
+{"outcome": "FINANCE_COST_DOCUMENT_UPLOADED", "upload_id": "f443f073-75e6-41ce-8d1c-0127f9bc59b0", "scan_status": "PENDING"}
+
+{"outcome": "FINANCE_COST_DOCUMENT_SCAN_RECORDED", "upload_id": "f443f073-75e6-41ce-8d1c-0127f9bc59b0", "scan_status": "CLEAN"}
+
+
+
+{"outcome": "FINANCE_COST_DOCUMENT_READ_RECORDED", "upload_id": "f443f073-75e6-41ce-8d1c-0127f9bc59b0"}
+
+{"outcome": "CREDIT_ECONOMIC_COST_RECONCILED", "version": 2, "currency": "EUR", "proposal_id": "b506df86-637f-496f-ac5f-767266aa67b8", "net_cost_minor": "0", "reconciliation_id": "e36e1e1a-d0dd-4430-960d-2fc10a53f0e8"}
+{"book_id": "71d97d1a-5b8f-4649-bc67-364745af4f74", "outcome": "CREDIT_ECONOMIC_PROFIT_RECONCILED", "new_attributions": 1}
+ok 105 - a fully re-reviewed replacement restores real financial readiness
+ok 106 - replacement appends a third accepted source and retains both former sources
+ok 107 - replacement appends the next PSP evidence version without duplicating fulfillment
+ok 108 - replacement evidence still creates no fictitious zero journal or money entry
+
+
+{"outcome": "FINANCE_COST_DOCUMENT_UPLOADED", "upload_id": "1bcbcd2d-9eca-4ab6-b819-fd993af4f676", "scan_status": "PENDING"}
+
+
+ok 109 - an active scanner lease disables retry after a durable reload
+ok 110 - the actual retry command preserves the same active-lease restriction
+
+{"outcome": "FINANCE_COST_DOCUMENT_SCAN_RECORDED", "upload_id": "1bcbcd2d-9eca-4ab6-b819-fd993af4f676", "scan_status": "ERROR"}
+
+ok 111 - an uploaded ERROR exposes a trusted retry capability to its actual creator
+
+ok 112 - another Finance actor cannot inherit the uploader retry action
+ok 113 - the server retains its exact creator restriction
+
+ok 114 - Finance plus read-only Auditor never gains a financial write while configuring MFA
+
+ok 115 - authorized manual retry schedules a real scan rather than declaring the document clean
+ok 116 - classification and retry helpers create no direct browser permission
+
+ok 117 - foreign Client cannot inspect the financial proof vault
+ok 118 - foreign Client cannot download even a known clean proof
+1..118

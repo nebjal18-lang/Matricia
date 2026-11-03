@@ -29,6 +29,7 @@ export default async function ClientQuestionnairesPage({ params, searchParams }:
   const organizationQuery = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : "";
   return (
     <ClientAppShell
+      languagePath={`/${locale}/client/questionnaires?${new URLSearchParams({ organizationId: space.selectedOrganizationId, ...(session ? { session } : {}) })}`}
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}

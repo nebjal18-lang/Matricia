@@ -1,0 +1,14 @@
+{
+  "scope": "OPTIMIZED_LOCAL_INTERMEDIATE_FRANCHISE_BUILD",
+  "candidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "node": "24.19.0",
+  "next": "16.4.1",
+  "buildExitCode": 0,
+  "typeScriptActive": true,
+  "ignoreBuildErrors": false,
+  "staticPages": 14,
+  "buildLogSha256": "37c5cd5064bc942a153382b38b6d94195cd39689e0770848d6b24ec75e948a8c",
+  "hostedCertification": false,
+  "productionDeployed": false
+}

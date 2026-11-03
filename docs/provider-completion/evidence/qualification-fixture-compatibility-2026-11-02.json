@@ -1,0 +1,405 @@
+{
+  "scope": "OWNED_LOCAL_TEST_BASELINE_458_PLUS_46_MIGRATIONS_ROLLBACK_ONLY_NOT_FRESH_REPLAY",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "migrations": [
+    {
+      "file": "20261102038000_provider_entry_evidence_and_replay.sql",
+      "sha256": "245e985959d02467e727daa598e1d964b3a871fa586e082823135ade0dc8e335"
+    },
+    {
+      "file": "20261102038100_provider_questionnaire_evidence.sql",
+      "sha256": "cb123d0c5514b543da1fc25ea93d04daf0cfaffb1bf986707705c7ce9b1d3240"
+    },
+    {
+      "file": "20261102038200_provider_work_scope_declarations.sql",
+      "sha256": "46398be20236665394fed07ac3c3c2e3677e63931f6a3b733452f58c2321e30f"
+    },
+    {
+      "file": "20261102038300_provider_current_evidence_applicability.sql",
+      "sha256": "90b1d03132a5796370cc585aeae409b62615de6cb3347fd9ba9d58df2e2da594"
+    },
+    {
+      "file": "20261102038400_provider_qualification_questionnaire_review.sql",
+      "sha256": "3b5b926aa1671f8a5755b97b9c1a6d2e8b0f425eb8a7598cdd7451c963b89b65"
+    },
+    {
+      "file": "20261102039000_provider_quote_versions_options_attachments.sql",
+      "sha256": "647c570a6218347d610ad5cb796bb6eddadb9751fa8875adb6aca19be5ffd781"
+    },
+    {
+      "file": "20261102039100_provider_quote_search_pages.sql",
+      "sha256": "77734580b4a453d75742431661faf17920ed5fb601e6bbf69a733db730f11547"
+    },
+    {
+      "file": "20261102039200_quote_published_history_during_revision.sql",
+      "sha256": "2f0e3f566c7a6732af698e8d18d6bf9addd0af52aefa016d74237520bece4e6d"
+    },
+    {
+      "file": "20261102040000_provider_independent_financial_declarations.sql",
+      "sha256": "1844e4117239fcc72f7b911c4cc33f96ae4564e0229c7cea6fd72c412d277194"
+    },
+    {
+      "file": "20261102040100_provider_monthly_closing.sql",
+      "sha256": "369c9554701d21ba8f85d68c281aa790750282fd6f0182d695ad0654cd359415"
+    },
+    {
+      "file": "20261102040200_provider_billing_workflow_queries.sql",
+      "sha256": "519ea2e59303830581c9d8cbd0a9e0ac1782d5598d416ab05969c7710188c7f6"
+    },
+    {
+      "file": "20261102040300_provider_billing_due_notifications.sql",
+      "sha256": "196f77f76470d7059676144e6d4a141e74cd1be661dce609d420c3e2bf71a64a"
+    },
+    {
+      "file": "20261102040400_provider_dispute_payable_bridge.sql",
+      "sha256": "138fc1a2e8f4f67404dd7b8d405f225356f36f4f5b0df032b3db941e6badd749"
+    },
+    {
+      "file": "20261102040500_provider_independent_plans_collection_credit.sql",
+      "sha256": "9c127cceeaee07495a640b8cfe031eb42da4fd9cc363da94dd0be5d79c21837d"
+    },
+    {
+      "file": "20261102040600_provider_incremental_payment_allocation.sql",
+      "sha256": "5cbba5d9b244d37bc0fafd5062ae10e582d136022cb04de1ebbe7ce19ab9c62d"
+    },
+    {
+      "file": "20261102040700_provider_governed_ordinary_issuance_only.sql",
+      "sha256": "6042dfda8100941adde80a4f5feb65df324d278e7a4a7304dad673a95c04aff4"
+    },
+    {
+      "file": "20261102040800_provider_immutable_decision_replays.sql",
+      "sha256": "4864d9c9aa68aeed79eb8f595c6fc6d202ff906e7aa66e596e47145e58fb01f4"
+    },
+    {
+      "file": "20261102040900_provider_closing_fairness_and_source_provenance.sql",
+      "sha256": "d8b11f75aa9838f002dee5e1c73788b2d3b7a33d5ac104e50e5f0305e2d5f7ac"
+    },
+    {
+      "file": "20261102040910_client_receipt_confirmation_context.sql",
+      "sha256": "88d5d36aeea1daf4c8ec1a630c1b0406b9ee6e02f3747780e21e19ad73383341"
+    },
+    {
+      "file": "20261102040920_provider_grouped_issuance_governed_only.sql",
+      "sha256": "12f436f10f05d08294d51f50ed89f5acc9b34acb3f54cd5ca9592186f58da321"
+    },
+    {
+      "file": "20261102040930_provider_dispute_ingestion_fairness.sql",
+      "sha256": "9690648a2f57f88f9d212794bf4f95a367f7b449413a76d4686c6a60b9feb63b"
+    },
+    {
+      "file": "20261102040940_dispute_signed_economic_authority.sql",
+      "sha256": "0bfc225bcb6e95624736c770a4d06cbc545a540823f246b965a2292a9164dc48"
+    },
+    {
+      "file": "20261102040950_dispute_economic_effects_on_appeal_transition.sql",
+      "sha256": "333cc0691f15fc25504e4fb18202e39e4d065175a6494e1abf6b679963f6bc63"
+    },
+    {
+      "file": "20261102041000_provider_versioned_receipts_assignments.sql",
+      "sha256": "a44897f33d19b092f3442d47e777011bf732f024ca811f2eb3626a3cd94220e2"
+    },
+    {
+      "file": "20261102041200_provider_structured_amendment_proposals.sql",
+      "sha256": "29f23abb35694b4ef346c50e854ee0dc81fdd12ee3e80f972d9c53b02e027fe5"
+    },
+    {
+      "file": "20261102041300_provider_mission_search.sql",
+      "sha256": "be6db42d3508c65bf0edf10e4bf0909613ebecf0954869ca3fd2960cd3216d74"
+    },
+    {
+      "file": "20261102041400_provider_milestone_decision_history.sql",
+      "sha256": "cc44736733b83a2564eab78c935de8467762b7bacd55135e9603fecfd58213fb"
+    },
+    {
+      "file": "20261102041500_provider_mission_execution_authority.sql",
+      "sha256": "8412d90f9392ebb9299653d362758eed13ac8ae524e60868b78a67dcd288df77"
+    },
+    {
+      "file": "20261102041600_signed_amendment_mission_execution.sql",
+      "sha256": "28580dcc2fb3545b0b20e3eafaebba52f0dae7d10bdd40c8365b222ef644c0af"
+    },
+    {
+      "file": "20261102041700_provider_delivery_receipt_recovery.sql",
+      "sha256": "143f0d42f55855810b02b53fef38143d20fd358b50adde7e64141d3efbfdc018"
+    },
+    {
+      "file": "20261102041800_client_delivery_receipt_recovery.sql",
+      "sha256": "431e5de160b5b93b68990aece893a0336029e5fae1ce7dae9a518cca402f23a3"
+    },
+    {
+      "file": "20261102041820_provider_mission_read_roles.sql",
+      "sha256": "58a25c0ed9bd72c0814273c3dd21d5d9d62ec6e2c7687e70bafe4dff0d78d99c"
+    },
+    {
+      "file": "20261102041830_provider_mission_query_authorization.sql",
+      "sha256": "3485ffa4f78704c1847fa4bb9117e3a317731bf0895849c993babb24718efe12"
+    },
+    {
+      "file": "20261102041900_signed_scope_reconciliation_exceptions.sql",
+      "sha256": "a7f1fdc5ca077ee9e7bb63ce1facfbbd0b038b7710b3275982bdb619c01dc35f"
+    },
+    {
+      "file": "20261102041950_signed_scope_generations.sql",
+      "sha256": "ee1d7b253d7f0aea526230bc68ec2e037e2dd5aa569527f2e1362b72c16d1771"
+    },
+    {
+      "file": "20261102041960_provider_structured_scope_proposals.sql",
+      "sha256": "9ead9ea5bb59d7624480d76d2cd35ca6b711fb10bfdd148e7365b272240ac978"
+    },
+    {
+      "file": "20261102042000_internal_message_explicit_organization_history.sql",
+      "sha256": "7d43ea043bbe07adb095dd6134445095092f42b1d9c8f16625aa476fc8ee3219"
+    },
+    {
+      "file": "20261102042010_contract_message_continuity.sql",
+      "sha256": "035771cd26618748ae3ad57aa29ae49d9b1aa638ea62853adbfb5f59541678c1"
+    },
+    {
+      "file": "20261102042020_provider_message_direct_resume.sql",
+      "sha256": "48af3ad6304dcd57c40580dc167152a19e52f4c164052cb2c3b37054dabde722"
+    },
+    {
+      "file": "20261102042030_message_execution_capability.sql",
+      "sha256": "8a6a3ab49c09c1e2f4f68bac426848613658656f8946f228d123bccfd1f9ebf0"
+    },
+    {
+      "file": "20261102042040_provider_message_read_entitlement.sql",
+      "sha256": "ac695a8075755834ae000f49c3b71bc210a46200189ce39162b436a6c990da71"
+    },
+    {
+      "file": "20261102043000_provider_common_legal_identity.sql",
+      "sha256": "76eabc09b13dc8e838ac4218de2330244e9e83c7ddc6389400d840f7fcdce33b"
+    },
+    {
+      "file": "20261102044000_dispute_business_deadlines.sql",
+      "sha256": "8caed83e7191de9f5672f7812789e863525f011f42a6eca4b9511ad45a583dbf"
+    },
+    {
+      "file": "20261102044100_dispute_canonical_party_evidence.sql",
+      "sha256": "6255e5e40700f86fb63e3513c9d815b128b2777231b42fe618bd01030ba16be2"
+    },
+    {
+      "file": "20261102044200_dispute_private_evidence_downloads.sql",
+      "sha256": "483dc9dd1f927190509c44aa60036b1ceef84ad13d697701c394400e8b93e50e"
+    },
+    {
+      "file": "20261102044400_dispute_technician_assignment_scope.sql",
+      "sha256": "8def5159338d5e0f26a88d0e826233c4a3c9b99bd5090900d10a9687fb0c347c"
+    }
+  ],
+  "fixtureOnlyChangesMechanicallyVerified": true,
+  "initialFailedAttempt": {
+    "test": "supabase/tests/0356_provider_dispute_economic_authority.test.sql",
+    "status": "FAILED",
+    "assertions": 58,
+    "rollbackSchemaRestored": true,
+    "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+    "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+    "commitSent": false,
+    "error": "ERROR:  DISPUTE_EVIDENCE_REQUIRED\nCONTEXT:  PL/pgSQL function canonical_party_dispute_evidence_v1(uuid,uuid,jsonb) line 7 at RAISE\nPL/pgSQL function appeal_mission_dispute(uuid,text,jsonb,text,uuid) line 10 at assignment\n",
+    "receipt": "/workspace/provider-review-context/work/fixture-compatibility/sql-0356/receipt.json"
+  },
+  "originalBusinessAssertionsPreserved": true,
+  "tests": [
+    {
+      "test": "supabase/tests/0342_client_quote_exact_transport_acceptance.test.sql",
+      "status": "PASSED",
+      "assertions": 30,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0342/receipt.json",
+      "rootInputSha256": "611db481590d6f40e960ffb9c4adbbb4a38677d7760e13b8257b546f48848d77",
+      "newSha256": "14a89f49b48ea3a69aaa8928c25f421b0f452c84f15de37166a94b7c7f0b66bf",
+      "secondProvider": true
+    },
+    {
+      "test": "supabase/tests/0346_provider_quote_completion.test.sql",
+      "status": "PASSED",
+      "assertions": 41,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0346/receipt.json",
+      "rootInputSha256": "8f39acb6fcb48b705d011a72f6b18da42da901470b8a827c5f314f76148ca850",
+      "newSha256": "3a496ffe93bc64294d202b2f7244e6e7e28546d2db31423046ca52a9805bb38a",
+      "secondProvider": true
+    },
+    {
+      "test": "supabase/tests/0347_provider_monthly_closing.test.sql",
+      "status": "PASSED",
+      "assertions": 56,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0347/receipt.json",
+      "rootInputSha256": "240a2739c46afe03cdb73036cc2587aa59b5019a950ac436ea565a0f27dc9fdb",
+      "newSha256": "c348a1101fb0f38b08a7ca08843d782dd281390f231798d3a2f618b6a0c38b97",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0348_provider_versioned_receipts_assignments.test.sql",
+      "status": "PASSED",
+      "assertions": 102,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0348/receipt.json",
+      "rootInputSha256": "4490cdc354d401db50335ac979501db8bb0f3aed5673301ff0784839cf19c2f7",
+      "newSha256": "e919dd12c3e79d32cde0a6e859c395a0cbcc0e87e21df52f6f8704942a58d7b0",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0352_provider_contract_message_continuity.test.sql",
+      "status": "PASSED",
+      "assertions": 68,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0352/receipt.json",
+      "rootInputSha256": "6bf8860e9af48894206116f1bfacf904e9ad5d4d317be84e122fc9b569d481ba",
+      "newSha256": "b4b819aec0c8507ce1918655e9247ef3994cef1b3b82b8a150b5f8b413e19fac",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0353_signed_amendment_before_initial_mission.test.sql",
+      "status": "PASSED",
+      "assertions": 18,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0353/receipt.json",
+      "rootInputSha256": "d00c2b253cb276a7edec70d62aa551289ea0034c0aede122535d07419a900e5d",
+      "newSha256": "cff6bfc4ddf1bf6e2ca3b63d23760ce780cae118923a3915cd346f9807776040",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0354_signed_scope_reconciliation_exceptions.test.sql",
+      "status": "PASSED",
+      "assertions": 129,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0354/receipt.json",
+      "rootInputSha256": "beedb061ca6ae8b3ae997d4ac8d94b9e3d5f7a84bb72a89d07933f8726fd1105",
+      "newSha256": "eacba482dba69b5e388f6f47b158530608d97834eea0f7c1a1bcd5483c22e947",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0355_signed_scope_generations.test.sql",
+      "status": "PASSED",
+      "assertions": 170,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0355/receipt.json",
+      "rootInputSha256": "269dac898f7539437eb3d89a953426521533a8f942cc19b3859d14136da659a8",
+      "newSha256": "88931fe16884478162071fc6c3587da9c7f69e037c26d92994bb68818827760c",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0355b_signed_replacement_before_initial_mission.test.sql",
+      "status": "PASSED",
+      "assertions": 27,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0355b/receipt.json",
+      "rootInputSha256": "bcb4708c8879bf0609f06d5f6cf046cb32aab45607ba0881d406ead8cebcf004",
+      "newSha256": "d1fb27d9cf7d7b3db4971526810a30d5c80d07b474ade6a5bf0ca5e76236764a",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0355c_signed_withdrawal_before_initial_mission.test.sql",
+      "status": "PASSED",
+      "assertions": 18,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0355c/receipt.json",
+      "rootInputSha256": "43a6fde5d6d574ea2365578e4bf8dbd722dd33b010b0330c6aeb151fc796e432",
+      "newSha256": "7c4ef0f80335c5ccc123cf1af9f24a4b5f657ae919c49cff60f7579428b5ec53",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0356_provider_dispute_economic_authority.test.sql",
+      "status": "PASSED",
+      "assertions": 85,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0356-retry/receipt.json",
+      "rootInputSha256": "9a115e93c042a70a0e54569e3d05acde3a7b1f93fd27aa066c17a79e94822d2d",
+      "newSha256": "a5384a6b525594eec69287b60acae76055ffc2ea29836e57f40c78284b8b8f4a",
+      "secondProvider": false,
+      "additionalTestPrerequisite": "Native appeal now supplies a canonical MESSAGE statement by its actual Client party; application computes its hash; business assertions unchanged"
+    },
+    {
+      "test": "supabase/tests/0104_contract_mission_checklist_snapshot.test.sql",
+      "status": "PASSED",
+      "assertions": 29,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0104/receipt.json",
+      "rootInputSha256": "e4c9010f5bbe486af5676881d12eec634c75578a1203cbcb8e243ae8eeb56151",
+      "newSha256": "2b57449250b1f5ec11c596b7d207ceda62793bee1c19528237c9467b742019d7",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0338_client_native_mission_dispute_acceptance.test.sql",
+      "status": "PASSED",
+      "assertions": 34,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0338/receipt.json",
+      "rootInputSha256": "25534f159c449c7cd576f8cb5e2426be789b85384c277b60050ded5da190b3a8",
+      "newSha256": "b6d336b1cf6a737227cd8783b5cdf4e4b3c8bfcc8f146e0c1b0d01ab958de2dc",
+      "secondProvider": false
+    },
+    {
+      "test": "supabase/tests/0339_client_native_quote_comparison_acceptance.test.sql",
+      "status": "PASSED",
+      "assertions": 18,
+      "rollbackSchemaRestored": true,
+      "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+      "commitSent": false,
+      "error": null,
+      "receipt": "work/fixture-compatibility/sql-0339/receipt.json",
+      "rootInputSha256": "e64a384908e98ba363fe852e8b0c6a1d33f8618f493fc0a623369ec518f117f7",
+      "newSha256": "e371abb0f27ef8a87206839a1049b02c53dacd4974e11fb7ca6f79827fd4a26b",
+      "secondProvider": true
+    }
+  ],
+  "totalAssertions": 825,
+  "allPassed": true,
+  "commitSent": false
+}

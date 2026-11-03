@@ -1,0 +1,63 @@
+{
+  "scope": "GENUINE_GOTRUE_GOVERNANCE_AND_CANONICAL_DEMO_EVENT_RESUME",
+  "status": "READY",
+  "realExternalPspPurchase": false,
+  "nativeOnboardingCertified": false,
+  "commercialPolicyCertified": false,
+  "platformRoleBootstrap": "TEST_SEPARATE_FINANCE_ACTORS_ONLY",
+  "originalIntentPreserved": true,
+  "originalEventPreserved": true,
+  "originalPaidAtPreserved": "2026-11-02T19:15:42.154Z",
+  "providerIntentId": "TEST-NATIVE-BOX-21FAAA22",
+  "providerEventId": "TEST-NATIVE-BOX-PAID-21FAAA22",
+  "persistedPaymentEventId": "2",
+  "verifiedEventReplayedWithoutDuplicate": true,
+  "organizationId": "c0b406b7-b8e2-4e62-b5fb-0003d2cd0562",
+  "ownerId": "bec900ee-c31a-47b2-b492-fea401b92c9e",
+  "buyerId": "7d002ae8-508b-4cf7-a437-a52aa68e9324",
+  "customerBoxId": "79ebcafc-a980-46c3-b22e-230da611cac6",
+  "benefitVersionId": "72fa9772-7997-40a8-97cd-bdf05bbffdd0",
+  "walletId": "3d909ad5-250e-477d-a83e-f247bb710cbf",
+  "periodEnd": "2026-12-02T19:15:42.154+00:00",
+  "canonicalGrant": "10",
+  "memberLimit": "3",
+  "tag": "21FAAA22",
+  "steps": [
+    {
+      "rpc": "process_verified_subscription_payment_v2",
+      "outcome": "SUBSCRIPTION_ACTIVATED"
+    },
+    {
+      "rpc": "process_verified_subscription_payment_v2",
+      "outcome": "SUBSCRIPTION_ACTIVATED"
+    },
+    {
+      "rpc": "get_customer_box_configuration_v1",
+      "outcome": null
+    },
+    {
+      "rpc": "configure_customer_box_v1",
+      "outcome": "CUSTOMER_BOX_CONFIGURED"
+    },
+    {
+      "rpc": "ensure_client_credit_wallet",
+      "outcome": "CREDIT_WALLET_READY"
+    },
+    {
+      "rpc": "get_subscription_credit_grant_context_v1",
+      "outcome": null
+    },
+    {
+      "rpc": "issue_subscription_credit_grant_v1",
+      "outcome": "CREDITS_ISSUED"
+    },
+    {
+      "rpc": "set_customer_box_envelope_v1",
+      "outcome": "BOX_ENVELOPE_SAVED"
+    },
+    {
+      "rpc": "get_my_box_workspace_v1",
+      "outcome": null
+    }
+  ]
+}

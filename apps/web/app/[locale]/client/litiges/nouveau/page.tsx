@@ -1,3 +1,4 @@
+import {loadDisputeOpenContext}from"@/modules/client/screens/litiges/open-context";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
@@ -21,7 +22,7 @@ export default async function NewDispute({
   if (!isLocale(locale)) notFound();
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/litiges/nouveau` }));
-  const result = await (await createServerDisputesRepository(query.organizationId)).list();
+  const result = await (await createServerDisputesRepository(space.selectedOrganizationId ?? query.organizationId)).list();
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/litiges/nouveau` }));
   const m = getDisputeMessages(locale);
   if (result.status === "error") {
@@ -32,6 +33,7 @@ export default async function NewDispute({
     );
   }
   if (!result.value.canOpen) redirect(`/${locale}/client/litiges${space.selectedQuery}`);
+  const context=space.selectedOrganizationId?await loadDisputeOpenContext(space.selectedOrganizationId):null;
   return (
     <ClientAppShell
       locale={locale}
@@ -46,7 +48,7 @@ export default async function NewDispute({
         <Card>
           <CardHeader><CardTitle>{m.newCase}</CardTitle></CardHeader>
           <CardContent>
-            <OpenForm locale={locale} missions={result.value.missions} m={m} keyValue={randomUUID()} />
+            {context?<OpenForm locale={locale} context={context} m={m} keyValue={randomUUID()} />:<p role="alert">{locale==="ar"?"تعذر تحميل الالتزامات والوثائق المسموح بها. أعد المحاولة.":"Impossible de charger les obligations et pièces autorisées. Réessayez le chargement."}</p>}
           </CardContent>
         </Card>
       </main>

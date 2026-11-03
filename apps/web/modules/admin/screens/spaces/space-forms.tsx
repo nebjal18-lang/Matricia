@@ -2,6 +2,8 @@
 
 import{ProductionReference}from"./production-reference";
 import { useActionState, type ReactNode } from "react";
+import type { DecisionContext } from "@/modules/shared/lib/dispute-economics/model";
+import { EconomicRulePanel, DecisionRestriction } from "@/modules/shared/lib/dispute-economics/panel";
 import Link from "next/link";
 import { ActorIntentForm } from "@/modules/admin/screens/spaces/actor-forms";
 import {
@@ -200,41 +202,60 @@ export function CompanyDecisionForm({
   );
 }
 
+function DisputeDecisionFeedback({ state, locale }: { state: DomainActionState; locale: Locale }) {
+  if (state.status === "idle") return null;
+  const ar = locale === "ar";
+  const reasons: Record<string, [string, string]> = {
+    FORBIDDEN: ["Décision refusée : un décideur indépendant des deux sociétés est requis.", "رُفض القرار: يلزم مراجع مستقل عن الشركتين."],
+    MFA_REQUIRED: ["Le second facteur est requis. Configurez-le dans Sécurité du compte.", "يلزم العامل الثاني. يمكن إعداده في أمان الحساب."],
+    UNAUTHENTICATED: ["Reconnectez-vous pour poursuivre.", "سجل الدخول مجدداً للمتابعة."],
+    VALIDATION: ["Choisissez au moins une preuve et complétez le motif.", "اختر دليلاً واحداً على الأقل وأكمل التبرير."],
+    POLICY_UNAVAILABLE: ["La politique du dossier est indisponible. Aucun enregistrement confirmé ; rechargez la page.", "سياسة الملف غير متاحة. لم يتم تأكيد التسجيل؛ أعد تحميل الصفحة."],
+    STALE_STATE: ["Le dossier a changé. Rechargez la page avant une nouvelle décision.", "تغير الملف. أعد تحميل الصفحة قبل إصدار قرار جديد."],
+  };
+  return <p role={state.status === "success" ? "status" : "alert"} className="admin-banner" data-tone={state.status === "success" ? "ok" : "danger"}>{state.status === "success" ? (ar ? "تم تأكيد تسجيل القرار." : "Enregistrement de la décision confirmé.") : (reasons[state.reason]?.[ar ? 1 : 0] ?? (ar ? "تعذر تأكيد التسجيل. أعد المحاولة بنفس الطلب." : "L’enregistrement n’a pas pu être confirmé. Réessayez avec la même demande."))}</p>;
+}
+
 export function DisputeDecisionForm({
   locale,
   query,
   caseId,
+  context,
+  commandKey,
 }: {
   locale: Locale;
   query: string;
   caseId: string;
+  context: DecisionContext;
+  commandKey: string;
 }) {
   const [state, action, pending] = useActionState(decideAdminDispute, idleDomain);
   const ar = locale === "ar";
+  if (context.status === "error" || !context.canDecide) return <DecisionRestriction context={context} locale={locale} />;
   return (
     <form action={action} className="client-stack">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="caseId" value={caseId} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <input type="hidden" name="idempotencyKey" value={commandKey} />
       <article className="client-card">
         <header><h2>{ar ? "قرار النزاع" : "Décision du litige"}</h2></header>
+        <EconomicRulePanel context={context.economics} locale={locale} />
+        {!context.policy ? <p role="status">{ar ? "تعذر تحميل سياسة الملف. لا يمكن اختيار سوى عدم المطابقة الذي يعيد الخادم التحقق منه." : "La politique du dossier est indisponible. Seule la non-conformité, vérifiée par le serveur, reste sélectionnable."}</p> : null}
         <div className="admin-form-grid">
           <Field id="dispute-outcome" label={ar ? "النتيجة" : "Décision"} required>
-            <select id="dispute-outcome" name="outcome" required defaultValue="MUTUAL_AGREEMENT">
-              <option value="MUTUAL_AGREEMENT">{ar ? "اتفاق" : "Accord mutuel"}</option>
-              <option value="COMPLIANT">{ar ? "مطابق" : "Conforme"}</option>
-              <option value="MINOR_CORRECTION">{ar ? "تصحيح طفيف" : "Correction mineure"}</option>
-              <option value="OUT_OF_SCOPE">{ar ? "خارج النطاق" : "Hors périmètre"}</option>
-              <option value="CLIENT_ABUSE">{ar ? "إساءة من العميل" : "Abus client"}</option>
+            <select id="dispute-outcome" name="outcome" required defaultValue={context.policy ? "MUTUAL_AGREEMENT" : "NON_COMPLIANT_CONFIRMED"}>
+              <option value="MUTUAL_AGREEMENT" disabled={!context.policy}>{ar ? "اتفاق" : "Accord mutuel"}</option>
+              <option value="COMPLIANT" disabled={!context.policy}>{ar ? "مطابق" : "Conforme"}</option>
+              <option value="MINOR_CORRECTION" disabled={!context.policy}>{ar ? "تصحيح طفيف" : "Correction mineure"}</option>
+              <option value="OUT_OF_SCOPE" disabled={!context.policy}>{ar ? "خارج النطاق" : "Hors périmètre"}</option>
+              <option value="CLIENT_ABUSE" disabled={!context.policy}>{ar ? "إساءة من العميل" : "Abus client"}</option>
               <option value="NON_COMPLIANT_CONFIRMED">{ar ? "عدم مطابقة مؤكد" : "Non-conformité confirmée"}</option>
             </select>
           </Field>
-          <Field id="dispute-rule" label={ar ? "نسخة القاعدة" : "Version de règle"} required>
-            <input id="dispute-rule" name="ruleVersion" required defaultValue="DISPUTE-RULE-V1" />
-          </Field>
-          <Field id="dispute-evidence" label={ar ? "معرفات الأدلة" : "Identifiants des preuves"} required>
-            <textarea id="dispute-evidence" name="evidenceIds" required minLength={36} placeholder={ar ? "معرّف دليل واحد على الأقل" : "Au moins un identifiant de preuve du dossier"} />
-          </Field>
+          <fieldset className="space-y-2">
+            <legend>{ar ? "الأدلة الموجودة في الملف" : "Preuves présentes au dossier"}</legend>
+            {context.evidence.length === 0 ? <p>{ar ? "لا يوجد دليل متاح؛ أضف الأدلة إلى الملف أولاً." : "Aucune preuve accessible ; complétez d’abord le dossier."}</p> : context.evidence.map(item => <label key={item.id} className="flex min-h-11 items-start gap-3"><input type="checkbox" name="evidenceIds" value={item.id} /><span className="break-words">{item.statement ?? (ar ? "دليل في الملف" : "Pièce du dossier")}</span></label>)}
+          </fieldset>
           <Field id="dispute-reason" label={ar ? "التبرير" : "Justification"} required>
             <textarea id="dispute-reason" name="reason" required minLength={10} maxLength={2000} />
           </Field>
@@ -242,9 +263,9 @@ export function DisputeDecisionForm({
       </article>
       <div className="admin-form-foot">
         <Link href={`/${locale}/administration/litiges${query}`} className="client-ghost-link">{ar ? "إلغاء" : "Annuler"}</Link>
-        <button type="submit" className="admin-primary-cta" disabled={pending}>{pending ? "…" : ar ? "تسجيل القرار" : "Enregistrer la décision"}</button>
+        <button type="submit" className="admin-primary-cta" disabled={pending || context.evidence.length === 0}>{pending ? "…" : ar ? "تسجيل القرار" : "Enregistrer la décision"}</button>
       </div>
-      <Feedback state={state} locale={locale} />
+      <DisputeDecisionFeedback state={state} locale={locale} />
     </form>
   );
 }

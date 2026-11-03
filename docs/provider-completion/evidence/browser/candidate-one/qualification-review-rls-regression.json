@@ -1,0 +1,13 @@
+{
+  "scope": "INDEPENDENT_REVIEWER_UI_QUALIFICATION_RLS_REGRESSION_REPRODUCTION",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "REPRODUCED",
+  "submittedProviderSessionExists": true,
+  "reviewerNativeAal": "aal2",
+  "reviewerSessionRows": 0,
+  "expectedExistingProtection": "QUESTIONNAIRE_ANSWERS_PRIVATE_TO_ACTOR",
+  "productIssue": "ADMIN_ACTION_CANNOT_RESOLVE_SUBMITTED_PROVIDER_SESSION_FOR_INDEPENDENT_REVIEW",
+  "decisionCreated": false,
+  "uiFeedback": "Vérifiez les champs, les preuves et la cohérence de la décision."
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-completion/supabase/migrations/20261102044000_dispute_business_deadlines.sql",
+      "sha256": "d5b1f516c3ad43975dda24655e68c17a6800180dc3aa34fa66d89a8a3cfef5ab"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-completion/supabase/migrations/20261102044100_dispute_canonical_party_evidence.sql",
+      "sha256": "690cc75f3d62e6d8eb8c4579a10a5a46f112f2c48a327ff0e29af35c48366d08"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-completion/supabase/migrations/20261102044200_dispute_private_evidence_downloads.sql",
+      "sha256": "483dc9dd1f927190509c44aa60036b1ceef84ad13d697701c394400e8b93e50e"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-completion/supabase/tests/0351_provider_dispute_evidence_deadlines.test.sql",
+      "sha256": "3c9d32d22f2fe3a053f30ebebbfab9fbd3d0f7d79536cc9e2cdf4b62761e245d"
+    }
+  ],
+  "status": "PASSED",
+  "assertions": 56,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

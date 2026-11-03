@@ -1,3 +1,4 @@
+import { withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
 import {
   Award,
   Building2,
@@ -23,10 +24,12 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 export type ProviderNavKey =
   | "home"
   | "qualify"
+  | "questionnaires"
   | "services"
   | "consult"
   | "quotes"
   | "missions"
+  | "contracts"
   | "planning"
   | "documents"
   | "billing"
@@ -50,11 +53,13 @@ export function buildProviderNav(locale: Locale, selectedQuery: string): Provide
   const q = selectedQuery;
   const n = providerDashboardCopy[locale];
   return [
-    { key: "home", href: `/${locale}/tableau-de-bord${q}`, label: n.navHome, icon: Home },
+    { key: "home", href: withDashboardWorkspaceHint(`/${locale}/tableau-de-bord${q}`, locale, "provider"), label: n.navHome, icon: Home },
+    { key: "questionnaires", href: `/${locale}/sous-traitant/questionnaires${q}`, label: locale === "ar" ? "استبيانات التأهيل" : "Questionnaires de qualification", icon: ClipboardCheck },
     { key: "qualify", href: `/${locale}/sous-traitant/qualification${q}`, label: n.navQualify, icon: ShieldCheck },
     { key: "services", href: `/${locale}/sous-traitant/services${q}`, label: n.navServices, icon: Wrench },
     { key: "consult", href: `/${locale}/sous-traitant/consultations${q}`, label: n.navConsult, icon: FolderKanban },
     { key: "quotes", href: `/${locale}/sous-traitant/devis${q}`, label: n.navQuotes, icon: ClipboardCheck },
+    { key: "contracts", href: `/${locale}/sous-traitant/contrats${q}`, label: locale === "ar" ? "العقود" : "Contrats", icon: FileText },
     { key: "missions", href: `/${locale}/sous-traitant/missions${q}`, label: n.navMissions, icon: Landmark },
     { key: "planning", href: `/${locale}/sous-traitant/planning${q}`, label: n.navPlanning, icon: Calendar },
     { key: "documents", href: `/${locale}/sous-traitant/documents${q}`, label: n.navDocs, icon: FileText },

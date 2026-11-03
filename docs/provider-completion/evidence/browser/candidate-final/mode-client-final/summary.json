@@ -1,0 +1,57 @@
+{
+  "scope": "EXPLICIT_NATIVE_CLIENT_MODE_AFTER_PROVIDER_ONLY_ACCEPTANCE_NO_DUPLICATE_IDENTITY",
+  "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "appTree": "c43980c6da4345d8da6260ffb264b5089becf2f2",
+  "status": "PASSED",
+  "steps": [
+    {
+      "step": "owner_touch_requests_client_mode_same_org_central_pending_and_self_approval_denied",
+      "passed": true,
+      "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4"
+    },
+    {
+      "step": "distinct_aal2_governance_reviewer_confirms_role_in_real_ui_without_new_org_membership_or_account",
+      "passed": true,
+      "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4"
+    },
+    {
+      "step": "approved_native_client_mode_opens_same_organization_without_recreating_identity",
+      "passed": true
+    },
+    {
+      "step": "native_stay_professional_link_returns_to_provider_context_same_org",
+      "passed": true
+    }
+  ],
+  "initialProviderOnlyAcceptancePreserved": true,
+  "beforeMemberships": [
+    {
+      "id": "e987ae17-d6f0-45b9-9570-d7a5d4af2cf2",
+      "organization_id": "c18f1b43-983d-4065-b094-48c02f9b284b"
+    }
+  ],
+  "beforeRoles": [
+    {
+      "role_code": "PROVIDER_OWNER"
+    }
+  ],
+  "providerNavigationLabel": "Espace prestataire",
+  "requestId": "50ffdfca-f3bc-416b-be31-e12bd655b88d",
+  "afterMemberships": [
+    {
+      "id": "e987ae17-d6f0-45b9-9570-d7a5d4af2cf2",
+      "organization_id": "c18f1b43-983d-4065-b094-48c02f9b284b"
+    }
+  ],
+  "afterRoles": [
+    {
+      "role_code": "CLIENT_OWNER"
+    },
+    {
+      "role_code": "PROVIDER_OWNER"
+    }
+  ],
+  "sourceGovernedActivationCandidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "clientNavigationLabel": "Accueil",
+  "providerReturnHref": "/fr/tableau-de-bord?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b&workspace=provider"
+}

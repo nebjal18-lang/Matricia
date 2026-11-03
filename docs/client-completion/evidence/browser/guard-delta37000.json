@@ -1,0 +1,59 @@
+{
+  "scope": "GUARD_DELTA_37000_SOURCE_AND_TARGET_READ_ONLY_VERIFICATION",
+  "sourcePurpose": "CANONICAL_ACL_SETUP_SOURCE_ONLY",
+  "sourceMigrationCount": 458,
+  "targetAdditionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "migration": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+  "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539",
+  "historical457ReceiptPreserved": "acl-fidelity/after.json",
+  "current458Fidelity": "acl-fidelity/before.json",
+  "guards": [
+    {
+      "bodyHash": "2f466542e3357a65617100edf1b1c9cf",
+      "function": "assert_credit_wallet_nonnegative",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "runtimeExecute": {
+        "anon": false,
+        "service_role": false,
+        "authenticated": false
+      },
+      "securityDefiner": true
+    },
+    {
+      "bodyHash": "86793d0ec147b8896d9d653bc6725907",
+      "function": "assert_financial_journal_balanced",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "runtimeExecute": {
+        "anon": false,
+        "service_role": false,
+        "authenticated": false
+      },
+      "securityDefiner": true
+    },
+    {
+      "bodyHash": "b96740241f29f80c25da4df4df0b6b35",
+      "function": "assert_financial_journal_has_entries",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "runtimeExecute": {
+        "anon": false,
+        "service_role": false,
+        "authenticated": false
+      },
+      "securityDefiner": true
+    }
+  ],
+  "ledgerAclChanges": 0,
+  "status": "PASSED",
+  "greenSqlReceipt": false
+}

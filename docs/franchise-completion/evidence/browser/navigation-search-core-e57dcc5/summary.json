@@ -1,0 +1,21 @@
+{
+  "scope": "FRANCHISE_MULTI_MANDATE_CONTEXT_SEARCH_LANGUAGE_AND_BOUNDARIES",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "PASSED",
+  "cases": [
+    {
+      "id": "GLOBAL_SEARCH_REAL_TERM",
+      "status": "PASS",
+      "resultLinks": 2
+    },
+    {
+      "id": "GLOBAL_SEARCH_NO_RESULT",
+      "status": "PASS",
+      "resultLinks": 0,
+      "scopePreserved": true
+    }
+  ],
+  "pageErrors": [],
+  "legalMandateCertified": false
+}

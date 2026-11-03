@@ -1,0 +1,14 @@
+
+ok 1 - legacy caller cannot relabel an independently approved STANDARD mandate as IT
+ok 2 - operator comes from the approved mandate, not the form
+ok 3 - two territories sharing an operator and library require an explicit mandate
+ok 4 - a proposed but unapproved mandate cannot back an economic book
+ok 5 - opening pins the exact independent mandate hash
+ok 6 - a correct-looking book cannot select the IT finance rule for a STANDARD economic mandate
+
+ERROR:  column reference "id" is ambiguous
+LINE 1: ...t exists(select 1 from public.organizations where id=p_audit...
+                                                             ^
+DETAIL:  It could refer to either a PL/pgSQL variable or a table column.
+QUERY:  not exists(select 1 from public.organizations where id=p_audit_organization_id and status='ACTIVE')
+CONTEXT:  PL/pgSQL function create_franchise_finance_rule(uuid,text,text,boolean,integer,integer,integer,jsonb,date,date,text,text,uuid) line 2 at IF

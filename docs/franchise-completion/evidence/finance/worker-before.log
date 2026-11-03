@@ -1,0 +1,90 @@
+
+ RUN  v5.0.3 /workspace/franchise-financial-close/apps/worker
+
+ ❯ src/provider-billing.test.ts (11 tests | 8 failed) 249ms
+   ❯ provider billing runtime (11)
+     × continues reminders for issued invoices when closing is unavailable and reports the failure 56ms
+     × continues reminders after a rejected closing request and releases the cycle for retry 30ms
+     × does not report a malformed reminders response as success: null 21ms
+     × does not report a malformed reminders response as success: {} 9ms
+     × does not report a malformed reminders response as success: {"processed":-1} 4ms
+     × does not report a malformed reminders response as success: {"processed":1.5} 8ms
+     × does not report a malformed reminders response as success: {"processed":"3"} 15ms
+     × never overlaps cycles until both independent pages have finished 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/provider-billing.test.ts > provider billing runtime > continues reminders for issued invoices when closing is unavailable and reports the failure
+AssertionError: expected 2nd "vi.fn()" call to have been called with [ …(2) ], but called only 1 times
+ ❯ src/provider-billing.test.ts:19:17
+     17|     const rpc = vi.fn().mockResolvedValueOnce({ data: null, error: { c…
+     18|     await expect(createProviderBillingScheduler({ rpc } as never)()).r…
+     19|     expect(rpc).toHaveBeenNthCalledWith(2, "run_provider_billing_remin…
+       |                 ^
+     20|   });
+     21|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/provider-billing.test.ts > provider billing runtime > continues reminders after a rejected closing request and releases the cycle for retry
+AssertionError: expected [Function] to throw error including 'PROVIDER_BILLING_SCHEDULER_FAILED' but got 'transport down'
+
+Expected: "PROVIDER_BILLING_SCHEDULER_FAILED"
+Received: "transport down"
+
+ ❯ src/provider-billing.test.ts:26:24
+     24|       .mockResolvedValueOnce(reminded).mockResolvedValueOnce(completed…
+     25|     const run = createProviderBillingScheduler({ rpc } as never);
+     26|     await expect(run()).rejects.toThrow("PROVIDER_BILLING_SCHEDULER_FA…
+       |                        ^
+     27|     await expect(run()).resolves.toBeUndefined();
+     28|     expect(rpc).toHaveBeenCalledTimes(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/provider-billing.test.ts > provider billing runtime > does not report a malformed reminders response as success: null
+ FAIL  src/provider-billing.test.ts > provider billing runtime > does not report a malformed reminders response as success: {}
+ FAIL  src/provider-billing.test.ts > provider billing runtime > does not report a malformed reminders response as success: {"processed":-1}
+ FAIL  src/provider-billing.test.ts > provider billing runtime > does not report a malformed reminders response as success: {"processed":1.5}
+ FAIL  src/provider-billing.test.ts > provider billing runtime > does not report a malformed reminders response as success: {"processed":"3"}
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/provider-billing.test.ts:40:71
+     38|     "does not report a malformed reminders response as success: %j", a…
+     39|       const rpc = vi.fn().mockResolvedValueOnce(completed).mockResolve…
+     40|       await expect(createProviderBillingScheduler({ rpc } as never)())…
+       |                                                                       ^
+     41|     },
+     42|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/provider-billing.test.ts > provider billing runtime > never overlaps cycles until both independent pages have finished
+AssertionError: expected "vi.fn()" to be called 2 times, but got 1 times
+ ❯ src/provider-billing.test.ts:59:17
+     57|     const first = run();
+     58|     await run();
+     59|     expect(rpc).toHaveBeenCalledTimes(2);
+       |                 ^
+     60|     finishClosing(completed);
+     61|     await Promise.resolve();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 3 passed (11)
+   Start at  06:19:01
+   Duration  897ms (tests 61%, transform 28%, import 10%, worker 1%)
+
+undefined
+/workspace/franchise-financial-close/apps/worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/provider-billing.test.ts --maxWorkers=1

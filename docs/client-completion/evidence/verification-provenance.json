@@ -1,0 +1,95 @@
+{
+  "scope": "LOCAL_CLIENT_TECHNICAL_VALIDATION_NOT_COMMERCIAL_RELEASE",
+  "sourceCommit": "74e749f",
+  "appTree": "468fa3077d29a31ae3d071eef830ff9f96b5a964",
+  "node": "v24.19.0",
+  "sql": {
+    "migrations": 458,
+    "files": 34,
+    "assertions": 904,
+    "passed": true,
+    "externalDatabaseCertified": false
+  },
+  "logs": [
+    {
+      "name": "workspace-types",
+      "localPath": "/tmp/client-final-types.log",
+      "sha256": "00e2f4e8fd9cf44c009f3e99b2c57cf90efefdf93801f6caab3806bdd1f14fb1"
+    },
+    {
+      "name": "workspace-lint",
+      "localPath": "/tmp/client-final-lint.log",
+      "sha256": "12d7715d7037000ecc00eeeb3c1efe71ad1c7a2e64a00086f21804bf161b9ab8"
+    },
+    {
+      "name": "web-excluding-pdf",
+      "localPath": "/tmp/client-integrated-web-final.log",
+      "sha256": "44e6115b945fc5d74d3044f8785a76d8477eaa323bcc6e29ff3a365b86e6f31d"
+    },
+    {
+      "name": "pdf-and-regression-batch",
+      "localPath": "/tmp/client-integration-regressions-final.log",
+      "sha256": "73b46dfb868c7258c79b0f49a208faeff805dadec33d41e056016e269057f74a"
+    },
+    {
+      "name": "new-context-and-financial-regressions",
+      "localPath": "/tmp/client-context-links-final.log",
+      "sha256": "6d93d0f1b7e5421c151844c767df52c012cec71e1909dfe4636ee596840204de"
+    },
+    {
+      "name": "calendar-label-regressions",
+      "localPath": "/tmp/client-calendar-label-final.log",
+      "sha256": "1915abb4b6b53a8a6fe4e68f1563029033ecd0f393d955d51dff40e67f924cf4"
+    },
+    {
+      "name": "packages",
+      "localPath": "/tmp/client-integrated-packages.log",
+      "sha256": "24fbfe667f4dddf9a73d63770e9d0a559af728f7c116f2011693284ff386721a"
+    },
+    {
+      "name": "worker",
+      "localPath": "/tmp/client-integrated-worker.log",
+      "sha256": "54ab3a410a968d0b36903171dec8d84d0eee9947b6bdaf7c051cd47e96fc2f76"
+    },
+    {
+      "name": "integration",
+      "localPath": "/tmp/client-integrated-integration.log",
+      "sha256": "a99407288cbd31d87e9f854f37827a3744d45d1f55c82ace78caf0fc29e9c777"
+    },
+    {
+      "name": "tooling",
+      "localPath": "/tmp/client-integrated-tooling.log",
+      "sha256": "149712bb8bf38d903a87d7f1fd4f9b79654106d6f7a913d33815af8c01a28073"
+    },
+    {
+      "name": "phase00",
+      "localPath": "/tmp/client-final-phase00.log",
+      "sha256": "ca212a8d754a9aabfe703acafd8bc5bcb2f643de017f8a7605a54079565ad26b"
+    },
+    {
+      "name": "workspace-build-after-portfolio-a11y",
+      "localPath": "/tmp/client-portfolio-a11y-build.log",
+      "sha256": "0854a9fd5b764231513c158754bed64e9e65196c90a1f4827965df14e227c3c3"
+    },
+    {
+      "name": "portfolio-a11y-regressions",
+      "localPath": "/tmp/client-portfolio-a11y-final.log",
+      "sha256": "10605ae2af8091b9f840c0609f2177ab4c3c06833ac51ebe3a3b227fec4dd7ae"
+    },
+    {
+      "name": "workspace-build-after-caption-contrast",
+      "localPath": "/tmp/client-caption-contrast-build.log",
+      "sha256": "cc5e9deb33870494333e8f7299f359a37607513d6873588cb5445ae5f463858e"
+    }
+  ],
+  "productionDeployed": false,
+  "commercialReleaseCertified": false,
+  "browserFinal": {
+    "axeScans": 32,
+    "axeViolations": 0,
+    "captionMeasurements": 32,
+    "minimumRenderedCaptionContrast": "5.1597:1",
+    "evidence": "docs/client-completion/evidence/browser/README.md",
+    "fullWcagCertification": false
+  }
+}

@@ -1,13 +1,54 @@
 "use server";
 import { createHash } from "node:crypto";
+import { unstable_rethrow } from "next/navigation";
+import { loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { z } from "zod";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { acceptInvitationSchema, closePeriodSchema, decideGovernanceSchema, entryFeeSchema, payoutSchema } from "@/modules/franchise/data/governance/model";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
-export type FranchiseActionState = { status: "idle" } | { status: "success"; outcome: string } | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "AAL2_REQUIRED" | "FAILED" };
+export type FranchiseActionState = { status: "idle" } | { status: "success"; outcome: string } | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "AAL2_REQUIRED" | "MFA_REQUIRED" | "FAILED" };
 const outcome = z.object({ outcome: z.string().min(3) }).passthrough(), text = (form: FormData, key: string) => String(form.get(key) ?? "");
-async function rpc(name: string, args: Record<string, unknown>): Promise<FranchiseActionState> { const client = await getSupabaseServerClient(), { data } = await client.auth.getUser(); if (!data.user) return { status: "error", reason: "UNAUTHENTICATED" }; const result = await client.rpc(name, args); if (result.error) { if (result.error.code === "42501" && /AAL|MFA/i.test(result.error.message ?? "")) return { status: "error", reason: "AAL2_REQUIRED" }; if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" }; if (["40001", "23505", "23514", "55000"].includes(result.error.code ?? "") || /IDEMPOTENCY|BALANCE|STALE/i.test(result.error.message ?? "")) return { status: "error", reason: "CONFLICT" }; return { status: "error", reason: "FAILED" }; } const parsed = outcome.safeParse(result.data); return parsed.success ? { status: "success", outcome: parsed.data.outcome } : { status: "error", reason: "FAILED" }; }
+async function rpc(name: string, args: Record<string, unknown>): Promise<FranchiseActionState> {
+  try {
+    let client: Awaited<ReturnType<typeof getSupabaseServerClient>>;
+    if (name === "accept_franchise_invitation") {
+      // The legacy invitation command retains its own mandate/mode-specific requirements.
+      client = await getSupabaseServerClient();
+      const auth = await client.auth.getUser();
+      if (auth.error) return { status: "error", reason: classifyAuthReadFailure(auth.error) === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "FAILED" };
+      if (!auth.data.user) return { status: "error", reason: "UNAUTHENTICATED" };
+    } else {
+      const access = await loadMyPlatformAccess();
+      if (access.status === "error") return { status: "error", reason: access.reason === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "FAILED" };
+      const finance = name !== "decide_franchise_governance";
+      // These are exactly the allow-lists of the corresponding SQL commands.
+      const allowed = finance ? ["SUPER_ADMIN", "FINANCE_MANAGER"] : ["SUPER_ADMIN", "MATRICIA_ADMIN"];
+      if (!allowed.some(role => access.roles.has(role))) return { status: "error", reason: "FORBIDDEN" };
+      if (!access.requirementSatisfied) return { status: "error", reason: "MFA_REQUIRED" };
+      client = access.client;
+      if (finance) {
+        // Financial SQL requires AAL2 even if an account policy does not demand MFA.
+        const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assurance.error) return { status: "error", reason: classifyAuthReadFailure(assurance.error) === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "FAILED" };
+        if (assurance.data?.currentLevel !== "aal2") return { status: "error", reason: "MFA_REQUIRED" };
+      }
+    }
+    const result = await client.rpc(name, args);
+    if (result.error) {
+      if (result.error.code === "42501" && /AAL|MFA/i.test(result.error.message ?? "")) return { status: "error", reason: "MFA_REQUIRED" };
+      if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
+      if (["40001", "23505", "23514", "55000"].includes(result.error.code ?? "") || /IDEMPOTENCY|BALANCE|STALE/i.test(result.error.message ?? "")) return { status: "error", reason: "CONFLICT" };
+      return { status: "error", reason: "FAILED" };
+    }
+    const parsed = outcome.safeParse(result.data);
+    return parsed.success ? { status: "success", outcome: parsed.data.outcome } : { status: "error", reason: "FAILED" };
+  } catch (error) {
+    unstable_rethrow(error);
+    return { status: "error", reason: "FAILED" };
+  }
+}
 function localeValid(form: FormData) { return isLocale(text(form, "locale")); }
 
 export async function decideGovernance(_: FranchiseActionState, form: FormData): Promise<FranchiseActionState> { if (!localeValid(form)) return { status: "error", reason: "VALIDATION" }; const parsed = decideGovernanceSchema.safeParse({ approvalRequestId: text(form, "approvalRequestId"), decision: text(form, "decision"), reason: text(form, "reason"), rowVersion: text(form, "rowVersion"), idempotencyKey: text(form, "idempotencyKey") }); return parsed.success ? rpc("decide_franchise_governance", { p_approval_request_id: parsed.data.approvalRequestId, p_decision: parsed.data.decision, p_reason: parsed.data.reason, p_expected_row_version: parsed.data.rowVersion, p_idempotency_key: parsed.data.idempotencyKey }) : { status: "error", reason: "VALIDATION" }; }

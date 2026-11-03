@@ -1,0 +1,12 @@
+{
+  "scope": "COMPLETE_OPTIMIZED_NEXT_WEBPACK_BUILD_TARGETED_QUOTE_STATUS_RENDERER_FOLLOWUP",
+  "candidate": "5b8b0f738137abee19f6552aef538e906d04f24a",
+  "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+  "status": "PASSED",
+  "typescriptCompleted": true,
+  "typescriptSkipped": false,
+  "serverStarted": true,
+  "productionDeployment": false,
+  "logSha256": "52e524652ced243d975db8ca5ba04cddf57f3b662c2852517367a9c0ac7af731",
+  "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/run-app.mjs --coordinated --production --candidate=5b8b0f738137abee19f6552aef538e906d04f24a"
+}

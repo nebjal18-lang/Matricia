@@ -55,7 +55,7 @@ export function FranchiseValidationsWorkbench({
   bucket?: string | null;
   commandIdentity?: { idempotencyKey: string; correlationId: string };
   organizationId?: string | null;
-  filters?:{q?:string;type?:string;category?:string;selected?:string};
+  filters?:{q?:string;type?:string;category?:string;selected?:string;page?:string};
 }) {
   const c = libraryCopy(locale);
   const all = [...workspace.services, ...workspace.questionnaires, ...workspace.rules];
@@ -66,6 +66,8 @@ export function FranchiseValidationsWorkbench({
   const selectionHref=(id:string)=>{const params=new URLSearchParams(query.replace(/^\?/,""));for(const[key,value]of Object.entries(filters??{}))if(value)params.set(key,value);params.set("selected",id);return`/${locale}/franchise/validations/${activeBucket}?${params}`;};
   const date=(value:string|null|undefined)=>value?new Intl.DateTimeFormat(locale==="ar"?"ar-MA":"fr-MA",{dateStyle:"medium",timeZone:"Africa/Casablanca"}).format(new Date(value)):"—";
   const bucketKeys = Object.keys(FRANCHISE_VALIDATION_BUCKETS);
+  const paginationQuery = new URLSearchParams(query.replace(/^\?/, ""));
+  for (const [key, value] of Object.entries(filters ?? {})) if (value && key !== "page") paginationQuery.set(key, value);
   return (
     <main className="client-page">
       <MandateBanner locale={locale} name={workspace.mandate.libraryName} />
@@ -94,7 +96,7 @@ export function FranchiseValidationsWorkbench({
             </label>
             <label>
               <span className="sr-only">{c.category}</span>
-              <select name="category" defaultValue={filters?.category??"all"}><option value="all">{c.categoriesOfLibrary}</option>{[...new Set(all.flatMap((item)=>item.category?[item.category]:[]))].map((category)=><option key={category} value={category}>{category}</option>)}</select>
+              <select name="category" defaultValue={filters?.category??"all"}><option value="all">{c.categoriesOfLibrary}</option>{(workspace.categories ?? []).map(category=><option key={category.id} value={category.id}>{category.title}</option>)}</select>
             </label>
             <label className="franchise-search">
               <span className="sr-only">{c.search}</span>
@@ -141,7 +143,7 @@ export function FranchiseValidationsWorkbench({
               </table>
             </div>
           )}
-          <CatalogServerPagination page={workspace.serverPage} locale={locale} query={query}/>
+          <CatalogServerPagination page={workspace.serverPage} locale={locale} query={`?${paginationQuery}`}/>
           {commandIdentity && (activeBucket === "approuves" || activeBucket === "publications") ? (
             <FranchisePublishReleaseForm locale={locale} workspace={workspace} commandIdentity={commandIdentity} organizationId={organizationId} />
           ) : null}

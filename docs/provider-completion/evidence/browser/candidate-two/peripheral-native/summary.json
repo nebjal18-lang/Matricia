@@ -1,0 +1,201 @@
+{
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "scope": "READ_ONLY_PROVIDER_ONLY_ROLE_PERIPHERAL_REAL_UI_BEFORE_CLIENT_ROLE_REQUEST",
+  "cases": [
+    {
+      "locale": "fr",
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "actualPath": "/fr/sous-traitant/achats",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "fr",
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "actualPath": "/fr/sous-traitant/reputation",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "fr",
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "actualPath": "/fr/sous-traitant/marketing",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "fr",
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "actualPath": "/fr/sous-traitant/mode-client",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": true
+    },
+    {
+      "locale": "fr",
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "actualPath": "/fr/sous-traitant/entreprise",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "fr",
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "actualPath": "/fr/sous-traitant/parametres",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "fr",
+      "path": "organisation/roles",
+      "http": 200,
+      "actualPath": "/fr/organisation/roles",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "fr",
+      "path": "notifications",
+      "http": 200,
+      "actualPath": "/fr/notifications",
+      "rtl": "ltr",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "actualPath": "/ar/sous-traitant/achats",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "actualPath": "/ar/sous-traitant/reputation",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "actualPath": "/ar/sous-traitant/marketing",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "actualPath": "/ar/sous-traitant/mode-client",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": true
+    },
+    {
+      "locale": "ar",
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "actualPath": "/ar/sous-traitant/entreprise",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "actualPath": "/ar/sous-traitant/parametres",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [
+        ""
+      ],
+      "unavailableLines": [
+        "تعذر تحميل تفضيلات الإشعارات."
+      ],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "organisation/roles",
+      "http": 200,
+      "actualPath": "/ar/organisation/roles",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    },
+    {
+      "locale": "ar",
+      "path": "notifications",
+      "http": 200,
+      "actualPath": "/ar/notifications",
+      "rtl": "rtl",
+      "overflow": false,
+      "alerts": [],
+      "unavailableLines": [],
+      "hasClientActivation": false
+    }
+  ]
+}

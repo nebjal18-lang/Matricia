@@ -11,5 +11,5 @@ export type ClientRfqRepository = {
   match(input: { requestId: string; targetPanelSize: number; idempotencyKey: string; correlationId: string }): Promise<Result<{ requestId: string; matchingRunId: string; eligibleCount: number; outcome: "MATCHING_COMPLETED" | "NO_MATCHING_PROVIDER" }>>;
   openRfq(input: { requestId: string; matchingRunId: string; deadline: string; idempotencyKey: string; correlationId: string }): Promise<Result<{ requestId: string; rfqId: string; invitedCount: number }>>;
   compare(input: { rfqId: string; idempotencyKey: string; correlationId: string }): Promise<Result<{ snapshotId: string; currency: string; rows: QuoteComparisonRow[] }>>;
-  select(input: { quoteId: string; quoteVersionId: string; selectionReason: string; comparisonSnapshotId: string; idempotencyKey: string; correlationId: string }): Promise<Result<{ quoteId: string; rfqId: string }>>;
+  select(input: { quoteId: string; quoteVersionId: string; selectionReason: string; comparisonSnapshotId: string; idempotencyKey: string; correlationId: string }): Promise<Result<{ quoteId: string; rfqId: string } | {approvalRequestId:string;approvalStatus:"PENDING"|"REJECTED"}>>;
 };

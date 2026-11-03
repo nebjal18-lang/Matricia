@@ -1,0 +1,11 @@
+import { requireDevelopment, validateCanonicalSourceTarget, docker } from './safety.mjs';
+requireDevelopment();
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
+const path=resolve(process.argv[2]??''),base=resolve('work/canonical-acl-source');
+if(!path.startsWith(base+sep)||!path.endsWith('/source-target.json'))throw new Error('OWN_CANONICAL_SOURCE_PATH_REQUIRED');
+const source=validateCanonicalSourceTarget(JSON.parse(await readFile(path)),{requireReady:false}),actual=JSON.parse(docker(['inspect',source.name]))[0];
+if(actual.Config.Labels?.['matricia.isolated-replay']!==source.token||actual.HostConfig.NetworkMode!=='none'||Object.values(actual.NetworkSettings.Ports??{}).some(ports=>ports?.length))throw new Error('EXACT_NO_NETWORK_SOURCE_REQUIRED');
+docker(['rm','--force','--volumes',source.name]);
+source.status='cleaned-setup-source';await writeFile(path,JSON.stringify(source),{mode:0o600});
+console.log(JSON.stringify({status:source.status,purpose:source.purpose,removedOnlyOwnedSource:true}));

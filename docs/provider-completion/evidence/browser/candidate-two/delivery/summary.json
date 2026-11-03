@@ -1,0 +1,96 @@
+{
+  "scope": "NATIVE_ASSIGNED_TECHNICIAN_DELIVERY_CLIENT_REJECTION_CORRECTION_AND_ACCEPTANCE",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "PASSED",
+  "missionId": "2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+  "physicalAntivirusCertified": false,
+  "steps": [
+    {
+      "step": "actual_assigned_technician_reads_mission_unassigned_cannot_read_or_submit",
+      "passed": true
+    },
+    {
+      "step": "actual_technician_delivery_1_v1_private_bytes_native_scan_and_independent_client_rejection",
+      "passed": true
+    },
+    {
+      "step": "actual_technician_delivery_1_v2_private_bytes_native_scan_and_independent_client_acceptance",
+      "passed": true
+    },
+    {
+      "step": "actual_technician_delivery_2_v1_private_bytes_native_scan_and_independent_client_acceptance",
+      "passed": true
+    },
+    {
+      "step": "all_native_delivery_versions_and_original_free_text_remain_immutable_after_correction_and_client_receipt",
+      "passed": true
+    },
+    {
+      "step": "owner_touch_revocation_removes_technician_mission_new_download_and_native_submit_access",
+      "passed": true
+    }
+  ],
+  "files": [
+    {
+      "id": "e2693448-44e0-4ab6-8fd2-f28a63872356",
+      "path": "a6fdcbf7-e25e-48d0-a7fc-2c6b78230585/aec586f4-36b3-47ab-8530-71da292cbf26/9a830289-79a8-4284-a177-2835790c9ddc/TEST_DELIVERY_1_V1.pdf",
+      "sha256": "fd36a0583b420d28d0952273cb4349647b2f4f9d921921545f64b363985fc9e2",
+      "sizeBytes": 750,
+      "scan": {
+        "scope": "KNOWN_SYNTHETIC_DELIVERY_PDF_SCANNER_TEST_PORT",
+        "proofId": "e2693448-44e0-4ab6-8fd2-f28a63872356",
+        "sha256": "fd36a0583b420d28d0952273cb4349647b2f4f9d921921545f64b363985fc9e2",
+        "result": "CLEAN",
+        "physicalAntivirusCertified": false
+      }
+    },
+    {
+      "id": "ee48d10d-b17d-46f3-aa36-25bf51a50978",
+      "path": "a6fdcbf7-e25e-48d0-a7fc-2c6b78230585/aec586f4-36b3-47ab-8530-71da292cbf26/fb3c4ac8-7c6f-4227-a180-37c96c65b79a/TEST_DELIVERY_1_V2.pdf",
+      "sha256": "0a1ccd58101245a5a01802669292b94b3d94e6f1b2997bfb3a8d4b7812f35aeb",
+      "sizeBytes": 773,
+      "scan": {
+        "scope": "KNOWN_SYNTHETIC_DELIVERY_PDF_SCANNER_TEST_PORT",
+        "proofId": "ee48d10d-b17d-46f3-aa36-25bf51a50978",
+        "sha256": "0a1ccd58101245a5a01802669292b94b3d94e6f1b2997bfb3a8d4b7812f35aeb",
+        "result": "CLEAN",
+        "physicalAntivirusCertified": false
+      }
+    },
+    {
+      "id": "5257e457-37fa-4c7d-9bf9-a9dab3e80dee",
+      "path": "a6fdcbf7-e25e-48d0-a7fc-2c6b78230585/02f46743-7e23-4098-8b52-dd44324e5307/6ff271c1-95e0-4c84-b317-daa8e0767c17/TEST_DELIVERY_2_V1.pdf",
+      "sha256": "1fb43ed525b7cb2de69996e8fc7530fad5196602b3f92f7885bb7d2d53c0091d",
+      "sizeBytes": 750,
+      "scan": {
+        "scope": "KNOWN_SYNTHETIC_DELIVERY_PDF_SCANNER_TEST_PORT",
+        "proofId": "5257e457-37fa-4c7d-9bf9-a9dab3e80dee",
+        "sha256": "1fb43ed525b7cb2de69996e8fc7530fad5196602b3f92f7885bb7d2d53c0091d",
+        "result": "CLEAN",
+        "physicalAntivirusCertified": false
+      }
+    }
+  ],
+  "versionSnapshots": [
+    {
+      "id": "deba06cd-66bd-45ef-bce4-584ea89d34d3",
+      "version": 1,
+      "description": "Rapport TEST 1, version 1 — نص أصلي محفوظ",
+      "content_hash": "8ab31a659c2039d0bbc848c76083ad46606da42db84196780a1757a0fb3b1171"
+    },
+    {
+      "id": "a6f906c1-26ca-4a4a-a342-a7d64812219c",
+      "version": 2,
+      "description": "Rapport TEST 1, version 2 — نص أصلي محفوظ",
+      "content_hash": "9e38210a1eae4d4b792f2a2aa8d8b83c992a4561eed7305605a593b135051c7c"
+    },
+    {
+      "id": "758c0f4f-dc5f-431c-9732-db3f9d7b8a3e",
+      "version": 1,
+      "description": "Rapport TEST 2, version 1 — نص أصلي محفوظ",
+      "content_hash": "eda4f00ca2fbd07077b0ddcdac9ab2eae63c3279aab404594f04195d8b0e5ccb"
+    }
+  ],
+  "recoveredFirstVersion": true
+}

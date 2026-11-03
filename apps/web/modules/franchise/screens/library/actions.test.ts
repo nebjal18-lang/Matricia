@@ -152,11 +152,12 @@ beforeEach(() => {
 describe("franchise library catalog actions", () => {
   it("crée un brouillon FR/AR dans la bibliothèque mandatée", async () => {
     const result = await createFranchiseServiceAction(idle, form({
-      locale: "fr", libraryId, subcategoryId, code: "IT_NEW", nameFr: "Nouveau", nameAr: "جديد",
+      locale: "fr", libraryId, franchiseId: key, subcategoryId, code: "IT_NEW", nameFr: "Nouveau", nameAr: "جديد",
       descriptionFr: "Description", descriptionAr: "وصف الخدمة", changeReason: "Création contrôlée",
       confirmed: "yes", idempotencyKey: key, correlationId: key,
     }));
     expect(result.status).toBe("success");
+    expect(mocks.load).toHaveBeenCalledWith(expect.objectContaining({franchiseId:key,libraryId}));
     expect(mocks.rpc).toHaveBeenCalledWith("create_catalog_service", expect.objectContaining({ p_library_id: libraryId, p_code: "IT_NEW" }));
   });
 

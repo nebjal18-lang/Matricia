@@ -1,0 +1,13 @@
+1..5
+{"sub":"a2040000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+{"sub":"a2040000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "d542254a-5fe0-4955-b8c1-4c0a44b785a4", "approval_request_id": "699980ca-4d77-426b-8dc1-d5edbdf7d47d"}
+{"sub":"a2040000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+{"sub":"a2040000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 1 - AAL2 with pending legal passport asks for organization activation, not another factor
+ok 2 - failed contractual activation does not activate the franchise
+ok 3 - failed prerequisites create no activation evidence
+{"sub":"a2040000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}
+ok 4 - AAL1 still cannot perform contractual activation
+{"sub":"a2040000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 5 - an active AAL2 passport still requires a real signed mandate

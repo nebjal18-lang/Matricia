@@ -12,6 +12,7 @@ class Query{
  in(key:string,values:unknown[]){this.filters.push(row=>!(key in row)||values.includes(row[key]));return this;}
  limit(value:number){this.maximum=value;return this;}
  order(){return this;}
+ range(from:number,to:number){this.maximum=to+1;return this;}
  then(fulfilled:(value:{data:Record<string,unknown>[];error:null})=>unknown){return Promise.resolve({data:(tables[this.table]??[]).filter(row=>this.filters.every(test=>test(row))).slice(0,this.maximum),error:null}).then(fulfilled);}
 }
 beforeEach(()=>{mocks.queries.length=0;mocks.rpc.mockClear();mocks.client={auth:{getUser:async()=>({data:{user:{id:U}}})},from:(table:string)=>new Query(table),rpc:mocks.rpc};});

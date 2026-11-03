@@ -1,0 +1,43 @@
+
+> matricia@0.1.0 test:tooling /workspace/franchise-completion
+> node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/db-test-support.test.mjs
+
+✔ the framework grant is inside the existing transaction and cannot grant application access (4.063892ms)
+✔ tests without a rollback transaction or with a commit cannot enable the framework grant (1.514162ms)
+✔ a function body and a leading block comment remain unchanged (0.216625ms)
+✔ read-only API plan is bounded and refuses mutation endpoints and production (3.885048ms)
+✔ p95 uses nearest-rank over nonempty real samples (0.491383ms)
+✔ performance plan requires exact staging identity, routes and real interactions (1.220932ms)
+✔ missing metrics or interactions cannot turn into a passing zero (0.243888ms)
+✔ extractProjectRef accepts only hosted HTTPS Supabase targets (2.377898ms)
+✔ configuration refuses production and requires exact target verification (0.957845ms)
+✔ configuration bounds page size and scenario sizes (2.031174ms)
+✔ scenario uses bounded keyset GET requests and emits metrics only (7.389934ms)
+✔ scenario fails closed when the keyset does not advance (0.821758ms)
+✔ gate is failed when the target row count is unavailable (2.263884ms)
+✔ failed browser runs retain executed counts and sanitized actionable diagnostics (8.203526ms)
+✔ a static parent reference or exclusion never substitutes runtime evidence (4.275652ms)
+✔ local acceptance refuses stale, hosted, incomplete and uncleared results (3.665129ms)
+✔ a local fixture cannot impersonate a hosted or production acceptance project (1.426135ms)
+✔ recognizes native Storage NoSuchBucket400 and missing-bucket404 (1.511591ms)
+✔ never treats an authorization, transport, server or successful lookup as proven absence (0.439752ms)
+✔ preparation never grants approval or invents passing evidence (9.449253ms)
+✔ current candidate with complete evidence shape passes; wrong SHA, stale results and unclosed issues fail (8.992474ms)
+✔ zero counts, skipped, flaky, expected failure and self-review cannot certify a release (3.227153ms)
+✔ evidence must match its bytes and stay inside the checkout, including symlink resolution (126.406581ms)
+✔ browser acceptance rejects empty, skipped, flaky and expected-failure reports (0.942616ms)
+✔ unfinished work in a business module fails the actual gate (308.928051ms)
+✔ test assertions may discuss markers while adjacent product code remains checked (686.827214ms)
+✔ SQL migrations stay covered and ordinary input hints are accepted (348.506804ms)
+✔ explicit unfinished sentinels and lowercase comment markers fail (251.031776ms)
+✔ accepts every verified local origin supported by the fixture loader without starting a server (1.699945ms)
+✔ rejects remote origins, credentials and unexpected route/configuration before any start (17.581877ms)
+✔ Next server-action guard catches initial states, typed wrappers and local re-exports (39.642886ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2496.287843

@@ -48,7 +48,7 @@ const QUALIFIED_OVERALL = new Set(["APPROVED", "CONDITIONAL", "PARTIALLY_QUALIFI
 
 export function computeProviderHomeCounts(input: {
   invitations?: Array<{ status: string; deadline: string; quote: { status: string } | null }> | null;
-  missions?: Array<{ status: string; milestones: Array<{ status: string; dueAt: string | null }>; deliverables: Array<{ status: string }> }> | null;
+  missions?: Array<{ status: string; scopeReconciliationRequired?:boolean; milestones: Array<{ status: string; dueAt: string | null; retired?: boolean }>; deliverables: Array<{ status: string; retirement?: unknown }> }> | null;
   invoices?: Array<{ paymentStatus: string; outstandingMinor: string }> | null;
   actionItems: readonly UserActionItem[];
   now: string;
@@ -65,11 +65,11 @@ export function computeProviderHomeCounts(input: {
   const consultationsDue = invitations.filter((item) => INVITE_OPEN.has(item.status) && (!item.quote || QUOTE_DRAFT.has(item.quote.status))).length;
   const quotesInProgress = invitations.filter((item) => item.quote && QUOTE_ACTIVE.has(item.quote.status) && item.quote.status !== "SELECTED").length;
   const activeMissions = missions.filter((item) => !["COMPLETED", "CANCELLED", "CLOSED"].includes(item.status)).length;
-  const deliverablesDue = missions.reduce(
+  const deliverablesDue = missions.some(mission=>mission.scopeReconciliationRequired===true)?null:missions.filter(item => !["COMPLETED", "CANCELLED", "CLOSED"].includes(item.status)).reduce(
     (sum, mission) =>
       sum +
-      mission.deliverables.filter((item) => ["PENDING", "REJECTED", "CORRECTION_REQUIRED", "IN_PROGRESS"].includes(item.status)).length +
-      mission.milestones.filter((item) => item.dueAt && !["DONE", "COMPLETED"].includes(item.status) && Date.parse(item.dueAt) <= now + 7 * 86_400_000).length,
+      mission.deliverables.filter((item) => !item.retirement && ["PENDING", "REJECTED", "CORRECTION_REQUIRED", "IN_PROGRESS"].includes(item.status)).length +
+      mission.milestones.filter((item) => !item.retired && item.dueAt && !["DONE", "COMPLETED", "ACCEPTED"].includes(item.status) && Date.parse(item.dueAt) <= now + 7 * 86_400_000).length,
     0,
   );
   const invoicesOutstanding = invoices.filter((item) => item.paymentStatus !== "PAID" && item.outstandingMinor !== "0").length;

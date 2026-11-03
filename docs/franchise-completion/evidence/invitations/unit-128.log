@@ -1,0 +1,12 @@
+
+ RUN  v5.0.3 /workspace/franchise-ci/apps/web
+
+
+ Test Files  8 passed (8)
+      Tests  128 passed (128)
+   Start at  06:40:29
+   Duration  2.88s (import 39%, transform 39%, tests 19%, worker 3%)
+
+    Isolate  8 workers spawned · ~260ms startup each (spawn + environment, per file)
+             at least ~781ms faster with isolate: false — reuses workers across files instead of one per file
+

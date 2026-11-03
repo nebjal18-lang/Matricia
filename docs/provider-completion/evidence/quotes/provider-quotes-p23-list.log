@@ -1,0 +1,6 @@
+Listing tests:
+  [chromium-mobile-360] › p23-provider-quotes.spec.ts:48:3 › FR Provider invitation, exact quote and submission are accessible and isolated
+  [chromium-mobile-360] › p23-provider-quotes.spec.ts:48:3 › AR Provider invitation, exact quote and submission are accessible and isolated
+  [chromium-desktop] › p23-provider-quotes.spec.ts:48:3 › FR Provider invitation, exact quote and submission are accessible and isolated
+  [chromium-desktop] › p23-provider-quotes.spec.ts:48:3 › AR Provider invitation, exact quote and submission are accessible and isolated
+Total: 4 tests in 1 file

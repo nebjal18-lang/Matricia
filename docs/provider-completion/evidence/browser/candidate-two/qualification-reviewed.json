@@ -1,0 +1,74 @@
+{
+  "scope": "NATIVE_PROVIDER_PARTNER_DOCUMENT_AND_INDEPENDENT_QUALIFICATION_REVIEW",
+  "status": "PASSED",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "steps": [
+    {
+      "step": "actual_private_partner_upload_scan_and_independent_document_review",
+      "passed": true,
+      "candidate": "e929f99135953bf05301c45b34f062fb5884c156"
+    },
+    {
+      "step": "independent_admin_ui_attests_test_historical_partnership_without_direct_sql_state_write",
+      "passed": true,
+      "candidate": "e929f99135953bf05301c45b34f062fb5884c156"
+    },
+    {
+      "step": "current_identity_revalidated_after_company_decision_change",
+      "passed": true,
+      "candidate": "e929f99135953bf05301c45b34f062fb5884c156"
+    },
+    {
+      "step": "native_independent_service_A_approval_and_service_B_information_required_remain_separate",
+      "passed": true,
+      "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc"
+    },
+    {
+      "step": "provider_owner_cannot_self_approve_service",
+      "passed": true,
+      "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc"
+    }
+  ],
+  "partnerSignatureSource": "HISTORICAL_TEST_LEGAL_SIGNATURE_PREREQUISITE_NOT_CERTIFIED",
+  "legalSignatureCertified": false,
+  "physicalAntivirusCertified": false,
+  "catalogueGovernanceCertified": false,
+  "partnerDocument": {
+    "id": "7092fdd8-850c-4a22-989d-2fe10bc0fc08",
+    "sha256": "7a2c629dfacae667941b419f13e0e6bf180fed8fe8c77f6abf94926c8efbc308",
+    "scan": {
+      "scope": "KNOWN_SYNTHETIC_PDF_SCANNER_TEST_PORT",
+      "physicalAntivirusCertified": false,
+      "observed": [
+        {
+          "documentId": "7092fdd8-850c-4a22-989d-2fe10bc0fc08",
+          "jobId": "26c8f1dc-c406-419e-9850-c935b65dca2b",
+          "result": "CLEAN",
+          "source": "NATIVE_CLAIM_AND_COMPLETE",
+          "sha256": "7a2c629dfacae667941b419f13e0e6bf180fed8fe8c77f6abf94926c8efbc308"
+        }
+      ]
+    },
+    "reviewedVersionId": "bd2273af-820f-4128-8ccb-a9415633bae4"
+  },
+  "sourceQuestionnaireCandidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "reviewedQuestionnaire": {
+    "sessionId": "ee0ef707-d890-40fc-a6d3-f34b6123a116",
+    "explicitSelection": true,
+    "frozenQuestionsDisplayed": true,
+    "manifestHash": "d0fe7da1324bb10a8ed4c3e15b3b283d5b8478294c359ea798c850b780967265",
+    "engineScoreDisplayed": true,
+    "humanScorePercent": "80"
+  },
+  "sourcePartnerPrerequisites": {
+    "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+    "receipt": "candidate-one/qualification-reviewed.json",
+    "receiptSha256": "4a0d5b4dd410c24feb7ca2d4512655774dc4e3eca3dcaeb4fb9709a9821c3a37",
+    "matchingDocumentIdHashScanJobAndVersion": true,
+    "stepsMatched": 3,
+    "correction": "Repeated resume annotated existing steps with the most recent failed receipt candidate. Original immutable receipt establishes these unchanged completed prerequisites on e929; no native mutation replayed.",
+    "asRecordedReceipt": "candidate-two/qualification-reviewed-as-recorded.json",
+    "asRecordedReceiptSha256": "cbc0e19a214a08510bf0a9920655ca21395ac10aa9abd0abae433f5b5919515e"
+  }
+}

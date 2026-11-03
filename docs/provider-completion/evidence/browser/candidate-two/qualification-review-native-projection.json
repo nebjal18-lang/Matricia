@@ -1,0 +1,13 @@
+{
+  "scope": "ACTUAL_NATIVE_AAL2_INDEPENDENT_REVIEWER_PROJECTION_READ_AFTER_UPGRADE",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "PASSED",
+  "qualificationId": "398d1e25-e2c6-414b-9e01-17daeedf39d5",
+  "sessionId": "ee0ef707-d890-40fc-a6d3-f34b6123a116",
+  "questionCount": 2,
+  "engineScoreBasisPoints": 8000,
+  "contextHash": "d0fe7da1324bb10a8ed4c3e15b3b283d5b8478294c359ea798c850b780967265",
+  "broadSessionSelectStillDenied": true,
+  "decisionNotYetMade": true
+}

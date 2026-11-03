@@ -1,11 +1,14 @@
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { supervisionMetrics,type FranchiseSupervisionMetrics } from "../spaces/metrics";
 import { providerDossiers,type ProviderDossier } from "../network/provider-dossier";
 import { z } from "zod";
+import { collectOperationPages, collectOperationIds } from "./paging";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
 const id = z.string().uuid();
 
 export type FranchiseOperationsSnapshot = {
+  permissions?:{canDecideQualifications:boolean;canMaintainDefinitions:boolean;canInstructDisputes:boolean;canProposeVolume:boolean};
   providerDossiers?:ProviderDossier[];
   metrics?:FranchiseSupervisionMetrics|null;
   requests: Array<{ id: string; status: string; title: string; urgency: string | null }>;
@@ -28,27 +31,6 @@ export type FranchiseOperationsSnapshot = {
   volumeProposals?: Array<{ id: string; skuId: string; status: string; paymentModel: string }>;
 };
 
-const empty: FranchiseOperationsSnapshot = {
-  requests: [],
-  matching: [],
-  quotes: [],
-  missions: [],
-  anomalies: [],
-  recommendations: [],
-  opportunities: [],
-  qualifications: [],
-  capacities: [],
-  documents: [],
-  threads: [],
-  members: [],
-  disputes: [],
-  skus: [],
-  anomalyDefinitions: [],
-  riskDefinitions: [],
-  recommendationDefinitions: [],
-  volumeProposals: [],
-};
-
 function rows<T>(schema: z.ZodType<T>, value: unknown): T[] {
   const parsed = z.array(schema).safeParse(value);
   if(!parsed.success)throw new Error("FRANCHISE_OPERATIONS_INVALID_RESPONSE");
@@ -56,75 +38,64 @@ function rows<T>(schema: z.ZodType<T>, value: unknown): T[] {
 }
 
 export async function loadFranchiseOperations(input: { libraryId: string; operatorOrganizationId?: string | null;franchiseId?:string|null }): Promise<FranchiseOperationsSnapshot> {
-  if (!z.string().uuid().safeParse(input.libraryId).success) return empty;
+  if (!id.safeParse(input.libraryId).success || !id.safeParse(input.franchiseId).success) throw new Error("FRANCHISE_OPERATIONS_SCOPE_REQUIRED");
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
-  if (!auth.user) return empty;
-  const[dossiersResult,metricsResult]=await Promise.all([input.franchiseId?client.rpc("franchise_provider_dossiers",{p_franchise_id:input.franchiseId}):Promise.resolve({data:[],error:null}),input.franchiseId?client.rpc("franchise_supervision_metrics",{p_franchise_id:input.franchiseId}):Promise.resolve({data:null,error:null})]);
+  const { data: auth, error: authError } = await client.auth.getUser();
+  if (authError) throw new Error(classifyAuthReadFailure(authError)==="UNAUTHENTICATED"?"FRANCHISE_OPERATIONS_UNAUTHENTICATED":"FRANCHISE_OPERATIONS_AUTH_UNAVAILABLE");
+  if (!auth.user) throw new Error("FRANCHISE_OPERATIONS_UNAUTHENTICATED");
+  const[dossiersResult,metricsResult,missionResult,permissionsResult]=await Promise.all([client.rpc("franchise_provider_dossiers",{p_franchise_id:input.franchiseId}),client.rpc("franchise_supervision_metrics",{p_franchise_id:input.franchiseId}),client.rpc("franchise_operational_missions_v1",{p_franchise_id:input.franchiseId}),client.rpc("franchise_operation_permissions_v1",{p_franchise_id:input.franchiseId})]);
   const metrics=metricsResult.data?supervisionMetrics.safeParse(metricsResult.data):null;
-  if(metricsResult.error||(metrics&&!metrics.success))throw new Error("FRANCHISE_METRICS_UNAVAILABLE");
+  if(metricsResult.error||!metrics?.success||metrics.data.libraryId!==input.libraryId||metrics.data.franchiseId!==input.franchiseId)throw new Error("FRANCHISE_METRICS_UNAVAILABLE");
+  const permissions=z.object({franchiseId:id,libraryId:id,canDecideQualifications:z.boolean(),canMaintainDefinitions:z.boolean(),canInstructDisputes:z.boolean(),canProposeVolume:z.boolean()}).safeParse(permissionsResult.data);
+  if(permissionsResult.error||!permissions.success||permissions.data.libraryId!==input.libraryId||permissions.data.franchiseId!==input.franchiseId)throw new Error("FRANCHISE_PERMISSIONS_UNAVAILABLE");
+  const missionSnapshot=z.object({complete:z.literal(true),libraryId:id,franchiseId:id,missions:z.array(z.object({id,status:z.string(),started_at:z.string().nullable()}))}).safeParse(missionResult.data);
+  if(missionResult.error||!missionSnapshot.success||missionSnapshot.data.libraryId!==input.libraryId||missionSnapshot.data.franchiseId!==input.franchiseId)throw new Error("FRANCHISE_MISSIONS_UNAVAILABLE");
   const dossiers=providerDossiers.safeParse(dossiersResult.data);
   if(dossiersResult.error||!dossiers.success)throw new Error("FRANCHISE_PROVIDER_DOSSIERS_UNAVAILABLE");
-  const [requestsResult, anomaliesResult, recommendationsResult, opportunitiesResult, qualificationsResult, capacitiesResult, documentVersionsResult, threadsResult, membersResult, missionsResult, skusResult] = await Promise.all([
-    client.from("service_requests").select("id,status,service_id,library_id").eq("library_id", input.libraryId).order("updated_at", { ascending: false }).limit(100),
-    client.from("diagnostic_anomalies").select("id,title_fr,title_ar,severity,status,anomaly_code,blocking,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("created_at", { ascending: false }).limit(100),
-    client.from("diagnostic_recommendations").select("id,title_fr,title_ar,priority,service_id,solution_level,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("priority").limit(100),
-    client.from("diagnostic_opportunities").select("id,status,priority,service_id,solution_level,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("created_at", { ascending: false }).limit(100),
-    client.from("provider_qualifications").select("id,service_id,row_version,current_decision_id,catalog_services!inner(library_id)").eq("catalog_services.library_id", input.libraryId).limit(100),
-    client.from("provider_capacity_versions").select("id,service_id,capacity_status,available_units,catalog_services!inner(library_id)").eq("catalog_services.library_id", input.libraryId).not("service_id", "is", null).order("version_number", { ascending: false }).limit(100),
-    client.from("provider_document_versions").select("id,status,provider_document_families!inner(document_kind,code)").order("version_number", { ascending: false }).limit(100),
-    client.from("internal_message_threads").select("id,subject,status,service_requests!inner(library_id)").eq("service_requests.library_id", input.libraryId).order("created_at", { ascending: false }).limit(100),
+  const [requestsResult, anomaliesResult, recommendationsResult, opportunitiesResult, threadsResult, membersResult, skusResult] = await Promise.all([
+    collectOperationPages((from,to)=>client.from("service_requests").select("id,status,service_id,library_id,current_version_id").eq("library_id", input.libraryId).order("updated_at", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("diagnostic_anomalies").select("id,title_fr,title_ar,severity,status,anomaly_code,blocking,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("created_at", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("diagnostic_recommendations").select("id,title_fr,title_ar,priority,service_id,solution_level,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("priority").order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("diagnostic_opportunities").select("id,status,priority,service_id,solution_level,diagnostic_runs!inner(library_id)").eq("diagnostic_runs.library_id", input.libraryId).order("created_at", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("internal_message_threads").select("id,subject,status,service_requests!inner(library_id)").eq("service_requests.library_id", input.libraryId).order("created_at", { ascending: false }).order("id").range(from,to)),
     input.operatorOrganizationId
-      ? client.from("organization_memberships").select("id,status,organization_member_roles(role_code,revoked_at)").eq("organization_id", input.operatorOrganizationId).eq("status", "ACTIVE").limit(50)
+      ? collectOperationPages((from,to)=>client.from("organization_memberships").select("id,status,organization_member_roles(role_code,revoked_at)").eq("organization_id", input.operatorOrganizationId).eq("status", "ACTIVE").order("id").range(from,to))
       : Promise.resolve({ data: [], error: null }),
-    client.from("missions").select("id,status,started_at").order("created_at", { ascending: false }).limit(50),
-    client.from("service_skus").select("id,code,status,service_id,catalog_services!inner(library_id)").eq("catalog_services.library_id", input.libraryId).eq("status", "ACTIVE").limit(100),
+    collectOperationPages((from,to)=>client.from("service_skus").select("id,code,status,service_id,catalog_services!inner(library_id)").eq("catalog_services.library_id", input.libraryId).eq("status", "ACTIVE").order("id").range(from,to)),
   ]);
-  if([requestsResult,anomaliesResult,recommendationsResult,opportunitiesResult,qualificationsResult,capacitiesResult,documentVersionsResult,threadsResult,membersResult,missionsResult,skusResult].some((r)=>r.error))throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
-  const requestRows = rows(z.object({ id, status: z.string(), service_id: id }), requestsResult.data);
+  if([requestsResult,anomaliesResult,recommendationsResult,opportunitiesResult,threadsResult,membersResult,skusResult].some((r)=>r.error))throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
+  const requestRows = rows(z.object({ id, status: z.string(), service_id: id, current_version_id:id.nullable() }), requestsResult.data);
   const requestIds = requestRows.map((item) => item.id);
-  const missionRows = rows(z.object({ id, status: z.string(), started_at: z.string().nullable() }), missionsResult.data);
+  const missionRows = missionSnapshot.data.missions;
   const serviceIds = [...new Set([
     ...requestRows.map((item) => item.service_id),
     ...rows(z.object({ service_id: id.nullable() }), recommendationsResult.data).flatMap((item) => item.service_id ? [item.service_id] : []),
-    ...rows(z.object({ service_id: id }), qualificationsResult.data).map((item) => item.service_id),
+    ...dossiers.data.flatMap(provider=>provider.qualifications.map(qualification=>qualification.serviceId)),
     ...rows(z.object({ service_id: id }), skusResult.data).map((item) => item.service_id),
   ])];
   const [servicesResult, versionsResult, matchingResult, rfqsResult, disputesResult, anomalyDefResult, riskDefResult, recoDefResult, proposalResult] = await Promise.all([
     serviceIds.length
-      ? client.from("catalog_services").select("id,code").in("id", serviceIds).limit(200)
+      ? collectOperationIds(serviceIds,(ids,from,to)=>client.from("catalog_services").select("id,code").in("id", ids).order("id").range(from,to))
       : Promise.resolve({ data: [], error: null }),
     requestIds.length
-      ? client.from("service_request_versions").select("request_id,urgency").in("request_id", requestIds).limit(200)
+      ? collectOperationIds(requestIds,(ids,from,to)=>client.from("service_request_versions").select("id,request_id,urgency").in("request_id", ids).order("id").range(from,to))
       : Promise.resolve({ data: [], error: null }),
     requestIds.length
-      ? client.from("matching_runs").select("id,request_id").in("request_id", requestIds).order("started_at", { ascending: false }).limit(50)
+      ? collectOperationIds(requestIds,(ids,from,to)=>client.from("matching_runs").select("id,request_id").in("request_id", ids).order("started_at", { ascending: false }).order("id").range(from,to))
       : Promise.resolve({ data: [], error: null }),
     requestIds.length
-      ? client.from("rfqs").select("id,request_id").in("request_id", requestIds).limit(100)
+      ? collectOperationIds(requestIds,(ids,from,to)=>client.from("rfqs").select("id,request_id").in("request_id", ids).order("id").range(from,to))
       : Promise.resolve({ data: [], error: null }),
     missionRows.length
-      ? client.from("dispute_cases").select("id,status,urgency,obligation_key,mission_id").in("mission_id", missionRows.map((item) => item.id)).limit(100)
+      ? collectOperationIds(missionRows.map((item) => item.id),(ids,from,to)=>client.from("dispute_cases").select("id,status,urgency,obligation_key,mission_id").in("mission_id", ids).order("id").range(from,to))
       : Promise.resolve({ data: [], error: null }),
-    client.from("anomaly_definition_versions").select("id,definition_id,severity,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).limit(200),
-    client.from("risk_definition_versions").select("id,definition_id,criticality,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).limit(200),
-    client.from("recommendation_definition_versions").select("id,definition_id,service_id,solution_level,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).limit(200),
-    client.from("franchise_volume_proposals").select("id,sku_id,status,payment_model").eq("library_id", input.libraryId).order("created_at", { ascending: false }).limit(100),
+    collectOperationPages((from,to)=>client.from("anomaly_definition_versions").select("id,definition_id,severity,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("risk_definition_versions").select("id,definition_id,criticality,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("recommendation_definition_versions").select("id,definition_id,service_id,solution_level,title_fr,title_ar,version").eq("library_id", input.libraryId).order("version", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("franchise_volume_proposals").select("id,sku_id,status,payment_model").eq("library_id", input.libraryId).order("created_at", { ascending: false }).order("id").range(from,to)),
   ]);
   if([servicesResult,versionsResult,matchingResult,rfqsResult,disputesResult,anomalyDefResult,riskDefResult,recoDefResult,proposalResult].some((r)=>r.error))throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const serviceCodes = new Map(rows(z.object({ id, code: z.string() }), servicesResult.data).map((item) => [item.id, item.code]));
-  const qualificationIdentities = rows(z.object({
-    id,
-    service_id: id,
-    row_version: z.number(),
-    current_decision_id: id.nullable(),
-  }), qualificationsResult.data);
-  const decisionIds = qualificationIdentities.flatMap((item) => item.current_decision_id ? [item.current_decision_id] : []);
-  const decisionsResult = decisionIds.length
-    ? await client.from("provider_qualification_decisions").select("id,status").in("id", decisionIds).limit(200)
-    : { data: [], error: null };
-  if(decisionsResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
-  const decisionStatus = new Map(rows(z.object({ id, status: z.string() }), decisionsResult.data).map((item) => [item.id, item.status]));
   function latestBy<T extends { definition_id: string; version: number }>(value: unknown, schema: z.ZodType<T>): T[] {
     const latest = new Map<string, T>();
     for (const item of rows(schema, value)) {
@@ -133,21 +104,21 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
     }
     return [...latest.values()];
   }
-  const urgencies = new Map(rows(z.object({ request_id: id, urgency: z.string() }), versionsResult.data).map((item) => [item.request_id, item.urgency]));
+  const urgencies = new Map(rows(z.object({ id, request_id: id, urgency: z.string() }), versionsResult.data).map((item) => [item.id, item.urgency]));
   const matchingRuns = rows(z.object({ id, request_id: id }), matchingResult.data);
   const candidatesResult = matchingRuns.length
-    ? await client.from("matching_candidates").select("id,matching_run_id,eligible,score_basis_points").in("matching_run_id", matchingRuns.map((item) => item.id)).limit(200)
+    ? await collectOperationIds(matchingRuns.map((item) => item.id),(ids,from,to)=>client.from("matching_candidates").select("id,matching_run_id,eligible,score_basis_points").in("matching_run_id", ids).order("id").range(from,to))
     : { data: [], error: null };
   if(candidatesResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const runRequest = new Map(matchingRuns.map((item) => [item.id, item.request_id]));
   const rfqs = rows(z.object({ id, request_id: id }), rfqsResult.data);
   const quotesResult = rfqs.length
-    ? await client.from("quotes").select("id,status,rfq_id").in("rfq_id", rfqs.map((item) => item.id)).limit(100)
+    ? await collectOperationIds(rfqs.map((item) => item.id),(ids,from,to)=>client.from("quotes").select("id,status,rfq_id").in("rfq_id", ids).order("id").range(from,to))
     : { data: [], error: null };
   if(quotesResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const quoteRows = rows(z.object({ id, status: z.string(), rfq_id: id }), quotesResult.data);
   const versionsQuoteResult = quoteRows.length
-    ? await client.from("quote_versions").select("quote_id,total_minor,currency,version_number").in("quote_id", quoteRows.map((item) => item.id)).limit(200)
+    ? await collectOperationIds(quoteRows.map((item) => item.id),(ids,from,to)=>client.from("quote_versions").select("quote_id,total_minor,currency,version_number").in("quote_id", ids).order("id").range(from,to))
     : { data: [], error: null };
   if(versionsQuoteResult.error)throw new Error("FRANCHISE_OPERATIONS_QUERY_FAILED");
   const latestQuote = new Map<string, { totalMinor: string; currency: string; version: number }>();
@@ -164,13 +135,14 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
   }
   const rfqRequest = new Map(rfqs.map((item) => [item.id, item.request_id]));
   return {
+    permissions:permissions.data,
     providerDossiers:dossiers.data,
     metrics:metrics?.success?metrics.data:null,
     requests: requestRows.map((item) => ({
       id: item.id,
       status: item.status,
       title: serviceCodes.get(item.service_id) ?? item.status,
-      urgency: urgencies.get(item.id) ?? null,
+      urgency: item.current_version_id ? urgencies.get(item.current_version_id) ?? null : null,
     })),
     matching: rows(z.object({
       id,
@@ -243,34 +215,9 @@ export async function loadFranchiseOperations(input: { libraryId: string; operat
       serviceCode: item.service_id ? serviceCodes.get(item.service_id) ?? null : null,
       solutionLevel: item.solution_level,
     })),
-    qualifications: qualificationIdentities.map((item) => ({
-      id: item.id,
-      serviceId: item.service_id,
-      serviceCode: serviceCodes.get(item.service_id) ?? null,
-      status: (item.current_decision_id ? decisionStatus.get(item.current_decision_id) : null) ?? "PENDING",
-      rowVersion: item.row_version,
-    })),
-    capacities: rows(z.object({
-      id,
-      service_id: id.nullable(),
-      capacity_status: z.string(),
-      available_units: z.number().nullable(),
-    }), capacitiesResult.data).map((item) => ({
-      id: item.id,
-      serviceId: item.service_id,
-      status: item.capacity_status,
-      availableUnits: item.available_units,
-    })),
-    documents: rows(z.object({
-      id,
-      status: z.string(),
-      provider_document_families: z.object({ document_kind: z.string(), code: z.string() }),
-    }), documentVersionsResult.data).map((item) => ({
-      id: item.id,
-      kind: item.provider_document_families.document_kind,
-      code: item.provider_document_families.code,
-      status: item.status,
-    })),
+    qualifications: dossiers.data.flatMap(provider=>provider.qualifications.map(item=>({id:item.id,serviceId:item.serviceId,serviceCode:item.serviceCode,status:item.status,rowVersion:item.rowVersion}))),
+    capacities: dossiers.data.flatMap(provider=>provider.capacities.map(item=>({id:item.id,serviceId:item.serviceId,status:item.status,availableUnits:item.availableUnits}))),
+    documents: dossiers.data.flatMap(provider=>provider.documents.map(document=>({id:document.id,kind:document.kind,code:document.code,status:document.status}))),
     threads: rows(z.object({ id, subject: z.string(), status: z.string() }), threadsResult.data).map((item) => ({
       id: item.id,
       subject: item.subject,

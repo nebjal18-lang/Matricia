@@ -239,7 +239,8 @@ describe("alignement maquettes constructeurs et espaces (06–20)", () => {
     expect(html).toContain("franchise-kanban");
     expect(html).toContain("Professionnels de votre périmètre");
     expect(html).toContain("Ouvrir le dossier fournisseur");
-    expect(html).toContain("Revues à réaliser");
+    expect(html).toContain("Signalements disponibles");
+    expect(html).not.toContain("Revues à réaliser");
     expect(html).toContain("franchise-dense-table");
     expect(html).toContain("franchise-perf-kpis");
     expect(html).toContain("Volume de demandes");
@@ -270,7 +271,8 @@ describe("alignement maquettes constructeurs et espaces (06–20)", () => {
     expect(html).toContain("Conversations");
     expect(html).toContain("/fr/franchise/documents/renouvellements");
     expect(html).toContain("/fr/franchise/notifications");
-    expect(html).toContain("Aucun montant, solde ou donnée financière");
+    expect(html).toContain("Vérification financière indisponible");
+    expect(html).toContain("Aucun solde ni absence de données ne peut être certifié");
     expect(html).toContain("Demander une modification");
     expect(html).toContain("Informatique");
     expect(html).not.toMatch(splitPattern);

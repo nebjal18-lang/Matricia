@@ -347,12 +347,12 @@ export function FranchiseLibraryStructureBoard({
                 ))}
               </ul>
             )}
-            <FranchiseCategoryCreateForm locale={locale} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} />
-            <FranchiseSubcategoryCreateForm locale={locale} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} categories={workspace.categories} />
+            <FranchiseCategoryCreateForm locale={locale} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
+            <FranchiseSubcategoryCreateForm locale={locale} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} categories={workspace.categories} />
             {workspace.categories.flatMap((category) => [
-              <FranchiseHierarchySubmitForm key={`cat-${category.id}`} locale={locale} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} objectType="CATEGORY" item={category} />,
+              <FranchiseHierarchySubmitForm key={`cat-${category.id}`} locale={locale} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} objectType="CATEGORY" item={category} />,
               ...category.children.map((child) => (
-                <FranchiseHierarchySubmitForm key={`sub-${child.id}`} locale={locale} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} objectType="SUBCATEGORY" item={child} />
+                <FranchiseHierarchySubmitForm key={`sub-${child.id}`} locale={locale} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} objectType="SUBCATEGORY" item={child} />
               )),
             ])}
           </article>
@@ -361,9 +361,9 @@ export function FranchiseLibraryStructureBoard({
           <article className="client-card">
             <header><h2>{c.version}</h2></header>
             <dl className="franchise-props">
-              <div><small>{c.libraryTitle}</small><span>{workspace.mandate.libraryName}</span></div>
-              <div><small>{c.version}</small><span dir="ltr">{workspace.mandate.libraryRowVersion}</span></div>
-              <div><small>{c.state}</small><span>{workspace.mandate.libraryStatus}</span></div>
+              <div><dt>{c.libraryTitle}</dt><dd>{workspace.mandate.libraryName}</dd></div>
+              <div><dt>{c.version}</dt><dd dir="ltr">{workspace.mandate.libraryRowVersion}</dd></div>
+              <div><dt>{c.state}</dt><dd>{workspace.mandate.libraryStatus}</dd></div>
             </dl>
           </article>
         ) : null}
@@ -638,8 +638,8 @@ export function FranchiseLibraryOverviewBoard({
             </p>
             <p className="client-access-note">{c.publishedImmutable}</p>
             <dl className="franchise-props">
-              <div><small>{c.libraryElementsIncluded}</small><span dir="ltr">{published}</span></div>
-              <div><small>FR · AR</small><span>{c.libraryFullCoverage}</span></div>
+              <div><dt>{c.libraryElementsIncluded}</dt><dd dir="ltr">{published}</dd></div>
+              <div><dt>FR · AR</dt><dd>{c.libraryFullCoverage}</dd></div>
             </dl>
             <Link href={`/${locale}/franchise/bibliotheque/version${query}`} className="franchise-cta">{c.libraryPrepareVersion} <ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>
           </article>

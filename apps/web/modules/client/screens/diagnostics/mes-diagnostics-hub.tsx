@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Clock3, Headset, Lightbulb, ListChecks, Target } from "lucide-react";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -39,6 +40,7 @@ const copy = {
     contact: "Nous contacter",
     resources: "Mes ressources utiles",
     overview: "Aperçu de votre situation",
+    empty: "Aucun diagnostic complet sur cette page.",
   },
   ar: {
     title: "تشخيصاتي",
@@ -61,6 +63,7 @@ const copy = {
     contact: "تواصلوا معنا",
     resources: "مواردي المفيدة",
     overview: "نظرة على وضعكم",
+    empty: "لا يوجد تشخيص كامل في هذه الصفحة.",
   },
 } as const;
 
@@ -71,6 +74,10 @@ export function MesDiagnosticsHub({
   todos,
   resources,
   assistanceHref,
+  historyFilter = "all",
+  filterHrefs,
+  indicativeHistory,
+  historyFailed = false,
 }: {
   locale: Locale;
   cards: DiagnosticCard[];
@@ -78,6 +85,10 @@ export function MesDiagnosticsHub({
   todos: TodoItem[];
   resources: ResourceItem[];
   assistanceHref: string;
+  historyFilter?: "all" | "complete" | "indicative";
+  filterHrefs?: Record<"all" | "complete" | "indicative", string>;
+  indicativeHistory?: ReactNode;
+  historyFailed?: boolean;
 }) {
   const t = copy[locale];
   return (
@@ -134,14 +145,12 @@ export function MesDiagnosticsHub({
           <section className="diag-hub-history" aria-labelledby="diag-history-title">
             <div className="diag-hub-history-head">
               <h2 id="diag-history-title">{t.history}</h2>
-              <div className="diag-hub-filters" role="tablist" aria-label={t.history}>
-                <span className="is-active">{t.all}</span>
-                <span>{t.complete}</span>
-                <span>{t.indicative}</span>
-              </div>
+              {filterHrefs ? <nav className="diag-hub-filters" aria-label={t.history}>
+                {(["all", "complete", "indicative"] as const).map((filter) => <Link key={filter} href={filterHrefs[filter]} aria-current={historyFilter === filter ? "page" : undefined} className={`inline-flex min-h-11 items-center rounded-lg px-3 focus-visible:outline-2 focus-visible:outline-offset-2 ${historyFilter === filter ? "is-active" : ""}`}>{t[filter]}</Link>)}
+              </nav> : null}
               <small>{t.sort}</small>
             </div>
-            <ul>
+            {historyFilter !== "indicative" ? <><ul>
               {history.map((row) => (
                 <li key={row.id}>
                   <span className="diag-hub-status" data-status={row.status}>
@@ -155,7 +164,8 @@ export function MesDiagnosticsHub({
                   <Link href={row.href}>{row.status === "completed" ? t.view : t.resume}<ArrowRight className="rtl-mirror" size={14} aria-hidden /></Link>
                 </li>
               ))}
-            </ul>
+            </ul>{!history.length && !historyFailed ? <p role="status">{t.empty}</p> : null}</> : null}
+            {historyFilter !== "complete" ? indicativeHistory : null}
           </section>
         </div>
 

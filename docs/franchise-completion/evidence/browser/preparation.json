@@ -1,0 +1,29 @@
+{
+  "scope": "LOCAL_FRANCHISE_BROWSER_PREPARATION_ONLY",
+  "source": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+  "environment": "development-local-isolated",
+  "ownedFixture": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "internalNetwork": true,
+  "publicContainerPorts": 0,
+  "nativeNewActors": 2,
+  "userJwtFabricated": false,
+  "identityAndMfa": "Genuine local GoTrue OTP and verified TOTP AAL2",
+  "organizationCreation": "create_or_request_organization",
+  "organizationStatus": "PENDING",
+  "staffActors": "Existing distinct native governance author and reviewer",
+  "mandateProposal": "propose_franchise_governance",
+  "independentApproval": "decide_franchise_governance",
+  "selfApproval": "42501 denied",
+  "activationExecuted": false,
+  "signatureCertified": false,
+  "backup": "Owned pre-mutation private pg_dump completed; restore not tested",
+  "localMachineKeys": "Expired 8-hour anon/service keys renewed only inside the owned local fixture; no user JWT fabricated and no external credential used",
+  "browserExecutable": "/usr/bin/chromium",
+  "preparationFailures": [
+    "Playwright-managed browser binaries were absent; existing system Chromium selected explicitly.",
+    "Development cold navigation exceeded the default 30-second navigation timeout. No production performance verdict is inferred.",
+    "An AAL2 user in a PENDING organization received FRANCHISE_ACTIVATION_MFA_REQUIRED from the contractual activation guard. This is recorded as a mixed-prerequisite defect, not as a successful signature or an MFA bypass."
+  ],
+  "hostedCertification": false
+}

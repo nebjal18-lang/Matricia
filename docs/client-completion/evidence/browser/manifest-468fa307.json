@@ -1,0 +1,22 @@
+{
+  "scope": "SAFE_FINAL_BROWSER_ARTIFACT_SHA256_MANIFEST",
+  "appTree": "468fa3077d29a31ae3d071eef830ff9f96b5a964",
+  "files": [
+    {
+      "file": "axe-final-468fa307.json",
+      "sha256": "1716d4808a23ba9f31f301840bf0cfb9b8f9bfb23abab7f578cec7cd00518270"
+    },
+    {
+      "file": "buyer-global-finance-468fa307.json",
+      "sha256": "7811b467ed253d2d8219dedb3e59f5c3c83b0d4013e5f9bd02fa6c981fa99e1a"
+    },
+    {
+      "file": "README.md",
+      "sha256": "3cc4c5b89e6e6b11fce6a46bd8a59e1a365eab86b718bb1b994c8b778eed1a6e"
+    }
+  ],
+  "contrastManifests": [
+    "contrast-before236caf9/manifest.json",
+    "contrast-after236caf9/manifest.json"
+  ]
+}

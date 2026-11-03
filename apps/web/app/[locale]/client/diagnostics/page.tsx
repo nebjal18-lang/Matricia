@@ -19,7 +19,7 @@ import { diagnosticToolMessages } from "@/modules/client/screens/diagnostics/too
 import { formatDimensionKey } from "@/modules/client/screens/diagnostics/journey";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 
-export default async function Diagnostics({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; page?: string }> }) {
+export default async function Diagnostics({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; page?: string; kind?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
@@ -31,18 +31,21 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
   const c = spaceCopy(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1",kind:query.kind??"all"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
         <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل التشخيصات." : "Impossible de charger les diagnostics."}</p></main>
       </ClientAppShell>
     );
   }
+  const page = Math.min(100000, Math.max(1, Number.parseInt(query.page ?? "1", 10) || 1));
+  const historyFilter = query.kind === "complete" || query.kind === "indicative" ? query.kind : "all";
+  const historyHref = (kind: string, pageNumber = 1) => `/${locale}/client/diagnostics?${new URLSearchParams({ organizationId: space.selectedOrganizationId, kind, page: String(pageNumber) })}`;
   const client = await getSupabaseServerClient();
-  const intakeResult = await client.from("public_diagnostic_intakes").select("id,organization_id,priorities,created_at").eq("organization_id", space.selectedOrganizationId).order("created_at", { ascending: false }).limit(100);
+  const intakeResult = await client.from("public_diagnostic_intakes").select("id,organization_id,priorities,created_at").eq("organization_id", space.selectedOrganizationId).order("created_at", { ascending: false }).order("id").range((page - 1) * 20, page * 20);
   const organizationIds = [...new Set([...result.value.sessions.map((session) => session.organizationId), ...(intakeResult.data ?? []).map((intake) => intake.organization_id)])];
   const organizationResult = organizationIds.length ? await client.from("organizations").select("id,display_name").in("id", organizationIds) : { data: [], error: null };
   if (organizationResult.error) {
     return (
-      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1",kind:query.kind??"all"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
         <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المؤسسات المرتبطة بالتشخيص." : "Impossible de charger les organisations liées au diagnostic."}</p></main>
       </ClientAppShell>
     );
@@ -98,7 +101,6 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
         }]
       : []),
   ];
-  const page = Math.min(100000,Math.max(1,Number.parseInt(query.page ?? "1",10)||1));
   const historyResult = page === 1 ? result : await (await createServerDiagnosticsRepository(space.selectedOrganizationId,page)).list();
   const historyRuns = historyResult.status === "success" ? historyResult.value.runs : [];
   const history = historyRuns.slice(0, 20).map((run) => ({
@@ -139,6 +141,7 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
 
   return (
     <ClientAppShell
+      languagePath={historyHref(historyFilter, page)}
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
@@ -147,8 +150,13 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
       kicker={c.kicker}
       actions={<Link href={questionnaireHref} className="client-cta">{c.startQuestionnaire}</Link>}
     >
+      {questionnaireResult.status === "error" ? <p role="alert" className="client-card">{locale === "fr" ? "La reprise du questionnaire est indisponible. Réessayez avant de créer un nouveau brouillon." : "استئناف الاستبيان غير متاح. حاولوا مجدداً قبل إنشاء مسودة جديدة."} <Link href={historyHref(historyFilter, page)}>{locale === "fr" ? "Réessayer" : "إعادة المحاولة"}</Link></p> : null}
       <MesDiagnosticsHub
         locale={locale}
+        historyFilter={historyFilter}
+        filterHrefs={{ all: historyHref("all"), complete: historyHref("complete"), indicative: historyHref("indicative") }}
+        historyFailed={historyResult.status === "error"}
+        indicativeHistory={<IndicativeIntakes locale={locale} failed={Boolean(intakeResult.error)} rows={(intakeResult.data ?? []).slice(0, 20).map((intake) => ({ id: intake.id, organizationId: intake.organization_id, organizationName: names.get(intake.organization_id) ?? space.organizationName ?? (locale === "fr" ? "Organisation" : "المؤسسة"), priorities: intake.priorities, createdAt: intake.created_at }))} />}
         cards={hubCards.length ? hubCards : [{
           id: "start",
           title: locale === "fr" ? "Commencer un diagnostic" : "بدء تشخيص",
@@ -163,22 +171,12 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
         assistanceHref={assistanceHref}
       />
       {historyResult.status === "error" ? <p role="alert">{locale === "fr" ? "Historique indisponible. Réessayez." : "السجل غير متاح. حاولوا مجدداً."}</p> : null}
-      <nav className="flex gap-4" aria-label={locale === "fr" ? "Pages de l’historique des diagnostics" : "صفحات سجل التشخيص"}>{page > 1 ? <Link href={`${space.selectedQuery}&page=${page-1}`}>{locale === "fr" ? "Précédent" : "السابق"}</Link> : null}{historyRuns.length > 20 ? <Link href={`${space.selectedQuery}&page=${page+1}`}>{locale === "fr" ? "Suivant" : "التالي"}</Link> : null}</nav>
+      <nav className="flex gap-4" aria-label={locale === "fr" ? "Pages de l’historique des diagnostics" : "صفحات سجل التشخيص"}>{page > 1 ? <Link href={historyHref(historyFilter, page - 1)}>{locale === "fr" ? "Précédent" : "السابق"}</Link> : null}{((historyFilter !== "indicative" && historyRuns.length > 20) || (historyFilter !== "complete" && (intakeResult.data?.length ?? 0) > 20)) ? <Link href={historyHref(historyFilter, page + 1)}>{locale === "fr" ? "Suivant" : "التالي"}</Link> : null}</nav>
       <CompleteForm disclosure={{summary:c.computeAnalysis,initialOpen:organizations.length>0&&!latest}} serviceChoices={serviceChoices} locale={locale} organizations={organizations} questionnaireHref={questionnaireHref} m={m} keyValue={randomUUID()}>
         {scopeServices.error?<p role="alert">{locale==="fr"?"Les périmètres de service sont momentanément indisponibles. L’analyse peut suivre les règles publiées ; réessayez pour choisir un contexte supplémentaire.":"نطاقات الخدمة غير متاحة مؤقتاً. يمكن للتحليل اتباع القواعد المنشورة؛ حاولوا مجدداً لاختيار سياق إضافي."}</p>:null}
         <DiagnosticTools locale={locale} query={space.selectedQuery} m={diagnosticToolMessages[locale]} />
       </CompleteForm>
-      <IndicativeIntakes
-        locale={locale}
-        failed={Boolean(intakeResult.error)}
-        rows={(intakeResult.data ?? []).map((intake) => ({
-          id: intake.id,
-          organizationId: intake.organization_id,
-          organizationName: names.get(intake.organization_id) ?? (locale === "fr" ? "Organisation" : "المؤسسة"),
-          priorities: intake.priorities,
-          createdAt: intake.created_at,
-        }))}
-      />
+
     </ClientAppShell>
   );
 }

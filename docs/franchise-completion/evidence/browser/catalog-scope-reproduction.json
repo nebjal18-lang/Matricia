@@ -1,0 +1,24 @@
+{
+  "scope": "NATIVE_ACTIVE_FRANCHISE_CATALOG_ACCESS_PREREQUISITE_REPRODUCTION",
+  "candidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "migrationCount": 533,
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "organizationStatus": "ACTIVE",
+  "franchiseStatus": "ACTIVE",
+  "activationMode": "NON_CONTRACTUAL_DEMO",
+  "activeOwnerAssignment": true,
+  "franchiseCatalogScope": true,
+  "catalogPageError": {
+    "code": "42501",
+    "message": "FRANCHISE_CATALOG_SCOPE_DENIED"
+  },
+  "operatorCatalogLibraryMandates": 0,
+  "activeOwnerViewDraftPolicyRows": 1,
+  "readerGuard": "private.franchise_catalog_reader_library requires CATALOG_VIEW_DRAFT via private.has_library_permission",
+  "expectedNextStep": "Resolve the governed library-delegation prerequisite without weakening the bounded reader or inserting an ad hoc production grant.",
+  "browserWorkspaceFailure": "FORBIDDEN",
+  "screenshot": "activation-core/first-governance-fr-390.png",
+  "manuallyGrantedCatalogAccess": false,
+  "coreAcceptance": "BLOCKED_BY_GOVERNED_LIBRARY_DELEGATION"
+}

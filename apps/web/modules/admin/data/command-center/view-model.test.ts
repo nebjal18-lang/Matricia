@@ -10,6 +10,12 @@ describe("summarizeAdminWork", () => {
   });
 });
 describe("dossierHref", () => {
+  it.each(["fr", "ar"] as const)("opens the governed plan and responsible member in %s", locale => {
+    expect(dossierHref(locale, { ...base, resourceType: "franchise_control_plan_owner", resourceId: "a3731000-0000-4000-8000-000000000001" })).toBe(`/${locale}/administration/gouvernance-franchise/plans/a3731000-0000-4000-8000-000000000001/responsable`);
+  });
+  it.each(["fr", "ar"] as const)("opens the private purpose-bound review in %s", locale => {
+    expect(dossierHref(locale, { ...base, resourceType: "franchise_governance_signal_review", resourceId: "a3711000-0000-4000-8000-000000000001" })).toBe(`/${locale}/administration/gouvernance-franchise/signalements/a3711000-0000-4000-8000-000000000001`);
+  });
   it("ouvre l’espace métier du dossier, pas le seul centre de commandement", () => {
     expect(dossierHref("fr", { ...base, resourceType: "MISSION_DISPUTE", resourceId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" })).toBe("/fr/administration/litiges/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
     expect(dossierHref("fr", { ...base, resourceType: "SERVICE_REQUEST", resourceId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" })).toBe("/fr/administration/demandes/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");

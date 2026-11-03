@@ -1,0 +1,18 @@
+{
+  "scope": "NATIVE_FRANCHISE_OTP_UI_MFA_AND_AUTHORIZED_DEEP_LINK",
+  "candidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "FAILED_OR_PREREQUISITE_BLOCKED",
+  "emailDeliveryCertified": false,
+  "otpRetrievedFrom": "Owned local GoTrue admin-generated OTP for an existing reserved test actor",
+  "originalActorSessionReplaced": false,
+  "userJwtFabricated": false,
+  "steps": [
+    {
+      "id": "LOGIN_UI_REQUESTS_OTP",
+      "status": "PASS",
+      "emailDeliveryCertified": false
+    }
+  ],
+  "failure": "TimeoutError: page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================"
+}

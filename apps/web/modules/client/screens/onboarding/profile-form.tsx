@@ -17,14 +17,18 @@ export function ClientProfileForm({
   idempotencyKey,
   profile,
   messages,
+  saveAction = saveClientProfile,
+  expectedProfileVersion,
 }: {
   organizationId: string;
   locale: Locale;
   idempotencyKey: string;
   profile: ClientProfileDraft | null;
   messages: ClientOnboardingMessages;
+  saveAction?: typeof saveClientProfile;
+  expectedProfileVersion?: number;
 }) {
-  const [state, action, pending] = useActionState(saveClientProfile, initialState);
+  const [state, action, pending] = useActionState(saveAction, initialState);
   const prefix = useId();
   const statusId = `${prefix}-status`;
   const invalid = state.status === "error" && state.reason === "VALIDATION";
@@ -49,6 +53,7 @@ export function ClientProfileForm({
   return (
     <form action={action} className="space-y-7" aria-describedby={statusId} noValidate>
       <input type="hidden" name="organizationId" value={organizationId} />
+      {expectedProfileVersion !== undefined ? <input type="hidden" name="expectedProfileVersion" value={expectedProfileVersion} /> : null}
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
 

@@ -3,6 +3,7 @@ update private.admin_execution_environment_v1 set environment='DEVELOPMENT',conf
 
 set local search_path=public,private,extensions;
 select plan(13);
+-- Independent validation and exact settlement are exercised natively in0347.
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values
  ('f2100000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','durable-owner@example.invalid','',now(),'{}','{}',now(),now()),
  ('f2100000-0000-4000-8000-000000000002','00000000-0000-0000-0000-000000000000','authenticated','authenticated','durable-accounting@example.invalid','',now(),'{}','{}',now(),now());
@@ -36,10 +37,10 @@ select set_config('request.jwt.claims','{"role":"service_role"}',true);
 select public.record_provider_payment_proof_scan_result((value->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('d',64),'durable-proof-clean')from durable_observed where key='upload';
 select set_config('request.jwt.claims','{"sub":"f2100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into durable_observed select 'recorded',public.finalize_my_provider_billing_intent((value->>'intent_id')::uuid)from durable_observed where key='intent';
-select is((select value->>'outcome'from durable_observed where key='recorded'),'PROVIDER_PAYMENT_RECORDED','trusted CLEAN can finalize the saved exact payment');
+select is((select value->>'outcome'from durable_observed where key='recorded'),'PROVIDER_FINANCIAL_DECLARATION_SUBMITTED','trusted CLEAN finalizes a durable declaration awaiting independent Finance');
 select is((select public.finalize_my_provider_billing_intent((value->>'intent_id')::uuid)from durable_observed where key='intent'),(select value from durable_observed where key='recorded'),'double click returns the archived financial result');
-select is((select count(*)from public.financial_entries where journal_id=(select(value->>'journal_id')::uuid from durable_observed where key='recorded')),2::bigint,'one balanced double-entry journal is created');
-select is((select sum(case direction when'DEBIT'then amount_minor else-amount_minor end)from public.financial_entries where journal_id=(select(value->>'journal_id')::uuid from durable_observed where key='recorded')),0::numeric,'recorded money remains exactly balanced');
+select is((select count(*)from public.financial_entries where organization_id='f2101000-0000-4000-8000-000000000001'),0::bigint,'a scanned declaration creates no cash journal before independent review');
+select is((select count(*)from public.provider_financial_declarations_v1 where provider_organization_id='f2101000-0000-4000-8000-000000000001'),1::bigint,'one immutable declaration survives a finalization replay');
 select throws_ok($$select public.cancel_my_provider_billing_intent((value->>'intent_id')::uuid)from durable_observed where key='intent'$$,'55000','RECORDED_BILLING_INTENT_IMMUTABLE','a completed payment cannot be cancelled through draft cancellation');
 select is(public.list_my_provider_billing_intents('f2101000-0000-4000-8000-000000000001'),'[]'::jsonb,'completed intent no longer appears in the refresh recovery list');
 set constraints all immediate;

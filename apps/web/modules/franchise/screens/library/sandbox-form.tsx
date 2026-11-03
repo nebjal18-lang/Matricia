@@ -1,4 +1,5 @@
 "use client";
+import { editorialFailureMessage } from "./command-errors";
 
 import { useActionState, useId } from "react";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
@@ -26,13 +27,14 @@ export function FranchiseQuestionnaireSandbox({
   const links = (workspace.compositionQuestions ?? []).filter((item) => item.versionId === selected?.questionnaireVersionId).sort((a,b)=>a.sortOrder-b.sortOrder);
   const questions = links.flatMap((link)=>{const q=workspace.questionVersionBank?.find((q)=>q.id===link.questionVersionId);return q?[q]:[];});
   const error = state.status === "error"
-    ? state.reason === "FORBIDDEN" ? c.forbidden : state.reason === "VALIDATION" ? (locale === "ar" ? "تحققوا من الحقول." : "Complétez la simulation.") : c.unavailable
+    ? state.reason === "MANDATE_REQUIRED" || state.reason === "UNAUTHENTICATED" ? editorialFailureMessage(state.reason,locale) : state.reason === "FORBIDDEN" ? c.forbidden : state.reason === "VALIDATION" ? (locale === "ar" ? "تحققوا من الحقول." : "Complétez la simulation.") : c.unavailable
     : null;
   if (!selected?.questionnaireVersionId) return <p className="client-access-note">{c.simulationPending}</p>;
   return (
     <form action={action} className="franchise-props-form">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="libraryId" value={workspace.mandate.libraryId} />
+      <input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId} />
       {organizationId ? <input type="hidden" name="organizationId" value={organizationId} /> : null}
       <input type="hidden" name="questionnaireId" value={selected.id} />
       <input type="hidden" name="questionnaireVersionId" value={selected.questionnaireVersionId} />

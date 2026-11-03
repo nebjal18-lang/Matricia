@@ -25,8 +25,9 @@ export type ClientHomeSnapshot =
       featuredProject: ClientFeaturedProject | null;
       comparison: ClientHomeComparison | null;
       insights: ClientHomeInsights;
+      partialSources?: Array<{ source: "requests" | "missions"; reason: "FORBIDDEN" | "UNAVAILABLE" }>;
     }
-  | { status: "error"; reason: "UNAUTHENTICATED" | "UNAVAILABLE"; counts: ClientHomeCounts; insights: ClientHomeInsights };
+  | { status: "error"; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE"; counts: ClientHomeCounts; insights: ClientHomeInsights };
 
 const emptyInsights: ClientHomeInsights = {
   documentsToReview: null,
@@ -64,35 +65,33 @@ export async function loadClientHomeSnapshot(input: {
   }
 
   try {
-    const repo = await createServerClientRfqRepository();
+    const repo = await createServerClientRfqRepository({ organizationId: input.organizationId, allForOrganization: true });
     const [rfq, missions] = await Promise.all([repo.list(), loadContractMissions(input.locale, input.organizationId)]);
 
-    if (rfq.status === "error" && rfq.reason === "UNAUTHENTICATED") {
+    if ((rfq.status === "error" && rfq.reason === "UNAUTHENTICATED") || (missions.status === "error" && missions.reason === "UNAUTHENTICATED")) {
       return { status: "error", reason: "UNAUTHENTICATED", counts: emptyUnavailable, insights: emptyInsights };
     }
 
-    const snapshotUnavailable = rfq.status === "error" || missions.status === "error";
-    if (snapshotUnavailable) {
-      return {
-        status: "error",
-        reason: "UNAVAILABLE",
-        counts: emptyUnavailable,
-        insights: emptyInsights,
-      };
-    }
-
-    const orgRequests = rfq.value.requests.filter((item) => item.organizationId === input.organizationId);
+    const partialSources: Array<{ source: "requests" | "missions"; reason: "FORBIDDEN" | "UNAVAILABLE" }> = [];
+    if (rfq.status === "error") partialSources.push({ source: "requests", reason: ["FORBIDDEN", "NO_CLIENT_ORGANIZATION", "ORGANIZATION_SELECTION_REQUIRED"].includes(rfq.reason) ? "FORBIDDEN" : "UNAVAILABLE" });
+    if (missions.status === "error") partialSources.push({ source: "missions", reason: ["FORBIDDEN_ORGANIZATION", "NO_CLIENT_ORGANIZATION", "ORGANIZATION_SELECTION_REQUIRED"].includes(missions.reason) ? "FORBIDDEN" : "UNAVAILABLE" });
+    if (partialSources.length === 2) return { status: "error", reason: partialSources.every((item) => item.reason === "FORBIDDEN") ? "FORBIDDEN" : "UNAVAILABLE", counts: emptyUnavailable, insights: emptyInsights };
+    const missionDashboard = missions.status === "success" ? missions.dashboard : null;
+    const orgRequests = rfq.status === "success" ? rfq.value.requests.filter((item) => item.organizationId === input.organizationId) : [];
     const counts = computeClientHomeCounts({
       requests: orgRequests.map((item) => ({ status: item.status, quoteCount: item.quoteCount })),
-      missions: missions.dashboard.missions.map((mission) => ({
+      missions: (missionDashboard?.missions ?? []).map((mission) => ({
         status: mission.status,
         milestones: mission.milestones.map((item) => ({ status: item.status, dueAt: item.dueAt })),
         deliverables: mission.deliverables.map((item) => ({ status: item.status })),
       })),
-      contracts: missions.dashboard.contracts.map((item) => ({ status: item.status, signatureCount: item.signatureCount })),
+      contracts: (missionDashboard?.contracts ?? []).map((item) => ({ status: item.status, signatureCount: item.signatureCount })),
       actionItems: input.actionItems,
       now: input.now,
     });
+
+    if (rfq.status === "error") { counts.openRequests = null; counts.quotesToReview = null; }
+    if (missions.status === "error") { counts.activeMissions = null; counts.pendingDecisions = null; counts.upcomingDue = null; }
 
     const featured = pickFeaturedRequest(orgRequests);
     let comparisonSnapshot: QuoteComparison | null = null;
@@ -138,12 +137,13 @@ export async function loadClientHomeSnapshot(input: {
       }),
       counts,
       lastRequestId: featured?.id ?? orgRequests[0]?.id ?? null,
-      organizationName: missions.dashboard.organizationName,
+      organizationName: missionDashboard?.organizationName ?? null,
+      ...(partialSources.length ? { partialSources } : {}),
       featuredProject,
       comparison,
       insights: toClientHomeInsights({
         actionItems: input.actionItems,
-        milestones: missions.dashboard.missions.flatMap((mission) => mission.milestones),
+        milestones: (missionDashboard?.missions ?? []).flatMap((mission) => mission.milestones),
         now: input.now,
       }),
     };

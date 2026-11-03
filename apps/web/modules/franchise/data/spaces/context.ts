@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { collectCatalogPages } from "@/modules/franchise/data/library/paged-query";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -12,7 +13,14 @@ const membershipSchema = z.object({
 
 export async function resolveFranchiseSpace(input: { locale: Locale; organizationId?: string; franchiseId?: string }) {
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const { data: auth, error: authError } = await client.auth.getUser();
+  const authFailure = classifyAuthReadFailure(authError);
+  if (authFailure === "UNAUTHENTICATED" || (!authFailure && !auth.user)) return { status: "unauthenticated" as const };
+  if (authFailure === "UNAVAILABLE") return {
+    status: "success" as const, locale: input.locale, userEmail: null,
+    selectedOrganizationId: null, selectedQuery: "", organizationName: null,
+    organizations: [] as Array<{ id: string; name: string }>, errorReason: "QUERY_FAILED" as const,
+  };
   if (!auth.user) return { status: "unauthenticated" as const };
   const response = await collectCatalogPages((from, to) => client.from("organization_memberships")
     .select("organization_id,organizations!inner(display_name,status),organization_member_roles(role_code,revoked_at)")

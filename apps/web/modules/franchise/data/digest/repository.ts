@@ -1,3 +1,5 @@
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
+import { collectOperationPages } from "../operations/paging";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { digestConfigurationRow, digestJobRow, digestRow, latestConfigurations, type FranchiseDigestDashboard } from "./model";
@@ -10,18 +12,19 @@ const membership = z.object({ organization_id: id, organization_member_roles: z.
 
 export type FranchiseDigestLoadResult = { status: "success"; dashboard: FranchiseDigestDashboard } | { status: "error"; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-export async function loadFranchiseDigest(franchiseId?: string): Promise<FranchiseDigestLoadResult> {
+async function readFranchiseDigest(franchiseId?: string): Promise<FranchiseDigestLoadResult> {
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const { data: auth,error:authError } = await client.auth.getUser();
+  if(authError)return{status:"error",reason:classifyAuthReadFailure(authError)==="UNAUTHENTICATED"?"UNAUTHENTICATED":"QUERY_FAILED"};
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const [franchisesResult, mandatesResult, territoriesResult, membershipsResult, configurationsResult, digestsResult, jobsResult] = await Promise.all([
-    client.from("franchises").select("id,operator_organization_id,territory_code,status,current_mandate_version_id").match(franchiseId ? { id: franchiseId } : {}).eq("status", "ACTIVE").order("created_at", { ascending: false }).limit(100),
-    client.from("franchise_mandate_versions").select("id,franchise_id,territory_version_id,version,mandate_status").match(franchiseId ? { franchise_id: franchiseId } : {}).eq("mandate_status", "ACTIVE").limit(100),
-    client.from("franchise_territory_versions").select("id,franchise_id,territory_code,name_fr,name_ar").match(franchiseId ? { franchise_id: franchiseId } : {}).limit(200),
-    client.from("organization_memberships").select("organization_id,organization_member_roles(role_code,franchise_id,revoked_at,organization_member_franchise_assignments(franchise_id,revoked_at))").eq("user_id", auth.user.id).eq("status", "ACTIVE").limit(100),
-    client.from("franchise_daily_digest_config_versions").select("id,franchise_id,recipient_user_id,version,enabled,frequency,local_send_time,time_zone,locale,created_at").match(franchiseId ? { franchise_id: franchiseId } : {}).eq("recipient_user_id", auth.user.id).order("version", { ascending: false }).limit(300),
-    client.from("franchise_daily_digests").select("id,franchise_id,digest_date,locale,metrics_snapshot,generated_at").match(franchiseId ? { franchise_id: franchiseId } : {}).order("digest_date", { ascending: false }).limit(60),
-    client.from("franchise_daily_digest_jobs").select("id,digest_id,franchise_id,recipient_user_id,status,attempt_count,next_attempt_at,last_error_code,updated_at").match(franchiseId ? { franchise_id: franchiseId } : {}).eq("recipient_user_id", auth.user.id).order("updated_at", { ascending: false }).limit(100),
+    collectOperationPages((from,to)=>client.from("franchises").select("id,operator_organization_id,territory_code,status,current_mandate_version_id").match(franchiseId ? { id: franchiseId } : {}).eq("status", "ACTIVE").order("created_at", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("franchise_mandate_versions").select("id,franchise_id,territory_version_id,version,mandate_status").match(franchiseId ? { franchise_id: franchiseId } : {}).eq("mandate_status", "ACTIVE").order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("franchise_territory_versions").select("id,franchise_id,territory_code,name_fr,name_ar").match(franchiseId ? { franchise_id: franchiseId } : {}).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("organization_memberships").select("organization_id,organization_member_roles(role_code,franchise_id,revoked_at,organization_member_franchise_assignments(franchise_id,revoked_at))").eq("user_id", auth.user.id).eq("status", "ACTIVE").order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("franchise_daily_digest_config_versions").select("id,franchise_id,recipient_user_id,version,enabled,frequency,local_send_time,time_zone,locale,created_at").match(franchiseId ? { franchise_id: franchiseId } : {}).eq("recipient_user_id", auth.user.id).order("version", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("franchise_daily_digests").select("id,franchise_id,digest_date,locale,metrics_snapshot,generated_at").match(franchiseId ? { franchise_id: franchiseId } : {}).order("digest_date", { ascending: false }).order("id").range(from,to)),
+    collectOperationPages((from,to)=>client.from("franchise_daily_digest_jobs").select("id,digest_id,franchise_id,recipient_user_id,status,attempt_count,next_attempt_at,last_error_code,updated_at").match(franchiseId ? { franchise_id: franchiseId } : {}).eq("recipient_user_id", auth.user.id).order("updated_at", { ascending: false }).order("id").range(from,to)),
   ]);
   if ([franchisesResult, mandatesResult, territoriesResult, membershipsResult, configurationsResult, digestsResult, jobsResult].some((result) => result.error)) return { status: "error", reason: "QUERY_FAILED" };
   const franchises = z.array(franchise).safeParse(franchisesResult.data), mandates = z.array(mandate).safeParse(mandatesResult.data), territories = z.array(territory).safeParse(territoriesResult.data), memberships = z.array(membership).safeParse(membershipsResult.data), configurations = z.array(digestConfigurationRow).safeParse(configurationsResult.data), digests = z.array(digestRow).safeParse(digestsResult.data), jobs = z.array(digestJobRow).safeParse(jobsResult.data);
@@ -32,4 +35,9 @@ export async function loadFranchiseDigest(franchiseId?: string): Promise<Franchi
   if (!scoped.length) return { status: "error", reason: "FORBIDDEN" };
   const ids = new Set(scoped.map((item) => item.id));
   return { status: "success", dashboard: { currentUserId: auth.user.id, franchises: scoped, configurations: latestConfigurations(configurations.data.filter((item) => ids.has(item.franchise_id))), digests: digests.data.filter((item) => ids.has(item.franchise_id)), jobs: jobs.data.filter((item) => ids.has(item.franchise_id)) } };
+}
+
+/** A transport rejection is an incident, never a successful empty workspace. */
+export async function loadFranchiseDigest(franchiseId?:string):Promise<FranchiseDigestLoadResult>{
+ try{return await readFranchiseDigest(franchiseId);}catch{return{status:"error",reason:"QUERY_FAILED"};}
 }

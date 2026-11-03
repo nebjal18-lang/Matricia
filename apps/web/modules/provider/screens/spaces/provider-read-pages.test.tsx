@@ -47,7 +47,8 @@ describe.each(["fr", "ar"] as const)("provider read failures in %s", (locale) =>
       expect(html).toContain(`organizationId=${organizationId}`);
     }
     expect(qualification).toHaveBeenCalledWith(organizationId);
-    expect(quotes).toHaveBeenCalledWith(organizationId);
+    expect(quotes).toHaveBeenCalledWith(organizationId, {page:1,query:undefined,mode:"consultations",tab:undefined});
+    expect(quotes).toHaveBeenCalledWith(organizationId, {page:1,query:undefined,mode:"quotes",tab:undefined});
   });
 
   it("requests an explicit choice for multiple memberships without querying an arbitrary tenant", async () => {

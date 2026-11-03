@@ -1,0 +1,35 @@
+import { z } from "zod";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { readAllPages, readRelatedPages } from "@/modules/shared/lib/data/read-pages";
+import { selectProviderMembership } from "@/modules/provider/data/spaces/organization-context";
+import { signatureReadinessSchema } from "@/modules/shared/lib/contracts-missions/signature-readiness";
+const id=z.string().uuid(),json=z.record(z.string(),z.unknown()),minor=z.union([z.string().regex(/^\d+$/u),z.number().int().safe().nonnegative()]).transform(String);
+const version=z.object({id,contract_id:id,version:z.number().int().positive(),request_snapshot:json,quote_snapshot:json,clauses:json,price_minor:minor,currency:z.string().regex(/^[A-Z]{3}$/u),content_hash:z.string().regex(/^[0-9a-f]{64}$/u),change_reason:z.string(),created_at:z.string()});
+const item=z.object({id,contract_version_id:id,item_key:z.string(),item_type:z.string(),label_fr:z.string(),label_ar:z.string(),details:json,sort_order:z.number().int()});
+const party=z.object({contract_version_id:id,organization_id:id,party_role:z.enum(["CLIENT","PROVIDER"]),legal_snapshot:json});
+const signature=z.object({id,contract_version_id:id,organization_id:id,signer_user_id:id,signer_role:z.string(),contract_hash:z.string(),proof:json,signed_at:z.string()});
+export type ProviderContractDossier=z.infer<typeof version>&{items:z.infer<typeof item>[];parties:z.infer<typeof party>[];signatures:z.infer<typeof signature>[]};
+export type ProviderContractList={organizationId:string;canPropose:boolean;page:number;hasMore:boolean;contracts:Array<{id:string;status:string;currentVersion:number;versions:ProviderContractDossier[];readiness:z.infer<typeof signatureReadinessSchema>|null}>};
+export async function loadProviderContracts(organizationId?:string,contractId?:string,page=1):Promise<{status:"success";value:ProviderContractList}|{status:"error";reason:"UNAUTHENTICATED"|"CONTEXT_REQUIRED"|"FORBIDDEN"|"UNAVAILABLE"|"INVALID_RESPONSE"}>{
+ const c=await getSupabaseServerClient(),auth=await c.auth.getUser();if(!auth.data.user)return{status:"error",reason:"UNAUTHENTICATED"};
+ const memberships=await readAllPages((from,to)=>c.from("organization_memberships").select("organization_id,organization_member_roles!inner(role_code,revoked_at)").eq("user_id",auth.data.user!.id).eq("status","ACTIVE").is("organization_member_roles.revoked_at",null).in("organization_member_roles.role_code",["PROVIDER_OWNER","PROVIDER_MANAGER","PROVIDER_TECHNICIAN","PROVIDER_SALES","PROVIDER_ACCOUNTING","PROVIDER_VIEWER"]).order("id").range(from,to));
+ if(memberships.error)return{status:"error",reason:"UNAVAILABLE"};const members=z.array(z.object({organization_id:id,organization_member_roles:z.array(z.object({role_code:z.string(),revoked_at:z.string().nullable()}))})).safeParse(memberships.data);
+ if(!members.success)return{status:"error",reason:"INVALID_RESPONSE"};const org=selectProviderMembership(members.data,organizationId);if(!org)return{status:"error",reason:organizationId?"FORBIDDEN":"CONTEXT_REQUIRED"};
+ const currentPage=Number.isSafeInteger(page)&&page>0&&page<=100000?page:1;
+ let query=c.from("contracts").select("id,status,current_version").eq("provider_organization_id",org.organization_id).order("updated_at",{ascending:false}).order("id",{ascending:false});
+ if(contractId){if(!id.safeParse(contractId).success)return{status:"error",reason:"FORBIDDEN"};query=query.eq("id",contractId)}else query=query.range((currentPage-1)*25,currentPage*25);
+ const contracts=await query,rows=z.array(z.object({id,status:z.string(),current_version:z.number().int().positive()})).safeParse(contracts.data);if(contracts.error)return{status:"error",reason:"UNAVAILABLE"};if(!rows.success)return{status:"error",reason:"INVALID_RESPONSE"};if(contractId&&!rows.data.length)return{status:"error",reason:"FORBIDDEN"};
+ const selected=rows.data.slice(0,25),ids=selected.map(c=>c.id),empty={status:"success"as const,value:{organizationId:org.organization_id,canPropose:org.organization_member_roles.some(r=>["PROVIDER_OWNER","PROVIDER_MANAGER"].includes(r.role_code)),page:currentPage,hasMore:rows.data.length>25,contracts:[]}};
+ if(!ids.length)return empty;
+ const versionsResult=await readRelatedPages(ids,(ids,from,to)=>c.from("contract_versions").select("id,contract_id,version,request_snapshot,quote_snapshot,clauses,price_minor::text,currency,content_hash,change_reason,created_at").in("contract_id",ids).order("contract_id").order("version",{ascending:false}).range(from,to));
+ const versions=z.array(version).safeParse(versionsResult.data);if(versionsResult.error)return{status:"error",reason:"UNAVAILABLE"};if(!versions.success)return{status:"error",reason:"INVALID_RESPONSE"};
+ const versionIds=versions.data.map(v=>v.id),[itemsResult,partiesResult,signaturesResult]=await Promise.all([
+ readRelatedPages(versionIds,(ids,from,to)=>c.from("contract_items").select("id,contract_version_id,item_key,item_type,label_fr,label_ar,details,sort_order").in("contract_version_id",ids).order("contract_version_id").order("sort_order").order("id").range(from,to)),
+ readRelatedPages(versionIds,(ids,from,to)=>c.from("contract_parties").select("contract_version_id,organization_id,party_role,legal_snapshot").in("contract_version_id",ids).order("contract_version_id").order("party_role").range(from,to)),
+ readRelatedPages(ids,(ids,from,to)=>c.from("contract_signatures").select("id,contract_version_id,organization_id,signer_user_id,signer_role,contract_hash,proof,signed_at").in("contract_id",ids).order("id").range(from,to)),
+ ]);
+ if(itemsResult.error||partiesResult.error||signaturesResult.error)return{status:"error",reason:"UNAVAILABLE"};const items=z.array(item).safeParse(itemsResult.data),parties=z.array(party).safeParse(partiesResult.data),signatures=z.array(signature).safeParse(signaturesResult.data);if(!items.success||!parties.success||!signatures.success)return{status:"error",reason:"INVALID_RESPONSE"};
+ const readinessById=new Map<string,z.infer<typeof signatureReadinessSchema>>();try{const result=await c.rpc("list_contract_signature_readiness_v1",{p_contract_ids:ids}),parsed=z.array(signatureReadinessSchema.extend({contract_id:id})).max(100).safeParse(result.data);if(!result.error&&parsed.success)for(const r of parsed.data)if(ids.includes(r.contract_id))readinessById.set(r.contract_id,r)}catch{/* Dossier remains readable with an explicit unavailable signature notice. */}
+ if(selected.some(c=>!versions.data.some(v=>v.contract_id===c.id&&v.version===c.current_version)))return{status:"error",reason:"INVALID_RESPONSE"};
+ return{status:"success",value:{...empty.value,contracts:selected.map(contract=>({id:contract.id,status:contract.status,currentVersion:contract.current_version,readiness:readinessById.get(contract.id)??null,versions:versions.data.filter(v=>v.contract_id===contract.id).map(v=>({...v,items:items.data.filter(i=>i.contract_version_id===v.id),parties:parties.data.filter(p=>p.contract_version_id===v.id),signatures:signatures.data.filter(s=>s.contract_version_id===v.id)}))}))}};
+}

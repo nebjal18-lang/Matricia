@@ -1,0 +1,31 @@
+{"sub":"a3680000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+ok 1 - Expert sees qualification authority independently of CRM write
+ok 2 - Expert sees definition authority for its exact mandate
+ok 3 - Expert does not gain procurement governance authority
+ok 4 - sibling mandate of the same operator is still denied to the Expert
+ok 5 - franchise review still requires AAL2 despite valid service authority
+{"sub":"a3680000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 6 - Expert can use the purpose-bound review for its service without a platform role
+ok 7 - no questionnaire is invented when this fixture has no submitted session
+ok 8 - service review remains denied outside every mandate of the Expert
+ok 9 - old A document is not revived as current when the latest family version targets B only
+{"sub":"a3680000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}
+ok 10 - Viewer read access is not a qualification mutation grant
+ok 11 - Viewer cannot edit definitions
+ok 12 - mission projection retains the exact selected mandate
+{"sub":"a3680000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal1"}
+ok 13 - Provider Manager may review qualification
+ok 14 - Provider Manager does not receive editorial definition rights
+ok 15 - non-owner/non-manager cannot submit a sibling proposal
+{"sub":"a3680000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 16 - Viewer cannot promote a readable dossier into an independent qualification review
+{"sub":"a3680000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 17 - franchise Manager who is also a member of the Provider cannot review itself
+ok 18 - legacy library-only command refuses multiple authorized mandates
+ok 19 - explicit target creates only a governed proposal
+ok 20 - proposal stays in selected territory even if another was created later
+ok 21 - exact six-decimal quantities persist without a float
+ok 22 - native proposal retry returns the same receipt
+ok 23 - denied calls and retry do not create another proposal
+ok 24 - UI capability projection grants no anonymous or worker access
+1..24

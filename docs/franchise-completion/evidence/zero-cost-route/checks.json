@@ -1,0 +1,44 @@
+{
+  "sourceBase": "349774fd",
+  "scope": "Admin SSR target selection, discoverability and authenticated scan retry UI",
+  "commands": [
+    {
+      "command": "pnpm --filter @matricia/web exec vitest run modules/admin/data/finance-cost-proofs app/[locale]/administration/finance/rapprochements-couts/page.test.tsx modules/shared/lib/finance-cost-proofs modules/admin/screens/pnl --maxWorkers=1",
+      "exitCode": 0,
+      "files": 7,
+      "testsPassed": 126,
+      "countingNote": "Includes the previous 52 UI tests and 24 existing backend-adapter tests; do not add these again to a full Web run."
+    },
+    {
+      "command": "pnpm --filter @matricia/web exec eslint modules/shared/lib/finance-cost-proofs modules/admin/screens/pnl modules/admin/data/finance-cost-proofs app/[locale]/administration/finance/rapprochements-couts app/[locale]/administration/finance/page.tsx",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm exec tsc -p work/finance-zero-ui/tsconfig.json",
+      "exitCode": 0,
+      "scope": "Isolated import graph covering the modified helper/UI directories, new DAL/SSR route and Finance index. Not a global build."
+    }
+  ],
+  "typesConfig": {
+    "extends": "../../apps/web/tsconfig.json",
+    "compilerOptions": {
+      "incremental": false,
+      "plugins": []
+    },
+    "include": [
+      "../../apps/web/modules/shared/lib/finance-cost-proofs/**/*.ts",
+      "../../apps/web/modules/admin/screens/pnl/**/*.ts",
+      "../../apps/web/modules/admin/screens/pnl/**/*.tsx",
+      "../../apps/web/modules/admin/data/finance-cost-proofs/**/*.ts",
+      "../../apps/web/app/[locale]/administration/finance/rapprochements-couts/**/*.tsx",
+      "../../apps/web/app/[locale]/administration/finance/page.tsx"
+    ],
+    "exclude": [
+      "../../node_modules"
+    ]
+  },
+  "sqlExecutedByAuthor": false,
+  "nativeBrowserExecutedByAuthor": false,
+  "productionModified": false,
+  "requiresCurrentBackendProjection": "get_finance_cost_documents_v1 document.can_retry is a server capability; absent means false"
+}

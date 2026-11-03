@@ -1,0 +1,13 @@
+{
+  "scope": "NATIVE_ADMIN_PROVIDER_QUEUE_VS_PROFILE_RLS_READ_ONLY_REPRODUCTION",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "organizations": 0,
+  "profiles": 1,
+  "snapshot": {
+    "rows": [],
+    "complete": true,
+    "snapshotAt": "2026-11-02T22:53:18.30321+00:00"
+  },
+  "errors": {}
+}

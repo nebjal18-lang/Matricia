@@ -1,0 +1,12 @@
+import{requireDevelopment,loadOwnState,docker,validateCanonicalSourceTarget}from'./safety.mjs';
+requireDevelopment();
+import{readFile,writeFile}from'node:fs/promises';
+import{resolve}from'node:path';
+import{createHash}from'node:crypto';
+const state=await loadOwnState(),source=validateCanonicalSourceTarget(JSON.parse(await readFile(resolve(process.argv[2]??'')))),container=JSON.parse(docker(['inspect',source.name]))[0];
+if(source.migrationCount!==458||container.Config.Labels?.['matricia.isolated-replay']!==source.token||container.HostConfig.NetworkMode!=='none'||Object.values(container.NetworkSettings.Ports??{}).some(ports=>ports?.length))throw Error('CANONICAL_OWNED_458_SOURCE_REQUIRED');
+const sql=`select jsonb_agg(jsonb_build_object('function',p.proname,'securityDefiner',p.prosecdef,'searchPath',p.proconfig,'bodyHash',md5(p.prosrc),'runtimeExecute',(select jsonb_object_agg(role_name,has_function_privilege(role_name,p.oid,'execute'))from(values('anon'),('authenticated'),('service_role'))r(role_name)))order by p.proname)from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname in('assert_financial_journal_has_entries','assert_financial_journal_balanced','assert_credit_wallet_nonnegative');`;
+const query=name=>JSON.parse(docker(['exec','-i',name,'psql','-X','-U','supabase_admin','-d','postgres','-Atq','-v','ON_ERROR_STOP=1'],{input:sql})),reference=query(source.name),target=query(state.database);
+if(JSON.stringify(reference)!==JSON.stringify(target)||target.length!==3||target.some(guard=>!guard.securityDefiner||guard.searchPath.join()!=='search_path=pg_catalog'||Object.values(guard.runtimeExecute).some(Boolean)))throw Error('CANONICAL_GUARD_FIDELITY_REQUIRED');
+const migration='20261102037000_deferred_ledger_invariant_execution_context.sql',proof={scope:'GUARD_DELTA_37000_SOURCE_AND_TARGET_READ_ONLY_VERIFICATION',sourcePurpose:source.purpose,sourceMigrationCount:source.migrationCount,targetAdditionalMigrations:state.additionalMigrations,migration,sha256:createHash('sha256').update(await readFile('supabase/migrations/'+migration)).digest('hex'),historical457ReceiptPreserved:'acl-fidelity/after.json',current458Fidelity:'acl-fidelity/before.json',guards:target,ledgerAclChanges:0,status:'PASSED',greenSqlReceipt:false};
+await writeFile(resolve(state.directory,'acl-fidelity/guard-delta37000.json'),JSON.stringify(proof,null,2));console.log(JSON.stringify({status:proof.status,sourceMigrations:source.migrationCount,guards:target.length,runtimeExecute:false,ledgerAclChanges:0}));

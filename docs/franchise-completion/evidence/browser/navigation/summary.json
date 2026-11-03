@@ -1,0 +1,294 @@
+{
+  "scope": "FRANCHISE_MULTI_MANDATE_CONTEXT_SEARCH_LANGUAGE_AND_BOUNDARIES",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "FAILED",
+  "cases": [
+    {
+      "id": "EXPLICIT_MANDATE_SELECTION",
+      "status": "FAIL",
+      "authorizedOptions": 2,
+      "optionLabels": [
+        "FRANCHISEE",
+        "FRANCHISEE"
+      ],
+      "failure": "Error: AUTHORIZED_MANDATE_OPTIONS_NEED_DISTINCT_BUSINESS_LABELS"
+    },
+    {
+      "id": "GLOBAL_SEARCH_REAL_TERM",
+      "status": "FAIL",
+      "failure": "TimeoutError: locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form.client-shell-search').locator('input[name=\"q\"]')\u001b[22m\n\u001b[2m    - locator resolved to <input name=\"q\" id=\"franchise-shell-search\" placeholder=\"Rechercher un service, une question, une règle…\"/>\u001b[22m\n\u001b[2m    - fill(\"TEST\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    34 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and editable\u001b[22m\n"
+    },
+    {
+      "id": "GLOBAL_SEARCH_NO_RESULT",
+      "status": "PASS",
+      "resultLinks": 0,
+      "scopePreserved": true
+    },
+    {
+      "id": "SPA_DETAIL_LANGUAGE_AND_SCOPE",
+      "status": "PASS",
+      "documentReloaded": false,
+      "detailPreserved": true,
+      "scopePreserved": true
+    },
+    {
+      "id": "GLOBAL_ROLE_fr_notifications",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_fr_organisation",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_fr_securite/compte",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_fr_securite/sessions",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_ar_notifications",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_ar_organisation",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_ar_securite/compte",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "id": "GLOBAL_ROLE_ar_securite/sessions",
+      "status": "PASS",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "id": "MENU_fr_375",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_fr_390",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_fr_768",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_fr_1440",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_ar_375",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_ar_390",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_ar_768",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "MENU_ar_1440",
+      "status": "PASS",
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "id": "FOREIGN_RLS_AND_RPC_DENIED",
+      "status": "PASS",
+      "hiddenRows": true,
+      "rpcCode": "42501",
+      "pages": [
+        {
+          "path": "services",
+          "status": "DENIED"
+        },
+        {
+          "path": "documents",
+          "status": "DENIED"
+        },
+        {
+          "path": "marketing",
+          "status": "DENIED"
+        },
+        {
+          "path": "finance",
+          "status": "DENIED"
+        },
+        {
+          "path": "gouvernance",
+          "status": "DENIED"
+        },
+        {
+          "path": "demandes",
+          "status": "DENIED"
+        }
+      ]
+    }
+  ],
+  "pageErrors": [],
+  "legalMandateCertified": false
+}

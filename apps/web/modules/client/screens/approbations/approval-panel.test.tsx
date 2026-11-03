@@ -27,8 +27,25 @@ describe("ClientApprovalsPanel", () => {
         messages={getApprovalMessages("fr")}
       />,
     );
-    expect(html).toContain("QUOTE");
+    expect(html).toContain("Dossier métier");
+    expect(html).not.toContain("22222222-2222-4222-8222-222222222222");
     expect(html).toContain("name=\"decision\"");
     expect(html).toContain("AAL2");
+  });
+
+  it.each(["fr", "ar"] as const)("distinguishes an incident from no requests in %s", (locale) => {
+    const messages = getApprovalMessages(locale);
+    const html = renderToStaticMarkup(<ClientApprovalsPanel locale={locale} result={{ status: "unavailable" }} organizationId="11111111-1111-4111-8111-111111111111" messages={messages} />);
+    expect(html).toContain(messages.unavailable);
+    expect(html).not.toContain(messages.empty);
+    expect(html).toContain("role=\"alert\"");
+    expect(html).toContain("organizationId=11111111-1111-4111-8111-111111111111");
+  });
+
+  it("keeps tenant context in both history directions", () => {
+    const html = renderToStaticMarkup(<ClientApprovalsPanel locale="ar" result={{ status: "success", items: [], page: 3, hasNext: true }} organizationId="11111111-1111-4111-8111-111111111111" messages={getApprovalMessages("ar")} />);
+    expect(html).toContain("approvalPage=2");
+    expect(html).toContain("approvalPage=4");
+    expect(html.match(/organizationId=/g)).toHaveLength(2);
   });
 });

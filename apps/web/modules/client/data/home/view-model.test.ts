@@ -106,6 +106,10 @@ describe("client-home view-model", () => {
     ]);
   });
 
+  it("ne transforme pas une demande terminée ou inconnue en projet courant", () => {
+    expect(pickFeaturedRequest([{status:"CANCELLED",quoteCount:2},{status:"EXPIRED",quoteCount:1},{status:"COMPLETED",quoteCount:3},{status:"UNKNOWN",quoteCount:0}])).toBeNull();
+  });
+
   it("expose les insights réels et reste nul si le snapshot manque", () => {
     expect(toClientHomeInsights({ actionItems: [], milestones: [], now: "2026-09-16T10:00:00Z", snapshotUnavailable: true }).documentsToReview).toBeNull();
     const insights = toClientHomeInsights({

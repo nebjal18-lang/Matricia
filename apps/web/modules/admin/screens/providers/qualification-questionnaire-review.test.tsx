@@ -1,0 +1,9 @@
+import{renderToStaticMarkup}from"react-dom/server";import{describe,expect,it,vi}from"vitest";
+vi.mock("./qualification-questionnaire-review-actions",()=>({loadQualificationQuestionnaireReview:vi.fn()}));
+import{QualificationQuestionnaireAnswers,QualificationQuestionnaireReview}from"./qualification-questionnaire-review";import type{QualificationReviewSession}from"./qualification-questionnaire-review-model";
+const id="11111111-1111-4111-8111-111111111111";
+const review:QualificationReviewSession={id,titleFr:"Qualification technique",titleAr:"التأهيل التقني",version:2,submittedAt:"2026-11-02T12:00:00Z",locale:"fr-MA",engineScoreBasisPoints:8081,snapshotHash:"a".repeat(64),answerManifestHash:"b".repeat(64),contextHash:"c".repeat(64),questions:[{id,labelFr:"Décrivez votre expérience",labelAr:"صف تجربتك",answerType:"TEXT",options:[],required:true,applicable:true,answered:true,value:"Texte déposé العربية <script>alert(1)</script>",answeredAt:"2026-11-02T11:00:00Z"}]};
+describe("Qualification review interface",()=>{
+ it.each(["fr","ar"]as const)("renders the exact frozen question and answer safely in %s",locale=>{const html=renderToStaticMarkup(<QualificationQuestionnaireAnswers review={review}locale={locale}/>);expect(html).toContain(locale==="ar"?"صف تجربتك":"Décrivez votre expérience");expect(html).toContain("Texte déposé العربية");expect(html).toContain("&lt;script&gt;");expect(html).not.toContain("<script>");expect(html).toContain("80.81");expect(html).toContain('dir="auto"')});
+ it("requires loading and explicit selection instead of manufacturing an ID from an empty list",()=>{const html=renderToStaticMarkup(<QualificationQuestionnaireReview qualificationId={id}locale="fr"required onReviewed={()=>{}}/>);expect(html).toContain("Charger les questionnaires soumis");expect(html).not.toContain('name="questionnaireSessionId"');expect(html).not.toContain('name="evidenceConfirmed"')});
+});

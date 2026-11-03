@@ -1,0 +1,17 @@
+
+> @matricia/web@0.1.0 test /workspace/franchise-completion/apps/web
+> vitest run modules/franchise/screens/library modules/franchise/screens/spaces --maxWorkers=2
+
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  13 passed (13)
+      Tests  117 passed (117)
+   Start at  09:41:52
+   Duration  20.50s (import 53%, transform 28%, tests 19%, worker 1%)
+
+  Transform  transforming modules took 8.84s · 28% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+

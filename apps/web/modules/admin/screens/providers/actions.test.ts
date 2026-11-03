@@ -1,3 +1,4 @@
+vi.mock("next/cache",()=>({revalidatePath:vi.fn()}));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ getUser: vi.fn(), rpc: vi.fn(), maybeSingle: vi.fn(), upload: vi.fn(), remove: vi.fn() }));
@@ -20,8 +21,8 @@ beforeEach(() => {
   mocks.getUser.mockReset().mockResolvedValue({ data: { user: { id } } });
   mocks.rpc.mockReset().mockImplementation(async (name: string) => name === "begin_provider_payment_proof_upload"
     ? { data: { outcome: "PROVIDER_PAYMENT_PROOF_UPLOAD_RESERVED", upload_id: id, storage_bucket: "provider-qualification", storage_object_path: `payments/${id}/${id}/${id}.pdf` }, error: null }
-    : name === "save_my_provider_billing_intent" ? {data:{intent_id:id},error:null} : name === "finalize_my_provider_billing_intent" ? {data:{outcome:"PROVIDER_PAYMENT_RECORDED"},error:null} : { data: { outcome: "RECORDED" }, error: null });
-  mocks.maybeSingle.mockReset().mockResolvedValue({ data: { currency: "MAD" }, error: null });
+    : name === "save_my_provider_billing_intent" ? {data:{intent_id:id},error:null} : name === "finalize_my_provider_billing_intent" ? {data:{outcome:"PROVIDER_FINANCIAL_DECLARATION_SUBMITTED"},error:null} : { data: { outcome: "RECORDED" }, error: null });
+  mocks.maybeSingle.mockReset().mockResolvedValue({ data: { currency: "MAD",provider_organization_id:id }, error: null });
   mocks.upload.mockReset().mockResolvedValue({ data: { path: "stored" }, error: null });
   mocks.remove.mockReset().mockResolvedValue({ data: [], error: null });
 });
@@ -29,9 +30,9 @@ beforeEach(() => {
 describe("admin provider finance actions", () => {
   it("convertit exactement les dirhams et calcule l’empreinte du justificatif", async () => {
     const form = base();
-    Object.entries({ organizationId: id, paymentReference: "VIR-2026-09", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "1 250,50", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
+    Object.entries({ organizationId: id,invoiceId:id, paymentReference: "VIR-2026-09", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "1 250,50", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
     form.set("proofFile", new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31])], "preuve.pdf", { type: "application/pdf" }));
-    expect(await recordAdminPayment(idle, form)).toEqual({ status: "success", outcome: "PROVIDER_PAYMENT_RECORDED" });
+    expect(await recordAdminPayment(idle, form)).toEqual({ status: "success", outcome: "PROVIDER_FINANCIAL_DECLARATION_SUBMITTED" });
     expect(mocks.rpc).toHaveBeenCalledWith("begin_provider_payment_proof_upload", expect.objectContaining({ p_declared_sha256: expect.stringMatching(/^[0-9a-f]{64}$/u), p_declared_size_bytes: 6 }));
     expect(mocks.upload).toHaveBeenCalledWith(expect.stringContaining("payments/"), expect.any(Buffer), expect.objectContaining({ contentType: "application/pdf", upsert: false }));
     expect(mocks.rpc).toHaveBeenCalledWith("save_my_provider_billing_intent", expect.objectContaining({p_kind:"PAYMENT",p_payload:expect.objectContaining({amountMinor:"125050",proofHash:expect.stringMatching(/^[0-9a-f]{64}$/u)})}));
@@ -40,16 +41,16 @@ describe("admin provider finance actions", () => {
 
   it("attend le scan et reprend sans nouveau téléversement", async () => {
     const form = base();
-    Object.entries({ organizationId: id, paymentReference: "VIR-SCAN", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "10,00", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
+    Object.entries({ organizationId: id,invoiceId:id, paymentReference: "VIR-SCAN", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "10,00", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
     form.set("proofFile", new File([new Uint8Array([0x25,0x50,0x44,0x46,0x2d,0x31])], "preuve.pdf", { type: "application/pdf" }));
     const original = mocks.rpc.getMockImplementation()!;
     let clean = false;
-    mocks.rpc.mockImplementation(async (name, args) => name === "finalize_my_provider_billing_intent" ? {data:{outcome:clean?"PROVIDER_PAYMENT_RECORDED":"PROVIDER_BILLING_SCAN_PENDING"},error:null} : original(name,args));
+    mocks.rpc.mockImplementation(async (name, args) => name === "finalize_my_provider_billing_intent" ? {data:{outcome:clean?"PROVIDER_FINANCIAL_DECLARATION_SUBMITTED":"PROVIDER_BILLING_SCAN_PENDING"},error:null} : original(name,args));
     const waiting = await recordAdminPayment(idle, form);
     expect(waiting.status).toBe("pending_scan");
     expect(mocks.rpc.mock.calls.some(([name]) => name === "record_provider_payment")).toBe(false);
     clean = true;
-    expect(await recordAdminPayment(waiting, new FormData())).toEqual({status:"success", outcome:"PROVIDER_PAYMENT_RECORDED"});
+    expect(await recordAdminPayment(waiting, new FormData())).toEqual({status:"success", outcome:"PROVIDER_FINANCIAL_DECLARATION_SUBMITTED"});
     expect(mocks.upload).toHaveBeenCalledTimes(1);
     expect(mocks.rpc.mock.calls.filter(([name]) => name === "save_my_provider_billing_intent")).toHaveLength(1);
     expect(mocks.rpc.mock.calls.filter(([name]) => name === "finalize_my_provider_billing_intent")).toHaveLength(2);
@@ -64,7 +65,7 @@ describe("admin provider finance actions", () => {
 
   it("refuse un faux PDF au lieu de fabriquer une preuve", async () => {
     const form = base();
-    Object.entries({ organizationId: id, paymentReference: "VIR-2026-09", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "10,00", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
+    Object.entries({ organizationId: id,invoiceId:id, paymentReference: "VIR-2026-09", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "10,00", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
     form.set("proofFile", new File(["not-a-pdf"], "preuve.pdf", { type: "application/pdf" }));
     expect(await recordAdminPayment(idle, form)).toEqual({ status: "error", reason: "VALIDATION" });
     expect(mocks.rpc).not.toHaveBeenCalled();
@@ -72,7 +73,7 @@ describe("admin provider finance actions", () => {
 
   it("conserve l’objet privé pour une reprise idempotente si la mutation financière échoue", async () => {
     const form = base();
-    Object.entries({ organizationId: id, paymentReference: "VIR-FAIL", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "10,00", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
+    Object.entries({ organizationId: id,invoiceId:id, paymentReference: "VIR-FAIL", paidOn: "2026-09-15", paymentMethod: "BANK_TRANSFER", currency: "MAD", amount: "10,00", cashAccountId: id, receivableAccountId: id }).forEach(([key, value]) => form.set(key, value));
     form.set("proofFile", new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31])], "preuve.pdf", { type: "application/pdf" }));
     mocks.rpc.mockImplementation(async (name: string) => name === "begin_provider_payment_proof_upload"
       ? { data: { outcome: "PROVIDER_PAYMENT_PROOF_UPLOAD_RESERVED", storage_bucket: "provider-qualification", storage_object_path: `payments/${id}/${id}/${id}.pdf` }, error: null }

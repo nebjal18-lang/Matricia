@@ -98,6 +98,8 @@ describe("ComparisonPanel", () => {
             deliverables: ["Rapport", "Plan d’action", "Restitution"],
             exclusions: [],
             warranty: "3 mois",
+            corrections:"Une itération de correction",
+            recurringLines:[{label:"Assistance trimestrielle",subtotalMinor:"9007199254740993",interval:"QUARTER"}],
           },
         }}
       />,
@@ -105,10 +107,15 @@ describe("ComparisonPanel", () => {
     expect(html).toContain("Offre A");
     expect(html).toContain("4 semaines");
     expect(html).toContain("Rapport");
-    expect(html).toContain("★ Offre recommandée");
-    expect(html).toContain("Pondérez vos critères");
+    expect(html).toContain("Rang de prix 1");
+    expect(html).not.toContain("★ Offre recommandée");
+    expect(html).toContain("Critères de comparaison");
+    expect(html).not.toContain('type="range"');
     expect(html).toContain("Complétude du devis");
     expect(html).toContain("100 %");
+    expect(html).toContain("Assistance trimestrielle");
+    expect(html).toContain("trimestre");
+    expect(html).toContain("Une itération de correction");
     expect(html).toContain("Maintenance / suivi");
     expect(html).toContain("Conditions de paiement");
     expect(html).toContain('name="selectionReason"');

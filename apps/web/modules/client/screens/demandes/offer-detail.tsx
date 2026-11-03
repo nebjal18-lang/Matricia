@@ -93,6 +93,9 @@ export function ClientOfferDetailView({
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
   return (
     <main className="client-page">
+      {detail.revisionInProgress?<article className="client-card" role="status"><h2>{locale==="ar"?"يجري إعداد مراجعة للعرض":"Révision du devis en cours"}</h2><p>{locale==="ar"?"هذه نسخة منشورة سابقة محفوظة للاطلاع. المسودة الجديدة خاصة بمقدم الخدمة؛ لا يمكن اختيار العرض حتى إعادة نشر النسخة الجديدة وتحديث المقارنة.":"Vous consultez une version publiée conservée dans l’historique. Le nouveau brouillon reste privé au prestataire ; la sélection attend sa republication et une comparaison actualisée."}</p></article>:null}
+      {detail.publishedVersions?.length?<nav className="client-card" aria-label={locale==="ar"?"النسخ المنشورة للعرض":"Versions publiées du devis"}><p>{locale==="ar"?"نسخة العرض المعروضة":"Version du devis affichée"} : {detail.displayedVersionNumber}</p><ul>{detail.publishedVersions.map(version=><li key={version.id}><Link aria-current={version.id===detail.quoteVersionId?"page":undefined} className="client-text-link" href={`/${locale}/client/demandes/${detail.requestId}/offres/${detail.quoteId}?${new URLSearchParams({...Object.fromEntries(new URLSearchParams(selectedQuery.replace(/^\?/,""))),versionId:version.id})}`}>{locale==="ar"?"النسخة":"Version"} {version.version} — {new Intl.DateTimeFormat(locale==="ar"?"ar-MA":"fr-MA",{dateStyle:"medium",timeZone:"Africa/Casablanca"}).format(new Date(version.submittedAt))}</Link></li>)}</ul></nav>:null}
+
       <nav className="client-crumb" aria-label={copy.crumbDetail}>
         <Link href={`/${locale}/client/demandes${selectedQuery}`}>{copy.crumbRequests}</Link>
         <span aria-hidden>/</span>
@@ -229,6 +232,7 @@ export function ClientOfferDetailView({
             </ul>
           </article>
 
+          {detail.options?.length?<article className="client-card"><h2>{locale==="ar"?"خيارات غير مشمولة في الإجمالي الأساسي":"Options hors total de base"}</h2><ul>{detail.options.map(option=><li key={option.id}><span dir="auto">{option.label}</span> — <span dir="ltr">{formatMinorExact(option.amountMinor,detail.currency,locale)}</span> {detail.optionPriceBasis==="EXCLUDING_TAX"?(locale==="ar"?"دون الضريبة":"HT"):(locale==="ar"?"— يجب توضيح المعالجة الضريبية لهذه النسخة السابقة":"— base fiscale de cette option historique à clarifier")}</li>)}</ul><p>{locale==="ar"?"يتطلب إدراج خيار نسخة عرض جديدة ببنود محسوبة الضريبة قبل الاختيار.":"L’intégration d’une option au périmètre nécessite une nouvelle version du devis avec des lignes fiscalisées avant sélection."}</p></article>:null}
           <article className="client-card" aria-labelledby="docs-title">
             <header>
               <h2 id="docs-title">

@@ -262,7 +262,7 @@ function LiveDisputeDetail({
           {visible.length === 0 ? <p>{messages.none}</p> : (
             <ul className="client-feed">
               {visible.map((item) => (
-                <li key={item.id}><span>{item.type}</span><small>{item.statement ?? item.url}</small></li>
+                <li key={item.id}><span>{item.type}</span><small dir="auto">{item.statement ?? item.url}</small>{(item.type==="DOCUMENT"||(item.type==="DELIVERY_PROOF"&&!item.url))?<a href={`/api/client/disputes/evidence/${item.id}`} className="client-text-link">{locale==="ar"?"تنزيل الدليل":"Télécharger la pièce"}</a>:null}</li>
               ))}
             </ul>
           )}

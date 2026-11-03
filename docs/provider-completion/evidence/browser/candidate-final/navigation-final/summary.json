@@ -1,0 +1,36 @@
+{
+  "scope": "FINAL_NATIVE_PROVIDER_HOME_BRAND_LANGUAGE_AND_INDEPENDENT_ADMIN_QUEUE",
+  "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "appTree": "c43980c6da4345d8da6260ffb264b5089becf2f2",
+  "status": "PASSED",
+  "steps": [
+    {
+      "step": "actual_provider_detail_language_switch_retains_mission_id_organization_and_RTL",
+      "passed": true
+    },
+    {
+      "step": "native_brand_home_and_global_language_links_keep_authorized_provider_workspace_after_client_role_activation",
+      "passed": true
+    },
+    {
+      "step": "independent_aal2_admin_provider_queue_restored_real_row_search_and_general_organization_select_stays_zero",
+      "passed": true
+    }
+  ],
+  "ordinaryMissionSignedScopePending": false,
+  "ordinaryMissionPendingNoticeFrAbsent": true,
+  "documentTimeOriginBefore": 1793665922226.2,
+  "brandHref": "/fr/tableau-de-bord?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b&workspace=provider",
+  "homeHref": "/fr/tableau-de-bord?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b&workspace=provider",
+  "detailArabicHref": "/ar/sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b",
+  "ordinaryMissionPendingNoticeArAbsent": true,
+  "documentTimeOriginAfterAr": 1793665922226.2,
+  "homeFrenchHref": "/fr/tableau-de-bord?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b&workspace=provider",
+  "documentTimeOriginAfterFr": 1793665922226.2,
+  "sameDocumentAcrossBothLocaleSwitches": true,
+  "queueCounts": {
+    "organizationGeneralSelect": 0,
+    "profiles": 1,
+    "queueRows": 1
+  }
+}

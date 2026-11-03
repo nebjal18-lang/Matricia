@@ -1,0 +1,19 @@
+{
+  "sourceBase": "df67da4",
+  "sourceSchemaCommit": "90fcd3bc0dd60f91b7e8589349b6c2ccd61d03bc",
+  "appBuildCommit": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "cohort": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "baselineMigrationCount": 533,
+  "migrationCount": 534,
+  "newMigrations": [
+    {
+      "file": "20261103455200_franchise_catalog_activation_bridge.sql",
+      "sha256": "d87e154be5ce86da010e401196e04b795badc4babb4849c3b13f8dac1049f91a",
+      "passed": true
+    }
+  ],
+  "freshReplay": false,
+  "stagingCertification": false
+}

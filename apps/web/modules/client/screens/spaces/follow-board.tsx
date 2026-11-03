@@ -1,3 +1,4 @@
+import { SignedScopePendingNotice } from "@/modules/shared/ui/signed-scope-pending-notice";
 import Link from "next/link";
 import { ArrowRight, Bell, Calendar, ChevronRight, FileText, MessageSquare, Scale } from "lucide-react";
 import type { ReactNode } from "react";
@@ -82,6 +83,13 @@ export function FollowBoard({
   const awaitingDeliverables = (mission?.deliverables ?? []).filter((item) => isAwaitingDeliverable(item.status));
   const priorities: Array<{ id: string; href: string; label: string; chip: string; tone: "peach" | "violet" | "sky" }> = [];
   if (mission) {
+    if (mission.signedScopePending) priorities.push({
+      id: "signed-scope-preparation",
+      href: `/${locale}/client/contrats${query}#contrat-${mission.contractId}`,
+      label: locale === "ar" ? "تحضير التزامات الملحق الموقّع" : "Préparer les obligations de l’avenant signé",
+      chip: c.actionRequired,
+      tone: "violet",
+    });
     if (awaitingDeliverables.length > 0) {
       priorities.push({
         id: "deliverable",
@@ -114,6 +122,7 @@ export function FollowBoard({
 
   return (
     <main className="client-page client-follow-page">
+      {mission ? <SignedScopePendingNotice pending={mission.signedScopePending} locale={locale} audience="client" contractId={mission.contractId} query={query} /> : null}
       <section className="client-board client-board-compare">
         <article className="client-card">
           <header className="client-priority-head">
@@ -241,7 +250,7 @@ export function FollowBoard({
               </li>
             )) : null}
             {upcomingDeadlines.length === 0 && !( !mission && preferDemo) ? (
-              <li><span className="client-feed-icon" data-tone="sky"><Calendar className="size-4" aria-hidden /></span><span>{c.emptyBoard}</span></li>
+              <li><span className="client-feed-icon" data-tone="sky"><Calendar className="size-4" aria-hidden /></span><span>{mission?.signedScopePending ? (locale === "ar" ? "تنتظر مواعيد الملحق تحضير العميل." : "Les échéances de l’avenant attendent la préparation du Client.") : c.emptyBoard}</span></li>
             ) : null}
           </ul>
         </article>

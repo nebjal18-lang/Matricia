@@ -15,14 +15,14 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 export default async function FranchiseGovernancePage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result: library } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
+  const { space, result: library } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/gouvernance`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const messages = getFranchiseMessages(locale);
   const result = library.status === "success" ? await loadFranchiseDashboard(locale, {
     franchiseId: library.workspace.mandate.franchiseId,
     organizationId: library.workspace.mandate.operatorOrganizationId ?? undefined,
     libraryId: library.workspace.mandate.libraryId,
   }) : null;
-  if (result?.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/franchise/gouvernance` }));
+  if (result?.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: space.currentPath }));
   const c = franchiseCopy(locale);
   const mandateName = franchiseMandateName(library);
   const board=library.status==="success"&&result?.status==="success"?await loadFranchiseSpaceFromLibrary({locale,query:space.selectedQuery,result:library}):null;
@@ -38,7 +38,7 @@ export default async function FranchiseGovernancePage({ params, searchParams }: 
     });
   }
   return (
-    <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="governance" title={c.govTitle} lead={c.govLead} kicker={c.govKicker} mandateName={mandateName} actions={result?.status === "success" ? <FranchiseActions href="#gouvernance" label={c.prepare} /> : null}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="governance" title={c.govTitle} lead={c.govLead} kicker={c.govKicker} mandateName={mandateName} actions={result?.status === "success" ? <FranchiseActions href="#gouvernance" label={c.prepare} /> : null}>
       <FranchiseOrganizationSelector locale={locale} organizations={space.organizations} selectedOrganizationId={space.selectedOrganizationId} returnPath={`/${locale}/franchise/gouvernance`} />
       {library.status === "error" ? <FranchiseAccessState locale={locale} reason={library.reason} returnPath={`/${locale}/franchise/gouvernance${space.selectedQuery}`} />
         : result?.status === "error" ? <WorkspaceFailure locale={locale} reason={result.reason} returnPath={`/${locale}/franchise/gouvernance${space.selectedQuery}`} supportReference="FRANCHISE_GOVERNANCE" />
@@ -46,7 +46,7 @@ export default async function FranchiseGovernancePage({ params, searchParams }: 
           <GovernanceBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={board ?? undefined} />
           <details id="gouvernance" className="client-ops" open>
             <summary>{c.opsGov}</summary>
-            <GovernancePanel dashboard={result.dashboard} locale={locale} m={messages} keys={keys} />
+            <GovernancePanel returnPath={space.currentPath} dashboard={result.dashboard} locale={locale} m={messages} keys={keys} />
           </details>
         </> : null}
 

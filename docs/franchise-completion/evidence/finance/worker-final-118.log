@@ -1,0 +1,16 @@
+
+> @matricia/worker@0.1.0 test /workspace/franchise-financial-close/apps/worker
+> vitest run --maxWorkers=1
+
+
+ RUN  v5.0.3 /workspace/franchise-financial-close/apps/worker
+
+
+ Test Files  13 passed (13)
+      Tests  118 passed (118)
+   Start at  06:23:18
+   Duration  6.08s (tests 45%, transform 31%, import 20%, worker 4%)
+
+    Isolate  13 workers spawned · ~250ms startup each (spawn + environment, per file)
+             at least ~3.00s faster with isolate: false — reuses workers across files instead of one per file
+

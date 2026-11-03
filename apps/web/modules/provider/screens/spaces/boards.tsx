@@ -19,6 +19,7 @@ import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 function capacityStatusLabel(status: string, locale: Locale, fallback: string) {
+  if(status==="UNAVAILABLE")return locale==="ar"?"حالة التوافر غير متاحة":"Disponibilité indisponible";
   const normalized = status.trim().toUpperCase();
   if (!status || status === "—" || status === fallback) return fallback;
   if (normalized === "AVAILABLE" || normalized === "OPEN" || normalized === "OPEN_TO_OPPORTUNITIES") {
@@ -128,7 +129,7 @@ export function ProviderHomeBoard({
   const capacityStatus = capacityStatusLabel(capacity.status, locale, c.capacityUnset);
   const showProfileCallout =
     snapshot === undefined ||
-    (snapshot.status === "success" && snapshot.stage !== "qualified");
+    (snapshot.status === "success" && snapshot.stage!==null && snapshot.stage !== "qualified");
   const journey = (() => {
     const fr = locale === "fr";
     const stage = snapshot?.status === "success" ? snapshot.stage : null;
@@ -157,7 +158,7 @@ export function ProviderHomeBoard({
     ];
   })();
   return (
-    <main className="client-page provider-home">
+    <main className="client-page provider-home">{snapshot?.status==="success"&&snapshot.stage===null?<p role="alert" className="client-card">{locale==="ar"?"ملف التأهيل غير متاح. أعيدوا المحاولة من قسم التأهيل.":"Qualification indisponible. Réessayez depuis la rubrique Qualification."}</p>:null}
       {showProfileCallout ? (
       <section className="provider-profile-callout" aria-label={c.profileBanner}>
         <Sprout className="size-5" aria-hidden />
@@ -256,7 +257,7 @@ export function ProviderHomeBoard({
         <article className="client-card provider-reputation-card">
           <header><h2><Star aria-hidden className="size-4" />{c.reputation}</h2></header>
           <p>{c.reputationLead}</p>
-          {live && snapshot?.status === "success" && snapshot.reputation.published > 0 ? (
+          {live&&snapshot?.status==="success"&&snapshot.reputation.published===null?<p role="alert">{locale==="ar"?"السمعة غير متاحة. أعيدوا المحاولة من قسم السمعة.":"Réputation indisponible. Réessayez depuis la rubrique Réputation."}</p>:live && snapshot?.status === "success" && snapshot.reputation.published!==null&&snapshot.reputation.published > 0 ? (
             <p>{snapshot.reputation.latest ?? c.received}</p>
           ) : (
             <div className="provider-reputation-empty">
@@ -810,7 +811,7 @@ export function ProviderDocumentsBoard({
   const pageHref=(next:number)=>{const p=new URLSearchParams(params);p.set("page",String(next));if(search.trim())p.set("q",search.trim());if(view!=="all")p.set("vue",view);return `/${locale}/sous-traitant/documents?${p}`;};
   const needle = search.trim().toLocaleLowerCase();
   const rows = (documents ?? []).filter((document) => {
-    if (view === "qualification" && !/LEGAL|INSURANCE|QUALIF|COMPLIANCE|IDENTITY/i.test(document.kind)) return false;
+    if (view === "qualification" && !/LEGAL|FISCAL|INSURANCE|CERTIFICATION|LICENSE|ACCREDITATION|QUALIF|COMPLIANCE|IDENTITY/i.test(document.kind)) return false;
     if (!needle) return true;
     return `${document.code} ${document.kind} ${document.status}`.toLocaleLowerCase().includes(needle);
   });
@@ -842,8 +843,8 @@ export function ProviderDocumentsBoard({
               <tbody>
                 {rows.map((document) => (
                   <tr key={document.id}>
-                    <td>{document.code}</td>
-                    <td>{document.kind}</td>
+                    <td><Link className="client-text-link" href={`/${locale}/sous-traitant/documents/${document.id}${query}`}>{document.code} · v{document.version}</Link></td>
+                    <td>{getProviderStatusLabel(locale,document.kind)}</td>
                     <td><span className="client-status-chip" data-tone={documentTone(document.status)}>{getProviderStatusLabel(locale, document.status)}</span></td>
                     <td>{c.docsPrivate}</td>
                     <td>{document.scanStatus === "CLEAN" ? <a href={`/api/provider/documents/${document.id}`} className="client-ghost-link">{c.open}</a> : <span role="status">{document.scanStatus === "PENDING" ? (locale === "ar" ? "الفحص جارٍ" : "Analyse en attente") : (locale === "ar" ? "في الحجر" : "En quarantaine")}</span>} <Cta href={qualifyHref}>{c.replace}</Cta></td>

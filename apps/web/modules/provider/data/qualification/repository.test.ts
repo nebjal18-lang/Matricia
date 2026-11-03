@@ -52,10 +52,11 @@ describe("provider dashboard projection diagnostics", () => {
 
 function providerReadClient(qualification: unknown = fixtureProjection.services[0]!.provider_qualifications) {
   const responses: Record<string, { data: unknown; error: unknown }> = {
-    organization_memberships: { data: [{ id: providerServiceId, organization_id: organizationId, organizations: { display_name: "Provider" } }], error: null },
+    organization_memberships: { data: [{ id: providerServiceId, organization_id: organizationId, organizations: { display_name: "Provider" },organization_member_roles:[{role_code:"PROVIDER_OWNER",revoked_at:null}] }], error: null },
     provider_profiles: { data: fixtureProjection.profile, error: null },
     provider_services: { data: [{ ...fixtureProjection.services[0], provider_qualifications: qualification }], error: null },
     provider_document_versions: { data: fixtureProjection.documents, error: null },
+    provider_work_scope_versions:{data:null,error:null},
     provider_intervention_mode_versions: { data: null, error: null },
     catalog_services: { data: fixtureProjection.catalog, error: null },
     catalog_libraries: { data: [{ id: organizationId, current_published_version_id: versionId }], error: null },
@@ -74,14 +75,14 @@ function providerReadClient(qualification: unknown = fixtureProjection.services[
     return query;
   });
   const rpc = vi.fn(async (name: string) => ({
-    data: name === "get_my_provider_identity_status_v1"
+    data: name==="list_provider_entry_documents_v1"?{items:fixtureProjection.documents,required_documents_complete:true}:name === "get_my_provider_identity_status_v1"
       ? { verified: true, last_verified_at: null }
-      : { eligible: true, reasons: [], qualification_status: "APPROVED", capacity_status: "AVAILABLE" },
+      : { eligible: true, reasons: [], qualification_status: "APPROVED", capacity_status: "AVAILABLE",capacity_available_units:8,capacity_lead_time_days:3,qualification_decision_version:4,rule_version:"TEST-RULE",qualification_rationale:"Pièce professionnelle à compléter",qualification_blocking_conditions:["Nouvelle attestation"],qualification_expires_at:"2027-01-01T00:00:00Z" },
     error: null,
   }));
   const client = { auth: { getUser: vi.fn(async () => ({ data: { user: { id: organizationId } } })) }, from, rpc };
   vi.mocked(getSupabaseServerClient).mockResolvedValue(client as never);
-  return { responses, from };
+  return { responses, from,rpc };
 }
 
 describe("provider dashboard read contract", () => {
@@ -98,7 +99,7 @@ describe("provider dashboard read contract", () => {
     expect(result.status).toBe("success");
     if (result.status === "success") {
       expect(result.dashboard.organizationId).toBe(organizationId);
-      expect(result.dashboard.services[0]).toMatchObject({ qualificationId, label: { fr: "Service autorisé", ar: "خدمة مخولة" } });
+      expect(result.dashboard.services[0]).toMatchObject({ qualificationId, label: { fr: "Service autorisé", ar: "خدمة مخولة" },availableUnits:8,leadTimeDays:3,eligibility:expect.objectContaining({decisionVersion:4,ruleVersion:"TEST-RULE"}),qualificationRationale:"Pièce professionnelle à compléter",blockingConditions:["Nouvelle attestation"] });
     }
   });
 
@@ -118,6 +119,14 @@ describe("provider dashboard read contract", () => {
     expect(await loadProviderDashboard()).toEqual({ status: "error", reason: "MEMBERSHIP_SHAPE_INVALID" });
     responses.organization_memberships = { data: null, error: { code: "503" } };
     expect(await loadProviderDashboard()).toEqual({ status: "error", reason: "MEMBERSHIP_QUERY_FAILED" });
+  });
+
+  it("filters documents before pagination and preserves readonly Provider membership",async()=>{
+    const {responses,rpc}=providerReadClient();
+    responses.organization_memberships={data:[{id:providerServiceId,organization_id:organizationId,organizations:{display_name:"Provider"},organization_member_roles:[{role_code:"PROVIDER_VIEWER",revoked_at:null}]}],error:null};
+    const result=await loadProviderDashboard(organizationId,2,{search:"ATTESTATION",kinds:["CERTIFICATION"]});
+    expect(result.status).toBe("success");if(result.status==="success")expect(result.dashboard.canManage).toBe(false);
+    expect(rpc).toHaveBeenCalledWith("list_provider_entry_documents_v1",{p_provider_organization_id:organizationId,p_page:2,p_search:"ATTESTATION",p_kinds:["CERTIFICATION"]});
   });
 
   it("does not query another tenant when the requested scope is unauthorized", async () => {

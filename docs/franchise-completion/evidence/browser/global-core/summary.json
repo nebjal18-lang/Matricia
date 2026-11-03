@@ -1,0 +1,98 @@
+{
+  "scope": "FRANCHISE_GLOBAL_ROLE_READ_ONLY_PAGES",
+  "candidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "PASSED",
+  "sensitiveMutationExecuted": false,
+  "cases": [
+    {
+      "locale": "fr",
+      "path": "notifications",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/fr/notifications",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "locale": "fr",
+      "path": "organisation",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/fr/organisation",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "locale": "fr",
+      "path": "securite/compte",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/fr/securite/compte",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "locale": "fr",
+      "path": "securite/sessions",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/fr/securite/sessions",
+      "franchiseReturnLinks": 24,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "path": "notifications",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/ar/notifications",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "path": "organisation",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/ar/organisation",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "path": "securite/compte",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/ar/securite/compte",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "path": "securite/sessions",
+      "status": "PASS",
+      "http": 200,
+      "landingPath": "/ar/securite/sessions",
+      "franchiseReturnLinks": 24,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false
+    }
+  ],
+  "pageErrors": []
+}

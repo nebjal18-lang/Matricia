@@ -1,0 +1,269 @@
+{
+  "scope": "SAFE_SHA256_EVIDENCE_MANIFEST",
+  "files": [
+    {
+      "file": "measured.json",
+      "sha256": "ade6ba79e3d261eef13f5bbacab7850be78bf1b2a53abb4cb9baec2b42bdabc0"
+    },
+    {
+      "file": "review-00-fr-375-closed-background.png",
+      "sha256": "80ef005dddce2620479c4213d52cb4589159aed4f2bb45d30edb7777a72f38be"
+    },
+    {
+      "file": "review-00-fr-375-closed.png",
+      "sha256": "628fb1637ec8f3dfee15c510d676460c7d87652aa22817e0848c966fa3908eda"
+    },
+    {
+      "file": "review-01-fr-375-open-background.png",
+      "sha256": "be20fe4d8f80cee207f750fd500d2a62ef9cdea53797e09cb08675e862d2ed10"
+    },
+    {
+      "file": "review-01-fr-375-open.png",
+      "sha256": "209cccf775b7f42469a0fd9d9100f6d359be7ce1788d7e0a00918ea2d71058aa"
+    },
+    {
+      "file": "review-02-fr-768-closed-background.png",
+      "sha256": "2f5c1e80dbb4650df06d2c629c081c39fe88f2fdc84fa04519c6caba61b5964d"
+    },
+    {
+      "file": "review-02-fr-768-closed.png",
+      "sha256": "964514a6c7826786c038472d3ea5a6370fd6d0b65c9b2eac64f1027e8dee464e"
+    },
+    {
+      "file": "review-03-fr-768-open-background.png",
+      "sha256": "f914f8dd181192fcbb1ebfcbcb64c2e1df57842307a596f361dd2914746b2df1"
+    },
+    {
+      "file": "review-03-fr-768-open.png",
+      "sha256": "3fb5b035608f9fab320ae1eefe3cf26ed6e899271c14b2164352d3f1f98a1863"
+    },
+    {
+      "file": "review-04-ar-375-closed-background.png",
+      "sha256": "8e175a62c6b6375f5c4913d35d33632d1c7a5e2f87ed6d228156c33fa81e49fe"
+    },
+    {
+      "file": "review-04-ar-375-closed.png",
+      "sha256": "03770f52ff1cf9ec3cf61dad719419f43e0936ba5d74922febe6a326f0212110"
+    },
+    {
+      "file": "review-05-ar-375-open-background.png",
+      "sha256": "18567861e1c5d5d6c51999fb2ac8f1081ab5bd8b2ca64173a2d2d45e5d35ebe6"
+    },
+    {
+      "file": "review-05-ar-375-open.png",
+      "sha256": "7427fe42724fc0b936f8fdb538a507eb6dc7f747a6a4e9c28be2e100bd2ddaa6"
+    },
+    {
+      "file": "review-06-ar-768-closed-background.png",
+      "sha256": "9649fb307efb15f6950010dae0249e683f929c9870e78085c970dd1801db8645"
+    },
+    {
+      "file": "review-06-ar-768-closed.png",
+      "sha256": "23481a4984dd9e99f9d096ee9a4d82bcb1ce6ea8563a4ad7d45e945bba4b5eed"
+    },
+    {
+      "file": "review-07-ar-768-open-background.png",
+      "sha256": "b5c6507845e6475e73f87c42f118808d973ea4156157ee9565db663113d2d849"
+    },
+    {
+      "file": "review-07-ar-768-open.png",
+      "sha256": "77afd7f121fa6e66627eb9be66129ccce78e05e1fc0ca3aa8b2dbad80fe67359"
+    },
+    {
+      "file": "review-08-fr-375-closed-background.png",
+      "sha256": "7d8e63cc050f157391c01ee8f858ba4022684968fdcd6a31c2e2a0cb73a46584"
+    },
+    {
+      "file": "review-08-fr-375-closed.png",
+      "sha256": "7dfb9735874b2f0d42c38095d802f83525cab62ebf365147191376c0c67605aa"
+    },
+    {
+      "file": "review-09-fr-375-open-background.png",
+      "sha256": "03917c642ab5ff3554d40ece90afc221e9d95f728254cd27315fa2f9ceb99248"
+    },
+    {
+      "file": "review-09-fr-375-open.png",
+      "sha256": "cda07b85336e26b7586c505b8da657aa6a2f3921da673c7b5b57ccf5c7bf8381"
+    },
+    {
+      "file": "review-10-fr-768-closed-background.png",
+      "sha256": "a0a29bfdfd3b766873d6c1e4462aa7d8174ff27a400647ef313980c70468a0dc"
+    },
+    {
+      "file": "review-10-fr-768-closed.png",
+      "sha256": "2c917b1152e3d60294f7c1662adb3523752821cb9d7106761d7891e56c6e24ec"
+    },
+    {
+      "file": "review-11-fr-768-open-background.png",
+      "sha256": "fe06293addeb0ee1a971995da58ba5814d8704d718d05708a080ad16b97c7b52"
+    },
+    {
+      "file": "review-11-fr-768-open.png",
+      "sha256": "1bbef134f624d50504e59309d5f43f8f4bc27b4bde254f69a531d4288acfe064"
+    },
+    {
+      "file": "review-12-ar-375-closed-background.png",
+      "sha256": "88554edbf183aa2bca56fb68029dafd8426b173702859abf0043988c148dcb49"
+    },
+    {
+      "file": "review-12-ar-375-closed.png",
+      "sha256": "b4a181dc8c2254868fff6f1cb1407acf6e5822aff95d403cb01631df748c2754"
+    },
+    {
+      "file": "review-13-ar-375-open-background.png",
+      "sha256": "5ff04a5306316cef0d23d9e0d164b6a58b135535b7e924cb401d5d63e84e2abe"
+    },
+    {
+      "file": "review-13-ar-375-open.png",
+      "sha256": "3edc7f18e469f2c340041fcd2f1aafc0f79226a941b224ee76b7371cf785f7c2"
+    },
+    {
+      "file": "review-14-ar-768-closed-background.png",
+      "sha256": "6e2759bcfc731a57017a38f65fad6e5cb221c80716da3f1a5d6b8efeac7d1b86"
+    },
+    {
+      "file": "review-14-ar-768-closed.png",
+      "sha256": "938b84fa628dc8a9b321a729c44cf7f01f77072581202f95cc44b598e09dc6bc"
+    },
+    {
+      "file": "review-15-ar-768-open-background.png",
+      "sha256": "326e49a161da3de5bab81ad48bbc58fd492aaa618de17ee65175a0b19b7cf439"
+    },
+    {
+      "file": "review-15-ar-768-open.png",
+      "sha256": "8d0df2e3ac690a6e8b40848754e42c7ce2ae93adb669a01044b3b1f7af5135b6"
+    },
+    {
+      "file": "review-16-fr-375-closed-background.png",
+      "sha256": "9dffca8c353fd6e83daa8112cb00a22897f00e77d16f3da487c2ef3644abe930"
+    },
+    {
+      "file": "review-16-fr-375-closed.png",
+      "sha256": "8d88d8ee70da3f3e76e4ef2609cc51b52845279637048faf445cfbb74c9c213f"
+    },
+    {
+      "file": "review-17-fr-375-open-background.png",
+      "sha256": "3c6e1f7fb8f874de677c99fc2dd8de85597e3a21b464270beec74dc26b61d951"
+    },
+    {
+      "file": "review-17-fr-375-open.png",
+      "sha256": "dc1cd83405d62b1eb2529fff6b77660ae07a5c597c96ad685902477f3b0efbe3"
+    },
+    {
+      "file": "review-18-fr-768-closed-background.png",
+      "sha256": "99ee6deb32532b9718048708311ba87ce425a193f991bca0507081a6e41f7b83"
+    },
+    {
+      "file": "review-18-fr-768-closed.png",
+      "sha256": "7809f7ff19516fd888b7bef641683fe19770a505067a0b7b6d6c84485c9ba199"
+    },
+    {
+      "file": "review-19-fr-768-open-background.png",
+      "sha256": "cc7103959a75d086c1e5edd07c823b0eecf70ac98a0d4730010c193db3c0914a"
+    },
+    {
+      "file": "review-19-fr-768-open.png",
+      "sha256": "69a7ecc2b72a3aa598d1675960303d3dff31763c5da114e32131911c881c4117"
+    },
+    {
+      "file": "review-20-ar-375-closed-background.png",
+      "sha256": "e5d5951c0271aa5616e182c35266898868cb9f80592c11ac7961cf7d25154f58"
+    },
+    {
+      "file": "review-20-ar-375-closed.png",
+      "sha256": "ce5d7452fab3cca6f348221c400b6757aa9c3becf7fc762ad1c05c423caf27e3"
+    },
+    {
+      "file": "review-21-ar-375-open-background.png",
+      "sha256": "bb85c4931f1364ce285c8ca1d51eade8d1f12cf8fd006b2864c518f310ae4eae"
+    },
+    {
+      "file": "review-21-ar-375-open.png",
+      "sha256": "068fe1018646b652bb0c15d5b0d899f1afd904de6ac68744fe5b496d3a90c3e2"
+    },
+    {
+      "file": "review-22-ar-768-closed-background.png",
+      "sha256": "47e4d4949af13cf1b464e863546a82a626fc02c693dc95c921af3b037e0bcfa5"
+    },
+    {
+      "file": "review-22-ar-768-closed.png",
+      "sha256": "f897e2466e13d12842cc3f8e167a63a4ca97b032d4b8dfc2ffad9e6f1e74b6bb"
+    },
+    {
+      "file": "review-23-ar-768-open-background.png",
+      "sha256": "6bc7cb97eb99c1f9c79a9d0abd97f3b4bebb44e4dbbbab9ccb2385a88deb3a7e"
+    },
+    {
+      "file": "review-23-ar-768-open.png",
+      "sha256": "b1a45c081be3de5cdcb7074392664f7d39bfde46b6c61fba2ff2695b1a83973c"
+    },
+    {
+      "file": "review-24-fr-375-closed-background.png",
+      "sha256": "626aed8ae4c37514aaf0b0473d43e812a965bc4738d1a996a1f740cea76e5608"
+    },
+    {
+      "file": "review-24-fr-375-closed.png",
+      "sha256": "2e2ccff247ba9fc09f8ed7a864bc1137d3f1c018de9045fe46af4da20c577b50"
+    },
+    {
+      "file": "review-25-fr-375-open-background.png",
+      "sha256": "249891388c7281488710b2a279688b3506c39689c1fb7109a1f35182bdcef210"
+    },
+    {
+      "file": "review-25-fr-375-open.png",
+      "sha256": "49bac85e9eca01829d0a79995317f3c80af550a2020d0d2b0c64e93360af3a3a"
+    },
+    {
+      "file": "review-26-fr-768-closed-background.png",
+      "sha256": "2852c30b2432cf566ed1e5aa2c93ab5e34219a3d071a7e56d9cbc61d8a8b502b"
+    },
+    {
+      "file": "review-26-fr-768-closed.png",
+      "sha256": "0a890fe5853809fb8b0445c2b69d8d84f6c020fec2fe9d928358bebc2916695a"
+    },
+    {
+      "file": "review-27-fr-768-open-background.png",
+      "sha256": "5e67fd9265b4a3a8b03212a090255e25498456f0f101eeb927d754056ec93cb0"
+    },
+    {
+      "file": "review-27-fr-768-open.png",
+      "sha256": "5cfd81e805ec986a2ae4eed6617568bf359dd1231b38cfacd76e710afb1c2b4e"
+    },
+    {
+      "file": "review-28-ar-375-closed-background.png",
+      "sha256": "1ad36c4d45eec766b9c28859e3860fc7b1a8f02cbc83e5e211f3c5a54e51b3f6"
+    },
+    {
+      "file": "review-28-ar-375-closed.png",
+      "sha256": "7d28c36eb1835e9feebf8da757ba4fb126d5943b3ad353b2d9d3f3dad270112f"
+    },
+    {
+      "file": "review-29-ar-375-open-background.png",
+      "sha256": "8910fddbc3ed745d41b60eed96a02659872d794c26b13a78986c5d03fc38d1fb"
+    },
+    {
+      "file": "review-29-ar-375-open.png",
+      "sha256": "ef8c0e77de90ac13e59c15fd79a12548ef195c244ef8fc9d00474c75f621067c"
+    },
+    {
+      "file": "review-30-ar-768-closed-background.png",
+      "sha256": "2e2d60100439116bef1906063d5a613bd30170abb4da73af683bfa9c6032e3c5"
+    },
+    {
+      "file": "review-30-ar-768-closed.png",
+      "sha256": "d4df97337050de862611d66a802ff126860f119637c2384c3a272e7e7418717b"
+    },
+    {
+      "file": "review-31-ar-768-open-background.png",
+      "sha256": "19a41466a2d49ae0d0f7b9f62e76da745b50a9d5606d54c13a59310687d94378"
+    },
+    {
+      "file": "review-31-ar-768-open.png",
+      "sha256": "e1e3c07fe57b694090a402641815b5c6ac7fd2e13d76235b26a7698419527255"
+    },
+    {
+      "file": "summary.json",
+      "sha256": "ee6b24808c5925b744ddb5d47caf99f0ba0f871915a86b3dec2f0f87f7335b27"
+    }
+  ]
+}

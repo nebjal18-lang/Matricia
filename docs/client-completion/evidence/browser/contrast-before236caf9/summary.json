@@ -1,0 +1,745 @@
+{
+  "scope": "INDETERMINATE_AXE_CONTRAST_COMPUTED_STYLES_AND_RENDERED_BACKGROUNDS",
+  "appTree": "8721910b794a7d3533f96a99b8d63fddc3701d02",
+  "scans": 32,
+  "nodes": 1409,
+  "reviewCounts": {
+    "DECORATIVE_BRAND_MARK_LOGOTYPE_CONTRAST_EXCEPTION": 33,
+    "RENDERED_BACKGROUND_BOUND_MEETS_TEXT_CONTRAST": 765,
+    "VISIBLE_PORTION_MEETS_CONTRAST_CLIPPED_OR_OCCLUDED_PORTION_NOT_MEASURED": 42,
+    "NOT_MEASURED_CLIPPED_OR_NOT_RENDERED": 535,
+    "OPAQUE_GLYPH_CONTRAST_BELOW_THRESHOLD_REVIEW": 16,
+    "OPAQUE_GLYPHS_MEET_CONTRAST_BACKGROUND_RECT_EXTENDS_BEYOND_TEXT_BACKING": 18
+  },
+  "status": "CONFIRMED_CAPTION_CONTRAST_FAILURE_BEFORE236CAF9",
+  "findings": [
+    {
+      "path": "client/portefeuille",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/portefeuille",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/portefeuille",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/portefeuille",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/actions",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/actions",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/actions",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/actions",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/questionnaires",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/questionnaires",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/questionnaires",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/questionnaires",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/boxes/mon-enveloppe",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/boxes/mon-enveloppe",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/boxes/mon-enveloppe",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": false,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    },
+    {
+      "path": "client/boxes/mon-enveloppe",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": true,
+      "target": [
+        "figcaption"
+      ],
+      "color": "rgb(94, 106, 147)",
+      "fontSize": "12.48px",
+      "glyph": {
+        "coreSamples": 52,
+        "minimumRatio": 4.1324,
+        "minimumLocation": {
+          "x": 79,
+          "y": 285,
+          "foregroundRgb": [
+            94,
+            106,
+            147
+          ],
+          "backgroundRgb": [
+            236,
+            225,
+            219
+          ]
+        },
+        "method": "normal screenshot pixels matching composited foreground within two RGB levels and differing from background by more than 15; antialias edge pixels excluded"
+      },
+      "backgroundBound": {
+        "samples": 5225,
+        "clippedSamplesNotMeasured": 0,
+        "occludedSamplesNotMeasured": 0,
+        "nontrivialFilterOrBlendOrClipPath": false,
+        "minimumRatio": 3.8817,
+        "lowestBackgroundRgb": [
+          231,
+          218,
+          211
+        ],
+        "requiredRatio": 4.5,
+        "meetsConservativeBound": false,
+        "method": "all visible rendered background pixels in text ranges after text fill removal; ancestor opacity multiplied; clipping and open-menu occlusion excluded; filters/blends/clip-path require separate review"
+      }
+    }
+  ],
+  "measuredJsonSha256": "425291bca0d59a7c39fdafff2ad7b10eee3672cc890cf21a3c2e055b4f172f2a",
+  "screenshots": "Four representative states exported; full original matrix kept in ignored native run state",
+  "exportedScanIndexes": [
+    0,
+    8,
+    12,
+    24
+  ]
+}

@@ -1,0 +1,5 @@
+
+> matricia@0.1.0 server-actions:validate /workspace/provider-completion
+> node scripts/release/server-action-exports.mjs
+
+PASS server-action exports (1832 source files checked)

@@ -1,0 +1,47 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-entry/supabase/migrations/20261102038000_provider_entry_evidence_and_replay.sql",
+      "sha256": "245e985959d02467e727daa598e1d964b3a871fa586e082823135ade0dc8e335"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-entry/supabase/migrations/20261102038100_provider_questionnaire_evidence.sql",
+      "sha256": "cb123d0c5514b543da1fc25ea93d04daf0cfaffb1bf986707705c7ce9b1d3240"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-entry/supabase/migrations/20261102038200_provider_work_scope_declarations.sql",
+      "sha256": "46398be20236665394fed07ac3c3c2e3677e63931f6a3b733452f58c2321e30f"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-entry/supabase/migrations/20261102038300_provider_current_evidence_applicability.sql",
+      "sha256": "90b1d03132a5796370cc585aeae409b62615de6cb3347fd9ba9d58df2e2da594"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-entry/supabase/tests/0345_provider_entry_acceptance.test.sql",
+      "sha256": "6b25d99306351d8c17f58fd09ddb76ed39fe74cd744872ecd90f5b1ce93d02db"
+    }
+  ],
+  "status": "PASSED",
+  "assertions": 44,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

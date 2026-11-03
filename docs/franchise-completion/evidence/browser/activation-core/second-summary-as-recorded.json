@@ -1,0 +1,36 @@
+{
+  "scope": "FRANCHISE_NATIVE_EXPLICIT_TEST_ACTIVATION",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "label": "SECOND",
+  "status": "PASSED",
+  "proposalCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "approvalCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "legalSignatureCertified": false,
+  "selfApprovalDenied": true,
+  "steps": [
+    {
+      "id": "CONTRACTUAL_PREREQUISITE_DENIED",
+      "status": "PASS",
+      "code": "55000",
+      "guard": "FRANCHISE_SIGNED_MANDATE_REQUIRED",
+      "verifiedAal2": true,
+      "organizationStatus": "ACTIVE",
+      "signatureGuardReached": true
+    },
+    {
+      "id": "UI_NON_CONTRACTUAL_ACTIVATION",
+      "status": "PASS",
+      "mode": "NON_CONTRACTUAL_DEMO",
+      "sourceHashPresent": true
+    },
+    {
+      "id": "ACTIVE_SPACE_OPENS",
+      "status": "PASS",
+      "simulationExplicit": true,
+      "failureReasons": [],
+      "urlPath": "/fr/franchise/invitations/afe7dbc8-b152-4a12-8c7e-bdcfd1f23f38"
+    }
+  ],
+  "privateFieldClearedBeforeScreenshot": true
+}

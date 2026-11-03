@@ -13,4 +13,11 @@ describe("franchise governance financial invariants", () => {
       { beneficiaryCode: "ASMA_MATRICIA", amountMinor: "2500" },
     ])?.amountMinor).toBe("5000");
   });
+  it("respecte les exposants monétaires, les signes et les grandes valeurs FR/AR",()=>{
+    expect(formatMinor("1234","TND","fr")).toContain("1,234");
+    expect(formatMinor("1234","JPY","fr")).not.toContain(",34");
+    expect(formatMinor("-9007199254740993123","KWD","fr").replace(/[.\s]/gu,"")).toContain("-9007199254740993,123");
+    expect(formatMinor("-1234","TND","ar")).toContain("1,234");
+    expect(()=>formatMinor("12.5","MAD","fr")).toThrow("INVALID_DOCUMENT_AMOUNT");
+  });
 });

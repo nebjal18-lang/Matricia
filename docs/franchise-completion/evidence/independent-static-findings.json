@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "df67da4",
+  "scope": "Static source checks, not a remote exploit or SQL execution",
+  "checks": {
+    "closeVersionCalculatedBeforeIdempotency": true,
+    "closeCanonicalHashIncludesMutableVersion": true,
+    "payoutBalanceCheckedBeforeIdempotency": true,
+    "postJournalStatusChecked": true,
+    "postNetRevenueAmountNotDerivedFromJournalEntries": true,
+    "postNoNativeReceiptRead": true,
+    "postEffectAndCategoryNotCoupled": true,
+    "postDoesNotInspectCostFormula": true
+  },
+  "financeMigrationSha256": "a4aa6183b6fc7fc7c549989ff1539efa750d1cfbaeb14bff03214390909cbf9c"
+}

@@ -1,0 +1,34 @@
+# Parcours Devis Sous-traitant
+
+Source de ce lot : `codex/client-completion-20261102`, `7e01276`. Branche métier : `codex/provider-quotes-20261102`. L'intégration est assurée sur `codex/provider-completion-20261102` ; les copies locales des dépendances d'entrée et de contexte ne font pas partie des commits à réintégrer.
+
+| Constat | Correction | Preuve et réserve |
+|---|---|---|
+| Une ligne ponctuelle disparaît des intervalles du formulaire | Champ caché pour la récurrence ponctuelle ; index des lignes conservé pour les lignes mixtes | FormData réellement produite par Chromium, FR/AR, ponctuel, récurrent et mixte. Les Server Actions sont simulées dans ce seul test de sérialisation ; le parcours authentifié complet reste à recetter. |
+| La sauvegarde utilise un ancien code fiscal | Même résolveur de politique fiscale approuvée que la lecture ; aucune catégorie ou TVA déduite arbitrairement | Actions testées sur source historique résoluble, catégorie divergente et politique absente ; l'absence de règle bloque la révision. |
+| Invitations/devis tronqués à 100 et détails perdus | Pagination 25 avec recherche serveur avant pagination, ordre stable, détail autorisé direct et résolution de lien RFQ | SQL : 102 invitations, page 5, recherche FR/AR, filtre devis, résultat vide réel et refus étranger. |
+| Pannes transformées en préremplissage/document vide | Retour indisponible explicite ; formulaire et publication bloqués si la version source ne se charge pas | Tests des loaders et composants serveur. Le texte libre n'est pas traduit. |
+| Aucun parcours d'options | Options HT facultatives, montants exacts, hors total de base ; base et suite figées dans le SLA de chaque version | SQL teste un montant au-delà de la précision JavaScript, l'absence de doublon et le maintien du total de base. L'intégration d'une option exige un nouveau devis aux lignes fiscalisées avant sélection ; aucun taux ni tarif commercial n'est inventé. Les anciennes options sans base connue exigent une confirmation de nouveau chiffrage. |
+| Pièces jointes absentes | Choix explicite de pièces Portfolio/Référence de la même société, scan sain, consentement, lien immuable à la version et téléchargement privé | SQL :droits Provider/Client/concurrent, partage de la bonne source et refus d'identifiant étranger. La décision de scan SQL est une fixture synthétique ; aucun antivirus externe ni téléchargement physique via Storage n'est certifié par ce reçu. |
+| Le lien du brouillon revient vers l'éditeur | Véritable PDF FR/AR, marqué brouillon, issu de la version autorisée et des montants exacts | 4 tests PDF ; absence de version ou panne bloque le téléchargement. Les intégrations externes ne sont pas impliquées. |
+| Révision volontaire d'un devis soumis impossible | Nouvelle version motivée avant sélection, délai/CAS/historique conservés ; versions précédentes immuables | SQL :V1 publiée→V2 brouillon→V2 republiée et refus de sélection obsolète. |
+| La révision masque V1 ou expose V2 au Client | Pointeur de dernière publication ; historique V1 consultable, brouillon et ses relations privés, état révision explicite | SQL sous le vrai rôle authenticated :V1 reste visible pendant V2, pièces V1 accessibles, V2 et relations cachées ; publication atomique avance le pointeur. La comparaison ne sélectionne pas silencieusement V1 pendant révision. |
+| Diff de versions incomplet | Options, base fiscale, modalités, maintenance et identités des originaux intégrées au diff | Tests ciblés ; la revue indépendante a détecté ce défaut puis relu sa correction. |
+
+## Contrôles réellement exécutés
+
+- `APP_ENV=development node /workspace/provider-identity/work/identity-proof/run-rollback.mjs --browser-root=/workspace/client-browser-verification --migration=<39000> --migration=<39100> --migration=<39200> --test=<0346_provider_quote_completion.test.sql> --output=<work/provider-0346-attempt1>` : **41 assertions SQL PASS**, commandes sous `SET ROLE authenticated`, triggers actifs, un plan complet, aucun cas sauté. Toutes les migrations et le test sont annulés ensemble : **aucun COMMIT**, empreinte de schéma identique avant/après. Le reçu est un test transactionnel sur la cible locale canonique existante 458 ; il ne remplace pas un rejeu intégral sur une base neuve.
+- `pnpm --filter @matricia/web test modules/provider/screens/devis modules/provider/data/quotes app/api/quotes/attachments modules/client/screens/demandes/quote-revision-notice.test.tsx modules/client/screens/demandes/comparison-panel.test.tsx modules/client/screens/demandes/offer-detail.test.tsx modules/provider/screens/spaces/nested-screens.test.tsx --exclude '**/draft-pdf.test.ts' --maxWorkers=2` : **19 fichiers, 123 tests PASS**.
+- `pnpm --filter @matricia/web test modules/provider/data/quotes/draft-pdf.test.ts --maxWorkers=1` : **1 fichier,4 tests PASS**, délai de test inchangé.
+- Lint ciblé du lot : **PASS**, aucun diagnostic. Le groupe de 123 tests et les 4 tests PDF ont également été rejoués après le redémarrage de l’environnement, avec succès. `git diff --check` : PASS.
+- TypeScript global : une ancienne exécution signalait deux erreurs dans les dépendances d'entrée/contexte, corrigées par leurs propriétaires (`82db84b`, `c05bf82`). **Le typecheck intégré final et le build ne sont pas certifiés par ce lot.**
+
+Reçus, empreintes et journal non sensible : [evidence/quotes/verification.json](evidence/quotes/verification.json), [receipt.json](evidence/quotes/receipt.json), [0346.rollback.log](evidence/quotes/0346.rollback.log).
+
+## Revue indépendante et limites
+
+L'agent d'entrée a relu la décision d'options HT, puis fait corriger le diff de versions. Root a relu `f46edf5`, les migrations39000/39200 et les routes de téléchargement : aucun blocage source restant identifié sur l'isolation des brouillons, les pièces et le CAS. Ces revues statiques ne sont pas présentées comme des exécutions SQL des réviseurs.
+
+L'ancien scénario `tests/e2e/p23-provider-quotes.spec.ts` possède désormais les noms de champs actuels et une saisie de 1250,50 en unité principale. **Il n'a pas été exécuté dans ce lot** : son ancien runner `p23-provider-quotes-run.mjs` utilise encore des fixtures avec désactivation de triggers et une préparation fiscale historique. Il ne sert pas de preuve. `pnpm exec playwright test --list tests/e2e/p23-provider-quotes.spec.ts` a seulement validé la découverte de ses 4 cas, sans les exécuter. La cohorte native Provider séparée doit couvrir le parcours authentifié, les erreurs, les pièces physiques, les reprises et les largeurs 375/390/768/1440 en FR/AR/RTL avant clôture intégrée.
+
+Les identités et politiques fiscales doivent être réellement approuvées ; les pièces doivent passer le scanner configuré. Aucun fournisseur, texte légal, tarif ou approbation de production n'a été inventé, aucune production modifiée.

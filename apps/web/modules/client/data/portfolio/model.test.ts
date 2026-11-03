@@ -15,11 +15,16 @@ describe("client portfolio exact money", () => {
   it.each([
     ["0", "MAD", "0.00 MAD"],
     ["125005", "MAD", "1250.05 MAD"],
+    ["100", "JPY", "100 JPY"],
+    ["-100", "JPY", "-100 JPY"],
+    ["1234", "KWD", "1.234 KWD"],
+    ["9007199254740993", "JPY", "9007199254740993 JPY"],
     ["-150", "MAD", "-1.50 MAD"],
     ["900719925474099312345", "MAD", "9007199254740993123.45 MAD"],
   ])("formats %s without floating point", (minor, currency, expected) => expect(exactMoney(minor, currency)).toBe(expected));
 
   it.each([["1250", "125000"], ["1250,5", "125050"], ["1250.05", "125005"]])("parses %s exactly", (input, expected) => expect(moneyToMinor(input)).toBe(expected));
+  it.each([["100","JPY","100"],["1,234","KWD","1234"],["١٫٢٣٤","KWD","1234"],["9007199254740993","JPY","9007199254740993"]])("uses currency exponents for %s %s",(amount,currency,expected)=>expect(moneyToMinor(amount,currency)).toBe(expected));
   it.each(["-1", "1.001", "NaN", "1e3", "", "12,345"])("rejects malformed amount %s", input => expect(moneyToMinor(input)).toBeNull());
 });
 

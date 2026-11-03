@@ -13,3 +13,10 @@ describe("explicit franchise invitation activation",()=>{
  it("reports a changed source for retry rather than a fabricated success",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{code:"40001",message:"FRANCHISE_MANDATE_CHANGED"}});expect(await executeFranchiseInvitationActivation(idle,form())).toEqual({status:"error",reason:"CHANGED"});expect(mocks.revalidate).not.toHaveBeenCalled();});
  it("rejects invalid previews and malformed activation evidence",async()=>{expect(await previewFranchiseInvitation("wrong-id")).toBeNull();expect(mocks.rpc).not.toHaveBeenCalled();mocks.rpc.mockResolvedValue({data:{outcome:"FRANCHISE_ACTIVATED"},error:null});expect(await executeFranchiseInvitationActivation(idle,form())).toEqual({status:"error",reason:"UNAVAILABLE"});});
 });
+
+describe("franchise activation prerequisites remain distinct",()=>{
+ it.each([['FRANCHISE_ACTIVATION_MFA_REQUIRED','MFA'],['FRANCHISE_ACTIVATION_ORGANIZATION_NOT_ACTIVE','ORGANIZATION_STATUS'],['FRANCHISE_INVITATION_ACCEPT_DENIED','FORBIDDEN']] as const)('maps %s to actionable %s',async(message,reason)=>{
+  const data=form();data.set('mode','CONTRACTUAL');mocks.rpc.mockResolvedValue({data:null,error:{code:'42501',message}});
+  expect(await executeFranchiseInvitationActivation(idle,data)).toEqual({status:'error',reason});expect(mocks.revalidate).not.toHaveBeenCalled();
+ });
+});

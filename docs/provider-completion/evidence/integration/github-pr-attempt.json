@@ -1,0 +1,14 @@
+{
+  "attemptedAt": "2026-11-03T00:59:30.493903+00:00",
+  "repository": "epitaphe360/matricia",
+  "base": "codex/client-completion-20261102",
+  "head": "codex/provider-completion-20261102",
+  "reviewedHeadBeforeAttempt": "5d97dbd",
+  "command": "gh pr create --repo epitaphe360/matricia --base codex/client-completion-20261102 --head codex/provider-completion-20261102 --title [title in PULL_REQUEST.md] --body-file docs/provider-completion/PULL_REQUEST.md --draft",
+  "exitCode": 1,
+  "error": "Post \"https://api.github.com/graphql\": Forbidden",
+  "pullRequestCreated": false,
+  "manualCompare": "https://github.com/epitaphe360/matricia/compare/codex/client-completion-20261102...codex/provider-completion-20261102?expand=1",
+  "merged": false,
+  "productionDeployed": false
+}

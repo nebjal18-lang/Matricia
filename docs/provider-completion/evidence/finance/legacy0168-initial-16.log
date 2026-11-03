@@ -1,0 +1,256 @@
+BEGIN
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+GRANT
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+INSERT 0 2
+REVOKE
+GRANT
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE VIEW
+CREATE FUNCTION
+CREATE TABLE
+ALTER TABLE
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+DO
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+DROP POLICY
+CREATE POLICY
+NOTIFY
+DO
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+INSERT 0 4
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE TRIGGER
+ALTER TABLE
+CREATE FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+DO
+SET
+ plan
+-------
+ 1..16
+(1 row)
+
+                                            ok
+-------------------------------------------------------------------------------------------
+ ok 1 - credit, plan and collection commands are security definer with a fixed search_path
+(1 row)
+
+                                    ok
+--------------------------------------------------------------------------
+ ok 2 - authenticated receives execute; anonymous and service_role do not
+(1 row)
+
+                                        ok
+-----------------------------------------------------------------------------------
+ ok 3 - credit notes never rewrite invoices and stay bounded by the original total
+(1 row)
+
+                                        ok
+-----------------------------------------------------------------------------------
+ ok 4 - invoice balances derive credited amounts, payment plans and overdue status
+(1 row)
+
+                                             ok
+---------------------------------------------------------------------------------------------
+ ok 5 - reconciliation and the J+8 helper consume derived outstanding, not a mutated invoice
+(1 row)
+
+                                     ok
+-----------------------------------------------------------------------------
+ ok 6 - closure dashboard and exception sweep treat only OVERDUE as blocking
+(1 row)
+
+                                       ok
+---------------------------------------------------------------------------------
+ ok 7 - collection advances by appending decisions and defaults an approved plan
+(1 row)
+
+                                       ok
+--------------------------------------------------------------------------------
+ ok 8 - helpers stay private; credit notes are readable only through tenant RLS
+(1 row)
+
+INSERT 0 3
+INSERT 0 3
+INSERT 0 2
+       set_config
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SELECT 2
+INSERT 0 6
+INSERT 0 2
+INSERT 0 2
+INSERT 0 6
+INSERT 0 2
+                                   ok
+------------------------------------------------------------------------
+ ok 9 - an unpaid past-due invoice is overdue before any credit or plan
+(1 row)
+
+INSERT 0 1
+INSERT 0 3
+INSERT 0 1
+                                           ok
+----------------------------------------------------------------------------------------
+ ok 10 - a credit note clears the hold by derivation without mutating the invoice total
+(1 row)
+
+INSERT 0 1
+INSERT 0 2
+                                             ok
+--------------------------------------------------------------------------------------------
+ ok 11 - a legacy approved plan without installments never suppresses an overdue obligation
+(1 row)
+
+INSERT 0 2
+                                                   ok
+---------------------------------------------------------------------------------------------------------
+ ok 12 - a governed future installment plan defers only its covered amounts while the invoice stays open
+(1 row)
+
+INSERT 0 1
+INSERT 0 2
+INSERT 0 1
+                                             ok
+---------------------------------------------------------------------------------------------
+ ok 13 - defaulting a plan restores OVERDUE without rewriting the invoice or the case header
+(1 row)
+
+                         is
+----------------------------------------------------
+ ok 14 - credit notes never mutate financial_status
+(1 row)
+
+                        is
+---------------------------------------------------
+ ok 15 - both invoices remain as originally issued
+(1 row)
+
+                                  throws_ok
+-----------------------------------------------------------------------------
+ ok 16 - a tenant without a finance platform role cannot issue a credit note
+(1 row)
+
+ finish
+--------
+(0 rows)
+
+ROLLBACK

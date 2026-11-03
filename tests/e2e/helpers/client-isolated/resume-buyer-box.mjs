@@ -1,0 +1,32 @@
+import { requireDevelopment, loadOwnState, docker } from './safety.mjs';
+requireDevelopment();
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
+const state=await loadOwnState(),directory=resolve(state.directory,'buyer-box'),actors=JSON.parse(await readFile(resolve(state.directory,'actors.private.json'))),trace=JSON.parse(await readFile(resolve(directory,'rpc-trace.private.json')));
+const ownerActor=actors.find(actor=>actor.label==='owner'),buyerActor=actors.find(actor=>actor.label==='buyer'),authorActor=actors.find(actor=>actor.label==='reviewer');
+const {createClient}=createRequire(resolve('apps/web/package.json'))('@supabase/supabase-js'),api=`http://127.0.0.1:${state.gatewayPort}`,config={auth:{persistSession:false,autoRefreshToken:false}};
+async function nativeClient(actor){const client=createClient(api,state.anonKey,config);if((await client.auth.setSession(actor.session)).error)throw new Error('NATIVE_RESUME_SESSION_REQUIRED');const assurance=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assurance.error||assurance.data?.currentLevel!=='aal2')throw new Error('NATIVE_RESUME_AAL2_REQUIRED');return client;}
+const owner=await nativeClient(ownerActor),buyer=await nativeClient(buyerActor),author=await nativeClient(authorActor),service=createClient(api,state.serviceKey,config),steps=[];
+async function call(client,name,args,outcome){const result=await client.rpc(name,args);if(result.error)throw new Error(`NATIVE_RESUME_${name}:${result.error.code}:${result.error.message}`);if(outcome&&result.data?.outcome!==outcome)throw new Error(`NATIVE_RESUME_UNEXPECTED_${name}`);steps.push({rpc:name,outcome:result.data?.outcome??null});return result.data;}
+const failed=trace.find(entry=>entry.rpc==='process_verified_subscription_payment_v2'&&entry.http>=400);
+if(!failed?.args||failed.args.p_gateway!=='DEMO'||failed.args.p_provider_environment!=='DEMO'||!/^TEST-NATIVE-BOX-PAID-[A-Z0-9]{8}$/u.test(failed.args.p_provider_event_id))throw new Error('PRESERVED_EXACT_FAILED_DEMO_EVENT_REQUIRED');
+const tag=failed.args.p_provider_event_id.slice(-8),key=suffix=>`native-box-${tag}-${suffix}`;
+try{
+ const activated=await call(service,'process_verified_subscription_payment_v2',failed.args,'SUBSCRIPTION_ACTIVATED');
+ await call(service,'process_verified_subscription_payment_v2',failed.args);
+ const eventId=docker(['exec','-i',state.database,'psql','-X','-U','supabase_admin','-d','postgres','-Atq','-v','ON_ERROR_STOP=1'],{input:`select id::text from public.subscription_payment_events where provider_event_id='${failed.args.p_provider_event_id}';`}).trim();
+ if(!/^\d+$/u.test(eventId))throw new Error('ONE_EXACT_PERSISTED_PAYMENT_EVENT_REQUIRED');
+ const context=await call(owner,'get_customer_box_configuration_v1',{p_organization_id:ownerActor.organizationId});if(context.status!=='CONFIGURABLE')throw new Error('PAID_BOX_MUST_BE_CONFIGURABLE');
+ const rule=trace.find(entry=>entry.rpc==='link_plan_box_rule'&&entry.http<400).data;
+ const benefits=trace.filter(entry=>entry.rpc==='create_benefit_version'&&entry.http<400).map(entry=>({id:entry.data.benefit_version_id,suffix:entry.args.p_code.endsWith('_CORE')?'CORE':'EXTRA'}));
+ if(benefits.length!==2||new Set(benefits.map(benefit=>benefit.suffix)).size!==2)throw new Error('EXACT_ORIGINAL_APPROVED_BENEFITS_REQUIRED');
+ const configured=await call(owner,'configure_customer_box_v1',{p_organization_id:ownerActor.organizationId,p_plan_box_rule_id:rule.plan_box_rule_id,p_expected_context_hash:context.context_hash,p_selections:benefits.map(benefit=>({slot_code:benefit.suffix,benefit_version_id:benefit.id,units:'1'})),p_idempotency_key:key('configure')},'CUSTOMER_BOX_CONFIGURED');
+ await call(owner,'ensure_client_credit_wallet',{p_organization_id:ownerActor.organizationId,p_idempotency_key:key('wallet')},'CREDIT_WALLET_READY');
+ const grant=await call(author,'get_subscription_credit_grant_context_v1',{p_organization_id:ownerActor.organizationId,p_payment_event_id:eventId,p_month_index:1});if(grant.can_issue!==true)throw new Error('CANONICAL_PAID_GRANT_NOT_ADMISSIBLE');
+ await call(author,'issue_subscription_credit_grant_v1',{p_organization_id:ownerActor.organizationId,p_payment_event_id:eventId,p_month_index:1,p_expected_terms_hash:grant.terms.terms_hash,p_idempotency_key:key('grant')},'CREDITS_ISSUED');
+ await call(owner,'set_customer_box_envelope_v1',{p_customer_box_id:configured.customer_box_id,p_scope:'MEMBER',p_target_id:buyerActor.userId,p_expected_version:0,p_credit_limit:'3',p_reason:'TEST uniquement — enveloppe personnelle limitée à trois crédits',p_idempotency_key:key('envelope')},'BOX_ENVELOPE_SAVED');
+ const workspace=await call(buyer,'get_my_box_workspace_v1',{p_organization_id:ownerActor.organizationId});const box=workspace.boxes.find(box=>box.id===configured.customer_box_id);if(!workspace.aal2||!box||box.credit_limit!=='3'||box.available!=='3'||!box.funding_ready)throw new Error('REAL_FUNDED_BUYER_SCOPE_NOT_READY');
+ const proof={scope:'GENUINE_GOTRUE_GOVERNANCE_AND_CANONICAL_DEMO_EVENT_RESUME',status:'READY',realExternalPspPurchase:false,nativeOnboardingCertified:false,commercialPolicyCertified:false,platformRoleBootstrap:'TEST_SEPARATE_FINANCE_ACTORS_ONLY',originalIntentPreserved:true,originalEventPreserved:true,originalPaidAtPreserved:failed.args.p_paid_at,providerIntentId:failed.args.p_provider_intent_id,providerEventId:failed.args.p_provider_event_id,persistedPaymentEventId:eventId,verifiedEventReplayedWithoutDuplicate:true,organizationId:ownerActor.organizationId,ownerId:ownerActor.userId,buyerId:buyerActor.userId,customerBoxId:configured.customer_box_id,benefitVersionId:benefits.find(benefit=>benefit.suffix==='CORE').id,walletId:grant.wallet_id,periodEnd:box.period_end,canonicalGrant:'10',memberLimit:'3',tag,steps};
+ await writeFile(resolve(directory,'fixture-proof.json'),JSON.stringify(proof,null,2));console.log(JSON.stringify({status:proof.status,nativeResumeSteps:steps.length,sameEventReplayed:true,externalPspCertified:false,evidence:resolve(directory,'fixture-proof.json')}));
+}catch(error){const message=String(error.message).replace(/[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/gu,'[REDACTED]').slice(0,500);await writeFile(resolve(directory,'resume-failure.json'),JSON.stringify({status:'FAILED',message,steps},null,2));console.log(JSON.stringify({status:'FAILED',message,evidence:resolve(directory,'resume-failure.json')}));process.exitCode=1;}

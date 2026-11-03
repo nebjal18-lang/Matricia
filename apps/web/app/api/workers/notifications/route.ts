@@ -1,30 +1,11 @@
 import { withOperationalHeartbeat } from "@/modules/shared/lib/operations/heartbeat";
-import { randomUUID,timingSafeEqual } from "node:crypto";
-import { deliverNotification,type NotificationDeliveryJob } from "@/modules/shared/lib/notification-delivery/adapter";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
+import { deliverNotification } from "@/modules/shared/lib/notification-delivery/adapter";
+import { runNotificationWorker } from "./runner";
 
-export const dynamic="force-dynamic";export const maxDuration=60;
-const responseHeaders={"cache-control":"no-store"}as const;
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-function authorized(request:Request,env:NodeJS.ProcessEnv){const expected=env.CRON_SECRET??"",supplied=request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]??"",a=Buffer.from(expected),b=Buffer.from(supplied);return a.length>=32&&a.length===b.length&&timingSafeEqual(a,b)}
-function limitOf(request:Request){const raw=new URL(request.url).searchParams.get("limit")??"5";return /^\d{1,2}$/.test(raw)&&Number(raw)>=1&&Number(raw)<=10?Number(raw):null}
-type Claim={delivery_id?:unknown;lease_token?:unknown;worker_id?:unknown;row_version?:unknown;channel?:unknown;attempt?:unknown;provider_idempotency_key?:unknown;recipient_email?:unknown;locale?:unknown;subject?:unknown;body?:unknown;cta_path?:unknown};
-type RpcResult={data:unknown;error:unknown};type WorkerDependencies={rpc:(name:string,args:Record<string,unknown>)=>Promise<RpcResult>;deliver:typeof deliverNotification;env:NodeJS.ProcessEnv};
-function parseClaim(raw:Claim,workerId:string):({deliveryId:string;leaseToken:string;attempt:number;job:NotificationDeliveryJob}|null){
- if(typeof raw.delivery_id!=="string"||!uuid.test(raw.delivery_id)||typeof raw.lease_token!=="string"||!uuid.test(raw.lease_token)||raw.worker_id!==workerId||!Number.isSafeInteger(raw.attempt)||(raw.attempt as number)<1||!Number.isSafeInteger(raw.row_version)||(raw.row_version as number)<1||!(["IN_APP","EMAIL"]as unknown[]).includes(raw.channel)||!(["fr-MA","ar-MA"]as unknown[]).includes(raw.locale)||typeof raw.subject!=="string"||typeof raw.body!=="string")return null;
- if(raw.channel==="EMAIL"&&(typeof raw.recipient_email!=="string"||typeof raw.provider_idempotency_key!=="string"))return null;
- return{deliveryId:raw.delivery_id,leaseToken:raw.lease_token,attempt:raw.attempt as number,job:{deliveryId:raw.delivery_id,channel:raw.channel as "IN_APP"|"EMAIL",recipientEmail:typeof raw.recipient_email==="string"?raw.recipient_email:null,locale:raw.locale as "fr-MA"|"ar-MA",subject:raw.subject,body:raw.body,ctaPath:typeof raw.cta_path==="string"?raw.cta_path:null,providerIdempotencyKey:typeof raw.provider_idempotency_key==="string"?raw.provider_idempotency_key:null}};
-}
-export async function runNotificationWorker(request:Request,dependencies:WorkerDependencies){
- if(!authorized(request,dependencies.env))return Response.json({code:"UNAUTHORIZED"},{status:401,headers:responseHeaders});const limit=limitOf(request);if(!limit)return Response.json({code:"INVALID_LIMIT"},{status:400,headers:responseHeaders});
- const workerId=`notifications-${randomUUID()}`,correlationId=randomUUID(),deadline=Date.now()+45_000;
- const summary={claimed:0,delivered:0,accepted:0,retried:0,deadLetterCandidates:0,blockedByPreference:0,reconciliationRequired:0};
- for(let index=0;index<limit&&Date.now()<deadline;index++){const claim=await dependencies.rpc("claim_notification_deliveries_v1",{p_worker_id:workerId,p_limit:1,p_lease_seconds:120});if(claim.error||!Array.isArray(claim.data))return Response.json({code:"NOTIFICATION_CLAIM_FAILED",summary},{status:503,headers:responseHeaders});if(claim.data.length===0)break;summary.claimed++;const parsed=parseClaim(claim.data[0]as Claim,workerId);if(!parsed){summary.reconciliationRequired++;return Response.json({code:"NOTIFICATION_CLAIM_INVALID",summary},{status:503,headers:responseHeaders})}const sendAuthorization=await dependencies.rpc("authorize_notification_delivery_send_v1",{p_delivery_id:parsed.deliveryId,p_lease_token:parsed.leaseToken,p_worker_id:workerId,p_correlation_id:correlationId});if(sendAuthorization.error){summary.reconciliationRequired++;return Response.json({code:"NOTIFICATION_SEND_AUTH_FAILED",summary},{status:503,headers:responseHeaders})}if((sendAuthorization.data as{authorized?:unknown}|null)?.authorized!==true){summary.blockedByPreference++;continue}let result;try{result=await dependencies.deliver(parsed.job,{env:dependencies.env,fetch})}catch{result={outcome:"PERMANENT_FAILURE"as const,errorCode:"DELIVERY_ADAPTER_RECONCILIATION_REQUIRED",evidence:{adapter:"UNKNOWN"}}}
-  const record=await dependencies.rpc("record_notification_delivery_worker_result_v1",{p_delivery_id:parsed.deliveryId,p_lease_token:parsed.leaseToken,p_worker_id:workerId,p_outcome:result.outcome,p_provider_message_id:(result.outcome==="DELIVERED"||result.outcome==="SENT")?result.providerMessageId:null,p_error_code:(result.outcome==="DELIVERED"||result.outcome==="SENT")?null:("errorCode" in result?result.errorCode:"DELIVERY_RESULT_INVALID"),p_result_snapshot:result.evidence,p_idempotency_key:`notification-attempt:${parsed.deliveryId}:${parsed.attempt}`,p_correlation_id:correlationId});
-  if(record.error){summary.reconciliationRequired++;return Response.json({code:"NOTIFICATION_RESULT_RECORD_FAILED",summary},{status:503,headers:responseHeaders})}const status=(record.data as{status?:unknown}|null)?.status;if(status==="DELIVERED")summary.delivered++;else if(status==="SENT")summary.accepted++;else if(status==="DEAD_LETTER")summary.deadLetterCandidates++;else if(status==="FAILED")summary.retried++;else{summary.reconciliationRequired++;return Response.json({code:"NOTIFICATION_RESULT_INVALID",summary},{status:503,headers:responseHeaders})}
- }
- return Response.json({outcome:"NOTIFICATIONS_PROCESSED",...summary},{headers:{...responseHeaders,"x-correlation-id":correlationId}});
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 async function runCycle(request:Request){const client=getSupabaseAdminClient();return runNotificationWorker(request,{rpc:async(name,args)=>{const result=await client.rpc(name,args);return{data:result.data,error:result.error}},deliver:deliverNotification,env:process.env})}
 export const GET=POST;
 

@@ -116,6 +116,7 @@ export function filterListRows(rows: readonly ProviderListRow[], search: string)
 
 export function providerSearchQuery(query: string, patch: Record<string, string | undefined>): string {
   const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+  if (["q", "tab", "domain"].some(key => Object.hasOwn(patch, key) && (patch[key] ?? "") !== (params.get(key) ?? ""))) params.delete("page");
   for (const [key, value] of Object.entries(patch)) {
     if (!value) params.delete(key);
     else params.set(key, value);

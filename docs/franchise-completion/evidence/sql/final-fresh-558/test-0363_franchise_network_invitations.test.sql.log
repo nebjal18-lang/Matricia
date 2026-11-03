@@ -1,0 +1,56 @@
+1..41
+ok 1 - no direct invitation writes
+ok 2 - raw token storage is unavailable to API roles
+ok 3 - worker cannot create invitations
+ok 4 - users cannot claim external email success
+{"sub":"f3630000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+ok 5 - AAL1 cannot request an external invitation
+{"sub":"f3630000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 6 - viewer cannot request invitations
+{"sub":"f3630000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 7 - manager of sibling mandate cannot request invitations
+{"sub":"f3630000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 8 - contact permission must be confirmed
+ok 9 - territory belongs to the exact mandate
+ok 10 - invalid later CSV row rejects the entire transaction
+ok 11 - no partial batch or false sent invitation survives
+{"sub":"f3630000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 12 - lost-response replay returns the same batch result
+ok 13 - one normalized recipient queued
+ok 14 - case-insensitive CSV duplicate is explicitly counted
+ok 15 - same key cannot change a batch
+ok 16 - saving a request does not mean SENT
+ok 17 - one durable email request after replay
+ok 18 - outbox does not contain token, hash or recipient email
+{"sub":"f3630000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 19 - queued, unsent invitation cannot be opened
+ok 20 - forged event envelope is denied
+ok 21 - requested invitation language is canonical
+ok 22 - production refuses a simulated email
+{"outcome": "FRANCHISE_NETWORK_INVITATION_SENT", "invitation_id": "f3638000-0000-4000-8000-000000000001"}
+{"outcome": "FRANCHISE_NETWORK_INVITATION_SENT", "invitation_id": "f3638000-0000-4000-8000-000000000001"}
+ok 23 - worker replay cannot replace provider evidence
+ok 24 - one audited delivery confirmation
+{"sub":"f3630000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 25 - matching token does not authorize a different account email
+ok 26 - sibling mandate manager cannot read network invitations
+{"sub":"f3630000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 27 - recipient email alone cannot replace token verification
+ok 28 - selector includes only the recipient active Client organization
+ok 29 - selector never offers the operator or another organization
+ok 30 - caller cannot substitute another target organization
+{"sub":"f3630000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+ok 31 - referral acceptance requires AAL2
+{"sub":"f3630000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 32 - acceptance replays the same origin
+{"outcome": "FRANCHISE_NETWORK_REFERRAL_REGISTERED", "invitation_id": "f3638000-0000-4000-8000-000000000001", "prospect_type": "CLIENT", "organization_id": "f3631000-0000-4000-8000-000000000002"}
+ok 33 - origin remains a single immutable referral
+ok 34 - fresh retry key does not duplicate acceptance effects
+ok 35 - no automatic role grant
+ok 36 - no duplicate organization membership
+ok 37 - no automatic economic entry
+ok 38 - historical referral cannot be removed
+ok 39 - registration does not invent organization verification
+ok 40 - a legacy organization-link action cannot replace the accepted source
+{"sub":"f3630000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 41 - expired historical TEST link fails against the real server clock

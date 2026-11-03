@@ -273,7 +273,6 @@ export type ClientHomeInsights = {
 export function pickFeaturedRequest<T extends { status: string; quoteCount: number }>(requests: readonly T[]): T | null {
   return requests.find((item) => item.quoteCount > 0 && ["RFQ_OPEN", "QUOTES_RECEIVED", "CLIENT_REVIEW"].includes(item.status))
     ?? requests.find((item) => OPEN_REQUEST.has(item.status))
-    ?? requests[0]
     ?? null;
 }
 

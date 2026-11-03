@@ -27,9 +27,19 @@ describe("provider planning source states", () => {
   });
 
   it.each(["fr", "ar"])("shows the empty week only after a successful read in %s", async (locale) => {
-    planning.mockResolvedValue({ status: "success", events: [], hasMore: false, page: 1, billingVisible: true });
+    planning.mockResolvedValue({ status: "success", events: [], hasMore: false, page: 1, billingVisible: true, operationalScopeIncomplete: false });
     const html = renderToStaticMarkup(await ProviderPlanningPage({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({ week: "2026-11-02" }) }));
     expect(html).toContain(locale === "ar" ? "لا مواعيد في هذا الأسبوع" : "Aucune échéance sur cette semaine");
     expect(html).not.toContain('role="alert"');
   });
+  it.each(["fr", "ar"])("keeps held scope partial without false empty-day claims in %s", async (locale) => {
+    planning.mockResolvedValue({ status: "success", events: [], hasMore: false, page: 1, billingVisible: true, operationalScopeIncomplete: true });
+    const html = renderToStaticMarkup(await ProviderPlanningPage({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({ week: "2026-11-02" }) }));
+    expect(html).toContain(locale === "ar" ? "التخطيط جزئي" : "Planning partiel");
+    expect(html).toContain(locale === "ar" ? "التخطيط غير مكتمل" : "Le planning reste incomplet");
+    expect(html).toContain(`/${locale}/sous-traitant/missions?organizationId=${organizationId}`);
+    expect(html).not.toContain(locale === "ar" ? "لا مواعيد في هذا الأسبوع" : "Aucune échéance sur cette semaine");
+    expect(html).not.toContain(locale === "ar" ? "لا حدث" : "Aucun événement");
+  });
+
 });

@@ -1,0 +1,29 @@
+{
+  "scope": "FRANCHISE_NATIVE_BASELINE",
+  "candidate": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+  "hostedCertification": false,
+  "tests": [
+    {
+      "id": "NO_MANDATE_fr",
+      "status": "PASS",
+      "httpStatus": 200,
+      "preciseAbsenceExplained": true,
+      "concreteApplyAction": true,
+      "overflow": false,
+      "dir": "ltr",
+      "lang": "fr"
+    },
+    {
+      "id": "NO_MANDATE_ar",
+      "status": "PASS",
+      "httpStatus": 200,
+      "preciseAbsenceExplained": true,
+      "concreteApplyAction": true,
+      "overflow": false,
+      "dir": "rtl",
+      "lang": "ar"
+    }
+  ],
+  "failure": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:19273/fr/franchise/services/nouveau?organizationId=30a8a981-0ab6-432e-8b3c-9ef0a4d094db\", waiting until \"networkidle\"\u001b[22m\n"
+}

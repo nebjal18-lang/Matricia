@@ -1,0 +1,51 @@
+
+{"status": "ACTIVE", "outcome": "CREDIT_PACK_ACTIVE", "pack_version_id": "966bbaba-8810-4e7f-808f-bb58e323cadf"}
+
+
+
+
+
+
+
+
+
+
+
+
+{"sub":"a3690000-0000-4000-8000-000000000003","role":"authenticated"}
+
+
+
+
+
+{"outcome": "CLIENT_BILLING_POLICY_APPROVED", "policy_id": "d7cf1f36-3921-46d2-857e-81ebdd60b439"}
+
+
+{"outcome": "CREDIT_REVENUE_POLICY_APPROVED", "operation": "ACTIVATE", "request_id": "bd905003-6f22-4021-94c1-098ac17ac419", "source_hash": "e3573bef4fba688120f180bce4685580df6701570ac2ad742932a0ace191ad34", "policy_version_id": "33ba9e99-effc-456d-8e80-6b3af3867e08"}
+
+
+{"outcome": "CREDIT_REVENUE_POLICY_APPROVED", "operation": "ACTIVATE", "request_id": "eac57746-5dba-467a-9eea-f5f907ed45f6", "source_hash": "a7b42df4ffdc57b6ac1e7b56e853a05f785402cb1201e70ea75172e01f89a72a", "policy_version_id": "92ad05d9-c244-4f78-aa53-ff7074287eb0"}
+
+
+
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "96d14eb5-a095-4f87-afcf-81f1a8b8829a", "approval_request_id": "49d24257-16db-41c2-b6dc-939a0abc48e1"}
+
+
+
+{"outcome": "BENEFIT_VERSION_ACTIVATED", "version": 1, "benefit_id": "f18c6745-7d09-4f89-a41c-ecce0ba38a81", "benefit_version_id": "0de89a9b-ac81-455a-9a65-27a1d847c86e"}
+
+
+{"outcome": "BENEFIT_ADMISSION_POLICY_REVIEWED", "decision": "APPROVE"}
+
+ok 1 - a seeded historical reservation is refused even when its own organization, wallet and governed benefit are valid
+ok 2 - a historical in-progress seed cannot skip native admission and operational transitions
+ok 3 - a historical consumed row with a made-up hash cannot create a canonical receipt
+ok 4 - all three refused import attempts leave no hidden historical redemption
+ok 5 - the real current reservation remains unchanged
+ok 6 - rejected historical seeds never manufacture economic consumption
+ok 7 - no distributable balance is invented for the unconsumed purchase
+ok 8 - the purchase used for this boundary test has the actual native DEMO capture chain
+ok 9 - the exact captured net remains unallocated rather than becoming franchise profit
+
+ok 10 - the inability to import history is not worked around by closing the current civil day
+1..10

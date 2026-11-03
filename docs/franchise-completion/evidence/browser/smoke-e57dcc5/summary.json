@@ -1,0 +1,979 @@
+{
+  "scope": "FRANCHISE_FR_AR_RESPONSIVE_NATIVE_MANDATE",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "widths": [
+    390
+  ],
+  "routes": [
+    "accueil",
+    "services",
+    "qualite",
+    "marketing",
+    "finance"
+  ],
+  "mandateActivation": "NON_CONTRACTUAL_DEMO",
+  "hostedCertification": false,
+  "manualFullWcagCertification": false,
+  "axeRuleExclusions": [],
+  "status": "FAILED",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "accueil",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > small"
+              ],
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > strong"
+              ],
+              [
+                ".client-lang-switch > a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                ".franchise-mobile-dock > a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                "li:nth-child(1) > .client-status-chip"
+              ],
+              [
+                "li:nth-child(2) > .client-status-chip"
+              ],
+              [
+                ".franchise-mobile-queue > li:nth-child(3) > span:nth-child(2) > small"
+              ],
+              [
+                "li:nth-child(3) > .client-status-chip"
+              ],
+              [
+                ".franchise-mobile-queue > li:nth-child(4) > span:nth-child(2) > small"
+              ],
+              [
+                "li:nth-child(4) > .client-status-chip"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-accueil.png",
+      "elapsedMs": 6123
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "services",
+      "status": "FAIL",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": [
+              {
+                "target": [
+                  "tr[data-selected=\"true\"] > td:nth-child(7) > .franchise-complete[aria-label=\"100%\"]"
+                ],
+                "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a span with no valid role attribute."
+              },
+              {
+                "target": [
+                  "tr:nth-child(2) > td:nth-child(7) > .franchise-complete[aria-label=\"100%\"]"
+                ],
+                "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a span with no valid role attribute."
+              }
+            ]
+          },
+          {
+            "id": "definition-list",
+            "impact": "serious",
+            "nodes": [
+              {
+                "target": [
+                  "dl"
+                ],
+                "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+              }
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > small"
+              ],
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > strong"
+              ],
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                ".franchise-mobile-dock > a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                "label[for=\"franchise-mandate-context\"]"
+              ],
+              [
+                ".mx-4 > .bg-primary.text-primary-foreground.hover\\:bg-primary\\/90"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(6) > .franchise-langs > .franchise-lang:nth-child(1)"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(6) > .franchise-langs > .franchise-lang[data-tone=\"mint\"]"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(8) > .client-status-chip"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"Mission A\"]"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(6) > .franchise-langs > .franchise-lang:nth-child(1)"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(6) > .franchise-langs > .franchise-lang[data-tone=\"mint\"]"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(8) > .client-status-chip"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(9) > a"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"Mission B\"]"
+              ],
+              [
+                ".client-priority-head > .client-status-chip"
+              ],
+              [
+                ".franchise-security-inline > ul > li:nth-child(4)"
+              ]
+            ]
+          }
+        ]
+      },
+      "failure": "Error: FRANCHISE_ACCESSIBILITY_VIOLATION",
+      "elapsedMs": 5803
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "qualite",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > small"
+              ],
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > strong"
+              ],
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                ".franchise-mobile-dock > a[data-active=\"true\"] > span:nth-child(1)"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > .inline-flex.shrink-0.justify-center"
+              ],
+              [
+                ".franchise-pill-tab[data-active=\"true\"] > em"
+              ],
+              [
+                ".franchise-pill-tab:nth-child(2) > em"
+              ],
+              [
+                ".franchise-pill-tab:nth-child(3) > em"
+              ],
+              [
+                "span[aria-current=\"page\"]"
+              ],
+              [
+                "li:nth-child(1) > .client-num"
+              ],
+              [
+                "li:nth-child(2) > .client-num"
+              ],
+              [
+                "li:nth-child(3) > .client-num"
+              ],
+              [
+                "li:nth-child(4) > .client-num"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-qualite.png",
+      "elapsedMs": 7520
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "marketing",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > small"
+              ],
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > strong"
+              ],
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span:nth-child(1)"
+              ],
+              [
+                "label[for=\"franchise-mandate-context\"]"
+              ],
+              [
+                ".client-card > button[type=\"submit\"]"
+              ],
+              [
+                "#_R_5klubsnqbrb_-safe"
+              ],
+              [
+                ".leading-7"
+              ],
+              [
+                ".gap-5.grid:nth-child(2) > .bg-card.rounded-2xl.p-4 > .text-xl"
+              ],
+              [
+                ".gap-5.grid:nth-child(2) > .bg-card.rounded-2xl.p-4 > .mt-2.text-muted-foreground"
+              ],
+              [
+                ".rounded-lg"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-brand-org\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-brand-org"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-color\"]"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-tone\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-tone"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-cta\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-cta"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-url\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-url"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-host\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-host"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-hashtags\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-hashtags"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-forbidden\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-forbidden"
+              ],
+              [
+                "fieldset:nth-child(15) > legend"
+              ],
+              [
+                "input[aria-label=\"Référence du claim\"]"
+              ],
+              [
+                "textarea[aria-label=\"Texte français du claim\"]"
+              ],
+              [
+                "textarea[aria-label=\"Texte arabe du claim\"]"
+              ],
+              [
+                "input[name=\"claimEvidenceReference\"]"
+              ],
+              [
+                "fieldset:nth-child(16) > legend"
+              ],
+              [
+                "input[aria-label=\"Référence de la certification\"]"
+              ],
+              [
+                "input[aria-label=\"Nom de la certification\"]"
+              ],
+              [
+                "input[name=\"certificationEvidenceReference\"]"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-reason\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-reason"
+              ],
+              [
+                ".min-h-11:nth-child(18)"
+              ],
+              [
+                "form[action=\"\"][enctype=\"multipart/form-data\"][method=\"POST\"] > .sm\\:w-auto"
+              ],
+              [
+                ".xl\\:grid-cols-2.gap-5.grid:nth-child(3) > .bg-card.rounded-2xl.p-4:nth-child(1) > .text-xl"
+              ],
+              [
+                "label[for=\"_R_9tklubsnqbrb_-org\"]"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-org"
+              ],
+              [
+                "label[for=\"_R_9tklubsnqbrb_-purpose\"]"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-purpose"
+              ],
+              [
+                "label[for=\"_R_9tklubsnqbrb_-decision\"]"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-decision"
+              ],
+              [
+                "label[for=\"_R_9tklubsnqbrb_-evidence\"]"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-evidence"
+              ],
+              [
+                ".sm\\:col-span-2:nth-child(11) > .sm\\:w-auto"
+              ],
+              [
+                ".xl\\:grid-cols-2.gap-5.grid:nth-child(3) > .bg-card.rounded-2xl.p-4:nth-child(2) > .text-xl"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(2) > .mt-3.text-muted-foreground"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(4) > .text-xl"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(4) > .mt-3.text-muted-foreground"
+              ],
+              [
+                "#_R_1atklubsnqbrb_-title"
+              ],
+              [
+                "section[aria-labelledby=\"_R_1atklubsnqbrb_-title\"] > .mt-3.text-muted-foreground"
+              ],
+              [
+                ".space-y-5 > .xl\\:grid-cols-2.gap-5.grid > .bg-card.rounded-2xl.p-4:nth-child(2) > .text-xl"
+              ],
+              [
+                ".space-y-5 > .xl\\:grid-cols-2.gap-5.grid > .bg-card.rounded-2xl.p-4:nth-child(2) > .space-y-3.mt-4 > .text-muted-foreground"
+              ],
+              [
+                "#marketing-calendars-title"
+              ],
+              [
+                "#calendrier > .gap-4.lg\\:grid-cols-2.mt-4 > .text-muted-foreground"
+              ],
+              [
+                ".xl\\:grid-cols-2.gap-5.grid:nth-child(6) > .bg-card.rounded-2xl.p-4:nth-child(1) > .text-xl"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(1) > .space-y-3.mt-4 > .text-muted-foreground"
+              ],
+              [
+                ".xl\\:grid-cols-2.gap-5.grid:nth-child(6) > .bg-card.rounded-2xl.p-4:nth-child(2) > .text-xl"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(2) > .mt-2.text-muted-foreground"
+              ],
+              [
+                ".xl\\:grid-cols-2.gap-5.grid:nth-child(6) > .bg-card.rounded-2xl.p-4:nth-child(2) > .space-y-3.mt-4 > .text-muted-foreground"
+              ],
+              [
+                "#attribution > .text-2xl"
+              ],
+              [
+                "label[for=\"marketing-filter-organization\"]"
+              ],
+              [
+                "#marketing-filter-organization"
+              ],
+              [
+                "label[for=\"marketing-filter-actor\"]"
+              ],
+              [
+                "#marketing-filter-actor"
+              ],
+              [
+                "label[for=\"marketing-filter-content\"]"
+              ],
+              [
+                "#marketing-filter-content"
+              ],
+              [
+                "label[for=\"marketing-filter-provider\"]"
+              ],
+              [
+                "#marketing-filter-provider"
+              ],
+              [
+                "label[for=\"marketing-filter-franchise\"]"
+              ],
+              [
+                "#marketing-filter-franchise"
+              ],
+              [
+                "label[for=\"marketing-filter-library\"]"
+              ],
+              [
+                "#marketing-filter-library"
+              ],
+              [
+                "label[for=\"marketing-filter-service\"]"
+              ],
+              [
+                "#marketing-filter-service"
+              ],
+              [
+                "label[for=\"marketing-filter-network\"]"
+              ],
+              [
+                "#marketing-filter-network"
+              ],
+              [
+                "label[for=\"marketing-filter-campaign\"]"
+              ],
+              [
+                "#marketing-filter-campaign"
+              ],
+              [
+                "label[for=\"marketing-filter-from\"]"
+              ],
+              [
+                "#marketing-filter-from"
+              ],
+              [
+                "label[for=\"marketing-filter-to\"]"
+              ],
+              [
+                "#marketing-filter-to"
+              ],
+              [
+                ".mt-4.text-muted-foreground"
+              ],
+              [
+                "section:nth-child(8) > .text-2xl"
+              ],
+              [
+                "section:nth-child(8) > .gap-4.lg\\:grid-cols-2.mt-4 > .text-muted-foreground"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-marketing.png",
+      "elapsedMs": 4690
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "finance",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > small"
+              ],
+              [
+                ".franchise-mandate-chip > span:nth-child(2) > strong"
+              ],
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a[data-active=\"true\"] > span:nth-child(1)"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                ".client-card:nth-child(2) > p:nth-child(3)"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-finance.png",
+      "elapsedMs": 3922
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "accueil",
+      "status": "PASS",
+      "http": 200,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                ".client-lang-switch > a[aria-current=\"page\"]"
+              ],
+              [
+                ".franchise-mobile-dock > a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                "li:nth-child(1) > .client-status-chip"
+              ],
+              [
+                "li:nth-child(2) > .client-status-chip"
+              ],
+              [
+                ".franchise-mobile-queue > li:nth-child(3) > span:nth-child(2) > small"
+              ],
+              [
+                "li:nth-child(3) > .client-status-chip"
+              ],
+              [
+                ".franchise-mobile-queue > li:nth-child(4) > span:nth-child(2) > small"
+              ],
+              [
+                "li:nth-child(4) > .client-status-chip"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "ar-390-accueil.png",
+      "elapsedMs": 9738
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "services",
+      "status": "FAIL",
+      "http": 200,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": [
+              {
+                "target": [
+                  "tr[data-selected=\"true\"] > td:nth-child(7) > .franchise-complete[aria-label=\"100%\"]"
+                ],
+                "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a span with no valid role attribute."
+              },
+              {
+                "target": [
+                  "tr:nth-child(2) > td:nth-child(7) > .franchise-complete[aria-label=\"100%\"]"
+                ],
+                "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a span with no valid role attribute."
+              }
+            ]
+          },
+          {
+            "id": "definition-list",
+            "impact": "serious",
+            "nodes": [
+              {
+                "target": [
+                  "dl"
+                ],
+                "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+              }
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".franchise-mobile-dock > a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                ".mx-4 > .bg-primary.text-primary-foreground.hover\\:bg-primary\\/90"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(6) > .franchise-langs > .franchise-lang:nth-child(1)"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(6) > .franchise-langs > .franchise-lang[data-tone=\"mint\"]"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"المهمة أ\"]"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(6) > .franchise-langs > .franchise-lang:nth-child(1)"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(6) > .franchise-langs > .franchise-lang[data-tone=\"mint\"]"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"المهمة ب\"]"
+              ]
+            ]
+          }
+        ]
+      },
+      "failure": "Error: FRANCHISE_ACCESSIBILITY_VIOLATION",
+      "elapsedMs": 7993
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "qualite",
+      "status": "PASS",
+      "http": 200,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".franchise-mobile-dock > a[data-active=\"true\"] > span:nth-child(1)"
+              ],
+              [
+                ".mx-4 > .inline-flex.shrink-0.justify-center"
+              ],
+              [
+                ".franchise-pill-tab[data-active=\"true\"] > em"
+              ],
+              [
+                ".franchise-pill-tab:nth-child(2) > em"
+              ],
+              [
+                ".franchise-pill-tab:nth-child(3) > em"
+              ],
+              [
+                "span[aria-current=\"page\"]"
+              ],
+              [
+                "li:nth-child(1) > .client-num"
+              ],
+              [
+                "li:nth-child(2) > .client-num"
+              ],
+              [
+                "li:nth-child(3) > .client-num"
+              ],
+              [
+                "li:nth-child(4) > .client-num"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "ar-390-qualite.png",
+      "elapsedMs": 7167
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "marketing",
+      "status": "PASS",
+      "http": 200,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                "a:nth-child(5) > span:nth-child(1)"
+              ],
+              [
+                ".client-card > button[type=\"submit\"]"
+              ],
+              [
+                ".gap-5.grid:nth-child(2) > .bg-card.rounded-2xl.p-4 > .text-xl"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-brand-org"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-tone"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-cta"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-url"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-host"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-hashtags"
+              ],
+              [
+                "label[for=\"_R_1dklubsnqbrb_-forbidden\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-forbidden"
+              ],
+              [
+                "fieldset:nth-child(15) > legend"
+              ],
+              [
+                "input[aria-label=\"مرجع الادعاء\"]"
+              ],
+              [
+                "textarea[aria-label=\"نص الادعاء بالفرنسية\"]"
+              ],
+              [
+                "textarea[aria-label=\"نص الادعاء بالعربية\"]"
+              ],
+              [
+                "input[aria-label=\"مرجع وثيقة إثبات الادعاء\"]"
+              ],
+              [
+                "input[aria-label=\"مرجع الشهادة\"]"
+              ],
+              [
+                "input[aria-label=\"اسم الشهادة\"]"
+              ],
+              [
+                "input[aria-label=\"مرجع وثيقة الشهادة\"]"
+              ],
+              [
+                "#_R_1dklubsnqbrb_-reason"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-org"
+              ],
+              [
+                "label[for=\"_R_9tklubsnqbrb_-purpose\"]"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-purpose"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-decision"
+              ],
+              [
+                "#_R_9tklubsnqbrb_-evidence"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(4) > .text-xl"
+              ],
+              [
+                ".bg-card.rounded-2xl.p-4:nth-child(4) > .mt-3.text-muted-foreground"
+              ],
+              [
+                "#marketing-filter-organization"
+              ],
+              [
+                "#marketing-filter-actor"
+              ],
+              [
+                "#marketing-filter-content"
+              ],
+              [
+                "label[for=\"marketing-filter-provider\"]"
+              ],
+              [
+                "#marketing-filter-provider"
+              ],
+              [
+                "#marketing-filter-franchise"
+              ],
+              [
+                "#marketing-filter-library"
+              ],
+              [
+                "label[for=\"marketing-filter-service\"]"
+              ],
+              [
+                "#marketing-filter-service"
+              ],
+              [
+                "#marketing-filter-network"
+              ],
+              [
+                "#marketing-filter-campaign"
+              ],
+              [
+                "label[for=\"marketing-filter-from\"]"
+              ],
+              [
+                "#marketing-filter-from"
+              ],
+              [
+                "#marketing-filter-to"
+              ],
+              [
+                "section:nth-child(8) > .text-2xl"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "ar-390-marketing.png",
+      "elapsedMs": 4671
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "finance",
+      "status": "PASS",
+      "http": 200,
+      "lang": "ar",
+      "dir": "rtl",
+      "overflow": false,
+      "workspaceFailures": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                "a[data-active=\"true\"] > span:nth-child(1)"
+              ],
+              [
+                ".mx-4 > button"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "ar-390-finance.png",
+      "elapsedMs": 4920
+    }
+  ],
+  "pageErrors": []
+}

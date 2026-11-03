@@ -1,0 +1,4 @@
+
+> @matricia/worker@0.1.0 typecheck /workspace/franchise-completion/apps/worker
+> tsc --noEmit
+

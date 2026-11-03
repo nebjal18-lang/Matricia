@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { Badge } from "@/modules/shared/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/shared/ui/card";
@@ -21,6 +22,7 @@ export function GovernanceDashboard({ dashboard, locale, messages: m }: { dashbo
             <p><span className="text-muted-foreground">{m.territory}: </span>{item.territoryCode} · {item.territoryVersions.length} {m.version.toLocaleLowerCase(locale)}</p>
             {mandate ? <div className="rounded-lg border p-3"><p className="font-medium">{m.mandate} · {m.version} {mandate.version}</p><p>{m.status}: {mandate.status}</p><p>{m.effective}: {date(mandate.effectiveFrom, locale)}</p><p>{m.entryFee}: <span dir="ltr">{amount(mandate.entryFeeMinor, "MAD", locale)}</span></p><p>{m.shares}: <span dir="ltr">{formatBps(mandate.franchiseeShareBps)} / {formatBps(mandate.neoxaShareBps)} / {formatBps(mandate.asmaShareBps)}</span></p></div> : <p>{m.humanPending}</p>}
             <p className={itValid ? "text-muted-foreground" : "font-semibold text-destructive"}>{item.type === "IT" ? itValid ? m.itRule : m.itMismatch : m.standardRule}</p>
+            {dashboard.capabilities.finance ? <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/administration/gouvernance-franchise/livres?${new URLSearchParams({ franchiseId: item.id })}`}>{locale === "ar" ? "ربط الدفتر المالي بالوكالة المعتمدة" : "Rattacher le livre au mandat approuvé"}</Link> : null}
           </CardContent></Card>;
         })}
       </div></section>

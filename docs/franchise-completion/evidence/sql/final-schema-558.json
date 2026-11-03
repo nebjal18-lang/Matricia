@@ -1,0 +1,134 @@
+{
+  "sourceBase": "df67da4",
+  "sourceSchemaCommit": "225921525d758b4eaa650765d894839b5152a9ff",
+  "appBuildCommit": "834202b6a77df4b2a13c77bdcfcc98ffdad6e011",
+  "appTree": "d334946aa988aceda5543b72c64411035643206f",
+  "cohort": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "baselineMigrationCount": 534,
+  "migrationCount": 558,
+  "newMigrations": [
+    {
+      "file": "20261103452800_franchise_book_mandate_binding.sql",
+      "sha256": "1ab476dbac9f9e97c4111c72294878f9313571563ecc09011ef4876575ee9741",
+      "passed": true
+    },
+    {
+      "file": "20261103452810_franchise_book_bound_financial_sources.sql",
+      "sha256": "da483730f9a69c23a2ef9f7c6ee450a681d3f5fa3786eed6abdbfc97640ccc5c",
+      "passed": true
+    },
+    {
+      "file": "20261103452820_franchise_book_opening_context.sql",
+      "sha256": "2ee571e1beb30a92c1c6856e1fe71541fc346b75087ddb26dc1b0602b09e569e",
+      "passed": true
+    },
+    {
+      "file": "20261103452830_franchise_entry_fee_legal_basis.sql",
+      "sha256": "b610b9d5377bac168916cbf5f8967ec52d471146a7946e7313ee6962292808d9",
+      "passed": true
+    },
+    {
+      "file": "20261103452840_franchise_book_provenance_chronology.sql",
+      "sha256": "fa7fcfbddbc0e04d0c7126d1755bf19c9340f44abe9847db636fed2f540e20ad",
+      "passed": true
+    },
+    {
+      "file": "20261103453000_finance_cost_document_vault.sql",
+      "sha256": "1e4536adcfcbc3aa12225f466f5a4e6210f5fe9671fad5118582dd40b9585959",
+      "passed": true
+    },
+    {
+      "file": "20261103453100_credit_economic_zero_cost_document_admission.sql",
+      "sha256": "21ba20637cf770a1b3ca1f88c4df717a09c02555bc73a10499b00f8678a072d0",
+      "passed": true
+    },
+    {
+      "file": "20261103453200_finance_cost_document_durable_scan_state.sql",
+      "sha256": "3bfddacc309cf384a250f018deb2c475321aa0993e8718ac48a9db09fae7e46d",
+      "passed": true
+    },
+    {
+      "file": "20261103453300_finance_cost_document_access_states.sql",
+      "sha256": "e0472dfad86eedc946a5a0116c0196790d81d8f04726aab158ef48d9b642099f",
+      "passed": true
+    },
+    {
+      "file": "20261103453400_finance_cost_target_selection.sql",
+      "sha256": "37c6c522027d4f5ac80e47dccea5eb2adf2d275edf6acd25ba9445dab2ff078a",
+      "passed": true
+    },
+    {
+      "file": "20261103454400_franchise_governance_signals.sql",
+      "sha256": "883d5c498a32c6225add4243cfaf9909f0a8d47d39f40185af80058773f4d85c",
+      "passed": true
+    },
+    {
+      "file": "20261103454410_franchise_governance_review_followups.sql",
+      "sha256": "074500d760e860d20366ebf097e91b31ce3322cbdc06317aec9fb02092c602e9",
+      "passed": true
+    },
+    {
+      "file": "20261103454490_franchise_control_bound_books.sql",
+      "sha256": "7688a0cf7f9f054372bf31bec0e418af5b467271710dc0c65bbe1407e4507e1f",
+      "passed": true
+    },
+    {
+      "file": "20261103454500_franchise_control_plan_owner_governance.sql",
+      "sha256": "39cb11fa2cc129b46247d5fdd317baf7f668cad5dfc36b509f8456f7d7227db9",
+      "passed": true
+    },
+    {
+      "file": "20261103454510_franchise_control_actor_recheck.sql",
+      "sha256": "56b74b97aa9f072deff12d0c8efe2ff1cdf87a75c61ed51acfd698aab0699138",
+      "passed": true
+    },
+    {
+      "file": "20261103454520_franchise_control_require_review_queue.sql",
+      "sha256": "b24ad7c8b1d5faf12d6bd9d107e74ccedc1a059bf11b33d1774422e3a53047e1",
+      "passed": true
+    },
+    {
+      "file": "20261103454530_franchise_control_single_latest_remeasurement.sql",
+      "sha256": "71840cb885715aad7a58667aa945131b5c55692d7c6bac2eee5cd867ed6ae2bf",
+      "passed": true
+    },
+    {
+      "file": "20261103455300_catalog_bilingual_service_deliverables.sql",
+      "sha256": "85bb03f5a917d86ca76eda58358c5cd0fd7f7ea6fbf2cbb2e457e8e88a571eb0",
+      "passed": true
+    },
+    {
+      "file": "20261103455310_credit_zero_to_expense_governed_recovery.sql",
+      "sha256": "da684062c4d5a0773b6b77becdea297befb7bd8e186210c8fcde432a213f9751",
+      "passed": true
+    },
+    {
+      "file": "20261103455320_franchise_mandate_choice_descriptors.sql",
+      "sha256": "460a875c4ccc7589b3db5080f9f97052c1edc86b9f1b214cc5e22d256e7b7578",
+      "passed": true
+    },
+    {
+      "file": "20261103455340_finance_rule_and_evidence_access_recovery.sql",
+      "sha256": "74533cd2606f685bf9b88e7566eed26dc81962d3527be43ffdc48f00bb68e3de",
+      "passed": true
+    },
+    {
+      "file": "20261103455350_franchise_finance_rule_operation_scope.sql",
+      "sha256": "d73ac732e36010118135e0363f15ee4a86bfefd7d33e5c09a06e7b64f07cc640",
+      "passed": true
+    },
+    {
+      "file": "20261103455360_franchise_finance_invoker_read_boundary.sql",
+      "sha256": "35dbe497df1bcf75179ed58ebee28f65ed4e994f85fdd598dff9aaa768d526e5",
+      "passed": true
+    },
+    {
+      "file": "20261103455370_franchise_book_selector_access_states.sql",
+      "sha256": "73d12255ebf4ba5ecd95bd9ea8635ba7c4a029daf69c64cb9672f930b26051c4",
+      "passed": true
+    }
+  ],
+  "freshReplay": false,
+  "stagingCertification": false
+}

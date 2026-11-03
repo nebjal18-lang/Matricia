@@ -25,6 +25,15 @@ describe("QuestionnairePanel", () => {
     expect(html).toContain("min-h-11");
     expect(html).not.toMatch(/(?:min-w|max-w|w)-\[(?:[4-9]\d\d|\d{4,})px\]/u);
   });
+  it("keeps identical SSR markup with Node24 navigator, offline navigator or no navigator",()=>{
+    const render=()=>renderToStaticMarkup(<QuestionnairePanel locale="ar" dashboard={dashboard} messages={getQuestionnaireMessages("ar")} identities={{start:identity,submit:identity,answers:{[id(5)]:identity}}}/>);
+    try{
+      vi.stubGlobal("navigator",undefined);const initial=render();
+      vi.stubGlobal("navigator",{userAgent:"Node.js/24"});expect(render()).toBe(initial);
+      vi.stubGlobal("navigator",{onLine:false});expect(render()).toBe(initial);
+      vi.stubGlobal("navigator",{onLine:true});expect(render()).toBe(initial);
+    }finally{vi.unstubAllGlobals();}
+  });
   it("lists company sites on session start", () => {
     const html = renderToStaticMarkup(<QuestionnairePanel locale="ar" dashboard={dashboard} messages={getQuestionnaireMessages("ar")} identities={{ start: identity, submit: identity, answers: { [id(5)]: identity } }} sites={[{ id: id(9), nameFr: "Siege Casablanca", nameAr: "المقر الدار البيضاء" }]} />);
     expect(html).toContain('name="siteId"');

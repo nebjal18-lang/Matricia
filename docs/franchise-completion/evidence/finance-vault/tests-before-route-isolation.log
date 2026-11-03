@@ -1,0 +1,30 @@
+
+ RUN  v5.0.3 /workspace/franchise-financial-close/apps/web
+
+ ❯ app/api/finance/cost-proofs/uploads/[uploadId]/route.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/api/finance/cost-proofs/uploads/[uploadId]/route.test.ts [ app/api/finance/cost-proofs/uploads/[uploadId]/route.test.ts ]
+Error: Cannot find package 'server-only' imported from /workspace/franchise-financial-close/apps/web/modules/shared/lib/supabase/admin.ts
+ ❯ modules/shared/lib/supabase/admin.ts:1:1
+      1| import "server-only";
+       | ^
+      2| import { createClient } from "@supabase/supabase-js";
+      3| import { getServerEnvironment } from "@/modules/shared/lib/env";
+ ❯ modules/shared/lib/privacy-files/server.ts:3:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  27 passed (27)
+   Start at  08:00:32
+   Duration  3.37s (import 50%, transform 25%, tests 21%, worker 4%)
+
+    Isolate  4 workers spawned · ~270ms startup each (spawn + environment, per file)
+             at least ~809ms faster with isolate: false — reuses workers across files instead of one per file
+
+undefined
+/workspace/franchise-financial-close/apps/web:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run modules/shared/lib/finance-cost-proofs/scan-consumer.test.ts modules/shared/lib/finance-cost-proofs/server.test.ts app/api/workers/finance-cost-scans/route.test.ts app/api/finance/cost-proofs/uploads/[uploadId]/route.test.ts --maxWorkers=1

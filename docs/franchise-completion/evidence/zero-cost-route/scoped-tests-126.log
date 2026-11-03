@@ -1,0 +1,12 @@
+
+ RUN  v5.0.3 /workspace/finance-zero-ui/apps/web
+
+
+ Test Files  7 passed (7)
+      Tests  126 passed (126)
+   Start at  09:09:26
+   Duration  7.83s (import 44%, transform 33%, tests 21%, worker 1%)
+
+    Isolate  7 workers spawned · ~350ms startup each (spawn + environment, per file)
+             at least ~2.10s faster with isolate: false — reuses workers across files instead of one per file
+

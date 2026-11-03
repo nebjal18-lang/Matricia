@@ -1,0 +1,119 @@
+{
+  "scope": "FINAL_PROVIDER_NATIVE_ACCEPTANCE_WITH_EXPLICIT_REMAINING_LIMITS",
+  "candidate": "5b8b0f738137abee19f6552aef538e906d04f24a",
+  "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+  "status": "BROWSER_CHECKS_PASSED_FINANCIAL_CLOSURE_AND_EXTERNAL_CERTIFICATIONS_NOT_CLAIMED",
+  "productionDeployment": false,
+  "remoteSupabaseVercelRailwayCertified": false,
+  "latestRuntimeBuild": {
+    "status": "PASSED",
+    "typescriptCompleted": true,
+    "candidate": "5b8b0f738137abee19f6552aef538e906d04f24a"
+  },
+  "responsive": {
+    "pages": 232,
+    "routes": 29,
+    "locales": [
+      "fr",
+      "ar"
+    ],
+    "widths": [
+      375,
+      390,
+      768,
+      1440
+    ],
+    "failures": 0,
+    "javascriptErrors": 0,
+    "horizontalOverflows": 0,
+    "captureCount": 232,
+    "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+  },
+  "axe": {
+    "scans": 256,
+    "violations": 0,
+    "incompleteRuleOccurrences": 256,
+    "incompleteRuleIds": [
+      "color-contrast"
+    ],
+    "exclusions": [],
+    "fullWcagCertified": false,
+    "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+  },
+  "selectedRenderedContrast": {
+    "scans": 8,
+    "targets": 56,
+    "backgroundBoundsPass": 48,
+    "opaqueGlyphsPass": 6,
+    "notMeasured": 2,
+    "belowThreshold": 0,
+    "allAxeIncompletesResolved": false,
+    "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+  },
+  "accountMenu": {
+    "cases": 8,
+    "passed": 8,
+    "hitTestedActionsPerCase": 3,
+    "keyboardTabOrder": true,
+    "touchOpenClose": true,
+    "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+  },
+  "modeClient": {
+    "steps": 4,
+    "status": "PASSED",
+    "governedActivationCandidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+    "sameOrganizationAndMembership": true,
+    "providerOnlyAcceptancePrecededActivation": true,
+    "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+  },
+  "navigation": {
+    "steps": 3,
+    "status": "PASSED",
+    "sameDocumentAcrossLocaleSwitches": true,
+    "ordinaryMissionSignedScopePending": false,
+    "ordinaryScopeNoticeAbsentFrAr": true,
+    "generalAdminOrganizationSelect": 0,
+    "purposeBoundProviderQueueRows": 1,
+    "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+  },
+  "nativeBusinessProvenance": {
+    "entryIdentityQuestionnaire": "e929f99135953bf05301c45b34f062fb5884c156",
+    "qualificationPartnerPrerequisites": "e929f99135953bf05301c45b34f062fb5884c156",
+    "qualificationServiceDecisionsQuotesRevisionContractMissionDeliveryMessages": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+    "currentFinanceAndGovernedClientRoleActivation": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+    "matrixNavigationMenusContrast": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+    "finalBuildAndTargetedQuoteStatus": "5b8b0f738137abee19f6552aef538e906d04f24a"
+  },
+  "helperGuardTests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "remainingLimits": [
+    "Current November3 financial declaration cannot enter October31 pre-statement; await actual November month-end cutoff and full approved dispute window. No closed invoice/payment plan/allocation browser certification.",
+    "No real legal signature, physical production antivirus, bank movement, professional fiscal validation or approved legal issuer publication certified.",
+    "No actual signed-amendment-awaiting-client-preparation UI flow played; ordinary false state verified; SQL and unit evidence remains separate.",
+    "Two selected contrast targets not rendered; all other axe contrast incompletes remain unresolved, no full WCAG certification.",
+    "Mode Client checks governance and context only, without rerunning full Client acceptance or bypassing Client compliance."
+  ],
+  "retainedFullMatrixCandidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "targetedQuoteStatusFollowup": {
+    "candidate": "5b8b0f738137abee19f6552aef538e906d04f24a",
+    "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+    "cases": 8,
+    "passed": 8,
+    "javascriptErrors": 0,
+    "horizontalOverflows": 0,
+    "rawSelectedEnumVisible": false,
+    "approvedLabels": {
+      "fr": "Sélectionné",
+      "ar": "مختار"
+    },
+    "sameRevisedNativeQuote": true,
+    "freeTextPreserved": true,
+    "businessMutationReplayed": false,
+    "full232MatrixReplayed": false,
+    "runtimeDeltaFiles": [
+      "apps/web/modules/provider/screens/spaces/workbenches.tsx"
+    ]
+  }
+}

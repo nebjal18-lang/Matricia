@@ -1,4 +1,5 @@
 "use client";
+import { editorialFailureMessage } from "./command-errors";
 import{useDraftAutosave,DraftAutosaveControl}from"./use-draft-autosave";
 import{CatalogBankSearch}from"./bank-search";
 import { useActionState, useRef, useState, type SetStateAction } from "react";
@@ -35,7 +36,7 @@ export function QuestionnaireCompositionEditor({ workspace, selected, locale, or
  return <form ref={formRef} action={action} className="client-card space-y-5">
   <h2>{ar?"تركيب الاستبيان وإصداره":"Composition et version du questionnaire"}</h2>
   <p>{ar?"يُحفظ الترتيب والمحتوى في الخادم. الإصدارات المنشورة غير قابلة للتعديل.":"L’ordre et la composition sont enregistrés sur le serveur. Les versions publiées restent immuables."}</p>
-  <DraftAutosaveControl autosave={autosave} locale={locale}/><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId??""}/><input type="hidden" name="libraryId" value={workspace.mandate.libraryId}/><input type="hidden" name="versionId" value={versionId}/><input type="hidden" name="expectedRowVersion" value={rowVersion}/><input type="hidden" name="idempotencyKey" value={key}/><input type="hidden" name="sections" value={JSON.stringify(sections)}/><input type="hidden" name="questions" value={JSON.stringify(questions)}/><input type="hidden" name="rules" value={JSON.stringify(rules)}/>
+  <DraftAutosaveControl autosave={autosave} locale={locale}/><input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId??""}/><input type="hidden" name="libraryId" value={workspace.mandate.libraryId}/><input type="hidden" name="franchiseId" value={workspace.mandate.franchiseId}/><input type="hidden" name="versionId" value={versionId}/><input type="hidden" name="expectedRowVersion" value={rowVersion}/><input type="hidden" name="idempotencyKey" value={key}/><input type="hidden" name="sections" value={JSON.stringify(sections)}/><input type="hidden" name="questions" value={JSON.stringify(questions)}/><input type="hidden" name="rules" value={JSON.stringify(rules)}/>
   <fieldset disabled={!editable||pending} className="space-y-4"><legend>{ar?"الأقسام والأسئلة":"Sections et questions"}</legend>
    {sections.map((section,index)=><div key={index} className="grid gap-3 rounded-lg border p-3 sm:grid-cols-3">
     <label>{ar?"رمز القسم":"Code de section"}<input required value={section.key} pattern="[A-Z][A-Z0-9_-]{1,79}" dir="ltr" onChange={(e)=>{const value=e.target.value;setSections((rows)=>rows.map((s,i)=>i===index?{...s,key:value}:s));setQuestions((rows)=>rows.map((q)=>q.sectionKey===section.key?{...q,sectionKey:value}:q));}} className="min-h-11 w-full rounded border px-3"/></label>
@@ -57,7 +58,7 @@ export function QuestionnaireCompositionEditor({ workspace, selected, locale, or
    <button type="submit" className="franchise-tool franchise-tool-primary" disabled={pending}>{pending?(ar?"جارٍ الحفظ…":"Enregistrement…"):(ar?"حفظ التركيب":"Enregistrer la composition")}</button>
   </fieldset>
   {!editable?<p role="status">{ar?"هذه نسخة ثابتة. أنشئوا مسودة جديدة قبل التعديل.":"Cette version est figée. Créez une nouvelle version brouillon avant de modifier sa composition."}</p>:null}
-  {state.status==="error"?<p role="alert">{state.reason==="CONFLICT"?(ar?"تغير الإصدار. أعيدوا تحميله قبل المحاولة.":"La version a changé. Rechargez-la avant de réessayer."):(ar?"تعذر الحفظ. بقيت تعديلاتكم في الشاشة.":"Enregistrement impossible. Vos modifications restent dans cet écran.")}</p>:null}
+  {state.status==="error"?<p role="alert">{editorialFailureMessage(state.reason,locale)}</p>:null}
   {pending?<p role="status">{ar?"جارٍ الحفظ في الخادم…":"Enregistrement en cours sur le serveur…"}</p>:dirty?<p role="status">{ar?"تعديلات غير محفوظة":"Modifications non enregistrées"}</p>:state.status==="success"?<p role="status">{ar?"تم الحفظ في الخادم":"Composition enregistrée sur le serveur"} {savedAt?<time dateTime={savedAt}>{new Intl.DateTimeFormat(ar?"ar-MA":"fr-MA",{timeStyle:"medium"}).format(new Date(savedAt))}</time>:null}</p>:null}
 
  </form>;

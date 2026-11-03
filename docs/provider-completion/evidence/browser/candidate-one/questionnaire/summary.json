@@ -1,0 +1,47 @@
+{
+  "scope": "NATIVE_PROVIDER_UI_SERVICES_CAPACITY_AND_CONDITIONAL_QUESTIONNAIRE",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "PASSED",
+  "steps": [
+    {
+      "step": "two_native_service_requests_persist_in_same_provider",
+      "passed": true
+    },
+    {
+      "step": "touch_declared_global_capacity_persists_without_qualification_approval",
+      "passed": true
+    },
+    {
+      "step": "native_regions_modes_radius_and_mission_size_declarations",
+      "passed": true
+    },
+    {
+      "step": "published_provider_questionnaire_started_from_real_ui",
+      "passed": true
+    },
+    {
+      "step": "conditional_required_rule_and_independent_server_refusal",
+      "passed": true
+    },
+    {
+      "step": "offline_queue_reconnect_and_persisted_native_reload",
+      "passed": true
+    },
+    {
+      "step": "arabic_original_free_text_and_persisted_conditional_visibility",
+      "passed": true
+    },
+    {
+      "step": "keyboard_resume_exact_draft_and_restore_answer",
+      "passed": true
+    },
+    {
+      "step": "native_provider_submission_is_persisted_and_read_only",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "fixtureScope": "HISTORICAL_SQL_TEST_PRECONDITION",
+  "sessionId": "ee0ef707-d890-40fc-a6d3-f34b6123a116"
+}

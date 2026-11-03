@@ -1,0 +1,91 @@
+import { requireDevelopment, loadOwnState } from './safety.mjs';
+requireDevelopment();
+import { createRequire } from 'node:module';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+const require = createRequire(resolve('apps/web/package.json'));
+const { createClient } = require('@supabase/supabase-js');
+const { createServerClient } = require('@supabase/ssr');
+const { chromium, expect } = createRequire(resolve('package.json'))('@playwright/test');
+const state = await loadOwnState();
+const owner = JSON.parse(await readFile(resolve(state.directory, 'actors.private.json'))).find(actor => actor.label === 'owner');
+const api = `http://127.0.0.1:${state.gatewayPort}`, origin = `http://127.0.0.1:${state.appPort}`;
+const client = createClient(api, state.anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+if ((await client.auth.setSession(owner.session)).error) throw new Error('NATIVE_SESSION_REQUIRED');
+const bag = new Map(), ssr = createServerClient(api, state.anonKey, { cookies: { getAll: () => [...bag.values()], setAll: entries => entries.forEach(entry => bag.set(entry.name, entry)) } });
+if ((await ssr.auth.setSession(owner.session)).error) throw new Error('NATIVE_SSR_SESSION_REQUIRED');
+const directory = resolve(state.directory, 'portfolio-browser');
+await mkdir(directory, { recursive: true });
+const proof = { scope: 'NATIVE_CLIENT_PORTFOLIO_SERVER_ACTIONS',appTree:execFileSync('git',['rev-parse','HEAD:apps/web'],{encoding:'utf8'}).trim(), candidate: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), status: 'RUNNING', nativeOnboardingCertified: false, physicalScanningCertified: false, independentBudgetApprovalCertified: false, steps: [], pageErrors: [] };
+const browser = await chromium.launch({ executablePath: '/usr/bin/chromium' });
+const context = await browser.newContext({ viewport: { width: 390, height: 960 }, hasTouch: true, serviceWorkers: 'block' });
+await context.addCookies([...bag.values()].map(cookie => ({ name: cookie.name, value: cookie.value, url: origin, httpOnly: false, secure: false, sameSite: 'Lax' })));
+const page = await context.newPage();
+page.on('pageerror', error => proof.pageErrors.push(error.message.slice(0, 500)));
+let current = 'open';
+const code = 'TEST_' + randomUUID().slice(0, 8).toUpperCase();
+const formFor = name => page.locator('form').filter({ has: page.locator(`input[name="${name}"]${name === "taskKey" ? ":not([readonly])" : ""}`) }).first();
+const save = async form => { proof.lastForm = await form.evaluate(element=>Object.fromEntries(new FormData(element))); await form.getByRole('button', { name: 'Enregistrer', exact: true }).click(); await expect(form.getByRole('status').filter({ hasText: 'Action enregistrée, auditée et propagée.' })).toBeVisible({ timeout: 20000 }); };
+async function row(table, columns, extra = () => true) {
+  const result = await client.from(table).select(columns).eq('organization_id', owner.organizationId);
+  if (result.error) throw new Error(`NATIVE_READ_FAILED:${table}:${result.error.code}`);
+  const found = result.data.find(extra);
+  if (!found) throw new Error('NATIVE_SAVED_OBJECT_MISSING:' + table);
+  return found;
+}
+try {
+  const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.error || assurance.data?.currentLevel !== 'aal2') throw new Error('NATIVE_AAL2_REQUIRED');
+  await page.goto(`${origin}/fr/client/portefeuille?organizationId=${owner.organizationId}`, { waitUntil: 'networkidle', timeout: 90000 });
+  let createdSite, createdProject;
+  if(process.argv.includes('--resume-test-project')){createdSite=await row('client_sites','id,code');createdProject=await row('client_projects','id,project_code,site_id');proof.priorNativeCreationReused=true;}else{
+  current = 'site';
+  const site = formFor('siteCode');
+  for (const [name, value] of Object.entries({ siteCode: code, nameFr: 'Site de recette native', nameAr: 'موقع اختبار أصلي', city: 'TEST', addressLine: 'TEST adresse de recette', changeReason: 'TEST création depuis navigateur natif' })) await site.locator(`[name="${name}"]`).fill(value);
+  await save(site);
+  createdSite = await row('client_sites', 'id,code', entry => entry.code === code);
+  proof.steps.push({ step: 'native_ui_site_creation_and_scoped_readback', passed: true });
+  current = 'project';
+  const project = formFor('projectCode');
+  await project.locator('[name="siteId"]').selectOption(createdSite.id);
+  for (const [name, value] of Object.entries({ projectCode: code, nameFr: 'Projet de recette native', nameAr: 'مشروع اختبار أصلي', descriptionFr: 'TEST Description saisie sans traduction automatique', descriptionAr: 'وصف تجريبي مستقل', changeReason: 'TEST création du projet' })) await project.locator(`[name="${name}"]`).fill(value);
+  await save(project);
+  createdProject = await row('client_projects', 'id,project_code,site_id', entry => entry.project_code === code);
+  if (createdProject.site_id !== createdSite.id) throw new Error('PROJECT_SITE_CONTEXT_LOST');
+  proof.steps.push({ step: 'native_ui_project_links_same_organization_site', passed: true });
+  }
+  current = 'task';
+  const task = formFor('taskKey');
+  await task.locator('[name="projectId"]').selectOption(createdProject.id);
+  for (const [name, value] of Object.entries({ taskKey: code, titleFr: 'Tâche native de test', titleAr: 'مهمة اختبار أصلية', descriptionFr: 'TEST résultat attendu', descriptionAr: 'نتيجة تجريبية', acceptanceCriteria: 'TEST preuve créée\nTEST responsable identifié', changeReason: 'TEST ajout tâche' })) await task.locator(`[name="${name}"]`).fill(value);
+  await save(task);
+  const createdTask = await row('client_project_tasks', 'id,project_id,task_key', entry => entry.task_key === code);
+  if (createdTask.project_id !== createdProject.id) throw new Error('TASK_PROJECT_CONTEXT_LOST');
+  proof.steps.push({ step: 'native_ui_task_links_authorized_project', passed: true });
+  current = 'budget';
+  const budget = formFor('fiscalYear');
+  await budget.locator('[name="projectId"]').selectOption(createdProject.id);
+  await budget.locator('[name="amount"]').fill('1250,50');
+  await budget.locator('[name="rationale"]').fill('TEST Budget brouillon : aucune approbation indépendante simulée');
+  await save(budget);
+  const createdBudget = await row('client_annual_budgets', 'id,currency,project_id,status', entry => entry.project_id === createdProject.id);
+  const amount = await row('client_annual_budget_versions', 'budget_id,amount_minor::text', entry => entry.budget_id === createdBudget.id);
+  if (createdBudget.currency !== 'MAD' || amount.amount_minor !== '125050' || createdBudget.status !== 'DRAFT') throw new Error('BUDGET_AMOUNT_OR_GOVERNANCE_INCORRECT');
+  proof.steps.push({ step: 'native_ui_MAD_budget_decimal_is_exact_minor_and_remains_draft', passed: true });
+  current = 'arabic_reload';
+  await page.goto(`${origin}/ar/client/portefeuille?organizationId=${owner.organizationId}`, { waitUntil: 'networkidle', timeout: 90000 });
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(page.getByText('مشروع اختبار أصلي', { exact: true }).first()).toBeVisible();
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) throw new Error('PORTFOLIO_RTL_OVERFLOW');
+  proof.steps.push({ step: 'native_AR_reload_uses_entered_AR_labels_without_overflow', passed: true });
+  await page.screenshot({ path: resolve(directory, 'portfolio-native-ar-390.png'), fullPage: true, caret: 'initial' });
+  proof.status = 'PASSED';
+} catch (error) {
+  proof.status = 'FAILED'; proof.failureStep = current; proof.failure = error.message.slice(0, 600); process.exitCode = 1;
+  await page.screenshot({ path: resolve(directory, 'failure.png'), fullPage: true, caret: 'initial' }).catch(() => {});
+} finally {
+  await browser.close(); await writeFile(resolve(directory, 'summary.json'), JSON.stringify(proof, null, 2));
+  console.log(JSON.stringify({ status: proof.status, steps: proof.steps.length, failureStep: proof.failureStep, failure: proof.failure, evidence: resolve(directory, 'summary.json') }));
+}

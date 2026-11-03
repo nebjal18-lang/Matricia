@@ -1,0 +1,43 @@
+ok 1 - an absent queue fails explicitly without disabling a production immutability guard
+
+
+{"role":"service_role"}
+ok 2 - native plans are generated without inventing an owner
+ok 3 - source proposal genuinely has no suggested owner
+{"sub":"a3650000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 4 - missing owner remains explicit rather than a successful empty state
+ok 5 - a real central task makes the plan discoverable to an independent administrator
+ok 6 - generic queue resolution cannot bypass the corrective plan governance
+ok 7 - plan cannot be approved without an independently approved assignment
+
+{"sub":"a3650000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 8 - selector contains only a currently authorized member of the exact mandate
+ok 9 - proposal replay preserves one assignment request
+ok 10 - first administrator cannot approve their own assignment
+{"sub":"a3650000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 11 - independent approval replay keeps the first assignment version
+ok 12 - effective owner follows the approved event rather than rewriting the original suggestion
+ok 13 - approval freezes the real responsible member in append-only evidence
+ok 14 - governed assignment preserves the missing original suggestion
+{"sub":"a3650000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+
+
+{"sub":"a3650000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal1"}
+ok 15 - a different available manager does not silently replace a revoked owner
+ok 16 - progress is blocked until the revoked owner is replaced through governance
+{"sub":"a3650000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+{"sub":"a3650000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 17 - reassignment appends a second approved ownership version
+{"sub":"a3650000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal1"}
+{"sub":"a3650000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 18 - declarative progress does not bypass native remeasurement
+ok 19 - replacement keeps the original approval owner evidence intact
+ok 20 - only two real independent assignment approvals exist despite retries
+ok 21 - unfinished objectives remain unfinished
+e955bf9a-f04a-475e-a73f-074cd932de45
+6b3600e9-5acc-4906-b931-4d97b8964914
+ok 22 - different older reports meeting one goal each cannot be combined into a completed plan
+b7aba1c4-ce80-486d-a407-9dbc974bd9bc
+47a9985a-614b-4e56-8de8-7a43bb279a67
+ok 23 - an older all-goals improvement does not override a newer degraded measurement
+1..23

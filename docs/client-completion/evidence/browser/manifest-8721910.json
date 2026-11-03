@@ -1,0 +1,42 @@
+{
+  "scope": "SAFE_BROWSER_ARTIFACT_SHA256_MANIFEST",
+  "appTree": "8721910b794a7d3533f96a99b8d63fddc3701d02",
+  "files": [
+    {
+      "file": "buyer-native-8721910.json",
+      "sha256": "46618116f27476efe1e4974148e9db4bdb152d2ffc35bb03c195c430070174d2"
+    },
+    {
+      "file": "buyer-demo-preserved-payment.json",
+      "sha256": "d10ce348ea34959c4854eb30530302bc0c4bd0d2754fb0df8f397fe133e45827"
+    },
+    {
+      "file": "buyer-immediate-read-before-poll.json",
+      "sha256": "9dc06e77b4ebd0ccc1c814b47d608511d9c7e132401d8ef56e9a2190875a5458"
+    },
+    {
+      "file": "buyer-reserved-fr-375.png",
+      "sha256": "6bb3a6697600cd74d699cc52522da80123131ddc91ad3193a4475f6a4a8334d0"
+    },
+    {
+      "file": "buyer-released-ar-375.png",
+      "sha256": "517dff873e2dcdf8c7a50b84f93f7f96164528929a27deed424d45c261b43284"
+    },
+    {
+      "file": "axe-final-8721910.json",
+      "sha256": "a798dd24f93155ba48c6b74b86530523349c9461600864e28e5bc91c95e0c033"
+    },
+    {
+      "file": "canonical-acl-historical457.json",
+      "sha256": "67abb7948d806593015eeae3aadc4e8be75342506f328d4d86857abd4055224d"
+    },
+    {
+      "file": "canonical-acl-current458.json",
+      "sha256": "ecf90e7ef834c3797a65e38cb65960ffaa51f0dd35095475cbced0e9ea475edc"
+    },
+    {
+      "file": "guard-delta37000.json",
+      "sha256": "1bb8110c5f4b2ece5161ad5abba15f001821520dd2e34d6d1bfa6ea2189dd7ef"
+    }
+  ]
+}

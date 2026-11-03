@@ -1,0 +1,33 @@
+{
+  "scope": "CHANGED_CAPTION_RENDERED_CONTRAST_ALL32_STATES",
+  "appTree": "468fa3077d29a31ae3d071eef830ff9f96b5a964",
+  "status": "ALL32_CHANGED_CAPTION_OPAQUE_GLYPHS_MEET_CONTRAST",
+  "scans": 32,
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "widths": [
+    375,
+    768
+  ],
+  "menuStates": [
+    "closed",
+    "open"
+  ],
+  "pages": [
+    "client/actions",
+    "client/boxes/mon-enveloppe",
+    "client/portefeuille",
+    "client/questionnaires"
+  ],
+  "minimumMeasuredOpaqueGlyphRatio": 5.1597,
+  "minimumCoreSamplesPerCaption": 27,
+  "reviewCounts": {
+    "OPAQUE_GLYPHS_MEET_CONTRAST_BACKGROUND_RECT_EXTENDS_BEYOND_TEXT_BACKING": 32
+  },
+  "rectangleBoundsRemainIndeterminate": true,
+  "rectangleBoundExplanation": "Font Range rect extends outside the caption background; no low rectangle bound is marked as passing. Actual opaque glyphs were measured against their exact rendered background. Antialias edge pixels are excluded.",
+  "manualFullWcagCertification": false,
+  "ruleExclusions": []
+}

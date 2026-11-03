@@ -1,0 +1,17 @@
+{
+  "scope": "GENUINE_BUYER_CANNOT_READ_GLOBAL_COMPANY_FINANCIAL_DOCUMENTS",
+  "appTree": "468fa3077d29a31ae3d071eef830ff9f96b5a964",
+  "checks": [
+    {
+      "rpc": "list_client_commercial_documents_v1",
+      "code": "42501",
+      "denied": true
+    },
+    {
+      "rpc": "list_client_billable_sources_v1",
+      "code": "42501",
+      "denied": true
+    }
+  ],
+  "status": "PASSED"
+}

@@ -1,0 +1,35 @@
+{
+  "scope": "NATIVE_AAL2_COMPLIANCE_PROVIDER_QUEUE_READ_AFTER38410_NO_BROAD_ORGANIZATION_SELECT",
+  "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "appTree": "46cb561cf9d17a69c5b6b5517d3506d2c3a3a1b4",
+  "status": "PASSED",
+  "organizationGeneralReadCount": 0,
+  "providerProfileCount": 1,
+  "providerQueueCount": 1,
+  "queue": {
+    "rows": [
+      {
+        "id": "c18f1b43-983d-4065-b094-48c02f9b284b",
+        "cells": [
+          "TEST ONLY provider-owner",
+          "TEST_SERVICE_B_B9BD23E48232",
+          "ACTIVE",
+          "VERIFIED",
+          "9",
+          "SIGNED",
+          "ACTIVE"
+        ],
+        "title": "TEST ONLY provider-owner",
+        "extras": {
+          "partner": "SIGNED",
+          "rowVersion": "13"
+        },
+        "status": "ACTIVE",
+        "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b"
+      }
+    ],
+    "complete": true,
+    "snapshotAt": "2026-11-02T23:18:06.769566+00:00"
+  },
+  "webBuildPending": true
+}

@@ -44,6 +44,9 @@ describe("QuotePreviewWorkbench", () => {
     expect(html).toContain("Soumettre ce devis");
     expect(html).toContain("Retourner modifier");
     expect(html).not.toMatch(/exemple illustratif/i);
+    expect(html).toContain(`/api/provider/quotes/${invitation.quote.id}/draft?locale=fr`);
+    expect(html).toContain("Aucune pièce jointe — facultatives");
+    expect(html).not.toContain("Plans</a>");
   });
 
   it("demande une version enregistrée plutôt que d’inventer un aperçu", () => {

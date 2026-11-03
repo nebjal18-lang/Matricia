@@ -1,0 +1,62 @@
+{
+  "status": "READY",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "ids": {
+    "clientCaseId": "81e02812-b415-4d26-a85e-ff58fc61c0c2",
+    "requestId": "449c728f-10d5-4b7b-9b73-f88d7cb990c9",
+    "requestVersionId": "440d6fd1-d225-4c7c-8eae-2cf4e5a06201",
+    "matchingRunId": "de95140a-35fd-4a44-bf05-bdb43c161df9",
+    "matchingCandidateId": "cc012e26-9746-4168-9e72-c41e1ebb7f92",
+    "rfqId": "4a0644e9-79f0-4903-a998-488cd405ecb3",
+    "invitationId": "9bf12a51-23e2-46a7-b258-d0179c96561d",
+    "taxRuleVersionId": "ac35ea05-55d8-4269-8235-caa9f4c49a93"
+  },
+  "providerQualificationWritten": false,
+  "providerQuoteWritten": false,
+  "nativeAuthenticationAltered": false,
+  "clientOnboardingCertified": false,
+  "physicalAntivirusCertified": false,
+  "catalogueGovernanceCertified": false,
+  "sourceSha256": "25534f159c449c7cd576f8cb5e2426be789b85384c277b60050ded5da190b3a8",
+  "taxSourceSha256": "8f39acb6fcb48b705d011a72f6b18da42da901470b8a827c5f314f76148ca850",
+  "appliedSqlSha256": "c041346bb942faf73a9b11c96f00d4bcd5a80190218ad04c8f5a19faf4b9aacd",
+  "taxProposal": {
+    "outcome": "SERVICE_TAX_MAPPING_PROPOSED",
+    "proposal_id": "ba35ad16-bc56-4153-aca2-88093275eadf",
+    "content_hash": "c491b1c987214458d3a3237ae51bff8ebf31981f8a4e10672ad16cbcb80edcad"
+  },
+  "taxDecision": {
+    "outcome": "SERVICE_TAX_MAPPING_PUBLISHED",
+    "version": 1,
+    "mapping_id": "ba35ad16-bc56-4153-aca2-88093275eadf",
+    "environment": "DEVELOPMENT",
+    "proposal_id": "ba35ad16-bc56-4153-aca2-88093275eadf",
+    "content_hash": "f79fd20a359b49a28c7b3ea737428603439bbf24fdbfc9d4d15981384d54be81",
+    "development_only": true
+  },
+  "rfqCreated": true,
+  "upstreamCandidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "rfqSqlSha256": "13c889ca1334ff3be623022e7ebefbf0fef060d572cc9a24ca7762df26d4aa6c",
+  "scope": "HISTORICAL_SQL_TEST_COUNTERPARTY_PREREQUISITES_AND_RFQ_PROVENANCE_NOT_NATIVE_CLIENT_ONBOARDING",
+  "source": "supabase/tests/0338_client_native_mission_dispute_acceptance.test.sql",
+  "documents": [
+    {
+      "kind": "REGISTRATION_DOCUMENT",
+      "sha256": "9a4a3cbe6e4c7fe2c4cae648dea7baed8c19a2d0607b3b60d223dc8e14069c8d",
+      "sizeBytes": 807
+    },
+    {
+      "kind": "REPRESENTATIVE_AUTHORITY",
+      "sha256": "cdf847843b3507ac6d6a3f55558d4ab3e0bbc095f8867c237356a84b01a88a16",
+      "sizeBytes": 807
+    }
+  ],
+  "privateStoragePathsOmitted": true,
+  "taxSource": "supabase/tests/0346_provider_quote_completion.test.sql",
+  "fixtureNote": "TEST-only counterparty legal/request/RFQ prerequisites extracted before real native Provider quote actions; real Provider qualification was completed before the invitation was made available.",
+  "sourceFilesVerifiedAgainstExecutionCandidate": {
+    "source": true,
+    "taxSource": true
+  }
+}

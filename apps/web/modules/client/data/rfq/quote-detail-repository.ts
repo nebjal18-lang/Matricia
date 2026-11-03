@@ -1,3 +1,6 @@
+import {readAllPages} from "@/modules/shared/lib/data/read-pages";
+import{readQuoteOptionPricing}from"@/modules/shared/lib/contracts-missions/quote-option-pricing";
+import{readQuoteCommercialTerms}from"@/modules/shared/lib/contracts-missions/quote-commercial-terms";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -23,9 +26,11 @@ const quoteRow = z.object({
   rfq_id: uuidSchema,
   status: z.enum(["DRAFT", "SUBMITTED", "REVISION_REQUESTED", "REVISED", "SELECTED", "NOT_SELECTED", "WITHDRAWN", "EXPIRED"]),
   current_version_id: uuidSchema.nullable(),
+  last_published_version_id:uuidSchema.nullable(),
 }).strict();
 const rfqRow = z.object({ id: uuidSchema, request_id: uuidSchema }).strict();
 const versionRow = z.object({
+  sla:z.unknown().optional(),
   id: uuidSchema,
   quote_id: uuidSchema,
   rfq_id: uuidSchema,
@@ -82,6 +87,7 @@ export async function loadClientOfferDetail(input: {
   requestId: string;
   quoteId: string;
   organizationQuery: string;
+  versionId?:string;
   organizationName?: string | null;
 }): Promise<OfferDetailResult> {
   const repository = await createServerClientRfqRepository();
@@ -106,12 +112,12 @@ export async function loadClientOfferDetail(input: {
   if (!uuidSchema.safeParse(input.quoteId).success || !dossier.rfqId) return { status: "not_found" };
 
   const [quoteResult, comparison] = await Promise.all([
-    client.from("quotes").select("id,rfq_id,status,current_version_id").eq("id", input.quoteId).eq("rfq_id", dossier.rfqId).limit(1),
+    client.from("quotes").select("id,rfq_id,status,current_version_id,last_published_version_id").eq("id", input.quoteId).eq("rfq_id", dossier.rfqId).limit(1),
     repository.comparison(dossier.rfqId),
   ]);
   if (quoteResult.error) return { status: "error" };
   const quote = z.array(quoteRow).max(1).safeParse(quoteResult.data);
-  if (!quote.success || !quote.data[0] || ["DRAFT", "WITHDRAWN"].includes(quote.data[0].status)) return { status: "not_found" };
+  if (!quote.success || !quote.data[0] || quote.data[0].status === "DRAFT") return { status: "not_found" };
 
   const rfqResult = await client.from("rfqs").select("id,request_id").eq("id", quote.data[0].rfq_id).limit(1);
   if (rfqResult.error) return { status: "error" };
@@ -119,19 +125,29 @@ export async function loadClientOfferDetail(input: {
   if (!rfq.success || rfq.data[0]?.request_id !== dossier.id) return { status: "not_found" };
 
   const compared = comparison.status === "success" ? comparison.value?.rows.find((row) => row.quoteId === input.quoteId) : undefined;
-  const versionId = compared?.quoteVersionId ?? quote.data[0].current_version_id;
+  if(input.versionId&&!uuidSchema.safeParse(input.versionId).success)return{status:"not_found"};
+  const versionId = input.versionId ?? quote.data[0].last_published_version_id ?? quote.data[0].current_version_id;
   if (!versionId) return { status: "not_found" };
 
-  const [versionResult, itemsResult, bindingsResult] = await Promise.all([
-    client.from("quote_versions").select("id,quote_id,rfq_id,version_number,lifecycle_status,solution_fr,solution_ar,deliverables,inclusions,exclusions,prerequisites,warranty_fr,warranty_ar,correction_terms_fr,correction_terms_ar,proposed_start_date,duration_days,valid_until,currency").eq("id", versionId).eq("quote_id", quote.data[0].id).limit(1),
+  const [versionResult, itemsResult, bindingsResult, optionsResult, attachmentsResult, historyResult] = await Promise.all([
+    client.from("quote_versions").select("sla,id,quote_id,rfq_id,version_number,lifecycle_status,solution_fr,solution_ar,deliverables,inclusions,exclusions,prerequisites,warranty_fr,warranty_ar,correction_terms_fr,correction_terms_ar,proposed_start_date,duration_days,valid_until,currency").eq("id", versionId).eq("quote_id", quote.data[0].id).limit(1),
     client.from("quote_items").select("id,quote_version_id,line_number,label_fr,label_ar,quantity::text,unit_code,tax_rate_basis_points,total_minor::text").eq("quote_version_id", versionId).order("line_number").limit(200),
     client.from("client_document_bindings").select("document_id,target_id").eq("target_type", "SERVICE_REQUEST").eq("target_id", dossier.id).limit(50),
+    client.from("quote_options").select("id,label_fr,label_ar,amount_minor::text,currency").eq("quote_version_id",versionId).order("option_key").limit(20),
+    client.from("quote_attachments").select("id,title").eq("quote_version_id",versionId).order("id").limit(20),
+    readAllPages((from,to)=>client.from("quote_versions").select("id,version_number,submitted_at").eq("quote_id",input.quoteId).not("submitted_at","is",null).order("version_number",{ascending:false}).range(from,to)),
   ]);
-  if (versionResult.error || itemsResult.error) return { status: "error" };
+  if (versionResult.error || itemsResult.error || optionsResult.error || attachmentsResult.error || bindingsResult.error || historyResult.error) return { status: "error" };
   const versionParsed = z.array(versionRow).max(1).safeParse(versionResult.data);
   const itemsParsed = z.array(itemRow).max(200).safeParse(itemsResult.data);
-  if (!versionParsed.success || !itemsParsed.success || !versionParsed.data[0]) return { status: "error" };
+  if (!versionParsed.success || !itemsParsed.success) return { status: "error" };
+  if(!versionParsed.data[0])return{status:"not_found"};
+  const history=z.array(z.object({id:uuidSchema,version_number:z.number().int().positive(),submitted_at:z.string()})).safeParse(historyResult.data);
+  if(!history.success)return{status:"error"};
   const version = versionParsed.data[0];
+  const options=z.array(z.object({id:uuidSchema,label_fr:z.string(),label_ar:z.string().nullable(),amount_minor:z.string().regex(/^\d+$/u),currency:z.string().length(3)})).max(20).safeParse(optionsResult.data);
+  const attachments=z.array(z.object({id:uuidSchema,title:z.string()})).max(20).safeParse(attachmentsResult.data);
+  if(!options.success||!attachments.success||options.data.some(row=>row.currency!==version.currency))return{status:"error"};
   if (!["SUBMITTED", "REVISED"].includes(version.lifecycle_status) && quote.data[0].status !== "SELECTED") return { status: "not_found" };
 
   const copy = offerDetailMessages(input.locale);
@@ -141,13 +157,16 @@ export async function loadClientOfferDetail(input: {
   const prerequisites = textList(version.prerequisites);
   const rankIndex = compared ? Math.max(0, compared.priceRank - 1) : 0;
   const documentsHref = `/${input.locale}/client/documents${input.organizationQuery}`;
-  const documents: ClientOfferDocument[] = [];
+  const documents: ClientOfferDocument[] = attachments.data.map(row=>({id:row.id,fileName:row.title,kind:documentKind(row.title),href:`/api/quotes/attachments/${row.id}`}));
   if (!bindingsResult.error) {
     const bindings = z.array(bindingRow).max(50).safeParse(bindingsResult.data);
-    const ids = bindings.success ? [...new Set(bindings.data.map((row) => row.document_id))].slice(0, 12) : [];
+    if(!bindings.success)return{status:"error"};
+    const ids = [...new Set(bindings.data.map((row) => row.document_id))].slice(0, 12);
     if (ids.length > 0) {
       const docsResult = await client.from("client_compliance_documents").select("id,original_file_name").in("id", ids).eq("status", "VERIFIED").eq("scan_status", "CLEAN").limit(12);
-      const docs = z.array(documentRow).max(12).safeParse(docsResult.data ?? []);
+      if(docsResult.error)return{status:"error"};
+      const docs = z.array(documentRow).max(12).safeParse(docsResult.data);
+      if(!docs.success)return{status:"error"};
       if (docs.success) {
         for (const document of docs.data) {
           documents.push({ id: document.id, fileName: document.original_file_name, kind: documentKind(document.original_file_name), href: `/api/client/documents/${document.id}` });
@@ -161,6 +180,9 @@ export async function loadClientOfferDetail(input: {
     value: {
       quoteId: quote.data[0].id,
       quoteVersionId: version.id,
+      displayedVersionNumber:version.version_number,
+      revisionInProgress:quote.data[0].status==="REVISED"||quote.data[0].status==="REVISION_REQUESTED",
+      publishedVersions:history.data.map(row=>({id:row.id,version:row.version_number,submittedAt:row.submitted_at})),
       requestId: dossier.id,
       rfqId: dossier.rfqId,
       label: offerLabel(rankIndex, input.locale),
@@ -174,6 +196,7 @@ export async function loadClientOfferDetail(input: {
         `${copy.validUntil} ${formatDate(version.valid_until, input.locale)}`,
       ],
       conditions: [
+        ...(readQuoteCommercialTerms(version.sla)?[(input.locale==="ar"?"شروط الدفع":"Modalités de paiement")+" : "+readQuoteCommercialTerms(version.sla)!.payment_terms,...(readQuoteCommercialTerms(version.sla)!.maintenance_terms?[(input.locale==="ar"?"الصيانة والمتابعة":"Maintenance et suivi")+" : "+readQuoteCommercialTerms(version.sla)!.maintenance_terms]:[])]:[]),
         `${copy.warranty} : ${localizedText(input.locale, version.warranty_fr, version.warranty_ar)}`,
         `${copy.corrections} : ${localizedText(input.locale, version.correction_terms_fr, version.correction_terms_ar)}`,
         ...prerequisites.slice(0, 2),
@@ -187,6 +210,8 @@ export async function loadClientOfferDetail(input: {
         taxLabel: formatTaxRate(item.tax_rate_basis_points),
         totalMinor: item.total_minor,
       })),
+      optionPriceBasis:readQuoteOptionPricing(version.sla),
+      options:options.data.map(row=>({id:row.id,label:localizedText(input.locale,row.label_fr,row.label_ar),amountMinor:row.amount_minor})),
       documents,
       points: [
         { id: "scope", hint: copy.scopeHint, action: "review" },

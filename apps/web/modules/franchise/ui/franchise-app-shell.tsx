@@ -7,6 +7,7 @@ import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { buildFranchiseNav, type FranchiseNavKey } from "@/modules/franchise/ui/franchise-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { FranchiseMandateSelector } from "./franchise-access-state";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import "@/modules/client/ui/client-experience.css";
 import "./franchise-experience.css";
@@ -25,6 +26,7 @@ export function FranchiseAppShell({
   kicker,
   actions,
   mandateName,
+  mandates,
   children,
 }: {
   locale: Locale;
@@ -38,11 +40,13 @@ export function FranchiseAppShell({
   kicker?: string;
   actions?: ReactNode;
   mandateName?: string | null;
+  mandates?: Array<{id:string;organizationId:string;label:string}>;
   children: ReactNode;
 }): ReactNode {
   const c = franchiseCopy(locale);
   const n = libraryCopy(locale);
   const currentPath = safeReturnPath(languagePath, locale);
+  const selectedFranchiseId = new URLSearchParams(selectedQuery.replace(/^\?/, "")).get("franchiseId");
   const nav = buildFranchiseNav(locale, selectedQuery);
   const routeByActive: Record<FranchiseNavKey, string> = {
     home: "accueil",
@@ -116,12 +120,16 @@ export function FranchiseAppShell({
             </span>
           ) : null}
           {mandateName ? <span className="franchise-scope-chip">{n.scope}</span> : null}
-          <form className="client-top-search client-shell-search" method="get" action={`/${locale}/franchise/bibliotheque`} role="search" aria-label={n.search}>
+          <form className="client-top-search client-shell-search" method="get" action={`/${locale}/franchise/recherche`} role="search" aria-label={n.search}>
             {selectedOrganizationId ? <input type="hidden" name="organizationId" value={selectedOrganizationId} /> : null}
+            {selectedFranchiseId ? <input type="hidden" name="franchiseId" value={selectedFranchiseId} /> : null}
             <Search aria-hidden className="size-4" />
             <label className="sr-only" htmlFor="franchise-shell-search">{n.search}</label>
             <input id="franchise-shell-search" name="q" placeholder={n.search} />
           </form>
+          <Link href={`/${locale}/franchise/recherche${selectedQuery}`} className="client-icon-btn franchise-mobile-search" aria-label={n.search}>
+            <Search aria-hidden className="size-4" />
+          </Link>
           <Link href={`/${locale}/notifications${selectedQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
             <Bell className="size-4" />
             <span className="franchise-notify-dot" aria-hidden />
@@ -182,6 +190,7 @@ export function FranchiseAppShell({
             </div>
           </header>
         ) : null}
+        <FranchiseMandateSelector locale={locale} mandates={mandates} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
         {children}
       </div>
     </div>

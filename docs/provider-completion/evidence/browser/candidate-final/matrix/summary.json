@@ -1,0 +1,6284 @@
+{
+  "scope": "PINNED_NATIVE_PROVIDER_CURRENT_BUSINESS_WITH_FINANCE_TIME_LIMIT",
+  "partialEntryAcceptance": false,
+  "nativeOperationCandidates": [
+    "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+    "5e06b3241a0eed0c387e4cdaad7983b6fec764c4"
+  ],
+  "unverifiedDomains": [
+    "finance_closed_invoice_detail_and_legal_external_signature"
+  ],
+  "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "appTree": "c43980c6da4345d8da6260ffb264b5089becf2f2",
+  "status": "PASSED",
+  "widths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "axeTags": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "ruleExclusions": [],
+  "manualFullWcagCertification": false,
+  "pageErrors": [],
+  "failures": [],
+  "rawSummarySha256": "17a7b37a77d52e10e2e1f4c5c6f9c47a7d1066983ee0475fd0cfaab07852cb28",
+  "rawSummaryBytes": 12446989,
+  "rawSummaryArchive": "raw-summary.json.gz",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 83,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 86,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 43,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 46,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 38,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 41,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 36,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 38,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 141,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 144,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 33,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 33,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 40,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 43,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 40,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 140,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 143,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 33,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-375-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 82,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 85,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 42,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 45,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 29,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 38,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 40,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 35,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 140,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 143,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 33,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 29,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 38,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 41,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 29,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 36,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 39,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 139,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 142,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-390-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 30,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 82,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 82,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 47,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 47,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 34,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 34,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 140,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 140,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 139,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 139,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 29,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 29,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-768-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 82,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 82,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 42,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 44,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 32,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 34,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 34,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 36,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 140,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 141,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 29,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 37,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 27,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 25,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 35,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 35,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 139,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 140,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 28,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "fr-1440-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 26,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 32,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 13,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 100,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 16,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 18,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 14,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 15,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 98,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-375-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 32,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 13,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 100,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 16,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 18,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 14,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 15,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 98,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-390-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 14,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 14,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 16,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 16,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 13,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 13,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 98,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 98,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-768-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-tableau-de-bord.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/identite",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-identite.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 31,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/qualification",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-qualification.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 31
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/services",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-services.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/questionnaires",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-questionnaires.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/documents",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-documents.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/consultations",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-consultations.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/devis",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-devis.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 12,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 13,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/contrats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-contrats.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 99,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/missions",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-missions.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 11,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/planning",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-planning.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/facturation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-facturation.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/facturation/pre-releve",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-facturation-pre-releve.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 16,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 16,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/facturation/echeancier",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-facturation-echeancier.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/litiges",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-litiges.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 8,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 28
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/messages",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-messages.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/entreprise",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-entreprise.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/parametres",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-parametres.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/achats",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-achats.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/reputation",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-reputation.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/marketing",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-marketing.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/mode-client",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-mode-client.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "organisation/roles",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-organisation-roles.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "notifications",
+      "http": 200,
+      "selectedOrganizationId": null,
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-notifications.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/consultations/9bf12a51-23e2-46a7-b258-d0179c96561d",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-consultations-9bf12a51-23e2-46a7-b258-d0179c96561d.png",
+      "axe": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/devis/357d43c8-4db4-423c-854c-130c70a3850b",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-devis-357d43c8-4db4-423c-854c-130c70a3850b.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 14,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 14,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/contrats/8e4c8e23-abed-485f-a034-e765ebe3a164",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-contrats-8e4c8e23-abed-485f-a034-e765ebe3a164.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 98,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 98,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-missions-2edc6a91-866e-4fd1-98c8-c0a7df9c0996.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 10,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 32
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "sous-traitant/messages/fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+      "http": 200,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "overflow": false,
+      "keyboardMenu": true,
+      "touchMenu": true,
+      "screenshot": "ar-1440-sous-traitant-messages-fff485bc-bdcf-493e-97d4-a5e6b775a6ef.png",
+      "axe": [
+        {
+          "menuOpen": false,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        },
+        {
+          "menuOpen": true,
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "nodes": 9,
+              "requiresFurtherReview": true
+            }
+          ],
+          "passedRules": 30
+        }
+      ]
+    }
+  ],
+  "axeScans": 256,
+  "incompleteRuleOccurrences": 256,
+  "incompleteRuleIds": [
+    "color-contrast"
+  ]
+}

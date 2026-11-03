@@ -17,6 +17,7 @@ import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import Link from "next/link";
+import { CreditPackCatalogue } from "@/modules/client/screens/credits/credit-pack-catalogue";
 
 export default async function Credits({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
   const { locale } = await params;
@@ -64,7 +65,7 @@ export default async function Credits({ params, searchParams }: { params: Promis
   return (
     <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="finance" title={m.title} lead={m.intro} kicker={c.kicker}>
     <main className="client-page">
-
+    <nav className="flex flex-wrap gap-4"><Link className="client-ghost-link" href={`/${locale}/client/avantages/execution?organizationId=${selectedOrganizationId}`}>{locale === "ar" ? "تنفيذ المزايا وقائمة الانتظار" : "Réalisation et liste d’attente des avantages"}</Link><Link className="client-ghost-link" href={`/${locale}/client/avantages/remboursements?organizationId=${selectedOrganizationId}`}>{locale === "ar" ? "طلبات الاسترداد" : "Demandes de remboursement"}</Link></nav>
     <section aria-labelledby="wallets"><h2 id="wallets" className="mb-3 text-xl font-semibold">{m.wallet}</h2><div className="grid gap-4 sm:grid-cols-2">
       {data.organizations.map(organization => {
         const wallet = data.wallets.find(item => item.organizationId === organization.id);
@@ -82,6 +83,8 @@ export default async function Credits({ params, searchParams }: { params: Promis
         </> : <><p className="mb-3">{m.noWallet}</p><WalletAction locale={locale} organizationId={organization.id} keyValue={randomUUID()} m={m}/></>}</CardContent></Card>;
       })}
     </div></section>
+
+    <CreditPackCatalogue locale={locale} organizationId={selectedOrganizationId} />
 
     <section aria-labelledby="boxes"><p className="mb-3"><Link className="underline" href={`/${locale}/client/boxes/configuration?organizationId=${selectedOrganizationId}`}>{locale === "ar" ? "إعداد صندوقي من قواعد العرض المعتمدة" : "Configurer ma Box selon les règles de mon offre"}</Link></p><h2 id="boxes" className="mb-3 text-xl font-semibold">{m.boxes}</h2>{data.catalogUnavailable?<p role="alert" className="mb-3">{m.catalogUnavailable}</p>:null}{data.customerBoxes.length === 0 ? <p className="text-muted-foreground">{m.noBoxes}</p> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {data.customerBoxes.map(customerBox => { const box = data.boxes.find(item => item.id === customerBox.boxVersionId); return box ? <Card key={customerBox.id}><CardHeader><CardTitle>{locale === "ar" ? box.nameAr : box.nameFr}</CardTitle><CardDescription>{new Date(customerBox.periodStart).toLocaleDateString(locale)} — {new Date(customerBox.periodEnd).toLocaleDateString(locale)}</CardDescription></CardHeader><CardContent className="space-y-1 text-sm"><p>{m.version}: <span dir="ltr">{box.version ?? "—"}</span></p><p>{m.boxType}: {box.type ?? "—"}</p><p>{m.creditBudget}: <strong dir="ltr">{box.creditBudget}</strong> {m.creditUnits}</p><p>{m.rollover}: <span dir="ltr">{box.rolloverMonths}</span> {m.months}</p></CardContent></Card> : <Card key={customerBox.id}><CardHeader><CardTitle>{m.boxVersionUnavailable}</CardTitle><CardDescription>{new Date(customerBox.periodStart).toLocaleDateString(locale)} — {new Date(customerBox.periodEnd).toLocaleDateString(locale)}</CardDescription></CardHeader></Card>; })}

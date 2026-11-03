@@ -1,0 +1,24 @@
+{
+  "scope": "OWNED_PROVIDER_FORWARD_SCHEMA_UPGRADE_NOT_GREEN_SQL_RECEIPT",
+  "additions": [],
+  "interleaved": [],
+  "security": {
+    "tablesWithoutRls": 0,
+    "pgtapApiExecutable": false
+  },
+  "greenSqlReceipt": false,
+  "nativeCohortPreserved": true,
+  "fromCandidate": {
+    "commit": "5dab966bb58c2c8e5eba8904a2447e8091d5dd58",
+    "appTree": "da1a53949f998a772ec9d01b4ea41bcdd3018db4",
+    "packagesTree": "6c29c0412c4b2576a7e58f803f560f3ebd404ea5",
+    "migrationsCount": 507
+  },
+  "candidate": {
+    "commit": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+    "appTree": "c43980c6da4345d8da6260ffb264b5089becf2f2",
+    "packagesTree": "6c29c0412c4b2576a7e58f803f560f3ebd404ea5",
+    "migrationsCount": 507
+  },
+  "sourceReceiptSha256": "b73864129bf8f14d3c33e7d7d09d36667c40c1d44303018ae3cae30a2278f6bb"
+}

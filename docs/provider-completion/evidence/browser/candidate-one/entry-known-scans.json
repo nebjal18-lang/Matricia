@@ -1,0 +1,27 @@
+{
+  "scope": "KNOWN_SYNTHETIC_PDF_SCANNER_TEST_PORT",
+  "physicalAntivirusCertified": false,
+  "observed": [
+    {
+      "documentId": "27afa168-3dad-44cb-949d-c72b971d3816",
+      "jobId": "9f49c363-7e88-4298-80fb-2252ab0f2b24",
+      "result": "CLEAN",
+      "source": "NATIVE_CLAIM_AND_COMPLETE",
+      "sha256": "f2469746c357db075ff57b015abfe1fe54ae95f48528a941b81ed5b1a6ca1aa1"
+    },
+    {
+      "documentId": "633cf043-dc0d-4202-bba5-ae373b6b3f60",
+      "jobId": "ede305dd-4ba9-45f5-9db7-fa28346e5a1f",
+      "result": "CLEAN",
+      "source": "NATIVE_CLAIM_AND_COMPLETE",
+      "sha256": "20242aa9f4ddd838b347b5ac5279bc1d768a32ab28b3213759d6f9ca1bd5b2e5"
+    },
+    {
+      "documentId": "7aacdae7-93d4-4b3e-8f9b-11d50e783449",
+      "jobId": "55d699da-827f-480d-a537-7c076680c6d2",
+      "result": "CLEAN",
+      "source": "NATIVE_CLAIM_AND_COMPLETE",
+      "sha256": "5abe41eaa4bc8aecdea5de9a80de8bfd4c4f3d76d2917a32151d05c526a9270e"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+
+> @matricia/web@0.1.0 test /workspace/franchise-completion/apps/web
+> vitest run modules/shared/lib/supabase/proxy.test.ts modules/franchise/screens/library/franchise-mockup-alignment.test.tsx
+
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  2 passed (2)
+      Tests  34 passed (34)
+   Start at  09:01:49
+   Duration  14.48s (transform 57%, import 29%, tests 13%, worker 1%)
+
+  Transform  transforming modules took 8.39s · 57% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+

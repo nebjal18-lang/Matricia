@@ -23,6 +23,7 @@ export function parseFranchiseRulePayload(raw:string,allowedIds:Set<string>){
  while(stack.length){const item=stack.pop()!;if(item.depth>20||++nodes>10000)return null;if(item.value&&typeof item.value==="object")for(const child of Object.values(item.value))stack.push({value:child,depth:item.depth+1});}
  const result=schema.safeParse(value);if(!result.success)return null;
  const refs:Condition[]=[result.data.condition_ast];while(refs.length){const node=refs.pop()!;if("group"in node)refs.push(...node.conditions);else if(!allowedIds.has(node.question_version_id))return null;}
+ for(const action of result.data.actions) if(["SHOW","HIDE","REQUIRED","OPTIONAL"].includes(action.type)&&!allowedIds.has(action.target??""))return null;
  const graph=result.data.dependency_graph;
  if(Object.keys(graph).length>256)return null;
  const visiting=new Set<string>(),done=new Set<string>();

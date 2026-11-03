@@ -11,17 +11,18 @@ import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 export type FranchiseServiceActionState =
   | { status: "idle" }
   | { status: "success"; serviceId: string; outcome?: string;command?:{draftVersionId:string;identityRowVersion:number;versionRowVersion:number} }
-  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" };
+  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" | "MANDATE_REQUIRED" };
 
 export type FranchiseSimulationActionState =
   | { status: "idle" }
   | { status: "success"; detail: string; evaluation?: {scoreBasisPoints:number;engineVersion:string;actions:Array<{type:string;target?:string;[key:string]:unknown}>} }
-  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" };
+  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" | "MANDATE_REQUIRED" };
 
 const createSchema = z.object({
   ...serviceDetailsSchema,
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   subcategoryId: uuidSchema,
   code: z.string().trim().regex(/^[A-Z][A-Z0-9_-]{1,79}$/u),
@@ -39,6 +40,7 @@ const commandSchema = z.object({
   ...serviceDetailsSchema,
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   serviceId: uuidSchema,
   subcategoryId: uuidSchema,
@@ -59,6 +61,7 @@ const commandSchema = z.object({
 const simulateSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   serviceId: uuidSchema,
   idempotencyKey: uuidSchema,
@@ -68,6 +71,7 @@ const simulateSchema = z.object({
 const submitSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   serviceId: uuidSchema,
   draftVersionId: uuidSchema,
@@ -81,6 +85,7 @@ const submitSchema = z.object({
 const reviewSubmitSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   draftVersionId: uuidSchema,
   identityRowVersion: z.coerce.number().int().positive(),
@@ -96,6 +101,7 @@ const ruleSubmitSchema = reviewSubmitSchema.extend({ ruleId: uuidSchema });
 const publishSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   libraryRowVersion: z.coerce.number().int().positive(),
   confirmed: z.literal("yes"),
@@ -106,6 +112,7 @@ const publishSchema = z.object({
 const questionnairePublishSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   questionnaireId: uuidSchema,
   draftVersionId: uuidSchema,
@@ -118,6 +125,7 @@ const questionnairePublishSchema = z.object({
 const duplicateSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   serviceId: uuidSchema,
   draftVersionId: uuidSchema,
@@ -135,6 +143,7 @@ const duplicateSchema = z.object({
 const archiveSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   serviceId: uuidSchema,
   draftVersionId: uuidSchema,
@@ -149,6 +158,7 @@ const archiveSchema = z.object({
 const cloneQuestionnaireSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   questionnaireId: uuidSchema,
   draftVersionId: uuidSchema,
@@ -163,6 +173,7 @@ const cloneQuestionnaireSchema = z.object({
 const questionnaireSimulateSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   questionnaireId: uuidSchema,
   questionnaireVersionId: uuidSchema,
@@ -173,6 +184,7 @@ const questionnaireSimulateSchema = z.object({
 const hierarchySchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   code: z.string().trim().regex(/^[A-Z][A-Z0-9_-]{1,79}$/u),
   nameFr: z.string().trim().min(2).max(240),
@@ -190,6 +202,7 @@ const subcategoryCreateSchema = hierarchySchema.extend({ categoryId: uuidSchema 
 const hierarchySubmitSchema = z.object({
   locale: z.string().refine(isLocale),
   organizationId: z.string().optional(),
+  franchiseId: uuidSchema.optional(),
   libraryId: uuidSchema,
   objectType: z.enum(["CATEGORY", "SUBCATEGORY"]),
   objectId: uuidSchema,
@@ -216,7 +229,7 @@ function mapRpcError(code: string | undefined, message: string | undefined): Ext
   return "UNAVAILABLE";
 }
 
-async function requireWorkspace(input: { locale: string; organizationId?: string; libraryId: string;serviceId?:string;questionnaireId?:string;ruleId?:string }): Promise<
+async function requireWorkspace(input: { locale: string; organizationId?: string; franchiseId?: string; libraryId: string;serviceId?:string;questionnaireId?:string;ruleId?:string }): Promise<
   | { status: "ok"; workspace: FranchiseLibraryWorkspace }
   | { status: "error"; reason: Exclude<FranchiseServiceActionState, { status: "idle" | "success" }>["reason"] }
 > {
@@ -226,13 +239,15 @@ async function requireWorkspace(input: { locale: string; organizationId?: string
     locale: parsedLocale,
     organizationId: input.organizationId && uuidSchema.safeParse(input.organizationId).success ? input.organizationId : undefined,
     libraryId: input.libraryId,
+    franchiseId: input.franchiseId,
     catalog:{kind:input.ruleId?"RULE":input.questionnaireId?"QUESTIONNAIRE":"SERVICE",objectId:input.serviceId??input.questionnaireId??input.ruleId},
   });
   if (workspace.status === "error") {
+    if (workspace.reason === "MANDATE_REQUIRED") return {status:"error",reason:"MANDATE_REQUIRED"};
     if (workspace.reason === "UNAUTHENTICATED") return { status: "error", reason: "UNAUTHENTICATED" };
     return { status: "error", reason: workspace.reason === "FORBIDDEN" || workspace.reason === "NO_MANDATE" ? "FORBIDDEN" : "UNAVAILABLE" };
   }
-  if (workspace.workspace.mandate.libraryId !== input.libraryId) return { status: "error", reason: "FORBIDDEN" };
+  if (workspace.workspace.mandate.libraryId !== input.libraryId || (input.franchiseId && workspace.workspace.mandate.franchiseId !== input.franchiseId)) return { status: "error", reason: "FORBIDDEN" };
   return { status: "ok", workspace: workspace.workspace };
 }
 

@@ -1,0 +1,13 @@
+
+ RUN  v5.0.3 /workspace/provider-completion/apps/web
+
+
+ Test Files  524 passed | 1 skipped (525)
+      Tests  2922 passed | 1 skipped (2923)
+   Start at  22:54:09
+   Duration  201.67s (import 59%, transform 20%, tests 19%, worker 3%)
+
+     Import  1346 modules were evaluated 2293 times · 137.27s total, 59% of tracked time
+             ~19.04s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

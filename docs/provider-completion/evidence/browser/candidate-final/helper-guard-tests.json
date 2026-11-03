@@ -1,0 +1,11 @@
+{
+  "scope": "PROVIDER_BROWSER_HELPER_TARGET_AND_PROVENANCE_GUARDS",
+  "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "command": "node --test tests/e2e/helpers/provider-browser/safety.test.mjs tests/e2e/helpers/provider-browser/fixture-source.test.mjs tests/e2e/helpers/provider-browser/upgrade-plan.test.mjs tests/e2e/helpers/provider-browser/plan.test.mjs",
+  "exitCode": 0,
+  "tests": 15,
+  "passed": 15,
+  "failed": 0,
+  "skipped": 0,
+  "productionConnectionCertified": false
+}

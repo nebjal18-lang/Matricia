@@ -2,9 +2,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { ProviderInboxBoard } from "./inbox-board";
 
+vi.mock("next/navigation", () => ({useRouter: () => ({refresh: vi.fn()})}));
+
 vi.mock("@/app/[locale]/messagerie/messaging-forms", () => ({
   OpenThreadForm: () => null,
-  SendMessageForm: () => null,
+  SendMessageForm: () => <form data-testid="send-control" />,
 }));
 
 const thread = {
@@ -24,6 +26,27 @@ const thread = {
 };
 
 describe("provider inbox board", () => {
+  it.each(["fr","ar"] as const)("does not infer send/upload authorization from a missing capability in %s",locale=>{
+    const html=renderToStaticMarkup(<ProviderInboxBoard locale={locale} query="" threads={[thread]} options={[]} conversation={{thread:{...thread},messages:[]}}/>);
+    expect(html).toContain(locale==="ar"?"صلاحيات الإرسال غير متاحة":"Les droits d’envoi sont indisponibles");expect(html).not.toContain('data-testid="send-control"');expect(html).not.toContain('type="file"');
+  });
+  it("renders send controls only with the explicit current server capability",()=>{
+    const html=renderToStaticMarkup(<ProviderInboxBoard locale="fr" query="" threads={[thread]} options={[]} conversation={{thread:{...thread,can_send:true},messages:[]}}/>);
+    expect(html).toContain('data-testid="send-control"');expect(html).toContain("Message avec pièces jointes — brouillon privé");
+  });
+
+  it("keeps the real conversation readable without exposing send/upload forms when the server denies execution",()=>{
+    const html=renderToStaticMarkup(<ProviderInboxBoard locale="fr" query="" threads={[thread]} options={[]} conversation={{thread:{...thread,can_send:false},messages:[]}}/>);
+    expect(html).toContain("lecture seule pour votre rôle ou votre affectation");expect(html).not.toContain('data-testid="send-control"');expect(html).not.toContain('name="body"');expect(html).not.toContain('type="file"');expect(html).toContain(thread.subject);
+  });
+  it("reports partial loading failures without asserting an empty inbox or notification feed", () => {
+    const html=renderToStaticMarkup(<ProviderInboxBoard locale="fr" query="?organizationId=org" threads={[]} conversation={null} options={[]} inboxError="UNAVAILABLE" optionsError notificationsUnavailable />);
+    expect(html).toContain('role="alert"');expect(html).toContain("Réessayer");expect(html).not.toContain("Aucune conversation liée");expect(html).not.toContain("Aucune notification pour le moment");
+  });
+  it("translates the consultation label without translating the user's message", () => {
+    const html=renderToStaticMarkup(<ProviderInboxBoard locale="ar" query="?page=5" threads={[thread]} conversation={null} options={[]} page={5} total={126}/>);
+    expect(html).toContain("طلب العروض");expect(html).toContain('page=6');expect(html).toContain('page=4');expect(html).toContain(thread.subject);
+  });
   it("affiche une conversation RFQ réelle et le lien consultation", () => {
     const html = renderToStaticMarkup(
       <ProviderInboxBoard

@@ -1,6 +1,8 @@
 import type{CatalogPageInput}from "@/modules/franchise/data/library/server-page";
 import { scopeFranchiseDashboards } from "@/modules/franchise/data/spaces/scoped-dashboard";
 import { redirect } from "next/navigation";
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { loadFranchiseCrm } from "@/modules/franchise/data/crm/repository";
 import { loadFranchiseDigest } from "@/modules/franchise/data/digest/repository";
 import { loadFranchiseFollowups } from "@/modules/franchise/data/followups/repository";
@@ -12,21 +14,36 @@ import { buildFranchiseSpaceBoard, emptyFranchiseSpaces } from "@/modules/franch
 import { loadFranchiseLibraryWorkspace, type FranchiseLibraryLoadResult } from "@/modules/franchise/data/library/workspace";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string;franchiseId?:string;catalog?:CatalogPageInput }) {
-  const space = await resolveFranchiseSpace(input);
-  if (space.status === "unauthenticated") redirect(`/${input.locale}/connexion`);
+export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string;franchiseId?:string;catalog?:CatalogPageInput;returnPath?:string;returnQuery?:Record<string,string|undefined> }) {
+  const destination = new URL(safeReturnPath(input.returnPath, input.locale) ?? `/${input.locale}/franchise/accueil`, "https://matricia.invalid");
+  for (const [key, value] of Object.entries(input.returnQuery ?? {})) if (typeof value === "string") destination.searchParams.set(key, value);
+  if (input.organizationId) destination.searchParams.set("organizationId", input.organizationId);
+  if (input.franchiseId) destination.searchParams.set("franchiseId", input.franchiseId);
+  const next = `${destination.pathname}${destination.search}${destination.hash}`;
+  const resolved = await resolveFranchiseSpace(input);
+  if (resolved.status === "unauthenticated") redirect(connexionHref(input.locale, { next }));
+  const space = { ...resolved, currentPath: next, mandates: [] as Array<{id:string;organizationId:string;libraryId:string;label:string}> };
   if (space.errorReason) return { space, result: { status: "error" as const, reason: space.errorReason } };
   if (space.organizations.length > 1 && !space.selectedOrganizationId) {
     return { space, result: { status: "error" as const, reason: "ORGANIZATION_REQUIRED" as const } };
   }
   const result = await loadFranchiseLibraryWorkspace({ locale: input.locale, organizationId: space.selectedOrganizationId ?? undefined,franchiseId:input.franchiseId,catalog:input.catalog });
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${input.locale}/connexion`);
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(input.locale, { next }));
+  if (result.status === "error" && result.reason === "MANDATE_REQUIRED") return {
+    space: { ...space, mandates: (result.availableMandates ?? []).filter(item => item.organizationId === space.selectedOrganizationId) },
+    result,
+  };
   if (result.status === "success") {
     const organizationId = result.workspace.mandate.operatorOrganizationId ?? null;
+    const mandates = (result.workspace.availableMandates ?? []).filter(item => item.organizationId === organizationId);
+    if (mandates.length > 1 && !input.franchiseId) return {
+      space: { ...space, mandates },
+      result: { status: "error" as const, reason: "MANDATE_REQUIRED" as const },
+    };
     const selected = new URLSearchParams();
     if (organizationId) selected.set("organizationId", organizationId);
     selected.set("franchiseId", result.workspace.mandate.franchiseId);
-    return { space: { ...space, selectedOrganizationId: organizationId, selectedQuery: `?${selected}` }, result };
+    return { space: { ...space, mandates, selectedOrganizationId: organizationId, selectedQuery: `?${selected}` }, result };
   }
   return { space, result };
 }
@@ -86,6 +103,10 @@ export async function loadFranchiseSpaceFromLibrary(input: {
   return loadFranchiseSpaceLive(franchiseSpaceLiveArgs({...input,query:`?${selected}`}));
 }
 
+function readSection<T>(read: Promise<T>): Promise<T | {status:"error";reason:"QUERY_FAILED"}> {
+  return read.catch(() => ({status:"error",reason:"QUERY_FAILED"} as const));
+}
+
 export async function loadFranchiseSpaceLive(input: {
   locale: Locale;
   query: string;
@@ -97,11 +118,11 @@ export async function loadFranchiseSpaceLive(input: {
   catalogRules?: Array<{ id: string; title: string; status: string; href: string; actions?: Array<{ type: string; target?: string }> }>;
 }) {
   const [crm, followups, governance, plans, digest, operations] = await Promise.all([
-    loadFranchiseCrm(input.franchiseId ?? undefined),
-    loadFranchiseFollowups(input.franchiseId ?? undefined),
-    loadFranchiseDashboard(input.locale,input.franchiseId?{franchiseId:input.franchiseId,libraryId:input.libraryId ?? undefined,organizationId:input.operatorOrganizationId ?? undefined}:undefined),
-    loadFranchiseCorrectivePlans(),
-    loadFranchiseDigest(input.franchiseId ?? undefined),
+    readSection(loadFranchiseCrm(input.franchiseId ?? undefined)),
+    readSection(loadFranchiseFollowups(input.franchiseId ?? undefined)),
+    readSection(loadFranchiseDashboard(input.locale,input.franchiseId?{franchiseId:input.franchiseId,libraryId:input.libraryId ?? undefined,organizationId:input.operatorOrganizationId ?? undefined}:undefined)),
+    readSection(loadFranchiseCorrectivePlans(input.franchiseId ?? undefined)),
+    readSection(loadFranchiseDigest(input.franchiseId ?? undefined)),
     input.libraryId ? loadFranchiseOperations({ libraryId: input.libraryId, operatorOrganizationId: input.operatorOrganizationId,franchiseId:input.franchiseId }).then((value)=>({status:"success"as const,value})).catch(()=>({status:"error"as const})) : Promise.resolve(null),
   ]);
   const scoped = scopeFranchiseDashboards({

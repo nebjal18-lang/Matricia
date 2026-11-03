@@ -1,0 +1,12 @@
+
+ RUN  v5.0.3 /workspace/franchise-audit/apps/web
+
+
+ Test Files  45 passed (45)
+      Tests  195 passed (195)
+   Start at  06:21:22
+   Duration  19.67s (import 60%, transform 25%, tests 13%, worker 2%)
+
+    Isolate  45 workers spawned · ~263ms startup each (spawn + environment, per file)
+             at least ~5.64s faster with isolate: false — reuses workers across files instead of one per file
+

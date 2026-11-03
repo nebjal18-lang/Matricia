@@ -1,0 +1,16 @@
+
+> @matricia/web@0.1.0 test /workspace/provider-quotes/apps/web
+> vitest run modules/provider/screens/devis modules/provider/data/quotes app/api/quotes/attachments modules/client/screens/demandes/quote-revision-notice.test.tsx modules/client/screens/demandes/comparison-panel.test.tsx modules/client/screens/demandes/offer-detail.test.tsx modules/provider/screens/spaces/nested-screens.test.tsx --exclude '**/draft-pdf.test.ts' --maxWorkers=2
+
+
+ RUN  v5.0.3 /workspace/provider-quotes/apps/web
+
+
+ Test Files  19 passed (19)
+      Tests  123 passed (123)
+   Start at  21:14:49
+   Duration  14.32s (import 45%, tests 29%, transform 25%, worker 1%)
+
+    Isolate  19 workers spawned · ~345ms startup each (spawn + environment, per file)
+             at least ~2.93s faster with isolate: false — reuses workers across files instead of one per file
+

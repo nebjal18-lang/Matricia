@@ -1,6 +1,6 @@
 import{expect,test}from"@playwright/test";
-import{runNotificationWorker}from"../../apps/web/app/api/workers/notifications/route";
-import{runDomainSchedulerWorker}from"../../apps/web/app/api/workers/domain-schedulers/route";
+import{runNotificationWorker}from"../../apps/web/app/api/workers/notifications/runner";
+import{runDomainSchedulerWorker}from"../../apps/web/app/api/workers/domain-schedulers/runner";
 
 for(const route of["notifications","domain-schedulers"]){
  test(`worker ${route} échoue fermé sans secret`,async({request})=>{const response=await request.post(`/api/workers/${route}`);expect(response.status()).toBe(401);expect(await response.json()).toEqual({code:"UNAUTHORIZED"})});

@@ -1,0 +1,2491 @@
+{
+  "environment": "development-local-isolated",
+  "network": "none",
+  "publicPorts": 0,
+  "images": {
+    "database": "ghcr.io/supabase/postgres:17.6.1.167",
+    "auth": "ghcr.io/supabase/gotrue:v2.196.0",
+    "storage": "ghcr.io/supabase/storage-api:v1.72.1"
+  },
+  "startedAt": "2026-11-02T18:15:28.503Z",
+  "status": "passed",
+  "migrations": [
+    {
+      "file": "20260910000100_extensions_and_shared.sql",
+      "sha256": "67b5fdada867218aeba44e618124ba57f508028a4dddf842cc4205449c67a76f",
+      "passed": true
+    },
+    {
+      "file": "20260910000200_identity_and_rbac.sql",
+      "sha256": "e98f4bdc67d20d148b028d04de4aa1e1bed0e82577a209dc2ae7ade6ee239378",
+      "passed": true
+    },
+    {
+      "file": "20260910000300_idempotency_audit_outbox.sql",
+      "sha256": "07f50e5e3a830305f69b9c4f702b756aec9cbe54ee50117df76f665c9d4f1735",
+      "passed": true
+    },
+    {
+      "file": "20260910000400_financial_ledger.sql",
+      "sha256": "031d69bcddde1fc3735c62320f647ba619622d7bbd5c294da3bb1ae3686f3b72",
+      "passed": true
+    },
+    {
+      "file": "20260910000500_credit_ledger.sql",
+      "sha256": "54411e74c4962af39c9ff9f4996008f246930664e30ade178b90eda44fca057d",
+      "passed": true
+    },
+    {
+      "file": "20260910000600_reference_data.sql",
+      "sha256": "743a2efb6b5a39f49218d09f86d23dafdf1c74b489b2f7b5af8f55bb706acbc2",
+      "passed": true
+    },
+    {
+      "file": "20260910000700_pgtap_test_support.sql",
+      "sha256": "fadd702bbe08a5982d8f4dfc9914012503b0a19bf2241d3ca008218a5f9e8c0c",
+      "passed": true
+    },
+    {
+      "file": "20260910000800_financial_command_rpcs.sql",
+      "sha256": "35088a4ecc3dc21acae1d71f3df108045cc453f75872adb9efd521b65b192c23",
+      "passed": true
+    },
+    {
+      "file": "20260910000900_audit_chain_sealing.sql",
+      "sha256": "813be3dee75ff051c19bd555d0023e1cfb3aa0ab4f057cee19042b646bf12298",
+      "passed": true
+    },
+    {
+      "file": "20260910001000_outbox_dispatch_protocol.sql",
+      "sha256": "6a28a4dcd27aba31166a1366bff6dcc1e6563bb1cec88907499bebfecb915301",
+      "passed": true
+    },
+    {
+      "file": "20260910001100_security_invariant_hardening.sql",
+      "sha256": "9ebafe48ca8329de0d3c95e0f74939d7de11ff8463c7dd1c24f9f97b94ea9183",
+      "passed": true
+    },
+    {
+      "file": "20260910001200_server_canonical_idempotency.sql",
+      "sha256": "cfdfdaf84ae8f56f21a53b3065a57a7f7ab3c3eeefb89dffb8d0c2d90c3d4417",
+      "passed": true
+    },
+    {
+      "file": "20260910001300_restrict_extension_schema_runtime_access.sql",
+      "sha256": "e45d278e04d54d32da7e5a52108d70784854f8d786c99d9a1301f81c3ca2d92c",
+      "passed": true
+    },
+    {
+      "file": "20260911001400_identity_workflows.sql",
+      "sha256": "1192c55eca44f4cf62236abb032ee404b5bca08c7e43f74a49654b500ecf112e",
+      "passed": true
+    },
+    {
+      "file": "20260911001500_readiness_probe.sql",
+      "sha256": "f190f8f2ccbc6937aeb2bbd63a4ff6eeb6f273311f977e8825c37aa7915922d2",
+      "passed": true
+    },
+    {
+      "file": "20260911001600_reload_api_schema.sql",
+      "sha256": "0b8299382ac4dbb8bac84983911baaf09e1c35f24ebe8bde9dfeab3b330d6d50",
+      "passed": true
+    },
+    {
+      "file": "20260911001700_fix_readiness_probe.sql",
+      "sha256": "163174c3d5969675c92b95fd1cc816fd55d0279d5846acbe3cfeb3b8fdf8fff9",
+      "passed": true
+    },
+    {
+      "file": "20260911001800_least_privilege_acl_and_readiness.sql",
+      "sha256": "8168722df19d38c1110770d578d59acf4534d724f0acb3ade6fcd825546b8877",
+      "passed": true
+    },
+    {
+      "file": "20260911001900_identity_role_requests.sql",
+      "sha256": "fb545cd8adb2a652ce3c92032bd2dcfcce1cf240d28f99cdf8ac28ad66f314ec",
+      "passed": true
+    },
+    {
+      "file": "20260911002000_invitation_decline.sql",
+      "sha256": "ac98c2e9b72740315365aa74b3a56eec6ccd4127e586695b550f82bf9828b12f",
+      "passed": true
+    },
+    {
+      "file": "20260911002100_email_invitations.sql",
+      "sha256": "1a73d307da2f8ad78ec2b14f9c602cab09487ef91c815c2b8298b2024a76df24",
+      "passed": true
+    },
+    {
+      "file": "20260911002200_invitation_self_guard.sql",
+      "sha256": "be6291336aab4262c1c89ec5d5f06eb5e4ba34e368a345792f3dcaae07540f74",
+      "passed": true
+    },
+    {
+      "file": "20260911002300_account_security_policy.sql",
+      "sha256": "0784acfbb25371b6296525c0da271ca2174707f87d6b678ba81b1d34e297efe1",
+      "passed": true
+    },
+    {
+      "file": "20260911002400_client_onboarding.sql",
+      "sha256": "f2210d25ababef5c71785739490c4d7480fef2717d7586d3cf89fc72c71206ed",
+      "passed": true
+    },
+    {
+      "file": "20260911002500_identity_security_hardening.sql",
+      "sha256": "20eb3f703b13c008166e2d3eccbbe03f2353e235e905aa91347826a2bb864cb6",
+      "passed": true
+    },
+    {
+      "file": "20260911002600_client_onboarding_hardening.sql",
+      "sha256": "512d847e414d46676551914ee3c223da5318db180a73bafcffec2469d50ecc14",
+      "passed": true
+    },
+    {
+      "file": "20260911002700_identity_security_followup.sql",
+      "sha256": "056e03161452d07016dfe0f80deeb8263b4f9e8405a48329185cc270a9e39d01",
+      "passed": true
+    },
+    {
+      "file": "20260911002800_account_security_audit_saga.sql",
+      "sha256": "b1830483f5c1c977010e1cc759c6efe9358a13687465337e82b26b40ce9d9eb6",
+      "passed": true
+    },
+    {
+      "file": "20260911002900_client_compliance_documents.sql",
+      "sha256": "b579f83f6ecbd90f06719a551908bfee8b46054d828208311b10e9829bee66c7",
+      "passed": true
+    },
+    {
+      "file": "20260911003000_client_compliance_questions.sql",
+      "sha256": "8c412febb55e1845afc8d9e3114958e8056fb1822a20af8a871734be177d9097",
+      "passed": true
+    },
+    {
+      "file": "20260911003100_client_document_submission_gate.sql",
+      "sha256": "5e820da065ffcc0a1473f91c5b4b6ce1d1bcd1984ec941be31d093965f6e0c5d",
+      "passed": true
+    },
+    {
+      "file": "20260911003200_client_question_review_state.sql",
+      "sha256": "00431aa3e1eac3abef9453d326b0f476adf59c28b65d46d56e592be3ff286f19",
+      "passed": true
+    },
+    {
+      "file": "20260911003300_client_document_submission_transition.sql",
+      "sha256": "7022df96655ed00d0cffc96089fea9db6ce97dd34b932ef12aa698a74ed61771",
+      "passed": true
+    },
+    {
+      "file": "20260911003400_client_document_security_hardening.sql",
+      "sha256": "cd964d5142fed98455e8f2416df58110fce637443e99edcf144d0db682c71d33",
+      "passed": true
+    },
+    {
+      "file": "20260911003500_client_compliance_matrix_and_anomalies.sql",
+      "sha256": "ea9a9ae705b84636d20ebcb63c2b4b6b45cdda93aacbdd24b04933f8644a3774",
+      "passed": true
+    },
+    {
+      "file": "20260911003550_client_document_scan_job_rpc.sql",
+      "sha256": "ccd10d5a9b05d533d48860fd3b2776afe1f3b233046a5187e63d47064cd18b55",
+      "passed": true
+    },
+    {
+      "file": "20260911003600_catalog_core.sql",
+      "sha256": "6f3d986ce859062a01c8b0950cea080486a2c5d91609e69e79b7cd7d0b413b8c",
+      "passed": true
+    },
+    {
+      "file": "20260911003700_question_engine_persistence.sql",
+      "sha256": "473dcf8a8ec5d454fd112fda3973bc9c005e155f057480b9e0d7068c172a2b5e",
+      "passed": true
+    },
+    {
+      "file": "20260911003800_client_catalog_read_api.sql",
+      "sha256": "a6e92ecf0d57035e0ac1378e0d6bbfc03cb4b50bca613435e216f0a8924338e8",
+      "passed": true
+    },
+    {
+      "file": "20260911003900_catalog_version_insert_compatibility.sql",
+      "sha256": "c01c9b8e9b51976a7d516640305403eafc58cdaaef6f77d5a838be800c2cd2c4",
+      "passed": true
+    },
+    {
+      "file": "20260911004000_catalog_version_explicit_snapshot_compatibility.sql",
+      "sha256": "216fcbb58355b816d3aff06f6a6127b90c6ceb7fc011b21b7d901dec8f09e9cb",
+      "passed": true
+    },
+    {
+      "file": "20260911004100_catalog_snapshot_lifecycle_hardening.sql",
+      "sha256": "524b8fc1ae37622f15d0be749c80c80f4e28dc1ca900fd104f43f63c709e5fc8",
+      "passed": true
+    },
+    {
+      "file": "20260911004200_catalog_baseline_import.sql",
+      "sha256": "fd5d7fba8d1f1a29fb87bd51fe94e12a5080098fad8670e4ee8464ea8a5ac0cc",
+      "passed": true
+    },
+    {
+      "file": "20260911004300_catalog_hierarchy_commands.sql",
+      "sha256": "efbfaeda3d5a77e102aa693dd5d3a4892702a381af52a161ad2acea84d2c5710",
+      "passed": true
+    },
+    {
+      "file": "20260911004400_catalog_service_commands.sql",
+      "sha256": "580b229b57a81c266a8956af5bf404c10f6ef98b4cf911cfb0890e9ea7051072",
+      "passed": true
+    },
+    {
+      "file": "20260911004500_catalog_hierarchy_legacy_compatibility.sql",
+      "sha256": "93c52120089ab06f13781c0dd72b1392a83b5d856fdf641803a70aba083b0722",
+      "passed": true
+    },
+    {
+      "file": "20260911004600_catalog_legacy_claim_role_compatibility.sql",
+      "sha256": "aa7852ae84008f5ed32f9b612f8a35646e102b6297c355c34bfdba06cf1a4a12",
+      "passed": true
+    },
+    {
+      "file": "20260911004700_catalog_legacy_approval_evidence_compatibility.sql",
+      "sha256": "c4d466ca725d70c927cdf39548517e776f6a99648164863568b7e0a51c6b5001",
+      "passed": true
+    },
+    {
+      "file": "20260911004800_catalog_import_question_scope_compatibility.sql",
+      "sha256": "e9993a483a40602d15f1ce651ce72fac0d0ca9feecdc2eb665e15d8de4197404",
+      "passed": true
+    },
+    {
+      "file": "20260911004900_catalog_import_draft_choice_compatibility.sql",
+      "sha256": "74cc6e02a35c09fa937dea3f20128a6f09edc2f194b928b50b53343df68a2e04",
+      "passed": true
+    },
+    {
+      "file": "20260911005000_question_draft_choice_contract.sql",
+      "sha256": "e0befc6872ab2ceca3ca5ccac5808dd734ee56d0777928e4f16f7238cb4f5739",
+      "passed": true
+    },
+    {
+      "file": "20260911005100_question_builder_commands.sql",
+      "sha256": "73321fe028e14e476958fd296781e798aaebbdcafc78507e0dda1c046242734c",
+      "passed": true
+    },
+    {
+      "file": "20260911005200_question_builder_command_hardening.sql",
+      "sha256": "8d186104f96a1944cd07275619de8f6348a65ab4b2ac50a2feb9d902d98354ee",
+      "passed": true
+    },
+    {
+      "file": "20260911005300_question_builder_create_auth_order.sql",
+      "sha256": "590f6f1a2975b67d7cae2b0d93c8f267daad3e838536b7757c139154187ab081",
+      "passed": true
+    },
+    {
+      "file": "20260911005400_question_builder_global_scope_hardening.sql",
+      "sha256": "211fdbe55e8f64f31521f29c9318190bb7039a753c808e946c3cc751287287d6",
+      "passed": true
+    },
+    {
+      "file": "20260912005500_rule_builder_commands.sql",
+      "sha256": "74099a125886a11848cbc13bf46f0fcf4834f397aca0358ffeef9a3bd4620f64",
+      "passed": true
+    },
+    {
+      "file": "20260912005600_rule_builder_json_validation_fix.sql",
+      "sha256": "a92f8cd5ece686a6aa20d27b4a98f37fa695b3ca3fd933da29fce9e921961d28",
+      "passed": true
+    },
+    {
+      "file": "20260912005700_questionnaire_builder_create.sql",
+      "sha256": "3271d46851cbaf7f642fe6d995fb4066048bb1ca9c3ad01c7f1f903cebb1df53",
+      "passed": true
+    },
+    {
+      "file": "20260912005800_questionnaire_snapshot_composition.sql",
+      "sha256": "5da6eb1c43c4ce49a9aa8a58bb83757936ad685f8c357d6512493a8d8ba4a14b",
+      "passed": true
+    },
+    {
+      "file": "20260912005900_rfq_matching_foundation.sql",
+      "sha256": "745a1d9864de6c2c6a794961b69c5a38499351cae9dee31c71083dcbe3c86b00",
+      "passed": true
+    },
+    {
+      "file": "20260912006000_quotes_comparison.sql",
+      "sha256": "d630f2416cbdd84bfd287119df23bfb971a3a0c8cfee21e674271dac328dee9f",
+      "passed": true
+    },
+    {
+      "file": "20260912006100_contracts_missions_core.sql",
+      "sha256": "7863dd3bbd61071a576252083bdd00ae6a1cf8f40e5c1571d4df8638a0415e72",
+      "passed": true
+    },
+    {
+      "file": "20260912006200_provider_qualification.sql",
+      "sha256": "40909eddd7372138d8be9620468c8e89ccf10eafd6a8c1e6108a9f25056e6906",
+      "passed": true
+    },
+    {
+      "file": "20260912006300_provider_billing_reconciliation.sql",
+      "sha256": "9b41e27104bf4bcd9951b74770d61d751f213de9c0947e5d55baed9794fc9610",
+      "passed": true
+    },
+    {
+      "file": "20260912006400_disputes_reassignment.sql",
+      "sha256": "2348a7f1a5a3248d697705f48f5b69be2dd15b289d20fea575bd763f63c70fbc",
+      "passed": true
+    },
+    {
+      "file": "20260912006500_rfq_policy_helper_acl_fix.sql",
+      "sha256": "21916594e63ccaa082601d88cf20ecde59387a3baa9f34c061b5078d1cb2849b",
+      "passed": true
+    },
+    {
+      "file": "20260912006600_volume_procurement_pools.sql",
+      "sha256": "81d761c3a46f6b312ab2c2582cc8c3231449680f82ca9e2b2b42422c08a8ea20",
+      "passed": true
+    },
+    {
+      "file": "20260912006700_franchise_governance.sql",
+      "sha256": "1e0496a79b8e6f144f74880621cfdd732f1c8163c50969426d57ab06fb07faf0",
+      "passed": true
+    },
+    {
+      "file": "20260912006800_franchise_finance.sql",
+      "sha256": "a4aa6183b6fc7fc7c549989ff1539efa750d1cfbaeb14bff03214390909cbf9c",
+      "passed": true
+    },
+    {
+      "file": "20260912006900_rls_policy_helper_acl_fixes.sql",
+      "sha256": "8e1cf3c101a9f0127507661f03962d24acea3b57ade263eef187c59e4de6ac3b",
+      "passed": true
+    },
+    {
+      "file": "20260912007000_subscription_plans_cycles.sql",
+      "sha256": "f075f5419daa69153e1f6cda9c0d157a5b566da0c6e34324648b6e245e42b753",
+      "passed": true
+    },
+    {
+      "file": "20260912007100_admin_command_center.sql",
+      "sha256": "2986251230cbecbde8eee9575a9afe5198d4660a1182e02b6290bc67108023cf",
+      "passed": true
+    },
+    {
+      "file": "20260912007200_diagnostics_opportunities.sql",
+      "sha256": "df02c3c72ed1675283da3b86c4a848f0590372abcb7f0d4b0bf8e4dda64fabad",
+      "passed": true
+    },
+    {
+      "file": "20260912007300_boxes_credits_security.sql",
+      "sha256": "412f9fe9e3ae8eb7a2284f8e4540db89919126766882ca6b31719b747ef494e2",
+      "passed": true
+    },
+    {
+      "file": "20260912007500_notifications_preferences_delivery.sql",
+      "sha256": "d75408abc5f39d6aafe440d6c88a08f3e8a377980ce05385577095d6d72f6ca5",
+      "passed": true
+    },
+    {
+      "file": "20260912007600_notification_required_variables_hotfix.sql",
+      "sha256": "ae47255099fb22d5ee9f7b60573a480d5cddda949fef06503091bf4d9f2b5246",
+      "passed": true
+    },
+    {
+      "file": "20260912007700_credit_wallet_client_admin_rls_fix.sql",
+      "sha256": "61602c665ca9ff5992103856715af90086164f561168d6d3214d59ac3e1d9044",
+      "passed": true
+    },
+    {
+      "file": "20260912007800_marketing_autopilot.sql",
+      "sha256": "848ee4eef06713d6a17871603d4c8cc878aa9d46033d38ec9adf9f8f030aefff",
+      "passed": true
+    },
+    {
+      "file": "20260912007900_franchise_crm_performance.sql",
+      "sha256": "a8a283ccacc06394ea813c94eb53f347fe317bb640023315e0c3f6bb392aa29d",
+      "passed": true
+    },
+    {
+      "file": "20260912008000_morocco_tax_engine.sql",
+      "sha256": "5d3dd8df01f09a25acdd4d89dba8b914fef872574919770d3573979b26360b2f",
+      "passed": true
+    },
+    {
+      "file": "20260912008100_morocco_tax_billing_compatibility.sql",
+      "sha256": "bd04860a66551d75ec1a870e3ba337d5765e087a1e3c5326e42743c8550995ec",
+      "passed": true
+    },
+    {
+      "file": "20260912008400_question_rule_advanced_engine.sql",
+      "sha256": "1ee30dc2f19230b0f0a08426d49b8f9b82b4cc4cdcbd95d360dbac593b3592c2",
+      "passed": true
+    },
+    {
+      "file": "20260912008500_question_rule_advanced_compatibility.sql",
+      "sha256": "69f970805bb01355642ef79c1af9e288691d9af05c80c798207ae950ec60dcf1",
+      "passed": true
+    },
+    {
+      "file": "20260912008600_marketing_authorization_hardening.sql",
+      "sha256": "30f4d65ff35f413c28300cbd46a886275e92d8b66775f948a8159732a7f362a9",
+      "passed": true
+    },
+    {
+      "file": "20260912008700_franchise_crm_security_hardening.sql",
+      "sha256": "61dbb7161102570b17bed4bab4f4ccf0d18b04ce91308ca8c3f06db3b19cb474",
+      "passed": true
+    },
+    {
+      "file": "20260912008800_question_rule_simulation_canonical_fix.sql",
+      "sha256": "c82969169b63b76713d3c7df7596eaeed71ed01bc7f2027f71432afc75b6840b",
+      "passed": true
+    },
+    {
+      "file": "20260912008900_franchise_crm_security_compatibility.sql",
+      "sha256": "ed9d0fa196babf3325d137d2a8358723806128a1aafb06b04ab91a6b0c3d0e52",
+      "passed": true
+    },
+    {
+      "file": "20260912009000_questionnaire_sessions.sql",
+      "sha256": "adbf5c198b9b2604e239d183b26a990facb380f0a4a6064e98f2e607c6acf0bf",
+      "passed": true
+    },
+    {
+      "file": "20260912009100_client_projects_budgets_calendar.sql",
+      "sha256": "0db0f2d880889f0d0c6d9eea852665b665419de88d068781d96996ea28d4e3c0",
+      "passed": true
+    },
+    {
+      "file": "20260912009200_provider_reputation_badges_favorites.sql",
+      "sha256": "5a01e0ecaa351b938d2653459e8e27632bd8e93acb1dddab0b77846b90e07947",
+      "passed": true
+    },
+    {
+      "file": "20260912009300_rewards_referrals_roi_savings.sql",
+      "sha256": "b6b1f2c915dd3d003bb244057dbf862b2534148173999cd4273b3162282760c7",
+      "passed": true
+    },
+    {
+      "file": "20260912009400_provider_feedback_privacy_hardening.sql",
+      "sha256": "a1b6c0af8cdccd1debb5f293513272b2fda12de8a733d5f08b62862283ea2f5f",
+      "passed": true
+    },
+    {
+      "file": "20260912009500_rewards_referrals_roi_security_hardening.sql",
+      "sha256": "202d429c30bba4b57a1377b14d59cd6665ec529824ab01b42dd5215364395112",
+      "passed": true
+    },
+    {
+      "file": "20260912009600_client_portfolio_integrity_hardening.sql",
+      "sha256": "3b2aaadca69a6f47eb60fbc692e07f1c9de9607200eb7e41889b9323cfe3d321",
+      "passed": true
+    },
+    {
+      "file": "20260912009700_rewards_referral_audience_hardening.sql",
+      "sha256": "8843c577218358add2fc6d3c9bbfea1aed34d8edae64552ea128b0cfcad46115",
+      "passed": true
+    },
+    {
+      "file": "20260912009800_provider_feedback_outbox_backfill.sql",
+      "sha256": "acc562632df51b734d54330a6d882178724f20671c599aeda9792f43dd8b35fb",
+      "passed": true
+    },
+    {
+      "file": "20260912009900_referral_conversion_anti_oracle.sql",
+      "sha256": "d0a93631792cc4f10be294ef8f6be7502c39bf328950ef8ef6b5e10e6d19f331",
+      "passed": true
+    },
+    {
+      "file": "20260912010000_assisted_intelligence_quality.sql",
+      "sha256": "e4df1e6e12effef6216ad042285803371997670787c34e4b267353bc19a9710c",
+      "passed": true
+    },
+    {
+      "file": "20260912010100_solution_bundles_benchmarks.sql",
+      "sha256": "80587963ea122fcba9cfa2ee35d119f210bf801b1965c8b6ec15a3aa5ca80909",
+      "passed": true
+    },
+    {
+      "file": "20260912010200_rfq_clone_recurring_services.sql",
+      "sha256": "a5a46bc7fb173a48e2a2259585201de40ecd9a6a42ecdcc1d18ffcf5a10887fc",
+      "passed": true
+    },
+    {
+      "file": "20260912010300_franchise_daily_digest.sql",
+      "sha256": "3e3250215b0c34ae27baef9931c9a60684a415ffdfc4eb726e24d5b3fc40c0be",
+      "passed": true
+    },
+    {
+      "file": "20260912010400_benchmark_privacy_hardening.sql",
+      "sha256": "23c3125e07105bbdf77ecd34c82cefb7d129458dade9921103709b1a73a08b1b",
+      "passed": true
+    },
+    {
+      "file": "20260912010500_assisted_intelligence_runtime_hardening.sql",
+      "sha256": "c98de47ff0b586389995049d234e9c2a4ecc3271852e197c20dbca9750ec800a",
+      "passed": true
+    },
+    {
+      "file": "20260912010600_rfq_recurring_runtime_hardening.sql",
+      "sha256": "8b42f7364371e943d4778f86e2129e9121615ab3afe3e4b311188216de4f622e",
+      "passed": true
+    },
+    {
+      "file": "20260912010700_assisted_intelligence_deployment_reconciliation.sql",
+      "sha256": "4f3bf69885ba83860388db7d82314a5e61cdf85e3d8fc9564284512e13846f6d",
+      "passed": true
+    },
+    {
+      "file": "20260912010800_franchise_daily_digest_compatibility.sql",
+      "sha256": "db3cbbf9536d10eaebc932e019e7399a6b82362c3a05504d8be8b54e8d6f0fc6",
+      "passed": true
+    },
+    {
+      "file": "20260912010900_benchmark_runtime_compatibility.sql",
+      "sha256": "6232b337f2ba0129901d7c92c32228cec5c6b92bebe28186a67b67361f0b73eb",
+      "passed": true
+    },
+    {
+      "file": "20260912011000_rfq_clone_alias_compatibility.sql",
+      "sha256": "0bdd18265adb121ab6834deab900d66b994f0a91b0383ca2e549c0508d585b49",
+      "passed": true
+    },
+    {
+      "file": "20260912011100_benchmark_submission_lock_hardening.sql",
+      "sha256": "15056bb0d088eb17ef1af75978a83943909c0ee7a7dc200c4635f0bf87cbb041",
+      "passed": true
+    },
+    {
+      "file": "20260912011200_assistance_pii_minimization_hardening.sql",
+      "sha256": "7ec87e1c6b1d5bfebf0718a950809e64ce734990e0583ee82e53f96bc2f4b1c3",
+      "passed": true
+    },
+    {
+      "file": "20260912011300_recurring_plan_alias_compatibility.sql",
+      "sha256": "36d377cab6d89670cdb54feb2a7241ef079b1a4dc786eaa94e816bc9feadcb14",
+      "passed": true
+    },
+    {
+      "file": "20260912011400_franchise_digest_role_hardening.sql",
+      "sha256": "41bd8bbe39eb8004909211c22c00e8a1448432bd94938a66f2d16b806cfd3d7b",
+      "passed": true
+    },
+    {
+      "file": "20260912011500_assistance_role_authorization_hardening.sql",
+      "sha256": "1d36e3f82b7f9cdd91c7af07fd01527c6f073d73bbb75b49091b3df1f8f76f67",
+      "passed": true
+    },
+    {
+      "file": "20260912011600_benchmark_registry_and_bundle_concurrency.sql",
+      "sha256": "6cb76577a23b3ddb10152c8fab39f66b314eb9a474f25c68ca2c56139b9e8a00",
+      "passed": true
+    },
+    {
+      "file": "20260912011700_assistance_role_helper_acl.sql",
+      "sha256": "6ffe765e67fdd42bd6140594df2f565440bdab5bde75e8694453205e5ebdc88c",
+      "passed": true
+    },
+    {
+      "file": "20260912011800_assistance_null_input_retention.sql",
+      "sha256": "e169ac4ebcd684813dfb055c42e61fed2d0a5ce1e77b59f1da670565c2ff0e1d",
+      "passed": true
+    },
+    {
+      "file": "20260912011900_benchmark_verified_value_binding.sql",
+      "sha256": "23af91da560bd404cacafd1d38c597d69ce92831f577d22ca0bd833869217d93",
+      "passed": true
+    },
+    {
+      "file": "20260912012000_franchise_digest_scope_hardening.sql",
+      "sha256": "0306f0c0099c9024ce3d08824cb86f568a2e82c55adebb069096eae917d51cb1",
+      "passed": true
+    },
+    {
+      "file": "20260912012100_assistance_retention_and_pii_hardening.sql",
+      "sha256": "a82295133cc1c58c9f34bfc9d9e04049453643e296cc8f341ccbca163593dc61",
+      "passed": true
+    },
+    {
+      "file": "20260912012200_franchise_digest_idempotency_scope.sql",
+      "sha256": "8cf1510849c7091d45b812f282819c9002dd4c8f5f2964783c4454abf4102ed4",
+      "passed": true
+    },
+    {
+      "file": "20260912012400_assistance_purge_audit_correlation.sql",
+      "sha256": "3c12fa2c0d324977d7d1a662b40e4e69ee092ae6597032c8db3d528ffc8e6c2c",
+      "passed": true
+    },
+    {
+      "file": "20260912012500_assistance_purge_execution_hardening.sql",
+      "sha256": "292fbf5344753d8ee30aebd3f100855e0ec13ef1b55c45fb19ac3db2c61509aa",
+      "passed": true
+    },
+    {
+      "file": "20260912012600_franchise_digest_scheduler_bounding.sql",
+      "sha256": "7986d7b2b0c462c914f4e5e436df8b57266f7eabc495d775197db6872181ccdb",
+      "passed": true
+    },
+    {
+      "file": "20260912012700_question_rule_rpc_authorization_hardening.sql",
+      "sha256": "fb595ec58b49cb13898faf86bfd5c9b4a8fb24e96b73defdac8a8807615515ea",
+      "passed": true
+    },
+    {
+      "file": "20260912012800_questionnaire_document_reference_scope.sql",
+      "sha256": "b8774bf527b114f25e66d0605e4145e67fb35e60d595b0f371ab8ff4122b2e75",
+      "passed": true
+    },
+    {
+      "file": "20260912012900_recurring_viewer_read_policy.sql",
+      "sha256": "272434dc8ab39f8acde4170f808797d515467496fc47a8645f5d1eaf43711354",
+      "passed": true
+    },
+    {
+      "file": "20260912013000_dispute_reassignment_provider_eligibility.sql",
+      "sha256": "176dbd1f9f8fad9448c1f2a3e64b9d47c9f6a00f4ce7f6959ef78e10d3218b22",
+      "passed": true
+    },
+    {
+      "file": "20260912013100_subscription_payment_activation.sql",
+      "sha256": "65905f7086ebc876e6e9381826bd88d64276c832682c39cd30e46d393c1f4fff",
+      "passed": true
+    },
+    {
+      "file": "20260912013200_benefit_consumption_requires_delivery.sql",
+      "sha256": "efe21c94cb617d0fd62a09fc7f178c12d85b4fb6502dc78b3a2ecb62d6aa863a",
+      "passed": true
+    },
+    {
+      "file": "20260912013300_admin_volume_aggregate_api.sql",
+      "sha256": "fb91e4305ce9d2ee4c177c287ecc4604130308294686a48c5a400e85723e0248",
+      "passed": true
+    },
+    {
+      "file": "20260912013400_assistance_rpc_role_alignment.sql",
+      "sha256": "014f5eca3e2f0b2091c55c852779687b222163515b62c54196d27e4f957389cf",
+      "passed": true
+    },
+    {
+      "file": "20260912013500_subscription_historical_plan_projection.sql",
+      "sha256": "db625b0a6500e3f35bcf306e5d0d2637ff713159dbb42cf0d89c6c0354da7f1b",
+      "passed": true
+    },
+    {
+      "file": "20260912013600_admin_finance_payment_projection.sql",
+      "sha256": "5aef1f20d8245d443989793b55c2aa5867915f08124f3891bce830757868f69c",
+      "passed": true
+    },
+    {
+      "file": "20260912013700_client_compliance_four_eyes.sql",
+      "sha256": "70f3f719d1812d11d2c82d521c99e03f4f0d493c1379d56f48018d130a777791",
+      "passed": true
+    },
+    {
+      "file": "20260912013800_admin_operations_projection.sql",
+      "sha256": "28facd4574d8dfa8cbb930209625cab7d007b8fe09ffa3492444708f1f8a640b",
+      "passed": true
+    },
+    {
+      "file": "20260912013900_client_compliance_security_remediation.sql",
+      "sha256": "5172924e08f24779b006fb52bf22d97b719ea07734ab064b3978157f53461131",
+      "passed": true
+    },
+    {
+      "file": "20260912014000_internal_object_messaging.sql",
+      "sha256": "31df348116001a51bfc10d5abc4641d6cfd6613246b4f6a39659bdd5f51ab70c",
+      "passed": true
+    },
+    {
+      "file": "20260912014100_franchise_followup_scheduler.sql",
+      "sha256": "cd9c91cab09061bbce9c6522689f6bf0c7bfb0fee69a46e04c71a45a5198272d",
+      "passed": true
+    },
+    {
+      "file": "20260912014200_questionnaire_abandonment_analytics.sql",
+      "sha256": "ec446ff7cf4bb8453dc7359d8a013dbb3e4c1d318dd1d6b3adbc5512abe0e5ea",
+      "passed": true
+    },
+    {
+      "file": "20260912014300_real_payment_gateways.sql",
+      "sha256": "7d3747adc73611cf0ea7ca29e3ecb145260045fb84277a78b668bd5f901e8b5f",
+      "passed": true
+    },
+    {
+      "file": "20260912014400_payment_cycle_number_ambiguity_fix.sql",
+      "sha256": "e1dacce31ebb9a38d78268beb181d0eaae870b34224420815df35b302843cb91",
+      "passed": true
+    },
+    {
+      "file": "20260912014500_payment_event_service_role_read_acl.sql",
+      "sha256": "5dc4066a3f7f85b2860ad24785097d058c4873d772d50b43c6ca68512ac33051",
+      "passed": true
+    },
+    {
+      "file": "20260912014600_fix_admin_operations_platform_role_guard.sql",
+      "sha256": "ee22f5c6cb9041780e6c085eb31a08d4f7aa3a41302815d0fdc25dac9e1931cc",
+      "passed": true
+    },
+    {
+      "file": "20260912014800_rfq_fair_rotation_recurring_scheduler.sql",
+      "sha256": "4549600fa524cab5e884d79064405fb90fe94b84cc47536c3e882042158ad958",
+      "passed": true
+    },
+    {
+      "file": "20260912015000_recurring_scheduler_iteration_bounding.sql",
+      "sha256": "778b2941a0eb19221276e4c562c1103059afe7f3556a5a85de9d0e0b93ed722a",
+      "passed": true
+    },
+    {
+      "file": "20260912015200_rfq_invitation_current_region_guard.sql",
+      "sha256": "614bff986cc19989212f26403adb0606c5a953c91bc9ca3f9d38a8d44bf203e9",
+      "passed": true
+    },
+    {
+      "file": "20260912015300_admin_operations_revoked_role_guard.sql",
+      "sha256": "1d7920eb30eb97e3f61b225a3872b09c9991b1a5c55b18ce13c9161889ec4924",
+      "passed": true
+    },
+    {
+      "file": "20260912015400_rfq_versioned_provider_eligibility.sql",
+      "sha256": "6a43db478edadb8438191a169c9a2b72e4d1026995176870dd244af8811dbabb",
+      "passed": true
+    },
+    {
+      "file": "20260912015500_admin_aal2_provider_effectivity.sql",
+      "sha256": "46b31565203d5b091b458ab39dccbe8d81a86d510a872c8c366ca751310aebed",
+      "passed": true
+    },
+    {
+      "file": "20260912015600_quote_tax_authority_hardening.sql",
+      "sha256": "866d062011079aeaadc8fc34b2923b3d4242b1544d3ae04ea4f10674cdca4f17",
+      "passed": true
+    },
+    {
+      "file": "20260912015700_provider_quote_exact_amount_projection.sql",
+      "sha256": "3356f696cd357a1d4657e27615c895cac62e8fde4d2e95a7aa7c231153648e7e",
+      "passed": true
+    },
+    {
+      "file": "20260913015800_marketing_v1_completeness.sql",
+      "sha256": "da6dc3d3620e6a90679fbe39da6f39bb90a1fa4ca4dc524585adbfb77fed1542",
+      "passed": true
+    },
+    {
+      "file": "20260913015900_contract_mission_checklist_snapshot.sql",
+      "sha256": "8155da2a96ef3ee3ec6b80f0bd8953f55b255e53662510655a07e3959a2d786f",
+      "passed": true
+    },
+    {
+      "file": "20260913016000_assistance_discovery_and_bundle_projection.sql",
+      "sha256": "92127492914f9f36fca679525161d9a57eedd7d62ee73b39224865eb635a377a",
+      "passed": true
+    },
+    {
+      "file": "20260913016100_client_project_contract_calendar_completeness.sql",
+      "sha256": "457c4b5a394f260b72a2ed35fe830dd0e2e4074836a64ba0c750a8a2cff06295",
+      "passed": true
+    },
+    {
+      "file": "20260913016200_client_calendar_unlinked_mission_regression.sql",
+      "sha256": "d1c4aef1b3c08881caee106c2f494ef9af8531fce4fdda532573d35cac478ed8",
+      "passed": true
+    },
+    {
+      "file": "20260913016300_v41_finance_boundaries_procurement_rib.sql",
+      "sha256": "d60fe243073fe7450f89d54dc3cf20ee08c849fcf5e8801798fc9225f74ccd48",
+      "passed": true
+    },
+    {
+      "file": "20260913016400_v41_signature_provider_evidence.sql",
+      "sha256": "deab2167dd854a785eb90c186abec95ec47e82546c36dc84a2256acc67ffb59f",
+      "passed": true
+    },
+    {
+      "file": "20260913016401_v41_signature_level_attestation_hardening.sql",
+      "sha256": "95a700568050468e45a29567ab917af91bc221f140dbe1bbdc40a8aaa5e74257",
+      "passed": true
+    },
+    {
+      "file": "20260913016500_v41_privacy_governance.sql",
+      "sha256": "0fcffd3e7427566cd1cfcbb1aac4b8fa9253db331bd4c504bd3008a188622b14",
+      "passed": true
+    },
+    {
+      "file": "20260913016501_v41_privacy_read_policy_acl.sql",
+      "sha256": "0fff4c71ab6fb3bb141fc66c831937c9f39d052f441aabf8f20b3dc37be2a25d",
+      "passed": true
+    },
+    {
+      "file": "20260913016600_v41_finops_margin_treasury.sql",
+      "sha256": "6e5bdb0eac11fe203a9c3e7df296b05e86402fafb48b7a4349e7ccebe5352c0d",
+      "passed": true
+    },
+    {
+      "file": "20260913016601_v41_finops_reconciliation_commands.sql",
+      "sha256": "bdcfa37980197b0ad16791626999fb727e5a61d1bf8c09c8a4126be2f010c5af",
+      "passed": true
+    },
+    {
+      "file": "20260913016700_v41_finance_workflow_commands.sql",
+      "sha256": "0a5936d98470618bf1e706670b50c69c0d6d899a90cb0a63b8f356d76f6c9c4a",
+      "passed": true
+    },
+    {
+      "file": "20260913016800_v41_resilience_security_registry.sql",
+      "sha256": "9f7fdeac67b5d0beadfc33dee5273653dc588511cb400d564d3e904a33cdf0d7",
+      "passed": true
+    },
+    {
+      "file": "20260913016900_v41_legal_governance_marketing.sql",
+      "sha256": "d775e3cf70a64b18cf056a5ab0b42d4c37d02ab9f52fba7e92424fe40296a8fd",
+      "passed": true
+    },
+    {
+      "file": "20260913016901_v41_marketing_claim_content_binding.sql",
+      "sha256": "0648e7cbd046c9d42161fa3c38160f1afea7278b624b0cf9d687c3eb200a67db",
+      "passed": true
+    },
+    {
+      "file": "20260913017000_v41_admin_overview.sql",
+      "sha256": "33072b07e71885ee0eb04d51e4cf0b5ec3355dae9145ea55335ccbb40fb46e38",
+      "passed": true
+    },
+    {
+      "file": "20260913017100_v41_admin_external_validations.sql",
+      "sha256": "4ec5b5fa0139d29609eec195dd90c94564b8ad5dd1381d6786ee81191dd5b079",
+      "passed": true
+    },
+    {
+      "file": "20260913017200_contract_amendment_activation.sql",
+      "sha256": "8cef9be685f53b35dd46a659b1910b050041247d989b47d599bfd0af622e1acf",
+      "passed": true
+    },
+    {
+      "file": "20260913017201_contract_amendment_trigger_compatibility.sql",
+      "sha256": "fa21b9de8092727aa441ace579cbd93d3abb9ad12b9b0b96719a48ec43268165",
+      "passed": true
+    },
+    {
+      "file": "20260913017300_secure_client_document_reuse.sql",
+      "sha256": "35e8497d4c526b89cb14a4a807665fbd614a1bc2ca2a675288ee9509d7df0d76",
+      "passed": true
+    },
+    {
+      "file": "20260913017400_admin_badge_policy_versions.sql",
+      "sha256": "51e567efa921b243ac43274ebc66d7b2ceed2ddb47ffcba2a8a3b964b43bcffd",
+      "passed": true
+    },
+    {
+      "file": "20260913017500_content_clone_provenance.sql",
+      "sha256": "0bf275bf7258409a24c5f6b027690bae96e429635160fd101aebbe92422a09d3",
+      "passed": true
+    },
+    {
+      "file": "20260913017600_typed_cost_center_financial_links.sql",
+      "sha256": "82ae52a357ba565811e59caff0233cedb7c4fa6402c947e584fe3e0df62cf975",
+      "passed": true
+    },
+    {
+      "file": "20260913017700_transversal_abuse_detection.sql",
+      "sha256": "f8cc8d3cfc2a1d609f63db45890c6fb5c60a0bbf93ab1c524f4a83518a003e73",
+      "passed": true
+    },
+    {
+      "file": "20260913017800_versioned_prefill_freshness.sql",
+      "sha256": "658e23ec2e718e811c070e5bc30480480f963d42419c2c645553fc86650189ff",
+      "passed": true
+    },
+    {
+      "file": "20260913017900_delivery_proof_trusted_scan.sql",
+      "sha256": "594e3f1a18b11aaf43a445754a28c6a0efe499d6ae38477c02180048ca517c43",
+      "passed": true
+    },
+    {
+      "file": "20260913018000_marketing_publication_worker.sql",
+      "sha256": "f0f32f71b588a97346e3db60c3df53ea2f31d3d58044ad320508a69749c5912f",
+      "passed": true
+    },
+    {
+      "file": "20260913018100_marketing_calendar_scheduler.sql",
+      "sha256": "dca8181097ca647f5f6be0e19ef1b481defb4406147bf7a70fb3e5df608dfbb6",
+      "passed": true
+    },
+    {
+      "file": "20260913018200_marketing_scheduling_sandbox_integrity.sql",
+      "sha256": "b34c5b651acfda2cadcf7cf34f48fb2d2d676c51a4ba083c28b8b42db5766dd5",
+      "passed": true
+    },
+    {
+      "file": "20260913018300_marketing_schedule_rule_commands.sql",
+      "sha256": "348469ec25a93fdb097a9a4afe03a93abea45f9af7e758ff5005c2a207ece282",
+      "passed": true
+    },
+    {
+      "file": "20260913018400_marketing_worker_lease_policy_hardening.sql",
+      "sha256": "49cb81e0255665230db75cc6165b75d3dfe9aa98c8e543216f35ee2ec2b567ad",
+      "passed": true
+    },
+    {
+      "file": "20260913018500_marketing_publication_attempt_integrity.sql",
+      "sha256": "4116b5784bfaad81b49bcab18263b343474f8b024365f4f14fd94205f2d4924a",
+      "passed": true
+    },
+    {
+      "file": "20260913018600_marketing_weekly_trends.sql",
+      "sha256": "d095ee3b00e06cea6c9ba25462f8ade5586a07720bf7cf67d10265f888f71dcf",
+      "passed": true
+    },
+    {
+      "file": "20260913018700_marketing_content_attribution_completion.sql",
+      "sha256": "c5c3956f687cc74153dfd093ff45c380173ccd7b744c58ab53e14049ed483a3f",
+      "passed": true
+    },
+    {
+      "file": "20260913018800_client_provider_completion.sql",
+      "sha256": "d1d461f56bb8583efb1295f04f967c21f8cb9f01bce67a977d04309bfa2d4cbd",
+      "passed": true
+    },
+    {
+      "file": "20260913018900_transversal_approval_accrual_completion.sql",
+      "sha256": "23ca77160797e878e63853e46b0d56a55b1d57cbdab6fb5a8dd23a453ae8e595",
+      "passed": true
+    },
+    {
+      "file": "20260913019000_automation_runtime_completion.sql",
+      "sha256": "64baf8566970e76a714fb03c5f55f0c679ed65e99eba87958c69cf1b486c26c3",
+      "passed": true
+    },
+    {
+      "file": "20260913019100_reputation_badges_checklists_authoritative.sql",
+      "sha256": "747b9a48ba28bf25217e7bfdfc39a7c411912eb6da8234c734ef2c45761648e2",
+      "passed": true
+    },
+    {
+      "file": "20260913019200_financial_value_center_completion.sql",
+      "sha256": "40de62f83baa6ecbabc4c93f10cc6729225524fd6d6576772b195dd1d5172bbd",
+      "passed": true
+    },
+    {
+      "file": "20260913019300_marketing_brand_evidence_idempotency_scope_fix.sql",
+      "sha256": "63c632a71277cc115a65be14911e4a391bd61d50597cdb1d6f0bded4301d2aa3",
+      "passed": true
+    },
+    {
+      "file": "20260915019400_public_contact_intake.sql",
+      "sha256": "49f16a19493f17fe2700a6e57ad8b6b4de2783d0ec1ddee4824a811d586beb10",
+      "passed": true
+    },
+    {
+      "file": "20260915019500_abuse_command_idempotency.sql",
+      "sha256": "4d4ccfe1d1c62641d077609ae3a12ee03b85fb53baa838711692122821478b05",
+      "passed": true
+    },
+    {
+      "file": "20260915019600_public_subscription_projection.sql",
+      "sha256": "f418909037bfbe193a0524dec4031488698aeb8b96a99d37525628233f765fd8",
+      "passed": true
+    },
+    {
+      "file": "20260915019700_diagnostic_opportunity_request_conversion.sql",
+      "sha256": "222e53597019fddd74a6b6327002ad68594126f01ff977b0d6f120bb6cfa3132",
+      "passed": true
+    },
+    {
+      "file": "20260915019800_public_diagnostic_intake.sql",
+      "sha256": "257849953f9bf05d9eb14c8d3b6498408c38ed5baff075f7f7168c7396a8f07c",
+      "passed": true
+    },
+    {
+      "file": "20260915019900_provider_qualification_private_uploads.sql",
+      "sha256": "06f30784a9cef1ede98a6316ea8f32120bff813b5fcfebeef7bd552183f8ab3f",
+      "passed": true
+    },
+    {
+      "file": "20260915020200_public_need_intake.sql",
+      "sha256": "41437cbce1948fef17542c3f69fb5310f03ae524bbf4e9d77877a1052db8b781",
+      "passed": true
+    },
+    {
+      "file": "20260915020300_provider_document_maintenance_compatibility.sql",
+      "sha256": "0cff793621bef59dacd7e481cc4af46a28fdfdd2ce7d0f53dbef45b96a256d17",
+      "passed": true
+    },
+    {
+      "file": "20260915020400_notification_required_variables_regression_fix.sql",
+      "sha256": "a1d2d983eb39c5c28e5d13214fbd16c1b769554a095d32e95a98ba941d41705f",
+      "passed": true
+    },
+    {
+      "file": "20260915020500_security_view_event_trigger_hardening.sql",
+      "sha256": "991db28c110444c8b54cdb1ce390d9097e9a57db62db82522ceea54e82a1f43c",
+      "passed": true
+    },
+    {
+      "file": "20260915020600_provider_payment_private_proofs.sql",
+      "sha256": "9e1545bb9b79ad6a9eae713278f69a4f5401f520cc365404cb65b618ad07234e",
+      "passed": true
+    },
+    {
+      "file": "20260915020700_provider_payment_proof_trusted_scan.sql",
+      "sha256": "3757900bd74bb04477c3ea1290db3a9f3e6c1d7e4e3729097dde9472cc0e8516",
+      "passed": true
+    },
+    {
+      "file": "20260916120000_admin_supervision_projection.sql",
+      "sha256": "9517f94ebe21c79460f4ae1083f4b903f1bebd06c3aed0bdd691369c3ae90629",
+      "passed": true
+    },
+    {
+      "file": "20260920180000_provider_consultation_document_download.sql",
+      "sha256": "a80492a67da36db05a0c5b89288effc2169230df0fc5f9897d891f97b5f4f8a4",
+      "passed": true
+    },
+    {
+      "file": "20260920200000_franchise_catalog_submit.sql",
+      "sha256": "125a1408c6a9af4e19302bb081ffb5344b38bcab55431492f10a3ee4fd7f20a1",
+      "passed": true
+    },
+    {
+      "file": "20260920210000_create_service_request_from_need_intake.sql",
+      "sha256": "a5a164319818d0e696ec043c7ef6253f717b6f85c314c70dca4da549b3071af3",
+      "passed": true
+    },
+    {
+      "file": "20260920220000_franchise_catalog_publication.sql",
+      "sha256": "ddac18705f4082308842d367bbf577a19419ec0307ddf2f396b34dd284362f38",
+      "passed": true
+    },
+    {
+      "file": "20260920230000_admin_supervision_parcours_enrichment.sql",
+      "sha256": "60e040ca91a409c324d490d2e73f2bfa902b5f1eeaa20b2f71ae55894ab8c110",
+      "passed": true
+    },
+    {
+      "file": "20260920240000_franchise_mandate_supervision.sql",
+      "sha256": "a500c360b1af5b37108e06efbdd8b51ff2843c58920c2700b007cb9da4f4abc3",
+      "passed": true
+    },
+    {
+      "file": "20260920245000_select_quote_and_notify.sql",
+      "sha256": "dd8d01161715417a83fca6ab7242cf28f72018ccaa0f7adc2e63a41caf27a5e7",
+      "passed": true
+    },
+    {
+      "file": "20260920250000_franchise_remaining_supervision.sql",
+      "sha256": "c45d02ec04a88560e5efe0187080f693474437a6d58bc0fc82b66ff8e8d4c7a7",
+      "passed": true
+    },
+    {
+      "file": "20260921120000_admin_boxes_pnl_closure_exceptions.sql",
+      "sha256": "7c886a792bed7ae7786ac87052377f10188e62ea00740861e45b46c55cf8cbae",
+      "passed": true
+    },
+    {
+      "file": "20260921140000_admin_volume_activate_pool.sql",
+      "sha256": "4191c5e25e9d578790c06f4f1d38ed774dcccd7538c61efc2043a4d0ed5c244a",
+      "passed": true
+    },
+    {
+      "file": "20260921150000_client_new_request_entitlement.sql",
+      "sha256": "5a33952e06b36c8565d68419c9dfc9047dc060f188cf77aba2386d3de5b80e84",
+      "passed": true
+    },
+    {
+      "file": "20260921160000_client_site_and_rfq_open_entitlement.sql",
+      "sha256": "71b88e1f7c7121c540fc599ee4c258fc42d52ad480da41b7df7d37ee76db8700",
+      "passed": true
+    },
+    {
+      "file": "20260921170000_admin_catalog_demand_vault.sql",
+      "sha256": "9d8dd9768b526b18b3e1e65bab3a2b60eaf86e03ad8410d64efba58dc68ce7fc",
+      "passed": true
+    },
+    {
+      "file": "20260921200000_franchise_quality_volume_operations.sql",
+      "sha256": "d793c7166eb4e6d4b747a5d7788ded294ca8573cc75677b5b5539d4b98a0b6ad",
+      "passed": true
+    },
+    {
+      "file": "20260921210000_provider_overdue_opportunity_hold.sql",
+      "sha256": "54a5544aa0365429940d5cc70cead40fc097047308637e22c4039974b4f2f861",
+      "passed": true
+    },
+    {
+      "file": "20260921220000_provider_credit_notes_collection.sql",
+      "sha256": "fedf7507240323510c6b7f1d804d9acfcfbb4b42f344f023274c7ebd473a3342",
+      "passed": true
+    },
+    {
+      "file": "20260921220100_franchise_definition_fks_qualification_read.sql",
+      "sha256": "a9a70f630d5e9f19f865bdafa7b8390dc10344d93dc1a19efdd4ed8093d417a9",
+      "passed": true
+    },
+    {
+      "file": "20260921230000_client_subscription_invoice_reference.sql",
+      "sha256": "5a66ec2ec2b735690a5b510ffbcf553c58a2ccfd1b3e9d4ffe1215113e664da5",
+      "passed": true
+    },
+    {
+      "file": "20260921240000_restore_closure_and_dispute_policy.sql",
+      "sha256": "d2fbc0b3a7c4fad6fc42502f87e218b21c58cff1b98ad1e95ee033cb2eebec95",
+      "passed": true
+    },
+    {
+      "file": "20260921250000_catalog_link_row_version_qualification.sql",
+      "sha256": "f1cf86c5aefb8112d3442278b329149281a968579e9beef95e4e27b50ff7f740",
+      "passed": true
+    },
+    {
+      "file": "20260922120000_temporary_suspend_account_security_mfa.sql",
+      "sha256": "f89618bdfa72c7acb00a3d67e182741a5132e98711f2e436d35f4c5153ea38c1",
+      "passed": true
+    },
+    {
+      "file": "20260922140000_franchise_catalog_library_scope.sql",
+      "sha256": "8e9104921fddf1fb86d1a3cf2fe5b3e9d36c1126ffa73303460dd1280e0a4fe7",
+      "passed": true
+    },
+    {
+      "file": "20260922150000_audit_fiscal_invitation_outbox_hardening.sql",
+      "sha256": "c2d54a945b28bcbe4c1ade7d2111309f0b95af73133ad9cf6d21a5cdc5662559",
+      "passed": true
+    },
+    {
+      "file": "20260928120000_need_request_quote_completeness.sql",
+      "sha256": "0dceac13a8bea6be72c335775cc77671135678b41976810c0a8edb1520ff254e",
+      "passed": true
+    },
+    {
+      "file": "20260929100000_marketing_workspaces_funnel.sql",
+      "sha256": "ae857c72bfb5507c1704935e1353b922951927535a372cd768162874c946beb2",
+      "passed": true
+    },
+    {
+      "file": "20260929110000_restore_account_security_mfa.sql",
+      "sha256": "e3e5d3faaf7dfd8a65d80f298507e87477ee3df8df4953f95b69d6f62e72085c",
+      "passed": true
+    },
+    {
+      "file": "20261008100000_provider_intervention_regions.sql",
+      "sha256": "116818eaf3458fd45323e50be4d6b2452f9d5824295cf4508b2a1d71d3316a65",
+      "passed": true
+    },
+    {
+      "file": "20261031100000_restore_financial_canonical_idempotency.sql",
+      "sha256": "94ed9399e18acf9701cd633772cadf06e0596d78ececffda864bd6408cae0475",
+      "passed": true
+    },
+    {
+      "file": "20261031210000_client_delivery_workflows.sql",
+      "sha256": "9da4e3d3703a8330e4182c734f720efda032657376f90aacf00bf93f65f0e267",
+      "passed": true
+    },
+    {
+      "file": "20261031211000_client_assistance_consent_withdrawal.sql",
+      "sha256": "5a2bfc753e9ffcfc2748bdaf9c4121ae02601ac0fa43cc46cab286a92cf32853",
+      "passed": true
+    },
+    {
+      "file": "20261031212000_client_history_search.sql",
+      "sha256": "64db3a796573ac8192e01fb68415e1885fb35719f22a9295ca019e0e5712926a",
+      "passed": true
+    },
+    {
+      "file": "20261031212100_client_request_intervention_mode.sql",
+      "sha256": "3310df3f61ba3569669f45eb61bf0f4977126932783de5d020cd09f6ea724268",
+      "passed": true
+    },
+    {
+      "file": "20261031213000_authenticated_legal_reacceptance.sql",
+      "sha256": "59fed7cdd5a2470e03ffb0fcbb3f288a9ea75339a5bf133b72013df5d30c2b61",
+      "passed": true
+    },
+    {
+      "file": "20261031213100_client_diagnostic_service_scope.sql",
+      "sha256": "57244ebf0ec9be7122b8bd3c6c46306b392c69ec4697511bfd18790827f4bcb8",
+      "passed": true
+    },
+    {
+      "file": "20261031214000_current_contract_amendment.sql",
+      "sha256": "ed69ccc24e349566936f0f923d7d4f342dde0c98e73b68a5855098a57dfe8ca9",
+      "passed": true
+    },
+    {
+      "file": "20261031220000_provider_payment_proof_status.sql",
+      "sha256": "95be820f29ac647029ee90ceeb90210d058005e630bc2d6dd52b22dcc5595fe4",
+      "passed": true
+    },
+    {
+      "file": "20261031221000_provider_billing_pdf_artifacts.sql",
+      "sha256": "5ec2452bcd0e22b8465d4ec7125592c45ffb11a144213a95907cc7ecf570836f",
+      "passed": true
+    },
+    {
+      "file": "20261031222000_provider_document_trusted_scans.sql",
+      "sha256": "00a5fe7b1ded9b0c3116edb7eccf72a55270684958f087e1e3d5abc572d4e576",
+      "passed": true
+    },
+    {
+      "file": "20261031223000_provider_quarantine_eligibility.sql",
+      "sha256": "f8f2c94c25a0175ab4ad3ab5e3d369f6f093811be1daf6b0c278c11ed13325ed",
+      "passed": true
+    },
+    {
+      "file": "20261031224000_provider_billing_pdf_notifications.sql",
+      "sha256": "113b429ef98b7a49261572b522b35c4ae4ae5ce984ee2d7fbce6d2cdc8873a15",
+      "passed": true
+    },
+    {
+      "file": "20261031225000_provider_scan_null_safe_fencing.sql",
+      "sha256": "0a9646bd357cbd06f21e302a21de5150af9f68a0baf49e215d1c769f71e39161",
+      "passed": true
+    },
+    {
+      "file": "20261031226000_provider_receipt_evidence.sql",
+      "sha256": "3be20af0984deb040fd6b8a7e82ffcee50196d59d8ac4b7d74fcb42e86b92b69",
+      "passed": true
+    },
+    {
+      "file": "20261031227000_provider_durable_billing_intents.sql",
+      "sha256": "e4fa2abf516656297acf143c4a1488205f621c9f963f1cc4a973ede41fde13ef",
+      "passed": true
+    },
+    {
+      "file": "20261031228000_provider_billing_emission_artifacts.sql",
+      "sha256": "188108bbffd3b91b368b7408a08d1debe1c811ad61c9f48402cba50d5aa4cc20",
+      "passed": true
+    },
+    {
+      "file": "20261031229000_provider_intervention_modes.sql",
+      "sha256": "02b94bd97de50abeecfdce99a2473430fc342ef31bc48df3b22cdd451a97d715",
+      "passed": true
+    },
+    {
+      "file": "20261031229100_provider_quote_revision_conflicts.sql",
+      "sha256": "e765913726b36d7067e821818e96b2d13f073b2981afb0a0d23d690d8d7eb70f",
+      "passed": true
+    },
+    {
+      "file": "20261031230000_franchise_exhaustive_balances.sql",
+      "sha256": "5914020135c186b774b2effda2fa59a886f4b9614bbe3feb6c1a2f47eb6a09a4",
+      "passed": true
+    },
+    {
+      "file": "20261031230100_franchise_questionnaire_composition.sql",
+      "sha256": "9f68ff8ac0b6f8cf7805214d5994a45b7c2665a6a7b7bf9de08f245868f90ad2",
+      "passed": true
+    },
+    {
+      "file": "20261031230200_franchise_scoped_messaging.sql",
+      "sha256": "25c530a9b465f9529f245f251d6e97849ac1037876c9c92a0320ac759d08762c",
+      "passed": true
+    },
+    {
+      "file": "20261031230300_franchise_provider_bridge.sql",
+      "sha256": "87c22c4524a29ebd3da91784b8ad3ea9f089c7554b6821c49c0bebfbfefcd870",
+      "passed": true
+    },
+    {
+      "file": "20261031230400_franchise_finance_rls_execute.sql",
+      "sha256": "d84f00964b25740fa6778c4f56c888edbf06adce256e702a0e1cb47e1c6f2db0",
+      "passed": true
+    },
+    {
+      "file": "20261031230500_franchise_private_document_exports.sql",
+      "sha256": "5a43e5dc99e8d9e9487414afaee179c4f6dc8bcaa7f20ced3e054e844782977c",
+      "passed": true
+    },
+    {
+      "file": "20261031230600_franchise_supervision_metrics.sql",
+      "sha256": "119a304b3689d7935214704e8c7ddfb2797a1016d0cb71468417b79f47f3264a",
+      "passed": true
+    },
+    {
+      "file": "20261031230710_franchise_catalog_server_pages.sql",
+      "sha256": "68314f37793bcf65e903f1e39e8387d93a950efad08997cffd1271b90ec994a9",
+      "passed": true
+    },
+    {
+      "file": "20261031230730_franchise_review_version_diff.sql",
+      "sha256": "57fe2c39589df9baea4607a852995f8d1c218f7f0b5bd2778ac6b53e478d4b1b",
+      "passed": true
+    },
+    {
+      "file": "20261031230740_internal_message_server_search.sql",
+      "sha256": "e028edfb8435e231cda7985ae5cb0ea4b8097445d1e6eda70d2b37764530b2eb",
+      "passed": true
+    },
+    {
+      "file": "20261031230760_franchise_service_revision_submission.sql",
+      "sha256": "34b2b1ad240e8766d7a81155bde0cf1cfcc330dc533571faf23bfc81abe266d7",
+      "passed": true
+    },
+    {
+      "file": "20261031240000_admin_delivery_execution.sql",
+      "sha256": "0d0bbb423e5a3dbd59992e34dc35c7a1ba00bb552934448c843caa68f4abf145",
+      "passed": true
+    },
+    {
+      "file": "20261031240100_admin_privacy_delivery.sql",
+      "sha256": "93fc4cd1db9a54a90fd41122cca188e4abf760ac8578d5c5949a1ee10d2a0366",
+      "passed": true
+    },
+    {
+      "file": "20261031240200_admin_support_capability.sql",
+      "sha256": "b4ca40561d471f706d19626b91b838dd7acd6f12d75bcb9378d389689d4894bf",
+      "passed": true
+    },
+    {
+      "file": "20261031240300_admin_deployment_environment_binding.sql",
+      "sha256": "0703327113872c2edf4fdff0fde1c011a0937f561d05f414722c2d88891c6af2",
+      "passed": true
+    },
+    {
+      "file": "20261031240400_admin_consultation_proposals.sql",
+      "sha256": "acd4015284cd7d23c83dad11151564389451b3093c9cac48b773c0c5038952e5",
+      "passed": true
+    },
+    {
+      "file": "20261031240500_admin_manual_review_queues.sql",
+      "sha256": "e67469ee8cc72499c4ba1635e7cb3eb2f527b9cd9589902fe5bca0371528c7c6",
+      "passed": true
+    },
+    {
+      "file": "20261031240600_admin_payload_capability_validation.sql",
+      "sha256": "a986000c89aadd6f058cc58b163202748895a38d02aa04128428dbab20555d51",
+      "passed": true
+    },
+    {
+      "file": "20261031240700_admin_bounded_retention_execution.sql",
+      "sha256": "00e107ec94ff3c94221176858c1d10ff49ec1347371ced5a260b759ac70fa20e",
+      "passed": true
+    },
+    {
+      "file": "20261031240750_admin_retention_immutable_message_capability.sql",
+      "sha256": "17da1a96ccb4f3da5abccb12d106cf7e94a947a893030008d6a56887b661f8f1",
+      "passed": true
+    },
+    {
+      "file": "20261031240800_admin_franchise_role_assignments.sql",
+      "sha256": "3a57509dca70dc14875717c7b96be90ca3ba590be3a5d29bb07464821ed7813f",
+      "passed": true
+    },
+    {
+      "file": "20261031240810_admin_scoped_franchise_invitations.sql",
+      "sha256": "8728921f2bd707ff8b75d1632f0169daf80b65c4a9311d0247b8e090e2f87923",
+      "passed": true
+    },
+    {
+      "file": "20261031240820_admin_organization_lifecycle_access.sql",
+      "sha256": "f45226c36a8475c892d98b47c8269cace08da18f34c829c536a1888fb65e3b5c",
+      "passed": true
+    },
+    {
+      "file": "20261031240830_admin_invitation_followup_execution.sql",
+      "sha256": "afbb2237d02ce66741ae57751fb29cda992aa6a4d868485a75c9bc28652732d8",
+      "passed": true
+    },
+    {
+      "file": "20261031240840_admin_retention_work_tracking_receipt.sql",
+      "sha256": "35861fa0c1fce973b2e9d866dd6e07b436e389eb722696698b8980ac23ea240e",
+      "passed": true
+    },
+    {
+      "file": "20261031240850_admin_template_review_tracking.sql",
+      "sha256": "bdd0fd4545e18880953cab0614a14a9fe8462637535326581dbebe04d5e64109",
+      "passed": true
+    },
+    {
+      "file": "20261031240860_admin_projection_and_message_paging.sql",
+      "sha256": "9045f9d43b48e28b1f75807e2404554dd9524677c632cfd00ffe971bd89219a6",
+      "passed": true
+    },
+    {
+      "file": "20261031240870_admin_approved_rfq_execution.sql",
+      "sha256": "0744297303c953a1c7a955ae46ae779f904dd3a2979eeec69f5b054ed84cde2d",
+      "passed": true
+    },
+    {
+      "file": "20261031240880_admin_tracked_requests_are_not_executed.sql",
+      "sha256": "057920a41a83d7a347ba926cb28369f8bac0efe426a1599bdfdae28be95e0c16",
+      "passed": true
+    },
+    {
+      "file": "20261031240890_admin_dsr_export_and_rectification.sql",
+      "sha256": "9a1567d2f9dec8b3cfd4513b8ced62d37f4f84f80d7e1392e248df1d3161bdf7",
+      "passed": true
+    },
+    {
+      "file": "20261031240900_franchise_role_assignment_consumers.sql",
+      "sha256": "f8590400e059cb2305151b16069d49deace08b73a131a6e64f4a5c6b6d5e1fea",
+      "passed": true
+    },
+    {
+      "file": "20261031240910_franchise_complete_role_consumers.sql",
+      "sha256": "7c5391e8aa88f3a619d04b139ac75e337202f065109ec2de65d21ad6cf560f42",
+      "passed": true
+    },
+    {
+      "file": "20261031240920_franchise_network_and_contract_calendar.sql",
+      "sha256": "bc490227869917548d3ed4a8523e8335116b4a232ddae4976c2ab161ea21aa5f",
+      "passed": true
+    },
+    {
+      "file": "20261031240930_franchise_question_editor.sql",
+      "sha256": "7e60df2585cd0aa7b50edc7843589fa0414fb37398efc410c51f0b7e1973d5f9",
+      "passed": true
+    },
+    {
+      "file": "20261031240950_franchise_catalog_count_performance.sql",
+      "sha256": "34373c760b23d77921e2942ec75fbb4caaab63a1f78597e97933662e25e66539",
+      "passed": true
+    },
+    {
+      "file": "20261031240960_franchise_questionnaire_review_bundle.sql",
+      "sha256": "8565093f2c419790d73217da182841b0fce32b95275f4337bd1b7dfa7d37d69b",
+      "passed": true
+    },
+    {
+      "file": "20261031240970_franchise_review_snapshot_differences.sql",
+      "sha256": "95d34a4cecbe5ce83ad00a184d7734a607416bb327eb446c9b8699ecd62db05c",
+      "passed": true
+    },
+    {
+      "file": "20261031240980_franchise_activation_evidence_modes.sql",
+      "sha256": "f3db43b878a17f3bed6598baa7341016ed4bf11707ebb5c513f56776b18288d1",
+      "passed": true
+    },
+    {
+      "file": "20261031240990_franchise_governance_snapshot.sql",
+      "sha256": "41296bed5e079d34d1987422961163a2186aa22cfd838d49015a55c2ec45d1f7",
+      "passed": true
+    },
+    {
+      "file": "20261031240995_catalog_editorial_review.sql",
+      "sha256": "93e686a09f306fa677c9ce4f57b45a4973542144c0793f6b41f6d7a7ad5e8f00",
+      "passed": true
+    },
+    {
+      "file": "20261031240996_internal_message_history_pages.sql",
+      "sha256": "aaf78f112df76c3ac27a632b19d7dd515641b9ff25fe373ac3fd369d5ac6d164",
+      "passed": true
+    },
+    {
+      "file": "20261031240997_catalog_legacy_source_four_eyes.sql",
+      "sha256": "16aa9c72c54a525eb027e3b6189022c65ebf379980827664741132e61b8c6b63",
+      "passed": true
+    },
+    {
+      "file": "20261031241000_admin_document_consent_completion.sql",
+      "sha256": "dc363a0f80fb640cb7d8d24eb227cd20d250611921826e797006b1cd54858d92",
+      "passed": true
+    },
+    {
+      "file": "20261031241100_platform_privacy_deployment_readiness.sql",
+      "sha256": "d8fd5f0659216e085bcb5765c9bb3918c169f77c48d6ebc1f322af855072d2aa",
+      "passed": true
+    },
+    {
+      "file": "20261031241200_admin_canonical_organization_identity.sql",
+      "sha256": "141bdf14582f08ddd93825f389f0a283f2315fa60e38a40cad4554c2750ca15c",
+      "passed": true
+    },
+    {
+      "file": "20261031241210_admin_provider_paged_projection_support.sql",
+      "sha256": "3fb8ec992f473e3fd06f25c6c90946dd160cd940b836547cca254f76951dcc0b",
+      "passed": true
+    },
+    {
+      "file": "20261031241220_admin_history_paging.sql",
+      "sha256": "6fcee5b64dffc182cfe9a0458643907c1c2087c4e83e8827f9d0d37a9b639237",
+      "passed": true
+    },
+    {
+      "file": "20261031241230_admin_identity_restrict_all_organizations.sql",
+      "sha256": "5d79a25fd0963953a92cc5e45a727a7c0532662f0cef3c89e7fde1af20f697fb",
+      "passed": true
+    },
+    {
+      "file": "20261031241240_admin_consistent_export_snapshots.sql",
+      "sha256": "fb867c48aa7de834db52c31bed1d5516928773b90518e727d3e1b94eb5bce70f",
+      "passed": true
+    },
+    {
+      "file": "20261031241250_admin_real_quote_and_milestone_facts.sql",
+      "sha256": "c22e8a37e56691542b29c117d43e576daf5fbc14c0cf58032167b937208a20d4",
+      "passed": true
+    },
+    {
+      "file": "20261031241260_admin_organization_compliance_projection.sql",
+      "sha256": "749698a5064fd8cc5b3c38db8b5af9adc1842e5205100657311aac66fc9ccbcc",
+      "passed": true
+    },
+    {
+      "file": "20261031241270_client_canonical_identifier_manual_review.sql",
+      "sha256": "16a12e8514ead5e38c64d65a12de18215e1fbc2ca4fc15867b1dd35b68162909",
+      "passed": true
+    },
+    {
+      "file": "20261031241275_client_identity_review_null_cas.sql",
+      "sha256": "acd435b270c80fb2571e5403f57a1b1a515ee125734ea735f166435b5757b58e",
+      "passed": true
+    },
+    {
+      "file": "20261031241290_admin_private_conversation_attachments.sql",
+      "sha256": "2021d327ed245b3154d07af1807573a7ca048df6d57b65f531d0cbf4f046ea65",
+      "passed": true
+    },
+    {
+      "file": "20261031241295_admin_identity_financial_lock_order.sql",
+      "sha256": "4a7dc2bedd9021031955e38e85b683c0193162b190d0f5e2ae06658995ed1a55",
+      "passed": true
+    },
+    {
+      "file": "20261031241300_franchise_demo_activation_access_guard.sql",
+      "sha256": "4427028e673f50f7b7d8c3bbb87e5337162f311b7a3886ca1173bd9671974e00",
+      "passed": true
+    },
+    {
+      "file": "20261031241310_dsr_partial_export_cannot_fulfil.sql",
+      "sha256": "1964f55ebdd807c5dd5b7f4b5f867c10a1f61639d5e2c6f981cf7b33a182ac5f",
+      "passed": true
+    },
+    {
+      "file": "20261031241320_dsr_scope_private_response_receipt.sql",
+      "sha256": "426a8a3110a513b16f16a3eeda37b06bc6f880eb82f7f389b2be980793489e55",
+      "passed": true
+    },
+    {
+      "file": "20261031241330_admin_client_compliance_pagination.sql",
+      "sha256": "6f97813775dde6c69717a9854b8dbab570522e2904c3512850189a9a47a4f866",
+      "passed": true
+    },
+    {
+      "file": "20261031241340_notification_template_pair_editor.sql",
+      "sha256": "3962354f327acefbb5f00a7775e98a7c05ee37fd533d8fdc03eb8ca1fa8b84d4",
+      "passed": true
+    },
+    {
+      "file": "20261031241345_notification_review_fulfilment.sql",
+      "sha256": "18f3602a80c716431ba62517db479d00aef3ce76ffed1a237789a8bab6567419",
+      "passed": true
+    },
+    {
+      "file": "20261031241350_admin_client_fiche_verified_projection.sql",
+      "sha256": "7901c61aaf4b9c6008e31f2bf0d2cdd307a35a11e66a4900a9ecbe36e631cead",
+      "passed": true
+    },
+    {
+      "file": "20261031241360_admin_complete_identity_revision.sql",
+      "sha256": "2ba9834aa615c31a5b9e17632b485dcc80918039ff77fec4e3004d80605a48a6",
+      "passed": true
+    },
+    {
+      "file": "20261031250000_payment_preparation_and_operational_health.sql",
+      "sha256": "eb2b7a3c73091607f30b6d81d611b086f0940b0c71021b834c36d709b8bdfc5f",
+      "passed": true
+    },
+    {
+      "file": "20261031250100_notification_receipts.sql",
+      "sha256": "f06db6465b76f27142ab1f62e9ddd8a2555e1c40c55bf029078262d36d13cc12",
+      "passed": true
+    },
+    {
+      "file": "20261031250200_subscription_refunds_and_adjustments.sql",
+      "sha256": "e93b18e351d9c00ceaf08c4b05efecb2e42fc200c87d33e8b3c441bc10f13053",
+      "passed": true
+    },
+    {
+      "file": "20261031250300_operational_metrics.sql",
+      "sha256": "26d1c06803c23013a95f81dce557030cc2f7a2dddc7d5ea39a649f20e429b491",
+      "passed": true
+    },
+    {
+      "file": "20261031250400_client_subscription_financial_holds.sql",
+      "sha256": "da41b2e914cb9db6aa678cab16e3f8ee37587d92a7f3250a4d0c4cf3be1aacec",
+      "passed": true
+    },
+    {
+      "file": "20261031250600_refund_native_reconciliation.sql",
+      "sha256": "7ae0262b695d24daac057da54ec14fb9299b0bfd1cff08b299e30c6923734c59",
+      "passed": true
+    },
+    {
+      "file": "20261031250700_social_native_verification.sql",
+      "sha256": "4d9f225b2b0f72a53f70a21ee44c5bb72d2076d4947fca80723a7c08589be5d5",
+      "passed": true
+    },
+    {
+      "file": "20261031250710_provider_credit_note_consumer_replay.sql",
+      "sha256": "b9fda1deaad60d7ea1e06dfd38a417cf845d84460d0b55566074b6a4db668858",
+      "passed": true
+    },
+    {
+      "file": "20261031250800_signature_trusted_deployment_guard.sql",
+      "sha256": "35feebfaa6badda439f16f2d75e8c8b8369dd72578b2d11f7c78519d65683b4e",
+      "passed": true
+    },
+    {
+      "file": "20261031250900_marketing_service_role_least_privilege.sql",
+      "sha256": "9c5b34d045429478923c20473f6839f8b0ad4c2ef5dc0d2b6055c674bf732e8e",
+      "passed": true
+    },
+    {
+      "file": "20261031251000_client_commercial_documents.sql",
+      "sha256": "b4394a1b8b8a8f5f0c5e63f6824ce304b61304113dcaf204b2638c37e1aaeb44",
+      "passed": true
+    },
+    {
+      "file": "20261031251010_client_billing_sources.sql",
+      "sha256": "1b44bf542622c2809f75d0b68bf07c33d6f67f59050e653f484a6d5ebb269668",
+      "passed": true
+    },
+    {
+      "file": "20261031251100_client_identity_operation_guards.sql",
+      "sha256": "67867cee067bbb3497c66d4ed87b4d008be5151a05de71d0d821cec61eea354b",
+      "passed": true
+    },
+    {
+      "file": "20261031251200_meta_media_durable_execution.sql",
+      "sha256": "7b2d941aa2b99fec8e6210f3155a19e83797d4daca8d93cbfc4d4dbc5a9fdb93",
+      "passed": true
+    },
+    {
+      "file": "20261031251210_meta_media_safe_metrics.sql",
+      "sha256": "21475083d2cc8e85405180a0ce9feeb8ecf1228a84f1a698d22a4158d58b7576",
+      "passed": true
+    },
+    {
+      "file": "20261031252000_provider_governed_billing_issuance.sql",
+      "sha256": "af5189a8868e23758e26efea5823b57a7fe59fd271beaaf5df90d8aeefdae506",
+      "passed": true
+    },
+    {
+      "file": "20261031253000_provider_current_identity_verification.sql",
+      "sha256": "b2c5505033d0b893cea9062c685cc6dc8b4563eee1a01d5819dae5aab4406ebf",
+      "passed": true
+    },
+    {
+      "file": "20261031253010_provider_admin_identity_revision_freshness.sql",
+      "sha256": "123d633c77457d68027e219348a1379973ba4afe8f837a0916db3f1c531d42ed",
+      "passed": true
+    },
+    {
+      "file": "20261031253011_provider_identity_current_document_binding.sql",
+      "sha256": "05789a02c33b771de9fb625ec0cc09407d1b8cde144adda1192b1c51dcfd6970",
+      "passed": true
+    },
+    {
+      "file": "20261031254000_provider_credit_note_pdf_issuance.sql",
+      "sha256": "7377bd107fecfa2a6a9e9716940ddd3f3eafb7831f502201d59f8052ced25b2a",
+      "passed": true
+    },
+    {
+      "file": "20261031255000_provider_windowed_planning.sql",
+      "sha256": "5c76c87a01f144982bd97ae0abdf117470b6b984d71cabe50b8c5c667412a16f",
+      "passed": true
+    },
+    {
+      "file": "20261031256000_provider_contractual_billing_recipients.sql",
+      "sha256": "448d8ff3e4b9fba44ec8c30d8f566f8c742e6f1e082ed38a11d1502ae27368be",
+      "passed": true
+    },
+    {
+      "file": "20261031257000_provider_quote_identity_anchors.sql",
+      "sha256": "af45c366f962b4b82b45922afb6fd3f6d76c0db6abd9c58f359db622dddba10d",
+      "passed": true
+    },
+    {
+      "file": "20261031258000_canonical_selected_quote_contracts.sql",
+      "sha256": "328c95a4aa85d7fb7534413a2dfa48ccd0162a4251b31c7e19e808798b02455b",
+      "passed": true
+    },
+    {
+      "file": "20261031258010_contract_policy_console.sql",
+      "sha256": "09690e355a26fa24d4dc195fe3dfaf2c4883ce0593850b64362930840a58ed48",
+      "passed": true
+    },
+    {
+      "file": "20261031258020_contract_amendment_core_bounds.sql",
+      "sha256": "fd12f4bc91b76bcd1a6a84f1825d1eace6e860af15b1e86849595b97b41325cc",
+      "passed": true
+    },
+    {
+      "file": "20261031258030_selected_quote_identity_refresh_model.sql",
+      "sha256": "191362ba478b052a241a88e2af09a2dc2d29a0432b1ee48beb61cb0def8ef0f3",
+      "passed": true
+    },
+    {
+      "file": "20261031258040_selected_quote_identity_reconfirmation.sql",
+      "sha256": "d651aebc92248bec8ae600d3586ecbb8c8e39a78f4da4c00274167a35d1acfeb",
+      "passed": true
+    },
+    {
+      "file": "20261031258050_contract_document_source_hash.sql",
+      "sha256": "21b1d320a04face97346161498252077ce233130e2311628c375b4933ac288c6",
+      "passed": true
+    },
+    {
+      "file": "20261031258100_contract_signature_evidence_bridge.sql",
+      "sha256": "021b1d8cf6d073fa98077e3d9ca84471fbb78103d35a3db464166514b7b591d9",
+      "passed": true
+    },
+    {
+      "file": "20261031258110_franchise_mandate_signature_source_binding.sql",
+      "sha256": "8995a42b82026433cd4ea209d76af118ef8885a3e4bb32f6ec9a1b63e4548b47",
+      "passed": true
+    },
+    {
+      "file": "20261031258120_contract_signature_effectivity.sql",
+      "sha256": "2d7153e8dbd50be93e063f671499bbb0c93a718d47797632e0ba365398426cad",
+      "passed": true
+    },
+    {
+      "file": "20261031258200_authoritative_client_request_progression.sql",
+      "sha256": "63763269783dd0532b629f40657f9b1a9ff542bbf70043c0b7790f39b4c27a62",
+      "passed": true
+    },
+    {
+      "file": "20261031258210_canonical_mission_milestone_links.sql",
+      "sha256": "68beba042a0306ff70c84c274ff968155dcd8abc47da3f4efc6562fc2d1d845a",
+      "passed": true
+    },
+    {
+      "file": "20261031259000_payment_trusted_deployment_binding.sql",
+      "sha256": "66d8b05d8b69b9923979393c9b18dbcfe32888b25b19a68bc558a2e6302cc7ce",
+      "passed": true
+    },
+    {
+      "file": "20261031259010_signature_mock_projection.sql",
+      "sha256": "b13bf11d7058a5332b17da68a8d2970e03e7276965638bb096e51f8198a08496",
+      "passed": true
+    },
+    {
+      "file": "20261031259020_notification_billing_concordance_gate.sql",
+      "sha256": "385735d85426765d344fd98b581925c0c3948f675b220cbd30a5b63c2f17199b",
+      "passed": true
+    },
+    {
+      "file": "20261031259100_signature_policy_governance.sql",
+      "sha256": "1d411595b98d6eabe843e12f1ffb6835ac0d18996d22e7389ddceadb6143ce08",
+      "passed": true
+    },
+    {
+      "file": "20261031259110_signature_completed_dispatch_replay.sql",
+      "sha256": "94c859966bc39f5d99e1350bd9efb484dedf193762ed6d397159bb4d94a66dcc",
+      "passed": true
+    },
+    {
+      "file": "20261031259200_marketing_verified_business_funnel.sql",
+      "sha256": "75932e8a8ba341bf0df3e242c7fb78c4dc41521d808ef0b74709cbddf4cc89b5",
+      "passed": true
+    },
+    {
+      "file": "20261031259300_trusted_scan_environment.sql",
+      "sha256": "9177c105fd6ac64da230f03ed0baf61572e44e5c2f144004c1402d0531881bcb",
+      "passed": true
+    },
+    {
+      "file": "20261031259400_signature_current_parties_before_send.sql",
+      "sha256": "d0e5a5a8ddfad556ded9b9fe733efd80fd79a39d1c62235b3c0c16256ca0090f",
+      "passed": true
+    },
+    {
+      "file": "20261031259401_signature_lock_order.sql",
+      "sha256": "2007b25da018d04c4488de7ab5443f1836238de283f45e22e047e4d4aa15d95e",
+      "passed": true
+    },
+    {
+      "file": "20261031259410_signature_local_cancellation.sql",
+      "sha256": "f8e7ca2781711d78b538d04cbf1b76c0969bbc7ecc2b49a252306ef48db59a19",
+      "passed": true
+    },
+    {
+      "file": "20261031259500_signature_canonical_document_archives.sql",
+      "sha256": "2cf86b12cdc7c4df4f745e35bd8c6059878bf8454bc33e136e25522e8047b24c",
+      "passed": true
+    },
+    {
+      "file": "20261031260000_provider_grouped_contractual_statements.sql",
+      "sha256": "915f7096c25cd71fabed873e8edc44e8e8cf3ce322c59b1c0cda86729dd09681",
+      "passed": true
+    },
+    {
+      "file": "20261031261000_dsr_subject_financial_records.sql",
+      "sha256": "8074ccadbf47efc3fbd316303a6f228be1476b5f12be3c355770ecdf573b7a2d",
+      "passed": true
+    },
+    {
+      "file": "20261031262000_internal_message_attachment_pipeline.sql",
+      "sha256": "22da857a112a5e78aa781f4baa4e8c23a30293a2b3525e56c5bb148992f9e213",
+      "passed": true
+    },
+    {
+      "file": "20261031262010_attachment_operational_visibility.sql",
+      "sha256": "76f36cd1ce218ba76f879e2d57367097af57c5743c85c9475e558e75a2e14c25",
+      "passed": true
+    },
+    {
+      "file": "20261031263000_organization_join_requests.sql",
+      "sha256": "a902d7b68acd8d1cd133a4c66df3294f0845b8232f743eb891dfc978d49cd8fd",
+      "passed": true
+    },
+    {
+      "file": "20261031263010_unused_organization_merge.sql",
+      "sha256": "9061e8801902f18298d8f5e089d0185e366aa8e29696ff17bb889139734d1ecd",
+      "passed": true
+    },
+    {
+      "file": "20261031263020_join_single_company_passport.sql",
+      "sha256": "cda046b97ebb661556b6155f20d66735355b682dd702709cbcc74d2259d706cd",
+      "passed": true
+    },
+    {
+      "file": "20261031264000_admin_accounts_without_membership.sql",
+      "sha256": "260a6e84f18eed98832bc18ca911bc19100dbe3ccefc7bfdd528935ce9e4c50e",
+      "passed": true
+    },
+    {
+      "file": "20261031264010_platform_account_access_decisions.sql",
+      "sha256": "7b936a8ca065e9709bc9d0087c1f4ab90f4cf45debe39288b84dfec7d419d570",
+      "passed": true
+    },
+    {
+      "file": "20261031264020_live_session_authorization.sql",
+      "sha256": "8b802bff826e193f06556e48d36ef63d0a34f180553379c7ef2ab92b14666e96",
+      "passed": true
+    },
+    {
+      "file": "20261031264021_delivery_proof_storage_binding.sql",
+      "sha256": "25984a7d248bb94ab549769055b56d13a385f53812f1606822d0330a90921f3b",
+      "passed": true
+    },
+    {
+      "file": "20261031264022_catalog_decision_authority_before_lookup.sql",
+      "sha256": "e9b03b1cbdb222f5028c1cb70b042601852a8c121e7fcfa467bc6f8a1ee8407c",
+      "passed": true
+    },
+    {
+      "file": "20261031265000_provider_canonical_quote_address.sql",
+      "sha256": "e88a84bc7e0e591285f431e6f99b8c7cb70e4e9ab46ba6ec9330407e09891bf6",
+      "passed": true
+    },
+    {
+      "file": "20261031266000_governed_service_tax_categories.sql",
+      "sha256": "87a7c801ef29282b453c428daf438872a295fc12cd0cd4fee8527e6734b9aec3",
+      "passed": true
+    },
+    {
+      "file": "20261031266010_quote_service_tax_policy_snapshots.sql",
+      "sha256": "12847ac476015afd24c0f56fb0d2478f809222d204299d748fe6352e9beb2d21",
+      "passed": true
+    },
+    {
+      "file": "20261031266020_central_fiscal_command_context.sql",
+      "sha256": "1b66d5c61db2cec61871278ac857b734f5e27a2dcfc56d0452d45916de3cb9f3",
+      "passed": true
+    },
+    {
+      "file": "20261031266100_client_request_tax_origins.sql",
+      "sha256": "23db9eb6bd9e809dedf01b9080967a141655e8ea6f29680f3f5012d10418ba3c",
+      "passed": true
+    },
+    {
+      "file": "20261031266110_client_request_catalog_authority.sql",
+      "sha256": "88fb51ef0c30cf990a687e3292a59c2944a41b2e8ec100630cf714fd9962ab60",
+      "passed": true
+    },
+    {
+      "file": "20261031266120_client_rfq_commitment_serialization.sql",
+      "sha256": "4602b82e90e6b85aaec22a8efbc9c117c8d3ad7c2347e167b864b93a23c7d847",
+      "passed": true
+    },
+    {
+      "file": "20261031267000_dsr_all_inventory_and_disclosure.sql",
+      "sha256": "16fe1fe02ed7df44c0f22a2ad9e4b9f2aeb5379e72fab3bd9a7f22af140deca0",
+      "passed": true
+    },
+    {
+      "file": "20261031267010_dsr_all_capture_and_delivery.sql",
+      "sha256": "7085b93220b73fa7dab9e57ebf0eca7e31611dd9c4d1259a75daf35f0bfe283b",
+      "passed": true
+    },
+    {
+      "file": "20261031267020_dsr_all_review_projections.sql",
+      "sha256": "97e5e3984606786e2d9fc7c6caa88b17734dce9035309be6a5b33c87086ee5e9",
+      "passed": true
+    },
+    {
+      "file": "20261031267025_dsr_verified_nonmember_account_scope.sql",
+      "sha256": "241995ab5da3105596ba0ad2a29b14d964ac46c82ba879b2edd9c9fb5e4faeae",
+      "passed": true
+    },
+    {
+      "file": "20261031267030_dsr_effective_processing_restriction.sql",
+      "sha256": "24847ceaccdcb2f8160b965663698e228cd8361185d3ae9cd6af5200df810c9e",
+      "passed": true
+    },
+    {
+      "file": "20261031267040_dsr_marketing_consumer_guards.sql",
+      "sha256": "7ec559943344d19fa0924811786e3e6a134ba0f5111e2caf1dd521ca5d4b5c00",
+      "passed": true
+    },
+    {
+      "file": "20261031267050_dsr_unexecuted_rights_cannot_fulfil.sql",
+      "sha256": "6cbc6c23503b03308b15ffa85cd0cbd710a1de019bc9478519fe0b1231c97ddb",
+      "passed": true
+    },
+    {
+      "file": "20261031267060_dsr_financial_rowset_and_bounded_cursor.sql",
+      "sha256": "041980eaf4cdae268d728625da808c71706e01fbe563a78314dcdaaa2423cfe2",
+      "passed": true
+    },
+    {
+      "file": "20261031267061_dsr_financial_preflight_payload_bounds.sql",
+      "sha256": "2e3e8b0d66e9825c0af0137132188cad02f2ce6649cc9c9b3ff655c041945dec",
+      "passed": true
+    },
+    {
+      "file": "20261031267070_governed_erasure_dispositions.sql",
+      "sha256": "c9b4d484891614de688f0906a95a2e021fe450dbb37953233245ebc2e2e9b97d",
+      "passed": true
+    },
+    {
+      "file": "20261031267071_erasure_current_authority_after_locks.sql",
+      "sha256": "59c9c7b607f951fe2a0e56a430cfbcd881d846c9f3d4e5424460ae18c2ad53cd",
+      "passed": true
+    },
+    {
+      "file": "20261031267100_dsr_reviewed_private_file_delivery.sql",
+      "sha256": "c54cfef3b5129047e5a3d534a6aa7dae2753f9bc3e1e1480f3305851c7da86b6",
+      "passed": true
+    },
+    {
+      "file": "20261031267110_privacy_file_operational_visibility.sql",
+      "sha256": "0e710517b107ff4be737f7117cb250dae7d1487190ec38f042201e1c8461a5bc",
+      "passed": true
+    },
+    {
+      "file": "20261031268000_subscription_funding_admission.sql",
+      "sha256": "bc8e1a1b310c460e90c95078de9cdd37a51085f925c3ef9d5baa843b58477938",
+      "passed": true
+    },
+    {
+      "file": "20261031268001_subscription_checkout_coordination.sql",
+      "sha256": "05f67a589dcbf1097adf8eb81469592457f8bfe31047583601e39b5d52e12bc6",
+      "passed": true
+    },
+    {
+      "file": "20261031268002_verified_payment_dispatch_inbox.sql",
+      "sha256": "2640ab5c3a160aee4bfab94ae757eb8107623815f41780c997768e5265efa60e",
+      "passed": true
+    },
+    {
+      "file": "20261031268003_checkout_creation_authority_anchor.sql",
+      "sha256": "06a8fe6eee43f1cf1a24af23c0520af2e1090d018ce2f8285143dbb480a9d174",
+      "passed": true
+    },
+    {
+      "file": "20261031268010_credit_lot_canonical_payment_funding.sql",
+      "sha256": "f3904ba1952f3304213b7fb5c26179c6d952477aaf35d7298ae714d155c8c09f",
+      "passed": true
+    },
+    {
+      "file": "20261031268011_subscription_credit_pending_adverse_facts.sql",
+      "sha256": "265a6d29b3568d37db21d059846f4da2877c8afcdca2fc6a27f297a11d33c653",
+      "passed": true
+    },
+    {
+      "file": "20261031268020_credit_revenue_economic_allocation.sql",
+      "sha256": "fb921168a12a42944c723e4367fadf98d576ce79b4c41d6f2958ab8ac4562ddb",
+      "passed": true
+    },
+    {
+      "file": "20261031268021_credit_revenue_fiscal_classification.sql",
+      "sha256": "cf447427a17a180d4651b3f3e4c4b969dda311aa824518029448529632a5c8aa",
+      "passed": true
+    },
+    {
+      "file": "20261031268022_credit_pack_capture_attempts_and_adjustments.sql",
+      "sha256": "a6070152b8279f3bf8994de1ce072330e3783786e99ad909fd53afd4a5c3ff75",
+      "passed": true
+    },
+    {
+      "file": "20261031268023_subscription_refund_frozen_posting_accounts.sql",
+      "sha256": "36cfa5753d7a5c26128b04c21ed53f027f1a9bcdd5be2970a7650545cd56d25b",
+      "passed": true
+    },
+    {
+      "file": "20261031268030_benefit_fulfillment_and_client_receipt.sql",
+      "sha256": "18600e989d91eac03ad7345895fb2bd168d710e7eacd4543c51f2d41fdf14145",
+      "passed": true
+    },
+    {
+      "file": "20261031268031_credit_consumption_library_allocation.sql",
+      "sha256": "3dd9dee0f815335d0268a48d8a5d3e771e29f40d9f06f93b7a62a5c657e612d8",
+      "passed": true
+    },
+    {
+      "file": "20261031268033_credit_economic_profit_close_readiness_guard.sql",
+      "sha256": "db66c954e74570544a1ea50bc9c1c46b42ce259029f2225973bf236844b7758e",
+      "passed": true
+    },
+    {
+      "file": "20261031268040_mission_frozen_catalog_service_source.sql",
+      "sha256": "33b0c6cdb19cc148af9b56b39646c5c762aa776115949d127e71bc6afc0c6d17",
+      "passed": true
+    },
+    {
+      "file": "20261031268041_mission_historical_published_service_execution.sql",
+      "sha256": "b4491cde5c7c6cfef8bedcfc6c37127769f2f8c8aa514b0c725ec00b62467888",
+      "passed": true
+    },
+    {
+      "file": "20261031268050_governed_manual_credit_grants.sql",
+      "sha256": "dd0de47bd33b3fd930db031ff32251890582527240589aa342e6aabec6878234",
+      "passed": true
+    },
+    {
+      "file": "20261031268060_benefit_admission_policies.sql",
+      "sha256": "12c75880896bb7c741278409fa73cc7f3539e3763e77ba16169542243ef32f2c",
+      "passed": true
+    },
+    {
+      "file": "20261031268061_benefit_execution_requires_admitted_evidence.sql",
+      "sha256": "c0b36d02a5a36567f290f5d4121cbbd4a3ffe09fe2224356a61defabcdccbe29",
+      "passed": true
+    },
+    {
+      "file": "20261031268062_benefit_reserve_final_allocation_guard.sql",
+      "sha256": "23cc99adb7269aafc8aa3258e1a71dd56b427c94d8e9922d6d42ec457ceb8bb5",
+      "passed": true
+    },
+    {
+      "file": "20261031268063_benefit_decision_fact_correlation.sql",
+      "sha256": "eb3b39482457b70f6b03fb5a68462a82c36c8f4980824c0332790ad2241b20c5",
+      "passed": true
+    },
+    {
+      "file": "20261031268070_client_credit_catalog_confidentiality.sql",
+      "sha256": "ea101da9d9a599300d1bc005bfc3ea6f702eb70b89247434c51803d54ec1d08b",
+      "passed": true
+    },
+    {
+      "file": "20261031268080_funded_customer_box_configuration.sql",
+      "sha256": "d0f346e2d028721523022e24c6272ff7b9c743547cf54a34202b0370ed009dd1",
+      "passed": true
+    },
+    {
+      "file": "20261031268081_subscription_credit_worker.sql",
+      "sha256": "7ed100a8c12daa026ebaed9853c2bc1165b3f2068a3bb6ccac54b1155dcc8548",
+      "passed": true
+    },
+    {
+      "file": "20261031268084_benefit_requires_governed_box_binding.sql",
+      "sha256": "fd34e124d40d6b38eb8fa64c6919d3035d66386791d2684c52d47740f53dd802",
+      "passed": true
+    },
+    {
+      "file": "20261031268085_subscription_box_terms_before_checkout.sql",
+      "sha256": "93fe68a1961186b46f4202725bbec3891917c28a2e1cf0935be3ed5a568d219a",
+      "passed": true
+    },
+    {
+      "file": "20261031268087_checkout_requires_active_box_rule.sql",
+      "sha256": "96d5e5ecb92e35e945c0815882f0a97e497bae03e9a58de41cd23f357d7f267d",
+      "passed": true
+    },
+    {
+      "file": "20261102010000_client_allocation_invoice_targets.sql",
+      "sha256": "9c9a0d12ceb5a841826aa0d5ac483c771c43eee49ee08f2a012891875fab94dc",
+      "passed": true
+    },
+    {
+      "file": "20261102021000_client_questionnaire_presentation.sql",
+      "sha256": "27f475ef5686dbeb2c24fa6ac406499e9dba85249f0bfaf365275180008c9af2",
+      "passed": true
+    },
+    {
+      "file": "20261102022000_client_mission_contract_preparation.sql",
+      "sha256": "e0b5d8a3593c8366454b969b87a22a74960b6445bab6b2b7f77d8a32bdbf06b5",
+      "passed": true
+    },
+    {
+      "file": "20261102022010_client_dispute_contract_context.sql",
+      "sha256": "840e99d1c8e5201f43e7edd15607efc1a042bee66a62985eabe31e19bafb43f1",
+      "passed": true
+    },
+    {
+      "file": "20261102022020_quote_commercial_terms_contract.sql",
+      "sha256": "df6d593d42a98fbead26fdf3f4fdad96a855411f62c47f0fbd79c75e87759d95",
+      "passed": true
+    },
+    {
+      "file": "20261102023000_client_credit_pack_catalogue.sql",
+      "sha256": "39355ea505df0704e2178816d6afdcf579012d7b68c1231a7a59a7c3ce0d2d30",
+      "passed": true
+    },
+    {
+      "file": "20261102023010_client_subscription_quotas.sql",
+      "sha256": "e02015d662e9c815a0e1898ee8189a7da23dd1a693af7cba78b4621ae5c2a1e2",
+      "passed": true
+    },
+    {
+      "file": "20261102023020_client_subscription_renewal.sql",
+      "sha256": "b1d12d9043c845c9e58382ed08f0cb806de7f015b87a8dfb23ce04670f53dca8",
+      "passed": true
+    },
+    {
+      "file": "20261102024000_customer_box_envelopes_and_frozen_policies.sql",
+      "sha256": "d1d118b03b7a7c08844ba29bfbe508be9eb2cdf5764376c57330dd77cb9888b0",
+      "passed": true
+    },
+    {
+      "file": "20261102024010_acquired_box_policy_and_recommendations.sql",
+      "sha256": "f7c53e972c9faac4b8bf8c748d80b0bd23df1a91ad5dcc66247518da7a1cbfb5",
+      "passed": true
+    },
+    {
+      "file": "20261102024020_benefit_waitlist_and_expiry.sql",
+      "sha256": "43ff56c0006a865d37c21dedc51f1aff88c0754832191f92736a20b71d270792",
+      "passed": true
+    },
+    {
+      "file": "20261102024030_native_benefit_execution.sql",
+      "sha256": "5c56e80c06fefb994f539ae0a99b9a9b1c0ec5b736854b6a4f20fe5fc3e96b80",
+      "passed": true
+    },
+    {
+      "file": "20261102025000_client_complete_financial_projections.sql",
+      "sha256": "77cd61a46ee7d7a5179b43cde88368f47a38a65f520122fdd2682cbd8e15c057",
+      "passed": true
+    },
+    {
+      "file": "20261102025010_client_project_editor.sql",
+      "sha256": "ad7fc89ebae9ed19a73836fd7fcdaf525d147fc11316fa25f3fc7c1d2548da6c",
+      "passed": true
+    },
+    {
+      "file": "20261102025020_client_allocation_target_search.sql",
+      "sha256": "7aaf20d4a49099135b956b25893dafcc6191a06234af105ba513d335e1e4316d",
+      "passed": true
+    },
+    {
+      "file": "20261102025030_client_measurement_evidence.sql",
+      "sha256": "ad720cdcc34bf67205574295434141ad8c400f0ad422b5e8b37b878b4aec0608",
+      "passed": true
+    },
+    {
+      "file": "20261102025040_client_referral_execution.sql",
+      "sha256": "a45de02084b04dc8a369d89c7c4c90033b83f99b1cfbe767a8b5d0ea2b0adb03",
+      "passed": true
+    },
+    {
+      "file": "20261102026000_client_notifications_history_reminders.sql",
+      "sha256": "865e73fbf085d1436235047df72d75e31b1a2b24c494dce5d04eec395e76e7b3",
+      "passed": true
+    },
+    {
+      "file": "20261102027000_client_commitment_approvals.sql",
+      "sha256": "78d873eb8c8222bb91a3cd529863e73729ef52771d831db33be5324b3257d1f3",
+      "passed": true
+    },
+    {
+      "file": "20261102027010_client_approval_subjects.sql",
+      "sha256": "a684cfad2b128a5d495f6b7f18738555fff00e98c973c9689245b2c7a5d5c5e6",
+      "passed": true
+    },
+    {
+      "file": "20261102028000_client_subscription_cycle_history.sql",
+      "sha256": "8646c01514cbe84616d9f57472de622cbdcb4fb65355c9664dde8af56c917572",
+      "passed": true
+    },
+    {
+      "file": "20261102029000_client_measurement_review_access.sql",
+      "sha256": "9b557de1301122c0c7b30d7add5918ba1a158693c3adc9c347754f9b651ffd10",
+      "passed": true
+    },
+    {
+      "file": "20261102030000_scoped_member_box_commands.sql",
+      "sha256": "50cc304e1a79878a4bc701b0cbc9d695af4c8c84a3bc5d4d0f297dffebdd5e13",
+      "passed": true
+    },
+    {
+      "file": "20261102030010_native_benefit_acquired_execution.sql",
+      "sha256": "ff0f9fb3ea8cc94ce0db73abf2ad1de5f3baa0e2a9b46db367c694776fb494c6",
+      "passed": true
+    },
+    {
+      "file": "20261102030020_governed_benefit_refunds.sql",
+      "sha256": "7441877784ce40925ad85b9134405afac9e3803c4241d66959322e33f4ce995d",
+      "passed": true
+    },
+    {
+      "file": "20261102030030_client_benefit_lifecycle_workspace.sql",
+      "sha256": "00bfd7e373efde8bb22a2e4aed975ad01661accf6375f94add40c87274a49428",
+      "passed": true
+    },
+    {
+      "file": "20261102030040_native_benefit_independent_receipt_projection.sql",
+      "sha256": "538ad61ffaddd1f4cd411152fc1027a6e017e4622f400223cd39e18409b74bba",
+      "passed": true
+    },
+    {
+      "file": "20261102030050_exact_acquired_box_reservation_context.sql",
+      "sha256": "780c577ed4149ccbdd8507877cec2fa06456db208f533ae36071a8477b2f0178",
+      "passed": true
+    },
+    {
+      "file": "20261102030060_match_native_execution_role_projection.sql",
+      "sha256": "6b5e214a7b0e1d27fe369b5ddd8b1d0c218851281739defab26b7d92e230f53e",
+      "passed": true
+    },
+    {
+      "file": "20261102030070_refund_consumption_exact_library_slices.sql",
+      "sha256": "1c42a8ba33f6fdbee997f85ca604e7946211ec2397f8d1b9196fe18d144b56f1",
+      "passed": true
+    },
+    {
+      "file": "20261102031000_governed_immediate_subscription_upgrade.sql",
+      "sha256": "b549124955532322dd6d15f9376ae3f6c54da4e7ab0611e500794f99276a2d65",
+      "passed": true
+    },
+    {
+      "file": "20261102031100_remaining_period_subscription_upgrade.sql",
+      "sha256": "c914a7a210c1556adfb88296cd794944e9fe2d6d8399c0b4aba6e7f3cf15714e",
+      "passed": true
+    },
+    {
+      "file": "20261102031110_preserve_acquired_box_upgrade_lineage.sql",
+      "sha256": "efbb6de62abd1ab95697d2be3fcb6958959540327177bbcee40a2e945f33406d",
+      "passed": true
+    },
+    {
+      "file": "20261102031120_subscription_upgrade_outbox_and_payable_options.sql",
+      "sha256": "2a1b2087d0f2e5d2a4253764dffc09bcc25a89d4ba0b04ba4fe2b2eda0d8dfd8",
+      "passed": true
+    },
+    {
+      "file": "20261102032000_client_referral_reward_execution_queue.sql",
+      "sha256": "99a04c6a801b0bdf5887ba8889776193a63a50353d9738acc1fe39d929381a89",
+      "passed": true
+    },
+    {
+      "file": "20261102033000_client_approved_command_resume.sql",
+      "sha256": "c98f2aa3a26837328c435046f3ab50ebc262e4ed45e90e624aa1650aa34a2c75",
+      "passed": true
+    },
+    {
+      "file": "20261102033100_client_approval_resume_availability.sql",
+      "sha256": "7b29bfe2f1b4f1fbdf2873fb27ad5604719e8f253c41b655f7cc5185c3053104",
+      "passed": true
+    },
+    {
+      "file": "20261102034000_quota_audit_lock_and_chain_order.sql",
+      "sha256": "c1e9c489730bcd405f030fced0c4acaffdc7d0dc255d11058e883a28b2b57428",
+      "passed": true
+    },
+    {
+      "file": "20261102035000_client_quote_comparison_exact_transport.sql",
+      "sha256": "514cb509bedafcc8ad6c72cf5b992b5a0a05a152154fa1bfef3e96b2962127f2",
+      "passed": true
+    }
+  ],
+  "sql": [
+    {
+      "file": "0008_p03_audit_outbox.test.sql",
+      "sha256": "b07cb53468c3f412d618f0a3da6d72c8d17f5b66a90960e201bed1760f629eb2",
+      "assertions": 17,
+      "passed": true
+    },
+    {
+      "file": "0070_client_portfolio_integrity_hardening.test.sql",
+      "sha256": "494a2e35fbda51c4684cfe2af1286e801e6d9ff3abb4cc36d27bee661d231c55",
+      "assertions": 25,
+      "passed": true
+    },
+    {
+      "file": "0248_benefit_fulfillment_receipts.test.sql",
+      "sha256": "c7edecf1a8552cf9af43c40b3c00d5f5a097dcc69fa5dc451874856286fec87c",
+      "assertions": 37,
+      "passed": true
+    },
+    {
+      "file": "0249_subscription_checkout_coordination.test.sql",
+      "sha256": "476d0b72655ca4da964f10b0cb42c882c3043fb541d132b03dea7175dba6b79b",
+      "assertions": 61,
+      "passed": true
+    },
+    {
+      "file": "0256_funded_customer_box_configuration.test.sql",
+      "sha256": "5dcecbff47f0add0a414c89ece5c7a49588309943eee6d8fedc3daea52a35559",
+      "assertions": 38,
+      "passed": true
+    },
+    {
+      "file": "0300_client_allocation_invoice_targets.test.sql",
+      "sha256": "e2f557375731e52504faa91635a2e4c600f70a1966ccae2d74bbb4a5cb4af21c",
+      "assertions": 23,
+      "passed": true
+    },
+    {
+      "file": "0301_client_questionnaire_presentation.test.sql",
+      "sha256": "6b5933b50847729206dc2b865e527426cec25d907f221ba542385b4b368ff69e",
+      "assertions": 13,
+      "passed": true
+    },
+    {
+      "file": "0316_client_notification_history_reminders.test.sql",
+      "sha256": "28fd06af00a235ff29cc8fb0c8dbce0674f88585d7df32773bde5de3a182913e",
+      "assertions": 22,
+      "passed": true
+    },
+    {
+      "file": "0327_client_commitment_approvals.test.sql",
+      "sha256": "b343643ac505487e65602fd2552a12e8065966a38e79c114c2445cc3af03dd2d",
+      "assertions": 17,
+      "passed": true
+    },
+    {
+      "file": "0329_client_measurement_review_access.test.sql",
+      "sha256": "e35450ad3d2439659dd543cc5a38adc4d8a01085c1d5ebcbfe6da0ea31d0e38c",
+      "assertions": 16,
+      "passed": true
+    },
+    {
+      "file": "0330_scoped_member_box_workflow.test.sql",
+      "sha256": "c475ae1b60a11f16f567fcdf833a9eb05ed19bbcbd1e4d61fc5522f91b0309dc",
+      "assertions": 24,
+      "passed": true
+    },
+    {
+      "file": "0331_acquired_native_benefit_execution.test.sql",
+      "sha256": "9d3f6b2d50520cd0901a08c780d1632e10a47a42dc91d62dc102f296160c9be1",
+      "assertions": 16,
+      "passed": true
+    },
+    {
+      "file": "0331_governed_immediate_subscription_upgrade.test.sql",
+      "sha256": "f4342a9f8a9cc66899c5e011235f26598aa969307f80c489c63d3f4d75ee2043",
+      "assertions": 29,
+      "passed": true
+    },
+    {
+      "file": "0332_governed_benefit_refunds.test.sql",
+      "sha256": "450d7aa52d7909c8b5c6ff03a1ba4459a497cd51d9a70288933a030a0512f604",
+      "assertions": 106,
+      "passed": true
+    },
+    {
+      "file": "0332_remaining_period_subscription_upgrade.test.sql",
+      "sha256": "1e5136176d431fffb3e0798c1446615adfe5afbd087052a6a49f1265a19c9f5c",
+      "assertions": 29,
+      "passed": true
+    },
+    {
+      "file": "0333_client_approved_command_resume.test.sql",
+      "sha256": "3c7633dc1bb0f50d92df8b8568718a36e8b8c4045a3e9a4e96ae43b88dabcc05",
+      "assertions": 39,
+      "passed": true
+    },
+    {
+      "file": "0333_client_benefit_lifecycle.test.sql",
+      "sha256": "63e706a8f0d5ace86e716e2dbc01a716abbdd81c2f1c32d30733fe8c1e4fa376",
+      "assertions": 28,
+      "passed": true
+    },
+    {
+      "file": "0334_acquired_benefit_native_rfq.test.sql",
+      "sha256": "ef9f71bb1070487c44acc3ed15e5e6867d5ca5c60427bf11a2ed3c5f9c2ae7a3",
+      "assertions": 18,
+      "passed": true
+    },
+    {
+      "file": "0334_annual_remaining_period_subscription_upgrade.test.sql",
+      "sha256": "0a103c7655df327bce09e1c94a1c080169b13efb1ef294cf1f1961c4afc1a236",
+      "assertions": 27,
+      "passed": true
+    },
+    {
+      "file": "0334_client_referral_reward_execution_queue.test.sql",
+      "sha256": "d8335e0ad13d382ab50d1d3311dce25ce72a91bc844b8f147c759bbfae201748",
+      "assertions": 32,
+      "passed": true
+    },
+    {
+      "file": "0335_native_activation_independent_receipt.test.sql",
+      "sha256": "be76e16400866400e6533a653241b7cfcb75ea6eb9c8e8b04089526b6c146680",
+      "assertions": 27,
+      "passed": true
+    },
+    {
+      "file": "0335_subscription_upgrade_nonpayable_option.test.sql",
+      "sha256": "548442f91acc06534a41145604cad43f398205646721c1e33927817b7b6652a0",
+      "assertions": 6,
+      "passed": true
+    },
+    {
+      "file": "0336_acquired_box_prorata_upgrade_lineage.test.sql",
+      "sha256": "004d9a96a4aab503930349fca6132cae82e3c42a5e47446b3e53cb497baec8bd",
+      "assertions": 16,
+      "passed": true
+    },
+    {
+      "file": "0337_unconfigured_box_before_psp.test.sql",
+      "sha256": "19580896977d0e70f8115bc501c296c0db62e82c5da1679795820e028c380e79",
+      "assertions": 3,
+      "passed": true
+    },
+    {
+      "file": "0338_client_native_mission_dispute_acceptance.test.sql",
+      "sha256": "25534f159c449c7cd576f8cb5e2426be789b85384c277b60050ded5da190b3a8",
+      "assertions": 34,
+      "passed": true
+    },
+    {
+      "file": "0338_overlapping_paid_box_exact_context.test.sql",
+      "sha256": "f16957aba752b7e44350963016f03964eeb3aa6dae3075df65b18d1b5d938d51",
+      "assertions": 18,
+      "passed": true
+    },
+    {
+      "file": "0339_accounting_native_role_projection.test.sql",
+      "sha256": "571f26b42cb2b373c001e6392f5d466e333b01b71ef8a4811479d27ec8074a9f",
+      "assertions": 8,
+      "passed": true
+    },
+    {
+      "file": "0339_client_native_quote_comparison_acceptance.test.sql",
+      "sha256": "e64a384908e98ba363fe852e8b0c6a1d33f8618f493fc0a623369ec518f117f7",
+      "assertions": 18,
+      "passed": true
+    },
+    {
+      "file": "0340_refund_pending_library_exact_slices.test.sql",
+      "sha256": "f247b59425cdaa5bf69bd21b33a5a26b416243571a719f954b1e92663df8b907",
+      "assertions": 24,
+      "passed": true
+    },
+    {
+      "file": "0341_quota_audit_lock_and_chain_order.test.sql",
+      "sha256": "0b276a14e109f1fb247edfb1fbd00896b611b7664ab7ff64d51f6fe9c903261a",
+      "assertions": 14,
+      "passed": true
+    },
+    {
+      "file": "0342_client_quote_exact_transport_acceptance.test.sql",
+      "sha256": "611db481590d6f40e960ffb9c4adbbb4a38677d7760e13b8257b546f48848d77",
+      "assertions": 30,
+      "passed": true
+    }
+  ],
+  "concurrencyIncluded": false,
+  "stagingCertification": false,
+  "cleanup": "passed",
+  "runtimeSecurity": {
+    "publicTables": 623,
+    "tablesWithoutRls": 0,
+    "pgtapApiExecutable": false
+  },
+  "finishedAt": "2026-11-02T18:20:04.041Z"
+}

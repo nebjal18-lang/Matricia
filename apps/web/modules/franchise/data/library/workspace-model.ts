@@ -91,6 +91,7 @@ export type FranchiseLibraryWorkspace = {
     operatorOrganizationId?: string;
   };
   serverPage?:CatalogServerPage;
+  availableMandates?:Array<{id:string;organizationId:string;libraryId:string;label:string}>;
   mandates?:Array<{id:string;organizationId:string;operatorCode:string}>;
   counts: { drafts: number; inReview: number; published: number; returns: number };
   categories: FranchiseCategoryNode[];
@@ -108,7 +109,7 @@ export type FranchiseLibraryWorkspace = {
 
 export type FranchiseLibraryLoadResult =
   | { status: "success"; workspace: FranchiseLibraryWorkspace }
-  | { status: "error"; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "NO_MANDATE" | "ORGANIZATION_REQUIRED" | "QUERY_FAILED" | "INVALID_RESPONSE" };
+  | { status: "error"; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "NO_MANDATE" | "MANDATE_REQUIRED" | "ORGANIZATION_REQUIRED" | "QUERY_FAILED" | "INVALID_RESPONSE"; availableMandates?: Array<{id:string;organizationId:string;libraryId:string;label:string}> };
 
 export const reviewStatuses = new Set(["IN_REVIEW", "FRANCHISE_REVIEW", "CENTRAL_REVIEW", "LOCAL_TEST"]);
 export const draftStatuses = new Set(["DRAFT"]);
@@ -153,4 +154,9 @@ export function catalogStatusTone(status: string): "violet" | "sky" | "mint" | "
   if (reviewStatuses.has(status)) return "sky";
   if (publishedStatuses.has(status)) return "mint";
   return "violet";
+}
+
+/** Archiving an identity never rewrites its historical published/draft version. */
+export function catalogEffectiveStatus(identityStatus: string, versionStatus?: string | null): string {
+  return ["ARCHIVED", "RETIRED"].includes(identityStatus) ? identityStatus : versionStatus ?? identityStatus;
 }

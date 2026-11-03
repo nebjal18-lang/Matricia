@@ -1,0 +1,9 @@
+{
+  "scope": "HISTORICAL_SQL_TEST_RELEASE_MEMBERSHIP_PRECONDITION",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "sqlSha256": "246d398234e74ca8e221e3a6fb2a30c224a105dc52754026d6d983757beb2f0a",
+  "nativeOwnerRlsVisibleServices": 2,
+  "governedCataloguePublicationCertified": false,
+  "rlsAltered": false
+}

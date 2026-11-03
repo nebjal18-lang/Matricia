@@ -8,7 +8,7 @@ import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 export type ApprovalActionState =
   | { status: "idle" }
   | { status: "success" }
-  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "FAILED" };
+  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "MFA_REQUIRED" | "FORBIDDEN" | "CONFLICT" | "FAILED" };
 
 const input = z.object({
   approvalRequestId: z.string().uuid(),
@@ -31,6 +31,9 @@ export async function decideClientApproval(_previous: ApprovalActionState, form:
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
+  const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.error) return { status: "error", reason: "FAILED" };
+  if (assurance.data.currentLevel !== "aal2") return { status: "error", reason: "MFA_REQUIRED" };
   const result = await client.rpc("decide_business_approval", {
     p_approval_request_id: parsed.data.approvalRequestId,
     p_expected_row_version: parsed.data.rowVersion,
@@ -43,6 +46,12 @@ export async function decideClientApproval(_previous: ApprovalActionState, form:
     if (result.error.code === "40001") return { status: "error", reason: "CONFLICT" };
     return { status: "error", reason: "FAILED" };
   }
+  const completed = z.object({
+    outcome: z.enum(["BUSINESS_APPROVAL_APPROVED", "BUSINESS_APPROVAL_REJECTED", "BUSINESS_APPROVAL_PARTIALLY_APPROVED"]),
+    approval_request_id: z.literal(parsed.data.approvalRequestId),
+    row_version: z.number().int().positive(),
+  }).safeParse(result.data);
+  if (!completed.success) return { status: "error", reason: "FAILED" };
   revalidatePath(`/${String(form.get("locale"))}/client/actions`);
   return { status: "success" };
 }

@@ -1,0 +1,72 @@
+{
+  "scope": "NATIVE_PROVIDER_UI_MIXED_ONE_TIME_RECURRING_OPTIONS_ATTACHMENTS_AND_VERSIONED_PUBLICATION",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "PASSED",
+  "steps": [
+    {
+      "step": "actual_owner_reference_upload_and_native_known_file_scan",
+      "passed": true
+    },
+    {
+      "step": "native_touch_invitation_acceptance_persists",
+      "passed": true
+    },
+    {
+      "step": "private_local_draft_offline_save_reload_preserves_original_free_text",
+      "passed": true
+    },
+    {
+      "step": "keyboard_native_version_exact_MAD_money_recurrence_option_outside_base_and_file_hash",
+      "passed": true
+    },
+    {
+      "step": "owner_real_draft_pdf_and_client_unpublished_version_and_attachment_denied",
+      "passed": true
+    },
+    {
+      "step": "confirmed_identity_native_publication_client_exact_bytes_and_foreign_denial",
+      "passed": true
+    },
+    {
+      "step": "arabic_published_quote_preserves_original_free_text",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "historicalUpstreamClientCertified": false,
+  "physicalAntivirusCertified": false,
+  "legalSignatureCertified": false,
+  "referenceDocument": {
+    "id": "51c40b8f-2232-4967-9f91-2857b9c395f2",
+    "sha256": "26bf54856de243a9150e802d8c08563f1341a86ffbabe387ed75cb9235f076d5",
+    "sizeBytes": 751
+  },
+  "referenceScan": {
+    "scope": "KNOWN_SYNTHETIC_PDF_SCANNER_TEST_PORT",
+    "physicalAntivirusCertified": false,
+    "observed": [
+      {
+        "documentId": "51c40b8f-2232-4967-9f91-2857b9c395f2",
+        "jobId": "13f17d26-fcca-47b3-9aa8-e41dcc28aba3",
+        "result": "CLEAN",
+        "source": "NATIVE_CLAIM_AND_COMPLETE",
+        "sha256": "26bf54856de243a9150e802d8c08563f1341a86ffbabe387ed75cb9235f076d5"
+      }
+    ]
+  },
+  "quoteId": "357d43c8-4db4-423c-854c-130c70a3850b",
+  "versionOneId": "2e5dc1e2-38a2-4f99-8faf-a52fda875b1c",
+  "money": {
+    "subtotalMinor": "175050",
+    "taxMinor": "35010",
+    "totalMinor": "210060",
+    "recurringSubtotalMinor": "50000",
+    "optionExcludedMinor": "10000"
+  },
+  "attachmentOneId": "62a84848-71e6-4ec4-a75b-00bdb5b7f672",
+  "draftPdf": {
+    "sha256": "f3727df83f5b099741c39392ea528b554bfca3c4e90df6d0a65e4650fb0d5a36",
+    "sizeBytes": 13644
+  }
+}

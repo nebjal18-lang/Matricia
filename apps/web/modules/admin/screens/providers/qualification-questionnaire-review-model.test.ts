@@ -1,0 +1,10 @@
+import {describe,expect,it}from"vitest";
+import{qualificationDecisionStates,qualificationScorePercent,reviewAnswerText,type QualificationReviewQuestion}from"./qualification-questionnaire-review-model";
+const question:QualificationReviewQuestion={id:"11111111-1111-4111-8111-111111111111",labelFr:"Question",labelAr:"سؤال",answerType:"TEXT",options:[],required:true,applicable:true,answered:true,value:"Texte libre français العربية <script>",answeredAt:null};
+describe("Qualification review data",()=>{
+ it("keeps free answers intact in FR and AR",()=>{expect(reviewAnswerText(question,"fr")).toBe(question.value);expect(reviewAnswerText(question,"ar")).toBe(question.value)});
+ it("localizes genuine boolean values and retains structured answers",()=>{expect(reviewAnswerText({...question,answerType:"BOOLEAN",value:true},"ar")).toBe("نعم");expect(reviewAnswerText({...question,value:{libelle:"Texte libre"}},"ar")).toContain("Texte libre")});
+ it("uses approved bilingual labels for multi-select arrays and preserves unmatched or free values",()=>{const q={...question,answerType:"MULTI_SELECT",value:["BTP","unknown"],options:[{value:"BTP",label_fr:"Bâtiment",label_ar:"البناء"}]};expect(reviewAnswerText(q,"fr")).toBe("Bâtiment, unknown");expect(reviewAnswerText(q,"ar")).toBe("البناء، unknown");expect(reviewAnswerText({...q,answerType:"TEXT"},"ar")).toContain('"BTP"')});
+ it("formats the actual engine score without replacing zero or rounding",()=>{expect(qualificationScorePercent(0)).toBe("0");expect(qualificationScorePercent(8081)).toBe("80.81");expect(qualificationScorePercent(10000)).toBe("100");expect(()=>qualificationScorePercent(10001)).toThrow()});
+ it("retains the native review transition after information required or suspension",()=>{expect(qualificationDecisionStates("INFORMATION_REQUIRED")).toEqual(["PENDING"]);expect(qualificationDecisionStates("SUSPENDED")).toEqual(["PENDING"]);expect(qualificationDecisionStates("APPROVED")).toEqual(["PENDING","SUSPENDED","EXPIRED"])});
+});

@@ -14,7 +14,7 @@ declare
   prior_sub text := current_setting('request.jwt.claim.sub', true);
   prior_claims text := current_setting('request.jwt.claims', true);
   plan public.subscription_plan_versions%rowtype;
-  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb;
+  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb; admission_context jsonb; admission jsonb;
   fixture_key text := 'checkout-fixture-' || p_plan_version_id::text;
 begin
   select * into strict plan from public.subscription_plan_versions where id = p_plan_version_id;
@@ -29,6 +29,20 @@ begin
     'Avantage synthétique de recette','ميزة اختبار اصطناعية','Prérequis de recette uniquement','شرط للاختبار فقط',
     1,0,0,plan.currency,null,null,null,'{}','{}','TEST_ONLY_CHECKOUT',clock_timestamp()-interval '1 minute',fixture_key||'-benefit');
   perform public.activate_benefit_version(p_organization_id,(benefit->>'benefit_version_id')::uuid,fixture_key||'-benefit-active');
+  -- Freeze a genuinely approved human-execution/independent-receipt policy in
+  -- the offered Box source before its independent review and before any PSP.
+  admission_context:=public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+  admission:=public.propose_benefit_admission_policy_v1((benefit->>'benefit_version_id')::uuid,
+    admission_context->>'source_hash',(admission_context->>'head_id')::uuid,
+    'NONE',null,null,'{}','{}',clock_timestamp()-interval'1 minute',null,
+    'TEST ONLY explicit human execution and independent Client receipt for checkout coordination',
+    'TEST-0249-CHECKOUT-ADMISSION','HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
+  perform set_config('request.jwt.claim.sub',reviewer_id::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',reviewer_id,'role','authenticated','aal','aal2')::text,true);
+  perform public.decide_benefit_admission_policy_v1((admission->>'policy_id')::uuid,admission->>'content_hash',true,
+    'TEST-0249-INDEPENDENT-REVIEW','TEST ONLY independent approval of the exact offered execution policy');
+  perform set_config('request.jwt.claim.sub',author_id::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',author_id,'role','authenticated','aal','aal2')::text,true);
   box := public.create_box_version(p_organization_id,'CHECKOUT_FIXTURE_BOX','FIXED','Box synthétique de recette','صندوق اختبار اصطناعي',
     plan.monthly_credit_grant,p_rollover_months,'{}',0,0,0,plan.currency,clock_timestamp()-interval '1 minute',
     jsonb_build_array(jsonb_build_object('slot_code','CORE','slot_kind','MANDATORY','minimum_selections',1,'maximum_selections',1,
@@ -87,6 +101,8 @@ select throws_ok($$select public.prepare_subscription_payment_intent_v2('b249000
 select set_config('request.jwt.claims','{"sub":"a2490000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p249 values('prep',public.prepare_subscription_payment_intent_v2('b2490000-0000-4000-8000-000000000001','d2490000-0000-4000-8000-000000000002','MONTHLY','PAYPAL','SANDBOX','funding249-first-order'));
 select is((select v->>'create_authorized'from p249 where k='prep'),'true','only first reservation authorizes creating the external order');
+select ok((select source_snapshot#>>'{options,0,source_snapshot,slots,0,benefits,0,admission_policy,policy_id}'is not null from private.subscription_prepared_box_terms_v1 where preparation_id=(select(v->>'preparation_id')::uuid from p249 where k='prep')),'the first PSP authority includes a frozen approved execution policy');
+select ok(exists(select 1 from public.benefit_admission_policy_versions_v1 policy join public.benefit_admission_policy_decisions_v1 decision on decision.policy_id=policy.id and decision.decision='APPROVE'and decision.content_hash=policy.content_hash and decision.decided_by<>policy.created_by where policy.id=(select(source_snapshot#>>'{options,0,source_snapshot,slots,0,benefits,0,admission_policy,policy_id}')::uuid from private.subscription_prepared_box_terms_v1 where preparation_id=(select(v->>'preparation_id')::uuid from p249 where k='prep'))),'the frozen offered policy was independently approved through native governance');
 select ok((select provider_create_authorized_at is not null from private.subscription_checkout_attempts_v1 where preparation_id=(select(v->>'preparation_id')::uuid from p249 where k='prep')),'commercial anchoring has an explicit pre-PSP authority marker, not a timestamp inference');
 select is(public.prepare_subscription_payment_intent_v2('b2490000-0000-4000-8000-000000000001','d2490000-0000-4000-8000-000000000002','MONTHLY','PAYPAL','SANDBOX','funding249-first-order')->>'create_authorized','false','same-key uncertainty cannot authorize a second PSP POST');
 select throws_ok($$select public.prepare_subscription_payment_intent_v2('b2490000-0000-4000-8000-000000000001','d2490000-0000-4000-8000-000000000002','MONTHLY','PAYPAL','SANDBOX','funding249-second-order')$$,'55000','SUBSCRIPTION_CHECKOUT_ALREADY_PENDING','different key cannot open another payable subscription attempt');
@@ -96,7 +112,8 @@ select set_config('request.jwt.claim.sub','',true);select set_config('request.jw
 insert into p249 values('intent',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p249 where k='prep'),'SANDBOX','SYNTHETIC-FIRST-ORDER-249',12345,'EUR'));
 select set_config('request.jwt.claim.sub','a2490000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2490000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 select set_config('request.jwt.claims','{"sub":"a2490000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
-select throws_ok($$select public.prepare_subscription_payment_capture_v2((select(v->>'payment_intent_id')::uuid from p249 where k='intent'),'SANDBOX')$$,'42501','PAYMENT_CUSTOMER_MFA_REQUIRED','direct AAL1 capture cannot bypass the financial layout');
+select throws_ok($$select public.prepare_subscription_payment_capture_v2((select(v->>'payment_intent_id')::uuid from p249 where k='intent'),'SANDBOX')$$,'42501','PAYMENT_CAPTURE_DENIED','direct AAL1 capture cannot bypass the financial layout');
+select ok((select state='REGISTERED'from private.subscription_checkout_attempts_v1 where preparation_id=(select(v->>'preparation_id')::uuid from p249 where k='prep'))and not exists(select 1 from private.subscription_capture_receipts_v1 where payment_intent_id=(select(v->>'payment_intent_id')::uuid from p249 where k='intent'))and not exists(select 1 from public.financial_journals where organization_id='b2490000-0000-4000-8000-000000000001'and journal_type='SUBSCRIPTION_PAYMENT'),'AAL1 refusal authorizes no capture call and records no receipt or monetary effect');
 select set_config('request.jwt.claims','{"sub":"a2490000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p249 values('capture-prep',public.prepare_subscription_payment_capture_v2((select(v->>'payment_intent_id')::uuid from p249 where k='intent'),'SANDBOX'));
 select is((select v->>'capture_authorized'from p249 where k='capture-prep'),'true','first capture transition alone authorizes the PSP call');

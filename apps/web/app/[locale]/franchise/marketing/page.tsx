@@ -16,16 +16,16 @@ import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 export default async function FranchiseMarketingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result: library } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
+  const { space, result: library } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/marketing`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const m = getMarketingMessages(locale);
   const c = franchiseCopy(locale);
   const result = space.errorReason ? { status: "error" as const, reason: space.errorReason } : await loadWorkspaceMarketingDashboard(space.selectedOrganizationId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/franchise/marketing` }));
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: space.currentPath }));
   const mandateName = franchiseMandateName(library);
   const brandDefaults = result.status === "success" && space.selectedOrganizationId ? await loadMarketingBrandDefaults(space.selectedOrganizationId, locale, mandateName ? [mandateName] : []) : null;
   const dimensionLabels = result.status === "success" ? await loadMarketingDimensionLabels(result.dashboard, locale) : {};
   return (
-    <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="marketing" title={m.workspaceTitle} lead={m.workspaceLead} kicker={c.kicker} mandateName={mandateName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="marketing" title={m.workspaceTitle} lead={m.workspaceLead} kicker={c.kicker} mandateName={mandateName}>
       <FranchiseOrganizationSelector locale={locale} organizations={space.organizations} selectedOrganizationId={space.selectedOrganizationId} returnPath={`/${locale}/franchise/marketing`} />
       {result.status === "error" ? (
         result.reason === "NO_ORGANIZATION"

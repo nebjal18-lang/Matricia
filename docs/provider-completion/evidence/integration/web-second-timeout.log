@@ -1,0 +1,30 @@
+
+ RUN  v5.0.3 /workspace/provider-completion/apps/web
+
+ ❯ modules/client/screens/boxes/member/actions.test.ts (5 tests | 1 failed) 15893ms
+   ❯ member Box actions (5)
+     × requires a real second factor before issuing any scoped command 14351ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  modules/client/screens/boxes/member/actions.test.ts > member Box actions > requires a real second factor before issuing any scoped command
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ modules/client/screens/boxes/member/actions.test.ts:11:2
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 523 passed | 1 skipped (525)
+      Tests  1 failed | 2921 passed | 1 skipped (2923)
+   Start at  22:44:26
+   Duration  342.22s (import 48%, transform 25%, tests 22%, worker 6%)
+
+     Import  1346 modules were evaluated 2330 times · 195.24s total, 48% of tracked time
+             ~28.15s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+
+undefined
+/workspace/provider-completion/apps/web:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run --maxWorkers=2 --exclude **/*pdf.test.* --exclude **/draft-pdf.test.*

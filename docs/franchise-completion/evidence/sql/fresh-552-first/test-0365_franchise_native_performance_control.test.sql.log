@@ -1,0 +1,49 @@
+ok 1 - absence of observations is not a zero score
+ok 2 - an observed zero numerator retains a true zero
+ok 3 - native ratio uses exact arithmetic
+ok 4 - a valid positive ratio is bounded
+ok 5 - members cannot run the scheduler
+ok 6 - service cannot invoke an unbounded private projection
+ok 7 - members cannot forge automatic reports
+{"sub":"a3650000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+ok 8 - AAL1 cannot change the model
+{"sub":"a3650000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 9 - model proposal replays exactly
+ok 10 - same command key cannot propose different settings
+ok 11 - model author cannot approve their own rule
+{"sub":"a3650000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+{"role":"service_role"}
+ok 12 - all native report collections succeed
+ok 13 - both real TEST mandates are independently measured
+ok 14 - daily monthly and quarterly reports are automatic for each mandate
+ok 15 - same-day replay creates no duplicate report
+ok 16 - unobserved axes cannot certify a global score
+ok 17 - an empty catalogue is unmeasured rather than zero
+ok 18 - an actually incomplete draft inventory retains an observed zero
+ok 19 - an open thirty-day proposal covers the same objectives without duplicate daily monthly quarterly plans
+ok 20 - TEST demo mandate cannot stand in for contractual compliance
+ok 21 - automatic source projection ignores administrator measurements
+ok 22 - small cohorts reveal no comparison identifiers
+ok 23 - independently approved model is frozen into every report
+ok 24 - generated report cannot be rewritten
+{"sub":"a3650000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+ok 25 - a member reads native reports for their exact mandate
+ok 26 - progress retries preserve the same append-only event
+ok 27 - free text remains unchanged
+ok 28 - manager cannot activate their own corrective plan
+ok 29 - plan history is bounded to fifty genuine events
+ok 30 - the complete history count is retained without silent truncation
+ok 31 - continuation reaches the remaining events without replaying the first page
+ok 32 - another mandate is denied at the bounded read API
+ok 33 - underlying RLS hides the other mandate reports
+ok 34 - automatic reports emit one event each and replay emits none
+ok 35 - each immutable report has an audit trail
+ok 36 - control engine never sanctions or terminates a franchise automatically
+{"sub":"a3650000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 37 - the composite operator is not offered independent approval controls
+ok 38 - composite Admin and franchise member cannot approve the operator plan
+{"sub":"a3650000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 39 - an actual native acquisition invitation is queued without delivery
+ok 40 - unsent invitation with null delivery mode remains a real pending count
+ok 41 - queued invitation is never counted as external delivery
+1..41

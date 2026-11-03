@@ -11,7 +11,8 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 export type SubscriptionCreditsView = {
   balance: string;
   unitCode: string;
-  memberCount: number;
+  memberCount: number | null;
+  available?: boolean;
   boxes: Array<{ id: string; name: string; budget: string; href: string }>;
   operations: Array<{ id: string; title: string; quantity: string; href: string }>;
 };
@@ -33,6 +34,7 @@ export function SubscriptionBoard({
   const subscription = dashboard.subscription;
   const plan = subscription?.currentPlan;
   const cycles = subscription?.cycles ?? [];
+  const unavailable = locale === "ar" ? "غير متاح" : "Non disponible";
   return (
     <main className="client-page">
       <nav className="client-tabs" aria-label={c.subPageTitle}>
@@ -54,10 +56,10 @@ export function SubscriptionBoard({
         <article className="client-card">
           <header><h2>{c.inBrief}</h2></header>
           <ul className="client-brief-kpis">
-            <li className="client-kpi-card"><span className="client-feed-icon" data-tone="violet"><Users className="size-4" aria-hidden /></span><strong dir="ltr">{credits.memberCount}</strong><small>{c.usersActive}</small></li>
+            <li className="client-kpi-card"><span className="client-feed-icon" data-tone="violet"><Users className="size-4" aria-hidden /></span><strong dir="auto">{credits.memberCount ?? unavailable}</strong><small>{c.usersActive}</small></li>
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="sky"><FileText className="size-4" aria-hidden /></span><strong dir="ltr">{cycles.length}</strong><small>{locale==="fr"?"Cycles comptabilisés":"الدورات المسجلة"}</small></li>
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="mint"><CreditCard className="size-4" aria-hidden /></span><strong dir="ltr">{credits.balance}</strong><small>{c.creditsAvailable} · {credits.unitCode}</small></li>
-            <li className="client-kpi-card"><span className="client-feed-icon" data-tone="peach"><Boxes className="size-4" aria-hidden /></span><strong dir="ltr">{credits.boxes.length}</strong><small>{c.boxesAvailable}</small></li>
+            <li className="client-kpi-card"><span className="client-feed-icon" data-tone="peach"><Boxes className="size-4" aria-hidden /></span><strong dir="auto">{credits.available === false ? unavailable : credits.boxes.length}</strong><small>{c.boxesAvailable}</small></li>
           </ul>
         </article>
       </section>
@@ -108,7 +110,7 @@ export function SubscriptionBoard({
             <h2>{c.myBoxes}</h2>
             <Link href={`/${locale}/client/credits${query}`} className="client-text-link">{c.seeAllBoxes}</Link>
           </header>
-          {credits.boxes.length === 0 ? <p>{locale === "ar" ? "لا صندوق ظاهر لهذه المؤسسة." : "Aucune Box visible pour cette organisation."}</p> : (
+          {credits.available === false ? <p role="alert">{locale === "ar" ? "تعذر تحميل الصناديق والأرصدة في نطاق صلاحياتكم. أعيدوا المحاولة عبر صفحة الأرصدة." : "Les Box et crédits ne peuvent pas être chargés dans votre périmètre d’accès. Réessayez depuis la page des crédits."}</p> : credits.boxes.length === 0 ? <p>{locale === "ar" ? "لا صندوق ظاهر لهذه المؤسسة." : "Aucune Box visible pour cette organisation."}</p> : (
             <ul className="client-feed">
               {credits.boxes.map((box) => (
                 <li key={box.id}><Link href={box.href}><Boxes className="size-4" aria-hidden /><span>{box.name}</span><em dir="ltr">{box.budget}</em></Link></li>

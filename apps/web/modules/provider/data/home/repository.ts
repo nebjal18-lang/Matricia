@@ -20,14 +20,14 @@ import {
 export type ProviderHomeSnapshot =
   | {
       status: "success";
-      stage: ProviderHomeStage;
+      stage: ProviderHomeStage | null;
       counts: ProviderHomeCounts;
       blockers: ProviderBlocker[];
       organizationName: string | null;
       organizationId: string | null;
       consultations: Array<{ id: string; title: string; status: string; href: string; tone: "sky" | "peach" | "mint" | "violet" }>;
       capacity: { status: string; domains: string; zones: string; modalities?:string };
-      reputation: { published: number; latest: string | null };
+      reputation: { published: number | null; latest: string | null };
     }
   | { status: "error"; reason: "UNAUTHENTICATED" | "UNAVAILABLE" | "NO_PROVIDER_ORGANIZATION"; counts: ProviderHomeCounts; blockers: ProviderBlocker[] };
 
@@ -90,13 +90,18 @@ export async function loadProviderHomeSnapshot(input: {
       snapshotUnavailable: !quotesOk && !missionsOk,
     });
 
+    const quoteAggregates = quotesOk ? (quotes.dashboard as typeof quotes.dashboard & {counts?:{consultationsDue:number;quotesInProgress:number};pagination?:unknown}) : null;
+    const missionAggregates = missionsOk ? (missions.dashboard as typeof missions.dashboard & {counts?:{activeMissions:number|null;deliverablesDue:number|null};countsReadState?:"SUCCESS"|"UNAVAILABLE"}) : null;
+    const billingAggregates = billingOk ? (billing.dashboard as typeof billing.dashboard & {counts?:{invoicesOutstanding:number|null}}) : null;
+    // An aggregate is authoritative for a paged result; one transport page is
+    // never a denominator for the whole company.
     // If a slice failed, null those counters rather than inventing zeros from empty arrays
     const safeCounts: ProviderHomeCounts = {
-      consultationsDue: quotesOk ? counts.consultationsDue : null,
-      quotesInProgress: quotesOk ? counts.quotesInProgress : null,
-      activeMissions: missionsOk ? counts.activeMissions : null,
-      deliverablesDue: missionsOk ? counts.deliverablesDue : null,
-      invoicesOutstanding: billingOk ? counts.invoicesOutstanding : null,
+      consultationsDue: quoteAggregates?.counts?.consultationsDue ?? (quoteAggregates && !quoteAggregates.pagination ? counts.consultationsDue : null),
+      quotesInProgress: quoteAggregates?.counts?.quotesInProgress ?? (quoteAggregates && !quoteAggregates.pagination ? counts.quotesInProgress : null),
+      activeMissions: missionAggregates?.counts ? missionAggregates.counts.activeMissions : missionAggregates?.countsReadState ? null : missionsOk ? counts.activeMissions : null,
+      deliverablesDue: missionAggregates?.counts ? missionAggregates.counts.deliverablesDue : missionAggregates?.countsReadState ? null : missionsOk ? counts.deliverablesDue : null,
+      invoicesOutstanding: billingAggregates?.counts ? billingAggregates.counts.invoicesOutstanding : billingAggregates?.listPage !== undefined ? null : billingOk ? counts.invoicesOutstanding : null,
     };
 
     const services = qualOk
@@ -108,12 +113,12 @@ export async function loadProviderHomeSnapshot(input: {
         }))
       : [];
 
-    const stage = resolveProviderHomeStage({
+    const stage = qualOk ? resolveProviderHomeStage({
       profileOverallStatus: qualOk ? qualification.dashboard.profile?.overallStatus ?? null : null,
       hasServices: services.length > 0,
       blockedServices: services.filter((service) => !service.eligible).length,
       qualifiedServices: services.filter((service) => service.eligible).length,
-    });
+    }) : null;
 
     const blockers = buildProviderBlockers({
       profileOverallStatus: qualOk ? qualification.dashboard.profile?.overallStatus ?? null : null,
@@ -132,7 +137,7 @@ export async function loadProviderHomeSnapshot(input: {
       : [];
     const capacityServices = qualOk ? qualification.dashboard.services : [];
     const capacity = {
-      status: capacitySummaryStatus(capacityServices),
+      status: qualOk ? capacitySummaryStatus(capacityServices) : "UNAVAILABLE",
       modalities:qualOk?qualification.dashboard.interventionModes?.map(mode=>interventionModeLabel(mode,input.locale)).join(" · ")||"—":"—",
       domains: [...new Set(capacityServices.map((service) => input.locale === "ar" ? service.libraryLabel.ar : service.libraryLabel.fr))].filter(Boolean).join(" · ") || "—",
       zones: qualOk ? qualification.dashboard.regionCodes?.map((code) => moroccoRegionLabel(code, input.locale)).join(" · ") || "—" : "—",
@@ -140,7 +145,7 @@ export async function loadProviderHomeSnapshot(input: {
     const publishedFeedback = reputation.status === "success" ? reputation.dashboard.feedback : [];
     const latestFeedback = publishedFeedback[0];
     const reputationPreview = {
-      published: publishedFeedback.length,
+      published: reputation.status === "success" ? publishedFeedback.length : null,
       latest: latestFeedback
         ? (input.locale === "ar" ? (latestFeedback.axes[0]?.messageAr ?? null) : (latestFeedback.axes[0]?.messageFr ?? null))
         : null,

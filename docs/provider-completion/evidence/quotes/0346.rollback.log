@@ -1,0 +1,487 @@
+BEGIN
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+ALTER TABLE
+ALTER TABLE
+UPDATE 0
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER POLICY
+ALTER POLICY
+ALTER POLICY
+ALTER POLICY
+CREATE FUNCTION
+DO
+NOTIFY
+DO
+SET
+ no_plan 
+---------
+(0 rows)
+
+GRANT
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+SELECT 1
+                                     ok                                     
+----------------------------------------------------------------------------
+ ok 1 - one published service version is available for the isolated fixture
+(1 row)
+
+INSERT 0 1
+SELECT 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                                                                                           decide_provider_company                                                                                                                                                            
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "efa12eda-09d4-4553-8556-d523995dfb3b", "row_version": 2, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "fc557516-805d-4a18-9498-2160f753d206", "partner_contract_status": "SIGNED", "provider_organization_id": "fd110000-0000-4000-8000-000000000002"}
+(1 row)
+
+INSERT 0 3
+DO
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DO
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                                                                                           decide_provider_company                                                                                                                                                            
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "57dbd0fd-5f50-4a42-987f-2b60b9d3ed00", "row_version": 2, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "4b088f21-8f28-4464-be3f-80125f28cb7e", "partner_contract_status": "SIGNED", "provider_organization_id": "fd110000-0000-4000-8000-000000000006"}
+(1 row)
+
+INSERT 0 3
+DO
+DO
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+CREATE TABLE
+GRANT
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                                                                       decide_service_tax_category_mapping_v1                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "SERVICE_TAX_MAPPING_PUBLISHED", "version": 1, "mapping_id": "0542a270-a108-46b1-bcd5-3dcb978ac313", "environment": "DEVELOPMENT", "proposal_id": "0542a270-a108-46b1-bcd5-3dcb978ac313", "content_hash": "5153f9cb791d417925238be7bc15ba9fc1730145c912ad603b8c82c1cfb723cc", "development_only": true}
+(1 row)
+
+CREATE FUNCTION
+CREATE TABLE
+GRANT
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+DO
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                              is                                              
+----------------------------------------------------------------------------------------------
+ ok 2 - a technical CLEAN reference is selectable without inventing a legal VERIFIED decision
+(1 row)
+
+                        throws_ok                        
+---------------------------------------------------------
+ ok 3 - explicit per-version sharing consent is required
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                                       is                                        
+---------------------------------------------------------------------------------
+ ok 4 - response-lost retry returns exactly the original immutable quote version
+(1 row)
+
+                   is                    
+-----------------------------------------
+ ok 5 - retry does not duplicate options
+(1 row)
+
+                                 is                                 
+--------------------------------------------------------------------
+ ok 6 - optional price remains exact beyond JavaScript safe integer
+(1 row)
+
+                            is                            
+----------------------------------------------------------
+ ok 7 - options are separate from the explicit base total
+(1 row)
+
+                        is                        
+--------------------------------------------------
+ ok 8 - retry binds only one immutable attachment
+(1 row)
+
+INSERT 0 1
+                                  is                                   
+-----------------------------------------------------------------------
+ ok 9 - the attachment hash is derived from the authoritative original
+(1 row)
+
+                                         ok                                         
+------------------------------------------------------------------------------------
+ ok 10 - the Provider can authorize its draft original without a public Storage URL
+(1 row)
+
+                                                               submit_provider_quote_with_identity_v1                                                                
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "QUOTE_SUBMITTED", "quote_id": "81ae5bea-42d1-4690-b15d-4ad76b9132b0", "version_number": 1, "quote_version_id": "07be8379-8908-4c94-91c4-df75f1a7eaa1"}
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+                            is                            
+----------------------------------------------------------
+ ok 11 - the actual Client role sees the published option
+(1 row)
+
+                                      is                                      
+------------------------------------------------------------------------------
+ ok 12 - the actual Client role sees the explicitly shared versioned original
+(1 row)
+
+                                        ok                                        
+----------------------------------------------------------------------------------
+ ok 13 - Client download authorization is bound to its own published consultation
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000006
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000006","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                        is                        
+--------------------------------------------------
+ ok 14 - a competing Provider cannot read options
+(1 row)
+
+                              is                              
+--------------------------------------------------------------
+ ok 15 - a competing Provider cannot inspect shared originals
+(1 row)
+
+                                      throws_ok                                      
+-------------------------------------------------------------------------------------
+ ok 16 - a foreign or guessed attachment is refused before privileged Storage access
+(1 row)
+
+                     throws_ok                      
+----------------------------------------------------
+ ok 17 - paging cannot cross Provider organizations
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                         throws_ok                         
+-----------------------------------------------------------
+ ok 18 - voluntary revision retains optimistic concurrency
+(1 row)
+
+INSERT 0 1
+                                      is                                      
+------------------------------------------------------------------------------
+ ok 19 - a submitted quote can produce a new motivated draft before selection
+(1 row)
+
+                           is                           
+--------------------------------------------------------
+ ok 20 - the original submitted version stays unchanged
+(1 row)
+
+                                       is                                        
+---------------------------------------------------------------------------------
+ ok 21 - original options remain immutable when not included in the new revision
+(1 row)
+
+                           throws_ok                            
+----------------------------------------------------------------
+ ok 22 - direct option writes remain forbidden to browser roles
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                          is                                           
+---------------------------------------------------------------------------------------
+ ok 23 - Client can still read the historical published V1 while V2 is a private draft
+(1 row)
+
+                               is                                
+-----------------------------------------------------------------
+ ok 24 - Client cannot read the V2 draft line through a relation
+(1 row)
+
+                            is                            
+----------------------------------------------------------
+ ok 25 - published pointer stays on V1 during a new draft
+(1 row)
+
+                                   is                                    
+-------------------------------------------------------------------------
+ ok 26 - V1 explicitly shared original remains available during revision
+(1 row)
+
+                                 ok                                  
+---------------------------------------------------------------------
+ ok 27 - old published attachment remains authorized during revision
+(1 row)
+
+                                  throws_ok                                   
+------------------------------------------------------------------------------
+ ok 28 - historical V1 cannot be selected while a new draft is being prepared
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                               submit_provider_quote_with_identity_v1                                                                
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "QUOTE_SUBMITTED", "quote_id": "81ae5bea-42d1-4690-b15d-4ad76b9132b0", "version_number": 2, "quote_version_id": "2576a628-5c3b-4df8-bcaf-aff3ffd42373"}
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                        is                                         
+-----------------------------------------------------------------------------------
+ ok 29 - Client history exposes both actual published versions after republication
+(1 row)
+
+                            is                             
+-----------------------------------------------------------
+ ok 30 - publication atomically advances the pointer to V2
+(1 row)
+
+                                   throws_ok                                   
+-------------------------------------------------------------------------------
+ ok 31 - old comparison and V1 cannot authorize selection after V2 publication
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+RESET
+INSERT 0 101
+INSERT 0 101
+SET
+                               is                                
+-----------------------------------------------------------------
+ ok 32 - the total covers every authorized invitation beyond 100
+(1 row)
+
+                 is                  
+-------------------------------------
+ ok 33 - transport pages are bounded
+(1 row)
+
+                          ok                           
+-------------------------------------------------------
+ ok 34 - the oldest invitation is accessible on page 5
+(1 row)
+
+                        is                        
+--------------------------------------------------
+ ok 35 - quote filtering occurs before pagination
+(1 row)
+
+                          is                           
+-------------------------------------------------------
+ ok 36 - French status search is applied before paging
+(1 row)
+
+                          is                           
+-------------------------------------------------------
+ ok 37 - Arabic status search is applied before paging
+(1 row)
+
+                             is                              
+-------------------------------------------------------------
+ ok 38 - a successful unmatched search is a real empty state
+(1 row)
+
+                  throws_ok                   
+----------------------------------------------
+ ok 39 - invalid pages are rejected precisely
+(1 row)
+
+RESET
+                              ok                               
+---------------------------------------------------------------
+ ok 40 - browser cannot call the private writer guard directly
+(1 row)
+
+                               ok                               
+----------------------------------------------------------------
+ ok 41 - service role cannot bypass quote CAS and authorization
+(1 row)
+
+ finish 
+--------
+ 1..41
+(1 row)
+
+ROLLBACK

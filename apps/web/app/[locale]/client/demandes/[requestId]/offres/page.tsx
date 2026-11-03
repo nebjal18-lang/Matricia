@@ -1,3 +1,5 @@
+import {loadQuoteRevisionsInProgress} from "@/modules/client/data/rfq/publication-state";
+import {QuoteRevisionNotice} from "@/modules/client/screens/demandes/quote-revision-notice";
 import {SelectedQuoteContract}from"@/modules/client/screens/missions/selected-quote-contract";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
@@ -48,12 +50,15 @@ export default async function CompareOffersPage({
     );
   }
 
+  const publication=await loadQuoteRevisionsInProgress(rfqId);
+  if(publication.status==="error")return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle}><main className="client-page"><p role="alert">{locale==="ar"?"تعذر التحقق من حالة نشر العروض. أعد المحاولة قبل المقارنة أو الاختيار.":"Impossible de vérifier l’état de publication des devis. Réessayez avant de comparer ou sélectionner."}</p><Link href={`/${locale}/client/demandes/${requestId}/offres${space.selectedQuery}`}>{locale==="ar"?"إعادة المحاولة":"Réessayer"}</Link></main></ClientAppShell>;
+  const revisionNotice=<QuoteRevisionNotice locale={locale} requestId={requestId} query={space.selectedQuery} revisions={publication.revisions}/>;
   const comparison = await repository.comparison(rfqId);
   if (comparison.status === "error" && comparison.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres` }));
   if (comparison.status === "error") {
     return (
       <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المقارنة." : "Impossible de charger la comparaison."}</p></main>
+        <main className="client-page">{revisionNotice}<p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المقارنة." : "Impossible de charger la comparaison."}</p></main>
       </ClientAppShell>
     );
   }
@@ -65,7 +70,9 @@ export default async function CompareOffersPage({
   return (
     <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
       <main className="client-page">
+        {revisionNotice}
         <ComparisonPanel
+          revisingQuoteIds={publication.revisions.map(row=>row.quoteId)}
           locale={locale}
           requestId={requestId}
           rfqId={rfqId}

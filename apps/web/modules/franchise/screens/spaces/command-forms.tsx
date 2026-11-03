@@ -1,6 +1,10 @@
 "use client";
 
+import { QualificationQuestionnaireReview } from "@/modules/shared/lib/provider-qualification-review/review";
+import { qualificationDecisionStates } from "@/modules/shared/lib/provider-qualification-review/model";
+import { networkStateLabel } from "@/modules/franchise/data/network/filters";
 import { useActionState, useId, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
@@ -27,12 +31,17 @@ function Feedback({ state, locale, success }: { state: FranchiseCommandState; lo
     ? success
     : state.status === "error"
       ? state.reason === "VALIDATION" ? c.commandInvalid
-        : state.reason === "FORBIDDEN" ? c.commandForbidden
+        : state.reason === "MFA_REQUIRED" ? locale === "ar" ? "أكّدوا العامل الثاني لتنفيذ هذا الإجراء." : "Confirmez votre second facteur pour effectuer cette action."
+          : state.reason === "FORBIDDEN" ? c.commandForbidden
           : state.reason === "CONFLICT" ? c.commandConflict
-            : state.reason === "UNAUTHENTICATED" ? c.commandForbidden
+            : state.reason === "UNAUTHENTICATED" ? locale === "ar" ? "أعيدوا الاتصال قبل متابعة الإجراء." : "Reconnectez-vous avant de reprendre cette action."
               : c.commandFailed
       : "";
-  return <p role={state.status === "error" ? "alert" : "status"} aria-live="polite" className={state.status === "error" ? "min-h-5 text-sm text-destructive" : "min-h-5 text-sm text-primary"}>{value}</p>;
+  return <div role={state.status === "error" ? "alert" : "status"} aria-live="polite" className={state.status === "error" ? "min-h-5 text-sm text-destructive" : "min-h-5 text-sm text-primary"}>
+    <p>{value}</p>
+    {state.status === "error" && state.reason === "MFA_REQUIRED" ? <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/securite/compte`}>{locale === "ar" ? "إعداد العامل الثاني أو تأكيده" : "Configurer ou vérifier mon second facteur"}</Link> : null}
+    {state.status === "error" && state.reason === "UNAUTHENTICATED" ? <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/connexion`}>{locale === "ar" ? "إعادة الاتصال" : "Me reconnecter"}</Link> : null}
+  </div>;
 }
 
 type CommandKeys = { idempotencyKey: string; correlationId: string };
@@ -193,34 +202,35 @@ export function FranchiseQualificationDecisionForm({
   const { state, action, pending, keys } = useCommand(decideFranchiseProviderQualification);
   const rows = qualifications.filter((item) => uuidPattern.test(item.id) && item.rowVersion);
   const [selectedId, setSelectedId] = useState(rows[0]?.id ?? "");
+  const[reviewed,setReviewed]=useState<{rowVersion:number;engineScorePercent:string}|null>(null);
+  const[score,setScore]=useState("");
+  const[decision,setDecision]=useState("INFORMATION_REQUIRED");
   if (rows.length === 0) return null;
   const selected = rows.find((item) => item.id === selectedId) ?? rows[0];
+  const states=qualificationDecisionStates(selected?.status??"PENDING");
+  const chosen=states.includes(decision)?decision:states[0]??"";
+  const needsEvidence=chosen==="APPROVED"||chosen==="CONDITIONAL";
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} organizationId={organizationId} extra={{ expectedRowVersion: String(selected?.rowVersion ?? 1) }} keys={keys} />
+      <HiddenScope locale={locale} organizationId={organizationId} extra={{ expectedRowVersion: String(reviewed?.rowVersion??selected?.rowVersion??1) }} keys={keys} />
       <div>
         <Label htmlFor={`${prefix}-q`}>{c.stepQual}</Label>
-        <select id={`${prefix}-q`} name="qualificationId" required className={control} value={selected?.id} onChange={(event) => setSelectedId(event.target.value)}>
-          {rows.map((item) => <option key={item.id} value={item.id}>{item.title} · {item.status}</option>)}
+        <select id={`${prefix}-q`} name="qualificationId" required className={control} value={selected?.id} onChange={(event) => {setSelectedId(event.target.value);setReviewed(null);setScore("");setDecision("INFORMATION_REQUIRED");}}>
+          {rows.map((item) => <option key={item.id} value={item.id}>{item.title} · {networkStateLabel(item.status,locale)}</option>)}
         </select>
       </div>
       <div>
         <Label htmlFor={`${prefix}-st`}>{c.state}</Label>
-        <select id={`${prefix}-st`} name="status" required className={control}>
-          <option value="INFORMATION_REQUIRED">INFORMATION_REQUIRED</option>
-          <option value="APPROVED">APPROVED</option>
-          <option value="CONDITIONAL">CONDITIONAL</option>
-          <option value="REJECTED">REJECTED</option>
+        <select id={`${prefix}-st`} name="status" required className={control} value={chosen} onChange={event=>setDecision(event.target.value)}>
+          {states.map(value=><option key={value} value={value}>{networkStateLabel(value,locale)}</option>)}
         </select>
       </div>
-      <div><Label htmlFor={`${prefix}-sess`}>{c.questionnaireSession}</Label><Input id={`${prefix}-sess`} name="questionnaireSessionId" dir="ltr" className="min-h-11 font-mono" /></div>
-      <div><Label htmlFor={`${prefix}-score`}>{c.scoreBps}</Label><Input id={`${prefix}-score`} name="scoreBasisPoints" type="number" min={0} max={10000} /></div>
-      <div><Label htmlFor={`${prefix}-rule`}>{c.ruleVersion}</Label><Input id={`${prefix}-rule`} name="ruleVersion" required defaultValue="QUAL-FR-001" pattern="[A-Z0-9][A-Z0-9._-]{2,79}" dir="ltr" className="min-h-11 font-mono" /></div>
+      <QualificationQuestionnaireReview key={`${selected?.id}:${keys.idempotencyKey}`} qualificationId={selected?.id??""} locale={locale} required={needsEvidence} onReviewed={selection=>{setReviewed(selection);setScore(selection?.engineScorePercent??"");}}/>
+      {needsEvidence?<div><Label htmlFor={`${prefix}-score`}>{locale==="ar"?"التقييم البشري (%)":"Score de revue humaine (%)"}</Label><Input id={`${prefix}-score`} name="scorePercent" type="text" inputMode="decimal" required pattern="(?:[0-9]{1,2}(?:[.,][0-9]{1,2})?|100(?:[.,]0{1,2})?)" value={score} onChange={event=>setScore(event.target.value)}/></div>:null}
       <div><Label htmlFor={`${prefix}-rat`}>{c.rationale}</Label><textarea id={`${prefix}-rat`} name="rationale" required minLength={3} maxLength={2000} className={control} /></div>
       <div><Label htmlFor={`${prefix}-block`}>{c.blockingCondition}</Label><Input id={`${prefix}-block`} name="blockingCondition" maxLength={500} /></div>
-      <div><Label htmlFor={`${prefix}-mand`}>{c.mandatoryPassed}</Label><select id={`${prefix}-mand`} name="mandatoryPassed" className={control}><option value="no">{c.approvalNo}</option><option value="yes">{c.approvalYes}</option></select></div>
       <label className="flex min-h-11 items-start gap-3 rounded-lg border p-3 text-sm"><input className="mt-0.5 size-5" type="checkbox" name="confirmed" value="yes" required /><span>{c.confirmCommand}</span></label>
-      <Button type="submit" disabled={pending} className="min-h-11">{pending ? c.pending : c.decideQualification}</Button>
+      <Button type="submit" disabled={pending||!chosen||(needsEvidence&&!reviewed)} className="min-h-11">{pending ? c.pending : c.decideQualification}</Button>
       <Feedback state={state} locale={locale} success={c.qualificationDecided} />
     </form>
   );
@@ -238,11 +248,11 @@ export function FranchiseMandateInviteForm({ locale, organizationId }: { locale:
       <div>
         <Label htmlFor={`${prefix}-role`}>{c.memberRole}</Label>
         <select id={`${prefix}-role`} name="roleCode" required className={control}>
-          <option value="FRANCHISE_EXPERT">FRANCHISE_EXPERT</option>
-          <option value="FRANCHISE_PROVIDER_MANAGER">FRANCHISE_PROVIDER_MANAGER</option>
-          <option value="FRANCHISE_ACCOUNTING">FRANCHISE_ACCOUNTING</option>
-          <option value="FRANCHISE_MANAGER">FRANCHISE_MANAGER</option>
-          <option value="FRANCHISE_VIEWER">FRANCHISE_VIEWER</option>
+          <option value="FRANCHISE_EXPERT">{locale==="ar"?"خبير الامتياز":"Expert franchisé"}</option>
+          <option value="FRANCHISE_PROVIDER_MANAGER">{locale==="ar"?"مسؤول شبكة مقدمي الخدمة":"Responsable réseau sous-traitants"}</option>
+          <option value="FRANCHISE_ACCOUNTING">{locale==="ar"?"محاسبة الامتياز":"Comptabilité franchisé"}</option>
+          <option value="FRANCHISE_MANAGER">{locale==="ar"?"مسؤول الامتياز":"Responsable franchisé"}</option>
+          <option value="FRANCHISE_VIEWER">{locale==="ar"?"مشاهد الامتياز":"Observateur franchisé"}</option>
         </select>
       </div>
       <div>
@@ -262,33 +272,33 @@ export function FranchiseMandateInviteForm({ locale, organizationId }: { locale:
 }
 
 export function FranchiseVolumeProposeForm({
-  locale, libraryId, organizationId, skus,
+  locale, libraryId, franchiseId, organizationId, skus,
 }: {
-  locale: Locale; libraryId: string; organizationId?: string | null; skus: Array<{ id: string; title: string }>;
+  locale: Locale; libraryId: string;franchiseId:string; organizationId?: string | null; skus: Array<{ id: string; title: string }>;
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
   const { state, action, pending, keys } = useCommand(proposeFranchiseVolumePurchase);
   const rows = skus.filter((item) => uuidPattern.test(item.id));
-  if (!uuidPattern.test(libraryId) || rows.length === 0) return <p className="client-access-note">{c.proposeVolume}</p>;
+  if (!uuidPattern.test(libraryId) || !uuidPattern.test(franchiseId)|| rows.length === 0) return <p className="client-access-note">{c.proposeVolume}</p>;
   return (
     <form action={action} className="franchise-props-form">
-      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} keys={keys} />
+      <HiddenScope locale={locale} libraryId={libraryId} organizationId={organizationId} keys={keys} extra={{franchiseId}}/>
       <div>
         <Label htmlFor={`${prefix}-sku`}>{c.sku}</Label>
         <select id={`${prefix}-sku`} name="skuId" required className={control}>
           {rows.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
         </select>
       </div>
-      <div><Label htmlFor={`${prefix}-fc`}>{c.forecastUnits}</Label><Input id={`${prefix}-fc`} name="forecastUnits" type="number" min={1} step="1" required /></div>
-      <div><Label htmlFor={`${prefix}-min`}>{c.minUnits}</Label><Input id={`${prefix}-min`} name="minimumCommitmentUnits" type="number" min={0} step="1" required /></div>
-      <div><Label htmlFor={`${prefix}-max`}>{c.maxUnits}</Label><Input id={`${prefix}-max`} name="maximumUnits" type="number" min={1} step="1" required /></div>
+      <div><Label htmlFor={`${prefix}-fc`}>{c.forecastUnits}</Label><Input id={`${prefix}-fc`} name="forecastUnits" type="number" min="0.000001" step="0.000001" required /></div>
+      <div><Label htmlFor={`${prefix}-min`}>{c.minUnits}</Label><Input id={`${prefix}-min`} name="minimumCommitmentUnits" type="number" min="0" step="0.000001" required /></div>
+      <div><Label htmlFor={`${prefix}-max`}>{c.maxUnits}</Label><Input id={`${prefix}-max`} name="maximumUnits" type="number" min="0.000001" step="0.000001" required /></div>
       <div>
         <Label htmlFor={`${prefix}-pay`}>{c.paymentModel}</Label>
         <select id={`${prefix}-pay`} name="paymentModel" className={control}>
-          <option value="PAY_PER_USE">PAY_PER_USE</option>
-          <option value="PREPAID">PREPAID</option>
-          <option value="HYBRID">HYBRID</option>
+          <option value="PAY_PER_USE">{locale==="ar"?"الدفع حسب الاستهلاك":"Paiement à la consommation"}</option>
+          <option value="PREPAID">{locale==="ar"?"الدفع المسبق":"Prépaiement"}</option>
+          <option value="HYBRID">{locale==="ar"?"دفع مختلط":"Paiement mixte"}</option>
         </select>
       </div>
       <div><Label htmlFor={`${prefix}-from`}>{c.periodStart}</Label><Input id={`${prefix}-from`} name="periodStart" type="date" required /></div>

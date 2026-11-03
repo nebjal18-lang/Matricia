@@ -1,0 +1,48 @@
+{
+  "scope": "NATIVE_FRANCHISE_OTP_UI_MFA_AND_AUTHORIZED_DEEP_LINK",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "FAILED_OR_PREREQUISITE_BLOCKED",
+  "emailDeliveryCertified": false,
+  "otpRetrievedFrom": "Owned local GoTrue admin-generated OTP for an existing reserved test actor",
+  "originalActorSessionReplaced": false,
+  "userJwtFabricated": false,
+  "steps": [
+    {
+      "id": "LOGIN_UI_REQUESTS_OTP",
+      "status": "PASS",
+      "emailDeliveryCertified": false
+    }
+  ],
+  "authRequests": [
+    {
+      "host": "127.0.0.1:19274",
+      "path": "/auth/v1/verify",
+      "status": 200
+    }
+  ],
+  "actionResponses": [
+    {
+      "status": 200,
+      "serverAction": true,
+      "locationPath": null,
+      "actionRedirect": null,
+      "contentType": "text/x-component"
+    },
+    {
+      "status": 307,
+      "serverAction": true,
+      "locationPath": "/fr/franchise/services/nouveau",
+      "actionRedirect": null
+    }
+  ],
+  "generatedVerificationType": "magiclink",
+  "enteredOtpMatchesGenerated": true,
+  "landingPath": "/fr/connexion",
+  "authStatus": "La connexion n’a pas abouti. Réessayez dans quelques instants.",
+  "browserSecureContext": {
+    "secure": true,
+    "cryptoRandomUuid": "function"
+  },
+  "failure": "TimeoutError: page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================"
+}

@@ -1,3 +1,4 @@
+import {chromium} from "@playwright/test";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { ComponentPropsWithoutRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -15,13 +16,14 @@ import { getProviderQuoteMessages } from "./messages";
 
 const id=(value:number)=>`${String(value).padStart(8,"0")}-0000-4000-8000-000000000000`;
 const dashboard={organizations:[{id:id(1),name:"Provider"}],organizationId:id(1),organizationName:"Provider",canManage:true,taxRules:[{id:id(2),category:"STANDARD_SERVICE",rateBasisPoints:2000,effectiveFrom:"2026-01-01",effectiveTo:null}],invitations:[{id:id(3),status:"ACCEPTED" as const,rowVersion:1,rfqId:id(4),deadline:"2027-01-01T00:00:00.000Z",requestId:id(5),description:"Audit",regionCode:"CASABLANCA",currency:"MAD",taxCategoryCode:null,quote:{id:id(6),status:"DRAFT",currentVersionId:id(7),versionNumber:1,currency:"MAD",subtotalMinor:"10000",taxMinor:"2000",totalMinor:"12000"}}]};
+const prefill={solution:"Solution proposée réelle",deliverables:"Rapport",inclusions:"",exclusions:"",prerequisites:"",warranty:"Une année",correctionTerms:"Corrections incluses",paymentTerms:"Solde à réception",proposedStartDate:"2026-12-01",durationDays:"10",validUntil:"2027-01-01T00:00",changeReason:"Version précédente",lines:[{label:"Forfait",quantity:"1",unitCode:"FORFAIT",unitPrice:"10,00",taxRuleVersionId:id(2),itemKind:"ONE_TIME"as const,recurrenceInterval:""as const}]};
 const identities={[id(3)]:{decision:id(8),revision:id(9),submit:id(10),correlation:id(11)}};
 
 describe("QuotePanel fiscal fail-closed",()=>{
   it("garde un devis DRAFT soumissible sans règle active mais interdit une nouvelle révision",()=>{
     const withoutActiveRule={...dashboard,taxRules:[]};
     const messages=getProviderQuoteMessages("fr");
-    const html=renderToStaticMarkup(<QuotePanel dashboard={withoutActiveRule} locale="fr" m={messages} identities={identities}/>);
+    const html=renderToStaticMarkup(<QuotePanel dashboard={withoutActiveRule} locale="fr" m={messages} identities={identities} prefills={{[id(3)]:prefill}}/>);
     expect(html).toContain("catégorie fiscale du besoin");
     expect(html).toContain('role="alert"');
     expect(html).toContain(messages.submit);
@@ -31,7 +33,7 @@ describe("QuotePanel fiscal fail-closed",()=>{
   });
   it("autorise le reflow des montants bigint tout en conservant leur direction LTR",()=>{
     const exact={...dashboard,invitations:[{...dashboard.invitations[0]!,taxCategoryCode:"STANDARD_SERVICE",quote:{...dashboard.invitations[0]!.quote!,subtotalMinor:"900719925474099300",taxMinor:"180143985094819860",totalMinor:"1080863910568919160"}}]};
-    const html=renderToStaticMarkup(<QuotePanel dashboard={exact} locale="ar" m={getProviderQuoteMessages("ar")} identities={identities}/>);
+    const html=renderToStaticMarkup(<QuotePanel dashboard={exact} locale="ar" m={getProviderQuoteMessages("ar")} identities={identities} prefills={{[id(3)]:prefill}}/>);
     expect(html).toContain('dir="ltr"');
     expect(html).toContain("[overflow-wrap:anywhere]");
     expect(html).toContain("1080863910568919160");
@@ -58,4 +60,31 @@ describe("Selected quote identity reconfirmation entry",()=>{
     const html=renderToStaticMarkup(<QuotePanel dashboard={selected} locale="fr" m={getProviderQuoteMessages("fr")} identities={identities}/>);
     expect(html).toContain("La version retenue n’est pas disponible");expect(html).not.toContain("Examiner et reconfirmer");
   });
+});
+
+describe("native browser quote FormData",()=>{
+ it.each(["fr","ar"]as const)("keeps positional recurrence entries in the real %s form for one-time, recurring and mixed lines",async(locale)=>{
+   const browser=await chromium.launch({executablePath:"/usr/bin/chromium"});
+   try {
+    const page=await browser.newPage();
+    for(const kinds of [["ONE_TIME"],["RECURRING"],["ONE_TIME","RECURRING","ONE_TIME"]]as const){
+      const lines=kinds.map((kind,index)=>({...prefill.lines[0]!,label:`Ligne ${index+1}`,itemKind:kind,recurrenceInterval:kind==="RECURRING"?"MONTH"as const:""as const}));
+      const active={...dashboard,invitations:[{...dashboard.invitations[0]!,taxCategoryCode:"STANDARD_SERVICE"}]};
+      const html=renderToStaticMarkup(<QuotePanel dashboard={active} locale={locale} m={getProviderQuoteMessages(locale)} identities={identities} prefills={{[id(3)]:{...prefill,lines}}}/>);
+      await page.setContent(html);
+      const values=await page.locator('form').filter({has:page.locator('[name="solution"]')}).evaluate(form=>{
+        const data=new FormData(form as HTMLFormElement);
+        return{labels:data.getAll("lineLabel"),kinds:data.getAll("itemKind"),intervals:data.getAll("recurrenceInterval")};
+      });
+      expect(values.labels).toHaveLength(kinds.length);
+      expect(values.kinds).toEqual([...kinds]);
+      expect(values.intervals).toEqual(kinds.map(kind=>kind==="RECURRING"?"MONTH":""));
+    }
+   }finally{await browser.close();}
+ },30000);
+ it("does not render an editable replacement or a publication form when the current version read failed",()=>{
+   const active={...dashboard,invitations:[{...dashboard.invitations[0]!,taxCategoryCode:"STANDARD_SERVICE"}]};
+   const html=renderToStaticMarkup(<QuotePanel dashboard={active} locale="fr" m={getProviderQuoteMessages("fr")} identities={identities} prefills={null}/>);
+   expect(html).toContain("La version actuelle n’a pas pu être chargée");expect(html).not.toContain('name="solution"');expect(html).not.toContain('name="confirmed"');
+ });
 });

@@ -1,0 +1,5 @@
+{
+  "status": "FAILED",
+  "message": "TEST_BOX_SETUP_process_verified_subscription_payment_v2:42501:permission denied for table financial_entries",
+  "successfulRpcCalls": 21
+}

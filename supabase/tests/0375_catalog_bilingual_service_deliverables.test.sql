@@ -1,0 +1,30 @@
+begin;
+set local search_path=public,extensions;
+select no_plan();
+select ok(private.is_valid_service_fulfillment_config('{"schema_version":1,"deliverables":[{"label_fr":"Rapport technique","label_ar":"تقرير تقني"}]}'::jsonb),'complete bilingual catalogue deliverables are accepted');
+select ok(private.is_valid_service_fulfillment_config('{"schema_version":1,"deliverables":["Legacy free text",{"label_fr":"FR","label_ar":"AR"}],"exclusions":["Exclusion source"]}'::jsonb),'legacy and bilingual deliverables coexist without losing other fulfillment data');
+select is(private.normalize_service_fulfillment_config('{"schema_version":1,"deliverables":[{"label_fr":"Rapport technique","label_ar":"تقرير تقني"}],"required_evidence":["Document TEST"]}'::jsonb),'{"schema_version":1,"deliverables":[{"label_fr":"Rapport technique","label_ar":"تقرير تقني"}],"required_evidence":["Document TEST"]}'::jsonb,'normalization preserves both labels and evidence exactly');
+select ok(not private.is_valid_service_fulfillment_config(jsonb_build_object('schema_version',1,'deliverables',value)),'invalid deliverable rejected: '||label)
+from(values('missing Arabic','[{"label_fr":"FR"}]'::jsonb),('missing French','[{"label_ar":"AR"}]'::jsonb),('blank Arabic','[{"label_fr":"FR","label_ar":" "}]'::jsonb),('non-string Arabic','[{"label_fr":"FR","label_ar":7}]'::jsonb),('unknown key','[{"label_fr":"FR","label_ar":"AR","extra":"x"}]'::jsonb),('null element','[null]'::jsonb),('numeric element','[7]'::jsonb),('object instead of array','{"label_fr":"FR","label_ar":"AR"}'::jsonb),('empty legacy string','[""]'::jsonb),('oversized label',jsonb_build_array(jsonb_build_object('label_fr',repeat('x',501),'label_ar','AR'))))test(label,value);
+select ok(not private.is_valid_service_fulfillment_config('{"schema_version":1,"exclusions":[{"label_fr":"FR","label_ar":"AR"}]}'::jsonb),'other fulfillment arrays retain their original string-only contract');
+select ok(not private.is_valid_service_fulfillment_config('{"schema_version":1,"deliverables":[{"label_fr":"FR","label_ar":"AR"}],"unapproved_key":true}'::jsonb),'bilingual delivery support does not admit unknown configuration keys');
+select throws_ok($$select private.normalize_service_fulfillment_config('{"schema_version":1,"deliverables":[{"label_fr":"FR"}]}'::jsonb)$$,'22023','CATALOG_SERVICE_CONFIG_SCHEMA_INVALID','normalizer fails closed for incomplete bilingual output');
+select ok(not has_function_privilege('authenticated','private.is_valid_service_deliverable_v1(jsonb)','execute')and not has_function_privilege('service_role','private.is_valid_service_deliverable_v1(jsonb)','execute'),'the internal validator does not add an application-facing capability');
+-- A real draft command exercises the same payload validator as the browser.
+-- Master catalogue identities are TEST preconditions, not a successful service.
+insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('a3750000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','service375@example.invalid','',now(),'{}','{}',now(),now());
+insert into public.platform_user_roles(user_id,role_code)values('a3750000-0000-4000-8000-000000000001','MATRICIA_ADMIN');
+insert into public.organizations(id,legal_name,display_name,status,created_by)values('b3750000-0000-4000-8000-000000000001','TEST375 catalogue','TEST375 catalogue','ACTIVE','a3750000-0000-4000-8000-000000000001');
+insert into public.catalog_libraries(id,code,slug,steward_organization_id,created_by)values('c3750000-0000-4000-8000-000000000001','TEST375','test375','b3750000-0000-4000-8000-000000000001','a3750000-0000-4000-8000-000000000001');
+insert into public.catalog_categories(id,library_id,code,slug,created_by)values('d3750000-0000-4000-8000-000000000001','c3750000-0000-4000-8000-000000000001','TEST375_CAT','test375-cat','a3750000-0000-4000-8000-000000000001');
+insert into public.catalog_subcategories(id,library_id,category_id,code,slug,created_by)values('e3750000-0000-4000-8000-000000000001','c3750000-0000-4000-8000-000000000001','d3750000-0000-4000-8000-000000000001','TEST375_SUB','test375-sub','a3750000-0000-4000-8000-000000000001');
+create temporary table service375(receipt jsonb);grant select,insert on service375 to authenticated;grant usage on schema extensions to authenticated;
+select set_config('request.jwt.claim.role','authenticated',true),set_config('request.jwt.claim.sub','a3750000-0000-4000-8000-000000000001',true),set_config('request.jwt.claims','{"sub":"a3750000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
+set local role authenticated;
+insert into service375 select public.create_catalog_service('c3750000-0000-4000-8000-000000000001','e3750000-0000-4000-8000-000000000001','TEST375_SERVICE','test375-service','Service TEST','خدمة اختبار','Description courte TEST','وصف اختبار قصير','Description complète TEST','وصف اختبار كامل','ADVISORY','jour','يوم',false,false,false,false,true,false,'MAD',1,'{"schema_version":1,"deliverables":[{"label_fr":"Rapport technique","label_ar":"تقرير تقني"}],"required_evidence":["Document TEST"]}','{"schema_version":1}',false,'TEST375 native bilingual draft','03750000-0000-4000-8000-000000000001');
+select is((select receipt->>'outcome'from service375),'CATALOG_SERVICE_CREATED','native draft creation accepts bilingual deliverables without omitting them');
+reset role;
+select is((select fulfillment_config from public.catalog_service_versions where id=(select(receipt->>'version_id')::uuid from service375)),'{"schema_version":1,"deliverables":[{"label_fr":"Rapport technique","label_ar":"تقرير تقني"}],"required_evidence":["Document TEST"]}'::jsonb,'native immutable draft retains both catalogue labels and evidence');
+select is((select translation_review_status from public.catalog_service_versions where id=(select(receipt->>'version_id')::uuid from service375)),'PENDING','supporting bilingual values does not fabricate independent translation approval');
+select *from finish();
+rollback;

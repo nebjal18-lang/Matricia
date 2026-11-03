@@ -1,3 +1,5 @@
+import { quoteStatusLabel } from "@/modules/provider/screens/devis/status-labels";
+import { SignedScopePendingNotice } from "@/modules/shared/ui/signed-scope-pending-notice";
 import {workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import { InvoiceFacts } from "@/modules/provider/screens/facturation/invoice-facts";
 import type { ProviderInvoiceDossier } from "@/modules/provider/data/billing/dossier";
@@ -19,7 +21,6 @@ import {
   Plus,
   Send,
   Settings2,
-  ShieldCheck,
   Target,
   TriangleAlert,
 } from "lucide-react";
@@ -285,7 +286,7 @@ export function QuoteMultilineWorkbench({
         </div>
         <div className="provider-workbench-meta">
           <span className="provider-autosave"><FileText className="size-4" aria-hidden />{invitation?.quote?.currentVersionId ? (locale==="ar"?`نسخة الخادم v${invitation.quote.versionNumber??"—"} محفوظة`:`Version serveur v${invitation.quote.versionNumber??"—"} enregistrée`) : (locale === "ar" ? "لم تحفظ نسخة بعد" : "Aucune version enregistrée")}</span>
-          <span className="client-status-chip" data-tone="mint">{invitation?.quote?.status ?? w.quoteDraftStatus}</span>
+          <span className="client-status-chip" data-tone="mint">{invitation?.quote?.status ? quoteStatusLabel(invitation.quote.status, locale) : w.quoteDraftStatus}</span>
         </div>
       </header>
       <section className="provider-quote-meta client-card">
@@ -330,7 +331,7 @@ export function QuoteMultilineWorkbench({
             <header><h3>{w.quoteChecks}</h3></header>
             <ul className="client-feed">
               <li><span>{locale === "ar" ? "تظهر نتائج التحقق في نموذج العرض قبل الحفظ والإرسال." : "Les contrôles du formulaire déterminent les champs manquants avant enregistrement et envoi."}</span></li>
-              <li><span>{locale === "ar" ? "حالة النسخة المحفوظة" : "État de la version enregistrée"} : {invitation?.quote?.status ?? "—"}</span></li>
+              <li><span>{locale === "ar" ? "حالة النسخة المحفوظة" : "État de la version enregistrée"} : {invitation?.quote?.status ? quoteStatusLabel(invitation.quote.status, locale) : "—"}</span></li>
             </ul>
             <div className="provider-workbench-actions">
               <Link href={`/${locale}/sous-traitant/devis${query}`} className="client-ghost-link">{w.breadcrumbQuotes}</Link>
@@ -346,7 +347,7 @@ export function QuoteMultilineWorkbench({
 
 function revisionFieldLabel(field:string,locale:Locale){
  if(field.startsWith("line:"))return `${locale==="ar"?"السطر":"Ligne"} ${field.slice(5)}`;
- const labels:Record<string,[string,string]>={currency:["Devise","العملة"],solution:["Solution","الحل"],deliverables:["Livrables","المخرجات"],inclusions:["Inclusions","المشمول"],exclusions:["Exclusions","الاستثناءات"],prerequisites:["Prérequis","المتطلبات"],warranty:["Garantie","الضمان"],correctionTerms:["Corrections","التصحيحات"],proposedStartDate:["Début prévu","البداية المتوقعة"],durationDays:["Durée (jours)","المدة بالأيام"],validUntil:["Validité (Casablanca)","الصلاحية بتوقيت الدار البيضاء"]};
+ const labels:Record<string,[string,string]>={options:["Options","خيارات"],optionPriceBasis:["Base fiscale des options","القاعدة الضريبية للخيارات"],paymentTerms:["Modalités de paiement","شروط الدفع"],maintenanceTerms:["Maintenance","الصيانة"],attachments:["Pièces jointes","المرفقات"],currency:["Devise","العملة"],solution:["Solution","الحل"],deliverables:["Livrables","المخرجات"],inclusions:["Inclusions","المشمول"],exclusions:["Exclusions","الاستثناءات"],prerequisites:["Prérequis","المتطلبات"],warranty:["Garantie","الضمان"],correctionTerms:["Corrections","التصحيحات"],proposedStartDate:["Début prévu","البداية المتوقعة"],durationDays:["Durée (jours)","المدة بالأيام"],validUntil:["Validité (Casablanca)","الصلاحية بتوقيت الدار البيضاء"]};
  return labels[field]?.[locale==="ar"?1:0]??field;
 }
 
@@ -450,6 +451,7 @@ export function MissionDeliveryWorkbench({
   const current = steps.find((step) => step.state === "current") ?? steps[0];
   return (
     <main className="client-page provider-workbench provider-mission-delivery">
+      {mission ? <SignedScopePendingNotice pending={mission.signedScopePending} locale={locale} audience="provider" contractId={mission.contractId} query={query} /> : null}
       <p className="provider-breadcrumb">
         <Crumb href={`/${locale}/sous-traitant/missions${query}`}>{w.breadcrumbMissions}</Crumb>
         <span aria-hidden>›</span>
@@ -654,6 +656,9 @@ export function CompanySecurityWorkbench({
   mfaEnabled = null,
   sessions = [],
   members = [],
+  sessionsUnavailable = false,
+  membersUnavailable = false,
+  securityUnavailable = false,
 }: {
   locale: Locale;
   query: string;
@@ -662,6 +667,9 @@ export function CompanySecurityWorkbench({
   mfaEnabled?: boolean | null;
   sessions?: readonly { id: string; label: string; lastSeen: string; isCurrent: boolean }[];
   members?: readonly { id: string; name: string; role: string }[];
+  sessionsUnavailable?: boolean;
+  membersUnavailable?: boolean;
+  securityUnavailable?: boolean;
 }) {
   const w = workbenchCopy(locale);
   const name = organizationName ?? (locale === "ar" ? "مؤسستكم" : "Votre entreprise");
@@ -677,10 +685,10 @@ export function CompanySecurityWorkbench({
           <h2>{w.companyTitle}</h2>
           <p>{w.companyLead}</p>
         </div>
-        <p className="client-verified provider-secure-banner"><ShieldCheck className="size-4" aria-hidden />{w.companySecure} — {w.companySecureLead}</p>
+        <p className="client-access-note">{locale === "ar" ? "تابعوا حالة حماية الحساب والفريق المصرح به أدناه." : "Consultez ci-dessous la protection du compte et l’équipe autorisée."}</p>
       </header>
       <nav className="client-tabs" aria-label={w.companyTitle}>
-        <Link href={`/${locale}/organisation${query}`}>{w.tabProfile}</Link>
+        <Link href={`/${locale}/sous-traitant/identite${query}`}>{w.tabProfile}</Link>
         <Link href={`/${locale}/organisation/roles${query}`}>{w.tabTeam}</Link>
         <Link href={`/${locale}/organisation/roles${query}`}>{w.tabRoles}</Link>
         <Link href={`/${locale}/organisation/roles${query}`}>{w.tabInvites}</Link>
@@ -707,7 +715,7 @@ export function CompanySecurityWorkbench({
           </article>
           <article className="client-card" id="equipe">
             <header className="client-priority-head"><h3>{w.companyOrgScope}</h3><span className="client-status-chip" data-tone="mint">{w.companyPrimaryOrg}</span></header>
-            {members.length === 0 ? <p role="status">{w.sessionsEmpty}</p> : (
+            {membersUnavailable ? <p role="alert">{locale === "ar" ? "تعذر تحميل الفريق. أعد تحميل الصفحة للمحاولة مجددا." : "Chargement de l’équipe indisponible. Rechargez la page pour réessayer."}</p> : members.length === 0 ? <p role="status">{locale === "ar" ? "لا يوجد عضو ظاهر في هذا النطاق." : "Aucun membre visible dans ce périmètre."}</p> : (
               <ul className="client-feed">
                 {members.map((member) => (
                   <li key={member.id}><span><strong>{member.name}</strong><small>{member.role}</small></span></li>
@@ -721,6 +729,7 @@ export function CompanySecurityWorkbench({
           <article className="client-card">
             <header><h3>{w.authSecurity}</h3></header>
             <p>{w.authSecurityLead}</p>
+            {securityUnavailable ? <p role="alert">{locale === "ar" ? "حالة حماية الحساب غير متاحة حاليا." : "État de protection du compte indisponible."}</p> : null}
             <ul className="client-feed">
               <li><Lock className="size-4" aria-hidden /><span><strong>{w.mfaTitle}</strong><small>{w.mfaLead}</small></span><em className="client-status-chip" data-tone={mfaEnabled ? "mint" : "peach"}>{mfaLabel}</em></li>
               <li><span><strong>{w.verifyMethods}</strong><small>{w.verifyApp}</small></span><Link href={`/${locale}/securite/compte${query}`} className="client-text-link">{w.modify}</Link></li>
@@ -728,7 +737,7 @@ export function CompanySecurityWorkbench({
           </article>
           <article className="client-card" id="sessions">
             <header className="client-priority-head"><h3>{w.activeSessions}</h3><Link href={`/${locale}/securite/sessions${query}`} className="client-text-link">{w.seeHistory}</Link></header>
-            {sessions.length === 0 ? <p role="status">{w.sessionsEmpty}</p> : (
+            {sessionsUnavailable ? <p role="alert">{locale === "ar" ? "تعذر تحميل الجلسات. راجعوا سجل الجلسات أو أعيدوا المحاولة." : "Chargement des sessions indisponible. Consultez leur historique ou réessayez."}</p> : sessions.length === 0 ? <p role="status">{w.sessionsEmpty}</p> : (
               <div className="client-table-wrap">
                 <table className="client-space-table">
                   <thead><tr><th>{w.sessionDevice}</th><th>{w.sessionLast}</th><th>{w.sessionStatus}</th></tr></thead>
@@ -747,7 +756,7 @@ export function CompanySecurityWorkbench({
           </article>
           <article className="client-card">
             <header className="client-priority-head"><h3>{w.securityHistory}</h3><Link href={`/${locale}/securite/compte${query}`} className="client-text-link">{w.seeHistory}</Link></header>
-            <p role="status">{w.historyEmpty}</p>
+            <p>{locale === "ar" ? "راجعوا أحداث الحماية في صفحة أمان الحساب." : "Consultez les événements de sécurité dans la page de protection du compte."}</p>
           </article>
         </div>
       </section>

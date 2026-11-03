@@ -1,0 +1,176 @@
+{
+  "scope": "NATIVE_PROVIDER_ACCOUNT_MENU_HIT_TEST_AND_KEYBOARD_TAB_ORDER",
+  "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "appTree": "c43980c6da4345d8da6260ffb264b5089becf2f2",
+  "status": "PASSED",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "passed": true,
+      "hitTests": [
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        },
+        {
+          "insideViewport": true,
+          "topmost": true
+        }
+      ],
+      "keyboardTabOrder": true,
+      "touchOpenClose": true
+    }
+  ]
+}

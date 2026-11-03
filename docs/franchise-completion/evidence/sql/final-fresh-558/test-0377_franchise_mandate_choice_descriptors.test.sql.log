@@ -1,0 +1,20 @@
+authenticated|a3770000-0000-4000-8000-000000000001|{"sub":"a3770000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+authenticated|a3770000-0000-4000-8000-000000000002|{"sub":"a3770000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "77ea80a0-21d7-4de3-9839-687c72d61f5e", "approval_request_id": "8e5fb757-3515-42a6-afbf-70720c34461d"}
+authenticated|a3770000-0000-4000-8000-000000000003|{"sub":"a3770000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+authenticated|a3770000-0000-4000-8000-000000000001|{"sub":"a3770000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+authenticated|a3770000-0000-4000-8000-000000000002|{"sub":"a3770000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "148ed90d-e490-47c7-94c8-4d3e0d7a04ca", "approval_request_id": "138dcd21-5a3f-47d1-abdb-a99d221c3b0c"}
+authenticated|a3770000-0000-4000-8000-000000000003|{"sub":"a3770000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 1 - one native owner sees both authorized mandates in the same library and organization
+ok 2 - each choice contains the approved French and Arabic territory names
+ok 3 - the business territory code distinguishes equal library and operator identities
+ok 4 - an unpublished library uses its real catalogue code instead of an invented name
+ok 5 - role descriptors come from existing approved reference labels
+ok 6 - an unrelated organization filter does not reveal another mandate
+a3770000-0000-4000-8000-000000000003|{"sub":"a3770000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 7 - a future territory version cannot replace the active approved territory label
+a3770000-0000-4000-8000-000000000004|{"sub":"a3770000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+ok 8 - a sibling organization member without assignment receives no choice descriptors
+ok 9 - selector descriptors add no anonymous or service capability
+1..9

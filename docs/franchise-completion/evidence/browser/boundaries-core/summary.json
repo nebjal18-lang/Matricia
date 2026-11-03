@@ -1,0 +1,33 @@
+{
+  "scope": "FRANCHISE_AUTH_DEEP_LINK_AND_ADMIN_DENIAL",
+  "candidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "PASSED",
+  "sensitiveMutationExecuted": false,
+  "cases": [
+    {
+      "id": "ANONYMOUS_DEEP_LINK_fr",
+      "status": "PASS",
+      "nextPreserved": true,
+      "otpEmailDeliveryCertified": false
+    },
+    {
+      "id": "FRANCHISE_CANNOT_ACCESS_ADMIN_fr",
+      "status": "PASS",
+      "verifiedAal2": true,
+      "preciseDenial": true
+    },
+    {
+      "id": "ANONYMOUS_DEEP_LINK_ar",
+      "status": "PASS",
+      "nextPreserved": true,
+      "otpEmailDeliveryCertified": false
+    },
+    {
+      "id": "FRANCHISE_CANNOT_ACCESS_ADMIN_ar",
+      "status": "PASS",
+      "verifiedAal2": true,
+      "preciseDenial": true
+    }
+  ]
+}

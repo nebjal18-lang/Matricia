@@ -1,6 +1,8 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 const fr = {
+  approvalPending: "Demande transmise aux approbateurs. Consultez Actions puis reprenez cette affectation après approbation.",
+  approvalRejected: "Cette affectation a été refusée. Consultez Actions pour connaître la décision.",
   title: "Portefeuille Client",
   intro: "Pilotez sites, projets, contrats, tâches, budgets annuels, centres de coûts et échéances dans un espace isolé par organisation.",
   organization: "Organisation",
@@ -70,6 +72,7 @@ const fr = {
   success: "Action enregistrée, auditée et propagée.",
   validation: "Vérifiez les champs saisis.",
   forbidden: "Action non autorisée.",
+  conflict: "Le dossier a changé. Rechargez la page avant de réessayer.",
   unavailable: "Service momentanément indisponible.",
   alerts: { ok: "Consommation dans l’enveloppe", watch: "Seuil d’attention atteint (80 %)", over: "Budget consommé à 100 %", exceeded: "Budget dépassé" },
   projectStatuses: { DRAFT: "Brouillon", PLANNED: "Planifié", ACTIVE: "Actif", ON_HOLD: "En pause", COMPLETED: "Terminé", CANCELLED: "Annulé", ARCHIVED: "Archivé" },
@@ -89,6 +92,8 @@ const fr = {
 
 const ar: typeof fr = {
   ...fr,
+  approvalPending: "تم إرسال الطلب للموافقة. راجعوا الإجراءات ثم استأنفوا التخصيص بعد الموافقة.",
+  approvalRejected: "رُفض هذا التخصيص. راجعوا الإجراءات للاطلاع على القرار.",
   title: "محفظة العميل",
   intro: "أدر المواقع والمشاريع والعقود والمهام والميزانيات السنوية ومراكز التكلفة والمواعيد ضمن مساحة مؤسسية معزولة.",
   organization: "المؤسسة",
@@ -158,6 +163,7 @@ const ar: typeof fr = {
   success: "تم تسجيل الإجراء وتدقيقه ونشره.",
   validation: "تحقق من الحقول المدخلة.",
   forbidden: "الإجراء غير مسموح.",
+  conflict: "تغير الملف. أعيدوا تحميل الصفحة قبل المحاولة مجدداً.",
   unavailable: "الخدمة غير متاحة مؤقتاً.",
   alerts: { ok: "الاستهلاك ضمن الغلاف", watch: "تم بلوغ عتبة الانتباه (80٪)", over: "استُهلكت الميزانية بالكامل", exceeded: "تم تجاوز الميزانية" },
   projectStatuses: { DRAFT: "مسودة", PLANNED: "مخطط", ACTIVE: "نشط", ON_HOLD: "موقوف", COMPLETED: "مكتمل", CANCELLED: "ملغى", ARCHIVED: "مؤرشف" },

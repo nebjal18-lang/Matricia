@@ -1,0 +1,17 @@
+
+> @matricia/web@0.1.0 test /workspace/franchise-completion/apps/web
+> vitest run modules/franchise 'app/[locale]/franchise' 'app/[locale]/administration/gouvernance-franchise' modules/shared/lib/finance-cost-proofs modules/admin/screens/pnl/finance-cost-proof-panel.test.tsx modules/admin/data/finance-cost-proofs 'app/[locale]/administration/finance/rapprochements-couts' app/api/finance/cost-proofs app/api/workers/finance-cost-scans app/api/internal/outbox/route.test.ts modules/shared/lib/supabase/proxy.test.ts 'app/[locale]/indisponible' modules/shared/lib/catalogue-builder/namespaced-command-uuid.test.ts modules/shared/ui/header modules/shared/lib/auth/read-failure.test.ts modules/shared/lib/auth/return-path.test.ts modules/admin/data/command-center/view-model.test.ts --maxWorkers=2
+
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  92 passed (92)
+      Tests  801 passed (801)
+   Start at  09:22:20
+   Duration  104.67s (import 59%, transform 22%, tests 17%, worker 2%)
+
+     Import  329 modules were evaluated 558 times · 83.31s total, 59% of tracked time
+             ~9.55s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

@@ -1,0 +1,38 @@
+{
+  "observedAt": "2026-11-03T06:17:53.082976+00:00",
+  "sourceCommit": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "reason": "GITHUB_ACTIONS_ACCOUNT_BILLING_LOCK",
+  "jobsExecuted": false,
+  "codeFailureProven": false,
+  "githubApiRead": "Forbidden; regular GitHub HTTPS run pages available",
+  "runs": [
+    {
+      "runId": "41588397772",
+      "url": "https://github.com/epitaphe360/matricia/actions/runs/41588397772",
+      "httpStatus": 200,
+      "billingErrorCount": 3,
+      "exactAnnotation": "The job was not started because your account is locked due to a billing issue.",
+      "fetchedPageSha256": "2b2122b52860a4c87fd26afb85018f578eaf01909dcfde48dc0756b15e8c5d98",
+      "sourcePageBytes": 176016
+    },
+    {
+      "runId": "41588322980",
+      "url": "https://github.com/epitaphe360/matricia/actions/runs/41588322980",
+      "httpStatus": 200,
+      "billingErrorCount": 3,
+      "exactAnnotation": "The job was not started because your account is locked due to a billing issue.",
+      "fetchedPageSha256": "6ca3c9a3850dc397a1b6745d875deb0cd620613441233a4bc85d26f983918d61",
+      "sourcePageBytes": 175413
+    },
+    {
+      "runId": "41556707354",
+      "url": "https://github.com/epitaphe360/matricia/actions/runs/41556707354",
+      "httpStatus": 200,
+      "billingErrorCount": 3,
+      "exactAnnotation": "The job was not started because your account is locked due to a billing issue.",
+      "fetchedPageSha256": "6cecfec5bdb6ffa1d5ff6ce8a8a5f2bc246c68dde8e7105445fda43761e3d929",
+      "sourcePageBytes": 176041
+    }
+  ],
+  "privacy": "Only public URLs, exact diagnostic and page hashes retained. Raw HTML containing ephemeral tokens is not committed."
+}

@@ -1,7 +1,9 @@
+import {readAllPages} from "@/modules/shared/lib/data/read-pages";
 import { z } from "zod";
 import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
-import type { SubscriptionDashboard } from "./model";
+import { subscriptionCheckoutAvailable, type SubscriptionDashboard } from "./model";
+import { getServerTimestamp } from "@/modules/shared/lib/time/server-clock";
 
 const uuid = z.string().uuid();
 const exactInteger = z.string().regex(/^\d+$/);
@@ -139,11 +141,12 @@ export async function loadSubscriptionDashboard(requestedOrganizationId?: string
   const subscription = subscriptionResult.data ? subscriptionSchema.safeParse(subscriptionResult.data) : null;
   if (!plans.success || (subscription && !subscription.success)) return { status: "error", reason: "INVALID_RESPONSE" };
   const subscriptionValue = subscription?.data ?? null;
-  const [projectionResult, transitionsResult] = subscriptionValue ? await Promise.all([
+  const [projectionResult, transitionsResult, cyclesResult] = subscriptionValue ? await Promise.all([
     client.rpc("get_client_subscription_historical_plan_projection", { p_subscription_id: subscriptionValue.id, p_cycle_limit: 24 }),
-    client.from("subscription_state_events").select("id::text,from_status,to_status,reason_code,occurred_at").eq("subscription_id", subscriptionValue.id).order("occurred_at", { ascending: false }).limit(50),
-  ]) : [{ data: null, error: null }, { data: [], error: null }];
-  if (projectionResult.error || transitionsResult.error) return { status: "error", reason: "QUERY_FAILED" };
+    readAllPages((from,to)=>client.from("subscription_state_events").select("id::text,from_status,to_status,reason_code,occurred_at").eq("subscription_id", subscriptionValue.id).order("occurred_at", { ascending: false }).order("id",{ascending:false}).range(from,to)),
+    loadSubscriptionCycles(client,subscriptionValue.id),
+  ]) : [{ data: null, error: null }, { data: [], error: null }, {data:[],error:null}];
+  if (projectionResult.error || transitionsResult.error || cyclesResult.error) return { status: "error", reason: "QUERY_FAILED" };
   const projection = subscriptionValue ? historicalProjectionSchema.safeParse(projectionResult.data) : null;
   const transitions = z.array(transitionSchema).safeParse(transitionsResult.data);
   if ((projection && !projection.success) || !transitions.success) return { status: "error", reason: "INVALID_RESPONSE" };
@@ -153,7 +156,7 @@ export async function loadSubscriptionDashboard(requestedOrganizationId?: string
     dashboard: {
       organizationId,
       organizationName: parsedMembership.organizations.display_name,
-      capabilities: { canStartTrial: roles.some((role) => role === "CLIENT_OWNER" || role === "CLIENT_ADMIN"), canChangePlan: roles.some((role) => role === "CLIENT_OWNER" || role === "CLIENT_ADMIN") },
+      capabilities: { canStartTrial: roles.some((role) => role === "CLIENT_OWNER" || role === "CLIENT_ADMIN"), canChangePlan: roles.some((role) => role === "CLIENT_OWNER" || role === "CLIENT_ADMIN"), canCheckout: !!subscriptionValue && subscriptionCheckoutAvailable(subscriptionValue.status, subscriptionValue.current_period_end, getServerTimestamp()) },
       plans: plans.data.map((plan) => ({
         id: plan.id,
         code: plan.subscription_plans.code,
@@ -176,7 +179,7 @@ export async function loadSubscriptionDashboard(requestedOrganizationId?: string
         rowVersion: subscriptionValue.row_version,
         currentPlan: projection?.success && projection.data.current_plan ? mapHistoricalPlan(projection.data.current_plan) : null,
         pendingPlan: projection?.success && projection.data.pending_plan ? mapHistoricalPlan(projection.data.pending_plan) : null,
-        cycles: projection?.success ? projection.data.cycles.map((cycle) => ({
+        cycles: projection?.success ? cyclesResult.data!.map((cycle) => ({
           id: cycle.id,
           cycleNumber: cycle.cycle_number,
           currency: cycle.currency,
@@ -190,4 +193,15 @@ export async function loadSubscriptionDashboard(requestedOrganizationId?: string
       } : null,
     },
   };
+}
+
+export async function loadSubscriptionCycles(client: Awaited<ReturnType<typeof getSupabaseServerClient>>,subscriptionId:string){
+ const all:z.infer<typeof cycleSchema>[]=[];let after:number|null=null;
+ for(;;){
+  const response=await client.rpc("list_client_subscription_cycle_page_v1",{p_subscription_id:subscriptionId,p_after_cycle:after,p_limit:100});
+  if(response.error)return{data:null,error:response.error};
+  const parsed=z.array(cycleSchema).max(100).safeParse(response.data);
+  if(!parsed.success||parsed.data.some((c,i)=>i>0&&c.cycle_number>=parsed.data[i-1]!.cycle_number)||after!==null&&parsed.data.some(c=>c.cycle_number>=after!))return{data:null,error:{code:"INVALID_RESPONSE"}};
+  all.push(...parsed.data);if(parsed.data.length<100)return{data:all,error:null};after=parsed.data.at(-1)!.cycle_number;
+ }
 }

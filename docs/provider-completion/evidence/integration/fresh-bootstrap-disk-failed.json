@@ -1,0 +1,19 @@
+{
+  "environment": "development-local-isolated",
+  "network": "none",
+  "publicPorts": 0,
+  "images": {
+    "database": "ghcr.io/supabase/postgres:17.6.1.167",
+    "auth": "ghcr.io/supabase/gotrue:v2.196.0",
+    "storage": "ghcr.io/supabase/storage-api:v1.72.1"
+  },
+  "startedAt": "2026-11-02T22:49:35.368Z",
+  "status": "failed",
+  "migrations": [],
+  "sql": [],
+  "concurrencyIncluded": false,
+  "stagingCertification": false,
+  "cleanup": "passed",
+  "failure": "LOCAL_REPLAY_COMMAND_FAILED:storage-bootstrap.log",
+  "finishedAt": "2026-11-02T22:51:46.580Z"
+}

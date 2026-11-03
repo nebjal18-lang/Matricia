@@ -1,0 +1,21 @@
+{
+  "scope": "ISOLATED_PROVIDER_NATIVE_COHORT_PREPARATION_NOT_APPLICATION_ACCEPTANCE",
+  "status": "NATIVE_COHORT_READY_AWAITING_INTEGRATED_CANDIDATE",
+  "runId": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "targetLabel": "matricia.provider-browser-test=b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "internalNetwork": "matricia_provider_browser_b9bd23e482324fbd",
+  "publicContainerPorts": 0,
+  "gatewayLoopbackPort": 19274,
+  "appPortReserved": 19273,
+  "appBuilt": false,
+  "appRunning": false,
+  "candidatePin": null,
+  "baselineMigrations": 458,
+  "baselineArchiveSha256": "f980bc88ebe06a1dcf83dd808f4f194b715f2d0e2a2eaa52a3d20cdd6ba2d54b",
+  "canonicalAclMatched": true,
+  "nativeActorCount": 15,
+  "userJwtFabricated": false,
+  "realEmailDeliveryCertified": false,
+  "staffRolesBootstrap": "EXPLICIT_LOCAL_TEST_ONLY",
+  "externalSupabaseVercelCertified": false
+}

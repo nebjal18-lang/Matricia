@@ -1,0 +1,716 @@
+BEGIN
+ALTER TABLE
+UPDATE 0
+ALTER TABLE
+ALTER TABLE
+INSERT 0 0
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE POLICY
+REVOKE
+GRANT
+CREATE FUNCTION
+DO
+CREATE TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE TRIGGER
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER POLICY
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+DO
+CREATE FUNCTION
+DO
+REVOKE
+NOTIFY
+CREATE FUNCTION
+REVOKE
+NOTIFY
+DO
+SET
+ no_plan 
+---------
+(0 rows)
+
+GRANT
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+SELECT 1
+                                     ok                                     
+----------------------------------------------------------------------------
+ ok 1 - one published service version is available for the isolated fixture
+(1 row)
+
+INSERT 0 1
+SELECT 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                                                                                           decide_provider_company                                                                                                                                                            
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "1fb1d511-8d3a-490c-8ec3-4d33909a2c5f", "row_version": 2, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "d613ede8-b8a5-451c-9680-4d89b451dd7c", "partner_contract_status": "SIGNED", "provider_organization_id": "fd110000-0000-4000-8000-000000000002"}
+(1 row)
+
+INSERT 0 3
+DO
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DO
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+CREATE TABLE
+GRANT
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                           decide_contract_policy_version_v1                                                                                            
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "CONTRACT_POLICY_VERSION_DECIDED", "decision": "APPROVE", "content_hash": "4c294a6b9852cb81f1a24152df94e44f2e88251e89951348e6cd6df89d6bd4fa", "policy_version_id": "4cf9d2d4-423f-4473-88fb-06dc194f1e6b"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+CREATE FUNCTION
+CREATE FUNCTION
+                                                                                                       prepare_governed_mock_policy_v1                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "SIGNATURE_POLICY_PROPOSED", "environment": "DEVELOPMENT", "proposal_id": "8671ef3f-731a-49be-9ddc-2fa1e5eb6892", "content_hash": "b74b889519e08c474d28c70e465655cdec99f8831849096482d83bb5e3ddc2b3", "development_mock": true}
+(1 row)
+
+                                                                                                                                                            complete_governed_mock_contract_v1                                                                                                                                                             
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"mode": "NON_CONTRACTUAL_DEMO", "outcome": "SIGNATURE_ENVELOPE_SIGNED", "replayed": false, "final_hash": "40ef3138d54736cb25cedd23209c348b3ad8295763b52e8b9691dbd5bbf787e8", "envelope_id": "55547422-bf44-4957-93e3-6a72ba9a7872", "achieved_level": "SIMPLE", "development_mock": true, "evidence_package_id": "a2983ac3-9cd0-49a7-b6bd-3c748948a29f"}
+(1 row)
+
+                                                ok                                                
+--------------------------------------------------------------------------------------------------
+ ok 2 - contract is sealed by real native governed DEV-mock flow, not forged signature validation
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                          is                           
+-------------------------------------------------------
+ ok 3 - Client preparation uses signed deliverable key
+(1 row)
+
+                      is                      
+----------------------------------------------
+ ok 4 - signed deliverable label is preserved
+(1 row)
+
+                        is                         
+---------------------------------------------------
+ ok 5 - user-authored source is preserved verbatim
+(1 row)
+
+                         is                          
+-----------------------------------------------------
+ ok 6 - criteria come from frozen governed checklist
+(1 row)
+
+CREATE FUNCTION
+                       throws_ok                       
+-------------------------------------------------------
+ ok 7 - stale checklist hash is refused before writing
+(1 row)
+
+                    throws_ok                     
+--------------------------------------------------
+ ok 8 - Client cannot invent a signed deliverable
+(1 row)
+
+                    throws_ok                    
+-------------------------------------------------
+ ok 9 - Client cannot invent checklist criterion
+(1 row)
+
+                             throws_ok                              
+--------------------------------------------------------------------
+ ok 10 - responsibility cannot be assigned outside contract parties
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                        is                        
+--------------------------------------------------
+ ok 11 - mission replay has exact stable response
+(1 row)
+
+RESET
+                           is                            
+---------------------------------------------------------
+ ok 12 - native mission command creates only one mission
+(1 row)
+
+                                            ok                                            
+------------------------------------------------------------------------------------------
+ ok 13 - real mission preserves signed label, party responsibility and own milestone link
+(1 row)
+
+                            is                            
+----------------------------------------------------------
+ ok 14 - actual acceptance uses chosen governed criterion
+(1 row)
+
+                           is                            
+---------------------------------------------------------
+ ok 15 - mission freezes exact bilingual checklist items
+(1 row)
+
+SET
+CREATE FUNCTION
+                  throws_ok                  
+---------------------------------------------
+ ok 16 - dispute cannot invent an obligation
+(1 row)
+
+                        throws_ok                         
+----------------------------------------------------------
+ ok 17 - Client cannot supply arbitrary dispute deadlines
+(1 row)
+
+                         throws_ok                          
+------------------------------------------------------------
+ ok 18 - unknown or foreign document cannot become evidence
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+(1 row)
+
+                     throws_ok                      
+----------------------------------------------------
+ ok 19 - AAL1 cannot open a financial/legal dispute
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                       is                        
+-------------------------------------------------
+ ok 20 - same real dispute is returned on replay
+(1 row)
+
+                  is                   
+---------------------------------------
+ ok 21 - replay creates no second case
+(1 row)
+
+                                      is                                      
+------------------------------------------------------------------------------
+ ok 22 - deadline comes from independently approved frozen contractual policy
+(1 row)
+
+                                  is                                   
+-----------------------------------------------------------------------
+ ok 23 - one private statement and one canonical document are retained
+(1 row)
+
+                            is                             
+-----------------------------------------------------------
+ ok 24 - document hash comes from canonical scanned source
+(1 row)
+
+INSERT 0 1
+                                 is                                  
+---------------------------------------------------------------------
+ ok 25 - authorized owner receives original private object reference
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                               is                               
+----------------------------------------------------------------
+ ok 26 - provider sees no CLIENT_ONLY evidence under actual RLS
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ 05457c8c-8041-493f-9ddd-b1cd392abe9a
+(1 row)
+
+SET
+                           throws_ok                            
+----------------------------------------------------------------
+ ok 27 - provider cannot request private download authorization
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000003
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                   is                   
+----------------------------------------
+ ok 28 - foreign tenant sees no mission
+(1 row)
+
+                 is                  
+-------------------------------------
+ ok 29 - foreign tenant sees no case
+(1 row)
+
+                   is                    
+-----------------------------------------
+ ok 30 - foreign tenant sees no evidence
+(1 row)
+
+                     throws_ok                      
+----------------------------------------------------
+ ok 31 - foreign tenant cannot prepare this mission
+(1 row)
+
+                             throws_ok                             
+-------------------------------------------------------------------
+ ok 32 - foreign tenant cannot authorize private evidence download
+(1 row)
+
+RESET
+                  is                   
+---------------------------------------
+ ok 33 - one real dispute audit exists
+(1 row)
+
+                   is                    
+-----------------------------------------
+ ok 34 - one warning outbox event exists
+(1 row)
+
+                                    is                                    
+--------------------------------------------------------------------------
+ ok 35 - precondition: selected contract has no pre-existing conversation
+(1 row)
+
+                           is                            
+---------------------------------------------------------
+ ok 36 - precondition: historical selected RFQ is closed
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+INSERT 0 1
+                               is                                
+-----------------------------------------------------------------
+ ok 37 - lost-response retry returns the same thread and command
+(1 row)
+
+              set_config              
+--------------------------------------
+ c6092045-f028-48dd-939e-8840a8c6791a
+(1 row)
+
+              set_config              
+--------------------------------------
+ b3c79738-054a-41d9-8496-ca3d5dd4a6da
+(1 row)
+
+                                 ok                                  
+---------------------------------------------------------------------
+ ok 38 - Provider selector includes its selected contractual dossier
+(1 row)
+
+                                      is                                      
+------------------------------------------------------------------------------
+ ok 39 - the new contract conversation has the selected Provider presentation
+(1 row)
+
+                                       is                                       
+--------------------------------------------------------------------------------
+ ok 40 - legacy conversation projection also carries Owner execution capability
+(1 row)
+
+                                                is                                                
+--------------------------------------------------------------------------------------------------
+ ok 41 - a dossier deep link resumes its authorized thread without searching the first inbox page
+(1 row)
+
+RESET
+                           is                           
+--------------------------------------------------------
+ ok 42 - opening the conversation never reopens the RFQ
+(1 row)
+
+                       is                       
+------------------------------------------------
+ ok 43 - replay creates no second object thread
+(1 row)
+
+                   is                    
+-----------------------------------------
+ ok 44 - one audited opening is retained
+(1 row)
+
+                  is                  
+--------------------------------------
+ ok 45 - one opening event is emitted
+(1 row)
+
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+              set_config              
+--------------------------------------
+ fa352000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fa352000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                   throws_ok                                   
+-------------------------------------------------------------------------------
+ ok 46 - unassigned Technician cannot read employer-wide contract conversation
+(1 row)
+
+                               is                               
+----------------------------------------------------------------
+ ok 47 - unassigned Technician sees no contract thread in inbox
+(1 row)
+
+                               throws_ok                                
+------------------------------------------------------------------------
+ ok 48 - unassigned Technician cannot send by a known thread identifier
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                lives_ok                                 
+-------------------------------------------------------------------------
+ ok 49 - Owner assigns the first Technician through the governed command
+(1 row)
+
+              set_config              
+--------------------------------------
+ fa352000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fa352000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                              lives_ok                               
+---------------------------------------------------------------------
+ ok 50 - assigned Technician can read the contractual mission thread
+(1 row)
+
+                                lives_ok                                
+------------------------------------------------------------------------
+ ok 51 - assigned Technician can send the unchanged bilingual free text
+(1 row)
+
+                                        lives_ok                                        
+----------------------------------------------------------------------------------------
+ ok 52 - assigned Technician can reach the same private thread after contract selection
+(1 row)
+
+              set_config              
+--------------------------------------
+ fa352000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fa352000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                throws_ok                                 
+--------------------------------------------------------------------------
+ ok 53 - second Technician cannot inherit the first Technician assignment
+(1 row)
+
+RESET
+INSERT 0 1
+SET
+                                    is                                    
+--------------------------------------------------------------------------
+ ok 54 - Technician plus Viewer retains authorized read but not execution
+(1 row)
+
+                                     is                                      
+-----------------------------------------------------------------------------
+ ok 55 - legacy projection never infers execution from composite read access
+(1 row)
+
+                               throws_ok                               
+-----------------------------------------------------------------------
+ ok 56 - adding Viewer cannot grant unassigned Technician write access
+(1 row)
+
+                               throws_ok                               
+-----------------------------------------------------------------------
+ ok 57 - composite read permission cannot prepare private file uploads
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                 lives_ok                                  
+---------------------------------------------------------------------------
+ ok 58 - Owner revokes the assignment without altering historical messages
+(1 row)
+
+              set_config              
+--------------------------------------
+ fa352000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fa352000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                            throws_ok                             
+------------------------------------------------------------------
+ ok 59 - revocation immediately removes Technician history access
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000003
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                              throws_ok                              
+---------------------------------------------------------------------
+ ok 60 - foreign tenant cannot enumerate contractual message options
+(1 row)
+
+RESET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fa352000-0000-4000-8000-000000000003
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fa352000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                         is                                         
+------------------------------------------------------------------------------------
+ ok 61 - Client Viewer keeps read access without gaining Provider message execution
+(1 row)
+
+                                     throws_ok                                     
+-----------------------------------------------------------------------------------
+ ok 62 - Client Viewer cannot send through the shared private conversation command
+(1 row)
+
+RESET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fa352000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fa352000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                                      throws_ok                                       
+--------------------------------------------------------------------------------------
+ ok 63 - Client-only role in a shared organisation is not a Provider read entitlement
+(1 row)
+
+                                        is                                         
+-----------------------------------------------------------------------------------
+ ok 64 - the other business profile cannot discover Provider conversation metadata
+(1 row)
+
+RESET
+                              ok                               
+---------------------------------------------------------------
+ ok 65 - service role cannot bypass option actor authorization
+(1 row)
+
+                    ok                     
+-------------------------------------------
+ ok 66 - anonymous option access is closed
+(1 row)
+
+                           ok                           
+--------------------------------------------------------
+ ok 67 - API cannot invoke the private lifecycle helper
+(1 row)
+
+                                is                                 
+-------------------------------------------------------------------
+ ok 68 - revocation never rewrites or deletes the authored message
+(1 row)
+
+ finish 
+--------
+ 1..68
+(1 row)
+
+ROLLBACK

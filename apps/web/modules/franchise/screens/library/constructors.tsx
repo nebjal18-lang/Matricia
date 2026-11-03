@@ -110,10 +110,10 @@ export function FranchiseServiceConstructor({
             <FranchiseServiceCommandForms locale={locale} workspace={workspace} service={service} commandIdentity={commandIdentity} organizationId={organizationId} />
           ) : (
             <dl className="franchise-props">
-              <div><small>{c.labelFr}</small><span>{service.nameFr ?? service.title}</span></div>
-              <div><small>{c.labelAr}</small><span dir="rtl" lang="ar">{service.nameAr ?? "—"}</span></div>
-              <div><small>{c.linked}</small><span>{service.category ?? "—"} / {service.subcategory ?? "—"}</span></div>
-              <div><small>{c.version}</small><span>{service.versionLabel ?? "—"}</span></div>
+              <div><dt>{c.labelFr}</dt><dd>{service.nameFr ?? service.title}</dd></div>
+              <div><dt>{c.labelAr}</dt><dd dir="rtl" lang="ar">{service.nameAr ?? "—"}</dd></div>
+              <div><dt>{c.linked}</dt><dd>{service.category ?? "—"} / {service.subcategory ?? "—"}</dd></div>
+              <div><dt>{c.version}</dt><dd>{service.versionLabel ?? "—"}</dd></div>
             </dl>
           )}
           <section className="franchise-deliverables">

@@ -1,0 +1,31 @@
+"use server";
+import { z } from "zod";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
+import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { parseMoneyInput } from "@/modules/shared/lib/money-input";
+import { readAllPages } from "@/modules/shared/lib/data/read-pages";
+export type ProviderAmendmentState={status:"idle"}|{status:"success";amendmentId:string}|{status:"error";reason:"VALIDATION"|"UNAUTHENTICATED"|"FORBIDDEN"|"MFA"|"UNAVAILABLE"|"CONFLICT"};
+const schema=z.object({locale:z.enum(["fr","ar"]),contractId:z.string().uuid(),versionId:z.string().uuid(),contentHash:z.string().regex(/^[0-9a-f]{64}$/u),reason:z.string().trim().min(3).max(2000),scopeDelta:z.string().trim().min(2).max(4000),priceDelta:z.string().max(100),deadlineDeltaDays:z.coerce.number().int().min(-3650).max(3650),idempotencyKey:z.string().uuid()});
+export async function proposeProviderAmendment(_:ProviderAmendmentState,form:FormData):Promise<ProviderAmendmentState>{
+ const input=schema.safeParse(Object.fromEntries(form));if(!input.success)return{status:"error",reason:"VALIDATION"};const p=input.data;
+ const ids=z.array(z.string().uuid()).max(50).safeParse(form.getAll("lineId")),labels=z.array(z.string().trim().max(500)).max(50).safeParse(form.getAll("lineLabel")),criteria=z.array(z.string().max(15000)).max(50).safeParse(form.getAll("lineCriteria"));
+ if(!ids.success||!labels.success||!criteria.success||ids.data.length!==labels.data.length||ids.data.length!==criteria.data.length||new Set(ids.data).size!==ids.data.length)return{status:"error",reason:"VALIDATION"};
+ const rawOperations=form.getAll("lineOperation"),rawTargets=form.getAll("lineTarget");
+ const operations=z.array(z.enum(["ADD","REPLACE","REMOVE"])).max(50).safeParse(rawOperations.length?rawOperations:ids.data.map(()=>"ADD"));
+ const targets=z.array(z.string().regex(/^$|^[A-Z][A-Z0-9_-]{1,79}$/u)).max(50).safeParse(rawTargets.length?rawTargets:ids.data.map(()=>""));
+ if(!operations.success||!targets.success||operations.data.length!==ids.data.length||targets.data.length!==ids.data.length)return{status:"error",reason:"VALIDATION"};
+ const referenced=targets.data.filter((_,index)=>operations.data[index]!=="ADD");if(new Set(referenced).size!==referenced.length||operations.data.some((operation,index)=>operation==="ADD"?targets.data[index]!=="":!targets.data[index]))return{status:"error",reason:"VALIDATION"};
+ const c=await getSupabaseServerClient(),auth=await c.auth.getUser();if(classifyAuthReadFailure(auth.error)==="UNAVAILABLE")return{status:"error",reason:"UNAVAILABLE"};if(!auth.data.user)return{status:"error",reason:"UNAUTHENTICATED"};const aal=await c.auth.mfa.getAuthenticatorAssuranceLevel();if(aal.error)return{status:"error",reason:"UNAVAILABLE"};if(aal.data?.currentLevel!=="aal2")return{status:"error",reason:"MFA"};
+ const result=await c.from("contract_versions").select("id,contract_id,currency,content_hash").eq("id",p.versionId).eq("contract_id",p.contractId).maybeSingle(),version=z.object({id:z.string().uuid(),contract_id:z.string().uuid(),currency:z.string().regex(/^[A-Z]{3}$/u),content_hash:z.string()}).safeParse(result.data);
+ if(result.error)return{status:"error",reason:"UNAVAILABLE"};if(!version.success)return{status:"error",reason:"FORBIDDEN"};if(version.data.content_hash!==p.contentHash)return{status:"error",reason:"CONFLICT"};
+ const amount=parseMoneyInput(p.priceDelta,version.data.currency);if(amount===null||BigInt(amount)<BigInt("-9223372036854775808")||BigInt(amount)>BigInt("9223372036854775807"))return{status:"error",reason:"VALIDATION"};
+ const itemsResult=await readAllPages((from,to)=>c.from("contract_items").select("id,item_key,item_type,label_fr,label_ar,sort_order").eq("contract_version_id",p.versionId).order("sort_order").order("id").range(from,to)),items=z.array(z.object({id:z.string().uuid(),item_key:z.string(),item_type:z.string(),label_fr:z.string(),label_ar:z.string(),sort_order:z.number().int().positive()})).safeParse(itemsResult.data);
+ if(itemsResult.error||!items.success)return{status:"error",reason:"UNAVAILABLE"};const maxOrder=items.data.reduce((max,item)=>Math.max(max,item.sort_order),0);
+ const selected=operations.data.map((operation,index)=>operation==="ADD"?undefined:items.data.find(item=>item.item_key===targets.data[index]&&item.item_type==="DELIVERABLE"));
+ if(operations.data.some((operation,index)=>operation!=="ADD"&&!selected[index]))return{status:"error",reason:"FORBIDDEN"};
+ const criteriaLists=criteria.data.map(value=>value.split(/\r?\n/u).map(line=>line.trim()).filter(Boolean));
+ if(operations.data.some((operation,index)=>operation!=="REMOVE"&&(!labels.data[index]||criteriaLists[index]!.length<1||criteriaLists[index]!.length>30||criteriaLists[index]!.some(label=>label.length<3||label.length>500))))return{status:"error",reason:"VALIDATION"};
+ const delta=ids.data.map((id,index)=>{const operation=operations.data[index]!,target=selected[index];if(operation==="REMOVE")return{operation,item_type:"DELIVERABLE",item_key:target!.item_key};return{operation,item_type:"DELIVERABLE",item_key:operation==="ADD"?`ADDED_${id.replaceAll("-","").toUpperCase()}`:target!.item_key,label_fr:labels.data[index],label_ar:labels.data[index],details:{acceptance_criteria:criteriaLists[index]!.map((label,criterionIndex)=>({key:`CRIT_${id.replaceAll("-","").toUpperCase()}_${criterionIndex+1}`,label_fr:label,label_ar:label}))},sort_order:operation==="ADD"?maxOrder+index+1:target!.sort_order}});
+ const command=await c.rpc("propose_provider_contract_amendment_v1",{p_contract_id:p.contractId,p_expected_contract_version_id:p.versionId,p_expected_contract_hash:p.contentHash,p_reason:p.reason,p_scope_delta:{description:p.scopeDelta},p_price_delta_minor:amount,p_deadline_delta_days:p.deadlineDeltaDays,p_deliverables_delta:delta,p_idempotency_key:p.idempotencyKey});
+ if(command.error)return{status:"error",reason:command.error.code==="42501"?"FORBIDDEN":["40001","55000","23505"].includes(command.error.code??"")?"CONFLICT":"UNAVAILABLE"};const response=z.object({outcome:z.literal("CONTRACT_AMENDMENT_DRAFTED"),amendment_id:z.string().uuid()}).safeParse(command.data);return response.success?{status:"success",amendmentId:response.data.amendment_id}:{status:"error",reason:"UNAVAILABLE"};
+}

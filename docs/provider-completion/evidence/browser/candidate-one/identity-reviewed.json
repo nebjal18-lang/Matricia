@@ -1,0 +1,31 @@
+{
+  "scope": "NATIVE_PROVIDER_EXACT_SUBMISSION_AND_INDEPENDENT_AAL2_UI_REVIEW_WITH_KNOWN_TEST_PDF_SCANNER",
+  "status": "PASSED",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "physicalAntivirusCertified": false,
+  "externalRegistryCertified": false,
+  "legalIdentityCertified": false,
+  "steps": [
+    {
+      "step": "known_test_pdf_bytes_scanned_then_independently_reviewed_by_native_commands",
+      "passed": true
+    },
+    {
+      "step": "keyboard_ui_submits_exact_canonical_profile_after_document_deposit",
+      "passed": true
+    },
+    {
+      "step": "plain_provider_owner_cannot_self_approve",
+      "passed": true
+    },
+    {
+      "step": "independent_native_admin_aal2_ui_verifies_current_identity",
+      "passed": true
+    },
+    {
+      "step": "no_client_role_or_trial_created_by_provider_identity",
+      "passed": true
+    }
+  ]
+}

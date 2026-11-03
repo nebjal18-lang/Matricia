@@ -6,8 +6,16 @@ import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import type { ProviderDashboard } from "./model";
 
+
+/** Fail explicitly at the safety bound instead of silently truncating an editable catalogue. */
+async function allRows(query:{range:(from:number,to:number)=>PromiseLike<{data:unknown;error:unknown}>}){
+ const data:unknown[]=[];
+ for(let offset=0;offset<10000;offset+=500){const result=await query.range(offset,offset+499);if(result.error||!Array.isArray(result.data))return{data:null,error:result.error??"INVALID_ROWS"};data.push(...result.data);if(result.data.length<500)return{data,error:null};}
+ return{data:null,error:"CATALOG_BOUNDS_EXCEEDED"};
+}
+
 const uuid = z.string().uuid();
-const membershipSchema = z.object({ id: uuid, organization_id: uuid, organizations: z.object({ display_name: z.string().min(1) }) });
+const membershipSchema = z.object({ id: uuid, organization_id: uuid, organizations: z.object({ display_name: z.string().min(1) }), organization_member_roles:z.array(z.object({role_code:z.string(),revoked_at:z.string().nullable()})).default([]) });
 const profileSchema = z.object({ company_status: z.string(), overall_status: z.string(), activity_summary: z.string(), team_size: z.number().int(), years_experience: z.number().int(), secondary_subcontracting_allowed: z.boolean(), accounting_contact_email: z.string().nullable(), partner_contract_status: z.string(), row_version: z.number().int().positive() });
 const serviceSchema = z.object({ id: uuid, service_id: uuid, request_status: z.string(), catalog_services: z.object({ code: z.string() }), provider_qualifications: z.object({ id: uuid, provider_qualification_decisions: z.object({ status: z.string() }).nullable() }).nullable(), provider_capacity_versions: z.array(z.object({ capacity_status: z.string(), available_units: z.number().int().nullable(), lead_time_days: z.number().int() })).max(1) });
 const documentSchema = z.object({ id: uuid, version_number: z.number().int().positive(), status: z.string(), expires_on: z.string().nullable(), storage_object_path:z.string().optional(), provider_document_families: z.object({ document_kind: z.string(), code: z.string() }) });
@@ -20,8 +28,9 @@ const eligibilitySchema = z.object({
   reasons: z.array(z.string()),
   qualification_status: z.string(),
   capacity_status: z.string(),
-  decision_version: z.number().int().positive().nullable().optional(),
+  qualification_decision_version: z.number().int().positive().nullable().optional(),
   rule_version: z.string().nullable().optional(),
+  capacity_available_units:z.number().int().nullable().optional(),capacity_lead_time_days:z.number().int().nullable().optional(),qualification_rationale:z.string().nullable().optional(),qualification_blocking_conditions:z.array(z.unknown()).optional(),qualification_expires_at:z.string().nullable().optional(),
   checked_at: z.string().nullable().optional(),
 });
 
@@ -40,13 +49,13 @@ export function diagnoseProviderServiceLabelCoverage(serviceIds: readonly string
   return serviceIds.some((serviceId) => !localizedServiceIds.has(serviceId)) ? "PROVIDER_SERVICE_LABEL_MISSING" : null;
 }
 
-export async function loadProviderDashboard(requestedOrganizationId?: string, documentPage = 1): Promise<{ status: "success"; dashboard: ProviderDashboard } | { status: "error"; reason: ProviderDashboardErrorReason }> {
+export async function loadProviderDashboard(requestedOrganizationId?: string, documentPage = 1, documentFilter:{search?:string;kinds?:string[]} = {}): Promise<{ status: "success"; dashboard: ProviderDashboard } | { status: "error"; reason: ProviderDashboardErrorReason }> {
   const client = await getSupabaseServerClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   const authFailure = classifyAuthReadFailure(authError);
   if (authFailure) return { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "AUTH_QUERY_FAILED" };
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
-  const membershipResult = await client.from("organization_memberships").select("id,organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_MANAGER"]).limit(100);
+  const membershipResult = await client.from("organization_memberships").select("id,organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_MANAGER","PROVIDER_SALES","PROVIDER_TECHNICIAN","PROVIDER_ACCOUNTING","PROVIDER_VIEWER"]).limit(100);
   if (membershipResult.error) return { status: "error", reason: "MEMBERSHIP_QUERY_FAILED" };
   const memberships = z.array(membershipSchema).safeParse(membershipResult.data);
   if (!memberships.success) return { status: "error", reason: "MEMBERSHIP_SHAPE_INVALID" };
@@ -58,21 +67,23 @@ export async function loadProviderDashboard(requestedOrganizationId?: string, do
   const [profileResult, servicesResult, documentsResult, catalogResult] = await Promise.all([
     client.from("provider_profiles").select("company_status,overall_status,activity_summary,team_size,years_experience,secondary_subcontracting_allowed,accounting_contact_email,partner_contract_status,row_version").eq("provider_organization_id", organizationId).maybeSingle(),
     client.from("provider_services").select("id,service_id,request_status,catalog_services!inner(code),provider_qualifications!provider_qualifications_provider_service_id_fkey(id,provider_qualification_decisions!provider_qualifications_current_decision_fk(status)),provider_capacity_versions!provider_capacity_versions_provider_organization_id_servic_fkey(capacity_status,available_units,lead_time_days)").eq("provider_organization_id", organizationId).order("version_number", { referencedTable: "provider_capacity_versions", ascending: false }).limit(1, { referencedTable: "provider_capacity_versions" }),
-    client.from("provider_document_versions").select("id,version_number,status,expires_on,storage_object_path,provider_document_families!inner(document_kind,code)").eq("provider_organization_id", organizationId).order("created_at", { ascending: false }).order("id",{ascending:false}).range((page-1)*30,page*30),
-    client.from("catalog_services").select("id,code,library_id,primary_subcategory_id,current_published_version_id").eq("status", "PUBLISHED").not("library_id", "is", null).not("primary_subcategory_id", "is", null).not("current_published_version_id", "is", null).order("code").limit(200),
+    client.rpc("list_provider_entry_documents_v1",{p_provider_organization_id:organizationId,p_page:page,p_search:documentFilter.search??"",p_kinds:documentFilter.kinds??[]}),
+    allRows(client.from("catalog_services").select("id,code,library_id,primary_subcategory_id,current_published_version_id").eq("status", "PUBLISHED").not("library_id", "is", null).not("primary_subcategory_id", "is", null).not("current_published_version_id", "is", null).order("code")),
   ]);
   if (profileResult.error) return { status: "error", reason: "PROFILE_QUERY_FAILED" };
   if (servicesResult.error) return { status: "error", reason: "SERVICES_QUERY_FAILED" };
   if (documentsResult.error) return { status: "error", reason: "DOCUMENTS_QUERY_FAILED" };
   if (catalogResult.error) return { status: "error", reason: "CATALOG_QUERY_FAILED" };
-  const projectionDiagnostic=diagnoseProviderDashboardProjection({ profile: profileResult.data, services: servicesResult.data, documents: documentsResult.data, catalog: catalogResult.data });
+  const documentPageResult=z.object({items:z.array(documentSchema).max(31),required_documents_complete:z.boolean()}).safeParse(documentsResult.data);
+  if(!documentPageResult.success)return{status:"error",reason:"DOCUMENTS_SHAPE_INVALID"};
+  const projectionDiagnostic=diagnoseProviderDashboardProjection({ profile: profileResult.data, services: servicesResult.data, documents: documentPageResult.data.items, catalog: catalogResult.data });
   if (projectionDiagnostic) return { status: "error", reason: projectionDiagnostic };
   const interventionResult=await client.from("provider_intervention_mode_versions").select("version_number,modes").eq("provider_organization_id",organizationId).order("version_number",{ascending:false}).limit(1).maybeSingle();
   const intervention=z.object({version_number:z.number().int().positive(),modes:z.array(interventionMode)}).nullable().safeParse(interventionResult.data);
   if(interventionResult.error||!intervention.success)return {status:"error",reason:"PROFILE_QUERY_FAILED"};
   const profile = profileResult.data === null ? null : profileSchema.safeParse(profileResult.data);
   const services = z.array(serviceSchema).safeParse(servicesResult.data);
-  const documents = z.array(documentSchema).safeParse(documentsResult.data);
+  const documents = z.array(documentSchema).safeParse(documentPageResult.data.items);
   if(!documents.success)return {status:"error",reason:"DOCUMENTS_QUERY_FAILED"};
   const documentPaths=documents.data.flatMap(item=>item.storage_object_path?[item.storage_object_path]:[]);
   const scansResult=documentPaths.length?await client.from("provider_document_scan_jobs").select("storage_object_path,scan_status").eq("provider_organization_id",organizationId).in("storage_object_path",documentPaths):{data:[],error:null};
@@ -91,9 +102,9 @@ export async function loadProviderDashboard(requestedOrganizationId?: string, do
   const libraryIds=[...new Set(catalogForLabels.map((item)=>item.library_id))];
   const categoryIds=[...new Set(catalogForLabels.map((item)=>item.primary_subcategory_id))];
   const [serviceVersionsResult,librariesResult,categoriesResult]=await Promise.all([
-    client.from("catalog_service_versions").select("id,name_fr,name_ar").in("id",catalogForLabels.map((item)=>item.current_published_version_id)).eq("status","PUBLISHED").limit(200),
-    client.from("catalog_libraries").select("id,current_published_version_id").in("id",libraryIds).eq("status","PUBLISHED").limit(20),
-    client.from("catalog_subcategories").select("id,current_published_version_id").in("id",categoryIds).eq("status","PUBLISHED").limit(100),
+    allRows(client.from("catalog_service_versions").select("id,name_fr,name_ar").in("id",catalogForLabels.map((item)=>item.current_published_version_id)).eq("status","PUBLISHED").order("id")),
+    allRows(client.from("catalog_libraries").select("id,current_published_version_id").in("id",libraryIds).eq("status","PUBLISHED").order("id")),
+    allRows(client.from("catalog_subcategories").select("id,current_published_version_id").in("id",categoryIds).eq("status","PUBLISHED").order("id")),
   ]);
   if(serviceVersionsResult.error||librariesResult.error||categoriesResult.error)return{status:"error",reason:"LOCALIZATION_QUERY_FAILED"};
   const libraries=z.array(catalogLibrarySchema).safeParse(librariesResult.data);
@@ -101,8 +112,8 @@ export async function loadProviderDashboard(requestedOrganizationId?: string, do
   const serviceVersions=z.array(localizedVersionSchema).safeParse(serviceVersionsResult.data);
   if(!libraries.success||!categories.success||!serviceVersions.success)return{status:"error",reason:"LOCALIZATION_SHAPE_INVALID"};
   const [libraryVersionsResult,categoryVersionsResult]=await Promise.all([
-    client.from("catalog_library_versions").select("id,name_fr,name_ar").in("id",libraries.data.map((item)=>item.current_published_version_id)).eq("status","PUBLISHED").limit(20),
-    client.from("catalog_subcategory_versions").select("id,name_fr,name_ar").in("id",categories.data.map((item)=>item.current_published_version_id)).eq("status","PUBLISHED").limit(100),
+    allRows(client.from("catalog_library_versions").select("id,name_fr,name_ar").in("id",libraries.data.map((item)=>item.current_published_version_id)).eq("status","PUBLISHED").order("id")),
+    allRows(client.from("catalog_subcategory_versions").select("id,name_fr,name_ar").in("id",categories.data.map((item)=>item.current_published_version_id)).eq("status","PUBLISHED").order("id")),
   ]);
   if(libraryVersionsResult.error||categoryVersionsResult.error)return{status:"error",reason:"LOCALIZATION_QUERY_FAILED"};
   const libraryVersions=z.array(localizedVersionSchema).safeParse(libraryVersionsResult.data);
@@ -121,5 +132,8 @@ export async function loadProviderDashboard(requestedOrganizationId?: string, do
   const identityResult=await client.rpc("get_my_provider_identity_status_v1",{p_provider_organization_id:organizationId});
   const identity=z.object({verified:z.boolean(),last_verified_at:z.string().nullable()}).safeParse(identityResult.data);
   if(identityResult.error||!identity.success)return{status:"error",reason:"ELIGIBILITY_QUERY_FAILED"};
-  return { status: "success", dashboard: { identityReview:{verified:identity.data.verified,lastVerifiedAt:identity.data.last_verified_at},interventionModes:intervention.data?.modes??[],interventionModeVersion:intervention.data?.version_number??0,regionCodes: await loadProviderRegions(organizationId) ?? [], organizationId, organizationName: membership.data.organizations.display_name, profile: profile ? { companyStatus: profile.data.company_status, overallStatus: profile.data.overall_status, activitySummary: profile.data.activity_summary, teamSize: profile.data.team_size, yearsExperience: profile.data.years_experience, secondarySubcontractingAllowed: profile.data.secondary_subcontracting_allowed, accountingContactEmail: profile.data.accounting_contact_email, partnerContractStatus: profile.data.partner_contract_status, rowVersion: profile.data.row_version } : null, services: services.data.map((item, index) => { const explanation = eligibility.data[index]!,labels=labelsByServiceId.get(item.service_id)!; return { id: item.id, serviceId: item.service_id, ...labels, requestStatus: item.request_status, qualificationId: item.provider_qualifications?.id ?? null, qualificationStatus: explanation.qualification_status, capacityStatus: explanation.capacity_status, availableUnits: item.provider_capacity_versions[0]?.available_units ?? null, leadTimeDays: item.provider_capacity_versions[0]?.lead_time_days ?? null, eligibility: { eligible: explanation.eligible, reasons: explanation.reasons, decisionVersion: explanation.decision_version ?? null, ruleVersion: explanation.rule_version ?? null, checkedAt: explanation.checked_at ?? null } }; }), documentPage:page, documentsHasMore:documents.data.length>30, documents: documents.data.slice(0,30).map((item) => ({ id: item.id, kind: item.provider_document_families.document_kind, code: item.provider_document_families.code, version: item.version_number, status: item.status, scanStatus:item.storage_object_path?scansByPath.get(item.storage_object_path):undefined, expiresOn: item.expires_on })), catalogServices: catalog.data.flatMap((item)=>{const labels=labelsByServiceId.get(item.id);return labels?[{id:item.id,...labels}]:[]}) } };
+  const workScopeResult=await client.from("provider_work_scope_versions").select("version_number,intervention_radius_km,mission_size_summary").eq("provider_organization_id",organizationId).order("version_number",{ascending:false}).limit(1).maybeSingle();
+  const workScope=z.object({version_number:z.number().int().positive(),intervention_radius_km:z.number().int().nonnegative().nullable(),mission_size_summary:z.string().min(3).max(1000)}).nullable().safeParse(workScopeResult.data);if(workScopeResult.error||!workScope.success)return{status:"error",reason:"PROFILE_QUERY_FAILED"};
+  const regionCodes=await loadProviderRegions(organizationId);if(regionCodes===null)return{status:"error",reason:"PROFILE_QUERY_FAILED"};
+  return { status: "success", dashboard: { workScope:workScope.data?{version:workScope.data.version_number,radiusKm:workScope.data.intervention_radius_km,missionSizeSummary:workScope.data.mission_size_summary}:null,canManage:membership.data.organization_member_roles.some(role=>role.revoked_at===null&&["PROVIDER_OWNER","PROVIDER_MANAGER"].includes(role.role_code)),requiredDocumentsComplete:documentPageResult.data.required_documents_complete,identityReview:{verified:identity.data.verified,lastVerifiedAt:identity.data.last_verified_at},interventionModes:intervention.data?.modes??[],interventionModeVersion:intervention.data?.version_number??0,regionCodes:regionCodes??[], organizationId, organizationName: membership.data.organizations.display_name, profile: profile ? { companyStatus: profile.data.company_status, overallStatus: profile.data.overall_status, activitySummary: profile.data.activity_summary, teamSize: profile.data.team_size, yearsExperience: profile.data.years_experience, secondarySubcontractingAllowed: profile.data.secondary_subcontracting_allowed, accountingContactEmail: profile.data.accounting_contact_email, partnerContractStatus: profile.data.partner_contract_status, rowVersion: profile.data.row_version } : null, services: services.data.map((item, index) => { const explanation = eligibility.data[index]!,labels=labelsByServiceId.get(item.service_id)!; return { id: item.id, serviceId: item.service_id, ...labels, requestStatus: item.request_status, qualificationId: item.provider_qualifications?.id ?? null, qualificationStatus: explanation.qualification_status, capacityStatus: explanation.capacity_status, availableUnits: explanation.capacity_available_units??null, leadTimeDays: explanation.capacity_lead_time_days??null,qualificationRationale:explanation.qualification_rationale??null,blockingConditions:explanation.qualification_blocking_conditions??[],qualificationExpiresAt:explanation.qualification_expires_at??null, eligibility: { eligible: explanation.eligible, reasons: explanation.reasons, decisionVersion: explanation.qualification_decision_version ?? null, ruleVersion: explanation.rule_version ?? null, checkedAt: explanation.checked_at ?? null } }; }), documentPage:page, documentsHasMore:documents.data.length>30, documents: documents.data.slice(0,30).map((item) => ({ id: item.id, kind: item.provider_document_families.document_kind, code: item.provider_document_families.code, version: item.version_number, status: item.status, scanStatus:item.storage_object_path?scansByPath.get(item.storage_object_path):undefined, expiresOn: item.expires_on })), catalogServices: catalog.data.flatMap((item)=>{const labels=labelsByServiceId.get(item.id);return labels?[{id:item.id,...labels}]:[]}) } };
 }

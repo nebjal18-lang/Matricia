@@ -1,0 +1,12 @@
+
+ RUN  v5.0.3 /workspace/franchise-risk/apps/web
+
+
+ Test Files  4 passed (4)
+      Tests  23 passed (23)
+   Start at  08:29:46
+   Duration  3.16s (import 51%, transform 24%, tests 23%, worker 2%)
+
+    Isolate  4 workers spawned · ~468ms startup each (spawn + environment, per file)
+             at least ~468ms faster with isolate: false — reuses workers across files instead of one per file
+

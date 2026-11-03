@@ -21,6 +21,7 @@ const tones: Record<PlanningKind, "peach" | "violet" | "mint" | "sky"> = {
 export function PlanningWeekBoard({
   locale,
   events,
+  incomplete,
   days,
   today,
   prevHref,
@@ -29,6 +30,7 @@ export function PlanningWeekBoard({
 }: {
   locale: Locale;
   events: readonly PlanningEvent[];
+  incomplete: boolean;
   days: readonly string[];
   today: string;
   prevHref: string;
@@ -63,7 +65,7 @@ export function PlanningWeekBoard({
         ))}
       </ul>
       {weekEvents.length === 0 ? (
-        <p className="client-card" role="status">{ar ? "لا مواعيد في هذا الأسبوع." : "Aucune échéance sur cette semaine."}</p>
+        <p className="client-card" role="status">{incomplete ? (ar ? "لم يُحمّل أي موعد معروف لهذا الأسبوع. التخطيط غير مكتمل." : "Aucune échéance connue chargée pour cette semaine. Le planning reste incomplet.") : (ar ? "لا مواعيد في هذا الأسبوع." : "Aucune échéance sur cette semaine.")}</p>
       ) : null}
       <section className="provider-planning-week" aria-label={ar ? "تخطيط الأسبوع" : "Planning de la semaine"}>
         {days.map((day) => {
@@ -72,7 +74,7 @@ export function PlanningWeekBoard({
             <article key={day} className="client-card provider-planning-day" data-today={day === today ? "true" : "false"}>
               <header>
                 <h2>{weekday.format(new Date(`${day}T12:00:00.000Z`))}</h2>
-                <p>{dayEvents.length === 0 ? (ar ? "لا حدث" : "Aucun événement") : ar ? `${dayEvents.length} أحداث` : `${dayEvents.length} événement${dayEvents.length > 1 ? "s" : ""}`}</p>
+                <p>{dayEvents.length === 0 ? (incomplete ? (ar ? "المواعيد غير مكتملة" : "Échéances non exhaustives") : (ar ? "لا حدث" : "Aucun événement")) : ar ? `${dayEvents.length} أحداث${incomplete ? " معروفة" : ""}` : `${dayEvents.length} événement${dayEvents.length > 1 ? "s" : ""}${incomplete ? " connu" + (dayEvents.length > 1 ? "s" : "") : ""}`}</p>
               </header>
               <ul className="client-feed">
                 {dayEvents.map((event) => (

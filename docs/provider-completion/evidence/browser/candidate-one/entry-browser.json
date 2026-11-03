@@ -1,0 +1,28 @@
+{
+  "scope": "NATIVE_PROVIDER_UI_LEGAL_PROFILE_ACTIVITY_AND_UPLOAD_ENTRY",
+  "status": "PASSED",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "steps": [
+    {
+      "step": "keyboard_legal_profile_save_persists_exact_version",
+      "passed": true
+    },
+    {
+      "step": "touch_provider_activity_profile_persisted",
+      "passed": true
+    },
+    {
+      "step": "three_real_private_uploads_persist_as_submitted_not_verified",
+      "passed": true
+    },
+    {
+      "step": "arabic_retains_declared_user_text_and_selected_organization",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "externalRegistryCertified": false,
+  "physicalAntivirusCertified": false,
+  "legalIdentityCertified": false
+}

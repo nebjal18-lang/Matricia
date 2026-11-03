@@ -1,0 +1,10 @@
+{
+  "scope": "NATIVE_FRANCHISE_EDITORIAL_CREATE_RETRY_REVIEW_PUBLICATION",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "FAILED",
+  "steps": [],
+  "productionCatalogTouched": false,
+  "legalSignatureCertified": false,
+  "failure": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('Le brouillon de service a été créé dans votre bibliothèque mandatée.', { exact: true })\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByText('Le brouillon de service a été créé dans votre bibliothèque mandatée.', { exact: true }) with timeout 30000ms\n  - waiting for getByText('Le brouillon de service a été créé dans votre bibliothèque mandatée.', { exact: true })\n"
+}

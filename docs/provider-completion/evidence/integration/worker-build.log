@@ -1,0 +1,4 @@
+
+> @matricia/worker@0.1.0 build /workspace/provider-completion/apps/worker
+> tsc --noEmit
+

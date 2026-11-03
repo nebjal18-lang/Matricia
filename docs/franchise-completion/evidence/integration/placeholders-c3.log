@@ -1,0 +1,5 @@
+
+> matricia@0.1.0 no-placeholders /workspace/franchise-completion
+> node --experimental-strip-types scripts/validate-no-placeholders.ts
+
+Aucun marqueur incomplet dans le périmètre applicatif.

@@ -1,0 +1,22 @@
+{"sub":"a3610000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+ok 1 - manager creates a real version through the audited command
+ok 2 - new draft is present before archive
+ok 3 - archive replay keeps exactly one audited outcome
+ok 4 - detail reads archived identity without rewriting source
+ok 5 - archived identity is absent from drafts despite historical draft version
+ok 6 - archived question is reachable through the actual archive filter
+ok 7 - archiving identity preserves original version state
+ok 8 - archiving creates no replacement historical version
+ok 9 - archive cannot be edited without restoring
+ok 10 - restored identity returns to the draft filter
+ok 11 - editing creates a separate draft version
+ok 12 - detail opens the current draft rather than a stale historical version
+ok 13 - original wording remains immutable after edit
+ok 14 - duplicate has its own identity
+ok 15 - duplicate starts at its first revision
+ok 16 - each native mutation emits one event and replay emits none
+{"sub":"a3610000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 17 - another mandate cannot read the edited catalogue
+ok 18 - another mandate cannot duplicate a foreign question
+ok 19 - underlying RLS also hides the foreign identities
+1..19

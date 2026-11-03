@@ -1,0 +1,43 @@
+ok 1 - no catalogue mandate is seeded for the native onboarding
+authenticated|a3740000-0000-4000-8000-000000000001|{"sub":"a3740000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+authenticated|a3740000-0000-4000-8000-000000000002|{"sub":"a3740000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "1de1bc39-8e42-4d85-a2bb-94dc118c96a9", "approval_request_id": "7c77f0fa-c011-4165-b818-818aab7c3903"}
+authenticated|a3740000-0000-4000-8000-000000000003|{"sub":"a3740000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}
+ok 2 - native activation remains explicitly noncontractual
+ok 3 - the native owner can load the catalogue without an injected mandate
+ok 4 - role and existing catalogue policy both remain required and now agree
+ok 5 - the bridge does not grant central independent approval
+ok 6 - one catalogue ACL mandate was created by native activation
+ok 7 - catalogue window comes from the exact approved activated mandate, never a new TTL
+service_role||{"role":"service_role"}
+ok 8 - scoped catchup is idempotent for an existing native grant
+ok 9 - catchup does not duplicate the grant audit
+ok 10 - catchup does not duplicate the grant outbox
+authenticated|a3740000-0000-4000-8000-000000000005|{"sub":"a3740000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+ok 11 - a sibling member without a role cannot inherit catalogue access
+ok 12 - member cannot select an unauthorized franchise UUID
+authenticated|a3740000-0000-4000-8000-000000000001|{"sub":"a3740000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+authenticated|a3740000-0000-4000-8000-000000000002|{"sub":"a3740000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+{"outcome": "FRANCHISE_APPROVED", "row_version": 2, "franchise_id": "ca359a62-c73a-4731-bcc0-2ce96819b649", "approval_request_id": "fa6f3d38-8fb2-4263-867a-acdfe476ae12"}
+authenticated|a3740000-0000-4000-8000-000000000004|{"sub":"a3740000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal1"}
+ok 13 - second owner loads the catalogue under their own exact assignment
+ok 14 - the second owner cannot select the first territory
+ok 15 - existing pair uniqueness is preserved across two territories
+ok 16 - both native source identities are preserved
+ok 17 - multi-territory bound equals an approved source date
+authenticated|a3740000-0000-4000-8000-000000000003|{"sub":"a3740000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}
+ok 18 - first owner retains their own authorized catalogue after second activation
+
+ok 19 - revoked role cannot use a still-active sibling catalogue ACL
+ok 20 - development evidence never becomes production catalogue authorization
+service_role||{"role":"service_role"}
+ok 21 - catchup cannot bless a development activation in production
+authenticated|a3740000-0000-4000-8000-000000000001|{"sub":"a3740000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+{"outcome": "CATALOG_MANDATE_REVOKED", "command_id": "24ced185-b218-42d1-8a6a-ba3b231865fc", "mandate_id": "c9b8d97c-59f7-43f3-a868-86e9b415b4d9", "row_version": 3}
+service_role||{"role":"service_role"}
+ok 22 - the revocation catchup starts a separate service request without a user claim
+ok 23 - catchup never resurrects an explicitly revoked catalogue mandate
+ok 24 - revocation did not produce a replacement ACL row
+ok 25 - only the service can invoke scoped catchup
+ok 26 - applications cannot fabricate catalogue provenance
+1..26

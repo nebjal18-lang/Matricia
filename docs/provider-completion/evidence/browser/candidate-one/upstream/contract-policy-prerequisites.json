@@ -1,0 +1,54 @@
+{
+  "scope": "SCOPED_TEST_REFERENCE_CHECKLIST_AND_NATIVE_FOUR_EYES_CONTRACT_POLICIES",
+  "status": "READY",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "policies": [
+    {
+      "kind": "TEMPLATE",
+      "proposal": {
+        "status": "PENDING_APPROVAL",
+        "outcome": "CONTRACT_POLICY_VERSION_PROPOSED",
+        "content_hash": "68cd7948714cfc5c90373f084d51647a462b4c4341a22591540ca61732b76e6d",
+        "policy_version_id": "47ec4690-4496-4f1d-8a46-ceceec1fc592"
+      },
+      "proposer": "governance-author",
+      "reviewer": "governance-reviewer",
+      "scope": "TEST_ONLY_NOT_A_PUBLISHED_COMMERCIAL_RATE",
+      "selfApprovalSqlstate": "42501",
+      "decision": {
+        "outcome": "CONTRACT_POLICY_VERSION_DECIDED",
+        "decision": "APPROVE",
+        "content_hash": "68cd7948714cfc5c90373f084d51647a462b4c4341a22591540ca61732b76e6d",
+        "policy_version_id": "47ec4690-4496-4f1d-8a46-ceceec1fc592"
+      }
+    },
+    {
+      "kind": "COMMISSION",
+      "proposal": {
+        "status": "PENDING_APPROVAL",
+        "outcome": "CONTRACT_POLICY_VERSION_PROPOSED",
+        "content_hash": "445e542e4889ada85e1e08f2ff9676f7aceb9b182187ad7d601e78aa00e1b4f5",
+        "policy_version_id": "1edf0509-80e9-4af8-b529-9523b7f00851"
+      },
+      "proposer": "finance-author",
+      "reviewer": "finance-reviewer",
+      "scope": "TEST_ONLY_NOT_A_PUBLISHED_COMMERCIAL_RATE",
+      "selfApprovalSqlstate": "42501",
+      "decision": {
+        "outcome": "CONTRACT_POLICY_VERSION_DECIDED",
+        "decision": "APPROVE",
+        "content_hash": "445e542e4889ada85e1e08f2ff9676f7aceb9b182187ad7d601e78aa00e1b4f5",
+        "policy_version_id": "1edf0509-80e9-4af8-b529-9523b7f00851"
+      }
+    }
+  ],
+  "commercialOfferingPublished": false,
+  "legalClausesApprovedForProduction": false,
+  "cataloguePublicationCertified": false,
+  "checklist": {
+    "scope": "HISTORICAL_SQL_TEST_PRECONDITION",
+    "sourceSha256": "25534f159c449c7cd576f8cb5e2426be789b85384c277b60050ded5da190b3a8",
+    "appliedSqlSha256": "b4a09b1d5d3f495d9af1b0f250625a63ca287ab49e19def25e9a1eec78c09c3a"
+  }
+}

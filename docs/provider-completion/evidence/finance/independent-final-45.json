@@ -1,0 +1,92 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040000_provider_independent_financial_declarations.sql",
+      "sha256": "1844e4117239fcc72f7b911c4cc33f96ae4564e0229c7cea6fd72c412d277194"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040100_provider_monthly_closing.sql",
+      "sha256": "369c9554701d21ba8f85d68c281aa790750282fd6f0182d695ad0654cd359415"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040200_provider_billing_workflow_queries.sql",
+      "sha256": "519ea2e59303830581c9d8cbd0a9e0ac1782d5598d416ab05969c7710188c7f6"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040300_provider_billing_due_notifications.sql",
+      "sha256": "196f77f76470d7059676144e6d4a141e74cd1be661dce609d420c3e2bf71a64a"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040400_provider_dispute_payable_bridge.sql",
+      "sha256": "138fc1a2e8f4f67404dd7b8d405f225356f36f4f5b0df032b3db941e6badd749"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040500_provider_independent_plans_collection_credit.sql",
+      "sha256": "9c127cceeaee07495a640b8cfe031eb42da4fd9cc363da94dd0be5d79c21837d"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040600_provider_incremental_payment_allocation.sql",
+      "sha256": "5cbba5d9b244d37bc0fafd5062ae10e582d136022cb04de1ebbe7ce19ab9c62d"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040700_provider_governed_ordinary_issuance_only.sql",
+      "sha256": "6042dfda8100941adde80a4f5feb65df324d278e7a4a7304dad673a95c04aff4"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040800_provider_immutable_decision_replays.sql",
+      "sha256": "4864d9c9aa68aeed79eb8f595c6fc6d202ff906e7aa66e596e47145e58fb01f4"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040900_provider_closing_fairness_and_source_provenance.sql",
+      "sha256": "d8b11f75aa9838f002dee5e1c73788b2d3b7a33d5ac104e50e5f0305e2d5f7ac"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040910_client_receipt_confirmation_context.sql",
+      "sha256": "88d5d36aeea1daf4c8ec1a630c1b0406b9ee6e02f3747780e21e19ad73383341"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040920_provider_grouped_issuance_governed_only.sql",
+      "sha256": "12f436f10f05d08294d51f50ed89f5acc9b34acb3f54cd5ca9592186f58da321"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040930_provider_dispute_ingestion_fairness.sql",
+      "sha256": "9690648a2f57f88f9d212794bf4f95a367f7b449413a76d4686c6a60b9feb63b"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-finance/supabase/tests/0347_provider_independent_finance.test.sql",
+      "sha256": "d33f785d374d0bc4e21675d6fdd4592ef120bd84c6a4ddc341c3a5f72b4f58d7"
+    }
+  ],
+  "status": "PASSED",
+  "assertions": 45,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

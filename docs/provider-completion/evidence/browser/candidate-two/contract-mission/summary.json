@@ -1,0 +1,138 @@
+{
+  "scope": "NATIVE_SELECTED_QUOTE_CANONICAL_CONTRACT_AND_ASSIGNED_MISSION",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "PASSED",
+  "steps": [
+    {
+      "step": "native_client_comparison_and_exact_version_selection",
+      "passed": true
+    },
+    {
+      "step": "native_contract_generated_from_selected_version_and_independently_published_policies",
+      "passed": true
+    },
+    {
+      "step": "canonical_frozen_FR_AR_PDF_archived_downloaded_and_foreign_party_denied",
+      "passed": true
+    },
+    {
+      "step": "governed_NATIVE_SIMPLE_mock_envelope_real_authority_files_and_callbacks_without_legal_signature_claim",
+      "passed": true
+    },
+    {
+      "step": "native_client_mission_from_frozen_contract_and_owner_touch_assignment_unlocks_only_assigned_technician",
+      "passed": true
+    }
+  ],
+  "mode": "NON_CONTRACTUAL_DEMO",
+  "legalSignatureCertified": false,
+  "clientOnboardingCertified": false,
+  "physicalAntivirusCertified": false,
+  "selection": {
+    "rfq_id": "4a0644e9-79f0-4903-a998-488cd405ecb3",
+    "outcome": "QUOTE_SELECTED",
+    "quote_id": "357d43c8-4db4-423c-854c-130c70a3850b",
+    "replayed": false,
+    "quote_version_id": "ec232501-590b-4da4-b1b4-1138ab9eb8b6"
+  },
+  "contractId": "8e4c8e23-abed-485f-a034-e765ebe3a164",
+  "contractVersionId": "4e2a2bc3-0890-469e-81c0-175ee033bc5e",
+  "sourceDocuments": [
+    {
+      "id": "31efaa74-675c-42ed-9806-fbe18a264968",
+      "locale": "fr",
+      "pdf_sha256": "e6cfba9783c2de5ec95660942b23a0de6ee64b5a1d4a5159ae3e372b41221aa0",
+      "size_bytes": 32785,
+      "source_hash": "39eb23f11a65689dbfa19612e7e260e530e1dab92330d1d77642f91d2d1ed0ce",
+      "parties_hash": "f07eff5c2ba16d805a45e363d162707bee037da19947b6a856a1f3af163fb6b0",
+      "storage_path": "contract/4e2a2bc3-0890-469e-81c0-175ee033bc5e/39eb23f11a65689dbfa19612e7e260e530e1dab92330d1d77642f91d2d1ed0ce/fr/e6cfba9783c2de5ec95660942b23a0de6ee64b5a1d4a5159ae3e372b41221aa0.pdf",
+      "render_version": "SIGNATURE_SOURCE_PDF_V1"
+    },
+    {
+      "id": "846ebeb8-b53f-4996-8dad-bcda3c3dc849",
+      "locale": "ar",
+      "pdf_sha256": "51bb0690409d74940e6868d7ddf42f26e10f5101f72f93ddf8d88efa1a10c72f",
+      "size_bytes": 40043,
+      "source_hash": "39eb23f11a65689dbfa19612e7e260e530e1dab92330d1d77642f91d2d1ed0ce",
+      "parties_hash": "f07eff5c2ba16d805a45e363d162707bee037da19947b6a856a1f3af163fb6b0",
+      "storage_path": "contract/4e2a2bc3-0890-469e-81c0-175ee033bc5e/39eb23f11a65689dbfa19612e7e260e530e1dab92330d1d77642f91d2d1ed0ce/ar/51bb0690409d74940e6868d7ddf42f26e10f5101f72f93ddf8d88efa1a10c72f.pdf",
+      "render_version": "SIGNATURE_SOURCE_PDF_V1"
+    }
+  ],
+  "envelopeId": "469e2191-02c4-446a-b4cb-af79662c6fc3",
+  "signers": [
+    {
+      "actor": "client-owner",
+      "signerId": "7c51f782-e6da-4ceb-a845-c4586fe6a2cf",
+      "authorization": {
+        "outcome": "SIGNATURE_AUTHORITY_RECORDED",
+        "replayed": false,
+        "signer_id": "7c51f782-e6da-4ceb-a845-c4586fe6a2cf",
+        "envelope_id": "469e2191-02c4-446a-b4cb-af79662c6fc3",
+        "authority_id": "26466239-5a4e-4b2c-bd22-9c2871277dc1"
+      }
+    },
+    {
+      "actor": "provider-owner",
+      "signerId": "db7870da-114f-436e-b38f-4ef8d1fccbf9",
+      "authorization": {
+        "outcome": "SIGNATURE_AUTHORITY_RECORDED",
+        "replayed": false,
+        "signer_id": "db7870da-114f-436e-b38f-4ef8d1fccbf9",
+        "envelope_id": "469e2191-02c4-446a-b4cb-af79662c6fc3",
+        "authority_id": "edde9c53-3f68-4693-bad7-ac46770ec40e"
+      }
+    }
+  ],
+  "missionId": "2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+  "missionPreparation": {
+    "criteria": [
+      {
+        "key": "PREPARE",
+        "label_ar": "إعداد المهمة",
+        "label_fr": "Préparer la mission",
+        "proof_required": false
+      },
+      {
+        "key": "VERIFY",
+        "label_ar": "التحقق من الدليل",
+        "label_fr": "Vérifier la preuve",
+        "proof_required": true
+      }
+    ],
+    "contract_id": "8e4c8e23-abed-485f-a034-e765ebe3a164",
+    "deliverables": [
+      {
+        "key": "DELIVERABLE_1",
+        "label_ar": "تسليم 1",
+        "label_fr": "Livrable 1",
+        "required_criteria": null,
+        "source_description": "Rapport TEST"
+      },
+      {
+        "key": "DELIVERABLE_2",
+        "label_ar": "تسليم 2",
+        "label_fr": "Livrable 2",
+        "required_criteria": null,
+        "source_description": "Suivi mensuel TEST"
+      }
+    ],
+    "template_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "contract_version_id": "4e2a2bc3-0890-469e-81c0-175ee033bc5e",
+    "client_organization_id": "554a54e1-c4a5-4cba-9f8f-6dcd7cf297d7",
+    "provider_organization_id": "c18f1b43-983d-4065-b094-48c02f9b284b"
+  },
+  "deliverables": [
+    {
+      "id": "aec586f4-36b3-47ab-8530-71da292cbf26",
+      "milestone_id": "0ad38c19-c266-4d71-92d6-f25458f84ede",
+      "deliverable_key": "DELIVERABLE_1"
+    },
+    {
+      "id": "02f46743-7e23-4098-8b52-dd44324e5307",
+      "milestone_id": "f9f14437-3d9f-43df-b8d9-4cb352875f56",
+      "deliverable_key": "DELIVERABLE_2"
+    }
+  ]
+}

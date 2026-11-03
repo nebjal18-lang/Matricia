@@ -1,0 +1,13 @@
+{
+  "scope": "OWNED_CLONE_ACL_FIDELITY_NOT_APPLICATION_CERTIFICATION",
+  "sourcePurpose": "CANONICAL_ACL_SETUP_SOURCE_ONLY",
+  "sourceStatus": "retained-setup-source",
+  "migrationCount": 458,
+  "canonicalObjects": 3915,
+  "observedObjects": 3915,
+  "definitionMismatches": [],
+  "sourceOnly": [],
+  "targetOnly": [],
+  "changes": [],
+  "status": "INSPECTED"
+}

@@ -1,0 +1,86 @@
+{
+  "scope": "ACTUAL_FINAL_BROWSER_COMMANDS_NOT_A_GLOBAL_ROOT_TEST_RECEIPT",
+  "candidate": "5b8b0f738137abee19f6552aef538e906d04f24a",
+  "commands": [
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/run-app.mjs --coordinated --production --candidate=706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "result": "COMPLETE_OPTIMIZED_BUILD_AND_TYPESCRIPT_PASSED_LOCAL_SERVER_READY",
+      "productionDeploy": false
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/mode-client-browser.mjs --resume-navigation --resume-after-reviewed-upgrade",
+      "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "exitCode": 0,
+      "result": "4 native steps PASSED; existing governed activation preserved from5e06"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/final-navigation-browser.mjs --resume-after-reviewed-upgrade",
+      "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "exitCode": 0,
+      "result": "3 steps PASSED after correcting a relative test selector; real SPA locale assertions passed before selector repair"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/matrix.mjs --current-business-state --preserve-reviewed-native-provenance --candidate=706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "exitCode": 0,
+      "result": "232 pages /256 axe scans,0 failures,0 JS errors;256 contrast incomplete occurrences retained"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/contrast-review.mjs --candidate=706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "exitCode": 0,
+      "result": "8 scans/56 selected targets:54 measured satisfactory,2 not measured;0 below threshold"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/account-menu-matrix.mjs",
+      "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "exitCode": 0,
+      "result": "8 cases PASSED;3 hit-tested actions and keyboard/touch per case"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/final-navigation-browser.mjs --recheck-passed-readonly",
+      "candidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+      "exitCode": 0,
+      "result": "3 steps PASSED plus actual ordinary-scope RPC=false and absent notice FR/AR; no business mutations replayed"
+    },
+    {
+      "command": "node --test tests/e2e/helpers/provider-browser/safety.test.mjs tests/e2e/helpers/provider-browser/fixture-source.test.mjs tests/e2e/helpers/provider-browser/upgrade-plan.test.mjs tests/e2e/helpers/provider-browser/plan.test.mjs",
+      "exitCode": 0,
+      "result": "15 PASS,0 FAIL,0 SKIP"
+    },
+    {
+      "command": "node --check tests/e2e/helpers/provider-browser/final-navigation-browser.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node --check tests/e2e/helpers/provider-browser/matrix.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node --check tests/e2e/helpers/provider-browser/qualification-review.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/upgrade-candidate.mjs --coordinated --candidate=5b8b0f738137abee19f6552aef538e906d04f24a",
+      "exitCode": 0,
+      "result": "0 new migrations;507 preserved; no fresh SQL replay certified"
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/run-app.mjs --coordinated --production --candidate=5b8b0f738137abee19f6552aef538e906d04f24a",
+      "result": "COMPLETE_OPTIMIZED_BUILD_AND_TYPESCRIPT_PASSED_LOCAL_SERVER_READY",
+      "productionDeploy": false
+    },
+    {
+      "command": "APP_ENV=development node tests/e2e/helpers/provider-browser/quote-status-localization-browser.mjs --candidate=5b8b0f738137abee19f6552aef538e906d04f24a",
+      "exitCode": 0,
+      "result": "8/8 PASS FR/AR×375/390/768/1440;both labels translated,no SELECTED visible,same V2/tenant,free text preserved,0 JS/overflow"
+    },
+    {
+      "command": "node --check tests/e2e/helpers/provider-browser/quote-status-localization-browser.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "retainedFullMatrixCandidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a"
+}

@@ -1,0 +1,3221 @@
+{
+  "scope": "OWNED_ISOLATED_CLIENT_NATIVE_AUTH_BROWSER",
+  "appTree": "c7092168ac05d4765220892029cf5f7eaf6c8e4b",
+  "actorLabel": "owner",
+  "ownerOrganizationId": "c0b406b7-b8e2-4e62-b5fb-0003d2cd0562",
+  "nativeOnboardingCertified": false,
+  "physicalScanningCertified": false,
+  "status": "PASSED",
+  "candidate": "b96cb8660489c8f265494e12eda75a41370712f0",
+  "sourceArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [],
+  "actorBootstrap": "SYNTHETIC_LOCAL_SQL_ROLE_FIXTURE_NOT_GOVERNED_ONBOARDING_PROOF",
+  "nativeAuth": {
+    "otp": true,
+    "totpAal2": true,
+    "userJwtFabrication": false,
+    "verifiedCurrentLevel": "aal2"
+  },
+  "pages": [
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        "Enregistrement sécuriséChaque réponse est validée par le serveur, isolée par organisation et enregistrée dans la version du questionnaire choisie. Les champs sensibles ne sont jamais affichés dans les messages techniques.",
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        "Enregistrement sécuriséChaque réponse est validée par le serveur, isolée par organisation et enregistrée dans la version du questionnaire choisie. Les champs sensibles ne sont jamais affichés dans les messages techniques.",
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        "Enregistrement sécuriséChaque réponse est validée par le serveur, isolée par organisation et enregistrée dans la version du questionnaire choisie. Les champs sensibles ne sont jamais affichés dans les messages techniques.",
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        "Enregistrement sécuriséChaque réponse est validée par le serveur, isolée par organisation et enregistrée dans la version du questionnaire choisie. Les champs sensibles ne sont jamais affichés dans les messages techniques.",
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        "Enregistrement sécuriséChaque réponse est validée par le serveur, isolée par organisation et enregistrée dans la version du questionnaire choisie. Les champs sensibles ne sont jamais affichés dans les messages techniques.",
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": false,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        "حفظ آمنيتحقق الخادم من كل إجابة ويعزلها حسب المؤسسة ويحفظها ضمن نسخة الاستبيان المختارة. لا تظهر الحقول الحساسة في الرسائل التقنية.",
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        "حفظ آمنيتحقق الخادم من كل إجابة ويعزلها حسب المؤسسة ويحفظها ضمن نسخة الاستبيان المختارة. لا تظهر الحقول الحساسة في الرسائل التقنية.",
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        "حفظ آمنيتحقق الخادم من كل إجابة ويعزلها حسب المؤسسة ويحفظها ضمن نسخة الاستبيان المختارة. لا تظهر الحقول الحساسة في الرسائل التقنية.",
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        "حفظ آمنيتحقق الخادم من كل إجابة ويعزلها حسب المؤسسة ويحفظها ضمن نسخة الاستبيان المختارة. لا تظهر الحقول الحساسة في الرسائل التقنية.",
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/diagnostics",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/questionnaires",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        "حفظ آمنيتحقق الخادم من كل إجابة ويعزلها حسب المؤسسة ويحفظها ضمن نسخة الاستبيان المختارة. لا تظهر الحقول الحساسة في الرسائل التقنية.",
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/actions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/portefeuille",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/credits",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/recompenses",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/demandes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/documents",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "notifications",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/abonnement",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/achats-groupes",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/boxes/configuration",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/contrats",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/favoris",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/finances",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/litiges",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/missions",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/onboarding",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "client/recherche",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "messagerie",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "organisation",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "path": "tableau-de-bord",
+      "http": 200,
+      "redirectedToLogin": false,
+      "selectedOrganizationRetained": true,
+      "rtl": true,
+      "horizontalOverflow": false,
+      "alerts": [
+        ""
+      ]
+    }
+  ],
+  "security": [
+    {
+      "case": "client-cannot-admin-rpc",
+      "denied": true
+    },
+    {
+      "case": "client-cannot-read-foreign-organization",
+      "denied": true
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "fr",
+      "width": 360,
+      "denied": true,
+      "http": 200,
+      "destination": "/fr/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "fr",
+      "width": 360,
+      "denied": true,
+      "http": 404,
+      "destination": "/fr/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "fr",
+      "width": 375,
+      "denied": true,
+      "http": 200,
+      "destination": "/fr/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "fr",
+      "width": 375,
+      "denied": true,
+      "http": 404,
+      "destination": "/fr/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "fr",
+      "width": 390,
+      "denied": true,
+      "http": 200,
+      "destination": "/fr/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "fr",
+      "width": 390,
+      "denied": true,
+      "http": 404,
+      "destination": "/fr/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "fr",
+      "width": 768,
+      "denied": true,
+      "http": 200,
+      "destination": "/fr/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "fr",
+      "width": 768,
+      "denied": true,
+      "http": 404,
+      "destination": "/fr/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "fr",
+      "width": 1440,
+      "denied": true,
+      "http": 200,
+      "destination": "/fr/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "fr",
+      "width": 1440,
+      "denied": true,
+      "http": 404,
+      "destination": "/fr/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "ar",
+      "width": 360,
+      "denied": true,
+      "http": 200,
+      "destination": "/ar/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "ar",
+      "width": 360,
+      "denied": true,
+      "http": 404,
+      "destination": "/ar/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "ar",
+      "width": 375,
+      "denied": true,
+      "http": 200,
+      "destination": "/ar/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "ar",
+      "width": 375,
+      "denied": true,
+      "http": 404,
+      "destination": "/ar/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "ar",
+      "width": 390,
+      "denied": true,
+      "http": 200,
+      "destination": "/ar/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "ar",
+      "width": 390,
+      "denied": true,
+      "http": 404,
+      "destination": "/ar/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "ar",
+      "width": 768,
+      "denied": true,
+      "http": 200,
+      "destination": "/ar/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "ar",
+      "width": 768,
+      "denied": true,
+      "http": 404,
+      "destination": "/ar/client/actions"
+    },
+    {
+      "case": "client-cannot-admin-page",
+      "locale": "ar",
+      "width": 1440,
+      "denied": true,
+      "http": 200,
+      "destination": "/ar/tableau-de-bord"
+    },
+    {
+      "case": "client-cannot-select-foreign-org",
+      "locale": "ar",
+      "width": 1440,
+      "denied": true,
+      "http": 404,
+      "destination": "/ar/client/actions"
+    }
+  ],
+  "businessWorkflowCertified": false,
+  "externalProvidersCertified": false,
+  "pageErrors": [],
+  "menus": [
+    {
+      "locale": "fr",
+      "width": 360,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": true,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": true,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": true,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": false,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": false,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": true,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": true,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": true,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": false,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "keyboardOpenClose": true,
+      "keyboardTabReachesAccountLink": true,
+      "touchTapOpenClose": false,
+      "accountLinkExposed": true,
+      "organizationRetained": true
+    }
+  ],
+  "publicSession": [
+    {
+      "locale": "fr",
+      "width": 360,
+      "signedInClientSpacePresent": true,
+      "href": "/fr/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "signedInClientSpacePresent": true,
+      "href": "/fr/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "signedInClientSpacePresent": true,
+      "href": "/fr/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "signedInClientSpacePresent": true,
+      "href": "/fr/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "signedInClientSpacePresent": true,
+      "href": "/fr/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "signedInClientSpacePresent": true,
+      "href": "/ar/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "signedInClientSpacePresent": true,
+      "href": "/ar/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "signedInClientSpacePresent": true,
+      "href": "/ar/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "signedInClientSpacePresent": true,
+      "href": "/ar/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "signedInClientSpacePresent": true,
+      "href": "/ar/tableau-de-bord?workspace=client&organizationId=c0b406b7-b8e2-4e62-b5fb-0003d2cd0562"
+    }
+  ],
+  "failures": [],
+  "navigationAndGeometryPassed": true,
+  "functionalReadinessPassed": true
+}

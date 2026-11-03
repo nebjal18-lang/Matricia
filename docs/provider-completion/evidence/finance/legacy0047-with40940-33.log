@@ -1,0 +1,365 @@
+BEGIN
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+GRANT
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+INSERT 0 2
+REVOKE
+GRANT
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE VIEW
+CREATE FUNCTION
+CREATE TABLE
+ALTER TABLE
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+DO
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+REVOKE
+GRANT
+DROP POLICY
+CREATE POLICY
+NOTIFY
+DO
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+INSERT 0 4
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE TRIGGER
+ALTER TABLE
+CREATE FUNCTION
+REVOKE
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+CREATE TRIGGER
+NOTIFY
+ALTER TABLE
+ALTER TABLE
+DO
+NOTIFY
+REVOKE
+NOTIFY
+DO
+NOTIFY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+DO
+NOTIFY
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+NOTIFY
+REVOKE
+NOTIFY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+DO
+NOTIFY
+DO
+REVOKE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+NOTIFY
+DO
+SET
+ plan
+-------
+ 1..33
+(1 row)
+
+GRANT
+GRANT
+                    ok
+-------------------------------------------
+ ok 1 - all provider billing records exist
+(1 row)
+
+                            ok
+-----------------------------------------------------------
+ ok 2 - RLS is restrictive on every provider billing table
+(1 row)
+
+                                    ok
+---------------------------------------------------------------------------
+ ok 3 - five billing commands are security definer with fixed search paths
+(1 row)
+
+                                     ok
+-----------------------------------------------------------------------------
+ ok 4 - anonymous and service roles cannot execute provider billing commands
+(1 row)
+
+                                               ok
+-------------------------------------------------------------------------------------------------
+ ok 5 - authenticated may declare and reconcile but cannot manufacture ordinary period documents
+(1 row)
+
+                      ok
+----------------------------------------------
+ ok 6 - direct financial mutations are denied
+(1 row)
+
+                        ok
+---------------------------------------------------
+ ok 7 - all provider billing records are immutable
+(1 row)
+
+                          ok
+------------------------------------------------------
+ ok 8 - tenant read policy covers every billing table
+(1 row)
+
+                            ok
+-----------------------------------------------------------
+ ok 9 - provider billing never stores floating-point money
+(1 row)
+
+                               ok
+-----------------------------------------------------------------
+ ok 10 - money is consistently represented in bigint minor units
+(1 row)
+
+                            ok
+----------------------------------------------------------
+ ok 11 - payable events reference a versioned fiscal rule
+(1 row)
+
+                                ok
+-------------------------------------------------------------------
+ ok 12 - payables preserve mission and contract-version provenance
+(1 row)
+
+                                ok
+-------------------------------------------------------------------
+ ok 13 - invoice statement and journal references are tenant-bound
+(1 row)
+
+                        ok
+---------------------------------------------------
+ ok 14 - payment journal reference is tenant-bound
+(1 row)
+
+                                ok
+------------------------------------------------------------------
+ ok 15 - invoice preserves its immutable fiscal-rule snapshot set
+(1 row)
+
+                           ok
+--------------------------------------------------------
+ ok 16 - one payable event can enter only one statement
+(1 row)
+
+                            ok
+----------------------------------------------------------
+ ok 17 - a statement can issue only one immutable invoice
+(1 row)
+
+                               ok
+----------------------------------------------------------------
+ ok 18 - payment references are unique inside a provider tenant
+(1 row)
+
+                                         ok
+------------------------------------------------------------------------------------
+ ok 19 - duplicate invoice allocations are impossible within a reconciliation batch
+(1 row)
+
+                             ok
+-------------------------------------------------------------
+ ok 20 - invoice balance view executes with invoker security
+(1 row)
+
+                                    ok
+---------------------------------------------------------------------------
+ ok 21 - invoice status is derived from immutable allocations and due date
+(1 row)
+
+                                    ok
+--------------------------------------------------------------------------
+ ok 22 - payable calculation resolves an active dated Morocco tax version
+(1 row)
+
+                               ok
+----------------------------------------------------------------
+ ok 23 - commission and tax rounding use exact versioned inputs
+(1 row)
+
+                                    ok
+---------------------------------------------------------------------------
+ ok 24 - billing idempotence rejects payload changes and serializes replay
+(1 row)
+
+                                 ok
+--------------------------------------------------------------------
+ ok 25 - statement composition prevents concurrent double inclusion
+(1 row)
+
+                              ok
+---------------------------------------------------------------
+ ok 26 - invoice command posts a balanced double-entry journal
+(1 row)
+
+                                  ok
+-----------------------------------------------------------------------
+ ok 27 - independent Finance review posts the balanced payment journal
+(1 row)
+
+                                             ok
+---------------------------------------------------------------------------------------------
+ ok 28 - guarded reconciliation implementation locks the payment and rejects over-allocation
+(1 row)
+
+                            ok
+-----------------------------------------------------------
+ ok 29 - payable recording emits audit and Outbox evidence
+(1 row)
+
+                             ok
+------------------------------------------------------------
+ ok 30 - statement issuance emits audit and Outbox evidence
+(1 row)
+
+                            ok
+----------------------------------------------------------
+ ok 31 - invoice issuance emits audit and Outbox evidence
+(1 row)
+
+                                  ok
+----------------------------------------------------------------------
+ ok 32 - independent financial review emits audit and Outbox evidence
+(1 row)
+
+                               ok
+----------------------------------------------------------------
+ ok 33 - guarded reconciliation emits audit and Outbox evidence
+(1 row)
+
+ finish
+--------
+(0 rows)
+
+ROLLBACK

@@ -1,0 +1,135 @@
+{
+  "scope": "GENUINE_GOTRUE_PROVIDER_COHORT_WITH_NATIVE_ORGANIZATIONS_AND_INVITATIONS",
+  "status": "READY",
+  "userJwtFabricated": false,
+  "nativeEmailDeliveryCertified": false,
+  "staffRoleBootstrap": "EXPLICIT_TEST_ONLY_NOT_GOVERNED_STAFF_ONBOARDING_CERTIFICATION",
+  "actors": [
+    {
+      "label": "provider-owner",
+      "userId": "9e380824-4e6b-4b49-893d-d434a5283324",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_OWNER"
+      ]
+    },
+    {
+      "label": "provider-manager",
+      "userId": "7e301e6f-b3da-4570-8b56-b4766ca22cc4",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_MANAGER"
+      ]
+    },
+    {
+      "label": "provider-accounting",
+      "userId": "6b1181d5-1abc-4d53-97c4-8d445fea1cef",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_ACCOUNTING"
+      ]
+    },
+    {
+      "label": "technician-assigned",
+      "userId": "a6fdcbf7-e25e-48d0-a7fc-2c6b78230585",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_TECHNICIAN"
+      ]
+    },
+    {
+      "label": "technician-unassigned",
+      "userId": "e8a339f7-b181-4ec8-bf5b-01449db81364",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_TECHNICIAN"
+      ]
+    },
+    {
+      "label": "technician-viewer",
+      "userId": "25645961-5e3d-48a9-8d7a-c79e3afbb395",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_TECHNICIAN",
+        "PROVIDER_VIEWER"
+      ]
+    },
+    {
+      "label": "provider-viewer",
+      "userId": "65553039-0b8e-4a4c-98d9-2c1c54343fb0",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_VIEWER"
+      ]
+    },
+    {
+      "label": "provider-sales",
+      "userId": "3682d372-6ca7-4745-b467-5cc40c20553c",
+      "organizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "roles": [
+        "PROVIDER_SALES"
+      ]
+    },
+    {
+      "label": "foreign-provider",
+      "userId": "2ee60a9b-05a3-4985-9200-f6808da7a755",
+      "organizationId": "ce574a5d-938b-403a-b773-90cf0460caa9",
+      "roles": [
+        "PROVIDER_OWNER"
+      ]
+    },
+    {
+      "label": "client-owner",
+      "userId": "ebf0a7dc-1836-413e-bf18-2a1a24c94109",
+      "organizationId": "554a54e1-c4a5-4cba-9f8f-6dcd7cf297d7",
+      "roles": [
+        "CLIENT_OWNER"
+      ]
+    },
+    {
+      "label": "compliance-reviewer",
+      "userId": "c1630c0a-0d87-49d5-8a63-a46853dedaf2",
+      "organizationId": null,
+      "roles": [
+        "COMPLIANCE_MANAGER"
+      ]
+    },
+    {
+      "label": "governance-author",
+      "userId": "5598ddb1-2150-45cd-ba38-cd856db095e7",
+      "organizationId": null,
+      "roles": [
+        "SUPER_ADMIN"
+      ]
+    },
+    {
+      "label": "governance-reviewer",
+      "userId": "0fccbf73-6a07-4a50-950d-b41495811cb1",
+      "organizationId": null,
+      "roles": [
+        "SUPER_ADMIN"
+      ]
+    },
+    {
+      "label": "finance-author",
+      "userId": "139eb2b2-d9a0-480e-af97-0a12084dd23c",
+      "organizationId": null,
+      "roles": [
+        "FINANCE_MANAGER"
+      ]
+    },
+    {
+      "label": "finance-reviewer",
+      "userId": "ea2896a0-2c85-4d05-b559-711f71e3bcd2",
+      "organizationId": null,
+      "roles": [
+        "FINANCE_MANAGER"
+      ]
+    }
+  ],
+  "noProviderClientRoleOrTrialActivated": true,
+  "boundary": {
+    "clientRoles": 0,
+    "clientTrials": 0
+  }
+}

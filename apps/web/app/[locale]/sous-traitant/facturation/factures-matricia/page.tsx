@@ -5,7 +5,7 @@ export default async function ProviderMatriciaInvoicesPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string }>;
+  searchParams: Promise<{ organizationId?: string;page?:string }>;
 }) {
   return renderProviderLedgerPage("factures", params, searchParams);
 }

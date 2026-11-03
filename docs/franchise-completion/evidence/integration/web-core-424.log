@@ -1,0 +1,13 @@
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  66 passed (66)
+      Tests  424 passed (424)
+   Start at  07:34:48
+   Duration  31.61s (import 56%, transform 26%, tests 14%, worker 5%)
+
+  Transform  transforming modules took 10.51s · 26% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+

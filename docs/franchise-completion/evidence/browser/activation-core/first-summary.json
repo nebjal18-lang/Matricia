@@ -1,0 +1,36 @@
+{
+  "scope": "FRANCHISE_NATIVE_EXPLICIT_TEST_ACTIVATION",
+  "candidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "label": "FIRST",
+  "status": "PARTIALLY_VERIFIED_ACTIVATION_SUCCEEDED_WORKSPACE_FORBIDDEN",
+  "proposalCandidate": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "approvalCandidate": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "legalSignatureCertified": false,
+  "selfApprovalDenied": true,
+  "steps": [
+    {
+      "id": "CONTRACTUAL_PREREQUISITE_DENIED",
+      "status": "PASS",
+      "code": "55000",
+      "guard": "FRANCHISE_SIGNED_MANDATE_REQUIRED",
+      "verifiedAal2": true,
+      "organizationStatus": "ACTIVE",
+      "signatureGuardReached": true
+    },
+    {
+      "id": "UI_NON_CONTRACTUAL_ACTIVATION",
+      "status": "PASS",
+      "mode": "NON_CONTRACTUAL_DEMO",
+      "sourceHashPresent": true
+    },
+    {
+      "id": "ACTIVE_SPACE_OPENS",
+      "status": "FAIL",
+      "simulationExplicit": false,
+      "urlPath": "/fr/franchise/gouvernance",
+      "reason": "FORBIDDEN"
+    }
+  ],
+  "privateFieldClearedBeforeScreenshot": true
+}

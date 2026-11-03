@@ -1,0 +1,22 @@
+{
+  "scope": "ADOPT_ORCHESTRATOR_APPLIED_SCHEMA_NO_DDL_REPLAYED",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "fromCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "reviewedReceipt": "docs/franchise-completion/evidence/sql/catalog-bridge-schema-534.json",
+  "reviewedReceiptSha256": "18eec788964d72ce37eab11b4bbc724fecd3b2b52ee6b338c6b5695b5bf0fbcb",
+  "baselineMigrationCount": 533,
+  "migrationCount": 534,
+  "adoptedMigrations": [
+    {
+      "file": "20261103455200_franchise_catalog_activation_bridge.sql",
+      "sha256": "d87e154be5ce86da010e401196e04b795badc4babb4849c3b13f8dac1049f91a"
+    }
+  ],
+  "security": {
+    "environment": "DEVELOPMENT",
+    "tablesWithoutRls": 0
+  },
+  "freshReplay": false,
+  "stagingCertification": false
+}

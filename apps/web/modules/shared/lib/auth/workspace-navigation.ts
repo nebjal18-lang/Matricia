@@ -46,3 +46,12 @@ export function translateLocalPath(value: string, locale: Locale, alternate: Loc
   }
   return `${url.pathname}${url.search}${url.hash}`;
 }
+
+/** Explicit workspace hint for the shared dashboard only; authorization stays on the server. */
+export function withDashboardWorkspaceHint(value: string, locale: Locale, workspace: "provider" | "client"): string {
+  const safe = safeReturnPath(value, locale) ?? `/${locale}/tableau-de-bord`;
+  const url = new URL(safe, "https://matricia.invalid");
+  if (url.pathname !== `/${locale}/tableau-de-bord`) return safe;
+  url.searchParams.set("workspace", workspace);
+  return `${url.pathname}${url.search}${url.hash}`;
+}

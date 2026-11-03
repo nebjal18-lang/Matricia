@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import { loadDisputeDecisionContext } from "@/modules/shared/lib/dispute-economics/server";
 import{AdminDecisionHistory}from"@/modules/admin/screens/history/panel";
 import { adminPillCode, filterAdminRows } from "@/modules/admin/data/spaces/filters";
 import Link from "next/link";
@@ -398,7 +400,7 @@ function DocumentLayout({ locale, query, space, row }: { locale: Locale; query: 
   );
 }
 
-export function SpaceDecisionBoard({
+export async function SpaceDecisionBoard({
   locale,
   query,
   space,
@@ -415,6 +417,7 @@ export function SpaceDecisionBoard({
   const choices = decisionChoices(locale, space);
   const guards = decisionGuards(locale, space);
   const pipeline = spec.pipeline(locale);
+  const decisionContext = family.decision === "dispute" ? await loadDisputeDecisionContext(row.id) : null;
   return (
     <main className="client-page" data-admin-layout="decision" data-admin-space={space} data-admin-family={family.decision}>
       <section className="admin-kpi-strip" data-count={String(kpis.length)}>
@@ -433,7 +436,7 @@ export function SpaceDecisionBoard({
         <section className="admin-two">
           <article className="client-card">
             <header><h2>{t(locale, "Décision sur le litige", "القرار بشأن النزاع")}</h2></header>
-            <DisputeDecisionForm locale={locale} query={query} caseId={row.id} />
+            <DisputeDecisionForm locale={locale} query={query} caseId={row.id} context={decisionContext!} commandKey={randomUUID()} />
           </article>
           <aside className="client-stack">
             <article className="admin-banner" data-tone="danger">

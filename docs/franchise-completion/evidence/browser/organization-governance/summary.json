@@ -1,0 +1,35 @@
+{
+  "scope": "NATIVE_TEST_ORGANIZATION_ACTIVATION_WITH_TWO_APPROVALS",
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "applicationBrowserRecipe": false,
+  "sourceCommandOrigin": "df67da46f48def7cf804855ab985a28dec4aab6e",
+  "status": "PASSED",
+  "identityLegallyVerified": false,
+  "contractSigned": false,
+  "steps": [
+    {
+      "id": "SENSITIVE_REQUEST_REQUIRES_TWO_APPROVALS",
+      "status": "PASS",
+      "approvalsRequired": 2
+    },
+    {
+      "id": "SELF_APPROVAL_DENIED",
+      "status": "PASS",
+      "code": "42501"
+    },
+    {
+      "id": "TWO_DISTINCT_NATIVE_APPROVERS",
+      "status": "PASS",
+      "approverLabels": [
+        "governance-reviewer",
+        "compliance-reviewer"
+      ]
+    },
+    {
+      "id": "NATIVE_APPROVED_EXECUTION_PERSISTED",
+      "status": "PASS",
+      "organizationStatus": "ACTIVE",
+      "requestStatus": "EXECUTED"
+    }
+  ]
+}

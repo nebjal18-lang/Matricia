@@ -1,3 +1,4 @@
+import { FranchiseAccessPage } from "@/modules/franchise/ui/franchise-access-page";
 import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -9,13 +10,13 @@ import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 export default async function FranchiseQuestionnaireDetailPage({ params, searchParams }: { params: Promise<{ locale: string; questionnaireId: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
   const [{ locale, questionnaireId }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId,catalog:{kind:"QUESTIONNAIRE",objectId:questionnaireId} });
-  if (result.status !== "success") notFound();
+  const { space, result } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/questionnaires/${questionnaireId}`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId,catalog:{kind:"QUESTIONNAIRE",objectId:questionnaireId} });
+  if (result.status !== "success") return <FranchiseAccessPage locale={locale} space={space} reason={result.reason} active="questionnaires" returnPath={`/${locale}/franchise/questionnaires/${questionnaireId}${space.selectedQuery}`} />;
   const item = result.workspace.questionnaires.find((row) => row.id === questionnaireId);
   if (!item) notFound();
   const c = libraryCopy(locale);
   return (
-    <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="questionnaires" title={c.questionnaireConstructorTitle} lead={c.questionnaireConstructorLead} kicker={c.scope} mandateName={result.workspace.mandate.libraryName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="questionnaires" title={c.questionnaireConstructorTitle} lead={c.questionnaireConstructorLead} kicker={c.scope} mandateName={result.workspace.mandate.libraryName}>
       <FranchiseQuestionnaireConstructor
         locale={locale}
         query={space.selectedQuery}

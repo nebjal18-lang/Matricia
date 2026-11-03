@@ -1,0 +1,45 @@
+{
+  "scope": "SAFE_SHA256_EVIDENCE_MANIFEST",
+  "files": [
+    {
+      "file": "measured.json.gz",
+      "sha256": "9aeed805acee02324a8557747bb401317a2881d6f09a4b03664aec87fe24ba97"
+    },
+    {
+      "file": "review-00-fr-375-closed-background.png",
+      "sha256": "ac429eda5d8c87a3a95c355a48257e92eef7e3719d68545222cc7e5e931caa78"
+    },
+    {
+      "file": "review-00-fr-375-closed.png",
+      "sha256": "eae27dfce63d0c1c7f4ec92160c47a2b412e9f6aed16c351ee82a8fca5f55d61"
+    },
+    {
+      "file": "review-08-fr-375-closed-background.png",
+      "sha256": "0044b2b74af09225dde77bf6910d103fb4cd6a81dddf80b8951de3c33396b4aa"
+    },
+    {
+      "file": "review-08-fr-375-closed.png",
+      "sha256": "ae68732d98a1968cc171551930a1d235ed9b323eb58b5f451af05dfe2e82495d"
+    },
+    {
+      "file": "review-12-ar-375-closed-background.png",
+      "sha256": "892eab23bb627cc350bbbb1dacc1dc588d48753e862091ae18f2bae4b966899e"
+    },
+    {
+      "file": "review-12-ar-375-closed.png",
+      "sha256": "053f89a6ee7f080afa554a75fb434b5ea9528da5416b031fdbea3b2c501fdebb"
+    },
+    {
+      "file": "review-24-fr-375-closed-background.png",
+      "sha256": "aeafc06054ad0f3ae0f22abe6196713780bc3cc5bfdf3a5234796434482bc675"
+    },
+    {
+      "file": "review-24-fr-375-closed.png",
+      "sha256": "0f825547a0f89e9a7bb11db05f5f74bf18b3aa71aac7ea3294b1142256966763"
+    },
+    {
+      "file": "summary.json",
+      "sha256": "83e631149da5636ebcb5b1efc511a27a9e669473ebdd3032f8f00e3716b5e597"
+    }
+  ]
+}

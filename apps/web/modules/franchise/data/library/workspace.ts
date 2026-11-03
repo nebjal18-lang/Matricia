@@ -1,6 +1,10 @@
 import {catalogPageArguments,catalogPageSchema,scopedIds,referencedQuestionVersions,type CatalogPageInput} from "./server-page";
 import { collectCatalogPages } from "./paged-query";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
+import { catalogEffectiveStatus } from "./workspace-model";
 import { z } from "zod";
+import { mandateChoicesSchema,mandateChoiceOptions } from "./mandate-choices";
+import { serviceFulfillmentRecordSchema } from "./service-deliverables";
 import { overlayFranchiseLibraryDemo } from "@/modules/franchise/data/library/demo-overlay";
 import {
   type FranchiseCatalogRow,
@@ -81,7 +85,7 @@ const serviceVersionRow = z.object({
   fixed_fulfillment_allowed: z.boolean(),
   base_currency: z.string(),
   sort_order: z.number().int(),
-  fulfillment_config: jsonObject,
+  fulfillment_config: serviceFulfillmentRecordSchema,
   visibility_rules: jsonObject,
   sensitive: z.boolean(),
   slug: z.string(),
@@ -148,7 +152,9 @@ const franchiseRoles = ["FRANCHISE_OWNER", "FRANCHISE_MANAGER", "FRANCHISE_EXPER
 
 async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "ar"; organizationId?: string;franchiseId?:string;libraryId?:string;catalog?:CatalogPageInput }): Promise<FranchiseLibraryLoadResult> {
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const { data: auth, error: authError } = await client.auth.getUser();
+  const authFailure = classifyAuthReadFailure(authError);
+  if (authFailure) return { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const [franchisesResult, membershipsResult] = await Promise.all([
     collectCatalogPages((from,to)=>client.from("franchises").select("id,library_id,operator_organization_id,franchise_type,operator_code,status,activation_mode").eq("status", "ACTIVE").order("created_at", { ascending: false }).order("id").range(from,to)),
@@ -163,7 +169,15 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
     .flatMap((role) => role.organization_member_franchise_assignments?.length?role.organization_member_franchise_assignments.filter((a)=>a.revoked_at===null).map((a)=>({organizationId:member.organization_id,franchiseId:a.franchise_id})):[{ organizationId: member.organization_id, franchiseId: role.franchise_id }]));
   const allowed = franchises.data.filter((item) => roles.some((role) => role.organizationId === item.operator_organization_id && (role.franchiseId === item.id || (role.franchiseId === null && franchises.data.filter((f)=>f.operator_organization_id===item.operator_organization_id).length===1))));
   if (!allowed.length) return { status: "error", reason: "NO_MANDATE" };
-  const selected = allowed.find((item)=>(!input.organizationId||item.operator_organization_id===input.organizationId)&&(!input.franchiseId||item.id===input.franchiseId)&&(!input.libraryId||item.library_id===input.libraryId));
+  const choicesResult=await client.rpc("franchise_mandate_choices_v1",{p_organization_id:input.organizationId??null});
+  if(choicesResult.error)return{status:"error",reason:choicesResult.error.code==="42501"?"FORBIDDEN":"QUERY_FAILED"};
+  const choices=mandateChoicesSchema.safeParse(choicesResult.data);
+  if(!choices.success)return{status:"error",reason:"INVALID_RESPONSE"};
+  const availableMandates=mandateChoiceOptions(choices.data,input.locale);
+  if(availableMandates.some(option=>!allowed.some(f=>f.id===option.id&&f.library_id===option.libraryId&&f.operator_organization_id===option.organizationId)))return{status:"error",reason:"INVALID_RESPONSE"};
+  const candidates = allowed.filter((item)=>availableMandates.some(option=>option.id===item.id)).filter((item)=>(!input.organizationId||item.operator_organization_id===input.organizationId)&&(!input.franchiseId||item.id===input.franchiseId)&&(!input.libraryId||item.library_id===input.libraryId));
+  if (candidates.length > 1 && !input.franchiseId) return { status: "error", reason: "MANDATE_REQUIRED", availableMandates: availableMandates.filter(option=>candidates.some(item=>item.id===option.id)) };
+  const selected = candidates[0];
   if (!selected) return { status: "error", reason: input.organizationId || input.franchiseId || input.libraryId ? "FORBIDDEN" : "NO_MANDATE" };
   const libraryId = selected.library_id;
   const pageResponse=await client.rpc("franchise_catalog_page",catalogPageArguments(selected.id,input.catalog));
@@ -254,7 +268,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
     return {
       id: item.id,
       title: namedCategory(item),
-      status: version?.status ?? item.status,
+      status: catalogEffectiveStatus(item.status, version?.status),
       draftVersionId: item.current_draft_version_id,
       identityRowVersion: item.row_version,
       versionRowVersion: version?.row_version,
@@ -263,7 +277,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
         return {
           id: child.id,
           title: namedSubcategory(child),
-          status: childVersion?.status ?? child.status,
+          status: catalogEffectiveStatus(child.status, childVersion?.status),
           draftVersionId: child.current_draft_version_id,
           identityRowVersion: child.row_version,
           versionRowVersion: childVersion?.row_version,
@@ -280,7 +294,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
       kind: "SERVICE",
       title: pickName(version, item.code),
       code: item.code,
-      status: version?.status ?? item.status,
+      status: catalogEffectiveStatus(item.status, version?.status),
       versionLabel: version ? `v${version.version}` : null,
       href: `/${locale}/franchise/services/${item.id}${q}`,
       category: category ? namedCategory(category) : null,
@@ -330,7 +344,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
           })()
         : item.code,
       code: item.code,
-      status: version?.status ?? item.status,
+      status: catalogEffectiveStatus(item.status, version?.status),
       versionLabel: version ? `v${version.version}` : null,
       href: `/${locale}/franchise/questionnaires/${item.id}${q}`,
       category: null,
@@ -352,7 +366,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
       kind: "RULE",
       title: item.rule_key,
       code: item.rule_key,
-      status: version?.status ?? item.status,
+      status: catalogEffectiveStatus(item.status, version?.status),
       versionLabel: version ? `v${version.version}` : null,
       href: `/${locale}/franchise/regles/${item.id}${q}`,
       category: null,
@@ -371,12 +385,12 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
   const questionByVersion = new Map(questionVersions.map((item) => [item.id, item]));
   const questionnaireByVersion = new Map(questionnaireVersions.map((item) => [item.id, item.questionnaire_id]));
   const questionRows: FranchiseQuestionRow[] = questions.filter((item) => item.library_id === libraryId).map((item) => {
-    const version = questionVersions.find((value) => value.id === item.current_published_version_id) ?? questionVersions.find((value) => value.id === item.current_draft_version_id);
+    const version = questionVersions.find((value) => value.id === item.current_draft_version_id) ?? questionVersions.find((value) => value.id === item.current_published_version_id);
     const linked = questionnaireQuestions.find((link) => questionByVersion.get(link.question_version_id)?.question_id === item.id);
     return {
       id: item.id,
       key: item.question_key,
-      status: version?.status ?? item.status,
+      status: catalogEffectiveStatus(item.status, version?.status),
       label: version ? (locale === "ar" ? version.label_ar : version.label_fr) : item.question_key,
       help: version ? ((locale === "ar" ? version.help_ar : version.help_fr) ?? "") : "",
       labelFr: version?.label_fr,
@@ -413,6 +427,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
       questionnaires: questionnaireRows.map(withReviews),
       rules: ruleRows.map(withReviews),
       questions: questionRows,
+      availableMandates,
       mandates:allowed.map((f)=>({id:f.id,organizationId:f.operator_organization_id,operatorCode:f.operator_code})),
       compositionRules:compositionRules.data.map((r)=>({versionId:r.questionnaire_version_id,ruleVersionId:r.rule_version_id,order:r.evaluation_order})),
       ruleVersionBank:ruleVersions.map((r)=>({id:r.id,title:rules.find((x)=>x.id===r.rule_id)?.rule_key??r.rule_id,status:r.status,version:r.version})),

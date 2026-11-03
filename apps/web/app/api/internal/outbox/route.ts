@@ -1,3 +1,5 @@
+import { scanOneFinanceCostDocument } from "@/modules/shared/lib/finance-cost-proofs/scan-consumer";
+import { consumeFranchiseNetworkInvitation } from "@/modules/franchise/data/network/invitation-consumer";
 import { consumeVerifiedPaymentInbox } from "@/modules/shared/lib/payment-dispatch/consumer";
 import { consumeClientCommercialDocumentIssued } from "@/modules/client/data/billing/issued-consumer";
 import { consumeSocialNativeVerification } from "@/modules/shared/lib/marketing-autopilot/native-verification-consumer";
@@ -137,6 +139,19 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ code: "INVALID_REQUEST" }, { status: 400, headers });
   }
 
+  if (parsed.data.eventType === "FinanceCostDocumentUploadedV1") {
+    const id = z.string().uuid().safeParse(parsed.data.payload.upload_id);
+    if (!id.success || id.data !== parsed.data.aggregateId) return Response.json({ code: "FINANCE_COST_DOCUMENT_EVENT_INVALID" }, { status: 400, headers });
+    const result = await scanOneFinanceCostDocument(getSupabaseAdminClient(), id.data);
+    const completed = result.ok && result.code === "FINANCE_COST_DOCUMENT_SCAN_RECORDED";
+    return Response.json({ outcome: result.code }, { status: completed ? 202 : 503, headers: { ...headers, ...(completed ? { "x-matricia-outbox-consumer": "FINANCE_COST_SCAN" } : {}) } });
+  }
+  if (parsed.data.eventType === "FranchiseNetworkInvitationRequestedV1") {
+    const id = z.string().uuid().safeParse(parsed.data.payload.invitation_id);
+    if (!id.success || id.data !== parsed.data.aggregateId) return Response.json({ code: "FRANCHISE_NETWORK_EVENT_INVALID" }, { status: 400, headers });
+    const result = await consumeFranchiseNetworkInvitation(parsed.data.id, id.data);
+    return Response.json({ outcome: result.code }, { status: result.ok ? 202 : 503, headers: { ...headers, ...(result.ok ? { "x-matricia-outbox-consumer": "FRANCHISE_NETWORK_INVITATION" } : {}) } });
+  }
   if (parsed.data.eventType === "ClientCommercialDocumentIssuedV1") {
     const id = z.string().uuid().safeParse(parsed.data.payload.document_id ?? parsed.data.aggregateId);
     if (!id.success) return Response.json({ code: "CLIENT_DOCUMENT_PAYLOAD_INVALID" }, { status: 400, headers });

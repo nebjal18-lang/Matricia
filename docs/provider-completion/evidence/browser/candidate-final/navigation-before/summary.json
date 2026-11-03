@@ -1,0 +1,12 @@
+{
+  "scope": "FINAL_NATIVE_PROVIDER_HOME_BRAND_LANGUAGE_AND_INDEPENDENT_ADMIN_QUEUE",
+  "candidate": "5dab966bb58c2c8e5eba8904a2447e8091d5dd58",
+  "appTree": "da1a53949f998a772ec9d01b4ea41bcdd3018db4",
+  "status": "FAILED",
+  "steps": [],
+  "brandHref": "/fr/tableau-de-bord?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b&workspace=provider",
+  "homeHref": "/fr/tableau-de-bord?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b&workspace=provider",
+  "detailArabicHref": "/ar/sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996?organizationId=c18f1b43-983d-4065-b094-48c02f9b284b",
+  "failureStage": "provider-workspace-links",
+  "failure": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('html')\nExpected: \"rtl\"\nReceived: \"ltr\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('html') with timeout 5000ms\n  - waiting for locator('html')\n    13 × locator resolved to <html lang=\"fr\" dir=\"ltr\">…</html>\n       - unexpected value \"ltr\"\n"
+}

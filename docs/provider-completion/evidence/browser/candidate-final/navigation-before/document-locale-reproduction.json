@@ -1,0 +1,29 @@
+{
+  "scope": "REAL_NATIVE_FR_AR_NAVIGATION_DOCUMENT_LANGUAGE_COUNTERPROOF",
+  "candidate": "5dab966bb58c2c8e5eba8904a2447e8091d5dd58",
+  "appTree": "da1a53949f998a772ec9d01b4ea41bcdd3018db4",
+  "before": {
+    "url": "/fr/sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+    "language": "fr",
+    "direction": "ltr",
+    "providerDirection": "ltr",
+    "title": "Mission et livraison",
+    "organization": "c18f1b43-983d-4065-b094-48c02f9b284b"
+  },
+  "afterSpa": {
+    "url": "/ar/sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+    "language": "fr",
+    "direction": "ltr",
+    "providerDirection": "rtl",
+    "title": "المهمة والتسليم",
+    "organization": "c18f1b43-983d-4065-b094-48c02f9b284b"
+  },
+  "afterDocument": {
+    "url": "/ar/sous-traitant/missions/2edc6a91-866e-4fd1-98c8-c0a7df9c0996",
+    "language": "ar",
+    "direction": "rtl",
+    "providerDirection": "rtl",
+    "title": "المهمة والتسليم",
+    "organization": "c18f1b43-983d-4065-b094-48c02f9b284b"
+  }
+}

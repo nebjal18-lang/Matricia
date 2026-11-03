@@ -1,0 +1,8 @@
+
+ RUN  v5.0.3 /workspace/provider-finance/apps/web
+
+
+ Test Files  9 passed (9)
+      Tests  42 passed (42)
+   Start at  21:49:23
+   Duration  41.94s (import 81%, tests 12%, transform 7%)

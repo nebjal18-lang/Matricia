@@ -1,3 +1,11 @@
+import Requests from "@/app/[locale]/franchise/demandes/page";
+import Quality from "@/app/[locale]/franchise/qualite/page";
+import Finance from "@/app/[locale]/franchise/finance/page";
+import Perimeter from "@/app/[locale]/franchise/perimetre/page";
+import Network from "@/app/[locale]/franchise/reseau/page";
+import Followups from "@/app/[locale]/franchise/relances/page";
+import Digest from "@/app/[locale]/franchise/digest/page";
+import Performance from "@/app/[locale]/franchise/performance/page";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -19,7 +27,7 @@ const mocks = vi.hoisted(() => ({
   organizations: [] as Array<{ id: string; name: string }>, selectedOrganizationId: null as string | null,
 }));
 vi.mock("@/modules/franchise/screens/library/page-helper", () => ({
-  requireFranchiseLibrary: async () => ({ space: { selectedQuery: "", selectedOrganizationId: mocks.selectedOrganizationId, userEmail: null, organizations: mocks.organizations, errorReason: null }, result: mocks.library }),
+  requireFranchiseLibrary: async (input: { locale: string; returnPath?: string }) => ({ space: { currentPath: input.returnPath ?? `/${input.locale}/franchise/accueil`, mandates: [], selectedQuery: "", selectedOrganizationId: mocks.selectedOrganizationId, userEmail: null, organizations: mocks.organizations, errorReason: null }, result: mocks.library }),
   franchiseMandateName: (result: FranchiseLibraryLoadResult) => result.status === "success" ? result.workspace.mandate.libraryName : null,
   loadFranchiseSpaceFromLibrary: mocks.live,
 }));
@@ -38,7 +46,7 @@ beforeEach(() => {
 
 afterEach(() => { vi.restoreAllMocks(); });
 
-const pages = [Home, Library, Services, Questionnaires, Rules, Validations, Documents];
+const pages = [Home, Library, Services, Questionnaires, Rules, Validations, Documents, Requests, Quality, Finance, Perimeter, Network, Followups, Digest, Performance];
 for (const locale of ["fr", "ar"] as const) describe(`Franchise readiness ${locale}`, () => {
   it.each(pages.map((page, index) => [index, page] as const))("page %i explains the missing mandate and provides a real regularization path", async (_, Page) => {
     const html = renderToStaticMarkup(await Page({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
@@ -71,5 +79,17 @@ for (const locale of ["fr", "ar"] as const) describe(`Franchise readiness ${loca
     const html = renderToStaticMarkup(await Marketing({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
     expect(html).toContain(`href="/${locale}/franchise/candidature"`); expect(html).toContain(`href="/${locale}/contact"`);
     expect(html).not.toContain('name="organizationId"');
+  });
+});
+
+for (const locale of ["fr", "ar"] as const) describe(`Franchise incident recovery ${locale}`, () => {
+  it.each(pages.map((page, index) => [index, page] as const))("page %i keeps a technical failure visible without a successful empty board", async (_, Page) => {
+    mocks.library = { status: "error", reason: "QUERY_FAILED" };
+    const html = renderToStaticMarkup(await Page({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
+    expect(html).toContain('data-workspace-failure="QUERY_FAILED"');
+    expect(html).not.toContain(`href="/${locale}/franchise/candidature"`);
+    expect(mocks.live).not.toHaveBeenCalled();
+    expect(mocks.governance).not.toHaveBeenCalled();
+    expect(html).not.toContain('GOVERNANCE_SUCCESS_BOARD');
   });
 });

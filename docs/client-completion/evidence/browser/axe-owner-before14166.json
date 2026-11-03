@@ -1,0 +1,576 @@
+{
+  "scope": "LOCAL_NATIVE_CLIENT_AXE_CORE_WCAG",
+  "appTree": "c7092168ac05d4765220892029cf5f7eaf6c8e4b",
+  "tags": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "status": "FAILED",
+  "ruleExclusions": [],
+  "scans": [
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": false,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>Alloué net</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>Restant</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>Consommation</small><span dir=\"ltr\">0 %</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 185,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 29
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": true,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>Alloué net</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>Restant</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>Consommation</small><span dir=\"ltr\">0 %</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 189,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 29
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": false,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>Alloué net</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>Restant</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>Consommation</small><span dir=\"ltr\">0 %</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 187,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 30
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": true,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>Alloué net</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>Restant</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>Consommation</small><span dir=\"ltr\">0 %</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 188,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 30
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 375,
+      "menuOpen": false,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>صافي المخصص</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>المتبقي</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>الاستهلاك</small><span dir=\"ltr\">0٪</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 81,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 29
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 375,
+      "menuOpen": true,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>صافي المخصص</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>المتبقي</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>الاستهلاك</small><span dir=\"ltr\">0٪</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 82,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 29
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 768,
+      "menuOpen": false,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>صافي المخصص</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>المتبقي</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>الاستهلاك</small><span dir=\"ltr\">0٪</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 82,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 30
+    },
+    {
+      "path": "client/portefeuille",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 768,
+      "menuOpen": true,
+      "violations": [
+        {
+          "id": "aria-progressbar-name",
+          "impact": "serious",
+          "help": "ARIA progressbar nodes must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(4) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".client-portfolio-grid:nth-child(7) > .client-card:nth-child(1) > .client-portfolio-item > .client-progress[role=\"progressbar\"][aria-valuemin=\"0\"]"
+              ],
+              "html": "<div class=\"client-progress\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><span style=\"width:0%\"></span></div>",
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/definition-list?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "dl"
+              ],
+              "html": "<dl class=\"client-fact-grid\"><div><small>صافي المخصص</small><span dir=\"ltr\">0.00 MAD</span></div><div><small>المتبقي</small><span dir=\"ltr\">1250.50 MAD</span></div><div><small>الاستهلاك</small><span dir=\"ltr\">0٪</span></div></dl>",
+              "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 83,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 30
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 25,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 25
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 375,
+      "menuOpen": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 30,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 26
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 27,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 26
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "fr",
+      "width": 768,
+      "menuOpen": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 28,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 27
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 375,
+      "menuOpen": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 2,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 25
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 375,
+      "menuOpen": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 3,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 26
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 768,
+      "menuOpen": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 3,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 26
+    },
+    {
+      "path": "client/actions",
+      "actor": "owner",
+      "locale": "ar",
+      "width": 768,
+      "menuOpen": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "passedRules": 27
+    }
+  ],
+  "errors": [],
+  "manualFullWcagCertification": false
+}

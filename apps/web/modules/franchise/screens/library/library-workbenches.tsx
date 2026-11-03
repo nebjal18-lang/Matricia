@@ -25,7 +25,7 @@ function ToolLink({ href, label, tone = "ghost", icon }: { href: string; label: 
 }
 
 function completeness(item: FranchiseCatalogRow) {
-  return Math.round(([item.nameFr, item.nameAr, item.description].filter(Boolean).length / 3) * 100);
+  return Math.round(([item.nameFr, item.nameAr, item.description].filter(value => Boolean(value?.trim())).length / 3) * 100);
 }
 
 function answerTypeLabel(type: string | null, locale: Locale) {
@@ -62,7 +62,7 @@ export function FranchiseServicesWorkbench({
         <ToolLink href={selected ? `/${locale}/franchise/services/${selected.id}/validation${query}` : `/${locale}/franchise/validations${query}`} label={c.submitValidation} />
       </Toolbar>
       <section className="franchise-workbench franchise-workbench-services">
-        <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} organizationId={organizationId} commandIdentity={commandIdentity} />
+        <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
         <aside className="client-card franchise-service-drawer">
           {createMode || !selected ? (
             <>
@@ -81,6 +81,9 @@ export function FranchiseServicesWorkbench({
 function ServiceProperties({ locale, workspace, service, commandIdentity, organizationId }: { locale: Locale; workspace: FranchiseLibraryWorkspace; service: FranchiseCatalogRow; commandIdentity: { idempotencyKey: string; correlationId: string }; organizationId: string | null }) {
   const c = libraryCopy(locale);
   const score = completeness(service);
+  const contentChecks = [service.nameFr, service.nameAr, service.description].map(value => Boolean(value?.trim()));
+  const latestReview = service.reviewEvents?.[0];
+  const reviewComment = latestReview?.comment?.trim() || c.noMatriciaReturn;
   return (
     <>
       <header className="client-priority-head">
@@ -97,21 +100,21 @@ function ServiceProperties({ locale, workspace, service, commandIdentity, organi
         <p className="client-access-note">{workspace.mandate.libraryName} · {service.code}</p>
         <h3>{c.generalInfo}</h3>
         <dl className="franchise-props">
-          <div><small>{c.labelFr}</small><span>{service.nameFr ?? service.title}</span></div>
-          <div><small>{c.labelAr}</small><span dir="rtl" lang="ar">{service.nameAr ?? "—"}</span></div>
-          <div><small>{c.linked}</small><span>{service.category ?? "—"} / {service.subcategory ?? "—"}</span></div>
-          <div><small>{c.version}</small><span>{service.versionLabel ?? "—"}</span></div>
+          <div><dt>{c.labelFr}</dt><dd>{service.nameFr ?? service.title}</dd></div>
+          <div><dt>{c.labelAr}</dt><dd dir="rtl" lang="ar">{service.nameAr ?? "—"}</dd></div>
+          <div><dt>{c.linked}</dt><dd>{service.category ?? "—"} / {service.subcategory ?? "—"}</dd></div>
+          <div><dt>{c.version}</dt><dd>{service.versionLabel ?? "—"}</dd></div>
         </dl>
         {service.description ? <p>{service.description}</p> : null}
         <div className="franchise-split">
           <article>
-            <h3>{c.draftCompleteness}</h3>
+            <h3>{locale === "ar" ? "اكتمال الحقول الوصفية" : "Champs descriptifs renseignés"}</h3>
             <span className="franchise-complete" aria-hidden><span style={{ width: `${score}%` }} /></span>
             <p><bdi dir="ltr">{score}%</bdi></p>
           </article>
           <article>
             <h3>{c.matriciaReturn}</h3>
-            <p>{c.noMatriciaReturn}</p>
+            <p dir="auto">{reviewComment}</p>
           </article>
         </div>
       </section>
@@ -121,19 +124,19 @@ function ServiceProperties({ locale, workspace, service, commandIdentity, organi
       </section>
       <section id="documents">
         <h3>{c.inspectorDocuments}</h3>
-        <p>{c.noDocuments}</p>
+        <p>{locale === "ar" ? "تتوفر الوثائق المصرح بها في الخزنة ضمن سياقها المهني." : "Les pièces autorisées sont consultables dans le coffre, selon leur contexte métier."}</p><Link href={`/${locale}/franchise/documents?organizationId=${workspace.mandate.operatorOrganizationId ?? organizationId ?? ""}&franchiseId=${workspace.mandate.franchiseId}`} className="franchise-tool">{locale === "ar" ? "فتح خزنة الوثائق" : "Ouvrir le coffre documentaire"}</Link>
       </section>
       <section id="historique">
         <h3>{c.inspectorHistory}</h3>
         <p>{service.versionLabel ?? "v1"} · {kindLabel(service.kind, locale)}</p>
       </section>
       <ul className="franchise-draft-checklist">
-        {c.draftChecklist.map((item, index) => {
-          const done = index < Math.round((score / 100) * c.draftChecklist.length);
+        {c.draftChecklist.slice(0, 3).map((item, index) => {
+          const done = contentChecks[index] === true;
           return <li key={item} data-done={done ? "true" : undefined}>{item}</li>;
         })}
       </ul>
-      <p className="franchise-matricia-note" role="note">{c.matriciaReturn}: {c.noMatriciaReturn}</p>
+      <p className="franchise-matricia-note" role="note">{c.matriciaReturn}: {reviewComment}</p>
       {service.command ? (
         <>
           <FranchiseServiceCommandForms locale={locale} workspace={workspace} service={service} commandIdentity={commandIdentity} organizationId={organizationId} />
@@ -301,9 +304,9 @@ export function FranchiseQuestionnairesWorkbench({
           {selected && !createMode ? (
             <>
               <dl className="franchise-props">
-                <div><small>{c.technicalKey}</small><span dir="ltr">{selected.code}</span></div>
-                <div><small>{c.version}</small><span>{selected.versionLabel ?? "—"}</span></div>
-                <div><small>{c.state}</small><StatusChip status={selected.status} locale={locale} /></div>
+                <div><dt>{c.technicalKey}</dt><dd dir="ltr">{selected.code}</dd></div>
+                <div><dt>{c.version}</dt><dd>{selected.versionLabel ?? "—"}</dd></div>
+                <div><dt>{c.state}</dt><dd><StatusChip status={selected.status} locale={locale} /></dd></div>
               </dl>
               <FranchiseCatalogSubmitForm locale={locale} workspace={workspace} item={selected} commandIdentity={commandIdentity} organizationId={organizationId} />
               <FranchiseCloneQuestionnaireForm locale={locale} workspace={workspace} item={selected} commandIdentity={commandIdentity} organizationId={organizationId} />

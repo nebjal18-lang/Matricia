@@ -1,0 +1,36 @@
+{
+  "scope": "NATIVE_FUNDED_BUYER_UI_RESERVE_RELEASE_AND_DENIAL",
+  "appTree": "8721910b794a7d3533f96a99b8d63fddc3701d02",
+  "status": "FAILED",
+  "externalPspCertified": false,
+  "originalPaymentPreserved": true,
+  "steps": [
+    {
+      "step": "funded_member_envelope_3_available",
+      "passed": true
+    },
+    {
+      "step": "foreign_box_workspace_denied",
+      "passed": true
+    },
+    {
+      "step": "buyer_global_wallet_rls_denied",
+      "passed": true
+    },
+    {
+      "step": "buyer_admin_finance_rpc_denied",
+      "passed": true
+    },
+    {
+      "step": "keyboard_ui_reservation_persists_exact_3_credits",
+      "passed": true
+    },
+    {
+      "step": "foreign_actor_cannot_release_buyer_reservation",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "redemptionId": "2d9c5a71-7bb1-4497-a1c4-5fbda88a4eb0",
+  "failure": "touch_ui_release_persists_and_restores_member_envelope"
+}

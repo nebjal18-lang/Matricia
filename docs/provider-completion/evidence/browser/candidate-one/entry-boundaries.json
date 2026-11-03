@@ -1,0 +1,143 @@
+{
+  "scope": "GENUINE_NATIVE_PROVIDER_ENTRY_ROLE_AND_ORGANIZATION_BOUNDARIES",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "PASSED",
+  "checks": [
+    {
+      "actor": "provider-viewer",
+      "case": "provider-viewer_cannot_read_representative_profile",
+      "rpc": "get_my_provider_legal_identity_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-viewer",
+      "case": "provider-viewer_cannot_modify_company",
+      "rpc": "submit_provider_profile",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-viewer",
+      "case": "provider-viewer_cannot_reserve_upload",
+      "rpc": "begin_provider_document_upload_v2",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-sales",
+      "case": "provider-sales_cannot_read_representative_profile",
+      "rpc": "get_my_provider_legal_identity_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-sales",
+      "case": "provider-sales_cannot_modify_company",
+      "rpc": "submit_provider_profile",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-sales",
+      "case": "provider-sales_cannot_reserve_upload",
+      "rpc": "begin_provider_document_upload_v2",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-accounting",
+      "case": "provider-accounting_cannot_read_representative_profile",
+      "rpc": "get_my_provider_legal_identity_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-accounting",
+      "case": "provider-accounting_cannot_modify_company",
+      "rpc": "submit_provider_profile",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-accounting",
+      "case": "provider-accounting_cannot_reserve_upload",
+      "rpc": "begin_provider_document_upload_v2",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "technician-unassigned",
+      "case": "technician-unassigned_cannot_read_representative_profile",
+      "rpc": "get_my_provider_legal_identity_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "technician-unassigned",
+      "case": "technician-unassigned_cannot_modify_company",
+      "rpc": "submit_provider_profile",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "technician-unassigned",
+      "case": "technician-unassigned_cannot_reserve_upload",
+      "rpc": "begin_provider_document_upload_v2",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "technician-viewer",
+      "case": "technician-viewer_cannot_read_representative_profile",
+      "rpc": "get_my_provider_legal_identity_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "technician-viewer",
+      "case": "technician-viewer_cannot_modify_company",
+      "rpc": "submit_provider_profile",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "technician-viewer",
+      "case": "technician-viewer_cannot_reserve_upload",
+      "rpc": "begin_provider_document_upload_v2",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "foreign-provider",
+      "case": "foreign_owner_cannot_read_representative",
+      "rpc": "get_my_provider_legal_identity_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "foreign-provider",
+      "case": "foreign_owner_cannot_modify_company",
+      "rpc": "submit_provider_profile",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-owner",
+      "case": "provider_owner_cannot_access_admin_review",
+      "rpc": "get_provider_identity_review_context_v1",
+      "sqlstate": "42501",
+      "passed": true
+    },
+    {
+      "actor": "provider-manager",
+      "case": "native_invited_manager_can_read_same_org_current_legal_profile",
+      "passed": true
+    },
+    {
+      "case": "negative_commands_preserve_current_provider_profile_version",
+      "passed": true
+    }
+  ]
+}

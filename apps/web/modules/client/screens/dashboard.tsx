@@ -39,11 +39,16 @@ type FeaturedSteps = NonNullable<Extract<ClientHomeSnapshot, { status: "success"
 
 function featuredStatusLabel(status: string, c: (typeof clientDashboardCopy)[Locale]) {
   if (status === "DRAFT") return c.statusDraft;
-  if (status === "RFQ_OPEN") return c.statusMatching;
+  if (status === "INFORMATION_REQUIRED") return c.statusInformationRequired;
+  if (status === "NO_PROVIDER_AVAILABLE") return c.statusNoProvider;
+  if (["READY", "MATCHING", "RFQ_OPEN"].includes(status)) return c.statusMatching;
   if (status === "QUOTES_RECEIVED" || status === "CLIENT_REVIEW") return c.quotesReceived;
   if (status === "PROVIDER_SELECTED" || status === "CONTRACT_PENDING") return c.statusChoice;
-  if (status === "MISSION_ACTIVE" || status === "IN_PROGRESS") return c.statusMission;
-  return c.quotesReceived;
+  if (["CONTRACTED", "MISSION_ACTIVE", "IN_PROGRESS"].includes(status)) return c.statusMission;
+  if (["COMPLETED", "CLOSED"].includes(status)) return c.statusCompleted;
+  if (status === "CANCELLED") return c.statusCancelled;
+  if (status === "EXPIRED") return c.statusExpired;
+  return c.statusUnavailable;
 }
 
 function homeStepLabel(id: "need" | "proposals" | "choice" | "mission", c: (typeof clientDashboardCopy)[Locale]) {
@@ -139,7 +144,7 @@ export function ClientDashboardHome({
   const insights = snapshot.insights;
   const currentStep = project?.steps.find((step) => step.current);
   const homeSteps = project ? compactHomeSteps(project.steps) : null;
-  const pendingDecisions = counts?.pendingDecisions ?? 0;
+  const pendingDecisions = counts?.pendingDecisions ?? null;
   const documents = toClientInboxRows(searchedItems, "DOCUMENT", selectedQuery);
   const messages = toClientInboxRows(searchedItems, "MESSAGE", selectedQuery);
   const deadlines = toClientDeadlineRows({
@@ -151,10 +156,10 @@ export function ClientDashboardHome({
   });
   const progressRows = counts
     ? [
-        { label: c.kpiRequests, value: counts.openRequests ?? 0 },
-        { label: c.kpiQuotes, value: counts.quotesToReview ?? 0 },
-        { label: c.kpiMissions, value: counts.activeMissions ?? 0 },
-      ]
+        { label: c.kpiRequests, value: counts.openRequests },
+        { label: c.kpiQuotes, value: counts.quotesToReview },
+        { label: c.kpiMissions, value: counts.activeMissions },
+      ].flatMap((row) => row.value === null ? [] : [{label: row.label, value: row.value}])
     : [];
   const progressMax = progressRows.reduce((max, row) => Math.max(max, row.value), 1);
   const notifCount = summary.total > 0 ? Math.min(summary.total, 9) : 0;
@@ -308,7 +313,7 @@ export function ClientDashboardHome({
               <header>
                 <h2 id="decisions-ring">{c.kpiDecisions}</h2>
               </header>
-              {counts === null ? <p>{c.unavailable}</p> : (
+              {pendingDecisions === null ? <p>{c.unavailable}</p> : (
                 <div className="client-decisions-ring-wrap">
                   <div
                     className="client-decisions-ring"
@@ -335,27 +340,19 @@ export function ClientDashboardHome({
                 <h2 id="progress-title">{c.projectProgress}</h2>
                 <small>{c.progressLead}</small>
               </header>
-              {counts === null ? <p>{c.unavailable}</p> : progressRows.every((row) => row.value === 0) ? (
+              {counts === null || progressRows.length < 3 ? <p>{c.unavailable}</p> : progressRows.every((row) => row.value === 0) ? (
                 <p>{c.progressEmpty}</p>
               ) : (
                 <div className="client-home-spark">
                   <svg viewBox="0 0 320 120" role="img" aria-label={c.projectProgress}>
                     {progressRows.map((row, index) => {
-                      const y = 100 - Math.round((row.value / progressMax) * 72);
-                      const color = index === 0 ? "#642bef" : index === 1 ? "#f86b71" : "#1e7a5c";
-                      const points = `16,100 112,${y + 8} 208,${y} 304,${Math.max(28, y - 10)}`;
-                      return (
-                        <g key={row.label}>
-                          <polyline fill={`${color}22`} stroke="none" points={`${points} 304,110 16,110`} />
-                          <polyline fill="none" stroke={color} strokeWidth="3" points={points} />
-                        </g>
-                      );
+                      const height = Math.round((row.value / progressMax) * 80);
+                      const color = index === 0 ? "#1d4ed8" : index === 1 ? "#9a3412" : "#166534";
+                      return <g key={row.label}><title>{row.label}: {row.value}</title><rect x={24 + index * 100} y={100 - height} height={height} width={64} fill={color} rx={4} /></g>;
                     })}
                   </svg>
                   <ul className="client-home-progress">
-                    <li><span data-tone="violet" /><span>{c.progressPrep}</span><strong dir="ltr">{counts.openRequests}</strong></li>
-                    <li><span data-tone="peach" /><span>{c.progressRun}</span><strong dir="ltr">{counts.activeMissions}</strong></li>
-                    <li><span data-tone="mint" /><span>{c.progressReview}</span><strong dir="ltr">{counts.quotesToReview}</strong></li>
+                    {progressRows.map((row,index)=><li key={row.label}><span data-tone={["violet","peach","mint"][index]}/><span>{row.label}</span><strong dir="ltr">{row.value}</strong></li>)}
                   </ul>
                 </div>
               )}
@@ -457,7 +454,7 @@ export function ClientDashboardHome({
             <p className="client-home-footer-right">{c.homeFooterRight}</p>
           </footer>
 
-          {snapshot.status === "error" ? <p className="admin-notice">{c.snapshotError}</p> : null}
+          {snapshot.status === "error" ? <p role="alert" className="admin-notice">{snapshot.reason === "FORBIDDEN" ? c.snapshotForbidden : c.snapshotError}</p> : snapshot.partialSources?.length ? <div role="status" className="admin-notice">{snapshot.partialSources.map((item) => <p key={item.source}>{item.source === "missions" ? c.kpiMissions : c.kpiRequests} : {item.reason === "FORBIDDEN" ? c.snapshotForbidden : c.snapshotError}</p>)}</div> : null}
         </main>
       </div>
     </div>

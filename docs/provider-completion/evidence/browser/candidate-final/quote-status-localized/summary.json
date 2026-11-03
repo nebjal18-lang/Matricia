@@ -1,0 +1,117 @@
+{
+  "scope": "REVIEWED_QUOTE_STATUS_RENDERER_ONLY_FR_AR_RESPONSIVE_FOLLOWUP",
+  "candidate": "5b8b0f738137abee19f6552aef538e906d04f24a",
+  "appTree": "ef4b62c67a4d8ad5a6403e6a4568bd9dc1774c75",
+  "retainedFullMatrixCandidate": "706cd89347e39425cadbd8a75beb8a93d3dd3e2a",
+  "retainedFullMatrixPages": 232,
+  "retainedFullMatrixAxeScans": 256,
+  "fullMatrixReplayed": false,
+  "changedRuntimeFiles": [
+    "apps/web/modules/provider/screens/spaces/workbenches.tsx"
+  ],
+  "sourceNativeQuoteCandidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "quoteId": "357d43c8-4db4-423c-854c-130c70a3850b",
+  "selectedVersionId": "ec232501-590b-4da4-b1b4-1138ab9eb8b6",
+  "nativeStatus": "SELECTED",
+  "businessMutationsReplayed": false,
+  "status": "PASSED",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "Sélectionné",
+      "visibleVerification": "État de la version enregistrée : Sélectionné",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "fr-375.png"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "Sélectionné",
+      "visibleVerification": "État de la version enregistrée : Sélectionné",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "fr-390.png"
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "Sélectionné",
+      "visibleVerification": "État de la version enregistrée : Sélectionné",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "fr-768.png"
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "Sélectionné",
+      "visibleVerification": "État de la version enregistrée : Sélectionné",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "fr-1440.png"
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "مختار",
+      "visibleVerification": "حالة النسخة المحفوظة : مختار",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "ar-375.png"
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "مختار",
+      "visibleVerification": "حالة النسخة المحفوظة : مختار",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "ar-390.png"
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "مختار",
+      "visibleVerification": "حالة النسخة المحفوظة : مختار",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "ar-768.png"
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "passed": true,
+      "horizontalOverflow": false,
+      "visibleBadge": "مختار",
+      "visibleVerification": "حالة النسخة المحفوظة : مختار",
+      "rawSelectedVisible": false,
+      "freeTextPreserved": true,
+      "selectedOrganizationId": "c18f1b43-983d-4065-b094-48c02f9b284b",
+      "screenshot": "ar-1440.png"
+    }
+  ],
+  "pageErrors": []
+}

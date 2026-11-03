@@ -1,0 +1,28 @@
+{
+  "scope": "NATIVE_CURRENT_PROVIDER_FINANCE_WITH_UNSHORTENED_REAL_DISPUTE_WINDOW",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "FAILED",
+  "steps": [
+    {
+      "step": "actual_native_sales_and_viewer_receipt_reservation_denied_42501",
+      "passed": true
+    }
+  ],
+  "realMoneyMovementCertified": false,
+  "physicalAntivirusCertified": false,
+  "closedInvoiceCertified": false,
+  "paymentPlanAndAllocationCertified": false,
+  "limitations": [
+    "A newly generated pre-statement cannot close before its real approved dispute deadline.",
+    "No historical invoice, financial entry, payment, balance, receipt or clock is injected."
+  ],
+  "idempotencyKey": "a750d063-4b0a-489d-afa4-ffba5415ffdd",
+  "uploadId": "b447e72a-26ff-471d-b9fc-4fa0f5b9e281",
+  "sha256": "6c1cdc139289d8f0b8f9557f8cc3b26a00352c5d6e6f78bde781b3cd301c9a0b",
+  "sizeBytes": 831,
+  "recoveredNativeCleanScanId": "9aab6d63-1f90-4456-9af2-2e5e2190f5aa",
+  "nativePendingIntentRecoveredAfterReload": true,
+  "failureStage": "known-finance-pdf-scan",
+  "failure": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 1\nReceived: 0\n\nCall Log:\n- Timeout 25000ms exceeded while waiting on the predicate"
+}

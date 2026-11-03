@@ -1,0 +1,34 @@
+{"sub":"a3620000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 1 - journal poster cannot independently classify its own expense
+{"sub":"a3620000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 2 - tax asset amount is not silently treated as expense
+ok 3 - generic posted journal never proves collected net revenue
+ok 4 - exact source object is bound to the actual immutable journal
+ok 5 - shared central cost remains excluded despite a valid net expense journal and independent reviewer
+ok 6 - cost and revenue categories cannot be interchanged
+ok 7 - expense retry returns its exact committed receipt
+ok 8 - a new idempotency key cannot duplicate the expense
+ok 9 - no collected revenue was invented
+ok 10 - closure includes the actual net expense recorded before its frozen cutoff
+ok 11 - actual expense produces a loss, never a fictitious distributable profit
+ok 12 - clôture retry retains the same version and exact response
+ok 13 - reusing a close key with changed intent is rejected
+ok 14 - cutoff must include the whole claimed civil period
+ok 15 - a second overlapping period cannot classify or allocate the same ledger history
+{"sub":"a3620000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+ok 16 - even successful receipts cannot be replayed without required AAL2
+{"sub":"a3620000-0000-4000-8000-000000000002","role":"authenticated"}
+ok 17 - missing AAL is never treated as permission to replay a financial close
+ok 18 - missing AAL cannot replay a classified expense
+ok 19 - missing AAL is denied before balance and journal checks
+{"sub":"a3620000-0000-4000-8000-000000000002","role":"authenticated","aal":null}
+ok 20 - JSON-null AAL is denied independently of an existing successful key
+{"sub":"a3620000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+ok 21 - foreign actor cannot use a library UUID as a mandate
+ok 22 - only one classified net expense was written
+ok 23 - retry and rejected requests created no duplicate closure
+ok 24 - a loss allocates zero and never manufactures beneficiary debt
+ok 25 - no financial distribution is manufactured for a loss
+ok 26 - native reconciliation guard remains present after retry repair
+ok 27 - purpose-bound mission projection has no anonymous or worker bypass
+1..27

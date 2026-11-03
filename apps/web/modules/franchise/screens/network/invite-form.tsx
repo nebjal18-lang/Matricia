@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { NetworkInvitationStatusPanel } from "./invitation-status-panel";
+import { networkInvitationCopy } from "./invitation-copy";
 import { useActionState, useId } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
@@ -28,10 +31,15 @@ const sources = {
 
 function Feedback({ state, locale }: { state: FranchiseInviteState; locale: Locale }) {
   const c = franchiseCopy(locale);
+  const n = networkInvitationCopy(locale);
   const value = state.status === "success"
-    ? `${c.inviteSent}${state.created > 1 ? ` (${state.created})` : ""}`
+    ? `${n.queued} : ${state.created}. ${n.skipped} : ${state.skipped ?? 0}.`
     : state.status === "error"
-      ? state.reason === "VALIDATION" ? c.inviteInvalid
+      ? state.reason === "UNAUTHENTICATED" ? n.session
+        : state.reason === "MFA_REQUIRED" ? n.mfa
+        : state.reason === "UNAVAILABLE" ? n.unavailable
+          : state.reason === "RATE_LIMITED" ? n.rate
+            : state.reason === "VALIDATION" ? c.inviteInvalid
         : state.reason === "FORBIDDEN" ? c.inviteForbidden
           : state.reason === "CONFLICT" ? c.inviteConflict
             : c.inviteFailed
@@ -75,9 +83,11 @@ export function FranchiseInviteForms({
   const [inviteState, inviteAction, invitePending] = useActionState(inviteFranchiseProvider, idle);
   const [csvState, csvAction, csvPending] = useActionState(importFranchiseProviders, idle);
   const nameLabel = prospectType === "CLIENT" ? c.inviteClientName : c.inviteName;
-  const submitLabel = prospectType === "CLIENT" ? c.inviteClient : c.inviteSubmit;
+  const n = networkInvitationCopy(locale);
+  const submitLabel = n.submit;
   return (
     <div className="grid gap-6 lg:grid-cols-2">
+      <div className="lg:col-span-2 rounded-md border p-4"><p>{n.explanation}</p><Link className="underline" href={`/${locale}/securite/compte?next=${encodeURIComponent(`/${locale}/franchise/${prospectType === "CLIENT" ? "clients" : "fournisseurs"}/inviter${organizationId ? `?organizationId=${organizationId}` : ""}`)}`}>{n.security}</Link></div>
       <form action={inviteAction} className="franchise-props-form">
         <Hidden locale={locale} organizationId={organizationId} franchiseId={franchiseId} territoryVersionId={territoryVersionId} ownerUserId={ownerUserId} idempotencyKey={keys.invite} prospectType={prospectType} />
         <div>
@@ -102,6 +112,8 @@ export function FranchiseInviteForms({
           <Label htmlFor={`${prefix}-followup`}>{c.inviteFollowup}</Label>
           <Input id={`${prefix}-followup`} name="nextFollowupAt" type="datetime-local" className={control} />
         </div>
+        <InvitationOptions locale={locale} prefix={`${prefix}-single`} />
+        <div><Label htmlFor={`${prefix}-phone`}>{n.phone}</Label><Input id={`${prefix}-phone`} name="contactPhone" type="tel" maxLength={40} className={control} dir="ltr" /></div>
         <div className="sm:col-span-2">
           <Button type="submit" disabled={invitePending} className="min-h-11">{invitePending ? c.invitePending : submitLabel}</Button>
           <Feedback state={inviteState} locale={locale} />
@@ -114,11 +126,21 @@ export function FranchiseInviteForms({
           <Textarea id={`${prefix}-csv`} name="csvText" required rows={8} dir="ltr" className="font-mono" placeholder={c.csvPlaceholder} />
         </div>
         <p className="sm:col-span-2 text-sm text-muted-foreground">{c.csvHelp}</p>
+        <InvitationOptions locale={locale} prefix={`${prefix}-batch`} />
         <div className="sm:col-span-2">
-          <Button type="submit" disabled={csvPending} className="min-h-11">{csvPending ? c.invitePending : c.csvSubmit}</Button>
+          <Button type="submit" disabled={csvPending} className="min-h-11">{csvPending ? c.invitePending : n.csv}</Button>
           <Feedback state={csvState} locale={locale} />
         </div>
       </form>
+      <NetworkInvitationStatusPanel locale={locale} franchiseId={franchiseId} />
     </div>
   );
+}
+
+function InvitationOptions({ locale, prefix }: { locale: Locale; prefix: string }) {
+  const n = networkInvitationCopy(locale);
+  return <>
+    <div><Label htmlFor={`${prefix}-language`}>{n.language}</Label><select id={`${prefix}-language`} name="invitationLocale" defaultValue={locale} className={control}><option value="fr">Français</option><option value="ar">العربية</option></select></div>
+    <label className="flex items-start gap-3 sm:col-span-2" htmlFor={`${prefix}-permission`}><input id={`${prefix}-permission`} type="checkbox" name="contactPermissionConfirmed" value="yes" required className="mt-1 size-5 shrink-0" /><span>{n.permission}</span></label>
+  </>;
 }

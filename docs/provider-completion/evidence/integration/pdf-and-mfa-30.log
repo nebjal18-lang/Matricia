@@ -1,0 +1,12 @@
+
+ RUN  v5.0.3 /workspace/provider-completion/apps/web
+
+
+ Test Files  5 passed (5)
+      Tests  30 passed (30)
+   Start at  22:51:19
+   Duration  29.98s (tests 80%, import 13%, transform 7%)
+
+    Isolate  5 workers spawned · ~557ms startup each (spawn + environment, per file)
+             at least ~2.23s faster with isolate: false — reuses workers across files instead of one per file
+

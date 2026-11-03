@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-11-03T09:26:43.027995+00:00",
+  "sourceCommit": "834202b6a77df4b2a13c77bdcfcc98ffdad6e011",
+  "appTree": "d334946aa988aceda5543b72c64411035643206f",
+  "web": {
+    "files": 92,
+    "tests": 801,
+    "status": "passed"
+  },
+  "worker": {
+    "files": 15,
+    "tests": 158,
+    "status": "passed",
+    "typecheck": "passed"
+  },
+  "finalWebTypecheck": "passed",
+  "finalWebLint": "passed",
+  "browserFinal": "pending",
+  "sqlFreshFinal": {
+    "status": "passed",
+    "migrations": 558,
+    "files": 73,
+    "assertions": 2813,
+    "publicTables": 664,
+    "tablesWithoutRls": 0,
+    "apiPgtapExecutable": false,
+    "cleanup": "passed"
+  },
+  "ci": "not_started_account_billing",
+  "optimizedTypedBuild": "passed",
+  "semanticDelta": {
+    "candidate": "b433394c",
+    "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+    "files": 13,
+    "tests": 117,
+    "lint": "passed",
+    "typecheck": "passed",
+    "overlapsWebGroup": true
+  },
+  "prCreation": {
+    "status": "blocked",
+    "reason": "API_GRAPHQL_FORBIDDEN",
+    "base": "codex/bootstrap-foundation",
+    "head": "codex/franchise-finance-completion-20261103"
+  }
+}

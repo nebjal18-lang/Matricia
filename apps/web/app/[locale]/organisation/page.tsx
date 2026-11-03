@@ -1,3 +1,6 @@
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
+import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -21,14 +24,22 @@ export default async function OrganizationPage({ params, searchParams }: { param
   const query = await searchParams;
   if (!isLocale(locale)) notFound();
   const returnTo = organizationReturnPath(locale, query.next);
-  const selfHref = returnTo ? `/${locale}/organisation?role=client&next=${encodeURIComponent(returnTo)}` : `/${locale}/organisation`;
+  const selfParams = new URLSearchParams();
+  if (query.role === "fournisseur" || query.role === "franchise") selfParams.set("role", query.role);
+  if (returnTo) selfParams.set("next", returnTo);
+  if (query.organizationId) selfParams.set("organizationId", query.organizationId);
+  const selfHref = `/${locale}/organisation${selfParams.size ? `?${selfParams}` : ""}`;
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(connexionHref(locale, { next: selfHref }));
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const authFailure = classifyAuthReadFailure(authError);
+  if (authFailure === "UNAVAILABLE") return <main className="client-page"><WorkspaceFailure locale={locale} reason="UNAVAILABLE" returnPath={selfHref} supportReference="ORGANIZATION_IDENTITY" /></main>;
+  if (authFailure === "UNAUTHENTICATED" || !user) redirect(connexionHref(locale, { next: selfHref }));
   const messages = getDictionary(locale).organization;
   const alternate = locale === "fr" ? "ar" : "fr";
   const defaultRole = query.role === "fournisseur" ? "PROVIDER_OWNER" : query.role === "franchise" ? "FRANCHISE_OWNER" : "CLIENT_OWNER";
-  const roleQuery = query.role === "fournisseur" || query.role === "franchise" ? `?role=${query.role}` : "";
+  const languageParams = new URLSearchParams(selfParams);
+  if (returnTo) languageParams.set("next", translateLocalPath(returnTo, locale, alternate));
+  const roleQuery = languageParams.size ? `?${languageParams}` : "";
   if (query.role === "fournisseur" || query.role === "franchise") {
     return (
       <main className="min-h-dvh bg-muted/40 px-4 py-8 sm:px-6 sm:py-12">
@@ -43,7 +54,7 @@ export default async function OrganizationPage({ params, searchParams }: { param
               <CardTitle className="text-2xl sm:text-3xl">{messages.title}</CardTitle>
               <CardDescription className="leading-6">{messages.description}</CardDescription>
             </CardHeader>
-            <CardContent><p className="mb-4"><Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/organisation/rattachements`}>{locale==="fr"?"Rejoindre une entreprise existante":"الانضمام إلى مؤسسة موجودة"}</Link></p><OrganizationForm locale={locale} idempotencyKey={randomUUID()} defaultRole={defaultRole} /></CardContent>
+            <CardContent><p className="mb-4"><Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/organisation/rattachements`}>{locale==="fr"?"Rejoindre une entreprise existante":"الانضمام إلى مؤسسة موجودة"}</Link></p><OrganizationForm locale={locale} idempotencyKey={randomUUID()} defaultRole={defaultRole} returnTo={returnTo} /></CardContent>
           </Card>
         </div>
       </main>

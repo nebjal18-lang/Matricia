@@ -1,0 +1,32 @@
+{
+  "scope": "REAL_NATIVE_FUTURE_DATE_GUARD_AND_MONOTONIC_FINANCIAL_COUNTERS",
+  "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "appTree": "46cb561cf9d17a69c5b6b5517d3506d2c3a3a1b4",
+  "status": "PASSED",
+  "moroccoToday": "2026-11-03",
+  "futureRejected": "2026-11-04",
+  "errorCode": "22023",
+  "errorMessage": "INVALID_RECEIPT_DECLARATION",
+  "before": {
+    "provider_financial_declarations_v1": 1,
+    "provider_payable_events": 1,
+    "financial_journals": 0,
+    "financial_entries": 0
+  },
+  "after": {
+    "provider_financial_declarations_v1": 1,
+    "provider_payable_events": 1,
+    "financial_journals": 0,
+    "financial_entries": 0
+  },
+  "noNewUploadOrFakeLedger": true,
+  "currentAccrual": {
+    "occurred_on": "2026-11-03",
+    "commission_amount_minor": 15755,
+    "tax_amount_minor": 3151
+  },
+  "preStatementPeriodEnd": "2026-10-31",
+  "preStatementLineCount": 0,
+  "currentReceiptPendingReason": "RECEIPT_AFTER_PRE_STATEMENT_PERIOD_END_WAIT_REAL_MONTHLY_CUTOFF_AND_FULL_DISPUTE_WINDOW",
+  "closedInvoiceCertified": false
+}

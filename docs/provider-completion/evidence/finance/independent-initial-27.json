@@ -1,0 +1,52 @@
+{
+  "scope": "OWNED_458_SCHEMA_ROLLBACK_TRANSACTION_NOT_FRESH_REPLAY",
+  "targetToken": "e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "targetLabel": "matricia.client-browser-test=e3ea17e3-1a4a-4a50-bdee-1b55bf272960",
+  "sourceBaselineArchiveSha256": "98055535924844add9c8b9164d9b68b4167c1557084dad677b263fad0d8782c6",
+  "additionalMigrations": [
+    {
+      "name": "20261102037000_deferred_ledger_invariant_execution_context.sql",
+      "sha256": "c43f147cd392fe4ef3d3e96baa5266a63476d93bf550bac019e72e78eb473539"
+    }
+  ],
+  "files": [
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040000_provider_independent_financial_declarations.sql",
+      "sha256": "1844e4117239fcc72f7b911c4cc33f96ae4564e0229c7cea6fd72c412d277194"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040100_provider_monthly_closing.sql",
+      "sha256": "369c9554701d21ba8f85d68c281aa790750282fd6f0182d695ad0654cd359415"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040200_provider_billing_workflow_queries.sql",
+      "sha256": "519ea2e59303830581c9d8cbd0a9e0ac1782d5598d416ab05969c7710188c7f6"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040300_provider_billing_due_notifications.sql",
+      "sha256": "196f77f76470d7059676144e6d4a141e74cd1be661dce609d420c3e2bf71a64a"
+    },
+    {
+      "kind": "migration",
+      "file": "/workspace/provider-finance/supabase/migrations/20261102040400_provider_dispute_payable_bridge.sql",
+      "sha256": "138fc1a2e8f4f67404dd7b8d405f225356f36f4f5b0df032b3db941e6badd749"
+    },
+    {
+      "kind": "test",
+      "file": "/workspace/provider-finance/supabase/tests/0347_provider_independent_finance.test.sql",
+      "sha256": "2d614285194559f797606a1cd371a9513220047359e110e7fd691c69dce19106"
+    }
+  ],
+  "status": "PASSED",
+  "assertions": 27,
+  "planCount": 1,
+  "beforeSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "afterSchemaFingerprint": "e40b335f90e6ac48bee13ec075bec9f7",
+  "rollbackSchemaRestored": true,
+  "commitSent": false,
+  "failure": null
+}

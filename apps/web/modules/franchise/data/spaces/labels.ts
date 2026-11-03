@@ -2,7 +2,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export function franchiseStageLabel(stage: string, locale: Locale) {
   const fr: Record<string, string> = {
-    SENT: "Envoyée",
+    SENT: "Prospect enregistré",
     OPENED: "Ouverte",
     REGISTERED: "Enregistrée",
     PROFILE_STARTED: "Dossier ouvert",
@@ -13,7 +13,7 @@ export function franchiseStageLabel(stage: string, locale: Locale) {
     CONTRACT_SIGNED: "Contrat",
   };
   const ar: Record<string, string> = {
-    SENT: "مُرسَلة",
+    SENT: "تم تسجيل العميل المحتمل",
     OPENED: "مفتوحة",
     REGISTERED: "مسجَّلة",
     PROFILE_STARTED: "ملف مفتوح",

@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 /workspace/franchise-history/apps/web
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  08:29:46
+   Duration  2.94s (import 46%, transform 36%, tests 16%, worker 1%)
+

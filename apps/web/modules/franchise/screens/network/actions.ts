@@ -1,17 +1,17 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prospectSchema } from "@/modules/franchise/data/crm/model";
+import { networkInvitationId, networkInvitationToken, networkInvitationTokenHash } from "@/modules/franchise/data/network/invitation-token";
 import { parseFranchiseProviderCsv } from "@/modules/franchise/data/network/csv";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
 export type FranchiseInviteState =
   | { status: "idle" }
-  | { status: "success"; outcome: string; created: number }
-  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "FAILED" };
+  | { status: "success"; outcome: string; created: number; skipped?: number }
+  | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CONFLICT" | "FAILED" | "MFA_REQUIRED" | "UNAVAILABLE" | "RATE_LIMITED" };
 
 const outcome = z.object({ outcome: z.string().min(3), prospect_id: z.string().uuid().optional() }).passthrough();
 const text = (form: FormData, key: string) => String(form.get(key) ?? "");
@@ -23,10 +23,13 @@ const iso = (value: string) => {
 
 async function rpc(name: string, args: Record<string, unknown>) {
   const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const { data: auth, error: authError } = await client.auth.getUser();
+  if (authError) return { status: "error" as const, reason: authError.status === 401 ? "UNAUTHENTICATED" as const : "FAILED" as const };
   if (!auth.user) return { status: "error" as const, reason: "UNAUTHENTICATED" as const };
   const result = await client.rpc(name, args);
   if (result.error) {
+    if (/MFA_REQUIRED/.test(result.error.message ?? "")) return { status: "error" as const, reason: "MFA_REQUIRED" as const };
+    if (result.error.code === "54000") return { status: "error" as const, reason: "RATE_LIMITED" as const };
     if (result.error.code === "42501") return { status: "error" as const, reason: "FORBIDDEN" as const };
     if (["40001", "23505", "23514"].includes(result.error.code ?? "") || /STALE|IDEMPOTENCY|TRANSITION/i.test(result.error.message ?? "")) {
       return { status: "error" as const, reason: "CONFLICT" as const };
@@ -54,47 +57,30 @@ function refresh(locale: string, organizationId: string) {
   return query;
 }
 
-async function saveProspect(input: {
-  locale: string;
-  franchiseId: string;
-  territoryVersionId: string;
-  prospectType: "CLIENT" | "PROVIDER";
-  displayName: string;
-  contactEmail: string;
-  organizationName: string;
-  sourceCode: string;
-  nextFollowupAt: string;
-  ownerUserId: string;
-  idempotencyKey: string;
-}) {
-  const saved = await rpc("save_franchise_prospect", {
-    p_franchise_id: input.franchiseId,
-    p_prospect_id: null,
-    p_territory_version_id: input.territoryVersionId,
-    p_prospect_type: input.prospectType,
-    p_display_name: input.displayName,
-    p_contact_email: input.contactEmail,
-    p_organization_name: input.organizationName || null,
-    p_source_code: input.sourceCode,
-    p_next_followup_at: input.nextFollowupAt || null,
-    p_owner_user_id: input.ownerUserId,
-    p_expected_row_version: 0,
-    p_idempotency_key: input.idempotencyKey,
+async function queueInvitations(form: FormData, rows: { displayName: string; contactEmail: string; organizationName: string; sourceCode: string; nextFollowupAt: string }[]) {
+  if (text(form, "contactPermissionConfirmed") !== "yes") return { status: "error" as const, reason: "VALIDATION" as const };
+  const locale = text(form, "invitationLocale") || text(form, "locale");
+  if (!isLocale(locale)) return { status: "error" as const, reason: "VALIDATION" as const };
+  let prepared;
+  try {
+    prepared = rows.map(row => {
+      const id = networkInvitationId(text(form, "idempotencyKey"), row.contactEmail);
+      return { invitation_id: id, token_hash: networkInvitationTokenHash(networkInvitationToken(id)),
+        display_name: row.displayName, contact_email: row.contactEmail.trim().toLowerCase(), organization_name: row.organizationName,
+        source_code: row.sourceCode, next_followup_at: row.nextFollowupAt, phone: text(form, "contactPhone"), locale };
+    });
+  } catch { return { status: "error" as const, reason: "UNAVAILABLE" as const }; }
+  return rpc("queue_franchise_network_invitations_v1", {
+    p_franchise_id: text(form, "franchiseId"), p_territory_version_id: text(form, "territoryVersionId"),
+    p_prospect_type: prospectType(form), p_owner_user_id: text(form, "ownerUserId"), p_rows: prepared,
+    p_contact_permission_confirmed: true, p_idempotency_key: text(form, "idempotencyKey"),
   });
-  if (saved.status !== "success" || !saved.data.prospect_id) return saved;
-  const activity = await rpc("record_franchise_activity", {
-    p_prospect_id: saved.data.prospect_id,
-    p_activity_type: "INVITATION",
-    p_occurred_at: new Date().toISOString(),
-    p_summary: input.locale === "ar"
-      ? (input.prospectType === "CLIENT" ? `تم إرسال دعوة عميل إلى ${input.contactEmail}` : `تم إرسال دعوة إلى ${input.contactEmail}`)
-      : (input.prospectType === "CLIENT" ? `Invitation client envoyée à ${input.contactEmail}` : `Invitation envoyée à ${input.contactEmail}`),
-    p_evidence_refs: [],
-    p_next_followup_at: input.nextFollowupAt || null,
-    p_idempotency_key: randomUUID(),
-  });
-  if (activity.status === "error" && activity.reason !== "CONFLICT") return activity;
-  return saved;
+}
+
+function queuedResult(saved: Awaited<ReturnType<typeof queueInvitations>>): FranchiseInviteState {
+  if (saved.status !== "success") return { status: "error", reason: saved.reason };
+  const result = z.object({ outcome: z.literal("FRANCHISE_NETWORK_INVITATIONS_QUEUED"), created: z.number().int().min(0).max(50), skipped: z.number().int().min(0).max(50), delivery: z.literal("OUTBOX_PENDING") }).safeParse(saved.data);
+  return result.success ? { status: "success", outcome: result.data.outcome, created: result.data.created, skipped: result.data.skipped } : { status: "error", reason: "FAILED" };
 }
 
 function prospectType(form: FormData): "CLIENT" | "PROVIDER" {
@@ -117,15 +103,13 @@ export async function inviteFranchiseProvider(_: FranchiseInviteState, form: For
     idempotencyKey: text(form, "idempotencyKey"),
   });
   if (!parsed.success) return { status: "error", reason: "VALIDATION" };
-  const saved = await saveProspect({ ...parsed.data, locale: text(form, "locale") });
-  if (saved.status !== "success") return { status: "error", reason: saved.reason };
-  refresh(text(form, "locale"), text(form, "organizationId"));
-  return { status: "success", outcome: saved.data.outcome, created: 1 };
+  const result = queuedResult(await queueInvitations(form, [parsed.data]));
+  if (result.status === "success") refresh(text(form, "locale"), text(form, "organizationId"));
+  return result;
 }
 
 export async function importFranchiseProviders(_: FranchiseInviteState, form: FormData): Promise<FranchiseInviteState> {
   if (!localeValid(form)) return { status: "error", reason: "VALIDATION" };
-  const type = prospectType(form);
   const identity = {
     franchiseId: text(form, "franchiseId"),
     territoryVersionId: text(form, "territoryVersionId"),
@@ -136,27 +120,10 @@ export async function importFranchiseProviders(_: FranchiseInviteState, form: Fo
   }
   const parsed = parseFranchiseProviderCsv(text(form, "csvText"));
   if (parsed.status !== "ok") return { status: "error", reason: "VALIDATION" };
-  let created = 0;
-  let lastOutcome = "FRANCHISE_PROSPECT_SAVED";
-  for (const row of parsed.rows) {
-    const saved = await saveProspect({
-      locale: text(form, "locale"),
-      ...identity,
-      prospectType: type,
-      displayName: row.displayName,
-      contactEmail: row.contactEmail,
-      organizationName: row.organizationName,
-      sourceCode: "CSV_IMPORT",
-      nextFollowupAt: "",
-      idempotencyKey: randomUUID(),
-    });
-    if (saved.status === "error" && saved.reason === "CONFLICT") continue;
-    if (saved.status !== "success") return { status: "error", reason: saved.reason };
-    created += 1;
-    lastOutcome = saved.data.outcome;
-  }
-  refresh(text(form, "locale"), text(form, "organizationId"));
-  return { status: "success", outcome: lastOutcome, created };
+  if (!z.string().uuid().safeParse(text(form, "idempotencyKey")).success) return { status: "error", reason: "VALIDATION" };
+  const result = queuedResult(await queueInvitations(form, parsed.rows.map(row => ({ ...row, sourceCode: "CSV_IMPORT", nextFollowupAt: "" }))));
+  if (result.status === "success") refresh(text(form, "locale"), text(form, "organizationId"));
+  return result;
 }
 
 export async function recordFranchiseFolderActivity(_: FranchiseInviteState, form: FormData): Promise<FranchiseInviteState> {

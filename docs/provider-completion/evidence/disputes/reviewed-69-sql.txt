@@ -1,0 +1,769 @@
+BEGIN
+ALTER TABLE
+UPDATE 0
+ALTER TABLE
+ALTER TABLE
+INSERT 0 0
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE POLICY
+REVOKE
+GRANT
+CREATE FUNCTION
+DO
+CREATE TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE TRIGGER
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+ALTER POLICY
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+REVOKE
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+DO
+DO
+ALTER TABLE
+DO
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+DO
+ALTER FUNCTION
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+ALTER FUNCTION
+REVOKE
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+NOTIFY
+DO
+SET
+ no_plan 
+---------
+(0 rows)
+
+GRANT
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+SELECT 1
+                                     ok                                     
+----------------------------------------------------------------------------
+ ok 1 - one published service version is available for the isolated fixture
+(1 row)
+
+INSERT 0 1
+SELECT 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                                                                                           decide_provider_company                                                                                                                                                            
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "PROVIDER_COMPANY_DECIDED", "command_id": "d51d875f-29ce-4078-b631-1874bcf07465", "row_version": 2, "company_status": "VERIFIED", "decision_version": 1, "company_decision_id": "6793a9f7-2762-4ac5-b3d0-b093f9e23b17", "partner_contract_status": "SIGNED", "provider_organization_id": "fd110000-0000-4000-8000-000000000002"}
+(1 row)
+
+INSERT 0 3
+DO
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 2
+UPDATE 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DO
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+CREATE TABLE
+GRANT
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+RESET
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000005
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                                                                           decide_contract_policy_version_v1                                                                                            
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "CONTRACT_POLICY_VERSION_DECIDED", "decision": "APPROVE", "content_hash": "4c294a6b9852cb81f1a24152df94e44f2e88251e89951348e6cd6df89d6bd4fa", "policy_version_id": "68f51a60-a839-4146-a87b-778491216902"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+CREATE FUNCTION
+CREATE FUNCTION
+                                                                                                       prepare_governed_mock_policy_v1                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"outcome": "SIGNATURE_POLICY_PROPOSED", "environment": "DEVELOPMENT", "proposal_id": "fdf401d7-6d73-4417-82df-714c8dc46071", "content_hash": "b74b889519e08c474d28c70e465655cdec99f8831849096482d83bb5e3ddc2b3", "development_mock": true}
+(1 row)
+
+                                                                                                                                                            complete_governed_mock_contract_v1                                                                                                                                                             
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"mode": "NON_CONTRACTUAL_DEMO", "outcome": "SIGNATURE_ENVELOPE_SIGNED", "replayed": false, "final_hash": "af4216fde001aff7afaf0d68acdbbf09bbd542facb809c90e5c5a64ad465273c", "envelope_id": "d6b6cdf8-8793-4270-bb66-5229fc37d892", "achieved_level": "SIMPLE", "development_mock": true, "evidence_package_id": "de1f3fcc-6688-43c4-8cc0-36e6101008f0"}
+(1 row)
+
+                                                ok                                                
+--------------------------------------------------------------------------------------------------
+ ok 2 - contract is sealed by real native governed DEV-mock flow, not forged signature validation
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+                          is                           
+-------------------------------------------------------
+ ok 3 - Client preparation uses signed deliverable key
+(1 row)
+
+                      is                      
+----------------------------------------------
+ ok 4 - signed deliverable label is preserved
+(1 row)
+
+                        is                         
+---------------------------------------------------
+ ok 5 - user-authored source is preserved verbatim
+(1 row)
+
+                         is                          
+-----------------------------------------------------
+ ok 6 - criteria come from frozen governed checklist
+(1 row)
+
+CREATE FUNCTION
+                       throws_ok                       
+-------------------------------------------------------
+ ok 7 - stale checklist hash is refused before writing
+(1 row)
+
+                    throws_ok                     
+--------------------------------------------------
+ ok 8 - Client cannot invent a signed deliverable
+(1 row)
+
+                    throws_ok                    
+-------------------------------------------------
+ ok 9 - Client cannot invent checklist criterion
+(1 row)
+
+                             throws_ok                              
+--------------------------------------------------------------------
+ ok 10 - responsibility cannot be assigned outside contract parties
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                        is                        
+--------------------------------------------------
+ ok 11 - mission replay has exact stable response
+(1 row)
+
+RESET
+                           is                            
+---------------------------------------------------------
+ ok 12 - native mission command creates only one mission
+(1 row)
+
+                                            ok                                            
+------------------------------------------------------------------------------------------
+ ok 13 - real mission preserves signed label, party responsibility and own milestone link
+(1 row)
+
+                            is                            
+----------------------------------------------------------
+ ok 14 - actual acceptance uses chosen governed criterion
+(1 row)
+
+                           is                            
+---------------------------------------------------------
+ ok 15 - mission freezes exact bilingual checklist items
+(1 row)
+
+SET
+CREATE FUNCTION
+                  throws_ok                  
+---------------------------------------------
+ ok 16 - dispute cannot invent an obligation
+(1 row)
+
+                        throws_ok                         
+----------------------------------------------------------
+ ok 17 - Client cannot supply arbitrary dispute deadlines
+(1 row)
+
+                         throws_ok                          
+------------------------------------------------------------
+ ok 18 - unknown or foreign document cannot become evidence
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+(1 row)
+
+                     throws_ok                      
+----------------------------------------------------
+ ok 19 - AAL1 cannot open a financial/legal dispute
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                       is                        
+-------------------------------------------------
+ ok 20 - same real dispute is returned on replay
+(1 row)
+
+                  is                   
+---------------------------------------
+ ok 21 - replay creates no second case
+(1 row)
+
+                                      is                                      
+------------------------------------------------------------------------------
+ ok 22 - deadline comes from independently approved frozen contractual policy
+(1 row)
+
+                                  is                                   
+-----------------------------------------------------------------------
+ ok 23 - one private statement and one canonical document are retained
+(1 row)
+
+                            is                             
+-----------------------------------------------------------
+ ok 24 - document hash comes from canonical scanned source
+(1 row)
+
+INSERT 0 1
+                                 is                                  
+---------------------------------------------------------------------
+ ok 25 - authorized owner receives original private object reference
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                               is                               
+----------------------------------------------------------------
+ ok 26 - provider sees no CLIENT_ONLY evidence under actual RLS
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ a1e31d5e-fad2-4ecc-b2b6-444c336ac57e
+(1 row)
+
+SET
+                           throws_ok                            
+----------------------------------------------------------------
+ ok 27 - provider cannot request private download authorization
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000003
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                   is                   
+----------------------------------------
+ ok 28 - foreign tenant sees no mission
+(1 row)
+
+                 is                  
+-------------------------------------
+ ok 29 - foreign tenant sees no case
+(1 row)
+
+                   is                    
+-----------------------------------------
+ ok 30 - foreign tenant sees no evidence
+(1 row)
+
+                     throws_ok                      
+----------------------------------------------------
+ ok 31 - foreign tenant cannot prepare this mission
+(1 row)
+
+                             throws_ok                             
+-------------------------------------------------------------------
+ ok 32 - foreign tenant cannot authorize private evidence download
+(1 row)
+
+RESET
+                  is                   
+---------------------------------------
+ ok 33 - one real dispute audit exists
+(1 row)
+
+                   is                    
+-----------------------------------------
+ ok 34 - one warning outbox event exists
+(1 row)
+
+                              is                               
+---------------------------------------------------------------
+ ok 35 - Friday plus two working days is Tuesday, never Sunday
+(1 row)
+
+                        is                        
+--------------------------------------------------
+ ok 36 - five-day correction excludes the weekend
+(1 row)
+
+                     is                      
+---------------------------------------------
+ ok 37 - contract-frozen holiday is excluded
+(1 row)
+
+                                  is                                   
+-----------------------------------------------------------------------
+ ok 38 - local wall time is retained over a daylight-saving transition
+(1 row)
+
+                throws_ok                
+-----------------------------------------
+ ok 39 - empty working week fails closed
+(1 row)
+
+                    throws_ok                     
+--------------------------------------------------
+ ok 40 - negative correction duration is rejected
+(1 row)
+
+                         ok                          
+-----------------------------------------------------
+ ok 41 - API cannot call the private deadline helper
+(1 row)
+
+                      ok                       
+-----------------------------------------------
+ ok 42 - legacy direct response path is closed
+(1 row)
+
+                       ok                       
+------------------------------------------------
+ ok 43 - service role cannot call legacy appeal
+(1 row)
+
+              set_config              
+--------------------------------------
+ bc900f84-2ee4-4bc3-9906-31082d76f258
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+SET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+RESET
+GRANT
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+SET
+SELECT 1
+                                                                   complete_provider_document_scan_job                                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"result": "CLEAN", "outcome": "PROVIDER_DOCUMENT_SCAN_RECORDED", "scan_id": "f5207693-8108-4832-acea-fa06d9caed18", "proof_id": "c2ec9b13-8db8-4791-9d55-57213305d90b"}
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+                                  is                                  
+----------------------------------------------------------------------
+ ok 44 - native Provider context is scoped to its actual organisation
+(1 row)
+
+                                            ok                                            
+------------------------------------------------------------------------------------------
+ ok 45 - context offers reviewed scanned originals, native message and versioned delivery
+(1 row)
+
+CREATE FUNCTION
+                           throws_ok                            
+----------------------------------------------------------------
+ ok 46 - Client private document cannot be attached by Provider
+(1 row)
+
+                   throws_ok                    
+------------------------------------------------
+ ok 47 - unknown or foreign message is rejected
+(1 row)
+
+                        throws_ok                         
+----------------------------------------------------------
+ ok 48 - Provider cannot impersonate Client-only evidence
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}
+(1 row)
+
+                      throws_ok                      
+-----------------------------------------------------
+ ok 49 - AAL1 cannot load sensitive evidence sources
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+                           is                            
+---------------------------------------------------------
+ ok 50 - lost-response retry returns same native receipt
+(1 row)
+
+RESET
+                            is                             
+-----------------------------------------------------------
+ ok 51 - retry creates no duplicate contradictory response
+(1 row)
+
+                                    is                                    
+--------------------------------------------------------------------------
+ ok 52 - authoritative hash comes from actual statement, not browser hash
+(1 row)
+
+                                      is                                      
+------------------------------------------------------------------------------
+ ok 53 - Provider document hash is resolved from the trusted scanned original
+(1 row)
+
+                                   is                                   
+------------------------------------------------------------------------
+ ok 54 - native message hash is resolved from its actual immutable text
+(1 row)
+
+                              is                               
+---------------------------------------------------------------
+ ok 55 - delivery evidence retains the exact submitted version
+(1 row)
+
+              set_config              
+--------------------------------------
+ 2fbc3f2c-eb9a-40db-b4ba-4b3617f1c1bf
+(1 row)
+
+SET
+                                     is                                     
+----------------------------------------------------------------------------
+ ok 56 - native Provider can obtain a scoped private download authorization
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000001
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+(1 row)
+
+                                         is                                          
+-------------------------------------------------------------------------------------
+ ok 57 - Client party can read Provider evidence explicitly shared with both parties
+(1 row)
+
+RESET
+                         is                          
+-----------------------------------------------------
+ ok 58 - actual used calendar is recorded explicitly
+(1 row)
+
+                                      ok                                       
+-------------------------------------------------------------------------------
+ ok 59 - acknowledgement records its configured correction deadline separately
+(1 row)
+
+               is                
+---------------------------------
+ ok 60 - one real response audit
+(1 row)
+
+                 is                 
+------------------------------------
+ ok 61 - one durable response event
+(1 row)
+
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000003
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+                         throws_ok                         
+-----------------------------------------------------------
+ ok 62 - foreign organisation cannot list evidence sources
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+SET
+                           ok                            
+---------------------------------------------------------
+ ok 63 - source genuinely expires on the next civil date
+(1 row)
+
+                                   is                                   
+------------------------------------------------------------------------
+ ok 64 - same actor and request recover receipt after source expiration
+(1 row)
+
+                          throws_ok                           
+--------------------------------------------------------------
+ ok 65 - a new operation cannot attach the now expired source
+(1 row)
+
+SET
+RESET
+INSERT 0 1
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000004
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}
+(1 row)
+
+SET
+INSERT 0 1
+              set_config              
+--------------------------------------
+ fd100000-0000-4000-8000-000000000002
+(1 row)
+
+                                     set_config                                     
+------------------------------------------------------------------------------------
+ {"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+(1 row)
+
+CREATE FUNCTION
+INSERT 0 2
+                             is                              
+-------------------------------------------------------------
+ ok 66 - composite actor appeal replays its original receipt
+(1 row)
+
+RESET
+                                       is                                       
+--------------------------------------------------------------------------------
+ ok 67 - both response and appeal Provider documents retain Provider authorship
+(1 row)
+
+                                  ok                                   
+-----------------------------------------------------------------------
+ ok 68 - membership order never attributes Provider evidence to Client
+(1 row)
+
+              set_config              
+--------------------------------------
+ 4956dfc0-350f-4545-8635-afa54cda8c56
+(1 row)
+
+SET
+                                       is                                        
+---------------------------------------------------------------------------------
+ ok 69 - Provider appeal original remains downloadable with composite membership
+(1 row)
+
+RESET
+ finish 
+--------
+ 1..69
+(1 row)
+
+ROLLBACK

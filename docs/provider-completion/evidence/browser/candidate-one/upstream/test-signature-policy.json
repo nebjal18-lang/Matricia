@@ -1,0 +1,55 @@
+{
+  "scope": "NATIVE_FOUR_EYES_DEVELOPMENT_MOCK_POLICY_ONLY",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "READY",
+  "mode": "NON_CONTRACTUAL_DEMO",
+  "providerCode": "MATRICIA_DEV_MOCK",
+  "environment": "DEVELOPMENT",
+  "level": "SIMPLE",
+  "legalSignatureCertified": false,
+  "productionProviderConfigured": false,
+  "clientOnboardingCertified": false,
+  "physicalAntivirusCertified": false,
+  "historicalClientFileBytesVerified": true,
+  "policies": [
+    {
+      "source": "CONTRACT",
+      "proposal": {
+        "outcome": "SIGNATURE_POLICY_PROPOSED",
+        "environment": "DEVELOPMENT",
+        "proposal_id": "1772acf7-2405-41cb-90b6-1f17f487fbb2",
+        "content_hash": "0806abd335ac773422789b3fa7e6d5b8a4a80d622d7c49602b6d61416ebe3806",
+        "development_mock": true
+      },
+      "selfApprovalSqlstate": "42501",
+      "decision": {
+        "outcome": "SIGNATURE_POLICY_APPROVED",
+        "environment": "DEVELOPMENT",
+        "proposal_id": "1772acf7-2405-41cb-90b6-1f17f487fbb2",
+        "valid_until": "2026-11-03T22:17:36.565937+00:00",
+        "development_mock": true,
+        "policy_version_id": "895708fa-f892-45ba-ab60-c4da325d0fb8"
+      }
+    },
+    {
+      "source": "AMENDMENT",
+      "proposal": {
+        "outcome": "SIGNATURE_POLICY_PROPOSED",
+        "environment": "DEVELOPMENT",
+        "proposal_id": "1a600af8-0774-4634-8f8e-9a1ed6945d2d",
+        "content_hash": "4825319a579a45d38cf704567543352c35c7570c1e7f858cb0b3134db24ee98c",
+        "development_mock": true
+      },
+      "selfApprovalSqlstate": "42501",
+      "decision": {
+        "outcome": "SIGNATURE_POLICY_APPROVED",
+        "environment": "DEVELOPMENT",
+        "proposal_id": "1a600af8-0774-4634-8f8e-9a1ed6945d2d",
+        "valid_until": "2026-11-03T22:17:36.813284+00:00",
+        "development_mock": true,
+        "policy_version_id": "e8401367-4194-4c03-b11b-2bab75ed081e"
+      }
+    }
+  ]
+}

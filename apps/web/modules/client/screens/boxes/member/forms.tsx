@@ -1,0 +1,17 @@
+"use client";
+import{useActionState,useId}from"react";
+import { workspaceSecurityHref } from "@/modules/shared/lib/auth/security-href";
+import Link from"next/link";
+import{reserveMemberBoxBenefit,releaseMemberBoxReservation}from"./actions";
+import type{MemberBoxActionState,MemberBoxWorkspace}from"./model";
+import type{MemberBoxMessages}from"./messages";
+const idle:MemberBoxActionState={status:"idle"},control="min-h-11 w-full rounded border bg-background px-3 py-2";
+function Feedback({state,locale,m,organizationId}:{state:MemberBoxActionState;locale:"fr"|"ar";m:MemberBoxMessages;organizationId?:string}){return <div aria-live="polite"><p role={state.status==="error"?"alert":"status"}>{state.status==="success"?m.success:state.status==="error"?m.errors[state.reason]:""}</p>{state.status==="error"&&state.reason==="MFA_REQUIRED"?<Link className="underline" href={workspaceSecurityHref(locale,`/${locale}/client/boxes/mon-enveloppe`,organizationId)}>{m.security}</Link>:null}</div>}
+export function MemberBoxReserveForm({locale,box,benefit,keyValue,m,aal2,organizationId}:{locale:"fr"|"ar";box:MemberBoxWorkspace["boxes"][number];benefit:MemberBoxWorkspace["boxes"][number]["benefits"][number];keyValue:string;m:MemberBoxMessages;aal2:boolean;organizationId?:string}){
+ const[state,action,pending]=useActionState(reserveMemberBoxBenefit,idle),id=useId();
+ return <form action={action} className="grid gap-3 rounded-lg border p-4"><h4>{locale==="ar"?benefit.name_ar:benefit.name_fr}</h4><p><bdi>{benefit.credit_cost}</bdi> {locale==="ar"?"رصيداً لكل وحدة":"crédits par unité"}</p><input type="hidden" name="locale" value={locale}/><input type="hidden" name="boxId" value={box.id}/><input type="hidden" name="benefitId" value={benefit.id}/><input type="hidden" name="idempotencyKey" value={keyValue}/><label htmlFor={`${id}-units`}>{m.units}<input id={`${id}-units`} name="units" inputMode="numeric" pattern="[1-9][0-9]{0,17}" required defaultValue="1" className={control}/></label><label htmlFor={`${id}-expires`}>{m.expires}<input id={`${id}-expires`} name="expiresAt" type="datetime-local" max={new Date(box.period_end).toISOString().slice(0,16)} required className={control}/></label><button className="min-h-11 rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" disabled={pending||!aal2||!box.funding_ready||BigInt(box.available)<BigInt(benefit.credit_cost)}>{pending?m.pending:m.reserve}</button><Feedback organizationId={organizationId} state={state}locale={locale}m={m}/></form>;
+}
+export function MemberBoxReleaseForm({locale,redemption,keyValue,m,aal2,organizationId}:{locale:"fr"|"ar";redemption:MemberBoxWorkspace["boxes"][number]["redemptions"][number];keyValue:string;m:MemberBoxMessages;aal2:boolean;organizationId?:string}){
+ const[state,action,pending]=useActionState(releaseMemberBoxReservation,idle),id=useId();
+ return <form action={action} className="mt-3 grid gap-3"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="redemptionId" value={redemption.id}/><input type="hidden" name="rowVersion" value={redemption.row_version}/><input type="hidden" name="idempotencyKey" value={keyValue}/><label htmlFor={id}>{m.reason}<input id={id} name="reason" minLength={3} maxLength={80} required className={control}/></label><button disabled={pending||!aal2}className="min-h-11 rounded border px-4 py-2">{pending?m.pending:m.cancel}</button><Feedback organizationId={organizationId} state={state}locale={locale}m={m}/></form>;
+}

@@ -1,0 +1,36 @@
+{
+  "scope": "NATIVE_GOVERNED_CATALOG_DELEGATION_RECONCILIATION",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appBuildCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "PASSED",
+  "manualGrantInserted": false,
+  "steps": [
+    {
+      "id": "RECONCILE_APPROVED_ACTIVATION_SOURCE",
+      "status": "PASS",
+      "outcome": "FRANCHISE_CATALOG_MANDATE_GRANTED"
+    },
+    {
+      "id": "IDEMPOTENT_RECONCILIATION_NO_NEW_EVENT",
+      "status": "PASS"
+    },
+    {
+      "id": "SAME_NATIVE_OWNER_READS_EXISTING_CATALOGUE",
+      "status": "PASS",
+      "serviceCount": 2
+    }
+  ],
+  "before": {
+    "catalogMandates": 0,
+    "grantEvents": 0
+  },
+  "afterFirst": {
+    "catalogMandates": 1,
+    "grantEvents": 1
+  },
+  "afterReplay": {
+    "catalogMandates": 1,
+    "grantEvents": 1
+  }
+}

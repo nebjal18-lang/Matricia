@@ -1,0 +1,54 @@
+{
+  "scope": "HISTORICAL_CLIENT_LEGAL_AND_FISCAL_TEST_PREREQUISITES_RFQ_NOT_CREATED",
+  "status": "UPSTREAM_READY",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "ids": {
+    "clientCaseId": "81e02812-b415-4d26-a85e-ff58fc61c0c2",
+    "requestId": "449c728f-10d5-4b7b-9b73-f88d7cb990c9",
+    "requestVersionId": "440d6fd1-d225-4c7c-8eae-2cf4e5a06201",
+    "matchingRunId": "de95140a-35fd-4a44-bf05-bdb43c161df9",
+    "matchingCandidateId": "cc012e26-9746-4168-9e72-c41e1ebb7f92",
+    "rfqId": "4a0644e9-79f0-4903-a998-488cd405ecb3",
+    "invitationId": "9bf12a51-23e2-46a7-b258-d0179c96561d",
+    "taxRuleVersionId": "ac35ea05-55d8-4269-8235-caa9f4c49a93"
+  },
+  "docs": [
+    {
+      "kind": "REGISTRATION_DOCUMENT",
+      "objectPath": "554a54e1-c4a5-4cba-9f8f-6dcd7cf297d7/provider-browser-test/registration.pdf",
+      "sha256": "9a4a3cbe6e4c7fe2c4cae648dea7baed8c19a2d0607b3b60d223dc8e14069c8d",
+      "sizeBytes": 807
+    },
+    {
+      "kind": "REPRESENTATIVE_AUTHORITY",
+      "objectPath": "554a54e1-c4a5-4cba-9f8f-6dcd7cf297d7/provider-browser-test/authority.pdf",
+      "sha256": "cdf847843b3507ac6d6a3f55558d4ab3e0bbc095f8867c237356a84b01a88a16",
+      "sizeBytes": 807
+    }
+  ],
+  "providerQualificationWritten": false,
+  "providerQuoteWritten": false,
+  "nativeAuthenticationAltered": false,
+  "clientOnboardingCertified": false,
+  "physicalAntivirusCertified": false,
+  "catalogueGovernanceCertified": false,
+  "sourceSha256": "25534f159c449c7cd576f8cb5e2426be789b85384c277b60050ded5da190b3a8",
+  "taxSourceSha256": "8f39acb6fcb48b705d011a72f6b18da42da901470b8a827c5f314f76148ca850",
+  "appliedSqlSha256": "c041346bb942faf73a9b11c96f00d4bcd5a80190218ad04c8f5a19faf4b9aacd",
+  "taxProposal": {
+    "outcome": "SERVICE_TAX_MAPPING_PROPOSED",
+    "proposal_id": "ba35ad16-bc56-4153-aca2-88093275eadf",
+    "content_hash": "c491b1c987214458d3a3237ae51bff8ebf31981f8a4e10672ad16cbcb80edcad"
+  },
+  "taxDecision": {
+    "outcome": "SERVICE_TAX_MAPPING_PUBLISHED",
+    "version": 1,
+    "mapping_id": "ba35ad16-bc56-4153-aca2-88093275eadf",
+    "environment": "DEVELOPMENT",
+    "proposal_id": "ba35ad16-bc56-4153-aca2-88093275eadf",
+    "content_hash": "f79fd20a359b49a28c7b3ea737428603439bbf24fdbfc9d4d15981384d54be81",
+    "development_only": true
+  },
+  "rfqCreated": false
+}

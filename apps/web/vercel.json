@@ -56,6 +56,10 @@
     {
       "path": "/api/workers/subscription-credit-grants",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/finance-cost-scans",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

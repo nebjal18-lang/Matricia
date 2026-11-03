@@ -1,0 +1,33 @@
+{
+  "scope": "NATIVE_POSTCONTRACT_PROVIDER_CLIENT_CONVERSATION_AND_PRIVATE_ATTACHMENT",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "status": "PASSED",
+  "physicalAntivirusCertified": false,
+  "steps": [
+    {
+      "step": "native_provider_keyboard_message_persists_once_in_same_postcontract_client_thread",
+      "passed": true
+    },
+    {
+      "step": "real_private_pdf_draft_quarantine_native_test_scan_and_touch_publish_exact_client_bytes_foreign_denials",
+      "passed": true
+    },
+    {
+      "step": "independent_client_touch_reply_remains_available_after_native_mission_completion",
+      "passed": true
+    },
+    {
+      "step": "arabic_thread_preserves_original_user_text_and_exact_organization",
+      "passed": true
+    }
+  ],
+  "threadId": "fff485bc-bdcf-493e-97d4-a5e6b775a6ef",
+  "nativeExistingPrivateDraftRecovered": true,
+  "clientPrivateDraftDeniedBy": "42501",
+  "draftId": "62706f96-69a3-49f4-bf80-a6801cadc748",
+  "uploadId": "7c3b5063-bc8e-45c9-b1e3-1ebe9f296a03",
+  "attachmentSha256": "4839fc4e73a7ffc07a4a6e5fdfe0fb9a3a11c0d89a4bad8c54340778c21e27d7",
+  "sizeBytes": 724,
+  "attachmentId": "d51b1f55-f656-449d-9340-14140a5def1a"
+}

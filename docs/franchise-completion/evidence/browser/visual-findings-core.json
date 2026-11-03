@@ -1,0 +1,23 @@
+{
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appBuildCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "status": "REPRODUCED_BY_CAPTURE_INSPECTION",
+  "findings": [
+    {
+      "id": "MOBILE_HEADER_CONTEXT_OVERLAP",
+      "locale": "ar",
+      "width": 375,
+      "capture": "navigation/menu-ar-375.png",
+      "observation": "Header context text overlaps language/account actions. Topmost account dropdown actions themselves remain correctly reachable."
+    },
+    {
+      "id": "MOBILE_SERVICE_TABLE_UNREADABLE",
+      "locale": "ar",
+      "width": 390,
+      "capture": "matrix-core-e57dcc5/ar-390-services-failure.png",
+      "observation": "Service table shrinks labels into vertical individual letters. Document scrollWidth reports no overflow; that metric alone does not establish usable columns."
+    }
+  ],
+  "manualFullWcagCertification": false
+}

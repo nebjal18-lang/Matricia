@@ -1,0 +1,8 @@
+
+> @matricia/web@0.1.0 typecheck /workspace/franchise-performance/apps/web
+> tsc --noEmit
+
+modules/franchise/data/performance/native-control.ts(26,201): error TS2737: BigInt literals are not available when targeting lower than ES2020.
+/workspace/franchise-performance/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @matricia/web@0.1.0 typecheck: `tsc --noEmit`
+Exit status 2

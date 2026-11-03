@@ -1,3 +1,4 @@
+import { withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -29,6 +30,10 @@ export default async function ProviderModeClientPage({
   const pending = roles.status === "success"
     ? roles.requests.find((item) => item.isOwn && item.status === "PENDING" && item.requestedRole.startsWith("CLIENT_"))
     : null;
+  const providerHref = withDashboardWorkspaceHint(`/${locale}/tableau-de-bord${space.selectedQuery}`, locale, "provider");
+  const clientQuery = new URLSearchParams(space.selectedQuery);
+  if (organizationId) clientQuery.set("organizationId", organizationId);
+  const clientHref = withDashboardWorkspaceHint(`/${locale}/tableau-de-bord?${clientQuery}`, locale, "client");
   const ar = locale === "ar";
   const copy = ar
     ? { title: "وضع العميل", lead: "سياقان، منصة واحدة — دون إنشاء مؤسسة ثانية.", current: "السياق المهني الحالي", switch: "متابعة كعميل", request: "تفعيل دور العميل", pending: "طلب دور العميل معلّق.", isolated: "الاستشارات والعروض المهنية تبقى في فضاء المقدّم." }
@@ -42,12 +47,12 @@ export default async function ProviderModeClientPage({
             <header><h2>{copy.current}</h2></header>
             <p><strong>{current?.displayName ?? space.organizationName ?? "—"}</strong></p>
             <p>{current?.currentRoles.join(" · ") || (ar ? "دور مهني" : "Rôle professionnel")}</p>
-            <Link href={`/${locale}/tableau-de-bord${space.selectedQuery}`} className="client-ghost-link">{ar ? "البقاء كمقدّم خدمة" : "Rester en mode professionnel"}</Link>
+            <Link href={providerHref} className="client-ghost-link">{ar ? "البقاء كمقدّم خدمة" : "Rester en mode professionnel"}</Link>
           </article>
           <article className="client-card">
             <header><h2>{copy.request}</h2></header>
             {hasClient ? (
-              <Link href={`/${locale}/tableau-de-bord${organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : ""}`} className="client-cta">{copy.switch}</Link>
+              <Link href={clientHref} className="client-cta">{copy.switch}</Link>
             ) : pending ? (
               <p role="status">{copy.pending}</p>
             ) : organizationId ? (

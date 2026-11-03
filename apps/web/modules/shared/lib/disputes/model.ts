@@ -1,3 +1,4 @@
+import type { DisputeEvidenceContext } from "./evidence-context";
 import { z } from "zod";
 
 export const uuidSchema=z.string().uuid();
@@ -17,7 +18,7 @@ export type TimelineEvent={id:string;type:string;from:string|null;to:string;crea
 export type Reassignment={id:string;key:string;status:string;originalCostMinor:string;proposedCostMinor:string|null;costDeltaMinor:string|null;currency:string;rowVersion:number};
 export type ReassignmentCandidate={organizationId:string;displayName:string;qualificationStatus:string;capacityStatus:string};
 export type DisputeSummary={id:string;missionId:string;obligationKey:string;description:string;urgency:"STANDARD"|"URGENT";status:z.infer<typeof statusSchema>;responseDueAt:string;reviewDueAt:string|null;appealDueAt:string|null;rowVersion:number};
-export type DisputeDetail=DisputeSummary&{clientOrganizationId:string;providerOrganizationId:string;policyVersion:string;evidence:Evidence[];response:DisputeResponse|null;decisions:DisputeDecision[];appeal:DisputeAppeal|null;events:TimelineEvent[];reassignment:Reassignment|null;candidates:ReassignmentCandidate[];capabilities:DisputeCapabilities};
+export type DisputeDetail=DisputeSummary&{evidenceOptions?:DisputeEvidenceContext;evidenceOptionsUnavailable?:boolean;correctionDueAt?:string|null;businessCalendarVersion?:string|null;clientOrganizationId:string;providerOrganizationId:string;policyVersion:string;evidence:Evidence[];response:DisputeResponse|null;decisions:DisputeDecision[];appeal:DisputeAppeal|null;events:TimelineEvent[];reassignment:Reassignment|null;candidates:ReassignmentCandidate[];capabilities:DisputeCapabilities};
 
 export function moneyToMinor(value:string):string|null{const normalized=value.trim().replace(/\s/gu,"").replace(",",".");if(!/^\d+(?:\.\d{1,2})?$/u.test(normalized))return null;const[whole,fraction=""]=normalized.split(".");return(BigInt(whole)*BigInt(100)+BigInt(fraction.padEnd(2,"0"))).toString();}
 export function formatMinorAmount(value:string,currency:string,locale:"fr"|"ar"):string{const amount=BigInt(value),zero=BigInt(0),scale=BigInt(100),negative=amount<zero,absolute=negative?-amount:amount,whole=(absolute/scale).toString(),fraction=(absolute%scale).toString().padStart(2,"0"),separator=locale==="ar"?"٬":" ",grouped=whole.replace(/\B(?=(\d{3})+(?!\d))/gu,separator);return `${negative?"−":""}${grouped},${fraction} ${currency}`;}

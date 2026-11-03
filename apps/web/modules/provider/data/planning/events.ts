@@ -101,8 +101,9 @@ export function collectPlanningEvents(input: {
   }
   if (input.missions.status === "success") {
     for (const mission of input.missions.dashboard.missions) {
+      if(mission.scopeReconciliationRequired||["COMPLETED","CANCELLED","CLOSED"].includes(mission.status))continue;
       for (const milestone of mission.milestones) {
-        if (milestone.dueAt && !["DONE", "COMPLETED"].includes(milestone.status)) {
+        if (!milestone.retired&&milestone.dueAt && !["DONE", "COMPLETED","ACCEPTED","CANCELLED"].includes(milestone.status)) {
           events.push({
             id: `ms:${milestone.id}`,
             kind: "milestone",

@@ -1,0 +1,9 @@
+# Onboarding : correction du jeu de recette 0301
+
+La réponse REST du dossier synthétique de recette contenait seulement cinq champs de profil : `legal_form`, `if_number`, `rc_number`, `registered_address` et `registered_city`. Le validateur canonique utilisé par `save_client_profile_draft` exige aussi la date de constitution, activité, secteur, effectif, contact, représentant et déclarations. Le modèle de lecture strict de l’onboarding rejetait correctement ce profil incomplet ; aucun élargissement de schéma ou d’accès n’a été appliqué.
+
+La fixture `0301_client_questionnaire_presentation.test.sql` fournit maintenant ces champs avec des valeurs explicitement synthétiques `TEST` et des adresses `example.invalid`. Une assertion appelle le véritable `private.validate_client_profile_payload` sur la ligne insérée. Avant correction, cette assertion échouait avec `CLIENT_PROFILE_REQUIRED_FIELDS_MISSING`.
+
+La recette navigateur doit créer un nouveau propriétaire et un nouveau dossier à partir de cette fixture. Les profils historiques immuables déjà insérés restent conservés. Leur remplacement ou mise à jour n’est pas nécessaire et n’est pas réalisé par ce changement. L’onboarding natif complet, la validation externe des documents et les registres réels ne sont pas certifiés par un seed historique.
+
+La preuve REST initiale se trouve dans l’artefact local du vérificateur navigateur `onboarding-fixture/before.json`. Le test SQL s’exécute en transaction annulée dans le clone local possédé ; le candidat partagé n’est pas modifié. Deux droits d’exécution indûment hérités lors du restore Docker ont été retirés uniquement dans ce clone, après comparaison en lecture seule avec les droits du candidat source, pour rétablir la fidélité de la recette. Aucun droit ni mécanisme de validation de l’application n’a été changé.

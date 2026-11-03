@@ -11,7 +11,7 @@ export default async function OfferDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; requestId: string; quoteId: string }>;
-  searchParams: Promise<{ organizationId?: string }>;
+  searchParams: Promise<{ organizationId?: string;versionId?:string }>;
 }) {
   const [{ locale, requestId, quoteId }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -28,6 +28,7 @@ export default async function OfferDetailPage({
     quoteId,
     organizationQuery: selectedQuery,
     organizationName,
+    versionId:query.versionId,
   });
   if (result.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres/${quoteId}` }));
   if (result.status === "not_found") notFound();

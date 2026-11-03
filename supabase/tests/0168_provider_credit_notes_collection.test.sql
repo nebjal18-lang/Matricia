@@ -1,6 +1,8 @@
 begin;
 set local search_path = public, extensions;
-select plan(15);
+select plan(16);
+-- Native declaration/validation, installment dates, reversals and immutable source
+-- correction are additionally exercised by0347, with real runtime roles.
 
 select ok((
   select count(*) = 5 and bool_and(p.prosecdef and p.proconfig::text like '%search_path=%')
@@ -38,10 +40,10 @@ select ok((
 ), 'invoice balances derive credited amounts, payment plans and overdue status');
 
 select ok((
-  pg_get_functiondef('public.reconcile_provider_payment(uuid,jsonb,text,uuid)'::regprocedure)
+  pg_get_functiondef('public.reconcile_provider_payment_pre_review_v1(uuid,jsonb,text,uuid)'::regprocedure)
     like '%provider_invoice_outstanding_minor%'
   and pg_get_functiondef('private.provider_has_overdue_matricia_invoice(uuid)'::regprocedure)
-    like '%payment_status = ''OVERDUE''%'
+    like '%provider_invoice_overdue_minor_v1%'
 ), 'reconciliation and the J+8 helper consume derived outstanding, not a mutated invoice');
 
 select ok((
@@ -83,12 +85,29 @@ values
 ('b1684000-0000-4000-8000-000000000001', true, true, 'OK', 'OK', 'AVAILABLE', array['CASABLANCA'], true),
 ('b1684000-0000-4000-8000-000000000002', true, true, 'OK', 'OK', 'AVAILABLE', array['CASABLANCA'], true);
 
-set local session_replication_role = replica;
+-- Complete immutable historical fixtures retain every foreign key and ledger constraint.
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+create temporary table fixture168 as
+select n,('b1684000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid org,
+ ('a1684000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid actor,
+ ('d1684000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid statement,
+ ('e1684000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid journal,
+ ('b168a000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid ar,
+ ('b168b000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid revenue,
+ ('b168c000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid tax
+from generate_series(1,2)n;
+insert into public.financial_accounts(id,organization_id,code,name,account_type,currency)
+select a.id,f.org,a.code,'TEST ONLY financial account',a.kind,'MAD'from fixture168 f cross join lateral(values(f.ar,'TEST168_AR','ASSET'),(f.revenue,'TEST168_REV','REVENUE'),(f.tax,'TEST168_TAX','LIABILITY'))a(id,code,kind);
+insert into public.provider_statements(id,provider_organization_id,statement_number,period_start,period_end,currency,subtotal_minor,tax_minor,total_minor,document_hash,correlation_id,created_by)
+select statement,org,'TEST168-ST-'||n,current_date-30,current_date-11,'MAD',1000,200,1200,repeat('f',64),extensions.gen_random_uuid(),actor from fixture168;
+insert into public.financial_journals(id,organization_id,journal_type,currency,idempotency_scope,idempotency_key,correlation_id,effective_at,description,created_by)
+select journal,org,'PROVIDER_COMMISSION_INVOICE','MAD','TEST168','TEST168-INVOICE-'||n,extensions.gen_random_uuid(),current_date-10,'TEST ONLY historical invoice',actor from fixture168;
+insert into public.financial_entries(organization_id,journal_id,account_id,direction,amount_minor,currency)
+select f.org,f.journal,a.id,a.direction,a.amount,'MAD'from fixture168 f cross join lateral(values(f.ar,'DEBIT',1200),(f.revenue,'CREDIT',1000),(f.tax,'CREDIT',200))a(id,direction,amount);
 insert into public.provider_invoices(id, provider_organization_id, statement_id, invoice_number, currency, subtotal_minor, tax_minor, total_minor, issued_on, due_on, tax_rule_snapshot, document_hash, journal_id, correlation_id, created_by)
 values
 ('c1684000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000001', 'd1684000-0000-4000-8000-000000000001', 'INV-CREDIT-168', 'MAD', 1000, 200, 1200, current_date - 10, current_date - 1, '[]', repeat('a', 64), 'e1684000-0000-4000-8000-000000000001', 'f1684000-0000-4000-8000-000000000001', 'a1684000-0000-4000-8000-000000000001'),
 ('c1684000-0000-4000-8000-000000000002', 'b1684000-0000-4000-8000-000000000002', 'd1684000-0000-4000-8000-000000000002', 'INV-PLAN-168', 'MAD', 1000, 200, 1200, current_date - 10, current_date - 1, '[]', repeat('b', 64), 'e1684000-0000-4000-8000-000000000002', 'f1684000-0000-4000-8000-000000000002', 'a1684000-0000-4000-8000-000000000002');
-set local session_replication_role = origin;
 
 select ok(
   private.provider_has_overdue_matricia_invoice('b1684000-0000-4000-8000-000000000001')
@@ -96,10 +115,12 @@ select ok(
   'an unpaid past-due invoice is overdue before any credit or plan'
 );
 
-set local session_replication_role = replica;
+insert into public.financial_journals(id,organization_id,journal_type,currency,idempotency_scope,idempotency_key,correlation_id,effective_at,description,created_by)
+select 'e1684000-0000-4000-8000-000000000011',org,'PROVIDER_CREDIT_NOTE','MAD','TEST168','TEST168-CREDIT',extensions.gen_random_uuid(),current_date-1,'TEST ONLY historical credit',actor from fixture168 where n=1;
+insert into public.financial_entries(organization_id,journal_id,account_id,direction,amount_minor,currency)
+select f.org,'e1684000-0000-4000-8000-000000000011',a.id,a.direction,a.amount,'MAD'from fixture168 f cross join lateral(values(f.ar,'CREDIT',1200),(f.revenue,'DEBIT',1000),(f.tax,'DEBIT',200))a(id,direction,amount)where f.n=1;
 insert into public.provider_credit_notes(id, provider_organization_id, invoice_id, credit_number, currency, subtotal_minor, tax_minor, total_minor, reason, issued_on, journal_id, document_hash, correlation_id, created_by)
 values ('aa681000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000001', 'c1684000-0000-4000-8000-000000000001', 'AV-168-1', 'MAD', 1000, 200, 1200, 'Avoir integral de test 168', current_date - 1, 'e1684000-0000-4000-8000-000000000011', repeat('c', 64), 'f1684000-0000-4000-8000-000000000011', 'a1684000-0000-4000-8000-000000000001');
-set local session_replication_role = origin;
 
 select ok(
   not private.provider_has_overdue_matricia_invoice('b1684000-0000-4000-8000-000000000001')
@@ -110,24 +131,25 @@ select ok(
   'a credit note clears the hold by derivation without mutating the invoice total'
 );
 
-set local session_replication_role = replica;
 insert into public.provider_payment_plans(id, provider_organization_id, invoice_id, reason, requested_by)
 values ('aa682000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000002', 'c1684000-0000-4000-8000-000000000002', 'Echeancier de test 168', 'a1684000-0000-4000-8000-000000000002');
 insert into public.provider_payment_plan_decisions(id, plan_id, provider_organization_id, decision_version, status, reason, decided_by)
 values
 ('aa683000-0000-4000-8000-000000000001', 'aa682000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000002', 1, 'REQUESTED', 'Echeancier de test 168', 'a1684000-0000-4000-8000-000000000002'),
 ('aa684000-0000-4000-8000-000000000001', 'aa682000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000002', 2, 'APPROVED', 'Approbation echeancier 168', 'a1684000-0000-4000-8000-000000000002');
-set local session_replication_role = origin;
 
+select ok(private.provider_has_overdue_matricia_invoice('b1684000-0000-4000-8000-000000000002'),'a legacy approved plan without installments never suppresses an overdue obligation');
+insert into public.provider_payment_plan_installments(plan_id,provider_organization_id,sequence,due_on,amount_minor)values
+('aa682000-0000-4000-8000-000000000001','b1684000-0000-4000-8000-000000000002',1,current_date+5,600),
+('aa682000-0000-4000-8000-000000000001','b1684000-0000-4000-8000-000000000002',2,current_date+10,600);
 select ok(
   not private.provider_has_overdue_matricia_invoice('b1684000-0000-4000-8000-000000000002')
   and (select payment_status from public.provider_invoice_balances where id = 'c1684000-0000-4000-8000-000000000002') = 'PAYMENT_PLAN'
   and (select outstanding_minor from public.provider_invoice_balances where id = 'c1684000-0000-4000-8000-000000000002') = 1200
   and private.provider_payment_plan_status('aa682000-0000-4000-8000-000000000001') = 'APPROVED',
-  'an approved payment plan lifts the overdue hold while the invoice stays open'
+  'a governed future installment plan defers only its covered amounts while the invoice stays open'
 );
 
-set local session_replication_role = replica;
 insert into public.provider_collection_cases(id, provider_organization_id, invoice_id, reason, opened_by)
 values ('aa685000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000002', 'c1684000-0000-4000-8000-000000000002', 'Recouvrement de test 168', 'a1684000-0000-4000-8000-000000000002');
 insert into public.provider_collection_case_decisions(id, case_id, provider_organization_id, decision_version, status, reason, decided_by)
@@ -136,7 +158,6 @@ values
 ('aa687000-0000-4000-8000-000000000001', 'aa685000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000002', 2, 'FORMAL_NOTICE', 'Mise en demeure test 168', 'a1684000-0000-4000-8000-000000000002');
 insert into public.provider_payment_plan_decisions(id, plan_id, provider_organization_id, decision_version, status, reason, decided_by)
 values ('aa688000-0000-4000-8000-000000000001', 'aa682000-0000-4000-8000-000000000001', 'b1684000-0000-4000-8000-000000000002', 3, 'DEFAULTED', 'Defaut echeancier test 168', 'a1684000-0000-4000-8000-000000000002');
-set local session_replication_role = origin;
 
 select ok(
   private.provider_collection_case_status('aa685000-0000-4000-8000-000000000001') = 'FORMAL_NOTICE'

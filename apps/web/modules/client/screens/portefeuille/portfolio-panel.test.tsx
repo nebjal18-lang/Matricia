@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("./actions", () => ({
   createSite: vi.fn(),
   createProject: vi.fn(),
+  editProject: vi.fn(),
   saveTask: vi.fn(),
   saveBudget: vi.fn(),
   createCostCenter: vi.fn(),
@@ -44,6 +45,8 @@ const data: Portfolio = {
   allocations: [{ id: "66666666-6666-4666-8666-666666666666", organizationId: org, costCenterId: center, budgetId: budget, projectId: project, type: "ACTUAL", amountMinor: "800000", currency: "MAD", createdAt: "2026-04-01" }],
   calendar: [{ organizationId: org, projectId: project, itemId: "77777777-7777-4777-8777-777777777777", sourceKind: "RFQ_DEADLINE", eventType: "QUOTE", titleFr: "Date limite de remise des devis", titleAr: "الموعد النهائي", startsAt: "2026-10-01T00:00:00Z", endsAt: null, status: "OPEN", occursOn: null, allDay: false }],
   libraries: [],
+  members: [],
+  budgetTotals: [{budgetId: budget, netMinor: "800000"}],
 };
 
 it.each(["fr", "ar"] as const)("uses business choices and a real evidence file (%s)", locale => {
@@ -54,6 +57,16 @@ it.each(["fr", "ar"] as const)("uses business choices and a real evidence file (
 });
 
 describe("PortfolioPanel", () => {
+  it.each(["fr", "ar"] as const)("names progress indicators and exposes budget facts as semantic terms and values (%s)", locale => {
+    const messages = getMessages(locale);
+    const html = renderToStaticMarkup(<PortfolioPanel locale={locale} data={data} m={messages} keys={{ site: "a", project: "b", task: "c", contract: "d", budget: "e", center: "f", allocation: "g", event: "h" }} />);
+    expect(html.match(/role="progressbar" aria-label="[^"]+"/gu)).toHaveLength(2);
+    expect(html).toContain(`aria-label="${messages.progress} · ${locale === "ar" ? "امتثال" : "Conformité"}"`);
+    const facts = html.match(/<dl class="client-fact-grid">([\s\S]*?)<\/dl>/u)?.[1];
+    expect(facts?.match(/<dt>/gu)).toHaveLength(3);
+    expect(facts?.match(/<dd /gu)).toHaveLength(3);
+    expect(facts).toContain(`<dt>${messages.used}</dt><dd dir="ltr">`);
+  });
   it("shows sites, integer progress and a consumption alert without placeholders", () => {
     const html = renderToStaticMarkup(
       <PortfolioPanel

@@ -1,0 +1,111 @@
+{
+  "scope": "LOCAL_OPTIMIZED_BROWSER_AUTH_TRANSPORT_DIAGNOSTIC",
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "cspBypassed": false,
+  "tlsVerificationDisabled": false,
+  "failedRequests": [
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/entreprises",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/fournisseur",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/franchise",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/besoin",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/diagnostic",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/a-propos",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/connexion",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/inscription",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/diagnostic",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/fournisseur",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/entreprises",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/franchise",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/abonnements",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/a-propos",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/fr/connexion",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "protocol": "http:",
+      "host": "127.0.0.1:19273",
+      "path": "/ar",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "upgradeInsecureRequests": true,
+  "nodeHttpHealth": 200,
+  "browserHealth": {
+    "status": 200
+  },
+  "classification": "LOCAL_AUTH_TRANSPORT_WORKS"
+}

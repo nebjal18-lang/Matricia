@@ -1,0 +1,11 @@
+{
+  "scope": "COMPLETE_PRODUCTION_MODE_NEXT_WEBPACK_BUILD_BEFORE_FINAL_NOTIFICATION_UI_FIX",
+  "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "appTree": "46cb561cf9d17a69c5b6b5517d3506d2c3a3a1b4",
+  "status": "PASSED",
+  "typescriptCompleted": true,
+  "typescriptSkipped": false,
+  "serverStarted": true,
+  "logSha256": "da2a8288435b64fbe4df7877b3d367de7b2382cd07fb0c6e1a416a2b6bc07c13",
+  "productionDeployment": false
+}

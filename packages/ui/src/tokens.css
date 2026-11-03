@@ -4,10 +4,15 @@
   --mat-navy-strong: #0b1240;
   --mat-navy-soft: #2a3a8c;
   --mat-navy-tint: #ebeef8;
-  --mat-violet: #642bef;
-  --mat-violet-strong: #5020d0;
-  --mat-violet-soft: #f1ebfe;
-  --mat-violet-line: #ddd0fc;
+  --mat-blue: #1d4ed8;
+  --mat-blue-strong: #1e40af;
+  --mat-blue-soft: #eff6ff;
+  --mat-blue-line: #bfdbfe;
+  /* Compatibility names keep older components on the shared Version A accent. */
+  --mat-violet: var(--mat-blue);
+  --mat-violet-strong: var(--mat-blue-strong);
+  --mat-violet-soft: var(--mat-blue-soft);
+  --mat-violet-line: var(--mat-blue-line);
   --mat-purple: #962ed0;
   --mat-rose: #e65290;
   --mat-rose-ink: #a8255f;
@@ -23,7 +28,7 @@
   --mat-canvas: #f9fafb;
   --mat-surface: #ffffff;
   --mat-border: #e4e7f0;
-  --mat-gradient: linear-gradient(105deg, #f86b71 0%, #e65290 38%, #962ed0 72%, #642bef 100%);
+  --mat-gradient: var(--mat-blue);
 
   /* Semantic roles (text variants of coral, rose and mint keep WCAG AA on white) */
   --mat-color-brand: var(--mat-navy);
@@ -48,5 +53,5 @@
   --mat-shadow-small: 0 1px 2px rgb(18 29 88 / 8%);
   --mat-shadow-medium: 0 8px 24px rgb(18 29 88 / 12%);
   --mat-shadow-overlay: 0 24px 64px rgb(18 29 88 / 18%);
-  --mat-focus-ring: 0 0 0 3px rgb(100 43 239 / 35%);
+  --mat-focus-ring: 0 0 0 3px rgb(29 78 216 / 35%);
 }

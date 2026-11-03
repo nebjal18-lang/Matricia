@@ -1,0 +1,238 @@
+{
+  "scope": "PROVIDER_CANDIDATE_TWO_NATIVE_BUSINESS_PASS_FINANCE_F13_REPRODUCTION",
+  "candidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "appTree": "e709d635bfc02c3297ec356689b24364243a67ea",
+  "businessCompletionCertified": false,
+  "passedNativeDomains": [
+    "qualification",
+    "quotes",
+    "revisions",
+    "contract_demo",
+    "mission",
+    "delivery_correction_reception_revocation",
+    "messaging_private_file"
+  ],
+  "blockedDomain": "current finance F13: Morocco civil today rejected against UTC current_date",
+  "files": [
+    {
+      "file": "admin-provider-queue-rls-reproduction.json",
+      "sizeBytes": 364,
+      "sha256": "c3a6140d4d1ad02bf94622853e7cbda7751cd9de7b13f32ac4127088c74634bd"
+    },
+    {
+      "file": "build.json",
+      "sizeBytes": 634,
+      "sha256": "1996ed7d1b12594af3e84bab65ef3cffa3827aa6961ff4f0a6d8a861ad7fc808"
+    },
+    {
+      "file": "build.log",
+      "sizeBytes": 12750,
+      "sha256": "4934ade295e9faeb0c5b0bb57a76d467a98cf7923caba39a1e1f2c8cc824f768"
+    },
+    {
+      "file": "contract-mission/assigned-mission-fr-390.png",
+      "sizeBytes": 344380,
+      "sha256": "42493de4fe0455cbc5f50d835a7c68849f3552721fb2553037188934bf9be871"
+    },
+    {
+      "file": "contract-mission/summary.json",
+      "sizeBytes": 5196,
+      "sha256": "f46e15b384b047bd910d07f687e26ad3e48de5069b1f8865d9a593375375ae08"
+    },
+    {
+      "file": "delivery/client-1-v1-rejected-fr-768.png",
+      "sizeBytes": 471072,
+      "sha256": "8277f292cfc5c4ffee84f1de1119e930311497dba80524f438206a430105c823"
+    },
+    {
+      "file": "delivery/client-1-v2-accepted-fr-768.png",
+      "sizeBytes": 470348,
+      "sha256": "69473c3b723152779606f5ef50dce513089850e3cc54ff44f1cbeb2654c1f12f"
+    },
+    {
+      "file": "delivery/client-2-v1-accepted-fr-768.png",
+      "sizeBytes": 470389,
+      "sha256": "82efcb44a8b9b25d0d39865ab1cb5f6f7b8ff621e8b07c845753dbed4db2ea5b"
+    },
+    {
+      "file": "delivery/provider-client-correction-ar-390.png",
+      "sizeBytes": 325249,
+      "sha256": "6f48db37a56df7250a17be0630c704b6fdc0e75d856a3f8f222536fc277e1f9c"
+    },
+    {
+      "file": "delivery/summary.json",
+      "sizeBytes": 3922,
+      "sha256": "5b31d3470382a42442fcc7f4ff7b0569216005712fd3b4e7506e3e29ce0b43b2"
+    },
+    {
+      "file": "finance-current/native-finalize-reproduction.json",
+      "sizeBytes": 540,
+      "sha256": "96ff85a4e3663e37e163633e91399c426da9cfdca92a30425aee4ebedd674a04"
+    },
+    {
+      "file": "finance-current/summary.json",
+      "sizeBytes": 1278,
+      "sha256": "7b17389727129da2b5f828487ab2653218006b0d8f4f3d1a18c0c9866cb0cf7e"
+    },
+    {
+      "file": "messaging/postcontract-thread-ar-390.png",
+      "sizeBytes": 282165,
+      "sha256": "d5decd489ff8aca96249848f6fa6049be6af6dc6198f1a4a74eacf1b5b69edea"
+    },
+    {
+      "file": "messaging/summary.json",
+      "sizeBytes": 1236,
+      "sha256": "ea87dac5c6cb34b401e3186b9bf5a6a20fc13e92161adef85fa2a2fc5ff5c711"
+    },
+    {
+      "file": "peripheral-native/ar-notifications-390.png",
+      "sizeBytes": 504167,
+      "sha256": "40b8ef95f00326b1a7d684d9d8f33f574a470bbe78798dc9099b165b5ae1a7f7"
+    },
+    {
+      "file": "peripheral-native/ar-organisation-roles-390.png",
+      "sizeBytes": 236410,
+      "sha256": "ec43881da72202769c4d957103eec70197481e7bdcadbe2354c6a4b0cb507b18"
+    },
+    {
+      "file": "peripheral-native/ar-sous-traitant-achats-390.png",
+      "sizeBytes": 144876,
+      "sha256": "4d4627143ab5fb8330ca5288687a32cffb8ae02f4325cb5fce0a4c478d18700a"
+    },
+    {
+      "file": "peripheral-native/ar-sous-traitant-entreprise-390.png",
+      "sizeBytes": 283050,
+      "sha256": "620806f887e218a3f83379ebec1fed70b3a553eab88ed185092462564c91eb02"
+    },
+    {
+      "file": "peripheral-native/ar-sous-traitant-marketing-390.png",
+      "sizeBytes": 363392,
+      "sha256": "29a451eaf7b41a30452b292e13023fb004bbff3e8d320649fe87287fb20a51fb"
+    },
+    {
+      "file": "peripheral-native/ar-sous-traitant-mode-client-390.png",
+      "sizeBytes": 153158,
+      "sha256": "76f1ee4b43501971dfab1853fcce5d69be03bb06b4bad30ceb866dacbe60ccd0"
+    },
+    {
+      "file": "peripheral-native/ar-sous-traitant-parametres-390.png",
+      "sizeBytes": 194523,
+      "sha256": "a5a08f6ccfc4c369d3106734b66e4a9334170a35ca9100c6e5d4b3013fe33b4e"
+    },
+    {
+      "file": "peripheral-native/ar-sous-traitant-reputation-390.png",
+      "sizeBytes": 222625,
+      "sha256": "4c7d0fbea16163fb219e217115ea0d8a3c70d03a03fa5b9fef3f07def086c6bb"
+    },
+    {
+      "file": "peripheral-native/fr-notifications-390.png",
+      "sizeBytes": 548404,
+      "sha256": "4d0436579a263b3738146bf45eb2f11f9b43feb96cc3afa840f729508cb9b844"
+    },
+    {
+      "file": "peripheral-native/fr-organisation-roles-390.png",
+      "sizeBytes": 253780,
+      "sha256": "7968e67c73efeb65b79c5e3c934be3851380736c95dc79ec416150e25a563440"
+    },
+    {
+      "file": "peripheral-native/fr-sous-traitant-achats-390.png",
+      "sizeBytes": 150863,
+      "sha256": "f29e567978fb874f5d3482a5d724887175875ffb39b9375ad73c9fa495f1fefd"
+    },
+    {
+      "file": "peripheral-native/fr-sous-traitant-entreprise-390.png",
+      "sizeBytes": 327497,
+      "sha256": "38d141cc6c1482f1daa1e55248b7373d8236374746dd6a4d0e25faa74eb15dc5"
+    },
+    {
+      "file": "peripheral-native/fr-sous-traitant-marketing-390.png",
+      "sizeBytes": 395455,
+      "sha256": "4644d6a1b00d7a3d2d8957b6830a501a577ada76a43bdb0e5172033c66233faa"
+    },
+    {
+      "file": "peripheral-native/fr-sous-traitant-mode-client-390.png",
+      "sizeBytes": 161057,
+      "sha256": "a8f1ec5f7c633648ebb5ed4dce0763ff205da4506d2bbac7356bb90a146368d5"
+    },
+    {
+      "file": "peripheral-native/fr-sous-traitant-parametres-390.png",
+      "sizeBytes": 212499,
+      "sha256": "fe457dd30f8214edd49dcf04e92b9a26dce4d9a77f3abd240e46950c42825361"
+    },
+    {
+      "file": "peripheral-native/fr-sous-traitant-reputation-390.png",
+      "sizeBytes": 249946,
+      "sha256": "83c554f32526ee5c678db469afc1b76aba0b12b5b9b3069bc163d5332ef6a20c"
+    },
+    {
+      "file": "peripheral-native/summary.json",
+      "sizeBytes": 4802,
+      "sha256": "610060f3cbf5d7512fae3aa4a31b0f254e03d2a6fe9ecc634447896cf2742b7e"
+    },
+    {
+      "file": "qualification-evidence-explicit-fr-768.png",
+      "sizeBytes": 492106,
+      "sha256": "30e4cb4ccbda2ec2392229ce012b35cf06dda1c5d2feff1acd470bab5df11364"
+    },
+    {
+      "file": "qualification-independent-admin-fr-768.png",
+      "sizeBytes": 438537,
+      "sha256": "7d94ac09201c922ea5556dd41a5a5ab1b2354a78cbc83500b7edbc8b7c1adcbc"
+    },
+    {
+      "file": "qualification-review-native-projection.json",
+      "sizeBytes": 552,
+      "sha256": "df5ea70f2b0df206ecc9063394289c2421cbb96ac8c8f80036d3bdec2a144982"
+    },
+    {
+      "file": "qualification-reviewed-as-recorded.json",
+      "sizeBytes": 2307,
+      "sha256": "cbc0e19a214a08510bf0a9920655ca21395ac10aa9abd0abae433f5b5919515e"
+    },
+    {
+      "file": "qualification-reviewed.json",
+      "sizeBytes": 3165,
+      "sha256": "20dbc9988106baade32fe8476349fbcd6d1e09d56b182d06907b4995b427d3fa"
+    },
+    {
+      "file": "quote-revision/client-retained-published-fr-768.png",
+      "sizeBytes": 398564,
+      "sha256": "0d283dc87e22772ac39c00beec435b3b4f2263db0699b0638b6c00eb577ba95e"
+    },
+    {
+      "file": "quote-revision/provider-republished-fr-390.png",
+      "sizeBytes": 557525,
+      "sha256": "65bf026047d64d60bf456193df423cb80f0898416ef320daffdd3fcfa3aedc2c"
+    },
+    {
+      "file": "quote-revision/summary.json",
+      "sizeBytes": 1577,
+      "sha256": "925f7b0286e17f7913aca3b1abcd3be38ec801af792f78e1204c5ff2643e493d"
+    },
+    {
+      "file": "quotes/submitted-ar-390.png",
+      "sizeBytes": 515533,
+      "sha256": "d78ab0427ee4c7062fbcfeb15339216ac89acccb7da0952f67e697358d528ad3"
+    },
+    {
+      "file": "quotes/submitted-fr-390.png",
+      "sizeBytes": 548678,
+      "sha256": "462bf00109153a3dab8fefcaa339d38c90b121504003518c15df9707819ba717"
+    },
+    {
+      "file": "quotes/summary.json",
+      "sizeBytes": 2312,
+      "sha256": "205e263bfef0aea6c30d4a4681a82200e165e301dd31aa57333e2d736e3ed094"
+    },
+    {
+      "file": "rfq-provenance.json",
+      "sizeBytes": 2846,
+      "sha256": "315b617c2cddc6d574991b12d47a00975b2c064fea116d4183001240e78e24ac"
+    },
+    {
+      "file": "upgrade.json",
+      "sizeBytes": 175896,
+      "sha256": "8438cb2f38a446f84e074b8e55eea4f0ce51556cc2030025b266b5b634b6804d"
+    }
+  ]
+}

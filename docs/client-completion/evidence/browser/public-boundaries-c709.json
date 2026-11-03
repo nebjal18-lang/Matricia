@@ -1,0 +1,106 @@
+{
+  "scope": "NATIVE_SIGNED_IN_CLIENT_PUBLIC_HEADER_BOUNDARIES",
+  "appTree": "c7092168ac05d4765220892029cf5f7eaf6c8e4b",
+  "status": "PASSED",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 700,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "fr",
+      "width": 701,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "fr",
+      "width": 767,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "fr",
+      "width": 1023,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "fr",
+      "width": 1024,
+      "keyboard": true,
+      "touch": null,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "keyboard": true,
+      "touch": null,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 700,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 701,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 767,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 1023,
+      "keyboard": true,
+      "touch": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 1024,
+      "keyboard": true,
+      "touch": null,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "keyboard": true,
+      "touch": null,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "failures": []
+}

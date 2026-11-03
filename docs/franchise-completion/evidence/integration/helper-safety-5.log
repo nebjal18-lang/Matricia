@@ -1,0 +1,13 @@
+✔ Franchise browser tooling refuses a production invocation before reading a private state (2.681189ms)
+✔ Franchise browser tooling requires a coordinated invocation even in development (0.413422ms)
+✔ Franchise browser tooling refuses an implicit or missing product candidate (0.735804ms)
+✔ the outage command requires an additional exclusive-coordination flag before any fixture access (247.236273ms)
+✔ the identity outage also refuses execution before exclusive coordination (99.527965ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 690.475702

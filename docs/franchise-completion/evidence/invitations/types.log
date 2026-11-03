@@ -1,0 +1,4 @@
+
+> @matricia/web@0.1.0 typecheck /workspace/franchise-ci/apps/web
+> tsc --noEmit
+

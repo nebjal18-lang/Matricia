@@ -1,0 +1,32 @@
+{
+  "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+  "appTree": "8fcc61239df657e3e16110acc09625418e7ed888",
+  "appBuildCandidate": "79a97ad97220c5e4b61a9b8a3d889b1043ea6dba",
+  "status": "FAILED",
+  "routes": 24,
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "widths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "visits": 192,
+  "passed": 176,
+  "failed": 16,
+  "jsErrors": 0,
+  "httpNon200": 0,
+  "workspaceReadFailures": 0,
+  "documentHorizontalOverflow": 0,
+  "axeViolationCaseCounts": {
+    "definition-list": 16,
+    "aria-prohibited-attr": 8
+  },
+  "axeRuleExclusions": [],
+  "manualVisualFindings": "../visual-findings-core.json",
+  "automatedAxeDoesNotCertifyFullAccessibility": true,
+  "hostedCertification": false
+}

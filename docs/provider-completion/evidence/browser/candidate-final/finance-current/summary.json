@@ -1,0 +1,69 @@
+{
+  "scope": "NATIVE_CURRENT_PROVIDER_FINANCE_WITH_UNSHORTENED_REAL_DISPUTE_WINDOW",
+  "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "appTree": "46cb561cf9d17a69c5b6b5517d3506d2c3a3a1b4",
+  "status": "PARTIALLY_VERIFIED_TIME_BOUND_CLOSURE_NOT_CLAIMED",
+  "steps": [
+    {
+      "step": "actual_native_sales_and_viewer_receipt_reservation_denied_42501",
+      "passed": true
+    },
+    {
+      "step": "accounting_touch_real_pdf_pending_scan_recovery_exact_MAD_declaration_without_payment_execution",
+      "passed": true,
+      "candidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4"
+    },
+    {
+      "step": "self_approval_and_early_finance_denied_then_actual_client_and_distinct_finance_UI_decisions_create_native_accrual",
+      "passed": true
+    },
+    {
+      "step": "native_four_eyes_closing_policy_scheduler_generates_real_future_pre_statement_and_retry_cannot_close_or_redate_it",
+      "passed": true
+    }
+  ],
+  "realMoneyMovementCertified": false,
+  "physicalAntivirusCertified": false,
+  "closedInvoiceCertified": false,
+  "paymentPlanAndAllocationCertified": false,
+  "limitations": [
+    "A newly generated pre-statement cannot close before its real approved dispute deadline.",
+    "No historical invoice, financial entry, payment, balance, receipt or clock is injected."
+  ],
+  "idempotencyKey": "df128f21-fbcc-484c-8353-39f2e8120775",
+  "sourceNativeDeliveryCandidate": "8941517a6beacfac1fd0b785035ce9ec15d877dc",
+  "sourceNativeReceiptCandidate": "5e06b3241a0eed0c387e4cdaad7983b6fec764c4",
+  "uploadId": "b447e72a-26ff-471d-b9fc-4fa0f5b9e281",
+  "sha256": "6c1cdc139289d8f0b8f9557f8cc3b26a00352c5d6e6f78bde781b3cd301c9a0b",
+  "sizeBytes": 831,
+  "declarationId": "6f9caa1f-0a4d-4cb6-90b0-9a182731db38",
+  "payableEventId": "3d0b55d0-c67e-4da7-8e7c-b37465cb2baa",
+  "referenceAccounts": {
+    "scope": "HISTORICAL_SQL_TEST_REFERENCE_ACCOUNTS_ONLY_NO_LEDGER_OR_BALANCE",
+    "source": "supabase/tests/0347_provider_monthly_closing.test.sql",
+    "sourceSha256": "236664c18e1f27a4ddc30164bc0a3cd53a8a1e5d5a19ecf0ee265400165ff9f9",
+    "extractedSqlSha256": "67c4c3356d80a4be4bedd991734c558d6111d0d248509408f1a22547db76a042",
+    "ids": [
+      "f1397dd1-458f-4bae-9f75-111b2e9d02a3",
+      "288568d9-04f1-4dcb-83b8-9df238362eb8",
+      "4edf54c5-fa4d-460c-8bca-a6aa7761d790"
+    ]
+  },
+  "closingPolicyId": "eeea909b-35ba-4dbf-952b-1ad067f92c1b",
+  "schedulerFirst": {
+    "outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED",
+    "processed": 1,
+    "period_end": "2026-10-31"
+  },
+  "period": {
+    "id": "3841eca2-a29a-44ad-9925-89e98f4b2315",
+    "period_end": "2026-10-31",
+    "generated_at": "2026-11-02T23:28:54.685847+00:00",
+    "dispute_until": "2026-11-05T23:28:54.685847+00:00"
+  },
+  "schedulerRetry": {
+    "outcome": "PROVIDER_BILLING_SCHEDULER_COMPLETED",
+    "processed": 0,
+    "period_end": "2026-10-31"
+  }
+}

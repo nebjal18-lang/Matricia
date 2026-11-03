@@ -12,6 +12,7 @@ export type ProviderActionState = { status: "idle" } | { status: "success"; outc
 const outcomeSchema = z.object({ outcome: z.string().min(3), command_id: z.string().uuid() }).passthrough();
 const uploadReservationSchema = z.object({
   outcome: z.literal("PROVIDER_DOCUMENT_UPLOAD_RESERVED"),
+  status:z.enum(["UPLOAD_PENDING","BOUND"]).default("UPLOAD_PENDING"),
   upload_id: z.string().uuid(),
   storage_bucket: z.literal("provider-qualification"),
   storage_object_path: z.string().min(10).max(1000),
@@ -54,11 +55,11 @@ export async function recordProviderDocument(_:ProviderActionState,data:FormData
   if(!auth.user)return{status:"error",reason:"UNAUTHENTICATED"};
   const file=await validateProviderDocumentFile(data.get("documentFile"));
   if(file.status==="error")return{status:"error",reason:"VALIDATION"};
-  const reservation=await client.rpc("begin_provider_document_upload",{p_provider_organization_id:v.organizationId,p_declared_mime_type:file.value.mimeType,p_declared_size_bytes:file.value.sizeBytes});
+  const reservation=await client.rpc("begin_provider_document_upload_v2",{p_provider_organization_id:v.organizationId,p_declared_mime_type:file.value.mimeType,p_declared_size_bytes:file.value.sizeBytes,p_expected_content_hash:file.value.sha256,p_operation_key:v.idempotencyKey});
   if(reservation.error)return failure(reservation.error);
   const reserved=uploadReservationSchema.safeParse(reservation.data);if(!reserved.success)return{status:"error",reason:"FAILED"};
-  const stored=await client.storage.from(reserved.data.storage_bucket).upload(reserved.data.storage_object_path,file.value.bytes,{contentType:file.value.mimeType,upsert:false,cacheControl:"3600"});
-  if(stored.error)return failure(stored.error);
+  const stored=reserved.data.status==="BOUND"?{error:null}:await client.storage.from(reserved.data.storage_bucket).upload(reserved.data.storage_object_path,file.value.bytes,{contentType:file.value.mimeType,upsert:false,cacheControl:"3600"});
+  if(stored.error&&String((stored.error as {statusCode?:string}).statusCode)!=="409")return failure(stored.error);
   const result=await client.rpc("record_provider_document_version",{p_provider_organization_id:v.organizationId,p_document_kind:v.documentKind,p_code:v.code,p_document:{issuer_name:v.issuerName,reference_number:v.referenceNumber,issued_on:v.issuedOn,expires_on:v.expiresOn,storage_object_path:reserved.data.storage_object_path,content_hash:file.value.sha256,metadata:{declared_mime_type:file.value.mimeType,declared_size_bytes:file.value.sizeBytes}},p_provider_service_ids:v.providerServiceIds,p_change_reason:v.changeReason,p_idempotency_key:v.idempotencyKey});
   if(result.error){await client.storage.from(reserved.data.storage_bucket).remove([reserved.data.storage_object_path]);return failure(result.error)}
   const recorded=outcomeSchema.safeParse(result.data);if(!recorded.success){await client.storage.from(reserved.data.storage_bucket).remove([reserved.data.storage_object_path]);return{status:"error",reason:"FAILED"}}
@@ -70,4 +71,11 @@ export async function declareProviderInterventionModes(_:ProviderActionState,dat
  const parsed=interventionDeclaration.safeParse({organizationId:text(data,"organizationId"),modes:data.getAll("modes").map(String),reason:text(data,"reason"),expectedVersion:text(data,"expectedVersion"),idempotencyKey:text(data,"idempotencyKey")});
  if(!parsed.success)return{status:"error",reason:"VALIDATION"};const v=parsed.data;
  return rpc("declare_provider_intervention_modes",{p_provider_organization_id:v.organizationId,p_modes:v.modes,p_reason:v.reason,p_expected_version:v.expectedVersion,p_idempotency_key:v.idempotencyKey});
+}
+
+export async function declareProviderWorkScope(_:ProviderActionState,data:FormData):Promise<ProviderActionState>{
+ if(!isLocale(text(data,"locale")))return{status:"error",reason:"VALIDATION"};
+ const parsed=z.object({organizationId:z.string().uuid(),radius:z.union([z.literal(""),z.coerce.number().int().nonnegative().max(2147483647)]),summary:z.string().trim().min(3).max(1000),expected:z.coerce.number().int().nonnegative(),reason:z.string().trim().min(3).max(500),key:z.string().uuid()}).safeParse({organizationId:text(data,"organizationId"),radius:text(data,"radiusKm"),summary:text(data,"missionSizeSummary"),expected:text(data,"expectedVersion"),reason:text(data,"reason"),key:text(data,"idempotencyKey")});
+ if(!parsed.success)return{status:"error",reason:"VALIDATION"};const v=parsed.data;
+ return rpc("declare_provider_work_scope_v1",{p_provider_organization_id:v.organizationId,p_intervention_radius_km:v.radius===""?null:v.radius,p_mission_size_summary:v.summary,p_expected_version:v.expected,p_reason:v.reason,p_operation_key:v.key});
 }

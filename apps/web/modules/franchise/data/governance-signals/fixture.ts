@@ -1,0 +1,6 @@
+import type { GovernanceSignals } from "./model";
+/** Synthetic isolated test-only fixture; application loaders never import it. */
+export function governanceSignalFixture(): GovernanceSignals {
+  const franchiseId = "d3650000-0000-4000-8000-000000000002";
+  return { status: "AVAILABLE", franchiseId, snapshot: { id: "a3711000-0000-4000-8000-000000000001", report_id: "a3711000-0000-4000-8000-000000000002", franchise_id: franchiseId, period_start: "2026-11-02", period_end: "2026-11-02", collected_at: "2026-11-03T08:00:00Z", source_evidence_hash: "e".repeat(64), methodology_version: "NATIVE_GOVERNANCE_SIGNALS_V1", summary: { scope: "MANDATED_LIBRARY_AGGREGATE_NO_TERRITORY_ATTRIBUTION", missionCount: 0, assignedProviderCount: 0, largestProviderShareBps: null, matchingRunCount: 0, requestsWithSeveralRuns: 0, governedPanelProposalCount: 0, panelInvitationCount: 0, panelDistinctProviders: null, previousPanelDistinctProviders: null, panelDiversityDelta: null, qualificationShortestSeconds: null, catalogReviewShortestSeconds: null, thresholdConfiguration: "APPROVED_THRESHOLDS_NOT_PROVIDED", riskVerdict: null, noFaultAsserted: true } }, benchmark: { status: "ADMIN_ONLY" }, capabilities: { canRequestReview: false, canInspect: false, requestRestriction: "MFA_REQUIRED" }, reviews: [], reviewCount: 0 };
+}

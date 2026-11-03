@@ -61,7 +61,7 @@ describe("franchise space boards", () => {
     expect(html).toContain("Vous ne pouvez pas auto-valider");
     expect(html).toContain("Couverture du réseau");
     expect(html).toContain("Conseil Anfa");
-    expect(html).toContain("Aucun montant, solde ou donnée financière");
+    expect(html).toContain("Vérification financière indisponible");
     expect(html).toContain("/fr/franchise/fournisseurs/inviter");
     expect(html).toContain("/fr/franchise/clients/inviter");
     expect(html).toContain("/fr/franchise/fournisseurs/accompagnement");
@@ -81,10 +81,10 @@ describe("franchise space boards", () => {
     const matching = renderToStaticMarkup(<FranchiseRequestsBoard locale="fr" query="" board={board} itemId="55555555-5555-4555-8555-555555555555" view="matching" />);
     expect(matching).toContain("name=\"q\"");
     expect(matching).toContain("Matching");
-    expect(matching).toContain("Studio Atlas");
-    expect(matching).toContain("/fr/franchise/fournisseurs/44444444-4444-4444-8444-444444444444");
+    expect(matching).not.toContain("Studio Atlas");
+    expect(matching).not.toContain("/fr/franchise/fournisseurs/44444444-4444-4444-8444-444444444444");
     const documents = renderToStaticMarkup(<DocumentsBoard locale="fr" query="" board={board} />);
-    expect(documents).toContain("invite://atlas");
+    expect(documents).not.toContain("invite://atlas");
     expect(documents).toContain("name=\"q\"");
     const messages = renderToStaticMarkup(<MessagesBoard locale="fr" query="" board={board} />);
     expect(messages).not.toContain("Invitation envoyée");
@@ -99,6 +99,7 @@ describe("franchise space boards", () => {
       crm,
       libraryName: "Informatique",
       governance: {
+        bookBindingReviewRequired:false,
         canApprove: false,
         canManageFinance: false,
         franchises: [],
@@ -106,6 +107,7 @@ describe("franchise space boards", () => {
         invitations: [],
         rules: [],
         books: [{
+          bindingReviewRequired:false,
           id: "99999999-9999-4999-8999-999999999999",
           libraryId: "22222222-2222-4222-8222-222222222222",
           organizationId: "22222222-2222-4222-8222-222222222222",
@@ -207,6 +209,7 @@ describe("franchise space boards", () => {
         anomalyDefinitions: [{ id: "31313131-3131-4313-8313-313131313131", titleFr: "Score critique", titleAr: "درجة حرجة", severity: "CRITICAL", status: "PUBLISHED" }],
       },
     });
+    board.permissions={canDecideQualifications:true,canMaintainDefinitions:true,canInstructDisputes:true,canProposeVolume:true};
     const defs = renderToStaticMarkup(<QualityBoard locale="fr" query={`?organizationId=${organizationId}`} board={board} view="definitions" libraryId={libraryId} organizationId={organizationId} />);
     expect(defs).toContain("Enregistrer la définition");
     expect(defs).toContain("Clé de définition");
@@ -246,4 +249,59 @@ describe("franchise space boards", () => {
     expect(html).not.toContain("Studio Atlas");
     if (previous) process.env.MATRICIA_DEMO_ACCESS_ENABLED = previous;
   });
+  it.each(["fr","ar"] as const)("ne présente pas une panne documentaire comme un coffre vide en %s",locale=>{
+    const board=buildFranchiseSpaceBoard({locale,query:"?franchiseId=selected",unavailableSections:["OPERATIONS"]});
+    const html=renderToStaticMarkup(<DocumentsBoard locale={locale} query="?franchiseId=selected" board={board}/>);
+    expect(html).toContain('role="alert"');expect(html).toContain("?franchiseId=selected");
+    expect(html).not.toContain("client-space-table");
+  });
+  it.each(["fr","ar"] as const)("garde les finances consultables si seule la supervision métier échoue en %s",locale=>{
+    const board=buildFranchiseSpaceBoard({locale,query:"",unavailableSections:["OPERATIONS"]});board.financeBindingStatus="READY";
+    const finance=renderToStaticMarkup(<FranchiseFinanceBoard locale={locale} query="" board={board}/>);
+    const volume=renderToStaticMarkup(<FranchiseFinanceBoard locale={locale} query="" board={board} view="volume"/>);
+    expect(finance).toContain("client-space-table");expect(volume).not.toContain("client-space-table");
+  });
+  it.each(["fr","ar"] as const)("n'affiche pas une absence d'alerte certifiée si le CRM échoue en %s",locale=>{
+    const board=buildFranchiseSpaceBoard({locale,query:"",unavailableSections:["CRM"]});
+    const html=renderToStaticMarkup(<PerformanceBoard locale={locale} query="" board={board}/>);
+    expect(html).toContain(locale==="ar"?"لا يمكن تأكيد عدم وجود تنبيهات":"L’absence d’alertes ne peut pas être confirmée");
+  });
+  it.each(["fr","ar"] as const)("garde le mandat et les filtres dans la recherche et la pagination en %s",locale=>{
+    const query="?organizationId=org-selected&franchiseId=mandate-selected";
+    const board=buildFranchiseSpaceBoard({locale,query,crm});
+    board.people=Array.from({length:10},(_,index)=>({...board.people[0]!,id:`test-${index}`,name:`Atlas ${index}`}));
+    const html=renderToStaticMarkup(<NetworkBoard locale={locale} query={query} board={board} search="Atlas"/>);
+    expect(html).toContain('name="franchiseId" value="mandate-selected"');
+    expect(html).toContain('name="organizationId" value="org-selected"');
+    expect(html).toContain("q=Atlas");expect(html).toContain("page=2");
+  });
+  it("montre un vrai prestataire sans créer un prospect ni une action CRM avec son organisation",()=>{
+    const board=buildFranchiseSpaceBoard({locale:"fr",query:"",crm});
+    const dossier={organizationId:"a3621000-0000-4000-8000-000000000099",name:"Prestataire natif sans prospect",companyStatus:"VERIFIED",status:"ACTIVE",createdAt:"2026-10-01T00:00:00Z",teamSize:2,regions:[],qualifications:[],capacities:[],documents:[{id:"a3622000-0000-4000-8000-000000000099",kind:"INSURANCE",code:"PROOF_NATIVE",status:"SUBMITTED",expiresOn:null}]};
+    const native=buildFranchiseSpaceBoard({locale:"fr",query:"",operations:{requests:[],matching:[],quotes:[],missions:[],anomalies:[],recommendations:[],opportunities:[],qualifications:[],capacities:[],documents:[],threads:[],members:[],disputes:[],skus:[],providerDossiers:[dossier]},crm});
+    expect(native.people).toHaveLength(board.people.length+1);
+    const html=renderToStaticMarkup(<NetworkBoard locale="fr" query="?franchiseId=selected" board={native} itemId={dossier.organizationId} view="documents"/>);
+    expect(html).toContain("PROOF_NATIVE");expect(html).toContain(`/fr/franchise/documents/${dossier.documents[0]!.id}?franchiseId=selected`);
+    expect(html).not.toContain("Consigner une activité");
+  });
+
+  it.each(["fr","ar"] as const)("affiche le caractère non contractuel des frais dans leur tableau en %s",locale=>{
+    const board=buildFranchiseSpaceBoard({locale,query:""});board.financeBindingStatus="READY";
+    const notice=locale==="ar"?"محاكاة غير تعاقدية · التطوير":"Simulation non contractuelle · développement";
+    board.finance=[{id:"fee-test",title:"Frais TEST",object:"TEST",status:"PENDING",auth:"1 000 MAD",tone:"sky",kind:"entryFee",executionNotice:notice}];
+    const html=renderToStaticMarkup(<FranchiseFinanceBoard locale={locale} query="" board={board} view="droit-entree"/>);
+    expect(html).toContain(notice);
+  });
+
+  it.each(["fr","ar"] as const)("ne transforme pas un rattachement financier inconnu ou à rapprocher en faux zéro en %s",locale=>{
+    const board=buildFranchiseSpaceBoard({locale,query:""});
+    const unknown=renderToStaticMarkup(<FranchiseFinanceBoard locale={locale} query="?franchiseId=selected" board={board}/>);
+    expect(unknown).not.toContain("franchise-kpi-tile");
+    board.financeBindingStatus="REVIEW_REQUIRED";
+    const review=renderToStaticMarkup(<FranchiseFinanceBoard locale={locale} query="?franchiseId=selected" board={board}/>);
+    expect(review).toContain(locale==="ar"?"يلزم التحقق من ربط الدفتر بالتفويض":"Rapprochement du mandat requis");
+    expect(review).toContain('dir="ltr">—</strong>');
+    expect(review).toContain("/franchise/gouvernance?franchiseId=selected");
+  });
+
 });

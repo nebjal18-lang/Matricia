@@ -29,6 +29,9 @@ export type ClientOfferFlag = {
 export type ClientOfferDetail = {
   quoteId: string;
   quoteVersionId: string;
+  displayedVersionNumber?:number;
+  revisionInProgress?:boolean;
+  publishedVersions?:{id:string;version:number;submittedAt:string}[];
   requestId: string;
   rfqId: string;
   label: string;
@@ -40,6 +43,8 @@ export type ClientOfferDetail = {
   conditions: string[];
   exclusions: string[];
   lines: ClientOfferLine[];
+  optionPriceBasis?:"EXCLUDING_TAX"|null;
+  options?:{id:string;label:string;amountMinor:string}[];
   documents: ClientOfferDocument[];
   points: ClientOfferPoint[];
   flags: ClientOfferFlag[];

@@ -40,15 +40,17 @@ export function QuotePreviewWorkbench({
   const currency = invitation?.currency ?? quote?.currency ?? null;
   const editHref = `/${locale}/sous-traitant/devis/${quote?.id ?? quoteId}${query}`;
   const lineCount = prefill?.lines.length ?? 0;
+  const draftParams=new URLSearchParams(query.replace(/^\?/,""));draftParams.set("locale",locale);
+  const draftHref=`/api/provider/quotes/${quote?.id??quoteId}/draft?${draftParams.toString()}`;
   const checklist = [
     { ok: Boolean(organizationName), label: w.quoteCheckOrg, detail: organizationName || "—" },
     { ok: true, label: w.quoteCheckClient, detail: w.quoteClientMasked },
     { ok: Boolean(quote?.id), label: w.quoteCheckRef, detail: quote ? `${quote.id.slice(0, 8)} (v${quote.versionNumber})` : "—" },
     { ok: lineCount > 0 && quote?.totalMinor != null, label: w.quoteCheckItems, detail: `${lineCount} ${w.quoteLinesCount}` },
     { ok: Boolean(prefill?.proposedStartDate || prefill?.durationDays), label: w.quoteCheckPlanning, detail: prefill?.proposedStartDate ? formatDay(locale, prefill.proposedStartDate) : "—" },
-    { ok: Boolean(prefill?.inclusions && prefill.exclusions), label: w.quoteCheckTerms, detail: w.quoteFilled },
+    { ok: Boolean(prefill?.paymentTerms), label: w.quoteCheckTerms, detail: w.quoteFilled },
     { ok: Boolean(prefill?.warranty && prefill.validUntil), label: w.quoteCheckWarranty, detail: prefill?.warranty ?? "—" },
-    { ok: Boolean(prefill?.deliverables), label: w.quoteCheckAttachments, detail: prefill?.deliverables ? w.quoteFilled : "—" },
+    { ok: true, label: w.quoteCheckAttachments, detail: prefill?.attachments?.length ? String(prefill.attachments.length) : locale==="ar"?"لا توجد مرفقات — اختيارية":"Aucune pièce jointe — facultatives" },
   ];
   const allOk = checklist.every((item) => item.ok);
 
@@ -154,10 +156,12 @@ export function QuotePreviewWorkbench({
                   <div className="provider-money-total"><dt>{m.total}</dt><dd dir="ltr">{quote.totalMinor ? formatMinorExact(quote.totalMinor, currency, locale) : "—"}</dd></div>
                 </dl>
                 <p className="client-verified">{w.quoteServerCalc}</p>
+                {prefill.options?.length?<section><h3>{locale==="ar"?"خيارات غير مشمولة في الإجمالي الأساسي":"Options hors total de base"}</h3><ul>{prefill.options.map((option,index)=><li key={index}><span dir="auto">{option.label}</span> — <span dir="ltr">{option.price} {currency}</span> {prefill.optionPriceBasis==="EXCLUDING_TAX"?(locale==="ar"?"دون الضريبة":"HT"):(locale==="ar"?"المعالجة الضريبية بحاجة للتوضيح":"base fiscale à clarifier")}</li>)}</ul></section>:null}
+                {prefill.attachments?.length?<section><h3>{w.quoteCheckAttachments}</h3><ul>{prefill.attachments.map(attachment=><li key={attachment.id}><a className="client-text-link" href={`/api/quotes/attachments/${attachment.id}`}><span dir="auto">{attachment.title}</span></a></li>)}</ul><p>{locale==="ar"?"تُراقب الصلاحيات وسلامة الملف عند كل تنزيل.":"Les droits et l’intégrité du fichier sont contrôlés à chaque téléchargement."}</p></section>:null}
                 <section className="provider-quote-notes">
                   <article><h4>{w.quoteInclusions}</h4><ul>{lines(prefill.inclusions).map((item) => <li key={item}>{item}</li>)}</ul></article>
                   <article><h4>{w.quoteExclusions}</h4><ul>{lines(prefill.exclusions).map((item) => <li key={item}>{item}</li>)}</ul></article>
-                  <article><h4>{w.quoteWarranty}</h4><p>{prefill.warranty}</p></article>
+                  <article><h4>{w.quoteWarranty}</h4><p>{prefill.warranty}</p></article><article><h4>{locale==="ar"?"شروط الدفع":"Modalités de paiement"}</h4><p dir="auto">{prefill.paymentTerms||(locale==="ar"?"غير محددة":"Non renseignées")}</p></article>{prefill.maintenanceTerms?<article><h4>{locale==="ar"?"الصيانة والمتابعة":"Maintenance et suivi"}</h4><p dir="auto">{prefill.maintenanceTerms}</p></article>:null}
                 </section>
               </div>
             </article>
@@ -165,7 +169,7 @@ export function QuotePreviewWorkbench({
           <footer className="provider-preview-actions">
             <Link href={editHref} className="client-ghost-link">{w.quoteBackToEdit}</Link>
             <div className="provider-workbench-actions">
-              <Link href={editHref} className="client-ghost-link">{w.quoteDownloadDraft}</Link>
+              <a href={draftHref} className="client-ghost-link" download>{w.quoteDownloadDraft}</a>
               {submitPanel}
             </div>
           </footer>

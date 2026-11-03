@@ -16,9 +16,9 @@ export type DocumentRow = { id: string; title: string; owner: string; status: st
 export type MessageRow = { id: string; title: string; meta: string; href: string; tone: Tone };
 export type NoticeRow = { id: string; title: string; meta: string; href: string };
 export type SupervisionRow = { id: string; title: string; status: string; meta?: string; href: string; tone?: Tone; rowVersion?: number };
-export type QualityRow = { id: string; title: string; type: string; status: string; next: string; tone: Tone; href?: string };
+export type QualityRow = { evidence?:string[]; severity?:string; id: string; title: string; type: string; status: string; next: string; tone: Tone; href?: string };
 export type FinanceKind = "statement" | "entryFee" | "payout" | "preStatement";
-export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string; kind?: FinanceKind;href?:string };
+export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string; kind?: FinanceKind;href?:string;executionNotice?:string };
 
 export function demoFranchiseSpaces(locale: Locale, query: string) {
   const fr = locale === "fr";
@@ -95,6 +95,8 @@ export function demoFranchiseSpaces(locale: Locale, query: string) {
     metrics:null as FranchiseSupervisionMetrics|null,
     unavailableSections:[] as string[],
     providerDossiers: [] as ProviderDossier[],
+    franchiseId:null as string|null,
+    permissions:{canDecideQualifications:false,canMaintainDefinitions:false,canInstructDisputes:false,canProposeVolume:false},
     canWrite: false,
     people: [
       { id: "pr1", name: fr ? "Studio Atlas" : "ستوديو أطلس", services: fr ? "Identité et supports" : "هوية ودعائم", status: fr ? "Qualifié" : "مؤهل", next: fr ? "Suivi trimestriel" : "متابعة فصلية", tone: "mint" as const, stage: "VERIFIED", email: "atlas@example.invalid", source: "NETWORK", nextFollowupAt: "2026-12-01T00:00:00.000Z", activities: [{ id: "pa1", type: "INVITATION", occurredAt: "2026-09-10T10:00:00.000Z", summary: fr ? "Invitation envoyée au professionnel." : "أُرسلت الدعوة للمهني.", evidence: ["invite://atlas"] }], pipelineEvents: [{ id: "pe1", from: "SENT", to: "VERIFIED", reasonCode: "ELIGIBILITY_CONFIRMED", occurredAt: "2026-09-12T10:00:00.000Z", evidence: [] }] },
@@ -181,6 +183,7 @@ export function demoFranchiseSpaces(locale: Locale, query: string) {
       { id: "gh3", title: fr ? "Communication aux professionnels" : "تبليغ المهنيين", actor: fr ? "Réseau" : "الشبكة" },
     ],
     corrective: [] as Array<{ id: string; title: string; status: string; due: string }>,
+    financeBindingStatus:"UNAVAILABLE" as "READY"|"REVIEW_REQUIRED"|"UNAVAILABLE",
     finance: [
       { id: "fi1", title: fr ? "Relevé de répartition" : "كشف التوزيع", object: fr ? "Période septembre 2026" : "فترة سبتمبر 2026", status: fr ? "À examiner" : "للمراجعة", auth: fr ? "Oui" : "نعم", tone: "peach" as const, amount: undefined },
       { id: "fi2", title: fr ? "Note d’allocation" : "مذكرة التخصيص", object: fr ? "Règle versionnée en vigueur" : "قاعدة بنسخة سارية", status: fr ? "En validation" : "قيد المصادقة", auth: fr ? "Oui" : "نعم", tone: "peach" as const, amount: undefined },

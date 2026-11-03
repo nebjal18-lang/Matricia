@@ -10,14 +10,14 @@ import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 export default async function FranchiseDocumentsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string; q?: string; page?: string; vue?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result } = await requireFranchiseLibrary({ locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
+  const { space, result } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/documents`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const c = libraryCopy(locale);
   const s = franchiseCopy(locale);
   const mandateName = franchiseMandateName(result);
-  const board = await loadFranchiseSpaceFromLibrary({ locale, query: space.selectedQuery, result });
+  const board = result.status === "success" ? await loadFranchiseSpaceFromLibrary({ locale, query: space.selectedQuery, result }) : undefined;
   const view = query.vue === "verifier" ? "verifier" : null;
   return (
-    <FranchiseAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="documents" title={s.docsTitleRich} lead={s.docsLeadRich} kicker={c.scope} mandateName={mandateName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="documents" title={s.docsTitleRich} lead={s.docsLeadRich} kicker={c.scope} mandateName={mandateName}>
       <FranchiseOrganizationSelector locale={locale} organizations={space.organizations} selectedOrganizationId={space.selectedOrganizationId} returnPath={`/${locale}/franchise/documents`} />
       {result.status === "error" ? (
         <FranchiseAccessState locale={locale} reason={result.reason} returnPath={`/${locale}/franchise/documents${space.selectedQuery}`} />

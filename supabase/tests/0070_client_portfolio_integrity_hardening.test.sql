@@ -26,6 +26,79 @@ insert into public.organization_member_roles(membership_id,role_code)values
 ('f7020000-0000-0000-0000-000000000001','CLIENT_OWNER'),
 ('f7020000-0000-0000-0000-000000000002','CLIENT_OWNER'),
 ('f7020000-0000-0000-0000-000000000003','CLIENT_MEMBER');
+-- Rollback-only verified identities, scanned-document metadata and trial quotas.
+-- Historical SQL fixtures, not a claim of real Storage scanning or onboarding E2E.
+insert into public.organization_identifiers(organization_id,identifier_type,normalized_value,verification_status)values('f7010000-0000-0000-0000-000000000001','ICE','997070000000001','VERIFIED'),('f7010000-0000-0000-0000-000000000001','IF','99707001','VERIFIED'),('f7010000-0000-0000-0000-000000000001','RC','TEST70_1','VERIFIED');
+-- Pre-existing verified profile and qualification setup. No eligibility stub.
+insert into public.client_compliance_cases(id,organization_id,status,current_profile_version,created_by,verified_at,activated_at)values('f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001','VERIFIED',1,'f7000000-0000-0000-0000-000000000001',now()-interval'1 day',now()-interval'1 day');
+insert into public.client_profile_versions(compliance_case_id,organization_id,version,profile_data,organization_snapshot,source_organization_row_version,created_by)values('f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001',1,'{"legal_form":"SARL","if_number":"99707001","rc_number":"TEST70_1","registered_city":"Casablanca","registered_address":{"line1":"TEST Client registered address","country_code":"MA"}}','{"legal_name":"P70 Client A SARL","display_name":"P70 Client A SARL","country_code":"MA","identifiers":{"ICE":"997070000000001","IF":"99707001","RC":"TEST70_1"}}',1,'f7000000-0000-0000-0000-000000000001');
+insert into public.client_identity_verification_history(compliance_case_id,organization_id,profile_version,verified_at,verified_by,source)values('f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001',1,now()-interval'1 day','f7000000-0000-0000-0000-000000000002','COMPLIANCE_DECISION');
+insert into public.client_compliance_documents(
+  id,compliance_case_id,organization_id,document_type,version,policy_version_id,
+  document_number,issuer,issued_on,expires_on,original_file_name,file_extension,
+  declared_mime_type,declared_size_bytes,declared_sha256,storage_object_path,
+  detected_mime_type,detected_size_bytes,status,uploaded_at,reviewed_by,reviewed_at,created_by
+) values
+('f7111000-0000-0000-0000-000000000001','f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001','REGISTRATION_DOCUMENT',1,(select id from public.client_document_policy_versions where document_type='REGISTRATION_DOCUMENT' and status='ACTIVE'),'RC-A','Tribunal',current_date-30,current_date+365,'registration-a.pdf','pdf','application/pdf',128,repeat('a',64),'f7010000-0000-0000-0000-000000000001/client-a/registration.pdf','application/pdf',128,'VERIFIED',clock_timestamp(),'f7000000-0000-0000-0000-000000000002',clock_timestamp(),'f7000000-0000-0000-0000-000000000001'),
+('f7111000-0000-0000-0000-000000000002','f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001','REPRESENTATIVE_AUTHORITY',1,(select id from public.client_document_policy_versions where document_type='REPRESENTATIVE_AUTHORITY' and status='ACTIVE'),'AUTH-A','Notaire',current_date-30,current_date+365,'authority-a.pdf','pdf','application/pdf',128,repeat('b',64),'f7010000-0000-0000-0000-000000000001/client-a/authority.pdf','application/pdf',128,'VERIFIED',clock_timestamp(),'f7000000-0000-0000-0000-000000000002',clock_timestamp(),'f7000000-0000-0000-0000-000000000001');
+insert into private.client_document_scan_results(
+  id,document_id,organization_id,sequence,result,engine_code,engine_version,computed_sha256,
+  detected_mime_type,detected_size_bytes,observed_claims,recorded_by,scanner_principal,correlation_id
+) values
+('f7112000-0000-0000-0000-000000000001','f7111000-0000-0000-0000-000000000001','f7010000-0000-0000-0000-000000000001',1,'CLEAN','DEMO_SCANNER','1.0',repeat('a',64),'application/pdf',128,'{}',null,'SUPABASE_SERVICE_ROLE','f7113000-0000-0000-0000-000000000001'),
+('f7112000-0000-0000-0000-000000000002','f7111000-0000-0000-0000-000000000002','f7010000-0000-0000-0000-000000000001',1,'CLEAN','DEMO_SCANNER','1.0',repeat('b',64),'application/pdf',128,'{}',null,'SUPABASE_SERVICE_ROLE','f7113000-0000-0000-0000-000000000002');
+update public.client_compliance_documents set current_scan_result_id=case id
+  when 'f7111000-0000-0000-0000-000000000001' then 'f7112000-0000-0000-0000-000000000001'::uuid
+  else 'f7112000-0000-0000-0000-000000000002'::uuid end,scan_status='CLEAN',scanned_at=clock_timestamp()
+where id in ('f7111000-0000-0000-0000-000000000001','f7111000-0000-0000-0000-000000000002');
+insert into public.client_compliance_evidence(
+  compliance_case_id,organization_id,evidence_type,object_path,file_sha256,review_status,
+  reviewed_by,reviewed_at,created_by,source_document_id,valid_until,validation_state
+) values
+('f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001','REGISTRATION_DOCUMENT','compliance/client-a/registration.pdf',repeat('a',64),'VERIFIED','f7000000-0000-0000-0000-000000000002',clock_timestamp(),'f7000000-0000-0000-0000-000000000001','f7111000-0000-0000-0000-000000000001',current_date+365,'SCANNED_CLEAN'),
+('f7110000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000001','REPRESENTATIVE_AUTHORITY','compliance/client-a/authority.pdf',repeat('b',64),'VERIFIED','f7000000-0000-0000-0000-000000000002',clock_timestamp(),'f7000000-0000-0000-0000-000000000001','f7111000-0000-0000-0000-000000000002',current_date+365,'SCANNED_CLEAN');
+
+
+
+
+insert into public.client_trials(id,organization_id,compliance_case_id,verified_profile_version,status,trial_started_at,trial_ends_at,activated_by)values('f7110000-0000-4000-8000-000000000002','f7010000-0000-0000-0000-000000000001','f7110000-0000-4000-8000-000000000001',1,'TRIAL_ACTIVE',now()-interval'1 day',now()+interval'29 days','f7000000-0000-0000-0000-000000000002');
+
+insert into public.organization_identifiers(organization_id,identifier_type,normalized_value,verification_status)values('f7010000-0000-0000-0000-000000000002','ICE','997070000000002','VERIFIED'),('f7010000-0000-0000-0000-000000000002','IF','99707002','VERIFIED'),('f7010000-0000-0000-0000-000000000002','RC','TEST70_2','VERIFIED');
+-- Pre-existing verified profile and qualification setup. No eligibility stub.
+insert into public.client_compliance_cases(id,organization_id,status,current_profile_version,created_by,verified_at,activated_at)values('f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002','VERIFIED',1,'f7000000-0000-0000-0000-000000000002',now()-interval'1 day',now()-interval'1 day');
+insert into public.client_profile_versions(compliance_case_id,organization_id,version,profile_data,organization_snapshot,source_organization_row_version,created_by)values('f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002',1,'{"legal_form":"SARL","if_number":"99707002","rc_number":"TEST70_2","registered_city":"Casablanca","registered_address":{"line1":"TEST Client registered address","country_code":"MA"}}','{"legal_name":"P70 Client B SARL","display_name":"P70 Client B SARL","country_code":"MA","identifiers":{"ICE":"997070000000002","IF":"99707002","RC":"TEST70_2"}}',1,'f7000000-0000-0000-0000-000000000002');
+insert into public.client_identity_verification_history(compliance_case_id,organization_id,profile_version,verified_at,verified_by,source)values('f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002',1,now()-interval'1 day','f7000000-0000-0000-0000-000000000001','COMPLIANCE_DECISION');
+insert into public.client_compliance_documents(
+  id,compliance_case_id,organization_id,document_type,version,policy_version_id,
+  document_number,issuer,issued_on,expires_on,original_file_name,file_extension,
+  declared_mime_type,declared_size_bytes,declared_sha256,storage_object_path,
+  detected_mime_type,detected_size_bytes,status,uploaded_at,reviewed_by,reviewed_at,created_by
+) values
+('f7121000-0000-0000-0000-000000000001','f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002','REGISTRATION_DOCUMENT',1,(select id from public.client_document_policy_versions where document_type='REGISTRATION_DOCUMENT' and status='ACTIVE'),'RC-A','Tribunal',current_date-30,current_date+365,'registration-a.pdf','pdf','application/pdf',128,repeat('a',64),'f7010000-0000-0000-0000-000000000002/client-a/registration.pdf','application/pdf',128,'VERIFIED',clock_timestamp(),'f7000000-0000-0000-0000-000000000001',clock_timestamp(),'f7000000-0000-0000-0000-000000000002'),
+('f7121000-0000-0000-0000-000000000002','f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002','REPRESENTATIVE_AUTHORITY',1,(select id from public.client_document_policy_versions where document_type='REPRESENTATIVE_AUTHORITY' and status='ACTIVE'),'AUTH-A','Notaire',current_date-30,current_date+365,'authority-a.pdf','pdf','application/pdf',128,repeat('b',64),'f7010000-0000-0000-0000-000000000002/client-a/authority.pdf','application/pdf',128,'VERIFIED',clock_timestamp(),'f7000000-0000-0000-0000-000000000001',clock_timestamp(),'f7000000-0000-0000-0000-000000000002');
+insert into private.client_document_scan_results(
+  id,document_id,organization_id,sequence,result,engine_code,engine_version,computed_sha256,
+  detected_mime_type,detected_size_bytes,observed_claims,recorded_by,scanner_principal,correlation_id
+) values
+('f7122000-0000-0000-0000-000000000001','f7121000-0000-0000-0000-000000000001','f7010000-0000-0000-0000-000000000002',1,'CLEAN','DEMO_SCANNER','1.0',repeat('a',64),'application/pdf',128,'{}',null,'SUPABASE_SERVICE_ROLE','f7123000-0000-0000-0000-000000000001'),
+('f7122000-0000-0000-0000-000000000002','f7121000-0000-0000-0000-000000000002','f7010000-0000-0000-0000-000000000002',1,'CLEAN','DEMO_SCANNER','1.0',repeat('b',64),'application/pdf',128,'{}',null,'SUPABASE_SERVICE_ROLE','f7123000-0000-0000-0000-000000000002');
+update public.client_compliance_documents set current_scan_result_id=case id
+  when 'f7121000-0000-0000-0000-000000000001' then 'f7122000-0000-0000-0000-000000000001'::uuid
+  else 'f7122000-0000-0000-0000-000000000002'::uuid end,scan_status='CLEAN',scanned_at=clock_timestamp()
+where id in ('f7121000-0000-0000-0000-000000000001','f7121000-0000-0000-0000-000000000002');
+insert into public.client_compliance_evidence(
+  compliance_case_id,organization_id,evidence_type,object_path,file_sha256,review_status,
+  reviewed_by,reviewed_at,created_by,source_document_id,valid_until,validation_state
+) values
+('f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002','REGISTRATION_DOCUMENT','compliance/client-a/registration.pdf',repeat('a',64),'VERIFIED','f7000000-0000-0000-0000-000000000001',clock_timestamp(),'f7000000-0000-0000-0000-000000000002','f7121000-0000-0000-0000-000000000001',current_date+365,'SCANNED_CLEAN'),
+('f7120000-0000-4000-8000-000000000001','f7010000-0000-0000-0000-000000000002','REPRESENTATIVE_AUTHORITY','compliance/client-a/authority.pdf',repeat('b',64),'VERIFIED','f7000000-0000-0000-0000-000000000001',clock_timestamp(),'f7000000-0000-0000-0000-000000000002','f7121000-0000-0000-0000-000000000002',current_date+365,'SCANNED_CLEAN');
+
+
+
+
+insert into public.client_trials(id,organization_id,compliance_case_id,verified_profile_version,status,trial_started_at,trial_ends_at,activated_by)values('f7120000-0000-4000-8000-000000000002','f7010000-0000-0000-0000-000000000002','f7120000-0000-4000-8000-000000000001',1,'TRIAL_ACTIVE',now()-interval'1 day',now()+interval'29 days','f7000000-0000-0000-0000-000000000001');
+
+insert into public.trial_entitlement_versions(entitlement_code,version,status,enabled,quota_value,configuration,effective_from,content_hash,created_by)values('TEST_0070_PROJECTS',1,'ACTIVE',true,10,'{"resource":"PROJECTS"}',now()-interval'1 day',repeat('8',64),'f7000000-0000-0000-0000-000000000002');
 insert into public.client_projects(id,organization_id,project_code,status,created_by)values
 ('f7030000-0000-0000-0000-000000000001','f7010000-0000-0000-0000-000000000001','P70_A','DRAFT','f7000000-0000-0000-0000-000000000001'),
 ('f7030000-0000-0000-0000-000000000002','f7010000-0000-0000-0000-000000000002','P70_B','DRAFT','f7000000-0000-0000-0000-000000000002');

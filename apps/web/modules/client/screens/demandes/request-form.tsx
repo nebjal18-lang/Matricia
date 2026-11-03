@@ -25,6 +25,7 @@ type RequestFormShared = {
 
 export type RequestFormContext =
   | (RequestFormShared & { source: "opportunity"; opportunityId: string })
+  | (RequestFormShared & { source: "benefit"; redemptionId:string; rowVersion:string; idempotencyKey:string })
   | (RequestFormShared & { source: "need"; intakeId: string; serviceCode: string });
 
 export type RequestSiteOption = { id: string; nameFr: string; nameAr: string };
@@ -57,7 +58,7 @@ export function RequestForm({
       <input type="hidden" name="locale" value={locale} />
       {context.source === "opportunity" ? (
         <input type="hidden" name="opportunityId" value={context.opportunityId} />
-      ) : (
+      ) : context.source === "benefit" ? (<><input type="hidden" name="benefitRedemptionId" value={context.redemptionId}/><input type="hidden" name="benefitRowVersion" value={context.rowVersion}/><input type="hidden" name="benefitIdempotencyKey" value={context.idempotencyKey}/></>) : (
         <>
           <input type="hidden" name="intakeId" value={context.intakeId} />
           <input type="hidden" name="serviceCode" value={context.serviceCode} />
@@ -149,7 +150,7 @@ export function RequestForm({
           </div>
           <p className="client-verified">
             <CheckCircle2 className="size-4" aria-hidden />
-            {context.source === "need" ? c.prefilledFromNeed : c.prefilledFromBilan}
+            {context.source === "benefit" ? (locale === "ar" ? "طلب مرتبط بميزة مكتسبة. يبقى مسودة إلى حين استكمال المعلومات والتحققات المطلوبة." : "Demande liée à un avantage acquis. Elle reste un brouillon tant que les informations et vérifications requises ne sont pas complètes.") : context.source === "need" ? c.prefilledFromNeed : c.prefilledFromBilan}
           </p>
           {state.status === "error" ? (
             <p role="alert">{state.reason === "VALIDATION" ? messages.validation : state.reason === "CONTEXT_REQUIRED" ? messages.contextError : state.reason === "FORBIDDEN" ? messages.notEntitled : messages.actionError}</p>

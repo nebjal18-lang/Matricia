@@ -1,3 +1,5 @@
+import{PagedBillingTable}from"./paged-history";
+import{workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import Link from "next/link";
 import { formatMinor, type BillingDashboard, type ProviderCommissionReceipt } from "@/modules/provider/data/billing/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -72,7 +74,7 @@ export function ProviderLedgerBoard({
 function PayablesTable({ locale, dashboard, m }: { locale: Locale; dashboard: BillingDashboard; m: BillingMessages }) {
   if (dashboard.payables.length === 0) return <p>{m.empty}</p>;
   return (
-    <table className="client-space-table">
+    <PagedBillingTable locale={locale}>
       <thead><tr><th>{m.date}</th><th>{m.event}</th><th>{m.amount}</th></tr></thead>
       <tbody>
         {dashboard.payables.map((row) => (
@@ -83,14 +85,14 @@ function PayablesTable({ locale, dashboard, m }: { locale: Locale; dashboard: Bi
           </tr>
         ))}
       </tbody>
-    </table>
+    </PagedBillingTable>
   );
 }
 
 function InvoicesTable({ locale, query, dashboard, m }: { locale: Locale; query: string; dashboard: BillingDashboard; m: BillingMessages }) {
   if (dashboard.invoices.length === 0) return <p>{m.empty}</p>;
   return (
-    <table className="client-space-table">
+    <PagedBillingTable locale={locale}>
       <thead><tr><th>{m.number}</th><th>{m.due}</th><th>{m.amount}</th><th>{m.outstanding}</th><th>{m.status}</th></tr></thead>
       <tbody>
         {dashboard.invoices.map((row) => (
@@ -99,11 +101,11 @@ function InvoicesTable({ locale, query, dashboard, m }: { locale: Locale; query:
             <td dir="ltr">{row.dueOn}</td>
             <td dir="ltr">{formatMinor(row.totalMinor, row.currency, locale)}</td>
             <td dir="ltr">{formatMinor(row.outstandingMinor, row.currency, locale)}</td>
-            <td>{row.paymentStatus.replaceAll("_", " ")}</td>
+            <td>{workflowStatusLabel(row.paymentStatus,locale)}</td>
           </tr>
         ))}
       </tbody>
-    </table>
+    </PagedBillingTable>
   );
 }
 
@@ -112,7 +114,7 @@ function ScheduleTables({ locale, query, dashboard, m, planKey }: { locale: Loca
   return (
     <div className="client-stack">
       {open.length === 0 ? <p>{m.empty}</p> : (
-        <table className="client-space-table">
+        <PagedBillingTable locale={locale}>
           <thead><tr><th>{m.invoice}</th><th>{m.dueSoon}</th><th>{m.outstanding}</th><th>{m.status}</th></tr></thead>
           <tbody>
             {open.map((row) => (
@@ -120,31 +122,31 @@ function ScheduleTables({ locale, query, dashboard, m, planKey }: { locale: Loca
                 <td><Link href={`/${locale}/sous-traitant/facturation/${row.id}${query}`} className="client-text-link" dir="ltr">{row.number}</Link></td>
                 <td dir="ltr">{row.dueOn}</td>
                 <td dir="ltr">{formatMinor(row.outstandingMinor, row.currency, locale)}</td>
-                <td>{row.paymentStatus.replaceAll("_", " ")}</td>
+                <td>{workflowStatusLabel(row.paymentStatus,locale)}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </PagedBillingTable>
       )}
       <h3>{m.paymentPlans}</h3>
       {dashboard.paymentPlans.length === 0 ? <p>{m.empty}</p> : (
-        <table className="client-space-table">
+        <PagedBillingTable locale={locale}>
           <thead><tr><th>{m.invoice}</th><th>{m.status}</th><th>{m.installment}</th></tr></thead>
           <tbody>
             {dashboard.paymentPlans.map((plan) => (
               <tr key={plan.id}>
                 <td dir="ltr">{plan.invoiceNumber}</td>
-                <td>{plan.status.replaceAll("_", " ")}</td>
-                <td>{plan.installments.map((item) => `${item.dueOn} · ${formatMinor(item.amountMinor, dashboard.invoices.find((invoice) => invoice.id === plan.invoiceId)?.currency ?? "MAD", locale)}`).join(" · ")}</td>
+                <td>{workflowStatusLabel(plan.status,locale)}</td>
+                <td>{plan.installments.map((item) => `${item.dueOn} · ${(plan.currency?formatMinor(item.amountMinor,plan.currency,locale):(locale==="ar"?"المبلغ غير متاح: عملة الفاتورة غير محملة":"Montant indisponible : devise de la facture non chargée"))}`).join(" · ")}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </PagedBillingTable>
       )}
       {planKey ? <SchedulePlanForm dashboard={dashboard} locale={locale} m={m} keyValue={planKey} /> : null}
       <h3>{m.payments}</h3>
       {dashboard.payments.length === 0 ? <p>{m.empty}</p> : (
-        <table className="client-space-table">
+        <PagedBillingTable locale={locale}>
           <thead><tr><th>{m.reference}</th><th>{m.paidOn}</th><th>{m.amount}</th></tr></thead>
           <tbody>
             {dashboard.payments.map((row) => (
@@ -155,7 +157,7 @@ function ScheduleTables({ locale, query, dashboard, m, planKey }: { locale: Loca
               </tr>
             ))}
           </tbody>
-        </table>
+        </PagedBillingTable>
       )}
     </div>
   );
@@ -164,7 +166,7 @@ function ScheduleTables({ locale, query, dashboard, m, planKey }: { locale: Loca
 function CommissionsTable({ locale, query, receipts, m }: { locale: Locale; query: string; receipts: ProviderCommissionReceipt[]; m: BillingMessages }) {
   if (receipts.length === 0) return <p>{m.empty}</p>;
   return (
-    <table className="client-space-table">
+    <PagedBillingTable locale={locale}>
       <thead><tr><th>{m.receipt}</th><th>{m.invoice}</th><th>{m.commission}</th><th>{m.tax}</th><th>{m.date}</th></tr></thead>
       <tbody>
         {receipts.map((row) => (
@@ -177,6 +179,6 @@ function CommissionsTable({ locale, query, receipts, m }: { locale: Locale; quer
           </tr>
         ))}
       </tbody>
-    </table>
+    </PagedBillingTable>
   );
 }

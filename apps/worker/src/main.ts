@@ -1,3 +1,5 @@
+import { createProviderBillingScheduler } from "./provider-billing";
+import { createFranchisePerformanceScheduler } from "./franchise-performance";
 import { createScannerHttpHandler } from "./scanner-http";
 import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
@@ -18,7 +20,7 @@ import { createWorkerDispatcher } from "./dispatcher";
 import { createSupabaseOutboxRepository } from "./outbox-repository";
 import { pollOutboxOnce } from "./poller";
 import { readWorkerRuntimeConfig } from "./worker-config";
-import { buildWorkerReadiness, createWorkerCycle } from "./worker-cycle";
+import { buildWorkerReadiness, createWorkerCycle, workerHeartbeatHealthy } from "./worker-cycle";
 import { createFranchiseFollowupScheduler } from "./franchise-followups";
 
 async function start(): Promise<void> {
@@ -38,6 +40,8 @@ async function start(): Promise<void> {
   }));
   const antivirusHealth = createClamAvTcpHealthCheck(readClamAvTcpConfig(process.env));
   const runFranchiseFollowups = createFranchiseFollowupScheduler(serviceClient, workerId);
+  const runProviderBilling = createProviderBillingScheduler(serviceClient);
+  const runFranchisePerformance = createFranchisePerformanceScheduler(serviceClient);
 
   let antivirusAvailable = false;
   const dispatcher = createWorkerDispatcher({
@@ -74,7 +78,7 @@ async function start(): Promise<void> {
       return;
     }
     if (request.url === "/readiness") {
-      const report = buildWorkerReadiness(cycle.getState());
+      const report = buildWorkerReadiness(cycle.getState(), runProviderBilling.getState(), runFranchisePerformance.getState(), runFranchiseFollowups.getState());
       response.statusCode = report.status === "ready" ? 200 : 503;
       response.end(JSON.stringify(report));
       return;
@@ -87,7 +91,8 @@ async function start(): Promise<void> {
   void runFranchiseFollowups().catch(() => log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "franchise.followup.scheduler", outcome: "failure", actorId: workerId, errorCode: "FRANCHISE_FOLLOWUP_CYCLE_FAILED" }));
   const recordHeartbeat = async () => {
     const state = cycle.getState();
-    const result = await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "MATRICIA_WORKER", p_healthy: Boolean(state.outbox?.ok), p_expires_after_seconds: 60 });
+    const billing = runProviderBilling.getState();
+    const result = await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "MATRICIA_WORKER", p_healthy: workerHeartbeatHealthy(state, billing, runFranchisePerformance.getState(), runFranchiseFollowups.getState()), p_expires_after_seconds: 60 });
     if (result.error) log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "worker.heartbeat", outcome: "failure", errorCode: "HEARTBEAT_RECORD_FAILED" });
     await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "CLAMAV", p_healthy: Boolean(state.antivirus?.ok), p_expires_after_seconds: 60 });
     await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "SCANNER_HTTP", p_healthy: Boolean(state.antivirus?.ok) && (process.env.MALWARE_SCANNER_TOKEN?.length ?? 0) >= 32, p_expires_after_seconds: 60 });
@@ -97,6 +102,12 @@ async function start(): Promise<void> {
   timer.unref();
   const followupTimer = setInterval(() => void runFranchiseFollowups().catch(() => log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "franchise.followup.scheduler", outcome: "failure", actorId: workerId, errorCode: "FRANCHISE_FOLLOWUP_CYCLE_FAILED" })), 30_000);
   followupTimer.unref();
+  const runBilling=()=>void runProviderBilling().catch(()=>log("error",{requestId:randomUUID(),correlationId:randomUUID(),event:"provider.billing.scheduler",outcome:"failure",errorCode:"PROVIDER_BILLING_CYCLE_FAILED"}));
+  runBilling();const billingTimer=setInterval(runBilling,30_000);billingTimer.unref();
+  const runPerformance = () => void runFranchisePerformance().catch(() => log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "franchise.control.scheduler", outcome: "failure", errorCode: "FRANCHISE_CONTROL_SCHEDULER_FAILED" }));
+  runPerformance();
+  const performanceTimer = setInterval(runPerformance, 30_000);
+  performanceTimer.unref();
 }
 
 void start().catch(() => {

@@ -1,0 +1,44 @@
+{
+  "scope": "NATIVE_PROVIDER_PARTNER_DOCUMENT_AND_INDEPENDENT_QUALIFICATION_REVIEW",
+  "status": "FAILED",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "steps": [
+    {
+      "step": "actual_private_partner_upload_scan_and_independent_document_review",
+      "passed": true
+    },
+    {
+      "step": "independent_admin_ui_attests_test_historical_partnership_without_direct_sql_state_write",
+      "passed": true
+    },
+    {
+      "step": "current_identity_revalidated_after_company_decision_change",
+      "passed": true
+    }
+  ],
+  "partnerSignatureSource": "HISTORICAL_TEST_LEGAL_SIGNATURE_PREREQUISITE_NOT_CERTIFIED",
+  "legalSignatureCertified": false,
+  "physicalAntivirusCertified": false,
+  "catalogueGovernanceCertified": false,
+  "partnerDocument": {
+    "id": "7092fdd8-850c-4a22-989d-2fe10bc0fc08",
+    "sha256": "7a2c629dfacae667941b419f13e0e6bf180fed8fe8c77f6abf94926c8efbc308",
+    "scan": {
+      "scope": "KNOWN_SYNTHETIC_PDF_SCANNER_TEST_PORT",
+      "physicalAntivirusCertified": false,
+      "observed": [
+        {
+          "documentId": "7092fdd8-850c-4a22-989d-2fe10bc0fc08",
+          "jobId": "26c8f1dc-c406-419e-9850-c935b65dca2b",
+          "result": "CLEAN",
+          "source": "NATIVE_CLAIM_AND_COMPLETE",
+          "sha256": "7a2c629dfacae667941b419f13e0e6bf180fed8fe8c77f6abf94926c8efbc308"
+        }
+      ]
+    },
+    "reviewedVersionId": "bd2273af-820f-4128-8ccb-a9415633bae4"
+  },
+  "failureStage": "human-service-APPROVED",
+  "failure": "expect(received).toBe(expected) // Object.is equality\n\nExpected: \"APPROVED\"\nReceived: \"NOT_REQUESTED\"\n\nCall Log:\n- Timeout 20000ms exceeded while waiting on the predicate"
+}

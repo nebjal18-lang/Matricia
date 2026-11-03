@@ -27,6 +27,7 @@ export const threadSummary = z.object({
   subject: z.string().min(1),
   status: z.enum(["OPEN", "LOCKED"]),
   contact_policy_version: z.string().min(1),
+  can_send: z.boolean().optional(),
   participant_organization_id: uuidSchema,
   participant_kind: participantKind,
   counterparty_alias: participantKind,
@@ -44,7 +45,7 @@ export const sendMessagePayload = z.object({ outcome: z.literal("INTERNAL_MESSAG
 
 export type InboxThread = z.infer<typeof threadSummary>;
 export type ThreadConversation = z.infer<typeof threadPayload>;
-export type ThreadOption = { rfqId: string; providerOrganizationId: string; senderOrganizationId: string; label: string };
+export type ThreadOption = { rfqId: string; providerOrganizationId: string; senderOrganizationId: string; label: string; context?: "RFQ" | "CONTRACT" };
 
 export const messageCursorSchema=z.object({createdAt:z.string().datetime({offset:true}),id:uuidSchema});
 export const threadPagePayload=threadPayload.extend({hasMore:z.boolean(),nextCursor:messageCursorSchema.nullable(),total:z.number().int().nonnegative()});

@@ -90,11 +90,19 @@ describe("quatre espaces connectés — documentation et nav", () => {
 
   it("aligne client et prestataire sur buildClientNav / buildProviderNav", () => {
     expect(buildClientPrimaryNav({ locale: "fr", selectedQuery: "" })).toHaveLength(9);
-    expect(buildClientNav({ locale: "fr", selectedQuery: "" })).toHaveLength(14);
+    expect(buildClientNav({ locale: "fr", selectedQuery: "" })).toHaveLength(15);
+    expect(buildClientNav({ locale: "fr", selectedQuery: "?organizationId=test" }).find((item) => item.key === "memberBoxes")?.href).toBe("/fr/client/boxes/mon-enveloppe?organizationId=test");
     expect(buildClientNav({ locale: "fr", selectedQuery: "" }).some((item) => item.key === "contracts")).toBe(true);
     expect(buildClientNav({ locale: "fr", selectedQuery: "" }).some((item) => item.key === "actions")).toBe(true);
     expect(buildClientNav({ locale: "ar", selectedQuery: "" }).find((item) => item.key === "portfolio")?.label).toBe("المحفظة");
-    expect(buildProviderNav("fr", "")).toHaveLength(17);
+    expect(buildProviderNav("fr", "")).toHaveLength(19);
+    for (const locale of ["fr", "ar"] as const) {
+      const nav = buildProviderNav(locale, "?organizationId=test");
+      expect(nav.find(item => item.key === "contracts")?.href).toBe(`/${locale}/sous-traitant/contrats?organizationId=test`);
+      expect(nav.find(item => item.key === "questionnaires")?.href).toBe(`/${locale}/sous-traitant/questionnaires?organizationId=test`);
+      for (const item of nav) expect(new URL(item.href, "https://matricia.invalid").searchParams.get("organizationId")).toBe("test");
+      expect(new URL(nav.find(item => item.key === "home")!.href, "https://matricia.invalid").searchParams.get("workspace")).toBe("provider");
+    }
     expect(buildProviderNav("ar", "").find((item) => item.key === "marketing")).toMatchObject({ label: "التسويق", href: "/ar/sous-traitant/marketing" });
     expect(buildProviderNav("fr", "").some((item) => item.key === "settings")).toBe(true);
     expect(buildProviderNav("fr", "").some((item) => item.key === "messages")).toBe(true);

@@ -1,0 +1,21 @@
+{
+  "scope": "GENUINE_GOTRUE_NEW_OTP_AAL1_SESSION_CANNOT_REVIEW_PROVIDER_IDENTITY",
+  "candidate": "e929f99135953bf05301c45b34f062fb5884c156",
+  "appTree": "efa577aea29c38142f7e14c8221c8cf4e45db185",
+  "status": "PASSED",
+  "userJwtFabricated": false,
+  "existingMfaFactorAltered": false,
+  "emailDelivered": false,
+  "currentAal": "aal1",
+  "nextAal": "aal2",
+  "nativeReviewSqlstate": "42501",
+  "uiPath": "/fr/administration/providers/c18f1b43-983d-4065-b094-48c02f9b284b/identite",
+  "uiAlerts": [
+    "Vérification renforcée nécessaireConfirmez votre second facteur pour accéder à cette fonction. Vos habilitations restent inchangées.Configurer ou vérifier mon second facteurContacter l’assistance",
+    ""
+  ],
+  "securityLinks": 2,
+  "reviewSubmitButtons": 0,
+  "separateAal1SessionRevoked": true,
+  "originalNativeAal2SessionRetained": true
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: vi.fn() }));
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
-import { loadProviderQuotes, parseQuoteVersionAmounts, sharedDocumentsFromRows, unambiguousTaxRules } from "./repository";
+import { loadConsultationSharedDocuments, loadProviderQuotes, parseQuoteVersionAmounts, sharedDocumentsFromRows, unambiguousTaxRules } from "./repository";
 
 describe("provider consultation and quote Auth reads", () => {
   it.each([[503, "AUTH_QUERY_FAILED"], [401, "UNAUTHENTICATED"]] as const)("preserves Auth %s before reading business data", async (status, reason) => {
@@ -49,4 +49,8 @@ describe("provider consultation shared documents", () => {
   it("ignore une projection invalide au lieu d’inventer une pièce", () => {
     expect(sharedDocumentsFromRows([{ document_id: "not-a-uuid", title: "cdc.pdf", file_extension: "pdf", size_bytes: "12" }])).toEqual([]);
   });
+});
+
+describe("shared consultation original load states",()=>{
+ it("separates a failed query from a real empty document pack",async()=>{const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:"UNAVAILABLE"}}).mockResolvedValueOnce({data:[],error:null}).mockResolvedValueOnce({data:[{document_id:"invalid"}],error:null});vi.mocked(getSupabaseServerClient).mockResolvedValue({rpc}as never);expect(await loadConsultationSharedDocuments("55555555-5555-4555-8555-555555555555")).toBeNull();expect(await loadConsultationSharedDocuments("55555555-5555-4555-8555-555555555555")).toEqual([]);expect(await loadConsultationSharedDocuments("55555555-5555-4555-8555-555555555555")).toBeNull();});
 });
