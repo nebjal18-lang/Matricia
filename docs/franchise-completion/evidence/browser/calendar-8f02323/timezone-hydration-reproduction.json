@@ -1,0 +1,13 @@
+{
+  "scope": "INDEPENDENT_SSR_CLIENT_DATE_RENDERING_DEFECT",
+  "candidate": "8f02323edb248987fd41e8d13982a3d4663dfac7",
+  "runtimeMode": "DEVELOPMENT",
+  "sourceUtc": "2026-11-01T21:57:32.806699Z",
+  "configuredTimeZone": "Africa/Casablanca",
+  "serverRendered": "1 nov. 2026, 22:57",
+  "browserRendered": "1 nov. 2026, 21:57",
+  "reactHydrationMismatchObserved": true,
+  "nativeDateMutated": false,
+  "closureRequestCreated": false,
+  "selectorTimeoutSeparatelyDiagnosed": "exact label includes all option text; combobox count1 and nonexact label count1"
+}

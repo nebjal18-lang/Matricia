@@ -1,0 +1,9 @@
+{
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "commandOutcome": "CATALOG_CHANGE_SUBMITTED",
+  "changeRequests": 1,
+  "outboxEvents": 1,
+  "sourceServiceMatches": true,
+  "rowStatus": "IN_REVIEW",
+  "noMutationReplayed": true
+}

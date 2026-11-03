@@ -1,0 +1,24 @@
+{
+  "scope": "TEST_ONLY_NATIVE_INDEPENDENT_AR_CONTENT_REVIEW",
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "versionId": "350280b5-005f-44ee-9cae-e651ddbbe05e",
+  "contentHash": "7d62f6e0f0d80f1d2b8d653ffdeaa23d588f2507b9472c4a3a43e2376a23380d",
+  "authorUserId": "28639141-28ce-48b6-bbb6-0290c1ecc108",
+  "reviewerUserId": "0fccbf73-6a07-4a50-950d-b41495811cb1",
+  "nameFr": "TEST ONLY Parcours éditorial franchisé",
+  "nameAr": "اختبار فقط للمسار التحريري للامتياز",
+  "descriptionFr": "Texte français saisi pour la recette et conservé sans traduction automatique.",
+  "descriptionAr": "نص عربي خاص بالاختبار ويُحفظ كما أُدخل.",
+  "fulfillmentConfig": {
+    "deliverables": [
+      {
+        "label_ar": "مخرج اختبار معتمد",
+        "label_fr": "Livrable de recette approuvé"
+      }
+    ],
+    "schema_version": 1
+  },
+  "explicitTestContentReviewed": true,
+  "commercialTranslatorCertification": false,
+  "legalSignatureCertified": false
+}

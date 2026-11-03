@@ -1,0 +1,13 @@
+{
+  "scope": "TEST_ONLY_INDEPENDENT_AR_REVIEW_OF_REGULARIZED_SERVICE_VERSION",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "originalVersionId": "3e7063a4-9023-4618-9a0b-5ea839ea1c6b",
+  "newVersionId": "b55e856e-d383-48d8-8c70-d9cce0ab332b",
+  "contentHash": "4a85be68cbcac85a50143e1cc092113ac6a839f2cd22f24fea1e6491075dffa4",
+  "nameFr": "Mission B",
+  "nameAr": "المهمة ب",
+  "descriptionFr": "Service mission B",
+  "descriptionAr": "خدمة المهمة ب",
+  "originalBilingualTextsPreserved": true,
+  "commercialTranslatorCertified": false
+}

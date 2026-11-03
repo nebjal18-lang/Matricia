@@ -20,8 +20,9 @@ const fullRoutes = ['accueil', 'recherche', 'bibliotheque', 'services', 'service
 const routes = spot ? ['accueil', 'services'] : smoke ? ['accueil', 'services', 'qualite', 'marketing', 'finance'] : fullRoutes;
 const widths = spot ? [360] : smoke ? [390] : [375, 390, 768, 1440], locales = ['fr', 'ar'];
 const proof = { scope: spot ? 'FRANCHISE_GOLD_MINIMUM_360_HEADER_AND_SERVICES' : 'FRANCHISE_FR_AR_RESPONSIVE_NATIVE_MANDATE', candidate: pin.commit, appTree: pin.appTree, locales, widths, routes, parallelContexts: parallel, mandateActivation: 'NON_CONTRACTUAL_DEMO', hostedCertification: false, manualFullWcagCertification: false, axeRuleExclusions: [], status: 'RUNNING', cases: [], pageErrors: [] };
-const browser = await chromium.launch({ headless: true, executablePath: '/usr/bin/chromium' });
+const browser = await chromium.launch({ headless: true, executablePath: '/usr/bin/chromium', handleSIGINT: false });
 const safe = value => String(value).replace(/[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/gu, '[REDACTED]').slice(0, 1200);
+let aborted = false; process.once('SIGINT', () => { aborted = true; void browser.close(); });
 let saved = Promise.resolve();
 function save() { const snapshot = JSON.stringify(proof, null, 2) + '\n'; saved = saved.then(() => writeFile(resolve(out, 'summary.json'), snapshot)); return saved; }
 try {
@@ -36,6 +37,7 @@ try {
     page.on('pageerror', error => proof.pageErrors.push({ locale, width, error: safe(error) }));
     try {
       for (const path of routes) {
+        if (aborted) break;
         const item = { locale, width, path, status: 'RUNNING' }, start = Date.now();
         try {
           const target = new URL(`http://127.0.0.1:${state.appPort}/${locale}/franchise/${path}`);
@@ -57,8 +59,8 @@ try {
           if (width === 390 || path === 'accueil' || spot) { const name = `${locale}-${width}-${path.replaceAll('/', '_')}.png`; await page.screenshot({ path: resolve(out, name), fullPage: true }); item.screenshot = name; }
           item.status = 'PASS';
         } catch (error) {
-          item.status = 'FAIL'; item.failure = safe(error); process.exitCode = 1;
-          if (item.http === 200) { const name = `${locale}-${width}-${path.replaceAll('/', '_')}-failure.png`; await page.screenshot({ path: resolve(out, name), fullPage: true }).catch(() => {}); item.screenshot = name; }
+          item.status = aborted ? 'INTERRUPTED' : 'FAIL'; item.failure = safe(error); process.exitCode = aborted ? 130 : 1;
+          if (item.http === 200) { const name = `${locale}-${width}-${path.replaceAll('/', '_')}-failure.png`; const captured = await page.screenshot({ path: resolve(out, name), fullPage: true }).then(() => true).catch(() => false); if (captured) item.screenshot = name; else item.screenshotUnavailable = true; }
         } finally {
           item.elapsedMs = Date.now() - start; proof.cases.push(item); await save();
           console.log(JSON.stringify({ locale, width, path, status: item.status, failure: item.failure }));
@@ -66,10 +68,10 @@ try {
       }
     } finally { await context.close(); }
   }
-  const workers = await Promise.allSettled(Array.from({ length: parallel }, async () => { while (next < groups.length) await visitGroup(groups[next++]); }));
+  const workers = await Promise.allSettled(Array.from({ length: parallel }, async () => { while (next < groups.length && !aborted) await visitGroup(groups[next++]); }));
   const rejected = workers.find(result => result.status === 'rejected'); if (rejected) throw rejected.reason;
   const expected = locales.length * widths.length * routes.length;
-  proof.status = proof.cases.length === expected && proof.cases.every(item => item.status === 'PASS') && proof.pageErrors.length === 0 ? 'PASSED' : 'FAILED';
+  proof.status = aborted ? 'INTERRUPTED' : proof.cases.length === expected && proof.cases.every(item => item.status === 'PASS') && proof.pageErrors.length === 0 ? 'PASSED' : 'FAILED';
 } catch (error) { proof.status = 'FAILED'; proof.failure = safe(error); process.exitCode = 1; }
 finally {
   await browser.close(); await save();

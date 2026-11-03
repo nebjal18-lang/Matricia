@@ -1,0 +1,27 @@
+{
+  "scope": "ACTUAL_ADMIN_UI_FOUR_EYES_TEST_PUBLICATION_WINDOW_CLOSURE",
+  "candidate": "8f02323edb248987fd41e8d13982a3d4663dfac7",
+  "appTree": "b23946c8893a2a33f8977ba9d7974a729e6452db",
+  "runtimeMode": "DEVELOPMENT",
+  "status": "FAILED",
+  "publishedSnapshotDeletedOrRewritten": false,
+  "currentReleaseRepointed": false,
+  "steps": [],
+  "before": [
+    {
+      "id": "e9f07911-209c-4692-b0c0-402b45a5cbbd",
+      "status": "PUBLISHED",
+      "isCurrent": false,
+      "snapshotHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "effectiveUntil": null
+    },
+    {
+      "id": "955fc6f8-b775-4f9c-834c-9ecc08fa7930",
+      "status": "PUBLISHED",
+      "isCurrent": true,
+      "snapshotHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "effectiveUntil": null
+    }
+  ],
+  "failure": "TimeoutError: locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Ancienne publication concernée', { exact: true })\u001b[22m\n"
+}

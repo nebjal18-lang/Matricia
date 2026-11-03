@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-11-03T10:14:13.366645+00:00",
+  "mergeObserved": true,
+  "mergeCommit": "a362abc17c332ad3a8894b55915e3bac35fcabb5",
+  "pr": "https://github.com/epitaphe360/matricia/pull/12",
+  "mergeRun": "https://github.com/epitaphe360/matricia/actions/runs/41615991197",
+  "annotation": "The job was not started because your account is locked due to a billing issue.",
+  "occurrences": 3,
+  "jobsStarted": false,
+  "mergedByAssistant": false
+}

@@ -1,0 +1,12 @@
+{
+  "auditEvents": 1,
+  "outboxEvents": 1,
+  "commandOutcome": "CATALOG_SERVICE_ARCHIVED",
+  "commandIdentityVersion": "2",
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "exactCopy": true,
+  "rowStatus": "ARCHIVED",
+  "rowVersion": 2,
+  "archivedRowVisible": true,
+  "noMutationReplayed": true
+}

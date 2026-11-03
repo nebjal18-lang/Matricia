@@ -1,6 +1,6 @@
 # Clôture financière et parcours Franchisé — plan de réalisation
 
-État : **IN_PROGRESS**. Source après les fusions utilisateur : `df67da4`, branche principale `codex/bootstrap-foundation`, contenant Client `7e01276` et Sous-traitant `8b38f9d`. Intégration dédiée : `codex/franchise-finance-completion-20261103`. Modifications antérieures conservées ; aucun déploiement ou merge.
+État : **CODE_DELIVERED_RECIPE_PARTIAL_FROZEN**. Périmètre figé à la demande de clôture rapide. PR12 fusionnée par l’utilisateur en `a362abc1` ; complément isolé depuis cette fusion dans `codex/franchise-publication-validation-20261103`. La dernière recette et ses limites font autorité dans `REPORT.md` et `evidence/browser/CLOSURE.json`. Source après les fusions utilisateur : `df67da4`, branche principale `codex/bootstrap-foundation`, contenant Client `7e01276` et Sous-traitant `8b38f9d`. Intégration dédiée : `codex/franchise-finance-completion-20261103`. Modifications antérieures conservées ; aucun déploiement ou merge.
 
 | Chantier | Propriétaire | Vérification attendue |
 |---|---|---|

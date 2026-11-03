@@ -1,0 +1,12 @@
+{
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "uploadId": "9a91307e-6b1a-471f-aa1e-ac86e8363ab3",
+  "status": "RESERVED",
+  "scanStatus": "PENDING",
+  "sizeBytes": 816,
+  "reservationCompleted": true,
+  "uploadCommitCertified": false,
+  "scannerCertified": false,
+  "zeroCostCertified": false,
+  "noNewUploadAttemptExecuted": true
+}

@@ -1,0 +1,965 @@
+{
+  "scope": "FRANCHISE_FR_AR_RESPONSIVE_NATIVE_MANDATE",
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "appTree": "d334946aa988aceda5543b72c64411035643206f",
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "widths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "routes": [
+    "accueil",
+    "recherche",
+    "bibliotheque",
+    "services",
+    "services/nouveau",
+    "questionnaires",
+    "questionnaires/nouveau",
+    "regles",
+    "regles/nouvelle",
+    "validations",
+    "perimetre",
+    "fournisseurs",
+    "fournisseurs/inviter",
+    "clients/inviter",
+    "demandes",
+    "qualite",
+    "performance",
+    "relances",
+    "digest",
+    "marketing",
+    "documents",
+    "messages",
+    "gouvernance",
+    "finance"
+  ],
+  "parallelContexts": 2,
+  "mandateActivation": "NON_CONTRACTUAL_DEMO",
+  "hostedCertification": false,
+  "manualFullWcagCertification": false,
+  "axeRuleExclusions": [],
+  "status": "INTERRUPTED_AFTER_REPRODUCED_LIBRARY_A11Y_DEFECT",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "accueil",
+      "status": "TOOL_ASSERTION_ERROR",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [
+        {
+          "columns": 9,
+          "width": 0,
+          "headerHeight": 0,
+          "firstRowHeight": 0,
+          "wrapperWidth": 0,
+          "wrapperScrollWidth": 0
+        }
+      ],
+      "failure": "Error: FRANCHISE_TABLE_COLUMNS_COMPRESSED_BELOW_READABLE_WIDTH",
+      "screenshot": "fr-375-accueil-failure.png",
+      "elapsedMs": 14978,
+      "classification": "TOOL_FALSE_POSITIVE_HIDDEN_DESKTOP_TABLE"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "accueil",
+      "status": "TOOL_ASSERTION_ERROR",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [
+        {
+          "columns": 9,
+          "width": 0,
+          "headerHeight": 0,
+          "firstRowHeight": 0,
+          "wrapperWidth": 0,
+          "wrapperScrollWidth": 0
+        }
+      ],
+      "failure": "Error: FRANCHISE_TABLE_COLUMNS_COMPRESSED_BELOW_READABLE_WIDTH",
+      "screenshot": "fr-390-accueil-failure.png",
+      "elapsedMs": 15155,
+      "classification": "TOOL_FALSE_POSITIVE_HIDDEN_DESKTOP_TABLE"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "recherche",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span:nth-child(1)"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > .inline-flex.shrink-0.justify-center"
+              ],
+              [
+                "#franchise-library-search"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-recherche.png",
+      "elapsedMs": 7072
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "recherche",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span:nth-child(1)"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > .inline-flex.shrink-0.justify-center"
+              ],
+              [
+                "#franchise-library-search"
+              ]
+            ]
+          }
+        ]
+      },
+      "elapsedMs": 7339
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "bibliotheque",
+      "status": "FAIL",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "definition-list",
+            "impact": "serious",
+            "nodes": [
+              {
+                "target": [
+                  "dl"
+                ],
+                "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+              }
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                "em"
+              ],
+              [
+                ".client-card:nth-child(2) > .client-access-note"
+              ]
+            ]
+          }
+        ]
+      },
+      "failure": "Error: FRANCHISE_ACCESSIBILITY_VIOLATION",
+      "screenshot": "fr-390-bibliotheque-failure.png",
+      "elapsedMs": 8645
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "bibliotheque",
+      "status": "FAIL",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "definition-list",
+            "impact": "serious",
+            "nodes": [
+              {
+                "target": [
+                  "dl"
+                ],
+                "failureSummary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > small, div > span"
+              }
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                ".leading-none"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                "em"
+              ],
+              [
+                ".client-card:nth-child(2) > .client-access-note"
+              ]
+            ]
+          }
+        ]
+      },
+      "failure": "Error: FRANCHISE_ACCESSIBILITY_VIOLATION",
+      "screenshot": "fr-375-bibliotheque-failure.png",
+      "elapsedMs": 9014
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "services",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [
+        {
+          "columns": 10,
+          "width": 846,
+          "headerHeight": 64,
+          "firstRowHeight": 99,
+          "wrapperWidth": 307,
+          "wrapperScrollWidth": 846
+        }
+      ],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                "label[for=\"franchise-mandate-context\"]"
+              ],
+              [
+                ".mx-4 > .bg-primary.text-primary-foreground.hover\\:bg-primary\\/90"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(8) > .client-status-chip"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"Mission A\"]"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(5)"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(7) > small"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(8) > .client-status-chip"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(9) > a"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"Mission B\"]"
+              ],
+              [
+                ".client-priority-head > .client-status-chip"
+              ],
+              [
+                ".franchise-security-inline > ul > li:nth-child(4)"
+              ]
+            ]
+          }
+        ]
+      },
+      "elapsedMs": 18724
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "services",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [
+        {
+          "columns": 10,
+          "width": 846,
+          "headerHeight": 64,
+          "firstRowHeight": 99,
+          "wrapperWidth": 322,
+          "wrapperScrollWidth": 846
+        }
+      ],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span[aria-hidden=\"true\"]"
+              ],
+              [
+                "label[for=\"franchise-mandate-context\"]"
+              ],
+              [
+                ".mx-4 > .bg-primary.text-primary-foreground.hover\\:bg-primary\\/90"
+              ],
+              [
+                "tr[data-selected=\"true\"] > td:nth-child(8) > .client-status-chip"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"Mission A\"]"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(7) > small"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(8) > .client-status-chip"
+              ],
+              [
+                "tr:nth-child(2) > td:nth-child(9) > a"
+              ],
+              [
+                ".franchise-row-menu[aria-label=\"Mission B\"]"
+              ],
+              [
+                ".client-priority-head > .client-status-chip"
+              ],
+              [
+                ".franchise-security-inline > ul > li:nth-child(4)"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-services.png",
+      "elapsedMs": 21051
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "services/nouveau",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span:nth-child(1)"
+              ],
+              [
+                "label[for=\"franchise-mandate-context\"]"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                ".client-status-chip[data-tone=\"violet\"]"
+              ],
+              [
+                "li[data-active=\"true\"] > em"
+              ],
+              [
+                "li:nth-child(2) > em"
+              ],
+              [
+                "li:nth-child(3) > em"
+              ],
+              [
+                "li:nth-child(4) > em"
+              ],
+              [
+                "li:nth-child(5) > em"
+              ],
+              [
+                "li:nth-child(6) > em"
+              ],
+              [
+                "article > .client-priority-head > .franchise-lang-toggle > em[data-active=\"true\"]"
+              ],
+              [
+                ".franchise-client-preview > .client-priority-head > .franchise-lang-toggle > em[data-active=\"true\"]"
+              ],
+              [
+                "div > strong"
+              ],
+              [
+                "em[data-tone=\"mint\"]"
+              ],
+              [
+                ".franchise-preview-card > p"
+              ],
+              [
+                ".franchise-preview-card > h3"
+              ]
+            ]
+          }
+        ]
+      },
+      "screenshot": "fr-390-services_nouveau.png",
+      "elapsedMs": 21401
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "services/nouveau",
+      "status": "PASS",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "a[aria-current=\"page\"]"
+              ],
+              [
+                ".client-lang-switch > a:nth-child(3)"
+              ],
+              [
+                "a:nth-child(5) > span:nth-child(1)"
+              ],
+              [
+                "label[for=\"franchise-mandate-context\"]"
+              ],
+              [
+                ".mx-4 > button"
+              ],
+              [
+                ".client-status-chip[data-tone=\"violet\"]"
+              ],
+              [
+                "li[data-active=\"true\"] > em"
+              ],
+              [
+                "li:nth-child(2) > em"
+              ],
+              [
+                "li:nth-child(3) > em"
+              ],
+              [
+                "li:nth-child(4) > em"
+              ],
+              [
+                "li:nth-child(5) > em"
+              ],
+              [
+                "li:nth-child(6) > em"
+              ],
+              [
+                "article > .client-priority-head > .franchise-lang-toggle > em[data-active=\"true\"]"
+              ],
+              [
+                ".franchise-client-preview > .client-priority-head > .franchise-lang-toggle > em[data-active=\"true\"]"
+              ],
+              [
+                "div > strong"
+              ],
+              [
+                "em[data-tone=\"mint\"]"
+              ],
+              [
+                ".franchise-preview-card > p"
+              ],
+              [
+                ".franchise-preview-card > h3"
+              ]
+            ]
+          }
+        ]
+      },
+      "elapsedMs": 23466
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "questionnaires",
+      "status": "INTERRUPTED",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "failure": "Error: page.evaluate: Target page, context or browser has been closed",
+      "elapsedMs": 15387,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP",
+      "screenshotUnavailableDueToExplicitStop": true
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "questionnaires/nouveau",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "regles",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "regles/nouvelle",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "validations",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 3,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "perimetre",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "fournisseurs",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "fournisseurs/inviter",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "clients/inviter",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 3,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "demandes",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 6,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "qualite",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "performance",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "relances",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 4,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "digest",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 5,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "marketing",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "documents",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "messages",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 2,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "gouvernance",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "finance",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "questionnaires",
+      "status": "INTERRUPTED",
+      "http": 200,
+      "lang": "fr",
+      "dir": "ltr",
+      "overflow": false,
+      "workspaceFailures": [],
+      "tables": [],
+      "failure": "Error: page.evaluate: Target page, context or browser has been closed\n Please check out https://github.com/dequelabs/axe-core-npm/blob/develop/packages/playwright/error-handling.md",
+      "elapsedMs": 15532,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP",
+      "screenshotUnavailableDueToExplicitStop": true
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "questionnaires/nouveau",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "regles",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "regles/nouvelle",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "validations",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 2,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "perimetre",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "fournisseurs",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "fournisseurs/inviter",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 4,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "clients/inviter",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "demandes",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 6,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "qualite",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 2,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "performance",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 16,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "relances",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 0,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "digest",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "marketing",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 3,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "documents",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 4,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "messages",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "gouvernance",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "finance",
+      "status": "INTERRUPTED",
+      "failure": "Error: page.goto: Target page, context or browser has been closed",
+      "elapsedMs": 1,
+      "classification": "INTERRUPTED_BY_EXPLICIT_MATRIX_STOP"
+    }
+  ],
+  "pageErrors": [],
+  "failure": "Error: browser.newContext: Target page, context or browser has been closed",
+  "interruptionReason": "Explicitly stopped after two real definition-list violations. Hidden desktop table assertions were tool setup errors; subsequent closed-browser attempts were not completed product tests.",
+  "effectiveCompletedCases": 10,
+  "passedCompletedCases": 6,
+  "reproducedProductFailureCases": 2,
+  "toolSetupFailureCases": 2,
+  "interruptedCases": 38
+}

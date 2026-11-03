@@ -1,0 +1,13 @@
+{
+  "scope": "TEST_ONLY_INDEPENDENT_AR_REVIEW_OF_REGULARIZED_SERVICE_VERSION",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "originalVersionId": "3266e397-e245-4cea-b14a-876247765440",
+  "newVersionId": "d298ef48-3bce-4d9e-afb0-4e340eb714bc",
+  "contentHash": "2d49bf5a23e5ec30aeba8c6335402099b7ee3576ffc6490064f86f9878a9a402",
+  "nameFr": "Mission A",
+  "nameAr": "المهمة أ",
+  "descriptionFr": "Service mission A",
+  "descriptionAr": "خدمة المهمة أ",
+  "originalBilingualTextsPreserved": true,
+  "commercialTranslatorCertified": false
+}

@@ -1,0 +1,23 @@
+{
+  "scope": "ADOPT_ORCHESTRATOR_APPLIED_SCHEMA_NO_DDL_REPLAYED",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "approvedSourceBase": "a362abc17c332ad3a8894b55915e3bac35fcabb5",
+  "fromCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "reviewedReceipt": "docs/franchise-completion/evidence/sql/publication-schema-559.json",
+  "reviewedReceiptSha256": "9df6a86aa30727075bcfc933626eaafb4d16cb303a03e3d24f20d875037b5735",
+  "baselineMigrationCount": 558,
+  "migrationCount": 559,
+  "adoptedMigrations": [
+    {
+      "file": "20261103455380_catalog_service_primary_link_repair.sql",
+      "sha256": "f04869f480a128ec01da467dcbb5965f774eb348d6eabc1431c992af3bd3274a"
+    }
+  ],
+  "security": {
+    "environment": "DEVELOPMENT",
+    "tablesWithoutRls": 0
+  },
+  "freshReplay": false,
+  "stagingCertification": false
+}

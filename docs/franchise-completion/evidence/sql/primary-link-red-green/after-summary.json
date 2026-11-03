@@ -1,0 +1,17 @@
+{
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "cohort": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "mode": "test",
+  "network": "existing-owned-internal",
+  "production": false,
+  "rollbackTests": true,
+  "status": "passed",
+  "results": [
+    {
+      "file": "supabase/tests/0378_catalog_service_primary_link_repair.test.sql",
+      "sha256": "3e4e56f76fecdafd3f1099405ffdde6e05052422b36a486cfc7160e80aa3a658",
+      "passed": true,
+      "assertions": 20
+    }
+  ]
+}

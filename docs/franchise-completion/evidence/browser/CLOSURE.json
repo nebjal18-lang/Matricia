@@ -1,0 +1,74 @@
+{
+  "scope": "CLOSURE_AT_USER_REQUEST_WITH_EXPLICIT_INCOMPLETE_COVERAGE",
+  "status": "PARTIAL_VERIFIED",
+  "testedCandidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "testedAppTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "typedBuildCandidate": "b433394c8b26f38a5e07e8beb25ceb245b5193d1",
+  "nativeSchemaMigrations": 559,
+  "typedBuild": "PASS",
+  "otpFr": "PASS_REAL_OTP_AND_TOTP_AAL2_EXACT_DEEP_TARGET",
+  "otpAr": "PASS_REAL_OTP_AND_TOTP_AAL2_EXACT_DEEP_TARGET",
+  "legacyNativeRegularization": {
+    "services": 2,
+    "stages": 10,
+    "status": "PASS",
+    "directPublishedOrLinkWrite": false,
+    "oldPublishedHashesRetained": true
+  },
+  "publication": {
+    "status": "BLOCKED",
+    "nativeError": "23P01 CATALOG_SCHEDULE_CONFLICT",
+    "existingReleaseOverrideOrCancellation": false,
+    "certified": false
+  },
+  "financePrivateFile": {
+    "status": "NOT_CONFIRMED",
+    "nativeCheckpoint": "RESERVED",
+    "scanStatus": "PENDING",
+    "realAntivirusCertified": false,
+    "zeroCostCertified": false
+  },
+  "finalResponsiveMatrix": {
+    "planned": 192,
+    "completed": 43,
+    "passed": 37,
+    "failed": 6,
+    "interruptedActiveVisits": 2,
+    "coverage": "INCOMPLETE",
+    "localesCompleted": [
+      "fr"
+    ],
+    "widthsVisited": [
+      375,
+      390
+    ],
+    "jsErrors": 0,
+    "remainingRule": "scrollable-region-focusable",
+    "remainingPaths": [
+      "qualite",
+      "relances",
+      "documents"
+    ],
+    "lastFocusCodeFix": "8ad97dd2 supplied by integration parent; not rebuilt or browser-certified by this child"
+  },
+  "notExecutedInFinalCampaign": [
+    "full192and360spot",
+    "finalmenuAndCrossTenantSuite",
+    "nativeRESTorGoTrueOutageRecovery",
+    "invitationQueueScenario",
+    "accountSignOut",
+    "realScannerCleanAndIndependentZeroCostReview"
+  ],
+  "intermediateCore192": {
+    "candidate": "e57dcc50f51c63c66c09ac68670e3e11f1d9d91d",
+    "completed": 192,
+    "passed": 176,
+    "failed": 16,
+    "doesNotCertifyFinalCandidate": true
+  },
+  "stagingCertified": false,
+  "productionChanged": false,
+  "secretsCommitted": false,
+  "browserContextsClosed": true,
+  "ownedLocalAppAndGatewayKeptForReview": true
+}

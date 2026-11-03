@@ -358,7 +358,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
             {demo.canWrite&&selected.rowVersion?<FranchiseProviderLinkForm locale={locale} prospectId={selected.id} rowVersion={selected.rowVersion} organizationId={organizationId||organizationIdFromQuery(query)||null} options={demo.providerDossiers}/>:null}
             <header><h2>{c.stepQual}</h2></header>
             {qualifications.length === 0 ? <p className="franchise-empty-panel">{c.emptyQualifications}</p> : (
-              <div className="client-table-wrap">
+              <div tabIndex={0} className="client-table-wrap">
                 <table className="client-space-table franchise-dense-table">
                   <thead><tr><th>{c.servicesTab}</th><th>{c.proofs}</th><th>{c.state}</th><th>{c.action}</th></tr></thead>
                   <tbody>
@@ -495,7 +495,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
             {tab(`/${locale}/franchise/fournisseurs/qualifies${query}`, c.qualified, view === "qualifies")}
             {tab(`/${locale}/franchise/fournisseurs/inactifs${query}`, c.inactive, view === "inactifs")}
           </nav>
-          <div className="client-table-wrap" id="reseau">
+          <div tabIndex={0} className="client-table-wrap" id="reseau">
             <table className="client-space-table franchise-dense-table">
               <thead><tr><th>{c.profile}</th><th>{c.services}</th><th>{c.folderState}</th><th>{c.capacityLevel}</th><th>{c.availability}</th><th>{c.document}</th><th>{c.qualityScore}</th><th>{c.action}</th></tr></thead>
               <tbody>
@@ -595,7 +595,7 @@ export function FranchiseRequestsBoard({ locale, query, mandateName, view, itemI
             <Link href={`/${locale}/franchise/demandes/devis${query}`} data-active={view === "devis" ? "true" : undefined}>{c.quotes}</Link>
             <Link href={`/${locale}/franchise/demandes/missions${query}`} data-active={view === "missions" ? "true" : undefined}>{c.missions}</Link>
           </nav>
-          <div className="client-table-wrap">
+          <div tabIndex={0} className="client-table-wrap">
             <table className="client-space-table">
               <thead><tr><th>{c.folder}</th><th>{c.stage}</th><th>{c.owner}</th><th>{c.flag}</th><th>{c.action}</th></tr></thead>
               <tbody>
@@ -643,7 +643,7 @@ export function FranchiseRequestsBoard({ locale, query, mandateName, view, itemI
                 </header>
                 <p>{c.matchingLead}</p>
                 {selected.matching?.length ? (
-                  <div className="client-table-wrap">
+                  <div tabIndex={0} className="client-table-wrap">
                     <table className="client-space-table">
                       <thead>
                         <tr>
@@ -795,7 +795,7 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
           {view === "definitions" || view === "risques" || view === "recommandations" || view === "incidents" ? (
             <p className="client-access-note">{c.ruleModelsLead}</p>
           ) : null}
-          <div className="client-table-wrap">
+          <div tabIndex={0} className="client-table-wrap">
             <table className="client-space-table franchise-dense-table">
               <thead><tr><th>{c.folder}</th><th>{c.type}</th><th>{c.severity}</th><th>{c.proofs}</th><th>{c.state}</th><th>{c.nextActionCol}</th><th>{c.action}</th></tr></thead>
               <tbody>
@@ -959,7 +959,7 @@ export function PerformanceBoard({ locale, query, mandateName, view, board }: Sp
               <Link href={`/${locale}/franchise/performance/tendances${query}`} data-active={view === "tendances" ? "true" : undefined}>{c.trendsTitle}</Link>
             </nav>
           </header>
-          <div className="client-table-wrap">
+          <div tabIndex={0} className="client-table-wrap">
             <table className="client-space-table franchise-dense-table">
               <thead><tr><th>{c.object}</th><th>{c.perfRequestsCol}</th><th>{c.state}</th><th>{c.nextAction}</th><th>{c.action}</th></tr></thead>
               <tbody>
@@ -1128,7 +1128,7 @@ export function FollowupsBoard({ locale, query, mandateName, view, page, board }
         ) : (
           <>
             <article className="client-card">
-              <div className="client-table-wrap">
+              <div tabIndex={0} className="client-table-wrap">
                 {view === "historique" ? (
                   <table className="client-space-table">
                     <thead><tr><th>{c.document}</th><th>{c.govHistory}</th><th>{c.dueWhen}</th></tr></thead>
@@ -1215,7 +1215,7 @@ export function GovernanceBoard({ locale, query, mandateName, view, board }: Spa
             <Link href={`/${locale}/franchise/documents${query}`} data-active={undefined}>{locale === "ar" ? "الوثائق" : "Documents"}</Link>
             <Link href={`/${locale}/franchise/gouvernance/historique${query}`} data-active={view === "historique" ? "true" : undefined}>{c.govHistory}</Link>
           </nav>
-          <div className="client-table-wrap" id="decisions">
+          <div tabIndex={0} className="client-table-wrap" id="decisions">
             <table className="client-space-table">
               <thead><tr><th>{c.object}</th><th>{c.type}</th><th>{c.state}</th><th>{c.action}</th></tr></thead>
               <tbody>
@@ -1342,7 +1342,7 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
               ) : null}
             </>
           ) : (
-            <div className="client-table-wrap">
+            <div tabIndex={0} className="client-table-wrap">
               <table className="client-space-table">
                 <thead><tr><th>{c.document}</th><th>{c.linked}</th><th>{c.state}</th><th>{locale==="ar"?"المبلغ":"Montant"}</th></tr></thead>
                 <tbody>
@@ -1417,7 +1417,7 @@ export function DocumentsBoard({ locale, query, view, search, page, board }: Spa
       <section className="franchise-docs-layout">
         <article className="client-card">
           <header><h2>{view === "renouvellements" ? n.renewals : n.documentsTitle}</h2></header>
-          <div className="client-table-wrap">
+          <div tabIndex={0} className="client-table-wrap">
             <table className="client-space-table franchise-docs-table franchise-dense-table">
               <thead>
                 <tr>

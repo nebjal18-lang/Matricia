@@ -52,6 +52,7 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
 
   return (
     <AdminModulePage locale={locale} active="catalog" path="catalogue" title={messages.title} lead={c.hubCatalogLead} querySuffix={context.toString()}>
+      <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/administration/catalogue/calendrier${libraryId ? `?${new URLSearchParams({ library: libraryId })}` : ""}`}>{locale === "ar" ? "جدول النشر" : "Calendrier des publications"}</Link>
       <div className="client-page admin-hub-wrap"><AdminHubStrip locale={locale} query={contextQuery} groupId="catalog" /></div>
       <p>
         <Link href={`/${locale}/administration/catalogue/validation${contextQuery}`} className={cn(buttonVariants({ variant: "outline" }), "min-h-11")}>{validationMessages.title}</Link>

@@ -1,0 +1,53 @@
+{
+  "scope": "TARGETED_REGRESSION_OF_SIX_RECORDED_FOCUS_FAILURES_FR_AR",
+  "candidate": "c7806afb7d4b0508b57a2439795f75289ef31738",
+  "appTree": "865af1bcf3bd0904b9c941c90a024c5f988492b7",
+  "runtimeMode": "DEVELOPMENT",
+  "optimizedFinalBrowserCertification": false,
+  "expectedCases": 2,
+  "ruleExclusions": [],
+  "status": "PASSED",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "relances",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 307,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "documents",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 307,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "pageErrors": []
+}

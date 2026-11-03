@@ -167,7 +167,7 @@ export function FranchiseLibraryHomeBoard({ locale, query, workspace }: { locale
                   </li>
                 ))}
               </ul>
-              <div className="client-table-wrap client-compare franchise-home-queue-table">
+              <div tabIndex={0} className="client-table-wrap client-compare franchise-home-queue-table">
               <table className="client-space-table">
                 <thead>
                   <tr>
@@ -467,7 +467,7 @@ export function FranchiseWorkQueueBoard({
             <span className="franchise-sort-chip">{c.queueSort} · {c.queueSortDue}</span>
           </header>
           {rows.length === 0 ? <p>{c.emptyQueue}</p> : (
-            <div className="client-table-wrap client-compare">
+            <div tabIndex={0} className="client-table-wrap client-compare">
               <table className="client-space-table">
                 <thead>
                   <tr>

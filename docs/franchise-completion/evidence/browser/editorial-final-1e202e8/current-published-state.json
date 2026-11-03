@@ -1,0 +1,21 @@
+{
+  "candidate": "1e202e8da9d19c6c63dd602f33d5739c8dd1048c",
+  "scope": "NATIVE_POST_PUBLICATION_CURRENT_STATE_READ",
+  "runtimeMode": "DEVELOPMENT",
+  "status": "PASS",
+  "library": {
+    "id": "a5ede8ae-6bc2-43f2-b2c6-9ea0ebbf3156",
+    "status": "PUBLISHED",
+    "current_release_id": "1bfa3b49-1f04-463e-aa7c-603c11f68f05"
+  },
+  "release": {
+    "id": "1bfa3b49-1f04-463e-aa7c-603c11f68f05",
+    "status": "PUBLISHED",
+    "snapshot_hash": "8ec4bd0a65c3f5ff54e06cb4ec12ed4c651ae3c13c2d388410566c5c3e7bb18b",
+    "published_at": "2026-11-03T10:54:38.890631+00:00",
+    "based_on_release_id": "955fc6f8-b775-4f9c-834c-9ecc08fa7930"
+  },
+  "manualLeasedConsumerCertified": true,
+  "automaticCronCertified": false,
+  "productionChanged": false
+}

@@ -4,9 +4,9 @@ Les constats de la contre-revue sont distincts de l’ancien audit navigateur M0
 
 | Identifiant | Cause et correction | Source principale / preuve | État et limite |
 |---|---|---|---|
-| FA01 | Auth indisponible assimilé à session absente ; classification technique et reprise exacte. | `data/spaces/context.ts`, `data/library/workspace.ts`, proxy partagé ;24 tests proxy. | Corrigé ; panne Auth native en cours de recette. |
+| FA01 | Auth indisponible assimilé à session absente ; classification technique et reprise exacte. | `data/spaces/context.ts`, `data/library/workspace.ts`, proxy partagé ;24 tests proxy. | Corrigé ; panne Auth native non achevée dans la recette finale. |
 | FA02 | Échec de contexte transformé en objet opérationnel vide. | `data/operations/repository.ts`, `screens/library/page-helper.ts`. | Corrigé, tests DAL et états partiels réussis. |
-| FA03 | Projections mélangées entre mandats, limites silencieuses et versions historiques arbitraires. | Lecteurs opérations/espaces et migration45200+ ;0368/0372/0377. | Corrigé ; recette multi-mandats finale en cours. |
+| FA03 | Projections mélangées entre mandats, limites silencieuses et versions historiques arbitraires. | Lecteurs opérations/espaces et migration45200+ ;0368/0372/0377. | Corrigé ; recette multi-mandats finale non clôturée. |
 | FA04 | Identité de clôture variant avec sa version générée ; rejeu de versement après contrôle du solde. | Migrations45210+ ;0362. | Corrigé ; ancien bénéfice sans source canonique reste bloqué. |
 | FA05 | Effet/catégorie/montant P&L libres, journal réutilisable et revenu non prouvé. | Gardes45211–45226, rapprochement canonique ;0362/0364/0369. | Corrigé, coûts nets réels et contrôles négatifs vérifiés. Pas de distribution historique positive inventée. |
 | FA06 | Prospect « invité » sans véritable invitation durable. | `data/network/invitation-consumer.ts`, actions réseau, worker ;0363. | Corrigé ; livraison email hébergée non certifiée. |
@@ -43,7 +43,7 @@ Les constats de la contre-revue sont distincts de l’ancien audit navigateur M0
 | Création de règle financière invalide | Colonnes SQL qualifiées puis scopes d’idempotence normalisés sans assouplir la contrainte ;0372. |
 | Projection INVOKER appelant un helper privé inaccessible | APIs booléennes étroites, contrôle exact, aucun USAGE privé ; INVOKER/RLS conservés,0372. |
 | Mauvais message de prérequis MFA | Identité de rôle courante séparée de l’autorisation finale stricte ;0370/0372 et aucun grant élargi. |
-| Description de bibliothèque, fournisseur et documents invalide pour un lecteur d’écran | Couples `dt/dd` dans les composants partagés ;117 tests du delta, recette axe finale encore en cours. |
-| En-tête mobile superposé et colonnes illisibles | Contexte sur une seconde ligne, tableaux dans leur zone défilante lisible, accès recherche mobile ; Services FR375/390 vérifié au C2, matrice C3 en cours. |
+| Description de bibliothèque, fournisseur et documents invalide pour un lecteur d’écran | Couples `dt/dd` dans les composants partagés ;117 tests du delta, recette axe finale encore non clôturée. |
+| En-tête mobile superposé et colonnes illisibles | Contexte sur une seconde ligne, tableaux dans leur zone défilante lisible, accès recherche mobile ; Services FR375/390 vérifié au C2, matrice C3 non clôturée. |
 
 Les contenus libres ne sont pas traduits. Aucune donnée réelle de société, prix ou condition commerciale absente n’est inventée. Aucune intégration hébergée, signature juridique, sauvegarde/restauration de staging ou publication client n’est certifiée par ces tests locaux.

@@ -105,7 +105,7 @@ export function FranchiseValidationsWorkbench({
             <button type="submit" className="franchise-tool">{c.search}</button>
           </form>
           {rows.length === 0 ? <p>{c.emptyQueue}</p> : (
-            <div className="client-table-wrap client-compare">
+            <div tabIndex={0} className="client-table-wrap client-compare">
               <table className="client-space-table">
                 <thead>
                   <tr>

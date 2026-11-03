@@ -1,0 +1,13 @@
+
+> @matricia/web@0.1.0 test /workspace/franchise-completion/apps/web
+> vitest run modules/admin/data/catalogue-calendar modules/admin/screens/catalogue-calendar 'app/[locale]/administration/catalogue/calendrier' --maxWorkers=2
+
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  4 passed (4)
+      Tests  56 passed (56)
+   Start at  10:52:36
+   Duration  1.56s (import 56%, transform 30%, tests 12%, worker 2%)
+

@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-03T10:02:02.464633+00:00",
+  "pr": "https://github.com/epitaphe360/matricia/pull/12",
+  "run": "https://github.com/epitaphe360/matricia/actions/runs/41614917812",
+  "annotation": "The job was not started because your account is locked due to a billing issue.",
+  "occurrences": 3,
+  "jobsStarted": false,
+  "vercelStatusFromUserScreenshot": "PENDING",
+  "vercelDetailsAccess": "CONNECT_PROXY_403",
+  "vercelDeployment": "https://vercel.com/epitaphemarket-5584s-projects/matricia/MLQNz2ZnGLYB2Su4eG1CQFEnjGGV",
+  "productionDeployedByAssistant": false
+}

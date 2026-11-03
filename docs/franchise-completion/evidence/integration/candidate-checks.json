@@ -15,12 +15,12 @@
   },
   "finalWebTypecheck": "passed",
   "finalWebLint": "passed",
-  "browserFinal": "pending",
+  "browserFinal": "partial_stopped_for_user_time_constraint",
   "sqlFreshFinal": {
     "status": "passed",
-    "migrations": 558,
-    "files": 73,
-    "assertions": 2813,
+    "migrations": 559,
+    "files": 74,
+    "assertions": 2833,
     "publicTables": 664,
     "tablesWithoutRls": 0,
     "apiPgtapExecutable": false,
@@ -38,9 +38,39 @@
     "overlapsWebGroup": true
   },
   "prCreation": {
-    "status": "blocked",
+    "status": "merged_by_user",
     "reason": "API_GRAPHQL_FORBIDDEN",
     "base": "codex/bootstrap-foundation",
-    "head": "codex/franchise-finance-completion-20261103"
+    "head": "codex/franchise-finance-completion-20261103",
+    "url": "https://github.com/epitaphe360/matricia/pull/12",
+    "createdByAssistant": false,
+    "assistantApiAttempt": "FORBIDDEN",
+    "mergeCommit": "a362abc17c332ad3a8894b55915e3bac35fcabb5",
+    "followupBranch": "codex/franchise-publication-validation-20261103"
+  },
+  "lastFocusDelta": {
+    "candidate": "8ad97dd2",
+    "appTree": "865af1bcf3bd0904b9c941c90a024c5f988492b7",
+    "tests": 117,
+    "files": 13,
+    "lint": "passed",
+    "fullOptimizedBuildReplayed": false,
+    "browserReplayed": false
+  },
+  "threeBlockersResume": {
+    "status": "passed_local_targeted",
+    "schemaMigrations": 560,
+    "publication": "PUBLISHED_NATIVE_LEASE_REPLAY",
+    "calendarGovernance": "TWO_DISTINCT_AAL2_ACTORS_FR_AR",
+    "financialFile": "UPLOADED_PRIVATE_BYTES_HASH_VERIFIED",
+    "scanner": "ERROR_REAL_ENGINE_UNAVAILABLE",
+    "unscannedZeroCost": "REFUSED_55000",
+    "visualCases": 12,
+    "visualMode": "DEVELOPMENT",
+    "axeViolations": 0,
+    "jsErrors": 0,
+    "fullOptimized192Replayed": false,
+    "newCalendarWebTests": 56,
+    "calendarSqlAssertions": 28
   }
 }

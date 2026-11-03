@@ -36,6 +36,15 @@ describe("private Finance cost evidence upload",()=>{
   expect(await uploadFinanceCostProof(client,input(),request)).toMatchObject({ok:true,upload:{scan_status:"PENDING"}});
   expect(rpc.mock.calls[0]![1].p_idempotency_key).toBe(rpc.mock.calls[1]![1].p_idempotency_key);expect(request).toHaveBeenCalledTimes(2);
  });
+ it("preserves a denied commit as failed and resumes its same stored proof after runtime recovery",async()=>{
+  request.mockResolvedValueOnce(new Response(JSON.stringify({code:"REQUEST_ORIGIN_DENIED"}),{status:403})).mockImplementationOnce(async()=>receipt());
+  expect(await uploadFinanceCostProof(client,input(),request)).toEqual({ok:false,code:"FORBIDDEN",uploadId});
+  store.mockResolvedValueOnce({error:{statusCode:409}});
+  expect(await uploadFinanceCostProof(client,input(),request)).toMatchObject({ok:true,upload:{upload_id:uploadId,status:"UPLOADED",scan_status:"PENDING"}});
+  expect(rpc.mock.calls[0]![1].p_idempotency_key).toBe(rpc.mock.calls[1]![1].p_idempotency_key);
+  expect(store.mock.calls[0]![0]).toBe(store.mock.calls[1]![0]);
+  expect(request.mock.calls[0]![0]).toBe(request.mock.calls[1]![0]);
+ });
  it("does not call a mismatched reservation or arbitrary storage bucket trustworthy",async()=>{
   rpc.mockResolvedValue({data:{...slot(),sha256:"0".repeat(64)},error:null});
   expect(await uploadFinanceCostProof(client,input(),request)).toEqual({ok:false,code:"INVALID_RESPONSE"});expect(store).not.toHaveBeenCalled();

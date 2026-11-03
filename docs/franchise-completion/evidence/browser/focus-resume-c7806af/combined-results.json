@@ -1,0 +1,20 @@
+{
+  "scope": "TWELVE_UNIQUE_TARGETED_FOCUS_REGRESSIONS_AFTER_RECORDED_DEV_NAVIGATION_INTERRUPTS",
+  "candidate": "c7806afb7d4b0508b57a2439795f75289ef31738",
+  "appTree": "865af1bcf3bd0904b9c941c90a024c5f988492b7",
+  "runtimeMode": "DEVELOPMENT",
+  "status": "PASSED",
+  "uniqueCases": 12,
+  "passed": 12,
+  "failed": 0,
+  "initialDevelopmentNavigationInterruptsPreserved": 2,
+  "onlyInterruptedCasesRetried": [
+    "fr:375:relances",
+    "fr:375:documents"
+  ],
+  "ruleExclusions": [],
+  "jsErrors": 0,
+  "optimizedFinalBrowserCertification": false,
+  "primaryReceipt": "summary.json",
+  "retryReceipt": "../focus-resume-c7806af-navigation-retry/summary.json"
+}

@@ -1,0 +1,21 @@
+{
+  "sourceBase": "a362abc17c332ad3a8894b55915e3bac35fcabb5",
+  "sourceSchemaCommit": "6232a12aedc425056ed81b0cd730691c699fd3a9",
+  "appBuildCommit": null,
+  "appTree": "b23946c8893a2a33f8977ba9d7974a729e6452db",
+  "cohort": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "baselineMigrationCount": 559,
+  "migrationCount": 560,
+  "newMigrations": [
+    {
+      "file": "20261103455400_catalog_release_window_governance.sql",
+      "sha256": "6d5f9d79b24991fb5f13342ed45897b10aa6085ff3e0d1488d0ef0815ea9ffae",
+      "passed": true
+    }
+  ],
+  "freshReplay": false,
+  "stagingCertification": false,
+  "developmentCandidate": "6232a12aedc425056ed81b0cd730691c699fd3a9",
+  "validationMode": "DEVELOPMENT_NATIVE_NO_NEW_OPTIMIZED_BUILD"
+}

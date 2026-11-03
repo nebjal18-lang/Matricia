@@ -1255,3 +1255,22 @@ compte externe empêche la preuve CI tant qu'elle n'est pas levée; elle ne vaut
 - Contraste mesuré : libelléAR4,1842→12,5138:1 ;54/56cibles conformes,2nonmesurées. Les256incomplets axe liés aux gradients restent explicitement non résolus globalement ; aucun certificatWCAG universel.
 - Limites réelles : clôture/facture/paiement/allocation du mois courant non joués avant le30novembre et sa contradiction ; signature juridique, scanner réel, mouvement bancaire, validation fiscale professionnelle, informations légales, email/PSP/workerhébergé/restaurationstaging non certifiés. Pas de faux solde, mock de réussite ou donnéesTEST publiées en production. Registre global5/76 et autres barrières release non fermés artificiellement.
 - Ancienne pileClient e3 sauvegardée privée11Mo puis4conteneurs nettoyés avec garde ; chaque replay neuf s'autonettoie. Source f59 et cohorteProviderb9 conservées ; app/gateway de recette arrêtés proprement, pas de service de production touché. Code/preuves/descriptionPR préparés, GitHubAPIcréationPR refusée ; branche et comparatif permettent la revue sans merge autorisé.
+
+
+## 2026-11-03 — Finance et Franchisé livrés, recette finale partielle figée
+
+- Source initialedf67da4 conservée après Client/Prestataire. PR12 fusionnée par l’utilisateur en a362abc1 ; l’assistant n’a ni fusionné ni déployé en production. Complément depuis cette fusion : codex/franchise-publication-validation-20261103.
+- Correctifs : mandat/ACLcatalogue natifs, organisation/territoire explicites, lecteurs exacts et erreurs distinctes, constructeurs/versionnage/UUID/livrablesFRAR, invitations/relances durables, six axes/rapports et plans indépendants, binding économique des livres, coûts nets/documents privés/coûts nuls et reprise vers dépense réelle, calendrier et replays financiers. PRIMARY manquant réparé par sauvegarde DRAFT native, jamais publication directe.
+- Rejeu final neuf :559migrations,74fichiersSQL,2833assertions PASS ;664tables publiques/0sansRLS/pgTAPnonexécutableAPI, nettoyagePASS. Web801PASS sur candidat834 ; deltas117PASS (groupes recouvrants), worker158PASS ; types/lint et build strictC3b433 PASS,31tooling/3intégration/5gardes d’outillage PASS.
+- NavigateurC3 : OTP→TOTP→AAL2 et retour exact FR/AR PASS ;10étapes éditoriales natives et régularisation de2anciens services PASS. Publication non exécutée :23P01 CATALOG_SCHEDULE_CONFLICT, aucune release annulée pour faire passer. Finance :RESERVED/PENDING, dépôt final non confirmé, pas de scanCLEAN/approbation réelle certifiés.
+- Matrice finale arrêtée à la demande de clôture rapide :43visites,37PASS/6FAIL et2interrompues. Les6échecs concernent le focus des tableaux ; correctif commun8ad97dd2 et117tests+lint PASS. Ce dernier delta n’a pas eu de nouvelle recette navigateur/build optimisé. La couverture finale192 n’est pas certifiée.
+- Dernier arbreapp865af1bcf3bd0904b9c941c90a024c5f988492b7 ; build strictb433/appTreec318 et état final distincts, sans réétiquetage des preuves. Voir docs/franchise-completion/REPORT.md, TRACEABILITY.md et evidence/browser/CLOSURE.json.
+- Limites : CI du compte GitHub encore bloquée par facturation après fusion, APIcréationPR Forbidden ; scanner physique, intégrations/staging hébergés, signature juridique, données légales/conditions validées, seuils de gouvernance et distribution historique positive non certifiés. Aucun100%global V1 ni procès-verbal client revendiqué. Aucun contrôle supplémentaire en cours.
+
+
+## 2026-11-03 — Reprise ciblée : publication, dépôt financier et visuel finalisés
+
+- Publication réelle PUBLISHED après régularisation560 à deux administrateurs natifsAAL2 ; auto-approbation refusée, claim/complete sous bail et rejeu sans doublon, anciennes versions/hashes conservés.
+- Même PDF privé repris après alignement Origin du runtime : UPLOADED,816octets/hash vérifiés,1upload,0rapprochement ; scannerERROR et refus55000 de coût nul maintiennent la sécurité faute de moteur réel.
+- Focus12cas FR/AR375/390 PASS enDEV, clavier réel et0axe/0JS. Pas de nouvelle campagne optimisée192 ni de déploiementprod.
+- AdminCalendrier560 exploitable FR/AR ; dates sérialisées serveur contre divergenceTZdata ;56testsWeb et28SQL PASS, revue indépendante favorable. Reçus finaux dans docs/franchise-completion/evidence/browser.

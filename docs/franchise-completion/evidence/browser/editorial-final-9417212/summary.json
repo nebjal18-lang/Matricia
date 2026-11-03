@@ -1,0 +1,20 @@
+{
+  "scope": "NATIVE_FRANCHISE_EDITORIAL_CREATE_RETRY_REVIEW_PUBLICATION",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "status": "FAILED",
+  "steps": [
+    {
+      "id": "CREATE_BILINGUAL_DRAFT_NATIVE_UI",
+      "status": "PASS",
+      "draftIdPresent": true
+    }
+  ],
+  "productionCatalogTouched": false,
+  "legalSignatureCertified": false,
+  "failureAlerts": [
+    "La version a changé. Rechargez puis enregistrez à nouveau.",
+    ""
+  ],
+  "failure": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 1\nReceived: 0\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate"
+}

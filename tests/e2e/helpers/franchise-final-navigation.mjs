@@ -3,6 +3,7 @@ import { readFile,writeFile,mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { chromium,expect } from '@playwright/test';
 const state=await fixtureState(),pin=await sourceCandidate(),dir=await privateDirectory(state),file=resolve(dir,'actors.private.json'),cohort=JSON.parse(await readFile(file));
+if(JSON.stringify(state.candidate.migrations)!==JSON.stringify(pin.migrations))throw Error('REVIEWED_EXACT_DATABASE_SCHEMA_REQUIRED');
 const first=cohort.mandates.find(value=>value.label==='FIRST'),second=cohort.mandates.find(value=>value.label==='SECOND');if(!first?.activation||!second?.activation)throw Error('TWO_NATIVE_AUTHORIZED_TEST_MANDATES_REQUIRED');
 const final=process.argv.includes('--phase=final');
 const focus=process.argv.find(value=>value.startsWith('--only='))?.slice(7);if(focus&&focus!=='search')throw Error('UNKNOWN_NAVIGATION_FOCUS');

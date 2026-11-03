@@ -1,0 +1,52 @@
+{
+  "scope": "NATIVE_FRANCHISE_EDITORIAL_CREATE_RETRY_REVIEW_PUBLICATION",
+  "candidate": "1e202e8da9d19c6c63dd602f33d5739c8dd1048c",
+  "appTree": "362a5b4ab3ddae7c7f0948e691716a8c550dc4e3",
+  "status": "PASSED",
+  "steps": [
+    {
+      "id": "CREATE_BILINGUAL_DRAFT_NATIVE_UI",
+      "status": "PASS",
+      "draftIdPresent": true
+    },
+    {
+      "id": "GOVERNED_PUBLICATION_NATIVE_UI",
+      "status": "PASS",
+      "releaseStatus": "SCHEDULED"
+    },
+    {
+      "id": "LEASED_NATIVE_PUBLICATION_AND_REPLAY",
+      "status": "PASS",
+      "automaticCronCertified": false,
+      "oneRelease": true
+    },
+    {
+      "id": "BILINGUAL_FIELDS_fr",
+      "status": "PASS",
+      "originalFrenchTextUnchanged": true
+    },
+    {
+      "id": "BILINGUAL_FIELDS_ar",
+      "status": "PASS",
+      "originalFrenchTextUnchanged": true
+    },
+    {
+      "id": "PREEXISTING_PUBLISHED_HASHES_UNCHANGED",
+      "status": "PASS",
+      "versions": 2
+    }
+  ],
+  "productionCatalogTouched": false,
+  "legalSignatureCertified": false,
+  "nativeStageCandidates": {
+    "createdAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "editedAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "duplicatedAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "archivedAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "submittedAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "approvedAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "arAttestedAtCandidate": "225921525d758b4eaa650765d894839b5152a9ff",
+    "publicationScheduledAtCandidate": "1e202e8da9d19c6c63dd602f33d5739c8dd1048c",
+    "publishedAtCandidate": "1e202e8da9d19c6c63dd602f33d5739c8dd1048c"
+  }
+}

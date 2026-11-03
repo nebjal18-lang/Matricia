@@ -1,0 +1,226 @@
+{
+  "scope": "TARGETED_REGRESSION_OF_SIX_RECORDED_FOCUS_FAILURES_FR_AR",
+  "candidate": "c7806afb7d4b0508b57a2439795f75289ef31738",
+  "appTree": "865af1bcf3bd0904b9c941c90a024c5f988492b7",
+  "runtimeMode": "DEVELOPMENT",
+  "optimizedFinalBrowserCertification": false,
+  "ruleExclusions": [],
+  "status": "FAILED",
+  "cases": [
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "qualite",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 307,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "relances",
+      "status": "FAIL",
+      "failure": "TypeError: Cannot read properties of null (reading 'status')"
+    },
+    {
+      "locale": "fr",
+      "width": 375,
+      "path": "documents",
+      "status": "FAIL",
+      "failure": "Error: page.goto: net::ERR_ABORTED at http://127.0.0.1:19273/fr/franchise/documents?organizationId=30a8a981-0ab6-432e-8b3c-9ef0a4d094db&franchiseId=2173ccb5-efb0-4fee-9709-63bafc67ac09\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:19273/fr/franchise/documents?organizationId=30a8a981-0ab6-432e-8b3c-9ef0a4d094db&franchiseId=2173ccb5-efb0-4fee-9709-63bafc67ac09\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "qualite",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 322,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "relances",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 322,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "path": "documents",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 322,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "qualite",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 307,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "relances",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 307,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 375,
+      "path": "documents",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 307,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "qualite",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 322,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "relances",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 322,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "path": "documents",
+      "status": "PASS",
+      "http": 200,
+      "documentOverflow": false,
+      "regions": [
+        {
+          "width": 322,
+          "scrollWidth": 768,
+          "tabIndex": 0,
+          "keyboardScrollVerified": true
+        }
+      ],
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,72 @@
+{
+  "scope": "AUTHORIZED_SHORT_RESUMPTION_OF_PUBLICATION_FINANCE_AND_TARGETED_VISUALS",
+  "supersedesForTheseThreeTargets": "CLOSURE.json",
+  "status": "REQUESTED_NATIVE_TARGETS_VERIFIED_WITH_SCANNER_LIMIT",
+  "nativeSchemaMigrations": 560,
+  "latestTestedCandidate": "1e202e8da9d19c6c63dd602f33d5739c8dd1048c",
+  "latestTestedAppTree": "362a5b4ab3ddae7c7f0948e691716a8c550dc4e3",
+  "runtimeMode": "DEVELOPMENT",
+  "newOptimizedBuildClaimed": false,
+  "calendar": {
+    "status": "PASSED_NATIVE_WINDOW_GOVERNANCE_PUBLICATION_SEPARATE",
+    "steps": 4,
+    "browserJsErrors": 0,
+    "makerAndReviewerDistinctNativeAal2": true,
+    "oldWindowFinite": true,
+    "snapshotsPreserved": true,
+    "currentNotRepointedByWindowClosure": true
+  },
+  "publication": {
+    "status": "PUBLISHED",
+    "releaseId": "1bfa3b49-1f04-463e-aa7c-603c11f68f05",
+    "currentReleaseMatches": true,
+    "ownerUiRequested": true,
+    "nativeLeasedConsumerAndExactReplay": true,
+    "oldPublishedHashesPreserved": 2,
+    "automaticCronCertified": false
+  },
+  "finance": {
+    "status": "UPLOADED",
+    "scanStatus": "ERROR",
+    "uploadId": "9a91307e-6b1a-471f-aa1e-ac86e8363ab3",
+    "sameOriginalUpload": true,
+    "sizeBytes": 816,
+    "privateStoredHashMatches": true,
+    "ownedServerHttp": 200,
+    "original403Cause": "localRuntimeOriginMismatch",
+    "productOriginGuardChanged": false,
+    "observerTimeoutPreserved": true,
+    "zeroCostDeniedCode": "55000",
+    "sameTargetUploads": 1,
+    "costReconciliations": 0,
+    "realScannerCertified": false
+  },
+  "targetedFocus": {
+    "candidate": "c7806afb7d4b0508b57a2439795f75289ef31738",
+    "appTree": "865af1bcf3bd0904b9c941c90a024c5f988492b7",
+    "uniqueCases": 12,
+    "passed": 12,
+    "failed": 0,
+    "locales": [
+      "fr",
+      "ar"
+    ],
+    "widths": [
+      375,
+      390
+    ],
+    "paths": [
+      "qualite",
+      "relances",
+      "documents"
+    ],
+    "realKeyboardScroll": true,
+    "axeRuleExclusions": [],
+    "jsErrors": 0,
+    "twoInitialDevelopmentNavigationInterruptsPreserved": true
+  },
+  "full192Campaign": "INCOMPLETE_AND_NOT_RERUN",
+  "stagingOrProductionCertified": false,
+  "productionChanged": false,
+  "remainingExternalPrerequisite": "Genuine antivirus service and current engine/signature configuration; CLEAN and independent zero-cost review remain unclaimed."
+}

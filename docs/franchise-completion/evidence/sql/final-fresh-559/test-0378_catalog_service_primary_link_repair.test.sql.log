@@ -1,0 +1,24 @@
+ok 1 - legacy source really lacks the required primary relation
+authenticated|a3780000-0000-4000-8000-000000000002|{"sub":"a3780000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 2 - unauthorized actor cannot repair another catalogue
+a3780000-0000-4000-8000-000000000001|{"sub":"a3780000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+ok 3 - AAL1 is denied by the existing authority guard before any structural repair, even when the submitted sensitivity flag is false
+{"sub":"a3780000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 4 - repair cannot move the parent into another library
+ok 5 - authorized real save opens the draft
+ok 6 - the parent was not artificially changed to repair its relation
+ok 7 - receipt identifies the structural repair without certifying publication
+ok 8 - same request replays its exact committed receipt after the identity version advanced
+ok 9 - same-parent save creates exactly one native primary draft link
+ok 10 - retry does not add duplicate primary versions
+ok 11 - the full original published version is unchanged
+ok 12 - published pointer and identity status are preserved while a separate draft is opened
+ok 13 - repair does not grant editorial or translation approval
+ok 14 - the native audit identifies the same-parent repair
+ok 15 - the normal native outbox carries structural repair metadata
+ok 16 - replay did not manufacture a second audit effect
+ok 17 - an existing coherent primary relation is reused without another repair
+ok 18 - normal repeated edits do not duplicate a valid primary relation
+ok 19 - later draft edits also preserve the original published history
+ok 20 - repair does not expose the native mutation to anonymous or service principals
+1..20

@@ -1,0 +1,55 @@
+{
+  "scope": "NATIVE_FRANCHISE_OTP_UI_MFA_AND_AUTHORIZED_DEEP_LINK",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "status": "PASSED_AUTHENTICATION_AND_NAVIGATION_ONLY",
+  "emailDeliveryCertified": false,
+  "otpRetrievedFrom": "Owned local GoTrue admin-generated OTP for an existing reserved test actor",
+  "originalActorSessionReplaced": false,
+  "userJwtFabricated": false,
+  "steps": [
+    {
+      "id": "LOGIN_UI_REQUESTS_OTP",
+      "status": "PASS",
+      "emailDeliveryCertified": false
+    },
+    {
+      "id": "REAL_SERVER_OTP_VERIFIED_AND_MFA_REQUIRED",
+      "status": "PASS",
+      "nextPreserved": true
+    },
+    {
+      "id": "REAL_TOTP_UI_RESUMES_EXACT_ROLE_ALLOWED_TARGET",
+      "status": "PASS",
+      "verifiedAal2": true,
+      "sameUser": true
+    }
+  ],
+  "authRequests": [
+    {
+      "host": "127.0.0.1:19274",
+      "path": "/auth/v1/verify",
+      "status": 200
+    }
+  ],
+  "actionResponses": [
+    {
+      "status": 200,
+      "serverAction": true,
+      "locationPath": null,
+      "actionRedirect": null,
+      "contentType": "text/x-component"
+    },
+    {
+      "status": 200,
+      "serverAction": true,
+      "locationPath": null,
+      "actionRedirect": null,
+      "contentType": "text/x-component"
+    }
+  ],
+  "generatedVerificationType": "magiclink",
+  "enteredOtpMatchesGenerated": true,
+  "targetWorkspaceFailures": [],
+  "locale": "fr"
+}

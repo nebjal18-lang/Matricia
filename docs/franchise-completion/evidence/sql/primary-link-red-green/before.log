@@ -1,0 +1,35 @@
+ok 1 - legacy source really lacks the required primary relation
+authenticated|a3780000-0000-4000-8000-000000000002|{"sub":"a3780000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}
+ok 2 - unauthorized actor cannot repair another catalogue
+a3780000-0000-4000-8000-000000000001|{"sub":"a3780000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}
+not ok 3 - a sensitive published source still requires AAL2 even when the submitted flag is false
+# Failed test 3: "a sensitive published source still requires AAL2 even when the submitted flag is false"
+#       caught: 42501: CATALOG_SCOPE_DENIED
+#       wanted: 42501: CATALOG_SENSITIVE_MFA_REQUIRED
+{"sub":"a3780000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}
+ok 4 - repair cannot move the parent into another library
+ok 5 - authorized real save opens the draft
+ok 6 - the parent was not artificially changed to repair its relation
+not ok 7 - receipt identifies the structural repair without certifying publication
+# Failed test 7: "receipt identifies the structural repair without certifying publication"
+#         have: NULL
+#         want: true
+ok 8 - same request replays its exact committed receipt after the identity version advanced
+not ok 9 - same-parent save creates exactly one native primary draft link
+# Failed test 9: "same-parent save creates exactly one native primary draft link"
+#         have: 0
+#         want: 1
+not ok 10 - retry does not add duplicate primary versions
+# Failed test 10: "retry does not add duplicate primary versions"
+#         have: 0
+#         want: 1
+ok 11 - the full original published version is unchanged
+ok 12 - published pointer and identity status are preserved while a separate draft is opened
+ok 13 - repair does not grant editorial or translation approval
+not ok 14 - the native audit identifies the same-parent repair
+# Failed test 14: "the native audit identifies the same-parent repair"
+#     (test result was NULL)
+
+ERROR:  column "created_at" does not exist
+LINE 1: ...id='f3780000-0000-4000-8000-000000000001'order by created_at...
+                                                             ^

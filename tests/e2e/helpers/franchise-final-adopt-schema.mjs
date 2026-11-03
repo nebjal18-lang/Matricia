@@ -3,10 +3,13 @@ import { readFile,writeFile,mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
+import { execFileSync } from 'node:child_process';
 const state=await fixtureState(),pin=await sourceCandidate(),path=process.argv.find(arg=>arg.startsWith('--receipt='))?.slice(10)??'docs/franchise-completion/evidence/sql/core-source-schema.json';
 if(!/^docs\/franchise-completion\/evidence\/sql\/[A-Za-z0-9.-]+\.json$/.test(path))throw Error('PUBLIC_REVIEWED_SCHEMA_RECEIPT_PATH_REQUIRED');
-const bytes=await readFile(path),reviewed=JSON.parse(bytes);
-if(reviewed.sourceBase!=='df67da4'||reviewed.cohort!==state.token||reviewed.environment!=='DEVELOPMENT_TEST_ONLY'||reviewed.freshReplay!==false||reviewed.stagingCertification!==false)throw Error('EXACT_ORCHESTRATOR_REVIEWED_LOCAL_SCHEMA_REQUIRED');
+const bytes=await readFile(path),reviewed=JSON.parse(bytes),approvedBase=process.argv.find(arg=>arg.startsWith('--source-base='))?.slice(14)??'df67da4';
+if(approvedBase!=='df67da4'&&!/^[0-9a-f]{40}$/.test(approvedBase))throw Error('EXPLICIT_REVIEWED_SOURCE_BASE_REQUIRED');
+execFileSync('git',['merge-base','--is-ancestor',approvedBase,pin.commit],{stdio:'pipe'});
+if(reviewed.sourceBase!==approvedBase||reviewed.cohort!==state.token||reviewed.environment!=='DEVELOPMENT_TEST_ONLY'||reviewed.freshReplay!==false||reviewed.stagingCertification!==false)throw Error('EXACT_ORCHESTRATOR_REVIEWED_LOCAL_SCHEMA_REQUIRED');
 if(reviewed.appTree&&reviewed.appTree!==pin.appTree)throw Error('EXACT_REVIEWED_APPLICATION_TREE_REQUIRED');
 if(state.candidate.commit===pin.commit){console.log(JSON.stringify({status:'EXACT_REVIEWED_SCHEMA_ALREADY_PINNED',candidate:pin.commit}));process.exit(0);}
 const old=new Map(state.candidate.migrations.map(item=>[item.file,item.sha256]));
@@ -15,6 +18,6 @@ const additions=pin.migrations.filter(item=>!old.has(item.file)),applied=reviewe
 if(reviewed.baselineMigrationCount!==state.candidate.migrations.length||reviewed.migrationCount!==pin.migrations.length||!isDeepStrictEqual(additions,applied))throw Error('ALL_AND_ONLY_REVIEWED_MIGRATIONS_REQUIRED');
 const security=JSON.parse(sql(state,"select json_build_object('environment',(select environment from private.admin_execution_environment_v1 where singleton),'tablesWithoutRls',(select count(*)from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public'and c.relkind in('r','p')and not c.relrowsecurity));"));
 if(security.environment!=='DEVELOPMENT'||security.tablesWithoutRls!==0)throw Error('ISOLATED_DEVELOPMENT_RLS_REQUIRED');
-const receipt={scope:'ADOPT_ORCHESTRATOR_APPLIED_SCHEMA_NO_DDL_REPLAYED',candidate:pin.commit,appTree:pin.appTree,fromCandidate:state.candidate.commit,reviewedReceipt:path,reviewedReceiptSha256:createHash('sha256').update(bytes).digest('hex'),baselineMigrationCount:reviewed.baselineMigrationCount,migrationCount:reviewed.migrationCount,adoptedMigrations:additions,security,freshReplay:false,stagingCertification:false};
+const receipt={scope:'ADOPT_ORCHESTRATOR_APPLIED_SCHEMA_NO_DDL_REPLAYED',candidate:pin.commit,appTree:pin.appTree,approvedSourceBase:approvedBase,fromCandidate:state.candidate.commit,reviewedReceipt:path,reviewedReceiptSha256:createHash('sha256').update(bytes).digest('hex'),baselineMigrationCount:reviewed.baselineMigrationCount,migrationCount:reviewed.migrationCount,adoptedMigrations:additions,security,freshReplay:false,stagingCertification:false};
 state.previousCandidates??=[];state.previousCandidates.push(state.candidate);state.candidate=pin;state.additionalMigrations.push(...additions);state.schemaStatus='CANDIDATE_READY';await persistPrivate(resolve(state.directory,'state.private.json'),state);
 await persistPrivate(resolve(state.directory,`adopted-reviewed-schema-${pin.commit}.json`),receipt);const out=resolve(path.endsWith('/core-source-schema.json')?'docs/franchise-completion/evidence/browser/core-build':`docs/franchise-completion/evidence/browser/schema-upgrades/${pin.commit.slice(0,12)}`);await mkdir(out,{recursive:true});await writeFile(resolve(out,'schema-adoption.json'),JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify({status:'REVIEWED_SCHEMA_ADOPTED_WITHOUT_DDL',candidate:pin.commit,migrationCount:pin.migrations.length,additions:additions.length}));

@@ -1,0 +1,74 @@
+{
+  "scope": "GOVERNED_NEW_VERSIONS_REPAIR_HISTORICAL_TEST_PRIMARY_LINKS",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "status": "PASSED_NATIVE_REGULARIZATION_PUBLICATION_STILL_REQUIRES_RELEASE",
+  "directLinkOrPublishedStateWrite": false,
+  "artificialParentChange": false,
+  "productionCatalogueTouched": false,
+  "commercialTranslatorCertified": false,
+  "steps": [
+    {
+      "id": "PUBLISHED_TEST_SOURCE_TO_NEW_DRAFT_AND_PRIMARY_NATIVE_UI",
+      "code": "TEST_SERVICE_A_B9BD23E48232",
+      "status": "PASS",
+      "parentUnchanged": true,
+      "originalVersionRetained": true,
+      "primaryLinkStatus": "DRAFT"
+    },
+    {
+      "id": "NEW_VERSION_AND_PRIMARY_SUBMITTED_BY_UI",
+      "code": "TEST_SERVICE_A_B9BD23E48232",
+      "status": "PASS"
+    },
+    {
+      "id": "INDEPENDENT_CENTRAL_APPROVAL_OF_VERSION_AND_PRIMARY",
+      "code": "TEST_SERVICE_A_B9BD23E48232",
+      "status": "PASS",
+      "selfApprovalDenied": true
+    },
+    {
+      "id": "NATIVE_INDEPENDENT_AR_REVIEW",
+      "code": "TEST_SERVICE_A_B9BD23E48232",
+      "status": "PASS",
+      "selfReviewDenied": true,
+      "proofSha256": "eaf88ffc5f6e7cdcc57dba0a28e92580328529f25f78124ba3947ac5b053fa21"
+    },
+    {
+      "id": "HISTORICAL_PUBLISHED_VERSION_HASH_AND_TEXT_UNCHANGED",
+      "code": "TEST_SERVICE_A_B9BD23E48232",
+      "status": "PASS"
+    },
+    {
+      "id": "PUBLISHED_TEST_SOURCE_TO_NEW_DRAFT_AND_PRIMARY_NATIVE_UI",
+      "code": "TEST_SERVICE_B_B9BD23E48232",
+      "status": "PASS",
+      "parentUnchanged": true,
+      "originalVersionRetained": true,
+      "primaryLinkStatus": "DRAFT"
+    },
+    {
+      "id": "NEW_VERSION_AND_PRIMARY_SUBMITTED_BY_UI",
+      "code": "TEST_SERVICE_B_B9BD23E48232",
+      "status": "PASS"
+    },
+    {
+      "id": "INDEPENDENT_CENTRAL_APPROVAL_OF_VERSION_AND_PRIMARY",
+      "code": "TEST_SERVICE_B_B9BD23E48232",
+      "status": "PASS",
+      "selfApprovalDenied": true
+    },
+    {
+      "id": "NATIVE_INDEPENDENT_AR_REVIEW",
+      "code": "TEST_SERVICE_B_B9BD23E48232",
+      "status": "PASS",
+      "selfReviewDenied": true,
+      "proofSha256": "8285d5f80f6d649ac512ba66ee63571ebe8d9971c73915e7a3091c382941d285"
+    },
+    {
+      "id": "HISTORICAL_PUBLISHED_VERSION_HASH_AND_TEXT_UNCHANGED",
+      "code": "TEST_SERVICE_B_B9BD23E48232",
+      "status": "PASS"
+    }
+  ]
+}

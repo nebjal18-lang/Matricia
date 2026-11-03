@@ -1,0 +1,24 @@
+{
+  "scope": "NATIVE_FINANCE_PRIVATE_TEST_FILE_WITHOUT_FABRICATED_CLEAN_SCAN",
+  "candidate": "c7806afb7d4b0508b57a2439795f75289ef31738",
+  "appTree": "865af1bcf3bd0904b9c941c90a024c5f988492b7",
+  "status": "FAILED",
+  "locale": "fr",
+  "steps": [
+    {
+      "id": "FRANCHISE_MEMBER_CENTRAL_FINANCE_TARGETS_DENIED",
+      "status": "PASS",
+      "rpcCode": "42501"
+    }
+  ],
+  "physicalAntivirusCertified": false,
+  "independentZeroCostReviewCertified": false,
+  "zeroCostCertified": false,
+  "hostedCertification": false,
+  "target": {
+    "id": "07425850-965b-49bf-9d73-42601dc68841",
+    "component": "PSP_FEE",
+    "label": "Encaissement · TEST FINAL FINANCE C2 B9BD · TEST-FINAL-FINANCE-C2-B9BD-CAPTURE (EUR)"
+  },
+  "failure": "TimeoutError: page.waitForResponse: Timeout 45000ms exceeded while waiting for event \"response\""
+}

@@ -1,0 +1,12 @@
+{
+  "scope": "REAL_BROWSER_EXISTING_UPLOAD_COMMIT_ORIGIN_REPRODUCTION",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "http": 403,
+  "body": {
+    "code": "REQUEST_ORIGIN_DENIED"
+  },
+  "browserOrigin": "http://127.0.0.1:19273",
+  "configuredLocalRuntimeAppOrigin": "https://matricia.test.invalid",
+  "productOriginGuardChanged": false,
+  "newUploadOrReservationCreated": false
+}

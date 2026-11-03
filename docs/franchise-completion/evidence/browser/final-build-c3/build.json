@@ -1,0 +1,20 @@
+{
+  "scope": "OPTIMIZED_TYPED_C3_APPLICATION_BUILD",
+  "candidate": "b433394c8b26f38a5e07e8beb25ceb245b5193d1",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "buildId": "GqDqfCoc1WypenqIqelHH",
+  "buildExitCode": 0,
+  "typescriptActive": true,
+  "ignoreBuildErrorsUsed": false,
+  "compiled": "2.6min",
+  "typescript": "2.9min ...",
+  "staticPagesGenerated": 14,
+  "serverStartedByBuild": false,
+  "databaseBusinessProbeExecutedByHarness": false,
+  "sourceMigrationCount": 558,
+  "nativeSchemaAdoptionRequiredBeforeJourneys": true,
+  "hostedCertification": false,
+  "log": "build.log",
+  "logSha256": "3739f6663c6ca92fca5fb8052bf3ffe3c66da8e7f265450a513f7bd0f7603bcf",
+  "command": "APP_ENV=development node tests/e2e/helpers/franchise-final-runtime.mjs --coordinated --production --build-only --candidate=b433394c8b26f38a5e07e8beb25ceb245b5193d1"
+}

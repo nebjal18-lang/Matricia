@@ -1,0 +1,19 @@
+{
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "publicationError": "23P01 CATALOG_SCHEDULE_CONFLICT",
+  "existingReleases": [
+    {
+      "id": "e9f07911-209c-4692-b0c0-402b45a5cbbd",
+      "status": "PUBLISHED",
+      "isCurrent": false
+    },
+    {
+      "id": "955fc6f8-b775-4f9c-834c-9ecc08fa7930",
+      "status": "PUBLISHED",
+      "isCurrent": true
+    }
+  ],
+  "nativeRegularizationCompleted": true,
+  "newPublicationCertified": false,
+  "existingReleaseCancelledOrRepointed": false
+}

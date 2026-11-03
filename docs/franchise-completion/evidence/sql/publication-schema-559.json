@@ -1,0 +1,19 @@
+{
+  "sourceBase": "a362abc17c332ad3a8894b55915e3bac35fcabb5",
+  "sourceSchemaCommit": "fd103febaca3c1daf152edb14b5923ed18fcf7f2",
+  "appBuildCommit": "b433394c8b26f38a5e07e8beb25ceb245b5193d1",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "cohort": "b9bd23e4-8232-4fbd-9c5d-8d19b3b16284",
+  "environment": "DEVELOPMENT_TEST_ONLY",
+  "baselineMigrationCount": 558,
+  "migrationCount": 559,
+  "newMigrations": [
+    {
+      "file": "20261103455380_catalog_service_primary_link_repair.sql",
+      "sha256": "f04869f480a128ec01da467dcbb5965f774eb348d6eabc1431c992af3bd3274a",
+      "passed": true
+    }
+  ],
+  "freshReplay": false,
+  "stagingCertification": false
+}

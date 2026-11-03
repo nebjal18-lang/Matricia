@@ -1,0 +1,25 @@
+{
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "scope": "BOUNDED_READ_ONLY_TEST_CATALOGUE_HISTORY_DIAGNOSTIC",
+  "servicesInSnapshot": 3,
+  "linksInSnapshot": 1,
+  "publishedServicesMissingPrimaryLink": [
+    {
+      "serviceId": "7c7c964d-6137-4949-89a2-a346b354003a",
+      "serviceCode": "TEST_SERVICE_A_B9BD23E48232",
+      "identityStatus": "PUBLISHED",
+      "primarySubcategoryPresent": true
+    },
+    {
+      "serviceId": "59beb511-1b37-4c31-bd4b-68fe615897d6",
+      "serviceCode": "TEST_SERVICE_B_B9BD23E48232",
+      "identityStatus": "PUBLISHED",
+      "primarySubcategoryPresent": true
+    }
+  ],
+  "requiredGuard": "private.validate_catalog_release_tree requires exactly one approved or published PRIMARY link per SERVICE",
+  "expectedGuardCode": "23514 PRIMARY_CATALOG_LINK_REQUIRED",
+  "newServiceAndIndependentArReviewValid": true,
+  "publishedLinksInsertedToForceSuccess": false,
+  "publicationCertified": false
+}

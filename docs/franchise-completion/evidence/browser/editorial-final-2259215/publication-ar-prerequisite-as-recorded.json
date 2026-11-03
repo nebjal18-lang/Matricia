@@ -1,0 +1,34 @@
+{
+  "scope": "NATIVE_FRANCHISE_EDITORIAL_CREATE_RETRY_REVIEW_PUBLICATION",
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "appTree": "d334946aa988aceda5543b72c64411035643206f",
+  "status": "FAILED",
+  "steps": [
+    {
+      "id": "SUBMIT_CENTRAL_REVIEW_NATIVE_UI",
+      "status": "PASS",
+      "recoveredWithoutMutationReplay": true,
+      "commandOutcome": "CATALOG_CHANGE_SUBMITTED",
+      "changeRequests": 1,
+      "outboxEvents": 1,
+      "transientMessageTimeoutPreserved": true
+    },
+    {
+      "id": "CREATE_BILINGUAL_DRAFT_NATIVE_UI",
+      "status": "PASS",
+      "draftIdPresent": true
+    },
+    {
+      "id": "INDEPENDENT_CENTRAL_REVIEW_NATIVE_RPC",
+      "status": "PASS",
+      "selfApprovalDenied": true
+    }
+  ],
+  "productionCatalogTouched": false,
+  "legalSignatureCertified": false,
+  "failureAlerts": [
+    "Cet élément n’est plus un brouillon : attendez le retour Matricia ou créez une nouvelle version.",
+    ""
+  ],
+  "failure": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 1\nReceived: 0\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate"
+}

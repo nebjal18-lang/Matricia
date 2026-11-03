@@ -1,0 +1,23 @@
+{
+  "scope": "ADOPT_ORCHESTRATOR_APPLIED_SCHEMA_NO_DDL_REPLAYED",
+  "candidate": "8f02323edb248987fd41e8d13982a3d4663dfac7",
+  "appTree": "b23946c8893a2a33f8977ba9d7974a729e6452db",
+  "approvedSourceBase": "a362abc17c332ad3a8894b55915e3bac35fcabb5",
+  "fromCandidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "reviewedReceipt": "docs/franchise-completion/evidence/sql/calendar-schema-560.json",
+  "reviewedReceiptSha256": "46fdc37b155ca5e2e23662728ad882a71de68f24531f063c2d15cbe2f30ab20e",
+  "baselineMigrationCount": 559,
+  "migrationCount": 560,
+  "adoptedMigrations": [
+    {
+      "file": "20261103455400_catalog_release_window_governance.sql",
+      "sha256": "6d5f9d79b24991fb5f13342ed45897b10aa6085ff3e0d1488d0ef0815ea9ffae"
+    }
+  ],
+  "security": {
+    "environment": "DEVELOPMENT",
+    "tablesWithoutRls": 0
+  },
+  "freshReplay": false,
+  "stagingCertification": false
+}

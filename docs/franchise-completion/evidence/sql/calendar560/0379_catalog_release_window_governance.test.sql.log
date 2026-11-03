@@ -1,0 +1,34 @@
+
+ok 1 - the real reviewed scheduler initially rejects the orphan overlapping publication
+ok 2 - a central actor cannot close the current release through reconciliation
+ok 3 - a separate audience is not silently cancelled as an orphan duplicate
+ok 4 - an in-flight publisher is rejected before governance takes library locks
+ok 5 - request pins the actual release hash
+ok 6 - the bounded context exposes the actual orphan conflict
+ok 7 - the requester cannot approve their own request
+ok 8 - request author cannot decide their own window closure
+
+ok 9 - missing AAL2 is classified independently from an unavailable calendar
+
+ok 10 - noncentral role receives no calendar governance context
+
+ok 11 - independent decision pins the exact frozen request source
+ok 12 - a second real SQL command actor approves the explicit closure
+ok 13 - decision retry returns the immutable receipt without extending a window
+ok 14 - a changed source cannot be approved from a stale second request
+ok 15 - the pending stale request is marked as changed
+ok 16 - an independent reviewer may reject a stale request safely
+
+ok 17 - request replay still succeeds after its release becomes retired
+ok 18 - the same real scheduler works after independently governed regularization
+ok 19 - the old snapshot, publication metadata and absent lineage remain unchanged
+ok 20 - only future availability ends at the real approval time, never retroactively
+ok 21 - the legitimate current release remains fully available and unchanged
+ok 22 - reconciliation never changes the current publication pointer
+ok 23 - the different audience retains its published status
+ok 24 - retries produce one immutable closure audit
+ok 25 - retries produce one closure outbox effect
+ok 26 - application and worker cannot fabricate governance records
+ok 27 - governance mutations are not exposed to anonymous or service principals
+ok 28 - normal atomic publication invokes the exact predecessor window closer
+1..28

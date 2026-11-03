@@ -1,0 +1,16 @@
+
+> @matricia/web@0.1.0 test /workspace/franchise-completion/apps/web
+> vitest run modules/franchise/screens/library modules/franchise/screens/spaces --maxWorkers=2
+
+
+ RUN  v5.0.3 /workspace/franchise-completion/apps/web
+
+
+ Test Files  13 passed (13)
+      Tests  117 passed (117)
+   Start at  10:22:14
+   Duration  8.81s (import 58%, transform 25%, tests 16%, worker 1%)
+
+    Isolate  13 workers spawned · ~252ms startup each (spawn + environment, per file)
+             at least ~1.39s faster with isolate: false — reuses workers across files instead of one per file
+

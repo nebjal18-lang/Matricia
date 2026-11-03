@@ -1,0 +1,65 @@
+{
+  "scope": "ACTUAL_ADMIN_UI_FOUR_EYES_TEST_PUBLICATION_WINDOW_CLOSURE",
+  "candidate": "1e202e8da9d19c6c63dd602f33d5739c8dd1048c",
+  "appTree": "362a5b4ab3ddae7c7f0948e691716a8c550dc4e3",
+  "runtimeMode": "DEVELOPMENT",
+  "status": "PASSED_NATIVE_WINDOW_GOVERNANCE_PUBLICATION_SEPARATE",
+  "publishedSnapshotDeletedOrRewritten": false,
+  "currentReleaseRepointed": false,
+  "browserJsErrors": [],
+  "steps": [
+    {
+      "id": "ACTUAL_FR_ADMIN_UI_WINDOW_CLOSURE_REQUEST",
+      "status": "PASS",
+      "requestId": "95f9c712-0f6b-4e22-a736-82049efb63c2",
+      "sourceHash": "6e67355ec10cef7b62903e34a879fe351818d43bdd428588ea3bce7b3e9022ab"
+    },
+    {
+      "id": "ACTUAL_MAKER_SELF_APPROVAL_DENIED",
+      "status": "PASS",
+      "code": "42501"
+    },
+    {
+      "id": "ACTUAL_AR_ADMIN_UI_INDEPENDENT_WINDOW_DECISION",
+      "status": "PASS",
+      "sameRequest": true
+    },
+    {
+      "id": "BOTH_SNAPSHOTS_AND_CURRENT_RELEASE_PRESERVED",
+      "status": "PASS",
+      "oldWindowNowFinite": true
+    }
+  ],
+  "before": [
+    {
+      "id": "e9f07911-209c-4692-b0c0-402b45a5cbbd",
+      "status": "PUBLISHED",
+      "isCurrent": false,
+      "snapshotHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "effectiveUntil": null
+    },
+    {
+      "id": "955fc6f8-b775-4f9c-834c-9ecc08fa7930",
+      "status": "PUBLISHED",
+      "isCurrent": true,
+      "snapshotHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "effectiveUntil": null
+    }
+  ],
+  "after": [
+    {
+      "id": "955fc6f8-b775-4f9c-834c-9ecc08fa7930",
+      "status": "PUBLISHED",
+      "isCurrent": true,
+      "snapshotHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "effectiveUntil": null
+    },
+    {
+      "id": "e9f07911-209c-4692-b0c0-402b45a5cbbd",
+      "status": "RETIRED",
+      "isCurrent": false,
+      "snapshotHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "effectiveUntil": "2026-11-03T10:53:33.260787+00:00"
+    }
+  ]
+}

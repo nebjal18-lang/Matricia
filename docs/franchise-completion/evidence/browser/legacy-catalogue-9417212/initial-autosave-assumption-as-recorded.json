@@ -1,0 +1,15 @@
+{
+  "scope": "GOVERNED_NEW_VERSIONS_REPAIR_HISTORICAL_TEST_PRIMARY_LINKS",
+  "candidate": "94172129eb5ae31c308a518f9ba085ce56fdc851",
+  "appTree": "c318ec4094656f3937f7754c488954f10bbce56a",
+  "status": "FAILED",
+  "directLinkOrPublishedStateWrite": false,
+  "artificialParentChange": false,
+  "productionCatalogueTouched": false,
+  "commercialTranslatorCertified": false,
+  "steps": [],
+  "failure": "TimeoutError: locator.uncheck: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: locator('textarea[name=\"descriptionFr\"]') }).first().getByLabel('Enregistrer automatiquement le brouillon', { exact: true })\u001b[22m\n",
+  "alerts": [
+    ""
+  ]
+}

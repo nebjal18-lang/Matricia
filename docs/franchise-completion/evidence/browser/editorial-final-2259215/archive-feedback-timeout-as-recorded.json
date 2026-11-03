@@ -1,0 +1,32 @@
+{
+  "scope": "NATIVE_FRANCHISE_EDITORIAL_CREATE_RETRY_REVIEW_PUBLICATION",
+  "candidate": "225921525d758b4eaa650765d894839b5152a9ff",
+  "appTree": "d334946aa988aceda5543b72c64411035643206f",
+  "status": "FAILED",
+  "steps": [
+    {
+      "id": "CREATE_BILINGUAL_DRAFT_NATIVE_UI",
+      "status": "PASS",
+      "draftIdPresent": true
+    },
+    {
+      "id": "OFFLINE_SAVE_PRESERVES_FIELDS",
+      "status": "PASS",
+      "falseSuccess": false
+    },
+    {
+      "id": "ONLINE_EXPLICIT_RETRY_AND_REORDER",
+      "status": "PASS",
+      "sortOrder": 17,
+      "exactBilingualFields": true
+    },
+    {
+      "id": "DUPLICATE_NATIVE_UI",
+      "status": "PASS",
+      "separateIdentity": true
+    }
+  ],
+  "productionCatalogTouched": false,
+  "legalSignatureCertified": false,
+  "failure": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('Le service a été archivé dans votre bibliothèque mandatée.', { exact: true })\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByText('Le service a été archivé dans votre bibliothèque mandatée.', { exact: true }) with timeout 30000ms\n  - waiting for getByText('Le service a été archivé dans votre bibliothèque mandatée.', { exact: true })\n"
+}

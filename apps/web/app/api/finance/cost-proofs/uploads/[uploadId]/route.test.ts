@@ -14,6 +14,23 @@ describe("Finance evidence upload commit HTTP boundary", () => {
     expect(response.status).toBe(403);
     expect(mocks.transfer).not.toHaveBeenCalled();
   });
+  it("fails closed when the local runtime public URL differs from the browser origin", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://matricia.test.invalid");
+    const localRequest = () => new Request(`http://127.0.0.1:19273/api/finance/cost-proofs/uploads/${id}`, {
+      method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:19273", "sec-fetch-site": "same-origin" }, body: "{}",
+    });
+    const denied = await POST(localRequest(), { params: Promise.resolve({ uploadId: id }) });
+    expect(denied.status).toBe(403);
+    expect(await denied.json()).toEqual({ code: "REQUEST_ORIGIN_DENIED" });
+    expect(mocks.transfer).not.toHaveBeenCalled();
+
+    // Correct the test runtime, retaining the exact origin check and original reservation.
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://127.0.0.1:19273");
+    const resumed = await POST(localRequest(), { params: Promise.resolve({ uploadId: id }) });
+    expect(resumed.status).toBe(200);
+    expect(await resumed.json()).toMatchObject({ upload_id: id, scan_status: "PENDING" });
+    expect(mocks.transfer).toHaveBeenCalledExactlyOnceWith(id, true);
+  });
   it("does not accept caller hashes, scan verdicts or arbitrary target fields", async () => {
     const response = await POST(request("https://matricia.example", JSON.stringify({ scan_status: "CLEAN", sha256: "a".repeat(64), target_id: id })), { params: Promise.resolve({ uploadId: id }) });
     expect(response.status).toBe(400);

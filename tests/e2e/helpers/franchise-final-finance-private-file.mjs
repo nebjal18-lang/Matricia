@@ -61,6 +61,7 @@ try {
     const receiptPromise = page.waitForResponse(r => new URL(r.url()).pathname.startsWith('/api/finance/cost-proofs/uploads/') && r.request().method() === 'POST', { timeout: 45000 });
     await page.getByRole('button', { name: labels.upload, exact: true }).click();
     const uploaded = await receiptPromise, receipt = await uploaded.json();
+    proof.uploadResponse = { http: uploaded.status(), code: receipt.code ?? null, outcome: receipt.outcome ?? null, scanStatus: receipt.scan_status ?? null, uploadId: receipt.upload_id ?? null };
     if (uploaded.status() !== 200 || receipt.outcome !== 'FINANCE_COST_DOCUMENT_UPLOADED' || !['PENDING', 'ERROR'].includes(receipt.scan_status)) throw Error('UPLOAD_MUST_REMAIN_UNAPPROVED_WITHOUT_REAL_SCANNER');
     const native = await author.client.rpc('get_finance_cost_upload_context_v1', { p_upload_id: receipt.upload_id });
     if (native.error || native.data?.status !== 'UPLOADED' || native.data.sha256 !== digest || native.data.size_bytes !== bytes.length || native.data.mime_type !== 'application/pdf') throw Error('ACTUAL_PRIVATE_UPLOAD_METADATA_MUST_MATCH_BYTES');
