@@ -89,18 +89,25 @@ update public.service_requests set current_version_id='f8854000-0000-4000-8000-0
 insert into public.catalog_releases(id,library_id,release_key,status,source_bundle_hash,created_by)values('f8857000-0000-4000-8000-000000000001','f8853000-0000-4000-8000-000000000001','TEST.0218.V1','DRAFT',repeat('e',64),'f8800000-0000-4000-8000-000000000003');
 insert into public.questionnaires(id,library_id,code,status,created_by)values('f8857000-0000-4000-8000-000000000002','f8853000-0000-4000-8000-000000000001','TEST_PROVIDER_0218','DRAFT','f8800000-0000-4000-8000-000000000003');
 insert into public.questionnaire_versions(id,questionnaire_id,library_id,catalog_release_id,version,status,title_fr,title_ar,description_fr,description_ar,audience,engine_version,policy_version,snapshot_hash,change_reason,created_by)values('f8857000-0000-4000-8000-000000000003','f8857000-0000-4000-8000-000000000002','f8853000-0000-4000-8000-000000000001','f8857000-0000-4000-8000-000000000001',1,'DRAFT','Questionnaire synthétique fournisseur','استبيان مقدم خدمة للاختبار','Source historique de recette','مصدر تاريخي للاختبار','PROVIDER','1.0.0','TEST-0218',repeat('f',64),'TEST source de qualification','f8800000-0000-4000-8000-000000000003');
-do $$declare requested jsonb;begin
+do $$declare requested jsonb;review jsonb;begin
  perform set_config('request.jwt.claim.sub','f8800000-0000-4000-8000-000000000002',true);
  perform set_config('request.jwt.claims','{"sub":"f8800000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
  requested:=public.request_provider_service('f8810000-0000-4000-8000-000000000002','f8853000-0000-4000-8000-000000000004','TEST-0218-service-request');
- insert into public.questionnaire_sessions(id,organization_id,actor_user_id,library_id,catalog_release_id,questionnaire_version_id,audience,locale,status,submitted_at,answer_manifest,answer_manifest_hash)values('f8857000-0000-4000-8000-000000000004','f8810000-0000-4000-8000-000000000002','f8800000-0000-4000-8000-000000000002','f8853000-0000-4000-8000-000000000001','f8857000-0000-4000-8000-000000000001','f8857000-0000-4000-8000-000000000003','PROVIDER','fr-MA','SUBMITTED',clock_timestamp(),'{}',repeat('1',64));
+ insert into public.questionnaire_sessions(id,organization_id,actor_user_id,library_id,catalog_release_id,questionnaire_version_id,audience,locale,status,submitted_at,answer_manifest,answer_manifest_hash)values('f8857000-0000-4000-8000-000000000004','f8810000-0000-4000-8000-000000000002','f8800000-0000-4000-8000-000000000002','f8853000-0000-4000-8000-000000000001','f8857000-0000-4000-8000-000000000001','f8857000-0000-4000-8000-000000000003','PROVIDER','fr-MA','SUBMITTED',clock_timestamp(),'[]',private.canonical_request_hash('[]'::jsonb));
+ -- Historical upstream evaluation facts are explicit and version-bound; the
+ -- native independent reviewer must still read and attest this exact context.
+ insert into public.questionnaire_session_snapshots(id,session_id,organization_id,questionnaire_version_id,catalog_release_id,questionnaire_snapshot_hash,release_source_bundle_hash,engine_version,policy_version,questions_manifest,rules_manifest,snapshot_hash)values('f8857000-0000-4000-8000-000000000005','f8857000-0000-4000-8000-000000000004','f8810000-0000-4000-8000-000000000002','f8857000-0000-4000-8000-000000000003','f8857000-0000-4000-8000-000000000001',repeat('f',64),repeat('e',64),'1.0.0','TEST-0218','[]','[]',private.canonical_request_hash(jsonb_build_object('fixture','TEST-0218','session','f8857000-0000-4000-8000-000000000004')));
+ insert into public.questionnaire_session_evaluations(session_id,organization_id,session_snapshot_id,questionnaire_version_id,engine_version,policy_version,score_basis_points,triggered_actions,answer_manifest_hash,result_payload,reproducibility_hash,evaluated_by)values('f8857000-0000-4000-8000-000000000004','f8810000-0000-4000-8000-000000000002','f8857000-0000-4000-8000-000000000005','f8857000-0000-4000-8000-000000000003','1.0.0','TEST-0218',8000,'[]',private.canonical_request_hash('[]'::jsonb),'{"historical_fixture":"TEST-0218","score_basis_points":8000}',private.canonical_request_hash(jsonb_build_object('evaluation','TEST-0218','score',8000)),'f8800000-0000-4000-8000-000000000002');
  perform set_config('request.jwt.claim.sub','f8800000-0000-4000-8000-000000000003',true);
  perform set_config('request.jwt.claims','{"sub":"f8800000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
- perform public.decide_provider_qualification((requested->>'qualification_id')::uuid,'APPROVED','f8857000-0000-4000-8000-000000000004',8000,'[{"key":"IDENTITY","passed":true}]','[]','TEST independent synthetic qualification','TEST-0218',clock_timestamp()+interval'1 year',1,'TEST-0218-qualification');
+ review:=public.get_provider_qualification_questionnaire_review_v1((requested->>'qualification_id')::uuid,'f8857000-0000-4000-8000-000000000004',1);
+ perform public.decide_provider_qualification((requested->>'qualification_id')::uuid,'APPROVED','f8857000-0000-4000-8000-000000000004',8000,jsonb_build_array(jsonb_build_object('key','IDENTITY','passed',true),jsonb_build_object('check','HUMAN_EVIDENCE_REVIEW','passed',true,'review_context_hash',review#>>'{selected,contextHash}')),'[]','TEST independent synthetic qualification','TEST-0218',clock_timestamp()+interval'1 year',1,'TEST-0218-qualification');
  perform set_config('request.jwt.claim.sub','f8800000-0000-4000-8000-000000000002',true);
  perform set_config('request.jwt.claims','{"sub":"f8800000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
  perform public.declare_provider_capacity('f8810000-0000-4000-8000-000000000002','f8853000-0000-4000-8000-000000000004','AVAILABLE',5,2,'TEST provider capacity declaration','TEST-0218-capacity');
 end$$;
+-- The invitation observes qualification and capacity from the preceding request.
+-- matricia:test-request-boundary
 insert into public.matching_runs(id,request_id,request_version_id,policy_version,status,target_panel_size,started_by,completed_at)values('f8855000-0000-4000-8000-000000000001','f8854000-0000-4000-8000-000000000001','f8854000-0000-4000-8000-000000000002','MATCH-V1','COMPLETED',1,'f8800000-0000-4000-8000-000000000001',clock_timestamp());
 insert into public.matching_candidates(id,matching_run_id,provider_organization_id,eligible,score_basis_points,score_explanation,rotation_component)values('f8855000-0000-4000-8000-000000000002','f8855000-0000-4000-8000-000000000001','f8810000-0000-4000-8000-000000000002',true,9000,'{}',50);
 insert into public.rfqs(id,request_id,request_version_id,matching_run_id,status,deadline,invited_count,opened_by)values('f8852000-0000-4000-8000-000000000001','f8854000-0000-4000-8000-000000000001','f8854000-0000-4000-8000-000000000002','f8855000-0000-4000-8000-000000000001','OPEN',clock_timestamp()+interval'1 day',1,'f8800000-0000-4000-8000-000000000001');
@@ -171,7 +178,7 @@ create function pg_temp.approve_checkout_box_fixture(
  p_audit_org uuid,p_plan_version uuid,p_maker uuid,p_reviewer uuid,p_code text,
  p_currency text,p_credit_budget bigint,p_rollover_months integer
 )returns jsonb language plpgsql as $$
-declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;begin
+declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;admission_context jsonb;admission_policy jsonb;begin
  if p_maker=p_reviewer then raise exception'TEST_REQUIRES_INDEPENDENT_FINANCE';end if;
  perform set_config('request.jwt.claim.sub',p_maker::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_maker,'role','authenticated','aal','aal2')::text,true);
@@ -180,9 +187,13 @@ declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;begin
  box:=public.create_box_version(p_audit_org,p_code,'FIXED','Box synthétique de recette','صندوق اصطناعي للاختبار',p_credit_budget,p_rollover_months,'{}',0,0,0,p_currency,clock_timestamp()-interval'1 minute',jsonb_build_array(jsonb_build_object('slot_code','CORE','slot_kind','MANDATORY','minimum_selections',1,'maximum_selections',1,'allowed_benefit_version_ids',jsonb_build_array(benefit->>'benefit_version_id'))),p_code||'-create');
  perform public.activate_box_version(p_audit_org,(box->>'box_version_id')::uuid,null,p_code||'-activate');
  rule:=public.link_plan_box_rule(p_audit_org,p_plan_version,(box->>'box_version_id')::uuid,'{"schema_version":1,"period_unit":"SUBSCRIPTION_CYCLE","budget_rule":"EXACT"}',clock_timestamp()-interval'1 minute',p_code||'-link');
- context:=public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
+ -- Explicit synthetic internal execution policy, independently reviewed before Box approval.
+ admission_context:=public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+ admission_policy:=public.propose_benefit_admission_policy_v1((benefit->>'benefit_version_id')::uuid,admission_context->>'source_hash',(admission_context->>'head_id')::uuid,'NONE',null,null,'{}',array[(box->>'box_version_id')::uuid],now()-interval '1 minute',null,'TEST ONLY explicit internal benefit execution policy','TEST_ONLY_CHECKOUT_POLICY','HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
  perform set_config('request.jwt.claim.sub',p_reviewer::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_reviewer,'role','authenticated','aal','aal2')::text,true);
+ perform public.decide_benefit_admission_policy_v1((admission_policy->>'policy_id')::uuid,admission_policy->>'content_hash',true,'TEST_ONLY_CHECKOUT_POLICY_REVIEW','TEST ONLY independent approval of internal benefit execution policy');
+ context:=public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
  approval:=public.approve_box_configuration_v1((rule->>'plan_box_rule_id')::uuid,context->>'source_hash','Approbation indépendante exclusivement synthétique de recette',p_code||'-approve');
  perform set_config('request.jwt.claim.sub',p_maker::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_maker,'role','authenticated','aal','aal2')::text,true);
@@ -194,6 +205,8 @@ insert into p218 values('payment-prepared',public.prepare_subscription_payment_i
 select pg_temp.as_service();
 insert into p218 values('payment-registered',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p218 where k='payment-prepared'),'SANDBOX','SYNTHETIC-218-ORDER',10000,'MAD'));
 insert into p218 values('payment-paid',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-218-CAPTURE-EVENT','SYNTHETIC-218-ORDER','PAYMENT_SUCCEEDED',10000,'MAD',clock_timestamp(),'SYNTHETIC-218-CAPTURE',repeat('c',64),repeat('d',64)));
+-- Financial eligibility is read in a later request than native payment capture.
+-- matricia:test-request-boundary
 select ok(exists(select 1 from public.credit_economic_funding_sources_v1 f join public.financial_journals j on j.id=f.financial_journal_id where f.organization_id='f8810000-0000-4000-8000-000000000001'and f.gross_minor=10000 and j.status='POSTED'),'signature financial context has a native captured receipt and posted cash journal');
 insert into p218 values('payment-dispute',public.process_verified_subscription_adjustment_v2('SANDBOX','SYNTHETIC-218-DISPUTE-OPEN','SYNTHETIC-218-CAPTURE','SYNTHETIC-218-DISPUTE','DISPUTE_OPENED',10000,'MAD',clock_timestamp(),repeat('e',64),repeat('f',64)));
 select throws_ok($$select public.run_mock_signature_provider(pg_temp.env('contract'),'SENT',null,'p218-held-client-denied')$$,'55000','CLIENT_FINANCIAL_HOLD_ACTIVE','financial hold after draft blocks send before any native signature event');

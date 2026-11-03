@@ -28,6 +28,8 @@ reset role;
 select set_config('request.jwt.claim.role','authenticated',true),set_config('request.jwt.claim.sub','a3740000-0000-4000-8000-000000000003',true),set_config('request.jwt.claims','{"sub":"a3740000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}',true);set local role authenticated;
 insert into catalog374 values('activation1',public.simulate_franchise_invitation_acceptance((select(v->>'invitation_id')::uuid from catalog374 where k='proposal1'),repeat('a',64),1,(select(v->>'mandate_version_id')::uuid from catalog374 where k='proposal1'),(public.franchise_invitation_activation_preview((select(v->>'invitation_id')::uuid from catalog374 where k='proposal1'))->>'mandateHash'),true,'TEST374-activate-A'));
 select is((select v->>'activationMode'from catalog374 where k='activation1'),'NON_CONTRACTUAL_DEMO','native activation remains explicitly noncontractual');
+-- Catalogue reads observe the completed native activation in a new request.
+-- matricia:test-request-boundary
 select lives_ok($$select public.franchise_catalog_page((select(v->>'franchise_id')::uuid from catalog374 where k='proposal1'))$$,'the native owner can load the catalogue without an injected mandate');
 select ok(private.has_library_permission('c3740000-0000-4000-8000-000000000001','CATALOG_VIEW_DRAFT'),'role and existing catalogue policy both remain required and now agree');
 select ok(not private.has_library_permission('c3740000-0000-4000-8000-000000000001','CATALOG_APPROVE'),'the bridge does not grant central independent approval');
@@ -58,6 +60,8 @@ select public.decide_franchise_governance((select(v->>'approval_request_id')::uu
 reset role;
 select set_config('request.jwt.claim.role','authenticated',true),set_config('request.jwt.claim.sub','a3740000-0000-4000-8000-000000000004',true),set_config('request.jwt.claims','{"sub":"a3740000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal1"}',true);set local role authenticated;
 insert into catalog374 values('activation2',public.simulate_franchise_invitation_acceptance((select(v->>'invitation_id')::uuid from catalog374 where k='proposal2'),repeat('b',64),1,(select(v->>'mandate_version_id')::uuid from catalog374 where k='proposal2'),(public.franchise_invitation_activation_preview((select(v->>'invitation_id')::uuid from catalog374 where k='proposal2'))->>'mandateHash'),true,'TEST374-activate-B'));
+-- Catalogue reads observe the completed native activation in a new request.
+-- matricia:test-request-boundary
 select lives_ok($$select public.franchise_catalog_page((select(v->>'franchise_id')::uuid from catalog374 where k='proposal2'))$$,'second owner loads the catalogue under their own exact assignment');
 select throws_ok($$select public.franchise_catalog_page((select(v->>'franchise_id')::uuid from catalog374 where k='proposal1'))$$,'42501','FRANCHISE_CATALOG_SCOPE_DENIED','the second owner cannot select the first territory');
 reset role;
