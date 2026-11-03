@@ -568,6 +568,14 @@ if (evidencePath) {
 
 try {
   await cleanupStaleFinancialConcurrencyFixtures(sql);
+  const databaseEnvironment = env.APP_ENV === 'staging' ? 'STAGING' : 'DEVELOPMENT';
+  await sql`
+    update private.admin_execution_environment_v1
+    set environment = ${databaseEnvironment},
+        configured_at = clock_timestamp(),
+        configuration_reference = 'SQL_TEST_RUNNER'
+    where singleton and environment is null
+  `;
   for (const file of files) {
     const source = await readFile(resolve(testDirectory, file), 'utf8');
     const result = await sql.unsafe(prepareSqlTest(source), [], { simple: true });
