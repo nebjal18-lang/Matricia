@@ -205,8 +205,15 @@ select is((select count(*)from public.contract_signatures where contract_id=(sel
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('a2100010-0000-4000-8000-000000000003','00000000-0000-0000-0000-000000000000','authenticated','authenticated','amend-signature210@example.invalid','',now(),'{}','{}',now(),now());
 insert into public.organization_memberships(id,organization_id,user_id,status)values('a2100010-0000-4000-8000-000000000103','b210000e-0000-4000-8000-000000000002','a2100010-0000-4000-8000-000000000003','ACTIVE');
 insert into public.organization_member_roles(membership_id,role_code)values('a2100010-0000-4000-8000-000000000103','PROVIDER_OWNER');
-insert into private.contract_signature_policy_versions_v1(environment,source_kind,version,provider_config_id,minimum_level,allow_development_mock,require_certificate,require_trusted_timestamp,approval_reference,adapter_registration_reference,approved_by,reviewed_by,approved_at)
-select'DEVELOPMENT','CONTRACT',1,id,'SIMPLE',true,false,false,'transaction-only-synthetic-signature-policy210','transaction-only-development-adapter210','b2100001-0000-4000-8000-000000000002','b210000a-0000-4000-8000-000000000002',clock_timestamp()-interval'1 second'from public.signature_provider_configs where provider_code='MATRICIA_DEV_MOCK'and environment='DEVELOPMENT';
+do $$declare cfg uuid;proposal jsonb;begin
+ select id into cfg from public.signature_provider_configs where provider_code='MATRICIA_DEV_MOCK'and environment='DEVELOPMENT'and status='ACTIVE'order by version desc limit 1;
+ perform set_config('request.jwt.claim.sub','b2100001-0000-4000-8000-000000000002',true);perform set_config('request.jwt.claims','{"sub":"b2100001-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
+ proposal:=public.propose_signature_policy_v1('b210000e-0000-4000-8000-000000000001','CONTRACT',cfg,'SIMPLE',false,false,'DEV-NON-CONTRACTUAL-FIXTURE210','DEV-INSTALLED-MOCK',1,'Transactional noncontractual protocol fixture',md5('policy:native-envelope210')::uuid);
+ perform set_config('request.jwt.claim.sub','b210000a-0000-4000-8000-000000000002',true);perform set_config('request.jwt.claims','{"sub":"b210000a-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
+ perform public.decide_signature_policy_v1((proposal->>'proposal_id')::uuid,proposal->>'content_hash',true,'Independent review of noncontractual test policy');
+end$$;
+-- The approved native policy becomes effective on the following RPC request.
+-- matricia:test-request-boundary
 do $$declare contract_ref uuid;version_ref uuid;envelope uuid;client_signer uuid;provider_signer uuid;begin
  select(v->>'contract_id')::uuid,(v->>'contract_version_id')::uuid into contract_ref,version_ref from amend_results where k='draft';
  perform set_config('request.jwt.claim.sub','b2100001-0000-4000-8000-000000000001',true);perform set_config('request.jwt.claims','{"sub":"b2100001-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);

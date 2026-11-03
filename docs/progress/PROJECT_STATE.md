@@ -1,3 +1,10 @@
+## 2026-11-03 — Réparation des validations CI des trois lots Administration
+
+- Tests temporels Maroc stabilisés sous Node 22.23.4 ; fixtures catalogue, Box, qualification, signature, mandat et Finance conformes aux préconditions natives. Frontières de requêtes explicites dans une unique transaction avec rollback ; contrôles TAP conservés.
+- Migration DSR additive pour les justificatifs de coûts Finance : portée, revue indépendante, CLEAN fiable, environnement et révocation couverts ; familles inconnues refusées. Aucune production modifiée.
+- Rejeu neuf **562 migrations PASS**, nettoyage PASS ; **347 fichiers SQL/RLS PASS par segments**, quatre courses officielles à deux connexions PASS ; **3 892 tests unitaires PASS**, un Storage opt-in ignoré existant ; intégration3/tooling33, lint/typecheck/build, phase00/frontières/no-placeholders PASS. Budget du job SQL : 40 minutes. Revue indépendante sans bloquant.
+- Passage CI unique GitHub Actions à confirmer après publication. Preuves et limites : `docs/recette/ci-repair-2026-11-03.md` et `docs/evidence/ci-repair-20261103.json`. Aucun visa global de livraison ni fusion annoncé.
+
 ## 2026-11-03 — Administration lot 3 : vraie recette AAL2 et reprise de pagination
 
 - Branche `codex/admin-lot3-20261103`, après PR #5 ; code candidat `e37e76e`. La recette native a reproduit un centre inutilisable sur une page d’approbations dépassant les résultats : HTTP416/PGRST103. Reprise page1 sous le même filtre/RLS uniquement pour cet état ; autres erreurs conservées.

@@ -70,6 +70,8 @@ select is((select v from entry_observed where k='work-scope'),(select v from ent
 select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic small and medium missions',0,'Initial declared work scope','d3450000-0000-4000-8000-000000000030')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','changed work facts cannot reuse operation key');
 select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic new mission scope',0,'Stale concurrent scope edit','d3450000-0000-4000-8000-000000000031')$$,'40001','STALE_PROVIDER_WORK_SCOPE','concurrent work scope preserves current version');
 insert into entry_observed values('capacity',public.declare_provider_capacity('d0610000-0000-0000-0000-000000000001',null,'AVAILABLE',7,9,'Synthetic global capacity','entry-capacity-0345'));
+-- Read the versioned result in the next logical RPC request.
+-- matricia:test-request-boundary
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_available_units','7','global capacity units match authoritative fallback');
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_lead_time_days','9','global lead time matches authoritative fallback');
 reset role;
@@ -79,6 +81,8 @@ insert into public.provider_capacity_versions(provider_organization_id,service_i
 set local role authenticated;
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_available_units','7','future and expired service declarations cannot override effective global capacity');
 insert into entry_observed values('service-capacity',public.declare_provider_capacity('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003','LIMITED',2,4,'Synthetic effective service capacity','entry-service-capacity-0345'));
+-- Read the versioned result in the next logical RPC request.
+-- matricia:test-request-boundary
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_available_units','2','effective service-specific declaration overrides global units');
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_lead_time_days','4','effective service-specific lead time matches status');
 
@@ -105,6 +109,8 @@ reset role;
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"d0600000-0000-0000-0000-000000000003","role":"authenticated","aal":"aal2"}',true);
 insert into entry_observed values('review',public.review_provider_document((select(v->>'document_version_id')::uuid from entry_observed where k='document'),'VERIFIED','Synthetic evidence human review','ENTRY-TEST-V1','entry-review-0345'));
 insert into entry_observed values('qualification-review',public.decide_provider_qualification((select(v->>'qualification_id')::uuid from entry_observed where k='service-a'),'INFORMATION_REQUIRED',null,null,'[]','["Nouvelle assurance requise"]','Synthetic request for additional evidence','ENTRY-TEST-V1',null,1,'entry-qualification-review-0345'));
+-- Read the versioned result in the next logical RPC request.
+-- matricia:test-request-boundary
 
 reset role;
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"d0600000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal1"}',true);

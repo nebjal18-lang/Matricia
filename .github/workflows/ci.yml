@@ -42,7 +42,9 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # The fresh reset and complete SQL/RLS suite include 562 migrations and
+    # exhaustive DSR inventories; keep enough time for all assertions to run.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

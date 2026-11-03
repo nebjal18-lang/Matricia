@@ -97,6 +97,51 @@ end$$;
 -- verdict path. Only the deterministic service verdict is a test precondition.
 insert into dsr243 values('original',pg_temp.sane_file243('d2430000-0000-4000-8000-000000000001','e2431000-0000-4000-8000-000000000001','original243.pdf','%PDF-1.7 TEST original personal file243'));
 insert into dsr243 values('foreign-original',pg_temp.sane_file243('d2430000-0000-4000-8000-000000000002','e2431000-0000-4000-8000-000000000002','foreign243.pdf','%PDF-1.7 TEST foreign personal file243'));
+-- Historical RESERVED finance-file metadata exercises discovery only. These
+-- records assert no funded economic target, trusted bytes or legal disclosure.
+-- The separate request keeps the complete-delivery scenario's reviewed cut exact.
+insert into public.finance_cost_document_uploads_v1(id,component,target_id,organization_id,target_snapshot,target_hash,storage_path,file_name,mime_type,size_bytes,sha256,created_by,idempotency_key)
+select ('f2431000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'PSP_FEE',extensions.gen_random_uuid(),
+ case when i=1 then 'b2430000-0000-4000-8000-000000000002'::uuid else 'b2430000-0000-4000-8000-000000000003'::uuid end,
+ '{"fixture":"TEST_ONLY_243_RESERVED_FINANCE_METADATA"}',private.canonical_request_hash('{"fixture":"TEST_ONLY_243_RESERVED_FINANCE_METADATA"}'::jsonb),
+ 'TEST_ONLY_243/finance-'||i||'.pdf','finance-fixture243.pdf','application/pdf',32,repeat('f',64),'a2430000-0000-4000-8000-000000000004',extensions.gen_random_uuid()
+from generate_series(1,2)i;
+insert into dsr243 values('finance-candidates',private.dsr_all_collect_file_sources_v1('d2430000-0000-4000-8000-000000000002'));
+select is((select count(*)::integer from dsr243,jsonb_array_elements(v->'entries')e where k='finance-candidates'and e->>'source_type'='public.finance_cost_document_uploads_v1'),1,'finance candidate discovery retains the exact organization boundary');
+select ok((select exists(select 1 from jsonb_array_elements(v->'entries')e where e->>'source_id'='f2431000-0000-4000-8000-000000000001'and e->>'bucket'='finance-cost-proofs'and e->>'sha256'=repeat('f',64))from dsr243 where k='finance-candidates'),'finance candidate preserves typed owner, private path and byte identity');
+select ok((select not(private.dsr_file_source_state_v1(e)->>'ready')::boolean from dsr243,jsonb_array_elements(v->'entries')e where k='finance-candidates'and e->>'source_type'='public.finance_cost_document_uploads_v1'),'reserved finance metadata cannot become trusted disclosed bytes');
+-- Historical upload acknowledgement is an explicit metadata precondition;
+-- the real fenced worker RPCs establish the deterministic DEVELOPMENT verdict.
+insert into storage.objects(bucket_id,name,owner_id,metadata)
+select storage_bucket,storage_path,created_by::text,jsonb_build_object('size',size_bytes,'mimetype',mime_type)
+from public.finance_cost_document_uploads_v1 where id='f2431000-0000-4000-8000-000000000001';
+update public.finance_cost_document_uploads_v1 set status='UPLOADED',uploaded_at=clock_timestamp()where id='f2431000-0000-4000-8000-000000000001';
+select pg_temp.service243();
+insert into dsr243 values('finance-scan-claim',public.claim_finance_cost_document_scan_jobs_v1('e2439000-0000-4000-8000-000000000001','f2431000-0000-4000-8000-000000000001',1,90)->0);
+select public.complete_finance_cost_document_scan_v1('f2431000-0000-4000-8000-000000000001','e2439000-0000-4000-8000-000000000001',(select(v->>'lease_token')::uuid from dsr243 where k='finance-scan-claim'),(select(v->>'row_version')::integer from dsr243 where k='finance-scan-claim'),'CLEAN',repeat('f',64),32,'MATRICIA_SANDBOX','TEST_ONLY_243');
+insert into dsr243 select 'finance-clean-entry',e from jsonb_array_elements(private.dsr_all_collect_file_sources_v1('d2430000-0000-4000-8000-000000000002')->'entries')e where e->>'source_type'='public.finance_cost_document_uploads_v1';
+select ok((select(private.dsr_file_source_state_v1(v)->>'ready')::boolean from dsr243 where k='finance-clean-entry'),'exact current leased CLEAN scan and private Storage metadata make finance bytes ready for independent review');
+-- Exercise the real DSR review transfer, not just the readiness projection.
+-- The distinct legal reviewer obtains exact bytes through a service receipt;
+-- no final personal-data disposition or real legal approval is fabricated.
+select pg_temp.actor243('a2430000-0000-4000-8000-000000000004');
+insert into dsr243 values('finance-scope',public.confirm_my_dsr_scope_v1('d2430000-0000-4000-8000-000000000002',array['ALL'],'TEST-243-finance-scope'));
+select pg_temp.actor243('a2430000-0000-4000-8000-000000000002');
+insert into dsr243 values('finance-capture',public.capture_admin_dsr_all_v1('d2430000-0000-4000-8000-000000000002',(select(v->>'scope_version_id')::uuid from dsr243 where k='finance-scope'),(select(v->>'inventory_version_id')::uuid from dsr243 where k='version'),'TEST-243-finance-capture'));
+insert into dsr243 select 'finance-captured-entry',e from public.dsr_all_packages_v1 p,jsonb_array_elements(p.snapshot_json::jsonb#>'{file_sources,entries}')e where p.id=(select(v->>'package_id')::uuid from dsr243 where k='finance-capture')and e->>'source_type'='public.finance_cost_document_uploads_v1';
+select lives_ok($$select pg_temp.review_file_bytes243((select(v->>'package_id')::uuid from dsr243 where k='finance-capture'),(select v->>'id'from dsr243 where k='finance-captured-entry'),null,'a2430000-0000-4000-8000-000000000001')$$,'a distinct reviewer can retrieve the exact CLEAN finance source through the real service transfer');
+select ok(exists(select 1 from private.dsr_file_transfer_tickets_v1 t join private.dsr_file_transfer_completions_v1 c on c.ticket_id=t.id where t.package_id=(select(v->>'package_id')::uuid from dsr243 where k='finance-capture')and t.kind='SOURCE_REVIEW'and t.actor_user_id='a2430000-0000-4000-8000-000000000001'and c.sha256=repeat('f',64)and c.size_bytes=32),'finance handoff records an authenticated exact-byte review receipt');
+select ok(not(private.dsr_all_file_manifest_v1((select(v->>'package_id')::uuid from dsr243 where k='finance-capture'))->>'complete')::boolean,'CLEAN finance handoff still cannot replace independent personal-scope and third-party disposition review');
+update private.admin_execution_environment_v1 set environment='PRODUCTION'where singleton;
+select ok((select not(private.dsr_file_source_state_v1(v)->>'ready')::boolean from dsr243 where k='finance-clean-entry'),'a sandbox finance scan never authorizes production DSR bytes');
+update private.admin_execution_environment_v1 set environment='DEVELOPMENT'where singleton;
+insert into public.finance_cost_document_revocations_v1(upload_id,reason,revoked_by)values('f2431000-0000-4000-8000-000000000001','TEST explicit finance proof revocation243','a2430000-0000-4000-8000-000000000001');
+select ok((select not(private.dsr_file_source_state_v1(v)->>'ready')::boolean from dsr243 where k='finance-clean-entry'),'revocation invalidates formerly ready finance bytes without changing the captured identity');
+select ok(not has_function_privilege('anon','private.dsr_all_collect_file_sources_v1(uuid)','EXECUTE')and not has_function_privilege('authenticated','private.dsr_all_collect_file_sources_v1(uuid)','EXECUTE')and not has_function_privilege('service_role','private.dsr_all_collect_file_sources_v1(uuid)','EXECUTE'),'direct DSR candidate collection stays private for every application role');
+select ok(not has_function_privilege('anon','private.dsr_file_source_state_v1(jsonb)','EXECUTE')and not has_function_privilege('authenticated','private.dsr_file_source_state_v1(jsonb)','EXECUTE')and not has_function_privilege('service_role','private.dsr_file_source_state_v1(jsonb)','EXECUTE'),'direct file readiness inspection stays private for every application role');
+create table public.dsr_unrecognized_file_fixture243(id uuid,storage_path text);
+select ok(not(private.dsr_all_collect_file_sources_v1('d2430000-0000-4000-8000-000000000002')->>'coverage_complete')::boolean,'a future unrecognized file family still blocks complete coverage even when empty');
+drop table public.dsr_unrecognized_file_fixture243;
 select pg_temp.actor243('a2430000-0000-4000-8000-000000000002');set local role authenticated;
 insert into dsr243 values('capture',public.capture_admin_dsr_all_v1('d2430000-0000-4000-8000-000000000001',(select(v->>'scope_version_id')::uuid from dsr243 where k='scope'),(select(v->>'inventory_version_id')::uuid from dsr243 where k='version'),'TEST-243-capture'));
 reset role;

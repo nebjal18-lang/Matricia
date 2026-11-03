@@ -93,10 +93,14 @@ insert into p256 values('prep',public.prepare_subscription_payment_intent_v2('b2
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p256 values('intent',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p256 where k='prep'),'DEMO','SYNTHETIC-MEMBER-ORDER-330',12345,'EUR'));
 insert into p256 values('paid',public.process_verified_subscription_payment_v2('DEMO','DEMO','SYNTHETIC-MEMBER-EVENT-330','SYNTHETIC-MEMBER-ORDER-330','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-MEMBER-CAPTURE-330',repeat('d',64),repeat('e',64)));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2560000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p256 values('context',public.get_customer_box_configuration_v1('b2560000-0000-4000-8000-000000000001'));
 insert into p256 values('selection',jsonb_build_array(jsonb_build_object('slot_code','CORE','benefit_version_id',(select v->>'benefit_version_id'from p256 where k='benefit3'),'units','1'),jsonb_build_object('slot_code','EXTRA','benefit_version_id',(select v->>'benefit_version_id'from p256 where k='benefit7'),'units','1')));
 insert into p256 values('configured',public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,(select v->>'context_hash'from p256 where k='context'),(select v from p256 where k='selection'),'member330-configure'));
+-- Acquired Box evidence is consumed in a later native request.
+-- matricia:test-request-boundary
 select public.ensure_client_credit_wallet('b2560000-0000-4000-8000-000000000001','member330-wallet');
 insert into p256 values('grant-context',public.get_subscription_credit_grant_context_v1('b2560000-0000-4000-8000-000000000001',(select id from public.subscription_payment_events where provider_event_id='SYNTHETIC-MEMBER-EVENT-330'),1));
 select public.issue_subscription_credit_grant_v1('b2560000-0000-4000-8000-000000000001',(select id from public.subscription_payment_events where provider_event_id='SYNTHETIC-MEMBER-EVENT-330'),1,(select v#>>'{terms,terms_hash}'from p256 where k='grant-context'),'member330-grant');

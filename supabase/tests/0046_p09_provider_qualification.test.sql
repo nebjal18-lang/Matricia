@@ -1,6 +1,11 @@
 begin;
 set local search_path=public,extensions;
 select plan(42);
+-- Inspect the actual guarded delegate, not only the public review adapter.
+create temporary view tested_qualification_command_source as
+ select case when pg_get_functiondef('public.decide_provider_qualification(uuid,text,uuid,integer,jsonb,jsonb,text,text,timestamptz,integer,text,uuid)'::regprocedure) like '%public.decide_provider_qualification_pre_review_0384(%'
+ then pg_get_functiondef('public.decide_provider_qualification(uuid,text,uuid,integer,jsonb,jsonb,text,text,timestamptz,integer,text,uuid)'::regprocedure)||pg_get_functiondef('public.decide_provider_qualification_pre_review_0384(uuid,text,uuid,integer,jsonb,jsonb,text,text,timestamptz,integer,text,uuid)'::regprocedure) else '' end as source;
+
 grant usage on schema extensions to authenticated;
 grant execute on all functions in schema extensions to authenticated;
 
@@ -39,12 +44,12 @@ select ok(exists(select 1 from pg_constraint where conrelid='public.provider_cap
 select ok(exists(select 1 from pg_constraint where conrelid='public.provider_qualification_decisions'::regclass and contype='c'and pg_get_constraintdef(oid)like'%INFORMATION_REQUIRED%'and pg_get_constraintdef(oid)like'%CONDITIONAL%'and pg_get_constraintdef(oid)like'%EXPIRED%'),'qualification supports all governed decision states');
 select ok((select p.prosrc like'%COMPANY_NOT_VERIFIED%'and p.prosrc like'%QUALIFICATION_NOT_DECIDED%'and position('DOCUMENT_' in p.prosrc)>0 and position('_INVALID' in p.prosrc)>0 and p.prosrc like'%CAPACITY_NOT_DECLARED%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='provider_service_eligibility_snapshot'),'eligibility exposes deterministic exclusion reasons');
 select ok((select p.prosrc like'%ACTIVE_HUMAN_RESTRICTION%'and p.prosrc like'%provider_restriction_decisions%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='provider_service_eligibility_snapshot'),'eligibility explains active human restrictions');
-select ok((select p.prosrc like'%HUMAN_QUALIFICATION_DECISION_REQUIRED%'and p.prosrc like'%audit_events%'and p.prosrc like'%event_outbox%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_provider_qualification'),'qualification decisions require a human and emit audit/outbox records');
-select ok((select p.prosrc like'%INVALID_QUALIFICATION_TRANSITION%'and p.prosrc like'%STALE_PROVIDER_QUALIFICATION%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_provider_qualification'),'qualification transitions and optimistic concurrency are enforced');
+select ok((select p.source like'%HUMAN_QUALIFICATION_DECISION_REQUIRED%'and p.source like'%audit_events%'and p.source like'%event_outbox%'from tested_qualification_command_source p),'qualification decisions require a human and emit audit/outbox records');
+select ok((select p.source like'%INVALID_QUALIFICATION_TRANSITION%'and p.source like'%STALE_PROVIDER_QUALIFICATION%'from tested_qualification_command_source p),'qualification transitions and optimistic concurrency are enforced');
 select ok((select p.prosrc like'%PROVIDER_DOCUMENT_SERVICE_SCOPE_DENIED%'and p.prosrc like'%provider_document_service_links%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='record_provider_document_version'),'documents cannot be linked across provider tenants');
 select ok(exists(select 1 from pg_constraint where conrelid='public.provider_restriction_decisions'::regclass and contype='c'and pg_get_constraintdef(oid)like'%jsonb_array_length(evidence_refs) > 0%'),'restriction decisions require evidence');
 select ok(exists(select 1 from pg_indexes where schemaname='public'and tablename='provider_document_versions'and indexname='provider_document_versions_expiry_idx'),'document expiry has an operational index');
-select ok((select p.prosrc like'%provider_service_match_profiles%'and p.prosrc like'%required_certifications_valid%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_provider_qualification'),'qualification synchronizes the existing RFQ eligibility contract');
+select ok((select p.source like'%provider_service_match_profiles%'and p.source like'%required_certifications_valid%'from tested_qualification_command_source p),'qualification synchronizes the existing RFQ eligibility contract');
 select ok((select p.prosrc like'%provider_match_profiles%'and p.prosrc like'%partner_contract_signed%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_provider_company'),'company decisions synchronize the existing RFQ eligibility contract');
 select ok((select p.prosrc like'%IDEMPOTENCY_KEY_REUSED%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='begin_provider_qualification_command'),'provider commands reject idempotency-key payload changes');
 select ok((select p.prosrc like'%FINANCIAL_RESTRICTED%'and p.prosrc like'%ProviderRestrictionDecidedV1%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname='decide_provider_restriction'),'restriction decisions update matching gates and emit a governed event');
