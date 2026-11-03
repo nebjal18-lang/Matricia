@@ -49,8 +49,7 @@ export default async function AdminCommandCenterPage({
       kicker={c.kicker}
     >
       {query.q?.trim() ? <AdminSearchResults locale={locale} query={query.q.trim()} organizationQuery={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} /> : null}
-      <AdminDirectoryBoard locale={locale} query={space.selectedQuery} />
-      <details className="client-ops" id="command-today" open={Boolean(query.q?.trim())}>
+      <details className="client-ops" id="command-today" open>
         <summary>{m.today}</summary>
         {result.status === "error" ? (
           <Alert variant="destructive">
@@ -69,6 +68,7 @@ export default async function AdminCommandCenterPage({
           />
         )}
       </details>
+      <AdminDirectoryBoard locale={locale} query={space.selectedQuery} />
     </AdminAppShell>
   );
 }

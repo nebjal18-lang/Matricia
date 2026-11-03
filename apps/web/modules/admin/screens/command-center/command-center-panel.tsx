@@ -248,7 +248,7 @@ export function CommandCenterPanel({
         </form>
       ) : null}
 
-      <section id="command-today" aria-labelledby={`${p}-today`} className="space-y-4">
+      <section id="command-work-items" aria-labelledby={`${p}-today`} className="space-y-4">
         <div className="admin-section-head">
           <h2 id={`${p}-today`}>{m.today}</h2>
         </div>

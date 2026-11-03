@@ -95,6 +95,8 @@ select is(private.subscription_prepared_box_terms_for_preparation_v1((select(v->
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 
 insert into p256 values('paid',public.process_verified_subscription_payment_v2('DEMO','DEMO','SYNTHETIC-DEMO-EVENT-256','SYNTHETIC-DEMO-ORDER-256','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-DEMO-CAPTURE-256',repeat('d',64),repeat('e',64)));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2560000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p256 values('context',public.get_customer_box_configuration_v1('b2560000-0000-4000-8000-000000000001'));
 select is((select v->>'status'from p256 where k='context'),'CONFIGURABLE','a real compatible payment makes the pre-approved Box configurable');
@@ -123,6 +125,8 @@ select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8
 select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2560000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 select set_config('test.ledger256',(select count(*)::text from public.credit_ledger_entries where organization_id='b2560000-0000-4000-8000-000000000001'),true);
 insert into p256 values('configured',public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,current_setting('test.context256'),(select v from p256 where k='selection'),'box256-configure'));
+-- Acquired Box evidence is consumed in a later native request.
+-- matricia:test-request-boundary
 select is((select v->>'outcome'from p256 where k='configured'),'CUSTOMER_BOX_CONFIGURED','the real command creates the customer Box');
 select is((select v->>'allocated_credits'from p256 where k='configured'),'10','selected costs exactly use the approved credit budget');
 select is(public.get_benefit_admission_availability_v1('b2560000-0000-4000-8000-000000000001',(select(v->>'benefit_version_id')::uuid from p256 where k='benefit3'))->>'admissible','true','the real funded assignment satisfies the approved Box condition even after catalogue retirement');

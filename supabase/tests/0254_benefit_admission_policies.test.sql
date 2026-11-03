@@ -12,7 +12,7 @@ declare
   prior_sub text := current_setting('request.jwt.claim.sub', true);
   prior_claims text := current_setting('request.jwt.claims', true);
   plan public.subscription_plan_versions%rowtype;
-  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb;
+  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb; admission_context jsonb; admission_policy jsonb;
   fixture_key text := 'checkout-fixture-' || p_plan_version_id::text;
 begin
   select * into strict plan from public.subscription_plan_versions where id = p_plan_version_id;
@@ -34,9 +34,20 @@ begin
   perform public.activate_box_version(p_organization_id,(box->>'box_version_id')::uuid,null,fixture_key||'-box-active');
   rule := public.link_plan_box_rule(p_organization_id,p_plan_version_id,(box->>'box_version_id')::uuid,
     '{"schema_version":1,"period_unit":"SUBSCRIPTION_CYCLE","budget_rule":"AT_MOST"}',clock_timestamp()-interval '1 minute',fixture_key||'-rule');
-  approval_context := public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
+  -- The advertised internal benefit must have its own current execution policy
+  -- before the independent reviewer approves the complete checkout promise.
+  admission_context := public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+  admission_policy := public.propose_benefit_admission_policy_v1(
+    (benefit->>'benefit_version_id')::uuid,admission_context->>'source_hash',(admission_context->>'head_id')::uuid,
+    'NONE',null,null,'{}',array[(box->>'box_version_id')::uuid],now()-interval '1 minute',null,
+    'TEST ONLY explicit internal benefit execution policy','TEST_ONLY_CHECKOUT_POLICY',
+    'HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
   perform set_config('request.jwt.claim.sub',reviewer_id::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',reviewer_id,'role','authenticated','aal','aal2')::text,true);
+  perform public.decide_benefit_admission_policy_v1((admission_policy->>'policy_id')::uuid,
+    admission_policy->>'content_hash',true,'TEST_ONLY_CHECKOUT_POLICY_REVIEW',
+    'TEST ONLY independent approval of internal benefit execution policy');
+  approval_context := public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
   perform public.approve_box_configuration_v1((rule->>'plan_box_rule_id')::uuid,approval_context->>'source_hash',
     'TEST ONLY independent approval of synthetic checkout terms',fixture_key||'-approve');
   perform set_config('request.jwt.claim.sub',coalesce(prior_sub,''),true);
@@ -80,7 +91,14 @@ select throws_ok($$select pg_temp.propose254(1,'GLOBAL_VERSION',3,2)$$,'42501','
 select pg_temp.actor254(1);
 select throws_ok($$select pg_temp.propose254(1,'NONE',null,null)$$,'55000','BENEFIT_LEGACY_RULE_UNSUPPORTED','a non-null source quota cannot be silently discarded');
 select throws_ok($$select pg_temp.propose254(2,'NONE',null,null)$$,'55000','BENEFIT_LEGACY_RULE_UNSUPPORTED','unknown nonempty JSON is refused');
-select throws_ok($$select pg_temp.propose254(3,'NONE',null,null)$$,'55000','BENEFIT_AUTOMATION_NOT_CONFIGURED','human evidence never enables an automatic executor');
+-- Native execution now permits policy proposals for automation, but a human
+-- policy cannot substitute for a separately governed native executor binding.
+insert into manual254 values('unbound-automation-policy',pg_temp.propose254(3,'NONE',null,null));
+select pg_temp.actor254(2);
+select public.decide_benefit_admission_policy_v1((select(v->>'policy_id')::uuid from manual254 where k='unbound-automation-policy'),(select v->>'content_hash'from manual254 where k='unbound-automation-policy'),true,'TEST_254_AUTOMATION_REVIEW','TEST independent human policy does not configure native automation');
+select pg_temp.actor254(3);
+select throws_ok($$select pg_temp.reserve254(1,3,1,'TEST-254-unbound-automation')$$,'55000','BENEFIT_AUTOMATION_NOT_CONFIGURED','human evidence never enables an automatic executor');
+select pg_temp.actor254(1);
 insert into manual254 values('global-policy',pg_temp.propose254(1,'GLOBAL_VERSION',3,2));
 select throws_ok($$select public.decide_benefit_admission_policy_v1((select(v->>'policy_id')::uuid from manual254 where k='global-policy'),(select v->>'content_hash'from manual254 where k='global-policy'),true,'TEST_254_APPROVAL','TEST own approval denied')$$,'42501','BENEFIT_POLICY_INDEPENDENT_REVIEW_REQUIRED','author cannot approve quota/capacity policy');
 select pg_temp.actor254(2);
@@ -144,6 +162,8 @@ reset role;
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into manual254 values('payment-registered',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from manual254 where k='payment-prepared'),'DEMO','SYNTHETIC-254-DEMO-ORDER',100,'MAD'));
 insert into manual254 values('payment-paid',public.process_verified_subscription_payment_v2('DEMO','DEMO','SYNTHETIC-254-DEMO-EVENT','SYNTHETIC-254-DEMO-ORDER','PAYMENT_SUCCEEDED',100,'MAD',clock_timestamp(),'SYNTHETIC-254-CAPTURE',repeat('d',64),repeat('e',64)));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select ok(private.current_subscription_funding_v1('b2540000-0000-4000-8000-000000000001')is not null,'funded quota period is backed by exact native payment/cycle/journal, never an ACTIVE label alone');
 select pg_temp.actor254(3);set local role authenticated;
 select is((pg_temp.reserve254(1,6,2,'TEST-254-funded-period')->>'outcome'),'BENEFIT_RESERVED','real funded period permits actual reservation under period-scoped policy');

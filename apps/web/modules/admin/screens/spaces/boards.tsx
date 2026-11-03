@@ -336,13 +336,17 @@ export function OrganizationFicheBoard({
   const org = fiche.organization;
   const base = `/${locale}/administration/entreprises/${org.id}`;
   const journey = organizationJourney(fiche, locale);
+  const memberQuery = new URLSearchParams({ organizationId: org.id, org: org.id });
+  const membersHref = `/${locale}/administration/utilisateurs?${memberQuery}`;
   const required = [
     { href: `${base}/modifier${query}`, title: c.completeInfo, detail: c.completeInfoLead, tone: "peach" as const },
     { href: `/${locale}/administration/conformite-clients${query}`, title: c.finishCompliance, detail: c.finishComplianceLead, tone: "peach" as const },
     { href: `/${locale}/administration/parcours${query}`, title: c.completeFolder, detail: c.completeFolderLead, tone: "sky" as const },
-    { href: `${base}/modifier${query}`, title: c.assignRoles, detail: c.assignRolesLead, tone: "peach" as const },
+    { href: membersHref, title: c.assignRoles, detail: c.assignRolesLead, tone: "peach" as const },
   ];
   const history = fiche.timeline.slice(0, 4);
+  const unknown = locale === "ar" ? "غير متاح" : "Non disponible";
+  const roles = [...new Set(fiche.memberships.flatMap((item) => item.roles))];
   return (
     <main className="client-page">
       <nav className="client-tabs" aria-label={c.overview}>
@@ -360,8 +364,10 @@ export function OrganizationFicheBoard({
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
             <div><dt>{c.type}</dt><dd>{inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes)}</dd></div>
-            <div><dt>{c.activity}</dt><dd>{org.display_name}</dd></div>
-            <div><dt>{c.ids}</dt><dd dir="ltr">{org.country_code}</dd></div>
+            <div><dt>{c.activity}</dt><dd>{org.client_legal_profile?.activity ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "البلد" : "Pays"}</dt><dd dir="ltr">{org.country_code}</dd></div>
+            <div><dt>{locale === "ar" ? "المعرّف الضريبي (IF)" : "Identifiant fiscal (IF)"}</dt><dd dir="ltr">{org.client_legal_profile?.if_number ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "السجل التجاري (RC)" : "Registre de commerce (RC)"}</dt><dd dir="ltr">{org.client_legal_profile?.rc_number ?? unknown}</dd></div>
             <div><dt>{locale === "ar" ? "المعرّف" : "Réf."}</dt><dd dir="ltr">{org.id.slice(0, 8)}…</dd></div>
           </dl>
         </article>
@@ -377,7 +383,7 @@ export function OrganizationFicheBoard({
           </ol>
         </article>
         <article className="client-card">
-          <header className="client-priority-head"><h2>{c.required}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
+          <header className="client-priority-head"><h2>{locale === "ar" ? "إجراءات الملف" : "Actions sur le dossier"}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
           <ul className="admin-req-list">
             {required.map((item) => (
               <li key={item.title}>
@@ -393,30 +399,30 @@ export function OrganizationFicheBoard({
           <header className="client-priority-head"><h2>{c.members}</h2></header>
           <ul className="client-feed">
             <li><Users className="size-4" aria-hidden /><span><strong>{c.membersCount}</strong><small dir="ltr">{fiche.memberships.length}</small></span></li>
-            <li><span><strong>{c.roles}</strong><small>{fiche.memberships[0]?.roles.join(", ") || "—"}</small></span></li>
+            <li><span><strong>{c.roles}</strong><small>{roles.join(", ") || "—"}</small></span></li>
             <li><span><strong>{c.access}</strong><small>{fiche.memberships.filter((item) => item.status === "ACTIVE").length}</small></span></li>
-            <li><span><strong>{c.invites}</strong><small>{fiche.memberships.filter((item) => item.status !== "ACTIVE").length}</small></span></li>
+            <li><span><strong>{c.invites}</strong><small>{fiche.memberships.filter((item) => item.status === "INVITED").length}</small></span></li>
           </ul>
-          <p className="client-access-note">{locale === "ar" ? "إدارة الأدوار تتم من تعديل المؤسسة." : "La gestion des rôles se fait depuis la modification de l’entreprise."}</p>
-          <Link href={`${base}/modifier${query}`} className="admin-soft-cta">{c.manageMembers}</Link>
+          <p className="client-access-note">{locale === "ar" ? "إدارة الأدوار تتم من دليل المستخدمين." : "La gestion des rôles se fait depuis l’annuaire des utilisateurs."}</p>
+          <Link href={membersHref} className="admin-soft-cta">{c.manageMembers}</Link>
         </article>
         <article className="client-card" id="boxes">
           <header className="client-priority-head"><h2>{c.boxes}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{c.plan}</strong><small>{fiche.subscriptions[0]?.status ?? "—"}</small></span></li>
-            <li><span><strong>{c.boxesActive}</strong><small>{fiche.subscriptions.length}</small></span></li>
-            <li><span><strong>{c.credits}</strong><small>—</small></span></li>
-            <li><span><strong>{c.nextBill}</strong><small dir="ltr">{fiche.subscriptions[0]?.current_period_end ?? "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "حالات الاشتراكات" : "États des abonnements"}</strong><small>{[...new Set(fiche.subscriptions.map(item => item.status))].join(", ") || "—"}</small></span></li>
+            <li><span><strong>{c.boxesActive}</strong><small>{unknown}</small></span></li>
+            <li><span><strong>{c.credits}</strong><small>{unknown}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "نهايات فترات الاشتراك" : "Fins de période des abonnements"}</strong><small dir="ltr">{fiche.subscriptions.map(item => item.current_period_end).filter(Boolean).join(", ") || "—"}</small></span></li>
           </ul>
           <Link href={`/${locale}/administration/finance${query}`} className="admin-dir-action" data-tone="mint">{c.seeFinance}</Link>
         </article>
         <article className="client-card">
           <header className="client-priority-head"><h2>{c.dossiers}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
-            <li><span><strong>{c.inProgress}</strong><small>{fiche.requests.length}</small></span></li>
-            <li><span><strong>{c.waiting}</strong><small>{fiche.disputes.length}</small></span></li>
-            <li><span><strong>{c.toComplete}</strong><small>{fiche.diagnostics.length}</small></span></li>
-            <li><span><strong>{c.recently}</strong><small>{fiche.missions.length}</small></span></li>
+            <li><span><strong>{c.requests}</strong><small>{fiche.requests.length}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "النزاعات" : "Litiges"}</strong><small>{fiche.disputes.length}</small></span></li>
+            <li><span><strong>{c.diag}</strong><small>{fiche.diagnostics.length}</small></span></li>
+            <li><span><strong>{c.missions}</strong><small>{fiche.missions.length}</small></span></li>
           </ul>
           <Link href={`/${locale}/administration/conformite-clients${query}`} className="admin-dir-action" data-tone="peach">{c.openCompliance}</Link>
         </article>

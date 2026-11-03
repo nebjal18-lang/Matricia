@@ -23,3 +23,26 @@ describe("dossierHref", () => {
     expect(dossierHref("fr", { ...base, organizationId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc" })).toBe("/fr/administration/entreprises/cccccccc-cccc-4ccc-8ccc-cccccccccccc");
   });
 });
+
+describe("severity before deadline", () => {
+  it("keeps an overdue critical alert ahead of today's low priority task without mutating input", () => {
+    const items = [
+      { ...base, id: "low", priority: "LOW" as const, dueAt: "2026-11-03T10:00:00Z" },
+      { ...base, id: "critical", priority: "CRITICAL" as const, dueAt: "2026-11-02T10:00:00Z" },
+      { ...base, id: "older", priority: "LOW" as const, dueAt: "2026-11-01T10:00:00Z" },
+    ];
+    const summary = summarizeAdminWork(items, "2026-11-03T11:00:00Z");
+    expect(summary.ordered.map(item => item.id)).toEqual(["critical", "older", "low"]);
+    expect(items.map(item => item.id)).toEqual(["low", "critical", "older"]);
+    expect(summary).toMatchObject({ critical: 1, overdue: 3, dueToday: 1 });
+  });
+
+  it("counts today's tasks using the Moroccan date across UTC midnight", () => {
+    const summary = summarizeAdminWork([
+      { ...base, dueAt: "2026-11-02T23:30:00Z" },
+      { ...base, id: "next", dueAt: "2026-11-03T23:30:00Z" },
+    ], "2026-11-03T00:15:00Z");
+    expect(summary.dueToday).toBe(1);
+    expect(summary.overdue).toBe(1);
+  });
+});

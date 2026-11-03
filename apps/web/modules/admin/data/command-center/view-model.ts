@@ -20,7 +20,6 @@ export function summarizeAdminWork(items: AdminWorkItem[], currentTime: string):
   const today = dayInMorocco(currentTime);
   const ordered = [...items].sort(
     (left, right) =>
-      Number(dayInMorocco(left.dueAt) !== today) - Number(dayInMorocco(right.dueAt) !== today) ||
       priorityRank[left.priority] - priorityRank[right.priority] ||
       new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime(),
   );

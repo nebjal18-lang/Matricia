@@ -170,6 +170,8 @@ do $$declare requested jsonb; started jsonb; submitted jsonb; reviewed jsonb;beg
  perform set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
  perform public.declare_provider_capacity('fd110000-0000-4000-8000-000000000002','fd300000-0000-4000-8000-000000000007','AVAILABLE',5,2,'TEST provider capacity declaration','TEST-0104-capacity');
 end$$;
+-- Eligibility observes native qualification and capacity on the next request.
+-- matricia:test-request-boundary
 insert into public.matching_runs(id,request_id,request_version_id,policy_version,status,target_panel_size,started_by,completed_at)
 values('fd170000-0000-4000-8000-000000000001','fd140000-0000-4000-8000-000000000001','fd160000-0000-4000-8000-000000000001','MATCH-V1','COMPLETED',1,'fd100000-0000-4000-8000-000000000001',clock_timestamp());
 insert into public.matching_candidates(id,matching_run_id,provider_organization_id,eligible,score_basis_points,score_explanation,rotation_component)
@@ -242,6 +244,8 @@ declare c public.contracts%rowtype;v public.contract_versions%rowtype;client_par
  return result||jsonb_build_object('development_mock',true,'mode','NON_CONTRACTUAL_DEMO');
 end$$;
 select pg_temp.prepare_governed_mock_policy_v1('fd110000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000004','fd100000-0000-4000-8000-000000000005','accept338');
+-- The approved native policy becomes effective on the following RPC request.
+-- matricia:test-request-boundary
 select pg_temp.complete_governed_mock_contract_v1('fd210000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000002','fd100000-0000-4000-8000-000000000004','fd100000-0000-4000-8000-000000000005','accept338');
 select ok(private.contract_version_signature_effective_v1('fd210000-0000-4000-8000-000000000001','fd220000-0000-4000-8000-000000000001'),'contract is sealed by real native governed DEV-mock flow, not forged signature validation');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
@@ -382,6 +386,8 @@ select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000004'
 insert into accept338 select'amend-policy',public.propose_signature_policy_v1('fd110000-0000-4000-8000-000000000001','AMENDMENT',(provider->>'id')::uuid,'SIMPLE',false,false,'TEST-NON-CONTRACTUAL-AMENDMENT','TEST-INSTALLED-MOCK',1,'TEST ONLY amendment execution protocol','34111111-1111-4111-8111-111111111111')from jsonb_array_elements(public.list_signature_policy_governance_v1()->'providers')provider where provider->>'code'='MATRICIA_DEV_MOCK'limit 1;
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000005',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000005","role":"authenticated","aal":"aal2"}',true);
 select public.decide_signature_policy_v1((select(v->>'proposal_id')::uuid from accept338 where k='amend-policy'),(select v->>'content_hash'from accept338 where k='amend-policy'),true,'TEST ONLY independent amendment signature policy review');
+-- The independently approved amendment policy applies to the next request.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into accept338 select'amend-envelope',public.create_amendment_signature_envelope((v->>'amendment_id')::uuid,'MATRICIA_DEV_MOCK','DEVELOPMENT','SIMPLE','test-348-amendment.pdf','test-signatures/provider348-amendment.pdf',repeat('e',64),'provider348-amendment-envelope')from accept338 where k='amend348';
 insert into accept338 select'amend-client-signer',public.add_signature_signer((v->>'envelope_id')::uuid,'fd110000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000001','CLIENT_OWNER',encode(extensions.digest('mf024-client@example.invalid','sha256'),'hex'),1,'provider348-amend-client-signer')from accept338 where k='amend-envelope';

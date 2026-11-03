@@ -91,6 +91,8 @@ do $$declare proposal jsonb;cfg uuid;begin
  perform set_config('request.jwt.claim.sub','fe600000-0000-4000-8000-000000000003',true);perform set_config('request.jwt.claims','{"sub":"fe600000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
  perform public.decide_signature_policy_v1((proposal->>'proposal_id')::uuid,proposal->>'content_hash',true,'Independent review of noncontractual deployment fixture');
 end$$;
+-- The approved native policy becomes observable to the next client request.
+-- matricia:test-request-boundary
 select ok(private.current_client_contract_party_v1('fe610000-0000-4000-8000-000000000001')is not null,'actual verified Client identity exists before READY');
 select ok(private.provider_current_identity_is_verified_v1('fe610000-0000-4000-8000-000000000002'),'actual reviewed Provider identity exists before READY');
 update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configuration_reference='transactional-test-p216',configured_at=clock_timestamp()where singleton;
@@ -123,6 +125,17 @@ select is(public.run_mock_signature_provider((select(value->>'envelope_id')::uui
 select throws_ok($$insert into public.signature_provider_configs(provider_code,environment,version,status,supported_levels,config_metadata)values('MATRICIA_DEV_MOCK','STAGING',1,'ACTIVE',array['QUALIFIED'],'{}')$$,'23514',null,'mock config cannot advertise qualified capability');
 insert into public.signature_provider_configs(provider_code,environment,version,status,supported_levels,config_metadata)values('MATRICIA_DEV_MOCK','STAGING',1,'ACTIVE',array['SIMPLE'],'{"development_only":true}');
 update private.admin_execution_environment_v1 set environment='STAGING'where singleton;
+-- STAGING has its own independently reviewed mock policy; DEVELOPMENT authority
+-- never crosses the deployment boundary merely because a provider config exists.
+do $$declare proposal jsonb;cfg uuid;begin
+ select id into cfg from public.signature_provider_configs where provider_code='MATRICIA_DEV_MOCK'and environment='STAGING'and status='ACTIVE'order by version desc limit 1;
+ perform set_config('request.jwt.claim.sub','fe600000-0000-4000-8000-000000000001',true);perform set_config('request.jwt.claims','{"sub":"fe600000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
+ proposal:=public.propose_signature_policy_v1('fe610000-0000-4000-8000-000000000001','CONTRACT',cfg,'SIMPLE',false,false,'DEV-NON-CONTRACTUAL-STAGING-FIXTURE','DEV-INSTALLED-MOCK',1,'Transactional noncontractual staging fixture',extensions.gen_random_uuid());
+ perform set_config('request.jwt.claim.sub','fe600000-0000-4000-8000-000000000003',true);perform set_config('request.jwt.claims','{"sub":"fe600000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
+ perform public.decide_signature_policy_v1((proposal->>'proposal_id')::uuid,proposal->>'content_hash',true,'Independent review of noncontractual staging fixture');
+ perform set_config('request.jwt.claim.sub','fe600000-0000-4000-8000-000000000001',true);
+end$$;
+-- matricia:test-request-boundary
 select set_config('request.jwt.claims','{"sub":"fe600000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p216 values('stage',public.create_signature_envelope('fe630000-0000-4000-8000-000000000001','fe640000-0000-4000-8000-000000000001','MATRICIA_DEV_MOCK','STAGING','SIMPLE','contract.pdf','contracts/p216.pdf',repeat('a',64),'p216-staging-envelope'));
 select is((select value->>'outcome'from p216 where kind='stage'),'SIGNATURE_ENVELOPE_CREATED','staging requires its own explicit SIMPLE-only mock configuration');

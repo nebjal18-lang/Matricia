@@ -115,6 +115,8 @@ select pg_temp.as_user('f9800000-0000-4000-8000-000000000001');
 insert into p228 values('amendment-policy',pg_temp.propose_policy('AMENDMENT',1,'p228-amendment-policy'));
 select pg_temp.as_user('f9800000-0000-4000-8000-000000000002');
 select public.decide_signature_policy_v1((select(v->>'proposal_id')::uuid from p228 where k='amendment-policy'),(select v->>'content_hash'from p228 where k='amendment-policy'),true,'Reviewed separate temporary amendment policy');
+-- Approved policies are consumed by a subsequent client request.
+-- matricia:test-request-boundary
 -- A configured URL is not evidence of an installed native adapter or legal approval.
 insert into public.signature_provider_configs(id,provider_code,environment,version,status,supported_levels,endpoint_base_url)values('f9890000-0000-4000-8000-000000000001','UNINSTALLED_TEST_ONLY','DEVELOPMENT',1,'ACTIVE',array['SIMPLE'],'https://not-contacted.example.invalid');
 select pg_temp.as_user('f9800000-0000-4000-8000-000000000001');

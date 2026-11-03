@@ -55,3 +55,21 @@ describe("admin space boards", () => {
     expect(html).not.toMatch(/exemple illustratif/i);
   });
 });
+
+for (const locale of ["fr", "ar"] as const) {
+  it(`shows legal facts, exact membership statuses and unavailable Boxes in ${locale}`, () => {
+    const html = renderToStaticMarkup(<OrganizationFicheBoard locale={locale} query="?organizationId=other" fiche={{ ...fiche,
+      organization: { ...fiche.organization, client_legal_profile: { version: 1, legal_form: "SARL", activity: "Conseil technique", registered_city: null, registered_address: null, if_number: "12345678", rc_number: "87654" } },
+      memberships: ["ACTIVE", "INVITED", "SUSPENDED", "REVOKED"].map((status, index) => ({ ...fiche.memberships[0]!, id: `member-${index}`, status, roles: index === 0 ? ["CLIENT_OWNER"] : ["PROVIDER_OWNER"] })),
+      subscriptions: [...fiche.subscriptions, { ...fiche.subscriptions[0]!, id: "cancelled", status: "CANCELLED" }],
+    }} />);
+    expect(html).toContain("Conseil technique");
+    expect(html).toContain("12345678");
+    expect(html).toContain("87654");
+    expect(html).toContain("CLIENT_OWNER, PROVIDER_OWNER");
+    expect(html).toContain(`${locale === "ar" ? "دعوات معلّقة" : "Invitations en attente"}</strong><small>1</small>`);
+    expect(html).toContain(`${locale === "ar" ? "صناديق نشطة" : "Boxes actives"}</strong><small>${locale === "ar" ? "غير متاح" : "Non disponible"}</small>`);
+    expect(html).toContain(`/administration/utilisateurs?organizationId=${row.id}&amp;org=${row.id}`);
+    expect(html).not.toContain("organizationId=other\" class=\"admin-soft-cta\">" + (locale === "ar" ? "إدارة الأعضاء" : "Gérer les membres"));
+  });
+}

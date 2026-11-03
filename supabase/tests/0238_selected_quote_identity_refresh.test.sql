@@ -342,6 +342,8 @@ declare c public.contracts%rowtype;v public.contract_versions%rowtype;client_par
 end$$;
 
 select pg_temp.prepare_governed_mock_policy_v1('fa122000-0000-4000-8000-000000000001','a2200000-0000-4000-8000-000000000002','f2120000-0000-4000-8000-000000000002','refresh238-final-signature');
+-- Native approval is visible to the subsequent client signing request.
+-- matricia:test-request-boundary
 insert into refresh238 values('ready',pg_temp.prepare_governed_mock_envelope238_v1((select(v->>'contract_id')::uuid from contract_results where k='draft'),'a2200000-0000-4000-8000-000000000001','fa120000-0000-4000-8000-000000000001','a2200000-0000-4000-8000-000000000002','f2120000-0000-4000-8000-000000000002','refresh238-final-signature'));
 create function pg_temp.refresh238_current(p_key text)returns jsonb language sql as $$select public.refresh_selected_quote_contract_draft_v1((select(v->>'contract_id')::uuid from contract_results where k='draft'),(select(v->>'contract_version_id')::uuid from refresh238 where k='refreshed'),(select v->>'content_hash'from refresh238 where k='refreshed'),(select v->>'context_hash'from refresh238 where k='current'),(select(v->>'proposal_id')::uuid from refresh238 where k='proposal'),'TEST no refresh of a signature that is already prepared or complete',p_key)$$;
 set local role authenticated;
