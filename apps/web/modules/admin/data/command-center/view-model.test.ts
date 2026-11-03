@@ -46,3 +46,32 @@ describe("severity before deadline", () => {
     expect(summary.overdue).toBe(1);
   });
 });
+
+for (const locale of ["fr", "ar"] as const) {
+  describe(`typed dossier links in ${locale}`, () => {
+    it.each([
+      ["QUOTE", "devis"], ["MATCHING_RUN", "matching"], ["MISSION_MILESTONE", "jalons"],
+      ["CONTRACT_AMENDMENT", "avenants"], ["MILESTONE", "jalons"], ["AMENDMENT", "avenants"],
+      ["PROVIDER_DOCUMENT_VERSION", "documents"], ["SERVICE_REQUEST", "demandes"],
+    ])("opens %s in its own projection", (resourceType, space) => {
+      expect(dossierHref(locale, { ...base, resourceType, resourceId: "resource-1" })).toBe(`/${locale}/administration/${space}/resource-1`);
+    });
+    it.each([
+      ["RFQ", "matching"], ["RFQ_PROVIDER", "matching"], ["DELIVERABLE", "missions"],
+      ["MISSION_DELIVERABLE", "missions"], ["QUOTE_VERSION", "devis"], ["CONTRACT_VERSION", "contrats"],
+      ["PROVIDER_DOCUMENT", "documents"],
+    ])("does not reinterpret a %s ID as its parent", (resourceType, space) => {
+      expect(dossierHref(locale, { ...base, resourceType })).toBe(`/${locale}/administration/${space}`);
+    });
+    it("preserves only organization context, encoding resource path delimiters", () => {
+      const href = dossierHref(locale, { ...base, resourceType: "QUOTE", resourceId: "quote/part?x=1#fragment" }, "?organizationId=org-1&q=old&actionPage=3&actionStatus=FAILED");
+      expect(href).toBe(`/${locale}/administration/devis/quote%2Fpart%3Fx%3D1%23fragment?organizationId=org-1`);
+    });
+    it.each(["", ".", ".."]) ("never builds a navigable dot segment for %s", resourceId => {
+      expect(dossierHref(locale, { ...base, resourceType: "QUOTE", resourceId })).toBe(`/${locale}/administration/command-center`);
+    });
+    it.each(["constructor", "toString", "unrecognized_quote_record"])("does not guess a detail route for %s", resourceType => {
+      expect(dossierHref(locale, { ...base, resourceType })).toBe(`/${locale}/administration/command-center`);
+    });
+  });
+}
