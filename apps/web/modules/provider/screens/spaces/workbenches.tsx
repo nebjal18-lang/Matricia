@@ -600,7 +600,7 @@ export function InvoiceSettlementWorkbench({
             <li data-state={settled ? "current" : "todo"}><span><Check className="size-4" aria-hidden /></span><small>{locale === "ar" ? "الرصيد صفر" : "Solde nul"}</small></li>
           </ol>
         </article>
-        <article className="client-card">
+        <article className="client-card" id={billingPanel ? undefined : "provider-payment-proof"}>
           <header><h3>{w.invoiceProofs}</h3></header>
           <p className="client-access-note">{w.invoiceReconcileNote}</p>
         </article>

@@ -27,7 +27,7 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
   const [result, amendments, vault] = await Promise.all([loadContractMissions(locale, space.selectedOrganizationId), loadClientAmendments(space.selectedOrganizationId), loadClientDocumentVault(space.selectedOrganizationId)]);
   const expired = vault.status === "success" ? expiredDocuments(vault.value.documents) : [];
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={c.misTitle} lead={c.misLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/client/demandes${space.selectedQuery}`} label={c.openFolder} />}>
+    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={c.misTitle} lead={c.misLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/client/demandes${space.selectedQuery}`} label={c.openFolder} />}>
       {expired.length > 0 ? (
         <Alert>
           <AlertTitle>{messages.expiredDocumentTitle}</AlertTitle>
@@ -70,7 +70,19 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
       <details className="client-ops">
         <summary>{c.opsMissions}</summary>
         {result.status === "error" ? (
-          <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
+          <Alert>
+            <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN" ? messages.noOrg : messages.loadError}</AlertTitle>
+            <AlertDescription>
+              {result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN"
+                ? messages.noOrg
+                : locale === "fr"
+                  ? "La lecture des contrats ou missions a échoué. Réessayez ou conservez la référence support ci-dessous."
+                  : "تعذر قراءة العقود أو المهام. أعيدوا المحاولة أو احتفظوا بمرجع الدعم أدناه."}
+              {result.reason !== "NO_ORGANIZATION" && result.reason !== "FORBIDDEN" ? (
+                <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? `مرجع ${result.reason}` : `Réf. ${result.reason}`}</span>
+              ) : null}
+            </AlertDescription>
+          </Alert>
         ) : (
           <div className="space-y-6">
             <MissionPanel d={result.dashboard} locale={locale} m={messages} />

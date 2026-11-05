@@ -34,8 +34,8 @@ export default async function ClientMissionJalonsPage({
   const mission = dashboard?.missions[0] ?? null;
 
   return (
-    <ClientAppShell languagePath={`/${locale}/client/missions/${missionId}/jalons${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
-      <JalonsBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} mission={mission} messages={messages} assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>
+    <ClientAppShell languagePath={`/${locale}/client/missions/${missionId}/jalons${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
+      <JalonsBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} organizations={space.organizations} mission={mission} messages={messages} assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>
         {result.status === "error" ? (
           <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
         ) : dashboard && dashboard.missions.length === 0 ? (

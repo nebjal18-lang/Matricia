@@ -27,4 +27,7 @@ describe("sensitive administration error states", () => {
   it.each([["42501", "FORBIDDEN"], ["PGRST202", "CONFIGURATION"], ["42883", "CONFIGURATION"], ["PGRST301", "UNAUTHENTICATED"], ["08006", "QUERY_FAILED"]])("classifies %s safely as %s", (code, reason) => {
     expect(adminReadFailure({ code })).toBe(reason);
   });
+  it("keeps an explicit MFA denial distinct from a bare role denial", () => {
+    expect(adminReadFailure({ code: "42501", message: "CENTRAL_MFA_REQUIRED" })).toBe("MFA_REQUIRED");
+  });
 });

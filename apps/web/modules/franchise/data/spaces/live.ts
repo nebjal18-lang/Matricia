@@ -55,7 +55,7 @@ export function emptyFranchiseSpaces(locale: Locale, query: string): FranchiseSp
   const demo = demoFranchiseSpaces(locale, query);
   return {
     ...demo,
-    // Never leak invented narrative CTAs / rights from the demo seed.
+    // Keep pipeline shells for live metric mapping; clear invented narrative CTAs/rights.
     treat: [],
     pipeline: demo.pipeline.map((step) => ({ ...step, detail: "—", status: "—" })),
     attention: [],

@@ -1,12 +1,15 @@
 import { Badge } from "@/modules/shared/ui/badge";
 import { loadAdminDocumentVault } from "@/modules/admin/data/catalog/repository";
 import { getCommerceMessages } from "@/modules/admin/screens/finance/commerce-messages";
+import { AdminReadError } from "@/modules/admin/ui/admin-read-error";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export async function DocumentVaultPanel({ locale }: { locale: Locale }) {
   const m = getCommerceMessages(locale);
   const result = await loadAdminDocumentVault();
-  if (result.status === "error") return null;
+  if (result.status === "error") {
+    return <AdminReadError locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} retryHref={`/${locale}/administration/documents`} />;
+  }
   return (
     <section aria-labelledby="admin-document-vault" className="mt-6 space-y-3">
       <h2 id="admin-document-vault" className="text-xl font-semibold">{m.vault}</h2>

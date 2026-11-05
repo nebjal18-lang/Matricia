@@ -8,6 +8,7 @@ import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 import { getDisputeMessages } from "@/modules/client/screens/litiges/messages";
 import { createServerDisputesRepository } from "@/modules/shared/lib/disputes/server-repository";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 
 export default async function DisputesPage({
   params,
@@ -28,10 +29,11 @@ export default async function DisputesPage({
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/litiges` }));
   const m = getDisputeMessages(locale);
   const c = spaceCopy(locale);
+  const selfHref = `/${locale}/client/litiges${space.selectedQuery}`;
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} title={m.title} lead={m.intro} kicker={space.organizationName ?? c.kicker}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل النزاعات." : "Impossible de charger les litiges."}</p></main>
+      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} title={m.title} lead={m.intro} kicker={space.organizationName ?? c.kicker}>
+        <WorkspaceFailure locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={selfHref} supportReference="CLIENT-DISPUTES" />
       </ClientAppShell>
     );
   }
@@ -45,7 +47,7 @@ export default async function DisputesPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       title={m.title}
       lead={m.intro}
       kicker={space.organizationName ?? c.kicker}
@@ -61,6 +63,7 @@ export default async function DisputesPage({
         )
       }
     >
+      {selected.status === "error" ? <WorkspaceFailure locale={locale} reason={selected.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={selfHref} supportReference="CLIENT-DISPUTE-DETAIL" /> : null}
       <DisputesBoard
         locale={locale}
         query={space.selectedQuery}

@@ -105,7 +105,9 @@ export function SubscriptionBoard({
           )}
           <Link href={`/${locale}/client/credits${query}`} className="client-cta">{c.seeCredits}</Link>
         </article>
-        <article className="client-card" id="boxes">
+      </section>
+      <section className="client-board client-board-compare" id="boxes">
+        <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.myBoxes}</h2>
             <Link href={`/${locale}/client/credits${query}`} className="client-text-link">{c.seeAllBoxes}</Link>

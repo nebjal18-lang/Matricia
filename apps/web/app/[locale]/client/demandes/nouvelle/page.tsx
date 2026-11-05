@@ -53,9 +53,16 @@ export default async function NewRequestPage({
   const opportunity = !query.benefitRedemptionId&&query.opportunityId ? await loadOpportunityRequestContext(query.opportunityId,space.selectedOrganizationId) : null;
   if(opportunity&&opportunity.organizationId!==space.selectedOrganizationId){if(query.organizationId)notFound();redirect(`/${locale}/client/demandes/nouvelle?${new URLSearchParams({opportunityId:opportunity.opportunityId,organizationId:opportunity.organizationId})}`);}
   if(opportunity?.existingRequestId)redirect(`/${locale}/client/demandes/${opportunity.existingRequestId}?organizationId=${opportunity.organizationId}`);
-  const need = !opportunity && query.intakeId
-    ? await loadNeedRequestContext(query.intakeId, query.serviceCode, space.selectedOrganizationId ?? undefined)
+  const need = !opportunity && !benefit && query.intakeId
+    ? await loadNeedRequestContext(query.intakeId, query.serviceCode)
     : null;
+  if (need && need.organizationId !== space.selectedOrganizationId) {
+    if (query.organizationId && query.organizationId !== need.organizationId) notFound();
+    const params = new URLSearchParams({ intakeId: need.intakeId, organizationId: need.organizationId });
+    if (need.serviceCode) params.set("serviceCode", need.serviceCode);
+    redirect(`/${locale}/client/demandes/nouvelle?${params}`);
+  }
+  if (need?.existingRequestId) redirect(`/${locale}/client/demandes/${need.existingRequestId}?organizationId=${need.organizationId}`);
   const organizationId = benefit?.organization_id ?? opportunity?.organizationId ?? need?.organizationId;
   const organization = organizationId && result.status === "success"
     ? result.value.organizations.find((item) => item.id === organizationId)
@@ -100,7 +107,7 @@ export default async function NewRequestPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="requests"
       title={c.newRequestTitle}
       lead={c.newRequestLead}

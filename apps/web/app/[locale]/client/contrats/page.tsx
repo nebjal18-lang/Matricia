@@ -48,7 +48,7 @@ export default async function ClientContractsPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="contracts"
       title={c.contractsTitle}
       lead={c.contractsLead}
@@ -57,8 +57,15 @@ export default async function ClientContractsPage({
       <main className="client-page space-y-5">
         {result.status === "error" ? (
           <Alert>
-            <AlertTitle>{messages.noOrg}</AlertTitle>
-            <AlertDescription>{messages.loadError}</AlertDescription>
+            <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN" ? messages.noOrg : messages.loadError}</AlertTitle>
+            <AlertDescription>
+              {result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN"
+                ? messages.noOrg
+                : messages.loadError}
+              {result.reason !== "NO_ORGANIZATION" && result.reason !== "FORBIDDEN" ? (
+                <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? `مرجع ${result.reason}` : `Réf. ${result.reason}`}</span>
+              ) : null}
+            </AlertDescription>
           </Alert>
         ) : contracts.length === 0 ? (
           <p>{c.contractsEmpty}</p>

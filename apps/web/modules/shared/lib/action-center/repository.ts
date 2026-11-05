@@ -12,7 +12,7 @@ const approvals = z.array(z.object({ id: uuid, action_type: z.string(), reason: 
 
 export type ActionCenterLoadResult = { status: "success"; value: UserActionCenter } | { status: "error"; reason: "UNAUTHENTICATED" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-const ACTION_CENTER_BUDGET_MS = 2500;
+const ACTION_CENTER_BUDGET_MS = 8000;
 
 function kind(source: string): UserActionItem["kind"] {
   if (source === "RISK_FLAG") return "RISK_REVIEW";

@@ -35,12 +35,18 @@ export default async function RequestsPage({ params, searchParams }: { params: P
     }))
     : [];
   const compareHref = rows[0] ? rows[0].href : `/${locale}/client/demandes${space.selectedQuery}`;
+  const listError = result.status === "error";
   return (
-    <ClientAppShell languagePath={`/${locale}/client/demandes?${new URLSearchParams({organizationId:space.selectedOrganizationId,q:query.q??"",statut:query.statut??"",page:String(page)})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.reqTitle} lead={c.reqLead} kicker={c.kicker} actions={<><SpaceActions href={`/${locale}/besoin${space.selectedQuery}`} label={c.newNeed} /><SpaceActions href={`/${locale}/client/demandes/recurrence${space.selectedQuery}`} label={c.cloneRequest} variant="soft" /><SpaceFilters href="#filtres" label={c.filters} /></>}>
-      {result.status==='error'?<p role="alert" className="client-card">{result.reason==='FORBIDDEN'?(locale==='fr'?'Votre rôle ne permet pas de consulter ces demandes.':'دوركم لا يسمح بعرض هذه الطلبات.'):(locale==='fr'?'Les demandes sont momentanément indisponibles. Réessayez.':'الطلبات غير متاحة مؤقتاً. حاولوا مجدداً.')}</p>:<>
-      {totalResult.error || total === null ? <p role="alert">{locale === "fr" ? "Le total est momentanément indisponible. Les résultats chargés restent consultables." : "العدد الإجمالي غير متاح مؤقتاً. يمكن عرض النتائج المحملة."}</p> : <p>{total} {locale === "fr" ? "demande(s) correspondant(s)" : "طلب مطابق"}</p>}
+    <ClientAppShell languagePath={`/${locale}/client/demandes?${new URLSearchParams({organizationId:space.selectedOrganizationId,q:query.q??"",statut:query.statut??"",page:String(page)})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.reqTitle} lead={c.reqLead} kicker={c.kicker} actions={<><SpaceActions href={`/${locale}/besoin${space.selectedQuery}`} label={c.newNeed} /><SpaceActions href={`/${locale}/client/demandes/recurrence${space.selectedQuery}`} label={c.cloneRequest} variant="soft" /><SpaceFilters href="#filtres" label={c.filters} /></>}>
+      {listError ? <p role="alert" className="client-card">{result.reason === "FORBIDDEN" ? (locale === "fr" ? "Votre rôle ne permet pas de consulter ces demandes." : "دوركم لا يسمح بعرض هذه الطلبات.") : (locale === "fr" ? "Les demandes sont momentanément indisponibles. Réessayez." : "الطلبات غير متاحة مؤقتاً. حاولوا مجدداً.")}</p> : null}
+      {!listError ? (totalResult.error || total === null ? <p role="alert">{locale === "fr" ? "Le total est momentanément indisponible. Les résultats chargés restent consultables." : "العدد الإجمالي غير متاح مؤقتاً. يمكن عرض النتائج المحملة."}</p> : <p>{total} {locale === "fr" ? "demande(s) correspondant(s)" : "طلب مطابق"}</p>) : null}
       <RequestsBoard searchQuery={query.q} statusFilter={query.statut} locale={locale} query={space.selectedQuery} compareHref={compareHref} rows={rows} organizationName={space.organizationName} />
-      <nav className="flex gap-4" aria-label={locale==='fr'?'Pages des demandes':'صفحات الطلبات'}>{page>1?<Link href={`?${new URLSearchParams({organizationId:space.selectedOrganizationId,q:query.q??'',statut:query.statut??'',page:String(page-1)})}`}>{locale==='fr'?'Précédent':'السابق'}</Link>:null}{result.value.requests.length>20?<Link href={`?${new URLSearchParams({organizationId:space.selectedOrganizationId,q:query.q??'',statut:query.statut??'',page:String(page+1)})}`}>{locale==='fr'?'Suivant':'التالي'}</Link>:null}</nav></>}
+      {!listError ? (
+        <nav className="flex gap-4" aria-label={locale === "fr" ? "Pages des demandes" : "صفحات الطلبات"}>
+          {page > 1 ? <Link href={`?${new URLSearchParams({ organizationId: space.selectedOrganizationId, q: query.q ?? "", statut: query.statut ?? "", page: String(page - 1) })}`}>{locale === "fr" ? "Précédent" : "السابق"}</Link> : null}
+          {result.value.requests.length > 20 ? <Link href={`?${new URLSearchParams({ organizationId: space.selectedOrganizationId, q: query.q ?? "", statut: query.statut ?? "", page: String(page + 1) })}`}>{locale === "fr" ? "Suivant" : "التالي"}</Link> : null}
+        </nav>
+      ) : null}
     </ClientAppShell>
   );
 }

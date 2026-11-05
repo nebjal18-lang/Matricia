@@ -28,6 +28,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock("@/modules/franchise/screens/library/page-helper", () => ({
   requireFranchiseLibrary: async (input: { locale: string; returnPath?: string }) => ({ space: { currentPath: input.returnPath ?? `/${input.locale}/franchise/accueil`, mandates: [], selectedQuery: "", selectedOrganizationId: mocks.selectedOrganizationId, userEmail: null, organizations: mocks.organizations, errorReason: null }, result: mocks.library }),
+  requireFranchiseMandate: async (input: { locale: string; returnPath?: string }) => ({ space: { currentPath: input.returnPath ?? `/${input.locale}/franchise/accueil`, mandates: [], selectedQuery: "", selectedOrganizationId: mocks.selectedOrganizationId, userEmail: null, organizations: mocks.organizations, errorReason: null }, mandate: mocks.library.status === "error" ? mocks.library : { status: "success", mandate: mocks.library.status === "success" ? mocks.library.workspace.mandate : null, availableMandates: [] } }),
   franchiseMandateName: (result: FranchiseLibraryLoadResult) => result.status === "success" ? result.workspace.mandate.libraryName : null,
   loadFranchiseSpaceFromLibrary: mocks.live,
 }));
@@ -69,6 +70,7 @@ for (const locale of ["fr", "ar"] as const) describe(`Franchise readiness ${loca
     expect(html).toContain(`href="/${locale}/franchise/gouvernance"`);
   });
   it("provides a labelled authorized organization selector when marketing lacks an unambiguous context", async () => {
+    mocks.library = { status: "success", workspace: { mandate: { franchiseId: "33333333-3333-4333-8333-333333333333", operatorOrganizationId: organizationId, libraryId: "44444444-4444-4444-8444-444444444444", libraryName: "SYNTHETIC" } } as FranchiseLibraryWorkspace };
     mocks.organizations = [{ id: organizationId, name: "Organisation A" }, { id: "55555555-5555-4555-8555-555555555555", name: "Organisation B" }];
     const html = renderToStaticMarkup(await Marketing({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
     expect(html).toContain(`action="/${locale}/franchise/marketing"`); expect(html).toContain('for="franchise-organization-context"');
@@ -79,17 +81,25 @@ for (const locale of ["fr", "ar"] as const) describe(`Franchise readiness ${loca
     const html = renderToStaticMarkup(await Marketing({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
     expect(html).toContain(`href="/${locale}/franchise/candidature"`); expect(html).toContain(`href="/${locale}/contact"`);
     expect(html).not.toContain('name="organizationId"');
+    expect(mocks.marketing).not.toHaveBeenCalled();
+  });
+  it("does not open marketing when the franchise library fails technically", async () => {
+    mocks.library = { status: "error", reason: "QUERY_FAILED" };
+    const html = renderToStaticMarkup(await Marketing({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
+    expect(html).toContain('data-workspace-failure="QUERY_FAILED"');
+    expect(mocks.marketing).not.toHaveBeenCalled();
   });
 });
 
 for (const locale of ["fr", "ar"] as const) describe(`Franchise incident recovery ${locale}`, () => {
-  it.each(pages.map((page, index) => [index, page] as const))("page %i keeps a technical failure visible without a successful empty board", async (_, Page) => {
+  it.each([...pages, Marketing].map((page, index) => [index, page] as const))("page %i keeps a technical failure visible without a successful empty board", async (_, Page) => {
     mocks.library = { status: "error", reason: "QUERY_FAILED" };
     const html = renderToStaticMarkup(await Page({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
     expect(html).toContain('data-workspace-failure="QUERY_FAILED"');
     expect(html).not.toContain(`href="/${locale}/franchise/candidature"`);
     expect(mocks.live).not.toHaveBeenCalled();
     expect(mocks.governance).not.toHaveBeenCalled();
+    expect(mocks.marketing).not.toHaveBeenCalled();
     expect(html).not.toContain('GOVERNANCE_SUCCESS_BOARD');
   });
 });

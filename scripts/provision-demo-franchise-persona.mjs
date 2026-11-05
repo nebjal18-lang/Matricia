@@ -104,9 +104,18 @@ async function main() {
     const membership = id(`${operatorOrg}:membership`);
     const franchise = id(`${projectRef}:demo:franchise:franchise`);
     const territory = id(`${projectRef}:demo:franchise:territory:v1`);
+    const mandate = id(`${projectRef}:demo:franchise:mandate:v1`);
     const snapshot = id(`${projectRef}:demo:franchise:snapshot:2026-08`);
     const now = Date.now();
     const dayMs = 86_400_000;
+    const economicRules = await database`
+      select id from public.franchise_economic_rule_versions
+      where franchise_type = 'STANDARD' and status = 'ACTIVE'
+      order by version desc
+      limit 1`;
+    if (economicRules.length !== 1) throw new Error("An ACTIVE STANDARD franchise economic rule is required for the demo franchise mandate");
+    const economicRuleId = economicRules[0].id;
+    const mandateHash = digest(`${franchise}:mandate:v1:${territory}:${economicRuleId}`);
 
     await database.begin(async (tx) => {
       await tx`insert into public.organizations(id,legal_name,display_name,country_code,status,created_by)
@@ -124,6 +133,23 @@ async function main() {
       await tx`insert into public.franchise_territory_versions(id,franchise_id,version,territory_code,name_fr,name_ar,scope_snapshot,effective_from,content_hash,created_by)
         values(${territory}::uuid,${franchise}::uuid,1,'SOUSS','Souss-Massa (démo)','سوس ماسة (تجريبي)',${tx.json({ regions: ["Souss-Massa"], origin: "demo" })},${new Date(now - 30 * dayMs).toISOString()},${digest(`${franchise}:territory:v1`)},${user.id}::uuid)
         on conflict(id) do nothing`;
+      await tx`insert into public.franchise_mandate_versions(
+          id,franchise_id,territory_version_id,economic_rule_version_id,version,mandate_status,
+          rights_snapshot,obligations_snapshot,contract_snapshot,entry_fee_minor,entry_fee_mode,entry_fee_term_months,
+          franchisee_share_bps,neoxa_share_bps,matricia_share_bps,distribution_basis,effective_from,content_hash,created_by
+        ) values(
+          ${mandate}::uuid,${franchise}::uuid,${territory}::uuid,${economicRuleId}::uuid,1,'ACTIVE',
+          ${tx.json({ origin: "demo", libraryCode: library.code })},
+          ${tx.json({ origin: "demo", obligations: ["catalog_quality", "network_followup"] })},
+          ${tx.json({ origin: "demo", mode: "CONTRACTUAL" })},
+          0,'EXEMPT',0,5000,2500,2500,'DISTRIBUTABLE_PROFIT',${new Date(now - 30 * dayMs).toISOString()},${mandateHash},${user.id}::uuid
+        )
+        on conflict(id) do update set mandate_status='ACTIVE',effective_from=excluded.effective_from,content_hash=excluded.content_hash`;
+      await tx`update public.franchises
+        set current_mandate_version_id=${mandate}::uuid,
+            status='ACTIVE',
+            updated_at=clock_timestamp()
+        where id=${franchise}::uuid`;
     });
 
     const prospects = [
@@ -165,7 +191,7 @@ async function main() {
     }
 
     await saveLocalEnvironment(source, credentials);
-    console.log(`PASS demo Franchise persona provisioned (library ${library.code}, 3 prospects, 1 objective, ${alertsSeeded} alerts${metrics.length === 0 ? " — no ACTIVE metric, snapshot/alerts skipped" : ""}); credentials stored only in ignored .env.local`);
+    console.log(`PASS demo Franchise persona provisioned (library ${library.code}, active mandate, 3 prospects, 1 objective, ${alertsSeeded} alerts${metrics.length === 0 ? " — no ACTIVE metric, snapshot/alerts skipped" : ""}); credentials stored only in ignored .env.local`);
   } finally {
     await database.end({ timeout: 2 });
   }

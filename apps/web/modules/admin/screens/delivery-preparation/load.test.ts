@@ -14,8 +14,22 @@ describe("delivery preparation workspace", () => {
     expect(rpc.mock.calls.map((call) => call[0])).toEqual(["delivery_preparation_overview", "list_delivery_preparation", "list_delivery_preparation", "list_delivery_preparation", "list_delivery_preparation", "list_delivery_preparation", "list_delivery_preparation"]);
   });
 
-  it("returns an error when one section fails", async () => {
-    const rpc = vi.fn(async (fn: string) => ({ data: fn === "delivery_preparation_overview" ? overview : list, error: fn === "delivery_preparation_overview" ? { message: "denied" } : null }));
-    await expect(loadDeliveryPreparationWorkspace({ rpc }, {})).resolves.toMatchObject({ status: "error" });
+  it("returns an error when the overview fails", async () => {
+    const rpc = vi.fn(async (fn: string) => ({ data: fn === "delivery_preparation_overview" ? overview : list, error: fn === "delivery_preparation_overview" ? { code: "42501", message: "denied" } : null }));
+    await expect(loadDeliveryPreparationWorkspace({ rpc }, {})).resolves.toMatchObject({ status: "error", reason: "FORBIDDEN" });
+  });
+
+  it("keeps secondary section failures as degraded sections", async () => {
+    const rpc = vi.fn(async (fn: string, args?: Record<string, unknown>) => ({
+      data: fn === "delivery_preparation_overview" ? overview : list,
+      error: fn === "list_delivery_preparation" && args?.p_section === "LEGAL" ? { code: "08006", message: "timeout" } : null,
+    }));
+    const result = await loadDeliveryPreparationWorkspace({ rpc }, {});
+    expect(result).toMatchObject({ status: "success", workspace: { unavailableSections: ["LEGAL"] } });
+  });
+
+  it("maps MFA overview denials distinctly", async () => {
+    const rpc = vi.fn(async () => ({ data: null, error: { code: "42501", message: "CENTRAL_MFA_REQUIRED" } }));
+    await expect(loadDeliveryPreparationWorkspace({ rpc }, {})).resolves.toMatchObject({ status: "error", reason: "MFA_REQUIRED" });
   });
 });

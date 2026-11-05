@@ -69,8 +69,11 @@ export default async function AdminFinancePage({
           <div className="admin-panel">
             <FinancePanel locale={locale} dashboard={result.value} m={m} identity={{ idempotencyKey: randomUUID(), correlationId: randomUUID() }} />
           </div>
+          <section id="plans" className="scroll-mt-24 rounded-xl border bg-card p-5">
+            <h2 className="text-xl font-semibold">{ar ? "الخطط والاشتراكات" : "Plans et abonnements"}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{ar ? "إدارة الخطط والصناديق وحزم الأرصدة من الأقسام التالية." : "Pilotez les plans, boxes et packs de crédits dans les sections suivantes."}</p>
+          </section>
           <section id="boxes" className="scroll-mt-24 rounded-xl border bg-card p-5">
-            <div id="credits" className="scroll-mt-24" />
             <h2 className="text-xl font-semibold">{commerce.boxes}</h2>
             {boxes.status === "error" ? (
               <p className="mt-2 text-sm text-muted-foreground">{blockedCopy(boxes.reason)}{mfaBlocked && boxes.reason === "FORBIDDEN" ? <> <Link href={`/${locale}/securite/compte`}>{ar ? "فتح أمان الحساب" : "Ouvrir la sécurité du compte"}</Link></> : null}</p>
@@ -92,7 +95,7 @@ export default async function AdminFinancePage({
               />
             )}
           </section>
-          <section id="catalogue-credits" className="scroll-mt-24 rounded-xl border bg-card p-5">
+          <section id="credits" className="scroll-mt-24 rounded-xl border bg-card p-5">
             <h2 className="text-xl font-semibold">{commerce.packs}</h2>
             {catalog.status === "error" ? (
               <p className="mt-2 text-sm text-muted-foreground">{blockedCopy(catalog.reason)}{mfaBlocked && catalog.reason === "FORBIDDEN" ? <> <Link href={`/${locale}/securite/compte`}>{ar ? "فتح أمان الحساب" : "Ouvrir la sécurité du compte"}</Link></> : null}</p>

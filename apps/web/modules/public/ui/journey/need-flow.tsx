@@ -23,6 +23,7 @@ type Draft = {
   categoryCode: string;
   confirmed: boolean;
   answers: Record<string, string>;
+  organizationId: string;
   expiresAt: number;
 };
 type Organization = { id: string; name: string };
@@ -38,7 +39,7 @@ const tagCatalog = {
   ar: ["استراتيجية", "تدبير", "تحول رقمي", "امتثال", "تكوين", "المغرب"],
 } as const;
 
-const blank = (initialNeed = "", classification: PublicNeedClassification | null = null): Draft => ({
+const blank = (initialNeed = "", classification: PublicNeedClassification | null = null, organizationId = ""): Draft => ({
   version: 3,
   step: 0,
   need: initialNeed,
@@ -51,6 +52,7 @@ const blank = (initialNeed = "", classification: PublicNeedClassification | null
   categoryCode: "",
   confirmed: false,
   answers: {},
+  organizationId,
   expiresAt: Date.now() + retentionMs,
 });
 const unavailable = async (): Promise<SaveNeedState> => ({ status: "error", reason: "UNAVAILABLE" });
@@ -140,6 +142,7 @@ export function parseNeedDraft(
         categoryCode: typeof value.categoryCode === "string" ? value.categoryCode.slice(0, 40) : "",
         confirmed: classificationChanged ? false : value.confirmed === true,
         answers: asAnswers(value.answers),
+        organizationId: typeof value.organizationId === "string" ? value.organizationId.slice(0, 80) : "",
         expiresAt: value.expiresAt,
       },
     };
@@ -152,6 +155,7 @@ export function NeedFlow({
   locale,
   initialNeed = "",
   initialClassification = null,
+  initialOrganizationId = "",
   invalidSelection = false,
   authenticated = false,
   organizations = [],
@@ -161,6 +165,7 @@ export function NeedFlow({
   locale: Locale;
   initialNeed?: string;
   initialClassification?: PublicNeedClassification | null;
+  initialOrganizationId?: string;
   invalidSelection?: boolean;
   authenticated?: boolean;
   organizations?: Organization[];
@@ -168,7 +173,7 @@ export function NeedFlow({
   discoverAction?: DiscoverAction;
 }) {
   const copy = getPublicJourneyCopy(locale).need;
-  const [draft, setDraft] = useState<Draft>(() => blank(initialNeed, initialClassification));
+  const [draft, setDraft] = useState<Draft>(() => blank(initialNeed, initialClassification, initialOrganizationId));
   const [loaded, setLoaded] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
   const [storageNotice, setStorageNotice] = useState<"expired" | "invalid" | null>(null);
@@ -250,6 +255,9 @@ export function NeedFlow({
         updateClassification={(classification) =>
           setDraft((current) => ({ ...current, classification, confirmed: false, expiresAt: Date.now() + retentionMs }))
         }
+        updateOrganizationId={(organizationId) =>
+          setDraft((current) => ({ ...current, organizationId, expiresAt: Date.now() + retentionMs }))
+        }
       />
     );
   }
@@ -296,8 +304,11 @@ export function NeedComposer({
   const copy = getPublicJourneyCopy(locale).need;
   const taxonomy = useMemo(() => getPublicProviderTaxonomy(locale), [locale]);
   const [customTag, setCustomTag] = useState("");
-  const [selectedOrganizationId, setOrganizationId] = useState("");
-  const organizationId = organizations.some((item) => item.id === selectedOrganizationId) ? selectedOrganizationId : organizations[0]?.id ?? "";
+  const organizationId = organizations.some((item) => item.id === draft.organizationId) ? draft.organizationId : organizations[0]?.id ?? "";
+  useEffect(() => {
+    if (!organizationId || draft.organizationId === organizationId) return;
+    setDraft((current) => ({ ...current, organizationId }));
+  }, [draft.organizationId, organizationId, setDraft]);
   const discoveryText = draft.need.trim();
   const discoveryKey = JSON.stringify([locale, organizationId, discoveryText]);
   const canDiscover = authenticated && Boolean(discoverAction) && Boolean(organizationId) && discoveryText.length >= 10;
@@ -483,7 +494,7 @@ export function NeedComposer({
           {authenticated && organizations.length > 1 ? (
             <label>
               {locale === "fr" ? "Entreprise concernée" : "المؤسسة المعنية"}
-              <select value={organizationId} onChange={(event) => setOrganizationId(event.target.value)}>
+              <select value={organizationId} onChange={(event) => patch({ organizationId: event.target.value })}>
                 {organizations.map((org) => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
@@ -691,6 +702,7 @@ export function NeedResult({
   back = edit,
   confirm,
   updateClassification,
+  updateOrganizationId,
 }: {
   locale: Locale;
   draft: Draft;
@@ -705,7 +717,9 @@ export function NeedResult({
   back?: () => void;
   confirm: () => void;
   updateClassification: (classification: PublicNeedClassification | null) => void;
+  updateOrganizationId: (organizationId: string) => void;
 }) {
+  const organizationId = organizations.some((item) => item.id === draft.organizationId) ? draft.organizationId : organizations[0]?.id ?? "";
   const copy = getPublicJourneyCopy(locale).need;
   const stages = getNeedStages(locale);
   const [state, action, pending] = useActionState(saveAction ?? unavailable, { status: "idle" } as SaveNeedState);
@@ -877,7 +891,13 @@ export function NeedResult({
             ) : (
               <label className="grid gap-2">
                 <strong>{locale === "fr" ? "Entreprise concernée" : "المؤسسة المعنية"}</strong>
-                <select name="organizationId" required className="min-h-11 rounded-md border bg-white px-3">
+                <select
+                  name="organizationId"
+                  required
+                  className="min-h-11 rounded-md border bg-white px-3"
+                  value={organizationId}
+                  onChange={(event) => updateOrganizationId(event.target.value)}
+                >
                   {organizations.map((org) => (
                     <option key={org.id} value={org.id}>{org.name}</option>
                   ))}
@@ -895,9 +915,9 @@ export function NeedResult({
               <p role="status" className="mt-3">
                 <CheckCircle2 className="inline" size={18} aria-hidden="true" /> {copy.accountSaved}{" "}
                 {draft.classification?.serviceCode ? (
-                  <Link className="font-semibold underline" href={publicNeedRequestHref(locale, state.intakeId, draft.classification.serviceCode)}>{copy.createRequest}</Link>
+                  <Link className="font-semibold underline" href={publicNeedRequestHref(locale, state.intakeId, draft.classification.serviceCode, organizationId || null)}>{copy.createRequest}</Link>
                 ) : (
-                  <Link className="font-semibold underline" href={`/${locale}/client/demandes`}>{copy.seeRequests}</Link>
+                  <Link className="font-semibold underline" href={`/${locale}/client/demandes${organizationId ? `?organizationId=${organizationId}` : ""}`}>{copy.seeRequests}</Link>
                 )}
               </p>
             ) : (

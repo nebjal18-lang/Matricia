@@ -81,12 +81,12 @@ export function SecurityBoard({
             <li>
               <span className="client-feed-icon" data-tone="violet"><Shield className="size-4" aria-hidden /></span>
               <span><strong>{c.verificationMethod}</strong><small>{method}</small></span>
-              <a href="#mfa" className="client-text-link">{c.manageMethod}</a>
+              <Link href={`/${locale}/securite/compte${query}`} className="client-text-link">{c.manageMethod}</Link>
             </li>
-            <li>
+            <li id="telephone">
               <span className="client-feed-icon" data-tone="sky"><Smartphone className="size-4" aria-hidden /></span>
               <span><strong>{c.recoveryPhone}</strong><small>{locale === "ar" ? "يُدار مع عامل التحقق القوي أدناه" : "Géré avec le second facteur ci-dessous"}</small></span>
-              <a href="#mfa" className="client-text-link">{c.manageMethod}</a>
+              <Link href={`/${locale}/securite/compte`} className="client-text-link">{c.manageMethod}</Link>
             </li>
           </ul>
         </article>

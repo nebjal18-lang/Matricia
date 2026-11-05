@@ -158,7 +158,7 @@ export function RequestForm({
           {state.status === "success" && state.requestId ? (
             <p role="status">
               {messages.saved}{" "}
-              <Link href={`/${locale}/client/demandes/${state.requestId}`}>{messages.view}</Link>
+              <Link href={`/${locale}/client/demandes/${state.requestId}?organizationId=${encodeURIComponent(context.organizationId)}`}>{messages.view}</Link>
             </p>
           ) : null}
           <div className="client-wizard-actions">

@@ -7,10 +7,10 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { WorkspaceFailure, type WorkspaceFailureReason } from "@/modules/shared/ui/workspace-failure";
 import { AdminAppShell, type AdminNavKey } from "./admin-app-shell";
 
-/** Database denial is never evidence that MFA is missing: assurance is checked independently first. */
-export function adminReadFailure(error: { code?: string } | null | undefined): WorkspaceFailureReason {
+/** Prefer explicit MFA/AAL markers in the message; bare 42501 remains a role denial. */
+export function adminReadFailure(error: { code?: string; message?: string } | null | undefined): WorkspaceFailureReason {
   if (!error) return "INVALID_RESPONSE";
-  if (error.code === "42501") return "FORBIDDEN";
+  if (error.code === "42501") return /MFA|AAL2/i.test(error.message ?? "") ? "MFA_REQUIRED" : "FORBIDDEN";
   if (error.code === "PGRST301" || error.code === "PGRST303") return "UNAUTHENTICATED";
   if (["PGRST202", "PGRST205", "42883", "42P01"].includes(error.code ?? "")) return "CONFIGURATION";
   return "QUERY_FAILED";

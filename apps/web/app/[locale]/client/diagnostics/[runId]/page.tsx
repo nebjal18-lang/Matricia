@@ -24,7 +24,7 @@ export default async function Result({ params, searchParams }: { params: Promise
     createServerAssistedIntelligenceRepository().then((repository) => repository.dashboard()),
   ]);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/diagnostics/${runId}?${new URLSearchParams({...query})}` }));
-  if(result.status==="error"){if(result.reason==="INVALID_INPUT"||result.reason==="FORBIDDEN")notFound();return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs"><main className="client-page"><p role="alert">{locale==="fr"?"Le diagnostic est momentanément indisponible. Réessayez pour relire le bilan conservé.":"التشخيص غير متاح مؤقتاً. حاولوا مجدداً لقراءة التشخيص المحفوظ."}</p></main></ClientAppShell>;}
+  if(result.status==="error"){if(result.reason==="INVALID_INPUT"||result.reason==="FORBIDDEN")notFound();return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="needs"><main className="client-page"><p role="alert">{locale==="fr"?"Le diagnostic est momentanément indisponible. Réessayez pour relire le bilan conservé.":"التشخيص غير متاح مؤقتاً. حاولوا مجدداً لقراءة التشخيص المحفوظ."}</p></main></ClientAppShell>;}
   if(!result.value)notFound();
   const detail = result.value;
   if(detail.organizationId!==space.selectedOrganizationId){if(query.organizationId)notFound();redirect(`/${locale}/client/diagnostics/${runId}?${new URLSearchParams({organizationId:detail.organizationId,...(query.anomalyId?{anomalyId:query.anomalyId}:{})})}`);}
@@ -47,7 +47,7 @@ export default async function Result({ params, searchParams }: { params: Promise
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
-      organizationName={space.organizationName}
+      organizationName={space.organizationName} organizations={space.organizations}
       active="needs"
       kicker={c.kicker}
     >

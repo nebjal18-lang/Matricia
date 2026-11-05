@@ -281,11 +281,12 @@ export function SpaceDetailBoard({
   const tabs = spec.tabs(locale);
   const kpis = spaceDetailCards(locale, space, row);
   const sections = spaceSectionCards(locale, space, row);
+  const tabTarget = (index: number) => `detail-onglet-${index + 1}`;
   return (
     <main className="client-page" data-admin-layout="detail" data-admin-space={space} data-admin-family={family.detail}>
       <nav className="admin-pills" aria-label={spec.title(locale)}>
         {tabs.map((tab, index) => (
-          <a key={tab} href={`#${tab}`} aria-current={index === 0 ? "page" : undefined}>{tab}</a>
+          <a key={`${tab}-${index}`} href={`#${tabTarget(index)}`} aria-current={index === 0 ? "page" : undefined}>{tab}</a>
         ))}
       </nav>
       {family.detail === "thread" ? (
@@ -294,7 +295,7 @@ export function SpaceDetailBoard({
         <DocumentLayout locale={locale} query={query} space={space} row={row} />
       ) : (
         <>
-          <section className="admin-kpi-strip" data-count={String(kpis.length)}>
+          <section id={tabTarget(0)} className="admin-kpi-strip scroll-mt-24" data-count={String(kpis.length)}>
             {kpis.map((card) => (
               <article key={card.title} className="client-card" data-tone={card.tone}>
                 <header><h2>{card.title}</h2></header>
@@ -304,14 +305,20 @@ export function SpaceDetailBoard({
             ))}
           </section>
           <section className="admin-fiche-lower">
-            {sections.map((card) => (
-              <article key={card.title} className="client-card" data-tone={card.tone}>
+            {sections.map((card, index) => (
+              <article key={card.title} id={tabTarget(Math.min(index + 1, Math.max(tabs.length - 1, 1)))} className="client-card scroll-mt-24" data-tone={card.tone}>
                 <header className="client-priority-head"><h2>{card.title}</h2></header>
                 <dl className="admin-dl">
                   {card.items.map((item) => (
                     <div key={`${card.title}-${item.label}`}><dt>{item.label}</dt><dd>{item.value}</dd></div>
                   ))}
                 </dl>
+              </article>
+            ))}
+            {tabs.slice(sections.length + 1).map((tab, index) => (
+              <article key={`extra-${tab}`} id={tabTarget(sections.length + 1 + index)} className="client-card scroll-mt-24">
+                <header className="client-priority-head"><h2>{tab}</h2></header>
+                <p>{detailNote(locale, space)}</p>
               </article>
             ))}
           </section>

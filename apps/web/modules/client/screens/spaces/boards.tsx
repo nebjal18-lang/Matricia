@@ -612,7 +612,7 @@ export function DocumentsBoard({ locale, query, children, documents, toHandle, r
           <Link href={`/${locale}/client/demandes${query}`}>{c.requestsTab}</Link>
           <Link href={`/${locale}/client/missions${query}`}>{c.missionsTab}</Link>
           <Link href={`/${locale}/client/contrats${query}`}>{c.contractsTab}</Link>
-          <Link href={`/${locale}/client/documents${query}`}>{c.contractsTab}</Link>
+          <Link href={`/${locale}/client/documents${query}`}>{c.docsTab}</Link>
         </nav>
         {recentRows.length === 0 ? <p>{c.emptyBoard}</p> : (
           <ul className="client-feed" id="documents-recents">
