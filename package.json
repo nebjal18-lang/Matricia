@@ -11,6 +11,7 @@
     "dev": "pnpm --filter @matricia/web dev",
     "start": "pnpm --filter @matricia/worker start",
     "build": "pnpm -r build",
+    "build:vercel": "pnpm --filter @matricia/web build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",

@@ -70,6 +70,6 @@ test('refuses a conflicting installed dependency without replacing it', async t 
   const root = await fixture(t);
   await mkdir(join(root, 'packages/domain/node_modules/next'));
   await writeFile(join(root, 'packages/domain/node_modules/next/keep'), 'existing dependency');
-  await assert.rejects(prepareVercelWebOutput(root), /VERCEL_WEB_ALIAS_CONFLICT: node_modules\/next/);
+  await assert.rejects(prepareVercelWebOutput(root), /VERCEL_WEB_ALIAS_CONFLICT: node_modules[/\\]next/);
   assert.equal(await readFile(join(root, 'packages/domain/node_modules/next/keep'), 'utf8'), 'existing dependency');
 });
