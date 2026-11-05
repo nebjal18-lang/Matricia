@@ -53,6 +53,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Preview comments patch static files after upload. Immutable assets reject that patch.
+  supportsImmutableAssets: false,
   serverExternalPackages:["pdfmake","@fontsource/noto-sans-arabic"],
   outputFileTracingIncludes:{
     "/api/**":["./node_modules/@fontsource/noto-sans-arabic/package.json","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-latin-400-normal.woff","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-400-normal.woff"],

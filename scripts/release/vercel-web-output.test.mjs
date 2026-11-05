@@ -6,6 +6,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { prepareVercelWebOutput } from '../prepare-vercel-web-output.mjs';
 
+test('keeps static assets patchable for Vercel preview comments', async () => {
+  const root = fileURLToPath(new URL('../../', import.meta.url));
+  const source = await readFile(join(root, 'apps/web/next.config.ts'), 'utf8');
+  assert.match(source, /supportsImmutableAssets:\s*false/);
+});
+
 test('all Vercel entrypoints retain the same scheduled application endpoints', async () => {
   const root = fileURLToPath(new URL('../../', import.meta.url));
   const configs = await Promise.all(['vercel.json', 'apps/web/vercel.json', 'packages/domain/vercel.json']
