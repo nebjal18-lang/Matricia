@@ -28,7 +28,7 @@ export default async function VolumePage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="finance"
       title={messages.title}
       lead={messages.description}

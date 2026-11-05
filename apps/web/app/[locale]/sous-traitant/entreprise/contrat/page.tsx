@@ -40,6 +40,7 @@ export default async function ProviderPartnerContractPage({
       kicker={result.status === "error" ? copy.error : getProviderStatusLabel(locale, status)}
     >
       <main className="client-page provider-partner-contract">
+        {result.status === "error" ? <p role="alert" className="client-card">{copy.error}</p> : null}
         <section className="client-board client-board-compare">
           <article className="client-card">
             <header><h2>{copy.status}</h2></header>

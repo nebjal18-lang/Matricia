@@ -7,6 +7,7 @@ import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { getMessages } from "@/modules/client/screens/portefeuille/messages";
 import { PortfolioPanel } from "@/modules/client/screens/portefeuille/portfolio-panel";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 export default async function ClientPortfolioPage({
@@ -25,8 +26,8 @@ export default async function ClientPortfolioPage({
   const m = getMessages(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="portfolio" title={m.title} lead={m.intro} kicker={spaceCopy(locale).kicker}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المحفظة." : "Impossible de charger le portefeuille."}</p></main>
+      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="portfolio" title={m.title} lead={m.intro} kicker={spaceCopy(locale).kicker}>
+        <WorkspaceFailure locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={`/${locale}/client/portefeuille${space.selectedQuery}`} supportReference="CLIENT-PORTFOLIO" />
       </ClientAppShell>
     );
   }
@@ -35,7 +36,7 @@ export default async function ClientPortfolioPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="portfolio"
       title={m.title}
       lead={m.intro}

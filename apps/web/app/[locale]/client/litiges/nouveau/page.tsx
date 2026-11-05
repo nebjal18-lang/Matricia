@@ -9,6 +9,7 @@ import { getDisputeMessages } from "@/modules/client/screens/litiges/messages";
 import { OpenForm } from "@/modules/client/screens/litiges/open-form";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 import { createServerDisputesRepository } from "@/modules/shared/lib/disputes/server-repository";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 export default async function NewDispute({
@@ -27,8 +28,8 @@ export default async function NewDispute({
   const m = getDisputeMessages(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={m.newCase} kicker={spaceCopy(locale).kicker}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل النزاعات." : "Impossible de charger les litiges."}</p></main>
+      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={m.newCase} kicker={spaceCopy(locale).kicker}>
+        <WorkspaceFailure locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={`/${locale}/client/litiges/nouveau${space.selectedQuery}`} supportReference="CLIENT-DISPUTE-OPEN" />
       </ClientAppShell>
     );
   }
@@ -39,7 +40,7 @@ export default async function NewDispute({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="missions"
       title={m.newCase}
       kicker={spaceCopy(locale).kicker}

@@ -32,7 +32,7 @@ export default async function CompareOffersPage({
   const repository = await createServerClientRfqRepository();
   const detail = await repository.detail(requestId);
   if (detail.status === "error" && detail.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres` }));
-  if(detail.status==="error")return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle}><p role="alert">{detail.reason==="FORBIDDEN"?(locale==="fr"?"Votre rôle ne permet pas de consulter ces offres.":"دوركم لا يسمح بعرض هذه العروض."):(locale==="fr"?"Les offres sont momentanément indisponibles. Réessayez.":"العروض غير متاحة مؤقتاً. حاولوا مجدداً.")}</p><Link href={`/${locale}/client/demandes/${requestId}/offres${space.selectedQuery}`}>{locale==="fr"?"Réessayer":"إعادة المحاولة"}</Link></ClientAppShell>;
+  if(detail.status==="error")return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.comparePageTitle}><p role="alert">{detail.reason==="FORBIDDEN"?(locale==="fr"?"Votre rôle ne permet pas de consulter ces offres.":"دوركم لا يسمح بعرض هذه العروض."):(locale==="fr"?"Les offres sont momentanément indisponibles. Réessayez.":"العروض غير متاحة مؤقتاً. حاولوا مجدداً.")}</p><Link href={`/${locale}/client/demandes/${requestId}/offres${space.selectedQuery}`}>{locale==="fr"?"Réessayer":"إعادة المحاولة"}</Link></ClientAppShell>;
   if (!detail.value) notFound();
 
   if(detail.value.organizationId!==space.selectedOrganizationId){if(query.organizationId)notFound();redirect(`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:detail.value.organizationId,...(query.rfq?{rfq:query.rfq}:{})})}`);}
@@ -44,20 +44,30 @@ export default async function CompareOffersPage({
   }
   if (!rfqId || !uuidSchema.safeParse(rfqId).success) {
     return (
-      <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
         <RequestsBoard locale={locale} query={space.selectedQuery} compareHref={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} rows={[]} organizationName={space.organizationName} />
       </ClientAppShell>
     );
   }
 
   const publication=await loadQuoteRevisionsInProgress(rfqId);
-  if(publication.status==="error")return<ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle}><main className="client-page"><p role="alert">{locale==="ar"?"تعذر التحقق من حالة نشر العروض. أعد المحاولة قبل المقارنة أو الاختيار.":"Impossible de vérifier l’état de publication des devis. Réessayez avant de comparer ou sélectionner."}</p><Link href={`/${locale}/client/demandes/${requestId}/offres${space.selectedQuery}`}>{locale==="ar"?"إعادة المحاولة":"Réessayer"}</Link></main></ClientAppShell>;
-  const revisionNotice=<QuoteRevisionNotice locale={locale} requestId={requestId} query={space.selectedQuery} revisions={publication.revisions}/>;
+  const publicationRevisions=publication.status==="error"?[]:publication.revisions;
+  const publicationWarning=publication.status==="error"?(
+    <p role="status" className="client-card">
+      {locale==="ar"
+        ?"تعذر التحقق الكامل من حالة نشر بعض العروض. تُعرض المقارنة المتاحة؛ أعيدوا المحاولة إذا بدا العرض ناقصاً."
+        :"Impossible de vérifier complètement l’état de publication de certains devis. La comparaison disponible s’affiche ; réessayez si une offre semble incomplète."}
+      {" "}
+      <Link href={`/${locale}/client/demandes/${requestId}/offres${space.selectedQuery}`}>{locale==="ar"?"إعادة المحاولة":"Réessayer"}</Link>
+      <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? "مرجع PUBLICATION_STATE" : "Réf. PUBLICATION_STATE"}</span>
+    </p>
+  ):null;
+  const revisionNotice=<QuoteRevisionNotice locale={locale} requestId={requestId} query={space.selectedQuery} revisions={publicationRevisions}/>;
   const comparison = await repository.comparison(rfqId);
   if (comparison.status === "error" && comparison.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres` }));
   if (comparison.status === "error") {
     return (
-      <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
+      <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
         <main className="client-page">{revisionNotice}<p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المقارنة." : "Impossible de charger la comparaison."}</p></main>
       </ClientAppShell>
     );
@@ -68,11 +78,12 @@ export default async function CompareOffersPage({
   const offerFacts = Object.fromEntries(facts);
 
   return (
-    <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
+    <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
       <main className="client-page">
+        {publicationWarning}
         {revisionNotice}
         <ComparisonPanel
-          revisingQuoteIds={publication.revisions.map(row=>row.quoteId)}
+          revisingQuoteIds={publicationRevisions.map(row=>row.quoteId)}
           locale={locale}
           requestId={requestId}
           rfqId={rfqId}
@@ -85,7 +96,7 @@ export default async function CompareOffersPage({
           selectedQuery={space.selectedQuery}
           requestTitle={detail.value.description}
           requestHref={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`}
-          organizationName={space.organizationName}
+          organizationName={space.organizationName} organizations={space.organizations}
           offerFacts={offerFacts}
           assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}
         />

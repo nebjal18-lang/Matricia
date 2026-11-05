@@ -136,7 +136,7 @@ function DemoDisputeDetail({ locale, query }: { locale: Locale; query: string })
             <h2>{detail.title}</h2>
             <p>{detail.project} · {detail.provider}</p>
           </div>
-          <span className="client-status-chip" data-tone="violet">{demo.disputes[0]?.status}</span>
+          <span className="client-status-chip" data-tone="violet">{demo.disputes[0]?.status ?? detail.stage}</span>
         </header>
         <nav className="client-tabs" aria-label={c.myDisputes}>
           <a href="#details" aria-current="page">{c.tabDetails}</a>
@@ -194,13 +194,14 @@ function DemoDisputeDetail({ locale, query }: { locale: Locale; query: string })
       <article className="client-card" id="history">
         <header><h2>{c.tabHistory}</h2></header>
         <ol className="client-mediation">
-          {detail.mediation.map((step) => (
-            <li key={`history-${step.id}`} data-state={step.state}>
-              <strong>{step.title}</strong>
-              <small>{step.date}</small>
+          {detail.files.map((file) => (
+            <li key={`history-${file.id}`} data-state="done">
+              <strong>{file.title}</strong>
+              <small>{file.by}</small>
             </li>
           ))}
         </ol>
+        <p className="client-access-note">{locale === "ar" ? "يعرض هذا السجل الوثائق والمراسلات المشتركة، وليس خطوات الوساطة." : "Cet historique reprend les pièces et échanges partagés, distinct du suivi de médiation."}</p>
       </article>
     </>
   );
@@ -271,7 +272,14 @@ function LiveDisputeDetail({
       </article>
       <article className="client-card" id="mediation">
         <header><h2>{c.mediationFollow}</h2></header>
-        <ol className="client-mediation" id="history">
+        <div className="client-next-action">
+          <h3>{c.nextPossible}</h3>
+          {actions ?? <p>{messages.noAction}</p>}
+        </div>
+      </article>
+      <article className="client-card" id="history">
+        <header><h2>{c.tabHistory}</h2></header>
+        <ol className="client-mediation">
           {selected.events.map((event) => (
             <li key={event.id} data-state="done">
               <strong>{event.type}</strong>
@@ -279,10 +287,6 @@ function LiveDisputeDetail({
             </li>
           ))}
         </ol>
-        <div className="client-next-action">
-          <h3>{c.nextPossible}</h3>
-          {actions ?? <p>{messages.noAction}</p>}
-        </div>
       </article>
     </>
   );

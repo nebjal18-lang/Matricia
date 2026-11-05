@@ -19,6 +19,7 @@ import { messages } from "@/modules/client/screens/diagnostics/messages";
 import { diagnosticToolMessages } from "@/modules/client/screens/diagnostics/tool-messages";
 import { formatDimensionKey } from "@/modules/client/screens/diagnostics/journey";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
+import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 
 export default async function Diagnostics({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; page?: string; kind?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
@@ -32,8 +33,8 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
   const c = spaceCopy(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1",kind:query.kind??"all"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل التشخيصات." : "Impossible de charger les diagnostics."}</p></main>
+      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1",kind:query.kind??"all"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
+        <WorkspaceFailure locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={`/${locale}/client/diagnostics${space.selectedQuery}`} supportReference="CLIENT-DIAGNOSTICS" />
       </ClientAppShell>
     );
   }
@@ -57,8 +58,8 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
   const organizationResult = organizationIds.length ? await client.from("organizations").select("id,display_name").in("id", organizationIds) : { data: [], error: null };
   if (organizationResult.error) {
     return (
-      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1",kind:query.kind??"all"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
-        <main className="client-page"><p role="alert" className="client-card">{locale === "ar" ? "تعذر تحميل المؤسسات المرتبطة بالتشخيص." : "Impossible de charger les organisations liées au diagnostic."}</p></main>
+      <ClientAppShell languagePath={`/${locale}/client/diagnostics?${new URLSearchParams({organizationId:space.selectedOrganizationId,page:query.page??"1",kind:query.kind??"all"})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="needs" title={m.title} lead={m.intro} kicker={c.kicker}>
+        <WorkspaceFailure locale={locale} reason="UNAVAILABLE" returnPath={`/${locale}/client/diagnostics${space.selectedQuery}`} supportReference="CLIENT-DIAGNOSTIC-ORGS" />
       </ClientAppShell>
     );
   }
@@ -157,7 +158,7 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="needs"
       kicker={c.kicker}
       actions={<Link href={questionnaireHref} className="client-cta">{c.startQuestionnaire}</Link>}

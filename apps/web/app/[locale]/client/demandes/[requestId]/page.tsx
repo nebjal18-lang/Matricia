@@ -31,7 +31,7 @@ export default async function RequestDetailPage({
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}` }));
   const result = await (await createServerClientRfqRepository()).detail(requestId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}` }));
-  if (result.status === "error") return <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={locale === "fr" ? "Ma demande" : "طلبي"}><p role="alert" className="client-card">{locale === "fr" ? "La demande est momentanément indisponible ou vos droits ne permettent pas sa consultation. Réessayez." : "الطلب غير متاح مؤقتاً أو لا تسمح صلاحياتكم بعرضه. حاولوا مجدداً."}</p><Link href={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`}>{locale === "fr" ? "Réessayer" : "إعادة المحاولة"}</Link></ClientAppShell>;
+  if (result.status === "error") return <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={locale === "fr" ? "Ma demande" : "طلبي"}><p role="alert" className="client-card">{locale === "fr" ? "La demande est momentanément indisponible ou vos droits ne permettent pas sa consultation. Réessayez." : "الطلب غير متاح مؤقتاً أو لا تسمح صلاحياتكم بعرضه. حاولوا مجدداً."}</p><Link href={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`}>{locale === "fr" ? "Réessayer" : "إعادة المحاولة"}</Link></ClientAppShell>;
   if (!result.value) notFound();
   const q = result.value;
   if (q.organizationId !== space.selectedOrganizationId) {
@@ -49,7 +49,7 @@ export default async function RequestDetailPage({
     : `/${locale}/client/demandes/${q.id}/offres${space.selectedQuery}`;
 
   return (
-    <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="requests" title={messages.detailTitle} lead={q.description} kicker={c.kicker}>
+    <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={messages.detailTitle} lead={q.description} kicker={c.kicker}>
       <main className="client-page">
         <article className="client-card">
           <header className="client-priority-head">

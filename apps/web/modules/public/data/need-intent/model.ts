@@ -102,9 +102,17 @@ export function serviceCodeFromNeedSnapshot(text: string): string | null {
   return match?.[1] ?? null;
 }
 
-export function publicNeedRequestHref(locale: Locale, intakeId: string, serviceCode?: string | null): string {
+export function publicNeedRequestHref(
+  locale: Locale,
+  intakeId: string,
+  serviceCode?: string | null,
+  organizationId?: string | null,
+): string {
   const params = new URLSearchParams({ intakeId });
   if (serviceCode && /^[A-Z][A-Z0-9_-]{1,79}$/u.test(serviceCode)) params.set("serviceCode", serviceCode);
+  if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(organizationId)) {
+    params.set("organizationId", organizationId);
+  }
   return `/${locale}/client/demandes/nouvelle?${params.toString()}`;
 }
 

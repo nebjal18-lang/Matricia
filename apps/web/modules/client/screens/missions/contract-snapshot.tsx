@@ -17,7 +17,7 @@ export function ContractSnapshot({ contract, locale, messages }: { contract: Con
       <SnapshotDatum label={messages.selectedQuote} value={contract.selectedQuoteVersionId} mono/>
       <SnapshotDatum label={messages.contractHash} value={contract.contentHash} mono/>
       <SnapshotDatum label={messages.changeReason} value={contract.changeReason}/>
-      <SnapshotDatum label={messages.snapshotDate} value={serializedDateLabel(contract.createdAt,contract.createdAtLabel)}/>
+      <SnapshotDatum label={messages.snapshotDate} value={serializedDateLabel(contract.createdAt,contract.createdAtLabel,locale)}/>
     </dl>
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
       <ItemList title={messages.acceptedDeliverables} items={deliverables} empty={messages.none}/>
@@ -51,7 +51,7 @@ export function MissionContractSnapshotView({ snapshot, missionId, locale, messa
       <SnapshotDatum label={messages.selectedQuote} value={snapshot.selectedQuoteVersionId} mono/>
       <SnapshotDatum label={messages.contractHash} value={snapshot.contentHash} mono/>
       <SnapshotDatum label={messages.contractAmount} value={formatExactMoney(snapshot.priceMinor, snapshot.currency, locale)}/>
-      <SnapshotDatum label={messages.snapshotDate} value={serializedDateLabel(snapshot.createdAt,snapshot.createdAtLabel)}/>
+      <SnapshotDatum label={messages.snapshotDate} value={serializedDateLabel(snapshot.createdAt,snapshot.createdAtLabel,locale)}/>
     </dl>
     <p className="mt-3 text-sm"><span className="text-muted-foreground">{messages.changeReason}: </span>{snapshot.changeReason}</p>
     <div className="mt-4 grid gap-4 sm:grid-cols-2"><ItemList title={messages.acceptedDeliverables} items={deliverables} empty={messages.none}/><ItemList title={messages.acceptedExclusions} items={exclusions} empty={messages.none}/></div>
@@ -68,6 +68,6 @@ function ItemList({ title, items, empty }: { title: string; items: Contract["ite
   return <section className="mt-4"><h5 className="font-medium">{title}</h5>{items.length ? <ol className="mt-2 space-y-2">{items.map((item) => <li key={item.id} className="rounded-lg border bg-background p-3"><span className="font-mono text-xs text-muted-foreground" dir="ltr">{item.key}</span><p className="mt-1" dir="auto">{item.label}</p></li>)}</ol> : <p className="mt-2 text-sm text-muted-foreground">{empty}</p>}</section>;
 }
 
-function SignatureList({ signatures, messages }: { signatures: ContractSignature[]; locale: Locale; messages: MissionMessages }) {
-  return <section className="mt-4"><h5 className="font-medium">{messages.recordedSignatures} ({signatures.length}/2)</h5>{signatures.length ? <ol className="mt-2 space-y-2">{signatures.map((signature) => <li key={signature.id} className="rounded-lg border bg-background p-3 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{signature.signerRole}</strong><time dateTime={signature.signedAt}>{serializedDateLabel(signature.signedAt,signature.signedAtLabel)}</time></div><p className="mt-2 break-all font-mono text-xs" dir="ltr">{messages.signerOrganization}: {signature.organizationId}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.signatureMethod}: {signature.method}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.evidenceHash}: {signature.evidenceHash}</p></li>)}</ol> : <p className="mt-2 text-sm text-muted-foreground">{messages.noSignature}</p>}</section>;
+function SignatureList({ signatures, locale, messages }: { signatures: ContractSignature[]; locale: Locale; messages: MissionMessages }) {
+  return <section className="mt-4"><h5 className="font-medium">{messages.recordedSignatures} ({signatures.length}/2)</h5>{signatures.length ? <ol className="mt-2 space-y-2">{signatures.map((signature) => <li key={signature.id} className="rounded-lg border bg-background p-3 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{signature.signerRole}</strong><time dateTime={signature.signedAt}>{serializedDateLabel(signature.signedAt,signature.signedAtLabel,locale)}</time></div><p className="mt-2 break-all font-mono text-xs" dir="ltr">{messages.signerOrganization}: {signature.organizationId}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.signatureMethod}: {signature.method}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.evidenceHash}: {signature.evidenceHash}</p></li>)}</ol> : <p className="mt-2 text-sm text-muted-foreground">{messages.noSignature}</p>}</section>;
 }

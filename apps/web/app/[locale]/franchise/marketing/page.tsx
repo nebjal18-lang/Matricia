@@ -13,27 +13,40 @@ import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { franchiseMandateName, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 
-export default async function FranchiseMarketingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string }> }) {
+export default async function FranchiseMarketingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const { space, result: library } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/marketing`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
+  const { space, result: library } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/marketing`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId: query.franchiseId });
   const m = getMarketingMessages(locale);
   const c = franchiseCopy(locale);
-  const result = space.errorReason ? { status: "error" as const, reason: space.errorReason } : await loadWorkspaceMarketingDashboard(space.selectedOrganizationId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: space.currentPath }));
   const mandateName = franchiseMandateName(library);
-  const brandDefaults = result.status === "success" && space.selectedOrganizationId ? await loadMarketingBrandDefaults(space.selectedOrganizationId, locale, mandateName ? [mandateName] : []) : null;
-  const dimensionLabels = result.status === "success" ? await loadMarketingDimensionLabels(result.dashboard, locale) : {};
+  const returnPath = `/${locale}/franchise/marketing${space.selectedQuery}`;
+
+  let body;
+  if (library.status === "error") {
+    body = <FranchiseAccessState locale={locale} reason={library.reason} returnPath={returnPath} />;
+  } else {
+    const result = space.errorReason
+      ? { status: "error" as const, reason: space.errorReason }
+      : await loadWorkspaceMarketingDashboard(space.selectedOrganizationId);
+    if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: space.currentPath }));
+    if (result.status === "error") {
+      body = result.reason === "NO_ORGANIZATION"
+        ? <FranchiseAccessState locale={locale} reason={space.organizations.length > 1 ? "ORGANIZATION_REQUIRED" : "NO_MANDATE"} returnPath={returnPath} />
+        : <WorkspaceFailure locale={locale} reason={result.reason} returnPath={returnPath} supportReference="FRANCHISE_MARKETING" />;
+    } else {
+      const brandDefaults = space.selectedOrganizationId
+        ? await loadMarketingBrandDefaults(space.selectedOrganizationId, locale, mandateName ? [mandateName] : [])
+        : null;
+      const dimensionLabels = await loadMarketingDimensionLabels(result.dashboard, locale);
+      body = <MarketingPanel workspace dashboard={result.dashboard} brandDefaults={brandDefaults} dimensionLabels={dimensionLabels} locale={locale} m={m} keys={marketingActionKeys(result.dashboard)} />;
+    }
+  }
+
   return (
     <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="marketing" title={m.workspaceTitle} lead={m.workspaceLead} kicker={c.kicker} mandateName={mandateName}>
       <FranchiseOrganizationSelector locale={locale} organizations={space.organizations} selectedOrganizationId={space.selectedOrganizationId} returnPath={`/${locale}/franchise/marketing`} />
-      {result.status === "error" ? (
-        result.reason === "NO_ORGANIZATION"
-          ? <FranchiseAccessState locale={locale} reason={space.organizations.length > 1 ? "ORGANIZATION_REQUIRED" : "NO_MANDATE"} returnPath={`/${locale}/franchise/marketing${space.selectedQuery}`} />
-          : <WorkspaceFailure locale={locale} reason={result.reason} returnPath={`/${locale}/franchise/marketing${space.selectedQuery}`} supportReference="FRANCHISE_MARKETING" />
-      ) : (
-        <MarketingPanel workspace dashboard={result.dashboard} brandDefaults={brandDefaults} dimensionLabels={dimensionLabels} locale={locale} m={m} keys={marketingActionKeys(result.dashboard)} />
-      )}
+      {body}
     </FranchiseAppShell>
   );
 }

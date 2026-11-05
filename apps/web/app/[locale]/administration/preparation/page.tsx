@@ -38,6 +38,7 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
   const servicePage = loaded.status === "success" ? loaded.workspace.servicePage : loaded.servicePage;
   const categoryPage = loaded.status === "success" ? loaded.workspace.categoryPage : loaded.categoryPage;
   const workspace = loaded.status === "success" ? loaded.workspace : null;
+  const loadFailure = loaded.status === "error" ? loaded.reason : "QUERY_FAILED";
   const href = (patch: Record<string, string | undefined>) => {
     const next = new URLSearchParams();
     const merged = { serviceQ: query.serviceQ, servicePage: String(servicePage), categoryQ: query.categoryQ, categoryPage: String(categoryPage), ...patch };
@@ -56,8 +57,9 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
           <a href="#integrations">{fr ? "Intégrations" : "التكاملات"}</a>
           <a href="#release">{fr ? "Décisions de livraison" : "قرارات التسليم"}</a>
         </nav>
-        {!workspace ? <WorkspaceFailure locale={locale} reason="QUERY_FAILED" returnPath={selfPath} /> : (
+        {!workspace ? <WorkspaceFailure locale={locale} reason={loadFailure} returnPath={selfPath} /> : (
           <>
+            {workspace.unavailableSections.length ? <p role="alert" className="mt-4 text-sm">{fr ? `Certaines sections sont temporairement indisponibles : ${workspace.unavailableSections.join(", ")}.` : `بعض الأقسام غير متاحة مؤقتاً: ${workspace.unavailableSections.join(", ")}.`}</p> : null}
             <p className="mt-4 text-sm">{fr ? `Services encore en français dans le champ arabe : ${workspace.overview.services_pending}. Brouillons de services : ${workspace.overview.services_drafted}. Catégories encore copiées : ${workspace.overview.categories_pending}. Brouillons de catégories : ${workspace.overview.categories_drafted}. Identité : ${workspace.overview.legal_drafted}/${workspace.overview.legal_total}. Formules : ${workspace.overview.box_drafted}. Intégrations décrites : ${workspace.overview.integrations_drafted}/${workspace.overview.integrations_total}, secrets enregistrés : ${workspace.overview.integrations_secret}. Décisions : ${workspace.overview.release_drafted}/${workspace.overview.release_total}.` : `خدمات ما زال حقلها العربي فرنساً: ${workspace.overview.services_pending}. مسودات الخدمات: ${workspace.overview.services_drafted}. فئات ما زالت منسوخة: ${workspace.overview.categories_pending}. مسودات الفئات: ${workspace.overview.categories_drafted}. الهوية: ${workspace.overview.legal_drafted}/${workspace.overview.legal_total}. الصيغ: ${workspace.overview.box_drafted}. تكاملات موصوفة: ${workspace.overview.integrations_drafted}/${workspace.overview.integrations_total}، أسرار محفوظة: ${workspace.overview.integrations_secret}. قرارات: ${workspace.overview.release_drafted}/${workspace.overview.release_total}.`}</p>
             <section id="catalogue" className="mt-8 grid gap-4">
               <h2>{fr ? "Noms arabes du catalogue" : "الأسماء العربية للدليل"}</h2>

@@ -80,7 +80,7 @@ export function RewardsBoard({
         <article className="client-card" id="parrainages">
           <header className="client-priority-head">
             <h2>{c.referralStatus}</h2>
-            <span className="client-text-link" aria-hidden>{c.seeHistory}</span>
+            <a href="#parrainages" className="client-text-link">{c.seeHistory}</a>
           </header>
           {conversions.length === 0 ? <p>{locale === "ar" ? "لا إحالات ظاهرة بعد." : "Aucun parrainage visible pour le moment."}</p> : (
             <div className="client-table-wrap">

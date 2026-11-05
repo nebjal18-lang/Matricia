@@ -192,7 +192,7 @@ function OrganizationOnboarding({ organization, locale, messages }: {
               </dl>
             ) : <p className="text-sm text-muted-foreground">{messages.trialNotStarted}</p>}
             {organization.trial?.status === "TRIAL_EXPIRED" ? (
-              <Link href={`/${locale}/client/abonnement`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.reactivateGold}</Link>
+              <Link href={`/${locale}/client/abonnement?organizationId=${encodeURIComponent(organization.id)}`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.reactivateGold}</Link>
             ) : null}
             <p className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">{messages.noCard}</p>
           </section>
@@ -215,7 +215,7 @@ export default async function ClientOnboardingPage({ params, searchParams }: { p
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="company"
       title={messages.title}
       lead={messages.description}

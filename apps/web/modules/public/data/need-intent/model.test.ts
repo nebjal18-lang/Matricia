@@ -31,6 +31,9 @@ describe("public need intent", () => {
     expect(serviceCodeFromNeedSnapshot(classificationSnapshot(classification!, "fr"))).toBe("IT-AUDIT-SI");
     expect(serviceCodeFromNeedSnapshot("Domaine présélectionné : Informatique (IT).")).toBeNull();
     expect(publicNeedRequestHref("fr", "11111111-1111-4111-8111-111111111111", "IT-AUDIT-SI")).toBe("/fr/client/demandes/nouvelle?intakeId=11111111-1111-4111-8111-111111111111&serviceCode=IT-AUDIT-SI");
+    expect(publicNeedRequestHref("fr", "11111111-1111-4111-8111-111111111111", "IT-AUDIT-SI", "22222222-2222-4222-8222-222222222222")).toBe(
+      "/fr/client/demandes/nouvelle?intakeId=11111111-1111-4111-8111-111111111111&serviceCode=IT-AUDIT-SI&organizationId=22222222-2222-4222-8222-222222222222",
+    );
   });
 
   it("ranks published services from bounded free text without loading questions", () => {

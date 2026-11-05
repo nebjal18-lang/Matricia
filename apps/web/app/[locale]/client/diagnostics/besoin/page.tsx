@@ -57,7 +57,7 @@ export default async function PriorityToNeedPage({
       };
 
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="needs" kicker={c.kicker}>
+    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="needs" kicker={c.kicker}>
       <main className="client-page">
         <div className="diag-conn">
           <header className="diag-conn-hero">

@@ -190,7 +190,8 @@
 .admin-side-sub {
   display: grid;
   gap: 0.1rem;
-  padding: 0.15rem 0 0.4rem 1.55rem;
+  padding-block: 0.15rem 0.4rem;
+  padding-inline: 1.55rem 0;
 }
 
 .admin-side-sub a {
@@ -1163,7 +1164,7 @@
   background-image: url("/admin/scene/pattern-bl.png");
   background-size: contain;
   background-position: left bottom;
-  opacity: 0.92;
+  opacity: 0.24;
 }
 
 .admin-workspace .client-scene-palms {
@@ -1175,7 +1176,7 @@
   background-size: contain;
   background-position: right top;
   transform: scaleX(-1);
-  opacity: 0.9;
+  opacity: 0.2;
 }
 
 .admin-workspace .client-scene-pattern {
@@ -1188,7 +1189,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: right bottom;
-  opacity: 0.88;
+  opacity: 0.2;
 }
 
 [dir="rtl"] .admin-workspace .client-scene-arch {
@@ -1247,9 +1248,22 @@
   gap: 0.45rem;
 }
 
-/* Keep menus in the scrollable table flow, including the final row on mobile. */
+/* Float row menus above the table without stretching the current row. */
+.admin-workspace .client-table-wrap .admin-row-menu {
+  position: relative;
+}
+
 .admin-workspace .client-table-wrap .admin-row-menu[open] > div {
-  position: static;
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 0.2rem);
+  z-index: 24;
+  min-inline-size: 12rem;
+  max-inline-size: min(18rem, 80vw);
+  border: 1px solid var(--client-line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgb(17 26 54 / 12%);
 }
 
 .admin-filters > label {

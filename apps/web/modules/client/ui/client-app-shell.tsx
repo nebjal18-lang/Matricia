@@ -28,6 +28,7 @@ export function ClientAppShell({
   selectedOrganizationId,
   userEmail,
   organizationName,
+  organizations = [],
   active,
   languagePath,
   searchAction,
@@ -45,6 +46,7 @@ export function ClientAppShell({
   selectedOrganizationId: string | null;
   userEmail: string | null;
   organizationName?: string | null;
+  organizations?: Array<{ id: string; name: string }>;
   active?: ClientNavKey;
   messagesUnread?: boolean;
   languagePath?: string;
@@ -64,6 +66,7 @@ export function ClientAppShell({
   const accountLabel = organizationName?.trim() || space.space;
   const currentPath = safeReturnPath(languagePath,locale);
   const langHref = currentPath ? translateLocalPath(currentPath, locale, alternate) : localeSwitchHref(locale, selectedQuery, active);
+  const switchBase = (currentPath ?? `/${locale}/tableau-de-bord`).split("?")[0]!;
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace" data-theme={theme}>
@@ -99,6 +102,23 @@ export function ClientAppShell({
             <input id="client-shell-search" name="q" defaultValue={searchQuery} placeholder={c.searchSpace} />
           </form>
           <div className="client-top-actions">
+            {organizations.length > 1 ? (
+              <details className="client-org-switch">
+                <summary>{accountLabel}</summary>
+                <ul>
+                  {organizations.map((organization) => {
+                    const current = organization.id === selectedOrganizationId;
+                    const href = `${switchBase}?organizationId=${encodeURIComponent(organization.id)}`;
+                    return (
+                      <li key={organization.id}>
+                        {current ? <span data-selected="true">{organization.name}</span> : <Link href={href}>{organization.name}</Link>}
+                      </li>
+                    );
+                  })}
+                  <li><Link href={`/${locale}/organisation`}>{locale === "ar" ? "مؤسساتي" : "Mes organisations"}</Link></li>
+                </ul>
+              </details>
+            ) : null}
             <Link href={`/${locale}/notifications${selectedQuery}`} className="client-icon-btn" aria-label={c.notifications}>
               <Bell className="size-4" />
             </Link>

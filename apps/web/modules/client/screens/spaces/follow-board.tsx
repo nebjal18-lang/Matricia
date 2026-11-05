@@ -50,7 +50,7 @@ export function FollowBoard({
 }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo();
+  const preferDemo = !mission && canApplyClientSpaceDemo();
   const folders = mission
     ? [{ id: mission.id, title: organizationName ?? c.misTitle, status: mission.status, tone: "mint" as const, href: `/${locale}/client/missions/${mission.id}/jalons${query}` }]
     : preferDemo
@@ -71,8 +71,8 @@ export function FollowBoard({
       ? demo.missions.steps
       : [];
   const offerHref = `/${locale}/client/demandes${query}`;
-  const offers = preferDemo && !mission ? demo.compareOffers.slice(0, 2) : [];
-  const files = preferDemo && !mission ? demo.missions.files : (mission?.deliverables ?? []).map((item) => ({
+  const offers = preferDemo ? demo.compareOffers.slice(0, 2) : [];
+  const files = preferDemo ? demo.missions.files : (mission?.deliverables ?? []).map((item) => ({
     id: item.id,
     title: item.label,
     href: `/${locale}/client/missions/${mission!.id}/jalons${query}`,

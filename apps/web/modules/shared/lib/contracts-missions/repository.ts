@@ -37,7 +37,7 @@ export async function loadContractMissions(locale: "fr" | "ar", requestedOrganiz
   if (authFailure) return {status:"error",reason:authFailure === "UNAVAILABLE" ? "QUERY_FAILED" : "UNAUTHENTICATED"};
   const auth = authResult.data;
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
-  const membershipResult = await readContractPages((from,to)=>client.from("organization_memberships").select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["CLIENT_OWNER", "CLIENT_ADMIN"]).order("id").range(from,to));
+  const membershipResult = await readContractPages((from,to)=>client.from("organization_memberships").select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["CLIENT_OWNER", "CLIENT_ADMIN", "CLIENT_BUYER"]).order("id").range(from,to));
   if (membershipResult.error) return { status: "error", reason: membershipResult.error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE" : "QUERY_FAILED" };
   const memberships = z.array(member).safeParse(membershipResult.data);
   if (!memberships.success) return { status: "error", reason: "INVALID_RESPONSE" };

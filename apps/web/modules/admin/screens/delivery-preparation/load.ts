@@ -8,8 +8,10 @@ export function preparationPageNumber(value: string | undefined) {
 }
 
 type PreparationRpc = {
-  rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }>;
+  rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>;
 };
+
+export type DeliveryPreparationFailure = "MFA_REQUIRED" | "FORBIDDEN" | "UNAUTHENTICATED" | "QUERY_FAILED" | "INVALID_RESPONSE";
 
 export type DeliveryPreparationWorkspace = {
   servicePage: number;
@@ -21,9 +23,24 @@ export type DeliveryPreparationWorkspace = {
   box: { total: number; items: PreparationItem[] };
   integrations: { total: number; items: PreparationItem[] };
   release: { total: number; items: PreparationItem[] };
+  unavailableSections: string[];
 };
 
-export async function loadDeliveryPreparationWorkspace(client: PreparationRpc, query: { serviceQ?: string; servicePage?: string; categoryQ?: string; categoryPage?: string }): Promise<{ status: "success"; workspace: DeliveryPreparationWorkspace } | { status: "error"; servicePage: number; categoryPage: number }> {
+function classifyPreparationError(error: { code?: string; message?: string } | null | undefined): DeliveryPreparationFailure {
+  if (!error) return "INVALID_RESPONSE";
+  if (error.code === "PGRST301" || error.code === "PGRST303") return "UNAUTHENTICATED";
+  if (error.code === "42501") return /MFA|AAL2/i.test(error.message ?? "") ? "MFA_REQUIRED" : "FORBIDDEN";
+  return "QUERY_FAILED";
+}
+
+function emptyList(): { total: number; items: PreparationItem[] } {
+  return { total: 0, items: [] };
+}
+
+export async function loadDeliveryPreparationWorkspace(client: PreparationRpc, query: { serviceQ?: string; servicePage?: string; categoryQ?: string; categoryPage?: string }): Promise<
+  | { status: "success"; workspace: DeliveryPreparationWorkspace }
+  | { status: "error"; reason: DeliveryPreparationFailure; servicePage: number; categoryPage: number }
+> {
   const servicePage = preparationPageNumber(query.servicePage);
   const categoryPage = preparationPageNumber(query.categoryPage);
   const [overviewResult, servicesResult, categoriesResult, legalResult, boxResult, integrationResult, releaseResult] = await Promise.all([
@@ -35,14 +52,38 @@ export async function loadDeliveryPreparationWorkspace(client: PreparationRpc, q
     client.rpc("list_delivery_preparation", { p_section: "INTEGRATION", p_query: "", p_limit: 20, p_offset: 0 }),
     client.rpc("list_delivery_preparation", { p_section: "RELEASE", p_query: "", p_limit: 20, p_offset: 0 }),
   ]);
+
+  if (overviewResult.error) return { status: "error", reason: classifyPreparationError(overviewResult.error), servicePage, categoryPage };
   const overview = preparationOverviewSchema.safeParse(overviewResult.data);
-  const services = preparationListSchema.safeParse(servicesResult.data);
-  const categories = preparationListSchema.safeParse(categoriesResult.data);
-  const legal = preparationListSchema.safeParse(legalResult.data);
-  const box = preparationListSchema.safeParse(boxResult.data);
-  const integrations = preparationListSchema.safeParse(integrationResult.data);
-  const release = preparationListSchema.safeParse(releaseResult.data);
-  const failed = [overviewResult, servicesResult, categoriesResult, legalResult, boxResult, integrationResult, releaseResult].some((result) => result.error) || !overview.success || !services.success || !categories.success || !legal.success || !box.success || !integrations.success || !release.success;
-  if (failed || !overview.success || !services.success || !categories.success || !legal.success || !box.success || !integrations.success || !release.success) return { status: "error", servicePage, categoryPage };
-  return { status: "success", workspace: { servicePage, categoryPage, overview: overview.data, services: services.data, categories: categories.data, legal: legal.data, box: box.data, integrations: integrations.data, release: release.data } };
+  if (!overview.success) return { status: "error", reason: "INVALID_RESPONSE", servicePage, categoryPage };
+
+  const unavailableSections: string[] = [];
+  const parseList = (label: string, result: { data: unknown; error: { code?: string; message?: string } | null }) => {
+    if (result.error) {
+      unavailableSections.push(label);
+      return emptyList();
+    }
+    const parsed = preparationListSchema.safeParse(result.data);
+    if (!parsed.success) {
+      unavailableSections.push(label);
+      return emptyList();
+    }
+    return parsed.data;
+  };
+
+  return {
+    status: "success",
+    workspace: {
+      servicePage,
+      categoryPage,
+      overview: overview.data,
+      services: parseList("SERVICES", servicesResult),
+      categories: parseList("CATEGORIES", categoriesResult),
+      legal: parseList("LEGAL", legalResult),
+      box: parseList("BOX", boxResult),
+      integrations: parseList("INTEGRATIONS", integrationResult),
+      release: parseList("RELEASE", releaseResult),
+      unavailableSections,
+    },
+  };
 }

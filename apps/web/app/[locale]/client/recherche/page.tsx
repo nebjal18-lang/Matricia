@@ -33,7 +33,7 @@ export default async function ClientSearchPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       searchQuery={q}
       title={c.searchResultsTitle}
       lead={c.searchResultsLead}

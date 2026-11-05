@@ -59,9 +59,17 @@ async function spaceOrRedirect(locale: string, organizationId?: string) {
   return space;
 }
 
+function providerFailureState(reason: string): ProviderContextState {
+  const contextStates: ProviderContextState[] = ["unavailable", "forbidden", "choose-organization", "no-organization"];
+  if (contextStates.includes(reason as ProviderContextState)) return reason as ProviderContextState;
+  if (["CONTEXT_REQUIRED", "ORGANIZATION_SELECTION_REQUIRED"].includes(reason)) return "choose-organization";
+  if (["NO_ORGANIZATION", "NO_PROVIDER_ORGANIZATION", "NO_BILLING_ORGANIZATION"].includes(reason)) return "no-organization";
+  if (reason === "FORBIDDEN") return "forbidden";
+  return "unavailable";
+}
+
 function ProviderReadFailure({locale,space,active,reason}:{locale:Locale;space:Awaited<ReturnType<typeof spaceOrRedirect>>;active:import("@/modules/provider/ui/provider-app-shell").ProviderNavKey;reason:string}) {
- const contextStates:ProviderContextState[]=["unavailable","forbidden","choose-organization","no-organization"];
- const state:ProviderContextState=contextStates.includes(reason as ProviderContextState)?reason as ProviderContextState:["FORBIDDEN","NO_ORGANIZATION","NO_PROVIDER_ORGANIZATION","NO_BILLING_ORGANIZATION"].includes(reason)?"forbidden":"unavailable";
+ const state = providerFailureState(reason);
  const retryHref=buildProviderNav(locale,space.selectedQuery).find(item=>item.key===active)?.href??`/${locale}/tableau-de-bord${space.selectedQuery}`;
  return <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active={active}>
   <main className="client-page"><ProviderReadState locale={locale} state={state} retryHref={retryHref} reason={reason}/></main>
@@ -186,7 +194,7 @@ export async function ProviderQuoteWorkbenchPage({
   const history=revisions?.map(item=>({...item,snapshot:revisionSnapshots[item.id]}))??null;
   const Workbench = mode === "revise" ? QuoteRevisionWorkbench : QuoteMultilineWorkbench;
   return (
-    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
+    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
       <Workbench history={history} locale={locale as Locale} query={space.selectedQuery} quoteId={quoteId} invitation={invitation} quotePanel={panel} prefill={invitation ? prefills[invitation.id] : undefined} />
     </ProviderAppShell>
   );
@@ -250,7 +258,7 @@ export async function ProviderMissionDeliveryPage({
   const contextBoundary=providerContextBoundary(locale as Locale,space,"missions",query.organizationId);
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
-  const result = await loadProviderMissions(locale as Locale, query.organizationId, missionId);
+  const result = await loadProviderMissions(locale as Locale, space.selectedOrganizationId ?? query.organizationId, missionId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="missions" reason={result.reason} />;
   const mission = result.status === "success" ? result.dashboard.missions.find((item) => item.id === missionId) ?? null : null;
