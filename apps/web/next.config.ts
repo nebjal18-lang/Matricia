@@ -1,12 +1,21 @@
 import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
 import { resolve } from "node:path";
+import { resolvePublicSupabaseEnvironment } from "./modules/shared/lib/public-supabase-environment";
 
 loadEnvConfig(resolve(import.meta.dirname, "../.."), process.env.NODE_ENV !== "production", console, true);
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-if (!supabaseUrl || !supabasePublishableKey) throw new Error("Public Supabase environment is not configured");
+const {
+  NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: supabasePublishableKey,
+} = resolvePublicSupabaseEnvironment({
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+});
 
 const supabaseOrigin = new URL(supabaseUrl).origin;
 const isProduction = process.env.NODE_ENV === "production";
@@ -44,6 +53,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Preview comments patch static files after upload. Immutable assets reject that patch.
+  supportsImmutableAssets: false,
   serverExternalPackages:["pdfmake","@fontsource/noto-sans-arabic"],
   outputFileTracingIncludes:{
     "/api/**":["./node_modules/@fontsource/noto-sans-arabic/package.json","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-latin-400-normal.woff","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-400-normal.woff"],

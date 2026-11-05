@@ -1,3 +1,22 @@
+## Build Vercel — compatibilité des variables publiques Supabase
+
+- Le journal distant confirme que la bonne application Next est maintenant compilée, puis échoue faute de configuration publique reconnue. Normalisation partagée : URL canonique/alias serveur public et clés publishable/anon publiques ; seules les deux valeurs canoniques sont injectées pour le navigateur. Aucun fallback de clé privilégiée et aucune valeur factice de production.
+- Quatorze tests PASS (priorités, alias, valeurs vides, absence, URL et clés privilégiées), lint ciblé PASS. Build complet PASS dans une copie sans dotenv avec uniquement SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY, sans clé canonique ni service-role. Valeur publique canonique retrouvée dans le bundle navigateur. Contrôle de configuration absente vérifié avec les CLI Node22 et24.
+- Packaging natif du nouveau build PASS :566 Lambda,116 sorties API,887 routes. Revue indépendante favorable. Les variables réelles du projet Vercel restent à confirmer ; leur absence demeure explicitement bloquante. Aucun succès hébergé ni audit métier global annoncé.
+
+## Build Vercel — suivi des vérifications distantes
+
+- Lint web complet et nouveau build complet PASS après capture du temps d’observation dans le loader serveur des invitations ; requête, contrôle d’expiration et autorisations conservés. Avertissement de variable inutilisée du scoring supprimé ; quatre régressions scoring et dix tests d’actions franchise PASS.
+- Packaging natif des trois racines rejoué sur le nouveau build : résultats identiques. Aperçu Vercel en échec, mais nouveau journal privé refusé faute d’authentification ; cause précise non établie et journal demandé au demandeur. Aucun succès de déploiement annoncé.
+- CI SQL : échec existant0193, version persistée5 contre2 attendue. Le trigger de rattrapage457400 ajoute des transitions après le lien230300 ; le RPC retourne une version intermédiaire. Constat conservé pour l’audit fonctionnel, sans modification de migration ou d’assertion pour masquer l’écart.
+
+## Build Vercel — préconfiguration automatique du monorepo
+
+- Configurations natives Next pour racine, `apps/web` et compatibilité `packages/domain` (cas du journal fourni). Le relais utilise les vrais artefacts et dépendances web, conserve le build métier domaine et refuse les collisions avec les sources/dépendances existantes. Les quinze crons sont conservés et leurs endpoints vérifiés.
+- Compilation web explicite `build:vercel`, dépendances Next/React détectables depuis la racine avec lockfile synchronisé. Cible TypeScript ES2020 pour les calculs BigInt de questionnaire existants. Aucun changement de design, de logique d’autorisation, de données ou de production.
+- Build complet Node22/pnpm10 PASS ; questionnaire32 PASS ; tooling42 PASS ; packaging officiel @vercel/next28.0.1 PASS aux trois racines :566 Lambda,116 sorties API,887 routes chacune. Helper réel rejoué deux fois dans une fixture propre ; revue indépendante favorable. Aucun déploiement distant certifié.
+- Preuve : `docs/evidence/vercel-autobuild.json`. Procédure : `docs/release/DEPLOYMENT_RUNBOOK.md`. L’audit global des scénarios métier reste ouvert et n’est pas remplacé par ces preuves de build.
+
 ## 2026-11-03 — Réparation des validations CI des trois lots Administration
 
 - Tests temporels Maroc stabilisés sous Node 22.23.4 ; fixtures catalogue, Box, qualification, signature, mandat et Finance conformes aux préconditions natives. Frontières de requêtes explicites dans une unique transaction avec rollback ; contrôles TAP conservés.

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { PaymentGatewayCode, PaymentRuntimeConfig } from "@matricia/infrastructure";
+import { resolvePublicSupabaseEnvironment } from "./public-supabase-environment";
 
 const publicEnvironmentSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
@@ -12,10 +13,10 @@ const serverEnvironmentSchema = publicEnvironmentSchema.extend({
 });
 
 export function getPublicEnvironment() {
-  return publicEnvironmentSchema.parse({
+  return publicEnvironmentSchema.parse(resolvePublicSupabaseEnvironment({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  });
+  }));
 }
 
 export function getServerEnvironment() {
