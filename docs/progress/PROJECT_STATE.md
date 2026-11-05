@@ -1,3 +1,9 @@
+## Build Vercel — compatibilité des variables publiques Supabase
+
+- Le journal distant confirme que la bonne application Next est maintenant compilée, puis échoue faute de configuration publique reconnue. Normalisation partagée : URL canonique/alias serveur public et clés publishable/anon publiques ; seules les deux valeurs canoniques sont injectées pour le navigateur. Aucun fallback de clé privilégiée et aucune valeur factice de production.
+- Quatorze tests PASS (priorités, alias, valeurs vides, absence, URL et clés privilégiées), lint ciblé PASS. Build complet PASS dans une copie sans dotenv avec uniquement SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY, sans clé canonique ni service-role. Valeur publique canonique retrouvée dans le bundle navigateur. Contrôle de configuration absente vérifié avec les CLI Node22 et24.
+- Packaging natif du nouveau build PASS :566 Lambda,116 sorties API,887 routes. Revue indépendante favorable. Les variables réelles du projet Vercel restent à confirmer ; leur absence demeure explicitement bloquante. Aucun succès hébergé ni audit métier global annoncé.
+
 ## Build Vercel — suivi des vérifications distantes
 
 - Lint web complet et nouveau build complet PASS après capture du temps d’observation dans le loader serveur des invitations ; requête, contrôle d’expiration et autorisations conservés. Avertissement de variable inutilisée du scoring supprimé ; quatre régressions scoring et dix tests d’actions franchise PASS.

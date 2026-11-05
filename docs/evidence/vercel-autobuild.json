@@ -64,7 +64,31 @@
     "passed": 10
   },
   "remoteChecks": {
-    "vercelPreview": "FAIL; private build log not accessible without Vercel authentication",
+    "vercelPreview": "Reported failure: missing public Supabase configuration. Public aliases now supported; actual remote variable names/values remain unverified.",
     "database": "FAIL in existing 0193_franchise_provider_bridge_delivery.test.sql: pipeline enrichment changes stored version while the RPC returns an intermediate version; functional audit remains open"
+  },
+  "publicEnvironmentCompatibility": {
+    "status": "PASS",
+    "unitTests": 14,
+    "isolatedBuild": "PASS with SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY only; no dotenv files, canonical variables or service-role key",
+    "browserCanonicalInlining": "PASS",
+    "missingConfigGuard": [
+      "Node22.23.4 PASS",
+      "Node24.19.0 PASS"
+    ],
+    "nativeRootPackaging": {
+      "status": "PASS",
+      "adapter": "28.0.1",
+      "buildId": "a_0ZupW-1QVWTYoPyXwnf",
+      "byType": {
+        "FileFsRef": 246,
+        "Lambda": 566,
+        "Prerender": 8,
+        "FileBlob": 3
+      },
+      "routeCount": 887,
+      "apiCount": 116
+    },
+    "realDeploymentVariablesStillRequired": true
   }
 }

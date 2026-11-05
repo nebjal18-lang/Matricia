@@ -23,3 +23,14 @@ Le dépôt fournit la configuration Next.js native aux trois emplacements : raci
 Comme tout build de ce monorepo, l’hébergeur doit rendre accessibles les fichiers workspace hors du sous-répertoire choisi et fournir les variables d’environnement de l’application. Aucun secret n’est enregistré dans ces configurations. Le build complet nécessite une cible TypeScript ES2020 pour les calculs BigInt exacts des questionnaires.
 
 Validation locale : build complet sous Node22/pnpm10, packaging avec l’adaptateur officiel `@vercel/next` depuis les trois emplacements ; fonctions serveur, API, assets et routes préservés. Les essais de packaging utilisent des copies jetables et ne déploient rien. Preuve : `docs/evidence/vercel-autobuild.json`. La vérification du déploiement distant reste distincte.
+
+## Configuration publique Supabase
+
+Le build nécessite l’URL publique et une clé publique réelle du projet Supabase visé. Les variables doivent être présentes dans la portée Vercel du déploiement (Preview et/ou Production), puis le projet doit être redéployé.
+
+- URL canonique : `NEXT_PUBLIC_SUPABASE_URL` ; alias public accepté : `SUPABASE_URL`.
+- Clé canonique : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; alias publics, par ordre de priorité : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ANON_KEY`.
+- Les valeurs vides sont ignorées. La résolution au build injecte uniquement les deux noms canoniques nécessaires au navigateur. La validation runtime utilise ces mêmes valeurs publiques.
+- Aucune clé n’est inventée ou enregistrée dans Git. `SUPABASE_SERVICE_ROLE_KEY` et les clés secrètes ne servent jamais de fallback ; une clé privilégiée reconnue dans un champ public est refusée sans afficher sa valeur. Les variables privées restent distinctes pour les opérations serveur qui les nécessitent.
+
+Un contrôle explicite est conservé si aucune URL ou clé publique n’est fournie ; le message donne les noms attendus, sans valeurs. Le build avec alias seuls a été validé dans une copie sans fichiers dotenv ; ce test ne prouve pas que le projet Vercel distant possède ces variables.
