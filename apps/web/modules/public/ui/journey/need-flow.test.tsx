@@ -68,7 +68,7 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
   });
 
   it("marks the recap as the fifth stage and preserves the original input", () => {
-    const html = renderToStaticMarkup(<NeedResult locale={locale} draft={draft(4)} authenticated={false} organizations={[]} storageAvailable storageNotice={null} invalidSelection={false} erase={() => undefined} edit={() => undefined} confirm={() => undefined} updateClassification={() => undefined} />);
+    const html = renderToStaticMarkup(<NeedResult locale={locale} draft={draft(4)} authenticated={false} organizations={[]} storageAvailable storageNotice={null} invalidSelection={false} erase={() => undefined} edit={() => undefined} confirm={() => undefined} updateClassification={() => undefined} updateOrganizationId={() => undefined} />);
     expect(html).toContain('aria-valuenow="5"');
     expect(html).toContain('aria-valuemax="5"');
     expect(html).toContain("Rénover mon chantier — نصي الأصلي");

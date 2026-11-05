@@ -26,6 +26,7 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
   const c = spaceCopy(locale);
   const [result, amendments, vault] = await Promise.all([loadContractMissions(locale, space.selectedOrganizationId), loadClientAmendments(space.selectedOrganizationId), loadClientDocumentVault(space.selectedOrganizationId)]);
   const expired = vault.status === "success" ? expiredDocuments(vault.value.documents) : [];
+  const missionAccessIssue = result.status === "error" && (result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" || result.reason === "FORBIDDEN_ORGANIZATION");
   return (
     <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={c.misTitle} lead={c.misLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/client/demandes${space.selectedQuery}`} label={c.openFolder} />}>
       {expired.length > 0 ? (
@@ -71,14 +72,14 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
         <summary>{c.opsMissions}</summary>
         {result.status === "error" ? (
           <Alert>
-            <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN" ? messages.noOrg : messages.loadError}</AlertTitle>
+            <AlertTitle>{missionAccessIssue ? messages.noOrg : messages.loadError}</AlertTitle>
             <AlertDescription>
-              {result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN"
+              {missionAccessIssue
                 ? messages.noOrg
                 : locale === "fr"
                   ? "La lecture des contrats ou missions a échoué. Réessayez ou conservez la référence support ci-dessous."
                   : "تعذر قراءة العقود أو المهام. أعيدوا المحاولة أو احتفظوا بمرجع الدعم أدناه."}
-              {result.reason !== "NO_ORGANIZATION" && result.reason !== "FORBIDDEN" ? (
+              {result.status === "error" && !missionAccessIssue ? (
                 <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? `مرجع ${result.reason}` : `Réf. ${result.reason}`}</span>
               ) : null}
             </AlertDescription>

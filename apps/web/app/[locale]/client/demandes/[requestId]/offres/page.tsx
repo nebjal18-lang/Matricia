@@ -96,7 +96,7 @@ export default async function CompareOffersPage({
           selectedQuery={space.selectedQuery}
           requestTitle={detail.value.description}
           requestHref={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`}
-          organizationName={space.organizationName} organizations={space.organizations}
+          organizationName={space.organizationName}
           offerFacts={offerFacts}
           assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}
         />
