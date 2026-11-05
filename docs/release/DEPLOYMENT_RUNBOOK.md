@@ -11,3 +11,15 @@
 7. Rejouer recettes FR/AR mobile/bureau, autorisations et budgets de performance ; rattacher les artefacts au SHA effectivement déployé, pas uniquement au SHA local.
 8. Exercer le retour à l’artefact web/worker précédent. Ne pas réappliquer aveuglément un ancien schéma : définir avec le propriétaire données la compatibilité, les migrations correctrices et le sort des écritures créées entre versions. Vérifier reprise des files et absence de doublons.
 9. Après validation et autorisation distincte de production, appliquer la procédure approuvée avec responsable, fenêtre, seuils de rollback et supervision. Consigner le résultat réel ; ne pas accorder de visa en avance.
+
+## Build Vercel préconfiguré
+
+Le dépôt fournit la configuration Next.js native aux trois emplacements : racine du dépôt, `apps/web` et, pour un projet existant ciblant la bibliothèque, `packages/domain`. Chaque configuration fixe le framework, la commande de compilation, l’installation avec lockfile gelé et la sortie réelle Next ; les quinze crons restent identiques.
+
+- Racine : `pnpm run build:vercel` compile uniquement `@matricia/web`, sortie `apps/web/.next`. Next/React/React DOM sont déclarés à la racine aux mêmes versions que l’application pour permettre leur détection par l’adaptateur Vercel.
+- Application : `pnpm run build`, sortie `.next`.
+- Compatibilité domaine : la configuration lance le même build web depuis le workspace, puis expose sa véritable sortie `.next`, ses fichiers publics et ses dépendances via des liens relatifs. Le helper vérifie les collisions avant toute modification et préserve les dépendances de la bibliothèque. Seul un ancien dossier `.next`, artefact de build, peut être remplacé. Le script métier `domain build` reste `tsc --noEmit`.
+
+Comme tout build de ce monorepo, l’hébergeur doit rendre accessibles les fichiers workspace hors du sous-répertoire choisi et fournir les variables d’environnement de l’application. Aucun secret n’est enregistré dans ces configurations. Le build complet nécessite une cible TypeScript ES2020 pour les calculs BigInt exacts des questionnaires.
+
+Validation locale : build complet sous Node22/pnpm10, packaging avec l’adaptateur officiel `@vercel/next` depuis les trois emplacements ; fonctions serveur, API, assets et routes préservés. Les essais de packaging utilisent des copies jetables et ne déploient rien. Preuve : `docs/evidence/vercel-autobuild.json`. La vérification du déploiement distant reste distincte.

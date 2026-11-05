@@ -1,3 +1,10 @@
+## Build Vercel — préconfiguration automatique du monorepo
+
+- Configurations natives Next pour racine, `apps/web` et compatibilité `packages/domain` (cas du journal fourni). Le relais utilise les vrais artefacts et dépendances web, conserve le build métier domaine et refuse les collisions avec les sources/dépendances existantes. Les quinze crons sont conservés et leurs endpoints vérifiés.
+- Compilation web explicite `build:vercel`, dépendances Next/React détectables depuis la racine avec lockfile synchronisé. Cible TypeScript ES2020 pour les calculs BigInt de questionnaire existants. Aucun changement de design, de logique d’autorisation, de données ou de production.
+- Build complet Node22/pnpm10 PASS ; questionnaire32 PASS ; tooling42 PASS ; packaging officiel @vercel/next28.0.1 PASS aux trois racines :566 Lambda,116 sorties API,887 routes chacune. Helper réel rejoué deux fois dans une fixture propre ; revue indépendante favorable. Aucun déploiement distant certifié.
+- Preuve : `docs/evidence/vercel-autobuild.json`. Procédure : `docs/release/DEPLOYMENT_RUNBOOK.md`. L’audit global des scénarios métier reste ouvert et n’est pas remplacé par ces preuves de build.
+
 ## 2026-11-03 — Réparation des validations CI des trois lots Administration
 
 - Tests temporels Maroc stabilisés sous Node 22.23.4 ; fixtures catalogue, Box, qualification, signature, mandat et Finance conformes aux préconditions natives. Frontières de requêtes explicites dans une unique transaction avec rollback ; contrôles TAP conservés.

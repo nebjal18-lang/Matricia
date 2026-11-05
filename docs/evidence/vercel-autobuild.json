@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "42927a1a57c068849ff5c2be824485a7ec304bf8",
+  "node": "22.23.4",
+  "pnpm": "10.17.1",
+  "build": "PASS",
+  "questionnaireTests": {
+    "passed": 32
+  },
+  "toolingTests": {
+    "passed": 42
+  },
+  "entries": {
+    "repository": {
+      "status": "PASS",
+      "adapter": "28.0.1",
+      "buildId": "95eVqUaeWa1u1ysIz8CZb",
+      "byType": {
+        "FileFsRef": 246,
+        "Lambda": 566,
+        "Prerender": 8,
+        "FileBlob": 3
+      },
+      "routeCount": 887,
+      "apiCount": 116
+    },
+    "web": {
+      "status": "PASS",
+      "adapter": "28.0.1",
+      "buildId": "95eVqUaeWa1u1ysIz8CZb",
+      "byType": {
+        "FileFsRef": 246,
+        "Lambda": 566,
+        "Prerender": 8,
+        "FileBlob": 3
+      },
+      "routeCount": 887,
+      "apiCount": 116
+    },
+    "domainCompatibility": {
+      "status": "PASS",
+      "adapter": "28.0.1",
+      "buildId": "95eVqUaeWa1u1ysIz8CZb",
+      "byType": {
+        "FileFsRef": 246,
+        "Lambda": 566,
+        "Prerender": 8,
+        "FileBlob": 3
+      },
+      "routeCount": 887,
+      "apiCount": 116
+    }
+  },
+  "relay": {
+    "aliases": 33,
+    "idempotence": "PASS",
+    "preservesExistingDependencies": true
+  },
+  "independentReview": "no material blocker",
+  "productionChanged": false,
+  "remoteDeploymentValidated": false
+}
