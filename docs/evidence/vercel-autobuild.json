@@ -14,7 +14,7 @@
     "repository": {
       "status": "PASS",
       "adapter": "28.0.1",
-      "buildId": "95eVqUaeWa1u1ysIz8CZb",
+      "buildId": "OH4oNfYIbaBGly-kFDka0",
       "byType": {
         "FileFsRef": 246,
         "Lambda": 566,
@@ -27,7 +27,7 @@
     "web": {
       "status": "PASS",
       "adapter": "28.0.1",
-      "buildId": "95eVqUaeWa1u1ysIz8CZb",
+      "buildId": "OH4oNfYIbaBGly-kFDka0",
       "byType": {
         "FileFsRef": 246,
         "Lambda": 566,
@@ -40,7 +40,7 @@
     "domainCompatibility": {
       "status": "PASS",
       "adapter": "28.0.1",
-      "buildId": "95eVqUaeWa1u1ysIz8CZb",
+      "buildId": "OH4oNfYIbaBGly-kFDka0",
       "byType": {
         "FileFsRef": 246,
         "Lambda": 566,
@@ -58,5 +58,13 @@
   },
   "independentReview": "no material blocker",
   "productionChanged": false,
-  "remoteDeploymentValidated": false
+  "remoteDeploymentValidated": false,
+  "lint": "PASS",
+  "franchiseActionTests": {
+    "passed": 10
+  },
+  "remoteChecks": {
+    "vercelPreview": "FAIL; private build log not accessible without Vercel authentication",
+    "database": "FAIL in existing 0193_franchise_provider_bridge_delivery.test.sql: pipeline enrichment changes stored version while the RPC returns an intermediate version; functional audit remains open"
+  }
 }

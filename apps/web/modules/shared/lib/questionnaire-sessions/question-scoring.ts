@@ -20,7 +20,7 @@ export function formatScore(value: bigint): string {
 
 export function toQuestionChoices(options: unknown): QuestionChoice[] {
   if (!Array.isArray(options)) return [];
-  return options.flatMap((item, index) => {
+  return options.flatMap((item) => {
     if (typeof item === "string" && item.trim()) {
       const label = item.trim();
       return [{ value: label, labelFr: label, labelAr: label }];

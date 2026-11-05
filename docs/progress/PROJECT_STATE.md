@@ -1,3 +1,9 @@
+## Build Vercel — suivi des vérifications distantes
+
+- Lint web complet et nouveau build complet PASS après capture du temps d’observation dans le loader serveur des invitations ; requête, contrôle d’expiration et autorisations conservés. Avertissement de variable inutilisée du scoring supprimé ; quatre régressions scoring et dix tests d’actions franchise PASS.
+- Packaging natif des trois racines rejoué sur le nouveau build : résultats identiques. Aperçu Vercel en échec, mais nouveau journal privé refusé faute d’authentification ; cause précise non établie et journal demandé au demandeur. Aucun succès de déploiement annoncé.
+- CI SQL : échec existant0193, version persistée5 contre2 attendue. Le trigger de rattrapage457400 ajoute des transitions après le lien230300 ; le RPC retourne une version intermédiaire. Constat conservé pour l’audit fonctionnel, sans modification de migration ou d’assertion pour masquer l’écart.
+
 ## Build Vercel — préconfiguration automatique du monorepo
 
 - Configurations natives Next pour racine, `apps/web` et compatibilité `packages/domain` (cas du journal fourni). Le relais utilise les vrais artefacts et dépendances web, conserve le build métier domaine et refuse les collisions avec les sources/dépendances existantes. Les quinze crons sont conservés et leurs endpoints vérifiés.
