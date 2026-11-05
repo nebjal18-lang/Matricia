@@ -38,6 +38,7 @@ export default async function ClientContractsPage({
     loadContractMissions(locale, space.selectedOrganizationId),
     loadClientAmendments(space.selectedOrganizationId),
   ]);
+  const contractAccessIssue = result.status === "error" && (result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" || result.reason === "FORBIDDEN_ORGANIZATION");
   const contracts = result.status === "success" ? result.dashboard.contracts : [];
   const missionsByContract = result.status === "success"
     ? Object.fromEntries(result.dashboard.missions.map((mission) => [mission.contractId, mission.id]))
@@ -57,12 +58,12 @@ export default async function ClientContractsPage({
       <main className="client-page space-y-5">
         {result.status === "error" ? (
           <Alert>
-            <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN" ? messages.noOrg : messages.loadError}</AlertTitle>
+            <AlertTitle>{contractAccessIssue ? messages.noOrg : messages.loadError}</AlertTitle>
             <AlertDescription>
-              {result.reason === "NO_ORGANIZATION" || result.reason === "FORBIDDEN"
+              {contractAccessIssue
                 ? messages.noOrg
                 : messages.loadError}
-              {result.reason !== "NO_ORGANIZATION" && result.reason !== "FORBIDDEN" ? (
+              {result.status === "error" && !contractAccessIssue ? (
                 <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? `مرجع ${result.reason}` : `Réf. ${result.reason}`}</span>
               ) : null}
             </AlertDescription>
