@@ -55,7 +55,10 @@
     "supabase": "2.117.0",
     "typescript": "5.9.3",
     "vitest": "5.0.3",
-    "vite": "8.1.6"
+    "vite": "8.1.6",
+    "next": "16.4.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "pnpm": {
     "overrides": {

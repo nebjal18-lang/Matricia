@@ -28,6 +28,13 @@ const approvalSchema = z.array(z.object({ id: z.string().uuid(), franchise_id: z
 const invitationSchema = z.array(z.object({ id: z.string().uuid(), franchise_id: z.string().uuid(), status: z.string(), expires_at: z.string() }));
 const organizationSchema = z.array(z.object({ id: z.string().uuid(), display_name: z.string() }));
 
+async function loadInvitations(client: Awaited<ReturnType<typeof getSupabaseServerClient>>, franchiseIds: string[]) {
+  const result = franchiseIds.length
+    ? await client.from("franchise_invitations").select("id,franchise_id,status,expires_at").in("franchise_id", franchiseIds).order("created_at", { ascending: false })
+    : { data: [], error: null };
+  return { ...result, observedAt: Date.now() };
+}
+
 const statusLabels: Record<string, { fr: string; ar: string }> = {
   REGISTERED: { fr: "Inscrit", ar: "مسجّل" },
   COMPANY_REVIEW: { fr: "Revue de la société", ar: "مراجعة الشركة" },
@@ -67,14 +74,13 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
     organizationIds.length ? client.from("organizations").select("id,display_name").in("id", organizationIds) : Promise.resolve({ data: [], error: null }),
     organizationIds.length ? client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", organizationIds).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]) : Promise.resolve({ data: [], error: null }),
     franchiseIds.length ? client.from("franchise_approval_requests").select("id,franchise_id,row_version,requested_by").in("franchise_id", franchiseIds).eq("status", "PENDING") : Promise.resolve({ data: [], error: null }),
-    franchiseIds.length ? client.from("franchise_invitations").select("id,franchise_id,status,expires_at").in("franchise_id", franchiseIds).order("created_at", { ascending: false }) : Promise.resolve({ data: [], error: null }),
+    loadInvitations(client, franchiseIds),
   ]);
   const organizations = new Map((organizationSchema.safeParse(organizationsResult.data).data ?? []).map((item) => [item.id, item.display_name]));
   const franchises = franchiseSchema.safeParse(franchisesResult.data).data ?? [];
   const approvals = approvalSchema.safeParse(approvalsResult.data).data ?? [];
   const invitations = invitationSchema.safeParse(invitationsResult.data).data ?? [];
   const bound = new Set(franchiseIds);
-  const now = Date.now();
   const models: Array<{ row: z.infer<typeof rowSchema>; model: FranchiseApplicationReviewModel; keys: { propose: string; approve: string; resend: string } }> = list.map((row) => {
     const approval = row.franchise_id ? approvals.find((item) => item.franchise_id === row.franchise_id) : undefined;
     const invitation = row.franchise_id ? invitations.find((item) => item.franchise_id === row.franchise_id) : undefined;
@@ -92,7 +98,7 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
         franchises: franchises.filter((item) => item.operator_organization_id === row.organization_id && !bound.has(item.id)).map((item) => ({ id: item.id, label: `${moroccoRegionLabel(item.territory_code, locale) || item.territory_code} · ${statusLabels[item.status]?.[locale] ?? item.status}` })),
         approval: approval ? { id: approval.id, rowVersion: approval.row_version, requestedByMe: approval.requested_by === auth.user?.id } : null,
         invitationId: invitation?.id ?? null,
-        invitationPending: Boolean(invitation && invitation.status === "SENT" && Date.parse(invitation.expires_at) > now),
+        invitationPending: Boolean(invitation && invitation.status === "SENT" && Date.parse(invitation.expires_at) > invitationsResult.observedAt),
       },
     };
   });
