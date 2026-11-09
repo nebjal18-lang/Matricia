@@ -26,7 +26,7 @@ function identityHash(localName: string) {
   return createHash("sha256").update(JSON.stringify({ firstName: localName, lastName: "Signer", email: `${localName}@example.test`, locale: "fr", level: "electronic_signature", authentication: "otp_email", fields: [{ type: "signature", document_id: documentId, page: 1, x: 42, y: 100 }] })).digest("hex");
 }
 function signerAudit(remoteId: string, localName: string, signedHash = "a".repeat(64)) {
-  return { version: 5, signature_request: { id: requestId }, signer: { id: remoteId, first_name: localName, last_name: "Signer", email_address: `${localName}@example.test`, signature_process_completed_at: "2026-11-09T12:00:00Z" }, documents: [{ id: documentId, initial_hash: sourceHash, signatures: [{ hash: signedHash }] }], authentication: { mode: "email" }, electronic_signature_level: { level: "Simple electronic signature" } };
+  return { version: 5, signature_request: { id: requestId, sent_at: "2026-11-09T11:59:00Z" }, signer: { id: remoteId, first_name: localName, last_name: "Signer", email_address: `${localName}@example.test`, consent_given_at: "2026-11-09T11:59:30Z", signature_process_completed_at: "2026-11-09T12:00:00Z" }, documents: [{ id: documentId, initial_hash: sourceHash, signatures: [{ hash: signedHash }] }], authentication: { mode: "email" }, electronic_signature_level: { level: "Simple electronic signature" } };
 }
 function signedMetadata(bytes: Uint8Array) {
   return { id: documentId, nature: "signable_document", content_type: "application/pdf", is_signed: true, sha256: createHash("sha256").update(bytes).digest("hex") };
@@ -267,6 +267,29 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
       json({ ...remoteSigner(signerId2, "local-client"), status: "signed" }), json(signerAudit(signerId2, "local-client")),
     ]);
     await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
+    expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["missing", undefined], ["invalid", "not-a-timestamp"], ["invalid calendar", "2026-02-31T11:59:30Z"],
+    ["after completion", "2026-11-09T12:00:01Z"], ["before sent", "2026-11-09T11:58:59Z"],
+    ["sub-millisecond after completion", "2026-11-09T12:00:00.000000001Z"],
+  ])("rejects %s explicit consent in an otherwise bound provider audit", async (_case, consent) => {
+    const audit = signerAudit(signerId1, "local-provider");
+    Object.assign(audit.signer, { consent_given_at: consent });
+    const pdf = new TextEncoder().encode("%PDF-1.7\nsigned bytes\n%%EOF");
+    const { provider, dependencies } = setup([json(remoteRequest("done")), json(signedMetadata(pdf)), new Response(pdf, { headers: { "content-type": "application/pdf" } }), json({ ...remoteSigner(signerId1, "local-provider"), status: "signed" }), json(audit)]);
+    await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_AUDIT_CONSENT_REQUIRED");
+    expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
+  });
+
+  it.each(["sent_at", "signature_process_completed_at"])("requires a valid %s to establish consent chronology", async field => {
+    const audit = signerAudit(signerId1, "local-provider");
+    if (field === "sent_at") audit.signature_request.sent_at = "";
+    else audit.signer.signature_process_completed_at = "invalid";
+    const pdf = new TextEncoder().encode("%PDF-1.7\nsigned bytes\n%%EOF");
+    const { provider, dependencies } = setup([json(remoteRequest("done")), json(signedMetadata(pdf)), new Response(pdf, { headers: { "content-type": "application/pdf" } }), json({ ...remoteSigner(signerId1, "local-provider"), status: "signed" }), json(audit)]);
+    await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_AUDIT_CONSENT_REQUIRED");
     expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
   });
 

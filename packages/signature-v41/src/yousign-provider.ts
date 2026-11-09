@@ -90,6 +90,23 @@ function signerFingerprint(value: Record<string, unknown>): string {
   return sha(JSON.stringify({ firstName: info.first_name, lastName: info.last_name, email: info.email.toLowerCase(), locale: info.locale, level: value.signature_level, authentication: value.signature_authentication_mode, fields }));
 }
 
+/** Compare provider timestamps without discarding sub-millisecond ordering. */
+function auditTimestamp(value: unknown): bigint {
+  if (typeof value !== "string") fail("YOUSIGN_AUDIT_CONSENT_REQUIRED");
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|[+-]\d{2}:\d{2})$/u.exec(value);
+  if (!match) fail("YOUSIGN_AUDIT_CONSENT_REQUIRED");
+  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number) as [number, number, number, number, number, number];
+  const base = Date.UTC(year, month - 1, day, hour, minute, second);
+  const calendar = new Date(base);
+  if (year < 1970 || month < 1 || month > 12 || day < 1 || calendar.getUTCDate() !== day || calendar.getUTCMonth() !== month - 1 || hour > 23 || minute > 59 || second > 59) fail("YOUSIGN_AUDIT_CONSENT_REQUIRED");
+  const zone = match[8]!;
+  const zoneHours = zone === "Z" ? 0 : Number(zone.slice(1, 3));
+  const zoneMinutes = zone === "Z" ? 0 : Number(zone.slice(4, 6));
+  if (zoneHours > 14 || zoneMinutes > 59 || zoneHours === 14 && zoneMinutes !== 0) fail("YOUSIGN_AUDIT_CONSENT_REQUIRED");
+  const offset = (zoneHours * 60 + zoneMinutes) * 60000 * (zone.startsWith("-") ? -1 : 1);
+  return BigInt(base - offset) * 1000000n + BigInt((match[7] ?? "").padEnd(9, "0"));
+}
+
 /** YouSign's documented JSON audit format binds initial document hashes to the
  * actual request and signer. An arbitrary JSON object is never sufficient. */
 function validateAudit(audit: Record<string, unknown>, requestId: string, state: YousignProviderRequestState, providerSignerId: string, remoteSigner: Record<string, unknown>): ReadonlyMap<string, readonly string[]> {
@@ -98,9 +115,12 @@ function validateAudit(audit: Record<string, unknown>, requestId: string, state:
   if (typeof audit.version !== "number" || !Number.isFinite(audit.version) || audit.version < 1
     || request.id !== requestId || signer.id !== providerSignerId || signer.first_name !== identity.first_name || signer.last_name !== identity.last_name
     || typeof signer.email_address !== "string" || typeof identity.email !== "string" || signer.email_address.toLowerCase() !== identity.email.toLowerCase()
-    || typeof signer.signature_process_completed_at !== "string" || !Number.isFinite(Date.parse(signer.signature_process_completed_at))
     || record(audit.electronic_signature_level).level !== "Simple electronic signature"
     || documents.length !== state.documents.length || new Set(documents.map(document => document.id)).size !== documents.length) fail("YOUSIGN_AUDIT_BINDING_MISMATCH");
+  const sentAt = auditTimestamp(request.sent_at);
+  const consentAt = auditTimestamp(signer.consent_given_at);
+  const completedAt = auditTimestamp(signer.signature_process_completed_at);
+  if (consentAt < sentAt || consentAt > completedAt) fail("YOUSIGN_AUDIT_CONSENT_REQUIRED");
   record(audit.authentication);
   const signedHashes = new Map<string, readonly string[]>();
   for (const expected of state.documents) {
