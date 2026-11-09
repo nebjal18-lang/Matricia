@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "observedAt": "2026-11-09T19:25:05.382265+00:00",
+  "observedAt": "2026-11-09T19:31:36.744202+00:00",
   "outcome": "PASS_SYNTHETIC_TECHNICAL_SCOPE",
   "productionEnabled": false,
   "providerCallsMade": 0,
@@ -23,11 +23,16 @@
       "passedAssertions": 21
     },
     "nativeLiveWorkflow": {
-      "passedAssertions": 64,
+      "passedAssertions": 66,
       "rollback": true,
       "database": "owned local validation clone",
       "fixturesSynthetic": true,
       "includesRotationAndDeactivationDenial": true
+    },
+    "adoptionLifecycle": {
+      "passedAssertions": 7,
+      "firstDraftAndRejectedDoNotAdopt": true,
+      "activationAndRetirementRetainAdoption": true
     }
   },
   "independentReview": {
@@ -49,7 +54,9 @@
     "supabase/migrations/20261109111000_yousign_governed_live_transport.sql": "003482284ccaa54c7c1469b4c8e31174b6a2bdb1fd63f44f05f69f8927fac03c",
     "supabase/tests/0390_yousign_sandbox_transport.test.sql": "4bd57ab1c635e3a9f30d413c5d2700b2113e110dadea59fdf4a680bdf245257c",
     "supabase/tests/0392_yousign_governed_live_transport.test.sql": "16c365d5394cd6c82eb24715fe6f857d578fe80bec66c204f087e1de411d4431",
-    "scripts/release/yousign-live-acceptance.mjs": "ff56d315ec53934d92eb21d48ac04cf9477296f8561967d364cdb77a292ad1ba"
+    "scripts/release/yousign-live-acceptance.mjs": "c3fd2d2a28365a342b2ec314376a4150e522ef7da7867600977524cb36091a7f",
+    "supabase/migrations/20261109112000_yousign_configuration_adoption_guard.sql": "a54120f2fa50e39e6e2a661ae73837a00b4972c2df9bf9c11d75c4eacc16ef2f",
+    "supabase/tests/0393_yousign_configuration_adoption.test.sql": "325701171f4bdabf5d860c433a725740793460b43dd4fd16d7fde20ec615b695"
   },
   "remaining": [
     "Real YouSign connection and native signature recipe with approved credentials",

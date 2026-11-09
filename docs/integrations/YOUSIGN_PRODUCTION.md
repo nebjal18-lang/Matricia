@@ -22,7 +22,7 @@ Les webhooks doivent porter le drapeau sandbox authentifié correspondant à l�
 
 ## Rotation et désactivation
 
-Chaque nouvelle révision de clés crée une version technique fournisseur distincte. Elle n’hérite jamais implicitement de l’attestation d’un ancien compte. Dès que YouSign est géré dans Configuration, la version fournisseur d’une enveloppe doit être liée à la révision actuellement active. Une rotation ou désactivation bloque les anciennes enveloppes avant tout appel fournisseur ; une réconciliation explicite est nécessaire.
+Chaque nouvelle révision de clés crée une version technique fournisseur distincte. Elle n’hérite jamais implicitement de l’attestation d’un ancien compte. Un premier brouillon ou refus ne coupe pas les opérations gouvernées existantes. Dès qu’une première révision YouSign a été activée dans Configuration, la version fournisseur d’une enveloppe doit être liée à la révision actuellement active. Une rotation ou désactivation bloque les anciennes enveloppes avant tout appel fournisseur ; une réconciliation explicite est nécessaire.
 
 ## Limites de la preuve
 
