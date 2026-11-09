@@ -5,14 +5,14 @@ import { openMatFuncSession } from "./helpers/mat-func-session";
 
 const copy = {
   fr: {
-    title: "Coffre documentaire transversal",
+    title: "Documents",
     link: "Lier un document",
     submit: "Créer la liaison",
     success: "Opération enregistrée.",
     purpose: "Réutilisation contrôlée MAT-FUNC-028 depuis le coffre Client",
   },
   ar: {
-    title: "خزنة المستندات المشتركة",
+    title: "الوثائق",
     link: "ربط مستند",
     submit: "إنشاء الوصلة",
     success: "تم تسجيل العملية.",

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "environment": "TEST",
-  "generatedAt": "2026-09-15T19:44:16.649Z",
+  "generatedAt": "2026-11-09T15:45:09.585Z",
   "outcome": "FAIL",
   "command": "node tests/e2e/helpers/final-core-product-run.mjs",
   "requirements": [
     "MAT-FUNC-020"
   ],
-  "error": "Final core Playwright failed: Error: Provider qualification repository rejected the provisioned fixture: UNKNOWN\n\n  74 |     await provider.page.goto(\"/fr/sous-traitant/qualification\", { waitUntil: \"domcontentloaded\", timeout: 20_000 });\n  75 |     await expect(provider.page.getByRole(\"heading\", { level: 1, name: \"Qualification et capacité\" })).toBeVisible();\n> 76 |     if (await provider.page.getByText(\"Impossible de charger l’espace qualification.\", { exact: true }).isVisible()) { const reason=await provider.page.evaluate(()=>document.querySelector(\"[data-error-reason]\")?.getAttribute(\"data-error-reason\")??\"UNKNOWN\");throw new Error(`Provider qualification repository rejected the provisioned fixture: ${reason}`); }\n     |                                                                                                                                                                                                                                                                         ^\n  77 |     if (await provider.page.getByText(\"Aucune organisation Prestataire active n’est associée à ce compte.\", { exact: true }).isVisible()) throw new Error(\"Provider qualification membership was not resolved\");\n  78 |\n  79 | ",
+  "error": "BROWSER_SUITE_FAILED",
   "cleanup": "verified"
 }

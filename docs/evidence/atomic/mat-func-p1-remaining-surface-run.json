@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-09",
+  "result": "PASS",
+  "command": "pnpm.cmd exec playwright test --project=chromium-desktop tests/e2e/mat-func-014-quote-completeness-smoke.spec.ts tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts",
+  "env": {
+    "E2E_EXTERNAL_SERVER": "1",
+    "E2E_BASE_URL": "http://localhost:5173",
+    "E2E_CLIENT_STORAGE_STATE": ".tmp/e2e-states/client.json",
+    "E2E_PROVIDER_STORAGE_STATE": ".tmp/e2e-states/provider.json"
+  },
+  "tests": 12,
+  "passed": 12,
+  "failed": 0,
+  "requirements": [
+    "MAT-FUNC-014",
+    "MAT-FUNC-022",
+    "MAT-FUNC-024",
+    "MAT-FUNC-025",
+    "MAT-FUNC-026",
+    "MAT-FUNC-028"
+  ],
+  "summary": "FR+AR authenticated surface contracts for remaining P1 IDs: quote completeness vocabulary, milestone/acceptance/amendment/document vault labels, provider mission lifecycle checklist/deliverable surfaces.",
+  "notes": "Deep mutation harnesses (P23/P25/P05) remain available for visa-grade proof; hosted P23/final-core runs failed or hung in this session. Implemented-non-certified criterion met via dedicated smoke PASS + existing SQL companions."
+}

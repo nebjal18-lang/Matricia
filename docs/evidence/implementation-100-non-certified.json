@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-09",
+  "definition": "IMPLEMENTED_NON_CERTIFIED = VERIFIED + PENDING:visa-independant only (no production, no independent visas)",
+  "counts": {
+    "total": 76,
+    "verified": 5,
+    "visaOnly": 71,
+    "implementedNonCertified": "76/76",
+    "verifiedPct": "≈7%"
+  },
+  "releaseGate": "REFUSED until independent visas + external P0 (YouSign live, etc.)",
+  "lastClosedBatch": {
+    "ids": ["MAT-FUNC-014", "MAT-FUNC-020", "MAT-FUNC-022", "MAT-FUNC-023", "MAT-FUNC-024", "MAT-FUNC-025", "MAT-FUNC-026", "MAT-FUNC-028", "MAT-FUNC-058", "MAT-FUNC-061", "MARKETING-002", "MARKETING-003", "MARKETING-004", "MARKETING-005", "MARKETING-008"],
+    "evidence": [
+      "docs/evidence/atomic/mat-func-058-field-help-run.json",
+      "docs/evidence/atomic/mat-func-061-accessibility-run.json",
+      "docs/evidence/atomic/mat-func-020-capacity-smoke-run.json",
+      "docs/evidence/atomic/mat-func-023-proof-scan-smoke-run.json",
+      "docs/evidence/atomic/mat-func-p1-remaining-surface-run.json",
+      "docs/evidence/atomic/marketing-002-008-unit-run.json",
+      "docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json"
+    ]
+  }
+}

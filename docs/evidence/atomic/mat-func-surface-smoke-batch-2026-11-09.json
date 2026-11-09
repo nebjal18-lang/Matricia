@@ -1,0 +1,30 @@
+{
+  "kind": "authenticated-surface-smoke-batch",
+  "executedAt": "2026-11-09T15:37:00Z",
+  "baseURL": "http://localhost:5173",
+  "auth": "demo personas → .tmp/e2e-states/{client,provider,franchise,admin}.json",
+  "commands": [
+    "node .tmp/gen-mat-func-storage-states.mjs",
+    "pnpm exec playwright test ... mat-func-*-atomic-smoke / marketing / 054 / 056 / 059 / 060 (chromium-desktop)"
+  ],
+  "results": {
+    "batch2": { "total": 48, "passed": 48, "failed": 0 },
+    "batch3": { "total": 37, "passed": 37, "failed": 0 },
+    "unit": {
+      "mat-func-056-progression-contract": "6 passed",
+      "mat-func-059-locale-contract": "included in 6",
+      "mat-func-061-design-tokens": "1 passed"
+    }
+  },
+  "promotedToVisaOnly": [
+    "MAT-FUNC-006","MAT-FUNC-015","MAT-FUNC-016","MAT-FUNC-017","MAT-FUNC-029","MAT-FUNC-030","MAT-FUNC-031","MAT-FUNC-032","MAT-FUNC-033","MAT-FUNC-034","MAT-FUNC-035","MAT-FUNC-036","MAT-FUNC-037","MAT-FUNC-039","MAT-FUNC-040","MAT-FUNC-041","MAT-FUNC-042","MAT-FUNC-043","MAT-FUNC-045","MAT-FUNC-046","MAT-FUNC-047","MAT-FUNC-048","MAT-FUNC-049","MAT-FUNC-050","MAT-FUNC-052","MAT-FUNC-053","MAT-FUNC-054","MAT-FUNC-055","MAT-FUNC-056","MAT-FUNC-057","MAT-FUNC-059","MAT-FUNC-060","MAT-FUNC-062","MAT-FUNC-063","MAT-FUNC-064","MAT-FUNC-065","MAT-FUNC-066","MAT-FUNC-067","MAT-FUNC-068",
+    "MARKETING-001","MARKETING-006","MARKETING-007"
+  ],
+  "limits": [
+    "These are authenticated FR/AR surface smokes (heading/lang/dir/no-500/no-overflow), not deep mutation E2E for every PENDING motif.",
+    "Franchise performance/relances may render access-gate copy for the demo persona; route still authenticated and stable.",
+    "Deep P1 mutation specs (014/022/024/025/026/028) remain separate and not promoted here.",
+    "MAT-FUNC-058/061 axe/help smokes not in the green promotion set of this batch."
+  ],
+  "newSignoff": "PENDING:visa-independant"
+}

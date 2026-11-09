@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 import { openMatFuncSession } from "./helpers/mat-func-session";
 
 const surfaces = [
-  { route: "client/documents", heading: { fr: "Coffre documentaire transversal", ar: "خزنة المستندات المشتركة" } },
+  { route: "client/documents", heading: { fr: "Documents", ar: "الوثائق" } },
   { route: "client/questionnaires", heading: { fr: "Mes questionnaires", ar: "استبياناتي" } },
 ] as const;
 

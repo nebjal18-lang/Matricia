@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-09",
+  "result": "PASS",
+  "command": "pnpm.cmd exec vitest run modules/shared/lib/marketing-autopilot/content-engine.test.ts modules/shared/lib/marketing-autopilot/publisher.test.ts modules/shared/lib/marketing-autopilot/funnel.test.ts modules/shared/lib/marketing-autopilot/brand-defaults-model.test.ts",
+  "cwd": "apps/web",
+  "tests": 25,
+  "passed": 25,
+  "failed": 0,
+  "requirements": ["MARKETING-002", "MARKETING-003", "MARKETING-004", "MARKETING-005", "MARKETING-008"],
+  "notes": "Sandbox publisher/content/funnel contracts PASS. MARKETING-005 live credentials remain out of scope for implemented-non-certified; sandbox path is accepted per PROMPT_100."
+}

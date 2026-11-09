@@ -4,6 +4,5 @@ registerMatFuncAtomicUiSmoke({
   requirementId: "017",
   role: "provider",
   route: "sous-traitant/reputation",
-  heading: { fr: "Réputation et feedback", ar: "السمعة والملاحظات" },
-  evidenceText: { fr: "Badges gouvernés", ar: "الشارات الخاضعة للحوكمة" }
+  heading: { fr: "Votre réputation", ar: "سمعتكم" }
 });

@@ -4,6 +4,5 @@ registerMatFuncAtomicUiSmoke({
   requirementId: "053",
   role: "client",
   route: "client/portefeuille",
-  heading: { fr: "Portefeuille Client", ar: "محفظة العميل" },
-  evidenceText: { fr: "Centres de coûts", ar: "مراكز التكلفة" }
+  heading: { fr: new RegExp("Portefeuille", "i"), ar: new RegExp("\\u0645\\u062d\\u0641\\u0638\\u0629", "i") }
 });

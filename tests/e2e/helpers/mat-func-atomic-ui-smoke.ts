@@ -47,9 +47,14 @@ export function registerMatFuncAtomicUiSmoke(surface: MatFuncAtomicSurface) {
         expect(response!.status()).toBeLessThan(500);
         await expect(page.locator("html")).toHaveAttribute("lang", locale);
         await expect(page.locator("html")).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
-        await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible();
+        const heading = surface.heading[locale];
+        const h1 = page.locator("h1").first();
+        await expect(h1).toBeVisible();
+        if (heading instanceof RegExp) await expect(h1).toHaveText(heading);
+        else await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
         if (surface.evidenceText) {
-          await expect(page.getByText(surface.evidenceText[locale]).first()).toBeVisible();
+          const evidence = surface.evidenceText[locale];
+          await expect(page.getByText(evidence).first()).toBeVisible({ timeout: 8_000 });
         }
         await expect(page.locator("body")).not.toContainText(/Application error|Internal Server Error|ChunkLoadError/u);
         await assertNoHorizontalOverflow(page);
