@@ -23,6 +23,7 @@ import { readWorkerRuntimeConfig } from "./worker-config";
 import { buildWorkerReadiness, createWorkerCycle, workerHeartbeatHealthy } from "./worker-cycle";
 import { createFranchiseFollowupScheduler } from "./franchise-followups";
 import { createBoundedFetch } from "./bounded-fetch";
+import { createWorkerLoop } from "./worker-loop";
 
 async function start(): Promise<void> {
   const config = readWorkerRuntimeConfig(process.env);
@@ -99,9 +100,12 @@ async function start(): Promise<void> {
     await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "CLAMAV", p_healthy: Boolean(cycle.getState().antivirus?.ok), p_expires_after_seconds: 60 });
     await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "SCANNER_HTTP", p_healthy: Boolean(cycle.getState().antivirus?.ok), p_expires_after_seconds: 60 });
   };
-  void cycle.run().then(recordHeartbeat).catch(() => {});
-  const timer = setInterval(() => void cycle.run().then(recordHeartbeat).catch(() => {}), 5_000);
+  const loop = createWorkerLoop({ runCycle: cycle.run, recordHeartbeat });
+  void loop.run().catch(() => {});
+  const timer = setInterval(() => void loop.run().catch(() => {}), 5_000);
   timer.unref();
+  const heartbeatTimer = setInterval(() => void loop.heartbeat().catch(() => {}), 15_000);
+  heartbeatTimer.unref();
   const followupTimer = setInterval(() => void runFranchiseFollowups().catch(() => log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "franchise.followup.scheduler", outcome: "failure", actorId: workerId, errorCode: "FRANCHISE_FOLLOWUP_CYCLE_FAILED" })), 30_000);
   followupTimer.unref();
   const runBilling=()=>void runProviderBilling().catch(()=>log("error",{requestId:randomUUID(),correlationId:randomUUID(),event:"provider.billing.scheduler",outcome:"failure",errorCode:"PROVIDER_BILLING_CYCLE_FAILED"}));

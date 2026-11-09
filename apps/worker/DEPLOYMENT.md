@@ -96,6 +96,13 @@ la readiness ; un ancien succès ne la maintient pas indéfiniment. Les heartbea
 antivirus/scanner relisent cet état avant leur envoi. `/health` reste un contrôle
 de vie du processus, distinct de la readiness des dépendances.
 
+Les ticks de polling concurrents partagent une seule promesse de cycle et un seul
+heartbeat de fin ; un lot long ne crée pas une rafale de callbacks en attente.
+Un timer distinct peut publier les heartbeats toutes les 15 secondes pendant ce
+lot. Les publications concurrentes partagent elles aussi une seule tâche de
+publication en cours ; elles utilisent toujours la fraîcheur observée au moment
+de la lecture, sans renouveler un ancien succès Outbox expiré.
+
 Les emails ne s’activent pas avec le seul nom `EMAIL_PROVIDER`. L’adaptateur web
 exige `EMAIL_DELIVERY_MODE=EXTERNAL`, `EMAIL_LIVE_DELIVERY_ENABLED=true`, une
 allowlist explicite de destinataires et soit Resend configuré, soit le fournisseur
