@@ -19,6 +19,7 @@ describe("Admin configuration UI", () => {
     expect(html).toContain('name="sourceRevisionId" value="'+other+'"'); expect(html).toContain('name="expectedActiveId" value=""');
     expect(html).toContain('href="/fr/administration/politiques-contrats"'); expect(html).toContain('href="/fr/administration/utilisateurs"');
     expect(html).toContain('href="#configuration-step-review"'); expect(html).toContain('value="0"');
+    expect(html).not.toContain("<h4");
     expect(html).toContain("ne certifie ni la livraison"); expect(html).not.toContain("prête pour la production");
   });
   it("never renders a private key even if it is accidentally present in settings", () => {
