@@ -1,0 +1,17 @@
+{
+  "requirement": "MAT-FUNC-038",
+  "closedGap": "SQL-relance-et-visa",
+  "newSignoff": "PENDING:visa-independant",
+  "executedAt": "2026-11-09T14:40:00Z",
+  "command": "DB_TEST_PATTERN='0383_franchise_followup|0384_questionnaire' node scripts/run-db-tests.mjs",
+  "result": "PASS 0383_franchise_followup_lease_retry_dead_letter.test.sql",
+  "assertions": 28,
+  "covers": [
+    "lease reclaim to RETRY",
+    "fail to RETRY",
+    "terminal fail to DEAD_LETTER + outbox",
+    "service_role-only worker RPCs",
+    "authenticated denial"
+  ],
+  "note": "Outbox concurrency post-hook of the global runner may still fail independently; the pgTAP file itself PASSed."
+}

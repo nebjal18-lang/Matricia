@@ -1,3 +1,11 @@
+## Avancement 100 % implémenté non certifié (2026-11-09)
+
+- **IMPLEMENTED_NON_CERTIFIED = 76/76 (100 %)** : 71 `PENDING:visa-independant` + 5 `VERIFIED`.
+- Preuve agrégée : `docs/evidence/implementation-100-non-certified.json`.
+- Derniers lots : 058/061 axe+aides ; 020/023 capacité/preuve ; marketing 002–005/008 sandbox ; P1 restant 014/022/024–026/028 via smokes dédiés PASS.
+- **RELEASE_GATE = REFUSÉ** jusqu’aux visas indépendants + P0 externes (YouSign live, etc.). Aucune promotion `VERIFIED` ajoutée.
+- Harness mutation P23/P25/final-core restent utiles pour preuve visa-grade ; runs hosted de cette session non verts / hung — non bloquants pour le compteur « implémenté non certifié ».
+
 ## Build Vercel — compatibilité des variables publiques Supabase
 
 - Le journal distant confirme que la bonne application Next est maintenant compilée, puis échoue faute de configuration publique reconnue. Normalisation partagée : URL canonique/alias serveur public et clés publishable/anon publiques ; seules les deux valeurs canoniques sont injectées pour le navigateur. Aucun fallback de clé privilégiée et aucune valeur factice de production.

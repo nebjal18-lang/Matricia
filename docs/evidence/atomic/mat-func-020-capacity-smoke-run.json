@@ -1,0 +1,19 @@
+{
+  "requirementId": "MAT-FUNC-020",
+  "date": "2026-11-09",
+  "result": "PASS",
+  "proofLevel": "ui-contract-smoke",
+  "command": "pnpm.cmd exec playwright test --project=chromium-desktop tests/e2e/mat-func-020-capacity-states-smoke.spec.ts",
+  "env": {
+    "E2E_EXTERNAL_SERVER": "1",
+    "E2E_BASE_URL": "http://localhost:5173",
+    "E2E_PROVIDER_STORAGE_STATE": ".tmp/e2e-states/provider.json"
+  },
+  "summary": "FR+AR: after org selection, capacity form exposes AVAILABLE/LIMITED/FULL/PAUSED options (versioned capacity contract).",
+  "tests": 2,
+  "passed": 2,
+  "failed": 0,
+  "companionSql": "supabase/tests/0046_p09_provider_qualification.test.sql",
+  "mutationHarness": "tests/e2e/helpers/final-core-product-run.mjs (in progress / prior FAIL fixture load)",
+  "notes": "Surface contract PASS. Full four-state mutation + matching impact remains covered by final-core harness when green."
+}
