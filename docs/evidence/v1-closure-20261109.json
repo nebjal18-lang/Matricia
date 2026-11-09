@@ -191,7 +191,7 @@
       "bytes": 42958
     },
     "work/v1-closure/inventory.json": {
-      "sha256": "cd8d69b9839443c825714ebe6913ac62c7c24720c538c4a38aa8b2ebb3b5d0ea",
+      "sha256": "cb99df26e4645a1cdffe4adc54da7909ef6b28aeaf87b28af00d62228923edf3",
       "bytes": 105477
     },
     "artifacts/test-results/playwright/public-experience-public-e-16b71-bonnements-et-accessibilité-chromium-desktop/home-ar.png": {
@@ -229,13 +229,536 @@
     "docs/evidence/v1-closure-sql-full-20261109.json": {
       "sha256": "e2f197ca5174c45efb3295d2d9ed3f5669e4ae8bf5c6202fbe550373d1e4049a",
       "bytes": 19275
+    },
+    "work/v1-closure/release-final.log": {
+      "sha256": "d62f9b6ce525cdd6959191b6ca4604e49d72364c5970ac52556af165223f83fc",
+      "bytes": 3146
     }
   },
   "release": {
     "status": "REFUSED",
     "verifiedRequirements": 5,
     "totalRequirements": 76,
-    "newVerifiedRequirements": 0
+    "newVerifiedRequirements": 0,
+    "exitCode": 1,
+    "conditionsNotSatisfied": 73,
+    "evaluatedCommit": "fffb00f8e3fd7fb8aa54ba5b774111e8c04cc4a1",
+    "worktreeWasFrozen": true,
+    "failureCodes": [
+      "INTERACTION_RUNTIME_PROOF_REQUIRED",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-002",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-003",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-004",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-005",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-006",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-008",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-009",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-010",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-011",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-012",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-014",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-015",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-016",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-017",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-020",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-021",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-022",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-023",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-024",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-025",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-026",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-027",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-028",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-029",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-030",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-031",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-032",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-033",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-034",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-035",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-036",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-037",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-038",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-039",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-040",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-041",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-042",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-043",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-044",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-045",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-046",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-047",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-048",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-049",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-050",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-051",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-052",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-053",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-054",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-055",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-056",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-057",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-058",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-059",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-060",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-061",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-062",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-063",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-064",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-065",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-066",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-067",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-068",
+      "REGISTRY_NOT_APPROVED:MARKETING-001",
+      "REGISTRY_NOT_APPROVED:MARKETING-002",
+      "REGISTRY_NOT_APPROVED:MARKETING-003",
+      "REGISTRY_NOT_APPROVED:MARKETING-004",
+      "REGISTRY_NOT_APPROVED:MARKETING-005",
+      "REGISTRY_NOT_APPROVED:MARKETING-006",
+      "REGISTRY_NOT_APPROVED:MARKETING-007",
+      "REGISTRY_NOT_APPROVED:MARKETING-008",
+      "RELEASE_MANIFEST_MISSING_OR_INVALID"
+    ],
+    "conditions": [
+      {
+        "code": "INTERACTION_RUNTIME_PROOF_REQUIRED",
+        "classification": "MISSING_RELEASE_EVIDENCE",
+        "owner": "release-orchestrator",
+        "evidenceReferences": null
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-002",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-003",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-004",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-005",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-006",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "admin_command_center_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-008",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-009",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-010",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "library_catalog_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-011",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-012",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "client_onboarding_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-014",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "quote_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-015",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "quote_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-016",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_qualification_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-017",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_qualification_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-020",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_qualification_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-021",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-022",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-023",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-024",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-025",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-026",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-027",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "domain_modeler",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-027-immutable-inventory-run.json]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-028",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "privacy_data_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-029",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-030",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_finance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-031",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_finance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-032",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "payments_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-033",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "boxes_credits_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-034",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "boxes_credits_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-035",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "subscription_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-036",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "franchise_governance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-037",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "franchise_governance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-038",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-038-sql-relance-run.json]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-039",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-040",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-041",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-042",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-043",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-044",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-044-sql-abandons-run.json]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-045",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-046",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-047",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-048",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-049",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-050",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-051",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "auth_identity_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-052",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "auth_identity_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-053",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "client_onboarding_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-054",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-055",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-056",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "ux_information_architect",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-057",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-058",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "ux_information_architect",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-059",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-060",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-061",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-062",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_finance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-063",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-064",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-065",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "admin_command_center_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-066",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "admin_command_center_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-067",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-068",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "security_architect",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-001",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-content-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-002",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-content-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-003",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-content-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-004",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-automation-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-005",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "social-integration-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-006",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-analytics-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-007",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-automation-agent",
+        "evidenceReferences": "[docs/traceability/V1_ATOMIC_GAP_AUDIT_2026-09-13.md, docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-008",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-analytics-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "RELEASE_MANIFEST_MISSING_OR_INVALID",
+        "classification": "MISSING_RELEASE_EVIDENCE",
+        "owner": "release-orchestrator",
+        "evidenceReferences": null
+      }
+    ]
   },
   "openPrerequisites": [
     "Identified authorized staging deployment and its actual secret bindings",
@@ -335,5 +858,6 @@
       "cwd": "."
     }
   },
-  "applicationTree": "b44e18dd4d3b7df4f7a7b8a1cb07ae2c549ffc31"
+  "applicationTree": "b44e18dd4d3b7df4f7a7b8a1cb07ae2c549ffc31",
+  "inventoryEvidence": "docs/evidence/v1-closure-inventory-20261109.json"
 }
