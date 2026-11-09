@@ -31,16 +31,16 @@ const allowlist = text.pipe(z.string().min(3)).refine(value => value.split(",").
 export const sectionSettingsSchemas = {
   COMPANY: z.object({legalName:short.pipe(z.string().min(2)),displayName:short.pipe(z.string().min(2)),ice:blankOptional(z.string().regex(/^\d{15}$/u)),rc:short,ifNumber:short,address:text.pipe(z.string().min(3)),city:short.pipe(z.string().min(2)),country:z.string().regex(/^[A-Z]{2}$/u),currency:z.string().regex(/^[A-Z]{3}$/u),supportEmail:email,supportPhone:short,websiteUrl:blankOptional(https),defaultLocale:z.enum(["fr","ar"]),timezone:short.pipe(z.string().min(1)).refine(value=>{try{new Intl.DateTimeFormat("fr",{timeZone:value});return true;}catch{return false;}})}).strict(),
   RESEND:z.object({RESEND_FROM_EMAIL:email,RESEND_FROM_NAME:short.refine(v=>!/[\r\n<>]/u.test(v)),EMAIL_RECIPIENT_ALLOWLIST:allowlist}).strict(),
-  PAYPAL:z.object({PAYPAL_ENV:z.enum(["sandbox","live"]),PAYPAL_CLIENT_ID:z.string().trim().min(8).max(512),PAYPAL_WEBHOOK_ID:z.string().trim().min(6).max(100),PAYPAL_WEBHOOK_CERT_URL:https.refine(raw=>{const u=new URL(raw);return ["api.paypal.com","api.sandbox.paypal.com"].includes(u.hostname)&&/^\/v1\/notifications\/certs\/[A-Za-z0-9_-]+$/u.test(u.pathname)&&!u.search;}),PAYPAL_ALLOWED_CURRENCIES:z.string().trim().max(300).refine(v=>v.split(",").every(c=>/^[A-Z]{3}$/u.test(c.trim())))}).strict(),
+  PAYPAL:z.object({PAYPAL_ENV:z.enum(["sandbox","live"]),PAYPAL_CLIENT_ID:z.string().trim().min(8).max(512),PAYPAL_WEBHOOK_ID:z.string().trim().min(6).max(100),PAYPAL_WEBHOOK_CERT_URL:https.refine(raw=>{const u=new URL(raw);return ["api-m.paypal.com","api-m.sandbox.paypal.com"].includes(u.hostname)&&/^\/v1\/notifications\/certs\/[A-Za-z0-9_-]+$/u.test(u.pathname)&&!u.search;}),PAYPAL_ALLOWED_CURRENCIES:z.string().trim().max(300).refine(v=>v.split(",").every(c=>/^[A-Z]{3}$/u.test(c.trim())))}).strict(),
   YOUSIGN:z.object({YOUSIGN_ENVIRONMENT:z.enum(["sandbox","live"]),YOUSIGN_WORKSPACE_ID:blankOptional(z.string().uuid())}).strict(),
   SCANNER:z.object({MALWARE_SCANNER_URL:https,MALWARE_SCANNER_ALLOWED_HOSTS:z.string().trim().min(3).max(1000).refine(v=>v.split(",").every(h=>/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/iu.test(h.trim())))}).strict(),
 } as const;
 export const sectionSecretsSchemas = {
   COMPANY:z.object({}).strict(),
-  RESEND:z.object({RESEND_API_KEY:secret,RESEND_WEBHOOK_SECRET:secret}).strict(),
+  RESEND:z.object({RESEND_API_KEY:secret.pipe(z.string().min(24)),RESEND_WEBHOOK_SECRET:z.string().regex(/^whsec_[A-Za-z0-9+/]{32,}={0,2}$/u)}).strict(),
   PAYPAL:z.object({PAYPAL_CLIENT_SECRET:secret,PAYPAL_WEBHOOK_CERTIFICATE_PEM_BASE64:z.string().min(100).max(48000).regex(/^[A-Za-z0-9+/]+={0,2}$/u)}).strict(),
-  YOUSIGN:z.object({YOUSIGN_API_KEY:secret,YOUSIGN_WEBHOOK_SECRET:secret}).strict(),
-  SCANNER:z.object({MALWARE_SCANNER_TOKEN:secret}).strict(),
+  YOUSIGN:z.object({YOUSIGN_API_KEY:secret,YOUSIGN_WEBHOOK_SECRET:secret.pipe(z.string().min(32))}).strict(),
+  SCANNER:z.object({MALWARE_SCANNER_TOKEN:secret.pipe(z.string().min(32)).refine(v=>!/[\s]/u.test(v))}).strict(),
 } as const;
 export function parseConfigurationValues(section:ConfigurationSection,settings:Record<string,string>,secrets:Record<string,string>){
   return {settings:sectionSettingsSchemas[section].parse(settings) as Record<string,string>,secrets:sectionSecretsSchemas[section].parse(secrets) as Record<string,string>};
