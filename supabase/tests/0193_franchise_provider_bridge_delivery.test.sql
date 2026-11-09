@@ -119,7 +119,7 @@ insert into functional_results values('LINK_REPLAY',public.link_franchise_provid
 reset role;
 select is((select value from functional_results where kind='LINK'),(select value from functional_results where kind='LINK_REPLAY'),'provider bridge command is idempotent');
 select is((select linked_organization_id from public.franchise_crm_prospects where id='d8993000-0000-4000-8000-000000000001'),'f1541000-0000-4000-8000-000000000002'::uuid,'explicit organization identifier is persisted');
-select is((select row_version from public.franchise_crm_prospects where id='d8993000-0000-4000-8000-000000000001'),2,'link advances optimistic version once');
+select ok((select row_version from public.franchise_crm_prospects where id='d8993000-0000-4000-8000-000000000001') = 5 and (select (value->>'row_version')::integer from functional_results where kind='LINK') = 5,'RPC returns final persisted version after native OPENED/REGISTERED/PROFILE_STARTED catch-up');
 select is((select jsonb_array_length(value)from functional_results where kind='DOSSIERS'),2,'dossier projection includes both scoped provider organizations');
 select is((select p->'qualifications'->0->>'status'from functional_results cross join lateral jsonb_array_elements(value)p where kind='DOSSIERS'and p->>'organizationId'='f1541000-0000-4000-8000-000000000002'),'APPROVED','provider A keeps its own approved qualification');
 select is((select p->'capacities'->0->>'status'from functional_results cross join lateral jsonb_array_elements(value)p where kind='DOSSIERS'and p->>'organizationId'='f1541000-0000-4000-8000-000000000003'),'FULL','provider B keeps its own unavailable capacity');
