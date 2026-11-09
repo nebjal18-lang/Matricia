@@ -17,10 +17,13 @@ for (let n = 0; n < args.length; n += 2) {
 }
 const root = resolve(options['--root'] ?? resolve(dirname(fileURLToPath(import.meta.url)), '../../..'));
 const runtimePath = resolve(options['--runtime'] ?? resolve(root, 'work/admin-configuration-native/runtime.private.json'));
-const config = JSON.parse(await readFile(runtimePath, 'utf8'));
+let config;
 function localEndpoint(raw, port) { const u = new URL(raw); return u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === String(port) && !u.username && !u.password && !u.search && !u.hash; }
-const databaseUrl = new URL(config.databaseUrl);
-if (!localEndpoint(config.baseUrl, 5183) || !localEndpoint(config.supabaseUrl, 55419) || databaseUrl.hostname !== '127.0.0.1' || databaseUrl.port !== '55322' || !/^\/matricia_admin_configuration_browser_[0-9]+$/u.test(databaseUrl.pathname) || config.database !== databaseUrl.pathname.slice(1)) throw Error('EXPLICIT_OWNED_LOCAL_CONFIGURATION_STACK_REQUIRED');
+try {
+  config = JSON.parse(await readFile(runtimePath, 'utf8'));
+  const databaseUrl = new URL(config.databaseUrl);
+  if (!localEndpoint(config.baseUrl, 5183) || !localEndpoint(config.supabaseUrl, 55419) || databaseUrl.hostname !== '127.0.0.1' || databaseUrl.port !== '55322' || !/^\/matricia_admin_configuration_browser_[0-9]+$/u.test(databaseUrl.pathname) || config.database !== databaseUrl.pathname.slice(1)) throw Error('TARGET_INVALID');
+} catch { throw Error('EXPLICIT_OWNED_LOCAL_CONFIGURATION_STACK_REQUIRED'); }
 const require = createRequire(resolve(root, 'package.json')), webRequire = createRequire(resolve(root, 'apps/web/package.json'));
 const { createClient } = webRequire('@supabase/supabase-js'), { createServerClient } = webRequire('@supabase/ssr');
 const { chromium, expect } = require('@playwright/test'), { default: AxeBuilder } = require('@axe-core/playwright'), postgres = require('postgres');
