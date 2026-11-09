@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { test, type Page } from "@playwright/test";
+import { surfaceOutcome, surfaceDestinationMatches } from "../../scripts/release/surface-outcome.mjs";
 
 const host = new URL(process.env.E2E_BASE_URL ?? "http://localhost:5173").hostname;
 test.skip(!["localhost", "127.0.0.1", "::1"].includes(host), "restricted to a local server");
@@ -115,17 +116,15 @@ async function scanRoute(page: Page, actor: string, locale: "fr" | "ar", route: 
     const body = sanitize(await page.locator("body").innerText().catch(() => ""));
     heading = (await page.locator("h1").first().textContent().catch(() => null))?.trim() ?? null;
     workspaceFailure = await page.locator("[data-workspace-failure]").first().getAttribute("data-workspace-failure").catch(() => null);
-    if (workspaceFailure && accessGatePatterns.some((pattern) => pattern.test(workspaceFailure))) {
-      accessGate = workspaceFailure;
-    } else {
+    {
       const failureText = `${workspaceFailure ?? ""} ${body}`;
       for (const pattern of accessGatePatterns) {
         if (pattern.test(failureText)) {
-          accessGate = String(pattern);
+          accessGate = failureText.match(pattern)?.[0] ?? null;
           break;
         }
       }
-      if (!accessGate) {
+      {
         for (const pattern of crashPatterns) {
           if (pattern.test(failureText)) {
             bodyFailure = String(pattern);
@@ -141,7 +140,11 @@ async function scanRoute(page: Page, actor: string, locale: "fr" | "ar", route: 
     page.off("console", onConsole);
     page.off("pageerror", onPageError);
   }
-  const hasIssue = Boolean((!accessGate && bodyFailure) || (status !== null && status >= 500) || consoleErrors.length || pageErrors.length);
+  const routePath=route.split("?")[0];
+  const expectedGate=actor==="admin-demo"&&["administration/classification-fiscale","administration/fiscalite-maroc"].includes(routePath??"");
+  const expectedUrl=new URL(`/${locale}/${route}`,process.env.E2E_BASE_URL??"http://localhost:5173");
+  const destinationMatches=surfaceDestinationMatches(page.url(),expectedUrl);
+  const outcome=surfaceOutcome({status,heading,workspaceFailure,accessGate,bodyFailure,consoleErrors,pageErrors,expectedGate,destinationMatches});
   return {
     actor,
     locale,
@@ -153,8 +156,7 @@ async function scanRoute(page: Page, actor: string, locale: "fr" | "ar", route: 
     accessGate,
     consoleErrors: consoleErrors.slice(0, 4),
     pageErrors: pageErrors.slice(0, 4),
-    hasIssue,
-    covered: status !== null && status < 500,
+    ...outcome,
     elapsedMs: Date.now() - started,
   };
 }
@@ -200,6 +202,8 @@ test("scan dynamic seeded surfaces", async ({ page }) => {
     actors: actorFilter,
     total: rows.length,
     covered: rows.filter((row) => row.covered).length,
+    businessCovered: rows.filter((row) => row.businessCovered).length,
+    expectedGateCovered: rows.filter((row) => row.expectedGateCovered).length,
     issues: rows.filter((row) => row.hasIssue).length,
     accessGates: rows.filter((row) => row.accessGate).length,
     missingSeedTemplates: seed.missingTemplates,

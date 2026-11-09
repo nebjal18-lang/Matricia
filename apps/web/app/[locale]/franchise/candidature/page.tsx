@@ -33,6 +33,7 @@ export default async function FranchiseCandidaturePage({ params }: { params: Pro
             <p className="public-lead mt-4">
               {presentation.definition}
             </p>
+            <Link className="public-link mt-4 inline-block" href={`/${locale}/franchise`}>{fr ? "Comprendre le modèle de franchise" : "فهم نموذج الامتياز"}</Link>
           </div>
           <PublicPhoto scene="terrace" caption={presentation.caption} />
         </section>

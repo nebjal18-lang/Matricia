@@ -1,0 +1,190 @@
+{
+  "reviewedBranch": "version-2",
+  "reviewedHead": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+  "scope": "Independent review of the current closure inventory and client/franchise UI patch; read-only application review.",
+  "verdict": "NO_STATIC_BLOCKER_LATEST_CI_PENDING",
+  "findings": [
+    {
+      "id": "CLOSURE-REVIEW-001",
+      "severity": "P2",
+      "file": "scripts/release/closure-inventory.mjs",
+      "line": 48,
+      "title": "Valid named route parameters are rejected as non-UUID",
+      "trigger": "Seed a real route such as /[locale]/franchise/questionnaires/[questionnaireId]/[tool] with an owned questionnaire UUID and tool=apercu.",
+      "actual": "The collector applies uuid.test to every non-catch-all parameter, returns INVALID_ROUTE_PARAMETERS, and cannot plan the legitimate case.",
+      "expected": "UUID validation applies to resource identifier keys; safe non-identifier route parameters retain the type/value semantics of the corresponding page.",
+      "recommendation": "Differentiate resource IDs (id and *Id) from named segments; add coverage for a valid questionnaire tool/module path and retain traversal rejection. Domain allowlists can additionally prevent phantom modules.",
+      "confidence": "high",
+      "productionIssue": false,
+      "status": "RESOLVED",
+      "resolution": "UUID validation is now restricted to id/*Id; safe named route segments are accepted, with a new enum/invalid-ID test."
+    },
+    {
+      "id": "CLOSURE-REVIEW-002",
+      "severity": "P2",
+      "status": "RESOLVED",
+      "file": "scripts/release/surface-outcome.mjs",
+      "line": 5,
+      "title": "An arbitrary access failure can satisfy an expected fiscal FORBIDDEN gate",
+      "trigger": "surfaceOutcome({status:200,heading:\"Accès\",accessGate:\"UNAUTHENTICATED\",expectedGate:true})",
+      "actual": "expectedGateCovered=true and hasIssue=false; MFA_REQUIRED and CONFIGURATION produce the same false-positive result.",
+      "expected": "Only the exact expected fiscal authorization refusal should satisfy that gate; expired login, MFA and infrastructure/configuration failures must fail.",
+      "recommendation": "Preserve the matched gate code in the scanner and require the exact expected code. Independently detect crash patterns even when another gate is present. Add negative cases for unrelated gate codes and gate+technical-failure combinations.",
+      "confidence": "high",
+      "resolution": "Expected fiscal coverage now requires the exact FORBIDDEN token. The scanner retains the matched code and computes technical/crash failures independently. Redirect, origin, organization and franchise mismatches are separately rejected."
+    }
+  ],
+  "passedChecks": [
+    {
+      "command": "node --test scripts/release/closure-inventory.test.mjs",
+      "tests": 9,
+      "status": "PASS"
+    },
+    {
+      "command": "node ../../node_modules/vitest/vitest.mjs run --maxWorkers=1 modules/franchise/screens/missing-reference-context.test.tsx modules/client/screens/diagnostics/solutions/actions.test.ts",
+      "tests": 11,
+      "status": "PASS"
+    },
+    {
+      "command": "node ../../node_modules/vitest/vitest.mjs run --maxWorkers=1 modules/shared/lib/payment-form-policy.test.ts",
+      "tests": 9,
+      "status": "PASS"
+    },
+    {
+      "command": "node --test scripts/release/surface-outcome.test.mjs scripts/release/closure-inventory.test.mjs",
+      "tests": 18,
+      "status": "PASS"
+    }
+  ],
+  "observations": [
+    "No production or external I/O performed by the reviewed changes.",
+    "No VERIFIED state is promoted; missing seeds and NOT_RUN plans remain explicit.",
+    "Manifest ownership guards validate only supplied scope metadata, and the report correctly says database ownership/RLS still require native verification.",
+    "The immediate solution-decision default retains the DEFERRED date requirement.",
+    "Missing franchise query recovery avoids backend access and preserves FR/AR direction."
+  ],
+  "limitations": [
+    "No global suite or production workflow started by the reviewer during latest CI.",
+    "Previously generated whole-project evidence is not presented as a fresh complete CI run for60e6b1c.",
+    "One existing opt-in native Storage test remains skipped; no native Storage acceptance is inferred.",
+    "Yousign integration, staging activation and external legal decisions remain outside the proof supplied by this CI fix."
+  ],
+  "sqlReview": {
+    "file": "supabase/migrations/20261109090000_franchise_link_final_row_version.sql",
+    "status": "TARGETED_EXECUTION_OBSERVED_PASS_FULL_SUITE_PENDING",
+    "verdict": "No static blocker identified",
+    "checks": [
+      "Only functional change is re-reading the locked prospect after its UPDATE statement and synchronous AFTER trigger catch-up.",
+      "The initial FOR UPDATE lock remains held through the command transaction, preserving stale-version serialization.",
+      "The cached response is checked before stale-version validation, preserving same-key idempotent replay.",
+      "The final row version is propagated consistently to response, audit metadata, Outbox payload and idempotency receipt.",
+      "CREATE OR REPLACE preserves existing ACLs; security definer and pg_catalog search_path remain unchanged.",
+      "The revised SQL assertion requires both persisted and returned versions to be5, while the preceding assertion verifies replay equality."
+    ],
+    "limits": [
+      "No DDL, migration execution or SQL mutation performed.",
+      "Existing stored idempotency receipts remain historical snapshots; previously cached version2 results are not rewritten by this additive migration."
+    ],
+    "executionEvidence": {
+      "freshMigrationsObserved": 572,
+      "seedApplied": true,
+      "targetedSqlAssertions": 17,
+      "concurrencyScenarios": 4,
+      "source": "docs/evidence/v1-closure-sql-0193-20261109.json",
+      "reviewerExecutedDdl": false
+    }
+  },
+  "paymentCspReview": {
+    "status": "NO_STATIC_BLOCKER",
+    "scope": "Helper, Next config integration, local browser script and artifact reviewed",
+    "observations": [
+      "CMI is the only provider enabling the additional form origin.",
+      "Only the configured HTTPS origin is inserted after exact allowed-host matching; credentials and malformed URLs fall back to self.",
+      "No privileged runtime variable is injected into the browser environment.",
+      "The browser script intercepts all context requests and its artifact records1POST to the configured gateway versus0 to the unrelated gateway.",
+      "This is a CSP navigation recipe, not proof of a live payment or provider account activation."
+    ],
+    "buildTimeLimitation": "CSP is constructed by Next configuration; changing payment gateway settings requires rebuilding/redeploying the artifact."
+  },
+  "documentationReview": {
+    "status": "NO_FALSE_VERIFIED_FOUND",
+    "remainingDocumentationUpdate": "D/SQL matrix and L2 next-step text still say fresh replay/0193 pending despite the new PASS evidence; synchronize before final commit.",
+    "externalValidation": "Yousign selection is correctly distinguished from integration, staging identity and legal approval."
+  },
+  "globalValidation": {
+    "priorCandidateLocalEvidence": {
+      "source": "docs/evidence/v1-closure-20261109.json",
+      "webUnitsPassed": 3780,
+      "otherWorkspaceUnitsPassed": 296,
+      "existingOptInStorageSkip": 1,
+      "toolingPassed": 63,
+      "integrationPassed": 3,
+      "publicBrowserPassed": 18,
+      "freshMigrations": 575,
+      "sqlFiles": 360,
+      "sqlAssertions": 9301,
+      "sqlConcurrencyScenarios": 4,
+      "canonicalBuild": "PASS Node22/Turbopack",
+      "lint": "PASS with4existingwarnings"
+    },
+    "latestCommitTargetedBrowserTests": "10PASS bundled Chromium and10PASS explicit executable, observed logs",
+    "latestCommitRemoteCi": "IN_PROGRESS; no final remote verdict available to this review",
+    "hostedBrowser": "Not verified; prior deployment status is distinct from hosted workflow validation."
+  },
+  "lastReview": {
+    "scope": [
+      "server-only package and Vitest marker setup",
+      "client selected tenant context",
+      "public franchise tests and return link",
+      "dynamic surface outcome classification"
+    ],
+    "observations": [
+      "The Vitest setup only neutralizes the server-only marker. It does not globally mock authentication or repositories.",
+      "Explicit tenant authorization is resolved before projecting display metadata; missing metadata on authorized rows fails as unavailable.",
+      "Presentation tests mock their local I/O module and check native franchise-form field names.",
+      "The missing-franchise-context page marks a workspace failure, preventing classification as successful business coverage.",
+      "HTTP404 and unexpected access gates cannot count as businessCovered in the new helper.",
+      "Expected fiscal coverage cannot be satisfied by expired login, MFA, configuration, missing resource or missing mandate.",
+      "A combined FORBIDDEN and technical failure is rejected.",
+      "The scanner compares final browser URL with the expected origin/path and explicit organization/franchise query context."
+    ],
+    "pendingCorrection": null,
+    "tested": "Previously reviewed outcome/inventory18NodePASS; this CI-only follow-up performs no suite execution and reads targeted browser logs."
+  },
+  "observedToolingSuite": {
+    "source": "work/v1-closure/tooling-final.log",
+    "tests": 63,
+    "pass": 63,
+    "fail": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "reviewerExecuted": false
+  },
+  "lastReviewedFileHashes": {
+    "scripts/release/surface-outcome.mjs": "409c7db05dc7dab103d7810d9967b5cab38348bf5603b32813bd57130449d90e",
+    "scripts/release/surface-outcome.test.mjs": "57c6c840d388d5c6cce503bc8064b1946781e06de5dff887fe1b0ec8a27100dc",
+    "tests/e2e/parcours-dynamic-surfaces.spec.ts": "253344f547faebe2269ad937bd2bf68f2d7f9fe870cbd0433996c0b977bd2786",
+    "apps/web/vitest.setup.ts": "b6dc72931ed327eaa168432d3d903c4ca85e567cd3cfb42873b66dd6efe71f89",
+    "apps/web/modules/client/data/spaces/context.ts": "c65ad42d7e5d0fac7fd5e3a1737db21f248e40464489d6c58a1a402711ba7c48",
+    ".github/workflows/ci.yml": "c0deaa41dc9a2256c8b9733ac6faf9ce2f0d6f78e1387d2479a994fa84f5edfa",
+    "apps/web/modules/provider/screens/devis/quote-panel.test.tsx": "8b7fdceaa836ed3cb1e5de1532a3708dc610cd1cbdce565c3c7b6b501d8e65ee"
+  },
+  "ciBrowserReview": {
+    "scope": "Commit60e6b1c: .github/workflows/ci.yml and apps/web/modules/provider/screens/devis/quote-panel.test.tsx only.",
+    "verdict": "No concrete defect identified in this change.",
+    "observations": [
+      "The quality job now installs Chromium through the same lockfile-installed Playwright CLI used by the tests.",
+      "The installation occurs before the workspace unit suite that exercises real browser FormData.",
+      "The test defaults to the Playwright-managed executable; an explicit PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH remains supported.",
+      "No assertion, timeout, retry setting, test case or cleanup path is removed or weakened.",
+      "Browser closing remains in finally.",
+      "Both local targeted logs show all10quote-panel tests passing, using the bundled browser and the explicit /usr/bin/chromium path respectively."
+    ],
+    "evidenceObserved": [
+      "work/v1-closure/quote-bundled-browser.log",
+      "work/v1-closure/quote-explicit-browser.log"
+    ],
+    "reviewerStartedSuites": false,
+    "remoteStatus": "Latest CI in progress according to parent task; no new commit CI success inferred from local or prior-commit evidence."
+  }
+}

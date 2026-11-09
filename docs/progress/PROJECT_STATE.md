@@ -1331,3 +1331,18 @@ compte externe empêche la preuve CI tant qu'elle n'est pas levée; elle ne vaut
 - Même PDF privé repris après alignement Origin du runtime : UPLOADED,816octets/hash vérifiés,1upload,0rapprochement ; scannerERROR et refus55000 de coût nul maintiennent la sécurité faute de moteur réel.
 - Focus12cas FR/AR375/390 PASS enDEV, clavier réel et0axe/0JS. Pas de nouvelle campagne optimisée192 ni de déploiementprod.
 - AdminCalendrier560 exploitable FR/AR ; dates sérialisées serveur contre divergenceTZdata ;56testsWeb et28SQL PASS, revue indépendante favorable. Reçus finaux dans docs/franchise-completion/evidence/browser.
+
+
+## 2026-11-09 — Clôture V1 : corrections et recette locale, release non certifiée
+
+- Synchronisation `version-2` avec le head GitHub `10c4fc3`, sans écrasement des changements entrants ; code candidat local `888bcaf`.
+- Corrections : champ de report optionnel pour accepter/refuser une solution, conservation stricte du tenant client, récupération FR/AR des références franchise sans mandat, origine CMI HTTPS explicitement autorisée par CSP, dépendance `server-only` et contexte de tests serveur explicites.
+- Préparation des recettes : inventaire filesystem, gardes de manifest org/franchise/bibliothèque, données manquantes signalées. Les cinq templates de recette sans IDs restent ouverts. Le scan ne certifie plus une 404, un refus inattendu, une redirection de connexion ou un contexte de tenant modifié. Les deux refus fiscaux attendus sont distingués des parcours métier réussis.
+- Preuves locales vertes : 4 076 tests unitaires réussis, un test Storage opt-in existant non exécuté ; 63 tests d’outillage ; intégration 3/3 ; Chromium public 18/18, FR/AR, 360/ordinateur, axe et quatre captures ; CMI intercepté 2/2 sans PSP réel ; build Next/Turbopack Node22 avec TypeScript ; lint 0 erreur et 4 avertissements existants.
+- SQL : environnement neuf séparé, 575 migrations + seed verts. Correctif additif de version finale CRM et assertion 0193 renforcée. Suite SQL globale complète : 360 fichiers, 9 301 assertions et quatre scénarios de concurrence verts sur la base isolée ; reçu `docs/evidence/v1-closure-sql-full-20261109.json`.
+- Revue technique indépendante conservée ; preuve principale : `docs/evidence/v1-closure-20261109.json`. Plan, lots et limites : `docs/release/V1_CLOSURE_2026-11-09.md`.
+- Aucun changement de production, aucun dossier IT existant réutilisé, aucun secret copié. Yousign sandbox retenu par le demandeur, sans activation EXTERNAL ni validation juridique déduite de ce choix.
+- Gate V1 : **REFUSÉ**, 73 conditions restantes sur worktree figé, toujours **5/76 VERIFIED**, aucune promotion. Staging/bindings, KYC, politiques four-eyes, signature réelle, CNDP/fiscalité, données de recette et parcours natifs C1–C8 restent à prouver.
+- Prochaine étape unique : confirmer la cible de staging et ses bindings autorisés pour alimenter les acteurs de recette puis exécuter les parcours natifs du plan.
+
+- Complément CI : correctif `60e6b1c` après le timeout du test navigateur devis dans le premier run. La CI installe désormais Chromium avec Playwright et le test ne dépend plus d’un chemin système implicite. 10 tests ciblés verts avec le navigateur Playwright et 10 avec l’override local, sans retry ni hausse de délai. **Run GitHub 42644570334 : quality, browser-public et database tous verts** sur le code courant. Le gate métier reste refusé indépendamment de cette validation technique.
