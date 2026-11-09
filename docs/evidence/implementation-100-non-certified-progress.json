@@ -1,0 +1,35 @@
+{
+  "goal": "100% implemented-non-certified (76/76 visa-only or VERIFIED)",
+  "updatedAt": "2026-11-09T14:45:00Z",
+  "before": {
+    "verified": 5,
+    "visaOnly": 11,
+    "sqlGaps": 2,
+    "e2eGaps": 50,
+    "otherGaps": 8,
+    "weightedImplementationPct": 72
+  },
+  "afterThisSession": {
+    "verified": 5,
+    "visaOnly": 14,
+    "sqlGapsClosed": ["MAT-FUNC-038", "MAT-FUNC-044"],
+    "otherGapsClosed": ["MAT-FUNC-027"],
+    "sqlGapsRemaining": 0,
+    "e2eSpecsAdded": "50+",
+    "visaOnlyPromotionsThisSession": 3,
+    "honestImplementationPct": "~75",
+    "note": "Specs/smokes authored for P1–P3 do NOT count as visa-only until PASS evidence JSON exists. Closed with executed PASS: 027, 038, 044."
+  },
+  "remainingTo100": {
+    "count": 57,
+    "buckets": {
+      "e2eNeedGreenRunOrExtension": 50,
+      "otherNeedExecutedProof": 7
+    }
+  },
+  "nextCommands": [
+    "DB_TEST_PATTERN=0385_immutable node scripts/run-db-tests.mjs",
+    "pnpm exec playwright test tests/e2e/mat-func-0*.spec.ts (with storage states)",
+    "Update REQUIREMENTS_COVERAGE only after docs/evidence/*.json PASS"
+  ]
+}

@@ -1,3 +1,11 @@
+## Avancement 100 % implémenté non certifié (2026-11-09)
+
+- Objectif : 76/76 en `VERIFIED` ou `PENDING:visa-independant` (≠ production, ≠ visas).
+- Fermés cette session avec preuves SQL exécutées PASS : **MAT-FUNC-027, 038, 044** → `PENDING:visa-independant`.
+- Compteur visa-only : 11 → **14** (+ 5 VERIFIED). Estimation implémentation pondérée ≈ **75 %** (reste ~57 lignes, surtout E2E à rejouer avec evidence JSON).
+- Artefacts : tests `0383`/`0384`/`0385`, specs P1–P3 `tests/e2e/mat-func-*`, suivi `docs/evidence/implementation-100-non-certified-progress.json`.
+- Interdit respecté : aucune promotion `VERIFIED` ; smokes E2E non exécutés non comptés visa-only.
+
 ## Build Vercel — compatibilité des variables publiques Supabase
 
 - Le journal distant confirme que la bonne application Next est maintenant compilée, puis échoue faute de configuration publique reconnue. Normalisation partagée : URL canonique/alias serveur public et clés publishable/anon publiques ; seules les deux valeurs canoniques sont injectées pour le navigateur. Aucun fallback de clé privilégiée et aucune valeur factice de production.
