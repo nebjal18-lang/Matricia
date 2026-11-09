@@ -4,7 +4,7 @@
 
 ```yaml
 id: ADMIN-DELIVERY-20261109
-status: IN_PROGRESS
+status: GREEN
 goal: Permettre au client de saisir et activer ses informations depuis l’administration, avec des états réels.
 scope: identité plateforme, coffre de connexions, tests de connexion, approbation indépendante, consommation runtime, YouSign gouverné et recette FR/AR
 invariants: [aucun secret lisible dans les retours ou journaux, AAL2 et droits serveur, révisions exactes, aucune fausse preuve de livraison, aucune mutation de production]
@@ -20,8 +20,8 @@ dependencies: [13e4086 fusionné depuis GitHub, clé serveur du coffre, SMTP Aut
 milestones: [contrats, implémentation parallèle, tests unitaires et SQL, contre-revue, build, recette navigateur, publication staging]
 risks: [credentials et comptes client absents, accès hébergé limité, approbations métier/juridiques non substituables par le code]
 validation_commands: [tests ciblés configuration et fournisseurs, SQL natif et refus de droits, pnpm typecheck, pnpm lint, pnpm build:vercel, recette FR/AR 360px]
-results: En cours; aucun statut de livraison finale déduit de la date souhaitée.
-next_phase: Valider le candidat exact et documenter les étapes techniques restantes pour la remise.
+results: Code3d04c50 et CI complète PASS; 4331unitaires,365SQL/9429assertions/4concurrences;12gestesAdmin et4pagesFRARsansviolationaxe; vraiPDFStorage/formulaireSigner natif PASS; revue indépendante sans finding ouvert. Activation externe et production non certifiées.
+next_phase: Préparer les accès client et SMTP Auth, saisir les credentials dans Admin, effectuer les recettes fournisseurs et obtenir les validations de production séparées.
 ```
 
 Autorité : `Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md`. Toute phase suit `SPECIFY → IMPLEMENT → TEST → REVIEW → RED TEAM → FIX → RETEST → INTEGRATE → VERIFY`. Une phase reste ouverte sans audit indépendant signé et preuves enregistrées.
