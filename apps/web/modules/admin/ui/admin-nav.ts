@@ -23,6 +23,6 @@ export function buildAdminNav(locale: Locale, selectedQuery: string): AdminNavIt
     { key: "catalog", href: `${p}/administration/catalogue${q}`, label: c.navCatalog, icon: BookOpen },
     { key: "finance", href: `${p}/administration/finance${q}`, label: c.navFinance, icon: Landmark },
     { key: "pilot", href: `${p}/administration/anti-abus${q}`, label: c.navPilot, icon: Shield },
-    { key: "settings", href: `${p}/administration/operations${q}`, label: c.navSettings, icon: Settings },
+    { key: "settings", href: `${p}/administration/configuration${q}`, label: c.navSettings, icon: Settings },
   ];
 }

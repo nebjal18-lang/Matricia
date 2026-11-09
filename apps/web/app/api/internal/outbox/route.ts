@@ -316,6 +316,13 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ outcome: "OUTBOX_EVENT_OBSERVED", eventId: parsed.data.id, consumer: CONSUMER_CODE }, { status: 202, headers: { ...headers, "x-matricia-outbox-consumer": CONSUMER_CODE } });
   }
 
+  // Configuration changes are facts already committed by the guarded database
+  // command. Observation does not claim provider delivery or release approval.
+  if (parsed.data.eventType === "PlatformConfigurationChangedV1") {
+    log("info", { requestId: parsed.data.correlationId, correlationId: parsed.data.correlationId, event: "outbox.event.observed", outcome: "success", aggregateType: parsed.data.eventType, aggregateId: parsed.data.aggregateId, data: { eventId: parsed.data.id, consumer: CONSUMER_CODE, factClass: "PERSISTED_PLATFORM_CONFIGURATION" } });
+    return Response.json({ outcome: "OUTBOX_EVENT_OBSERVED", eventId: parsed.data.id, consumer: CONSUMER_CODE }, { status: 202, headers: { ...headers, "x-matricia-outbox-consumer": CONSUMER_CODE } });
+  }
+
   // Terminal observer for events without a dedicated consumer.
   // Payloads can contain tenant data and must never be copied to application logs.
   log("info", {

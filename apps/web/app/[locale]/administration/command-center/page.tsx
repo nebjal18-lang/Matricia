@@ -1,4 +1,5 @@
 import { AdminSearchResults } from "@/modules/admin/screens/command-center/search";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
@@ -49,6 +50,10 @@ export default async function AdminCommandCenterPage({
       kicker={c.kicker}
     >
       {query.q?.trim() ? <AdminSearchResults locale={locale} query={query.q.trim()} organizationQuery={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} /> : null}
+      <section className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 p-5" aria-labelledby="initial-configuration-title">
+        <div><h2 id="initial-configuration-title" className="text-lg font-semibold">{locale === "ar" ? "إعداد منصتكم" : "Configurer votre plateforme"}</h2><p className="mt-1 text-sm text-muted-foreground">{locale === "ar" ? "بيانات المؤسسة والاتصالات ومراحل الإعداد قبل بدء التشغيل." : "Retrouvez les informations de votre entreprise, les connexions et les étapes avant mise en service."}</p></div>
+        <Link href={`/${locale}/administration/configuration`} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground">{locale === "ar" ? "فتح الإعداد" : "Ouvrir la configuration"}</Link>
+      </section>
       <details className="client-ops" id="command-today" open>
         <summary>{m.today}</summary>
         {result.status === "error" ? (

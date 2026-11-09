@@ -1,5 +1,29 @@
 # Matricia — ExecPlan permanent
 
+## Configuration Admin autonome — 2026-11-09
+
+```yaml
+id: ADMIN-DELIVERY-20261109
+status: IN_PROGRESS
+goal: Permettre au client de saisir et activer ses informations depuis l’administration, avec des états réels.
+scope: identité plateforme, coffre de connexions, tests de connexion, approbation indépendante, consommation runtime, YouSign gouverné et recette FR/AR
+invariants: [aucun secret lisible dans les retours ou journaux, AAL2 et droits serveur, révisions exactes, aucune fausse preuve de livraison, aucune mutation de production]
+ownership:
+  database: delivery_configuration_db, migration 20261109110000
+  server: delivery_configuration_server, model/repository/vault/actions
+  interface: delivery_configuration_ui, écran configuration
+  runtime: delivery_configuration_runtime, email/paiements/scanner
+  signature: delivery_signature_production, adaptateur et migration 20261109111000
+  integration: root, navigation/recette/docs
+  review: delivery_independent_review, lecture seule
+dependencies: [13e4086 fusionné depuis GitHub, clé serveur du coffre, SMTP Auth et hébergement préparés avant premier accès]
+milestones: [contrats, implémentation parallèle, tests unitaires et SQL, contre-revue, build, recette navigateur, publication staging]
+risks: [credentials et comptes client absents, accès hébergé limité, approbations métier/juridiques non substituables par le code]
+validation_commands: [tests ciblés configuration et fournisseurs, SQL natif et refus de droits, pnpm typecheck, pnpm lint, pnpm build:vercel, recette FR/AR 360px]
+results: En cours; aucun statut de livraison finale déduit de la date souhaitée.
+next_phase: Valider le candidat exact et documenter les étapes techniques restantes pour la remise.
+```
+
 Autorité : `Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md`. Toute phase suit `SPECIFY → IMPLEMENT → TEST → REVIEW → RED TEAM → FIX → RETEST → INTEGRATE → VERIFY`. Une phase reste ouverte sans audit indépendant signé et preuves enregistrées.
 
 ## Format obligatoire d’un ExecPlan
