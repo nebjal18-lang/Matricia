@@ -1,3 +1,4 @@
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import {randomUUID} from "node:crypto";
 import {createPaymentGateway,PaymentGatewayError} from "@matricia/infrastructure";
 import {z} from "zod";
@@ -13,7 +14,7 @@ const preparedSchema=z.object({preparation_id:z.string().uuid(),amount_minor:z.s
 const respond=(body:unknown,status:number)=>Response.json(body,{status,headers:paymentResponseHeaders});
 export async function POST(request:Request){
  let config:ReturnType<typeof getServerEnvironment>;let gateway:ReturnType<typeof createPaymentGateway>;
- try{config=getServerEnvironment();gateway=createPaymentGateway(getPaymentRuntimeConfig());}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
+ try{config=getServerEnvironment();gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
  if(!paymentOriginAllowed(request,config.NEXT_PUBLIC_APP_URL))return respond({error:"REQUEST_ORIGIN_DENIED"},403);
  const body=await readPaymentJson(request,32768);if(!body.ok)return respond({error:body.status===413?"REQUEST_TOO_LARGE":"INVALID_REQUEST"},body.status);
  const input=inputSchema.safeParse(body.body);if(!input.success)return respond({error:"INVALID_REQUEST"},400);

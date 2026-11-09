@@ -1,3 +1,4 @@
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import { randomUUID } from "node:crypto";
 import { createPaymentGateway, PaymentGatewayError } from "@matricia/infrastructure";
 import { NextResponse } from "next/server";
@@ -15,7 +16,7 @@ export async function POST(request:Request){
   let gateway: ReturnType<typeof createPaymentGateway>;
   try {
     environment=getServerEnvironment();
-    gateway=createPaymentGateway(getPaymentRuntimeConfig());
+    gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));
   } catch {
     return NextResponse.json({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},{status:503});
   }

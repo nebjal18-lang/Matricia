@@ -1,3 +1,4 @@
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import { createPaymentGateway, PaymentGatewayError } from "@matricia/infrastructure";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
   let gateway: ReturnType<typeof createPaymentGateway>;
   let appUrl: string;
   try {
-    gateway = createPaymentGateway(getPaymentRuntimeConfig());
+    gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));
     appUrl = getServerEnvironment().NEXT_PUBLIC_APP_URL;
   } catch {
     return NextResponse.json({ error: "PAYMENT_CONFIGURATION_UNAVAILABLE" }, { status: 503 });

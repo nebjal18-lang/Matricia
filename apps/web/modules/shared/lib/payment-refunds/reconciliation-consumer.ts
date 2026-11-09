@@ -1,3 +1,4 @@
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import { createPaymentGateway } from "@matricia/infrastructure";
 import { z } from "zod";
 import { getPaymentRuntimeConfig } from "@/modules/shared/lib/env";
@@ -5,7 +6,7 @@ import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 const schema = z.object({ outcome: z.literal("REFUND_RECONCILIATION_AUTHORIZED"), refund_request_id: z.string().uuid(), provider_refund_id: z.string(), capture_id: z.string(), amount_minor: z.string().regex(/^[1-9]\d*$/u), currency: z.string() });
 export async function consumeRefundReconciliation(requestId: string): Promise<{ ok: boolean; code: string }> {
   let gateway;
-  try { gateway = createPaymentGateway(getPaymentRuntimeConfig()); } catch { return { ok: false, code: "REFUND_PROVIDER_UNCONFIGURED" }; }
+  try { gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment())); } catch { return { ok: false, code: "REFUND_PROVIDER_UNCONFIGURED" }; }
   if (gateway.code !== "PAYPAL" || !("lookupRefund" in gateway)) return { ok: false, code: "REFUND_PROVIDER_UNSUPPORTED" };
   const client = getSupabaseAdminClient(), loaded = await client.rpc("load_refund_reconciliation_work_v2", { p_request_id: requestId,p_provider_environment:gateway.providerEnvironment });
   if (loaded.error) return { ok: false, code: "REFUND_RECONCILIATION_UNAUTHORIZED" };

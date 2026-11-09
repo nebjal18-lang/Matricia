@@ -31,13 +31,13 @@ export function getDemoPaymentWebhookSecret() {
   return z.string().min(32).parse(process.env.PAYMENT_WEBHOOK_SECRET_DEMO);
 }
 
-export function getPaymentRuntimeConfig(): PaymentRuntimeConfig {
-  const provider = z.enum(["DEMO", "CMI", "PAYPAL"]).parse(process.env.PAYMENT_PROVIDER?.toUpperCase());
-  const allowedProviders = parseEnumSet(process.env.PAYMENT_PROVIDER_ALLOWLIST, ["DEMO", "CMI", "PAYPAL"] as const);
-  const liveEnabled = process.env.PAYMENT_LIVE_ENABLED === "true";
+export function getPaymentRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): PaymentRuntimeConfig {
+  const provider = z.enum(["DEMO", "CMI", "PAYPAL"]).parse(environment.PAYMENT_PROVIDER?.toUpperCase());
+  const allowedProviders = parseEnumSet(environment.PAYMENT_PROVIDER_ALLOWLIST, ["DEMO", "CMI", "PAYPAL"] as const);
+  const liveEnabled = environment.PAYMENT_LIVE_ENABLED === "true";
   if (provider === "DEMO") {
-    if (process.env.NODE_ENV === "production" || process.env.APP_ENV?.trim().toLowerCase() === "production") throw new Error("PAYMENT_DEMO_FORBIDDEN");
-    return { provider, allowedProviders, liveEnabled, demoWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET_DEMO };
+    if (environment.NODE_ENV === "production" || environment.APP_ENV?.trim().toLowerCase() === "production") throw new Error("PAYMENT_DEMO_FORBIDDEN");
+    return { provider, allowedProviders, liveEnabled, demoWebhookSecret: environment.PAYMENT_WEBHOOK_SECRET_DEMO };
   }
   if (provider === "CMI") {
     return {
@@ -45,11 +45,11 @@ export function getPaymentRuntimeConfig(): PaymentRuntimeConfig {
       allowedProviders,
       liveEnabled,
       cmi: {
-        environment: z.enum(["demo", "live"]).parse(process.env.CMI_ENV),
-        gatewayUrl: z.string().url().parse(process.env.CMI_GATEWAY_URL),
-        allowedGatewayHosts: parseHostSet(process.env.CMI_GATEWAY_ALLOWED_HOSTS),
-        merchantId: z.string().min(3).max(64).parse(process.env.CMI_MERCHANT_ID),
-        storeKey: z.string().min(16).parse(process.env.CMI_STORE_KEY),
+        environment: z.enum(["demo", "live"]).parse(environment.CMI_ENV),
+        gatewayUrl: z.string().url().parse(environment.CMI_GATEWAY_URL),
+        allowedGatewayHosts: parseHostSet(environment.CMI_GATEWAY_ALLOWED_HOSTS),
+        merchantId: z.string().min(3).max(64).parse(environment.CMI_MERCHANT_ID),
+        storeKey: z.string().min(16).parse(environment.CMI_STORE_KEY),
       },
     };
   }
@@ -58,13 +58,13 @@ export function getPaymentRuntimeConfig(): PaymentRuntimeConfig {
     allowedProviders,
     liveEnabled,
     paypal: {
-      environment: z.enum(["sandbox", "live"]).parse(process.env.PAYPAL_ENV),
-      clientId: z.string().min(8).parse(process.env.PAYPAL_CLIENT_ID),
-      clientSecret: z.string().min(8).parse(process.env.PAYPAL_CLIENT_SECRET),
-      webhookId: z.string().min(6).max(50).parse(process.env.PAYPAL_WEBHOOK_ID),
-      certificateUrl: z.string().url().parse(process.env.PAYPAL_WEBHOOK_CERT_URL),
-      certificatePem: decodeCertificate(process.env.PAYPAL_WEBHOOK_CERTIFICATE_PEM_BASE64),
-      allowedCurrencies: parseCurrencySet(process.env.PAYPAL_ALLOWED_CURRENCIES),
+      environment: z.enum(["sandbox", "live"]).parse(environment.PAYPAL_ENV),
+      clientId: z.string().min(8).parse(environment.PAYPAL_CLIENT_ID),
+      clientSecret: z.string().min(8).parse(environment.PAYPAL_CLIENT_SECRET),
+      webhookId: z.string().min(6).max(50).parse(environment.PAYPAL_WEBHOOK_ID),
+      certificateUrl: z.string().url().parse(environment.PAYPAL_WEBHOOK_CERT_URL),
+      certificatePem: decodeCertificate(environment.PAYPAL_WEBHOOK_CERTIFICATE_PEM_BASE64),
+      allowedCurrencies: parseCurrencySet(environment.PAYPAL_ALLOWED_CURRENCIES),
     },
   };
 }

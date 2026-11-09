@@ -1,8 +1,11 @@
 import { verifyResendReceipt } from "@/modules/shared/lib/notification-delivery/resend-receipt";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 export async function POST(request: Request) {
   const headers = { "cache-control": "no-store" };
-  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  let secret: string | undefined;
+  try { secret = (await getPlatformRuntimeEnvironment()).RESEND_WEBHOOK_SECRET; }
+  catch { return Response.json({ code: "EMAIL_RECEIPT_UNCONFIGURED" }, { status: 503, headers }); }
   if (!secret) return Response.json({ code: "EMAIL_RECEIPT_UNCONFIGURED" }, { status: 503, headers });
   const reader = request.body?.getReader();
   if (!reader) return Response.json({ code: "EMAIL_RECEIPT_INVALID" }, { status: 400, headers });

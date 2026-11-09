@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { deliverNotification } from "@/modules/shared/lib/notification-delivery/adapter";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 
 const inputSchema = z.object({
   locale: z.enum(["fr", "ar"]),
@@ -23,7 +24,10 @@ function requesterHash(headerStore: Headers) {
 }
 
 async function notifySupport(requestId: string, input: z.infer<typeof inputSchema>) {
-  const recipientEmail = process.env.PUBLIC_CONTACT_NOTIFICATION_EMAIL?.trim() || null;
+  let environment: NodeJS.ProcessEnv;
+  try { environment = await getPlatformRuntimeEnvironment(); }
+  catch { return; } // The intake is already persisted; do not invent delivery.
+  const recipientEmail = environment.PUBLIC_CONTACT_NOTIFICATION_EMAIL?.trim() || null;
   if (!recipientEmail) return;
   await deliverNotification({
     deliveryId: requestId,
@@ -34,7 +38,7 @@ async function notifySupport(requestId: string, input: z.infer<typeof inputSchem
     body: `Référence : ${requestId.slice(0, 8).toUpperCase()}\nCatégorie : ${input.category}\nAdresse de réponse : ${input.replyEmail}\n\n${input.message}`,
     ctaPath: null,
     providerIdempotencyKey: `public-contact:${requestId}`,
-  }, { env: process.env, fetch });
+  }, { env: environment, fetch });
 }
 
 export async function submitContactRequest(_: ContactActionState, formData: FormData): Promise<ContactActionState> {
