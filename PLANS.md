@@ -193,3 +193,39 @@ next_phase: P05
 ```
 
 La carte détaillée et les gates sont dans `docs/specs/sections/phase-map.md`.
+
+## Staging repair — 2026-11-09
+
+```yaml
+id: STAGING-REPAIR-20261109
+title: Corriger les écarts de configuration hébergée et terminer les adaptateurs exécutables
+status: IN_PROGRESS
+goal: Isoler la recette du backend public et traiter les onze constats de l’inventaire Vercel/Supabase.
+scope: configuration Preview dédiée, OTP, migrations additives staging, preflight, worker et YouSign sandbox
+requirements: [MAT-FUNC-001, MAT-FUNC-015, MAT-FUNC-020, MAT-FUNC-023, hardening P19]
+invariants:
+  - aucune mutation de production ni promotion sans autorisation de production distincte
+  - aucun secret dans Git, les journaux ou les preuves
+  - une intégration sans credentials et recette réelle reste non certifiée
+  - politiques de signature, four-eyes, RLS, scans et budgets de production conservés
+ownership:
+  - integration_manager: branche codex/staging-repair-20261109 et fichiers partagés
+  - staging_preflight_implementation: scripts/staging
+  - staging_runtime_implementation: apps/worker et recette de conteneurisation
+  - yousign_runtime_implementation: signature-v41, consommateur/webhook et migration additive signature
+dependencies: accès temporaires Vercel/Supabase; comptes tiers et décisions métier existantes
+milestones: [préparer, corriger, tester, revue indépendante, intégrer, déployer Preview si accès disponibles]
+decisions:
+  - inventaire source daté du 2026-11-09; aucune supposition de validité des valeurs masquées
+  - branch spécifique Preview sans copie de données de production
+risks:
+  - capacités du forfait Supabase et durée des accès temporaires
+  - credentials email/PSP/scanner/YouSign et choix juridiques non déductibles des jetons de gestion
+validation_commands: [pnpm test:tooling, pnpm typecheck, tests ciblés worker/signature/auth, pnpm build:vercel]
+evidence_paths: [docs/evidence/staging-repair-20261109.json, /workspace/outputs/staging-repair]
+progress_log:
+  - 2026-11-09: GitHub synchronisé sur 4962ce7; worktrees indépendants; correction demandée par le propriétaire.
+results: IN_PROGRESS
+independent_signoff: PENDING
+next_phase: Recette du staging avec services externes réellement configurés, puis gate de production séparé.
+```
