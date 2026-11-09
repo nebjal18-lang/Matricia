@@ -16,16 +16,17 @@ export async function resolveClientSpace(input: { locale: Locale; organizationId
   const roles = ids.length ? await client.from("organization_member_roles").select("membership_id").in("membership_id", ids).is("revoked_at", null).like("role_code", "CLIENT_%") : { data: [], error: null };
   if (roles.error) throw new Error("CLIENT_CONTEXT_UNAVAILABLE");
   const authorized = new Set((roles.data ?? []).map((row) => row.membership_id));
-  const organizations = [...new Map((memberships.data ?? [])
-    .filter((row) => authorized.has(row.id))
+  const eligible = (memberships.data ?? []).filter((row) => authorized.has(row.id));
+  if (input.organizationId && !eligible.some((row) => row.organization_id === input.organizationId)) notFound();
+  const organizations = [...new Map(eligible
     .map((row) => {
       const organization = Array.isArray(row.organizations) ? row.organizations[0] : row.organizations;
       const name = organization && typeof organization === "object" && "display_name" in organization && typeof organization.display_name === "string"
         ? organization.display_name
         : null;
-      return name ? [row.organization_id, { id: row.organization_id, name }] as const : null;
-    })
-    .filter((entry): entry is readonly [string, { id: string; name: string }] => entry !== null)).values()];
+      if (!name) throw new Error("CLIENT_CONTEXT_UNAVAILABLE");
+      return [row.organization_id, { id: row.organization_id, name }] as const;
+    })).values()];
   const organizationIds = organizations.map((organization) => organization.id);
   if (input.organizationId && !organizationIds.includes(input.organizationId)) notFound();
   if (!organizationIds.length) redirect(`/${input.locale}/organisation`);

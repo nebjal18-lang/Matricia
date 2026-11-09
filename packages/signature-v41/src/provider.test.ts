@@ -55,4 +55,12 @@ describe("SignatureProvider V4.1", () => {
     expect(assessSignatureProviderReadiness(external, { NODE_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "OTHER" })).toEqual({ status: "not_ready", code: "SIGNATURE_PROVIDER_CODE_MISMATCH" });
     expect(assessSignatureProviderReadiness(external, { NODE_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "MOROCCO_SIGNATURE_PROVIDER" })).toMatchObject({ status: "ready", providerCode: "MOROCCO_SIGNATURE_PROVIDER" });
   });
+  it("keeps a real sandbox adapter out of production while allowing a built staging server", () => {
+    const sandbox = { ...new DevelopmentMockSignatureProvider(), code: "YOUSIGN", developmentOnly: false, sandboxOnly: true } as unknown as import("./provider.js").SignatureProvider;
+    const configured = { NODE_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "YOUSIGN" };
+    expect(assessSignatureProviderReadiness(sandbox, { ...configured, APP_ENV: "production" })).toEqual({ status: "not_ready", code: "SIGNATURE_SANDBOX_PROVIDER_FORBIDDEN" });
+    expect(assessSignatureProviderReadiness(sandbox, configured)).toEqual({ status: "not_ready", code: "SIGNATURE_SANDBOX_PROVIDER_FORBIDDEN" });
+    expect(assessSignatureProviderReadiness(sandbox, { ...configured, APP_ENV: "staging" })).toMatchObject({ status: "ready", providerCode: "YOUSIGN" });
+    expect(assessSignatureProviderReadiness(sandbox, { ...configured, APP_ENV: "staging", SIGNATURE_PROVIDER_MODE: "DEVELOPMENT_MOCK" })).toEqual({ status: "not_ready", code: "SIGNATURE_PROVIDER_MODE_INVALID" });
+  });
 });

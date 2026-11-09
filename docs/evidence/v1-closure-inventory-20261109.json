@@ -1,0 +1,2380 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "fffb00f8e3fd7fb8aa54ba5b774111e8c04cc4a1",
+  "gate": "NOT_CERTIFIED",
+  "productionModified": false,
+  "liveTestsRun": false,
+  "pages": [
+    {
+      "template": "/",
+      "file": "page.tsx"
+    },
+    {
+      "template": "/[locale]",
+      "file": "[locale]/(public)/page.tsx"
+    },
+    {
+      "template": "/[locale]/a-propos",
+      "file": "[locale]/(public)/a-propos/page.tsx"
+    },
+    {
+      "template": "/[locale]/abonnements",
+      "file": "[locale]/(public)/abonnements/page.tsx"
+    },
+    {
+      "template": "/[locale]/actions",
+      "file": "[locale]/actions/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/[space]",
+      "file": "[locale]/administration/[space]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/[space]/[itemId]",
+      "file": "[locale]/administration/[space]/[itemId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/[space]/[itemId]/[action]",
+      "file": "[locale]/administration/[space]/[itemId]/[action]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/achats-groupes",
+      "file": "[locale]/administration/achats-groupes/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/anti-abus",
+      "file": "[locale]/administration/anti-abus/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/approbations-finance",
+      "file": "[locale]/administration/approbations-finance/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/assistance/[id]",
+      "file": "[locale]/administration/assistance/[id]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/avantages/livraisons",
+      "file": "[locale]/administration/avantages/livraisons/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/avantages/regles",
+      "file": "[locale]/administration/avantages/regles/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/avantages/remboursements",
+      "file": "[locale]/administration/avantages/remboursements/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/candidatures-franchise",
+      "file": "[locale]/administration/candidatures-franchise/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/catalogue",
+      "file": "[locale]/administration/catalogue/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/catalogue/calendrier",
+      "file": "[locale]/administration/catalogue/calendrier/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/catalogue/publications",
+      "file": "[locale]/administration/catalogue/publications/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/catalogue/questionnaires/revues",
+      "file": "[locale]/administration/catalogue/questionnaires/revues/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/catalogue/revues",
+      "file": "[locale]/administration/catalogue/revues/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/catalogue/validation",
+      "file": "[locale]/administration/catalogue/validation/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/classification-fiscale",
+      "file": "[locale]/administration/classification-fiscale/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/clients",
+      "file": "[locale]/administration/clients/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/clients/[organizationId]",
+      "file": "[locale]/administration/clients/[organizationId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/clonage",
+      "file": "[locale]/administration/clonage/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/command-center",
+      "file": "[locale]/administration/command-center/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/confidentialite",
+      "file": "[locale]/administration/confidentialite/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/confidentialite/effacement",
+      "file": "[locale]/administration/confidentialite/effacement/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/confidentialite/inventaire",
+      "file": "[locale]/administration/confidentialite/inventaire/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/confidentialite/remise",
+      "file": "[locale]/administration/confidentialite/remise/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/confidentialite/restrictions",
+      "file": "[locale]/administration/confidentialite/restrictions/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/conformite-clients",
+      "file": "[locale]/administration/conformite-clients/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/conformite-clients/[caseId]",
+      "file": "[locale]/administration/conformite-clients/[caseId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/conformite-clients/[caseId]/identite",
+      "file": "[locale]/administration/conformite-clients/[caseId]/identite/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/entreprises",
+      "file": "[locale]/administration/entreprises/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/entreprises/[organizationId]",
+      "file": "[locale]/administration/entreprises/[organizationId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/entreprises/[organizationId]/archiver",
+      "file": "[locale]/administration/entreprises/[organizationId]/archiver/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/entreprises/[organizationId]/modifier",
+      "file": "[locale]/administration/entreprises/[organizationId]/modifier/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/entreprises/nouvelle",
+      "file": "[locale]/administration/entreprises/nouvelle/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/facturation-clients",
+      "file": "[locale]/administration/facturation-clients/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/finance",
+      "file": "[locale]/administration/finance/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/finance/prestataires",
+      "file": "[locale]/administration/finance/prestataires/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/finance/rapprochements-couts",
+      "file": "[locale]/administration/finance/rapprochements-couts/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/finance/recompenses",
+      "file": "[locale]/administration/finance/recompenses/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/fiscalite-maroc",
+      "file": "[locale]/administration/fiscalite-maroc/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/fusion-organisations",
+      "file": "[locale]/administration/fusion-organisations/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/gouvernance-franchise",
+      "file": "[locale]/administration/gouvernance-franchise/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/gouvernance-franchise/livres",
+      "file": "[locale]/administration/gouvernance-franchise/livres/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/gouvernance-franchise/plans/[planId]/responsable",
+      "file": "[locale]/administration/gouvernance-franchise/plans/[planId]/responsable/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/gouvernance-franchise/signalements/[requestId]",
+      "file": "[locale]/administration/gouvernance-franchise/signalements/[requestId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/incitations",
+      "file": "[locale]/administration/incitations/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/marketing-autopilot",
+      "file": "[locale]/administration/marketing-autopilot/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/notifications/modeles",
+      "file": "[locale]/administration/notifications/modeles/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/operations",
+      "file": "[locale]/administration/operations/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/parcours",
+      "file": "[locale]/administration/parcours/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/politiques-contrats",
+      "file": "[locale]/administration/politiques-contrats/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/preparation",
+      "file": "[locale]/administration/preparation/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/providers",
+      "file": "[locale]/administration/providers/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/providers/[organizationId]",
+      "file": "[locale]/administration/providers/[organizationId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/providers/[organizationId]/identite",
+      "file": "[locale]/administration/providers/[organizationId]/identite/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/questionnaires/analytique",
+      "file": "[locale]/administration/questionnaires/analytique/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/revues-capacites",
+      "file": "[locale]/administration/revues-capacites/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/signatures",
+      "file": "[locale]/administration/signatures/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/support/[id]",
+      "file": "[locale]/administration/support/[id]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/utilisateurs",
+      "file": "[locale]/administration/utilisateurs/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/utilisateurs/[userId]",
+      "file": "[locale]/administration/utilisateurs/[userId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/utilisateurs/[userId]/roles",
+      "file": "[locale]/administration/utilisateurs/[userId]/roles/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/utilisateurs/acces",
+      "file": "[locale]/administration/utilisateurs/acces/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/utilisateurs/inviter",
+      "file": "[locale]/administration/utilisateurs/inviter/page.tsx"
+    },
+    {
+      "template": "/[locale]/administration/v4-1/[module]",
+      "file": "[locale]/administration/v4-1/[module]/page.tsx"
+    },
+    {
+      "template": "/[locale]/besoin",
+      "file": "[locale]/(public)/besoin/page.tsx"
+    },
+    {
+      "template": "/[locale]/catalogue",
+      "file": "[locale]/catalogue/page.tsx"
+    },
+    {
+      "template": "/[locale]/catalogue/[librarySlug]/[serviceSlug]",
+      "file": "[locale]/catalogue/[librarySlug]/[serviceSlug]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/abonnement",
+      "file": "[locale]/client/abonnement/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/abonnement/cycles/[cycleId]",
+      "file": "[locale]/client/abonnement/cycles/[cycleId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/achats-groupes",
+      "file": "[locale]/client/achats-groupes/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/actions",
+      "file": "[locale]/client/actions/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/avantages/execution",
+      "file": "[locale]/client/avantages/execution/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/avantages/livraisons",
+      "file": "[locale]/client/avantages/livraisons/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/avantages/remboursements",
+      "file": "[locale]/client/avantages/remboursements/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/boxes/configuration",
+      "file": "[locale]/client/boxes/configuration/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/boxes/mon-enveloppe",
+      "file": "[locale]/client/boxes/mon-enveloppe/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/contrats",
+      "file": "[locale]/client/contrats/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/credits",
+      "file": "[locale]/client/credits/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes",
+      "file": "[locale]/client/demandes/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes/[requestId]",
+      "file": "[locale]/client/demandes/[requestId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes/[requestId]/comparaison",
+      "file": "[locale]/client/demandes/[requestId]/comparaison/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes/[requestId]/offres",
+      "file": "[locale]/client/demandes/[requestId]/offres/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes/[requestId]/offres/[quoteId]",
+      "file": "[locale]/client/demandes/[requestId]/offres/[quoteId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes/nouvelle",
+      "file": "[locale]/client/demandes/nouvelle/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/demandes/recurrence",
+      "file": "[locale]/client/demandes/recurrence/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/diagnostics",
+      "file": "[locale]/client/diagnostics/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/diagnostics/[runId]",
+      "file": "[locale]/client/diagnostics/[runId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/diagnostics/assistance",
+      "file": "[locale]/client/diagnostics/assistance/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/diagnostics/besoin",
+      "file": "[locale]/client/diagnostics/besoin/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/diagnostics/evolution",
+      "file": "[locale]/client/diagnostics/evolution/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/diagnostics/solutions",
+      "file": "[locale]/client/diagnostics/solutions/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/documents",
+      "file": "[locale]/client/documents/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/favoris",
+      "file": "[locale]/client/favoris/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/finances",
+      "file": "[locale]/client/finances/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/finances/encaissements-prestataire",
+      "file": "[locale]/client/finances/encaissements-prestataire/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/litiges",
+      "file": "[locale]/client/litiges/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/litiges/[caseId]",
+      "file": "[locale]/client/litiges/[caseId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/litiges/nouveau",
+      "file": "[locale]/client/litiges/nouveau/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/missions",
+      "file": "[locale]/client/missions/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/missions/[missionId]",
+      "file": "[locale]/client/missions/[missionId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/missions/[missionId]/jalons",
+      "file": "[locale]/client/missions/[missionId]/jalons/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/onboarding",
+      "file": "[locale]/client/onboarding/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/portefeuille",
+      "file": "[locale]/client/portefeuille/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/questionnaires",
+      "file": "[locale]/client/questionnaires/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/recherche",
+      "file": "[locale]/client/recherche/page.tsx"
+    },
+    {
+      "template": "/[locale]/client/recompenses",
+      "file": "[locale]/client/recompenses/page.tsx"
+    },
+    {
+      "template": "/[locale]/conditions",
+      "file": "[locale]/(public)/conditions/page.tsx"
+    },
+    {
+      "template": "/[locale]/confidentialite",
+      "file": "[locale]/(public)/confidentialite/page.tsx"
+    },
+    {
+      "template": "/[locale]/confidentialite/demandes",
+      "file": "[locale]/confidentialite/demandes/page.tsx"
+    },
+    {
+      "template": "/[locale]/connexion",
+      "file": "[locale]/connexion/page.tsx"
+    },
+    {
+      "template": "/[locale]/connexion/consentements",
+      "file": "[locale]/connexion/consentements/page.tsx"
+    },
+    {
+      "template": "/[locale]/contact",
+      "file": "[locale]/(public)/contact/page.tsx"
+    },
+    {
+      "template": "/[locale]/cookies",
+      "file": "[locale]/(public)/cookies/page.tsx"
+    },
+    {
+      "template": "/[locale]/diagnostic",
+      "file": "[locale]/(public)/diagnostic/page.tsx"
+    },
+    {
+      "template": "/[locale]/diagnostic/resultat",
+      "file": "[locale]/(public)/diagnostic/resultat/page.tsx"
+    },
+    {
+      "template": "/[locale]/entreprises",
+      "file": "[locale]/(public)/entreprises/page.tsx"
+    },
+    {
+      "template": "/[locale]/fournisseur",
+      "file": "[locale]/(public)/fournisseur/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise",
+      "file": "[locale]/(public)/franchise/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/[...slug]",
+      "file": "[locale]/franchise/[...slug]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/accueil",
+      "file": "[locale]/franchise/accueil/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/bibliotheque",
+      "file": "[locale]/franchise/bibliotheque/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/candidature",
+      "file": "[locale]/franchise/candidature/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/clients/inviter",
+      "file": "[locale]/franchise/clients/inviter/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/demandes",
+      "file": "[locale]/franchise/demandes/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/digest",
+      "file": "[locale]/franchise/digest/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/documents",
+      "file": "[locale]/franchise/documents/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/documents/[documentId]",
+      "file": "[locale]/franchise/documents/[documentId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/finance",
+      "file": "[locale]/franchise/finance/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/finance/releves/[closureId]",
+      "file": "[locale]/franchise/finance/releves/[closureId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/fournisseurs",
+      "file": "[locale]/franchise/fournisseurs/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/fournisseurs/contrats/[decisionId]",
+      "file": "[locale]/franchise/fournisseurs/contrats/[decisionId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/fournisseurs/inviter",
+      "file": "[locale]/franchise/fournisseurs/inviter/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/gouvernance",
+      "file": "[locale]/franchise/gouvernance/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/invitations/[invitationId]",
+      "file": "[locale]/franchise/invitations/[invitationId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/marketing",
+      "file": "[locale]/franchise/marketing/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/messages",
+      "file": "[locale]/franchise/messages/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/performance",
+      "file": "[locale]/franchise/performance/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/perimetre",
+      "file": "[locale]/franchise/perimetre/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/qualite",
+      "file": "[locale]/franchise/qualite/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/questionnaires",
+      "file": "[locale]/franchise/questionnaires/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/questionnaires/[questionnaireId]",
+      "file": "[locale]/franchise/questionnaires/[questionnaireId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/questionnaires/[questionnaireId]/[tool]",
+      "file": "[locale]/franchise/questionnaires/[questionnaireId]/[tool]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/questionnaires/nouveau",
+      "file": "[locale]/franchise/questionnaires/nouveau/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/questions",
+      "file": "[locale]/franchise/questions/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/questions/[questionId]",
+      "file": "[locale]/franchise/questions/[questionId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/recherche",
+      "file": "[locale]/franchise/recherche/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/regles",
+      "file": "[locale]/franchise/regles/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/regles/nouvelle",
+      "file": "[locale]/franchise/regles/nouvelle/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/relances",
+      "file": "[locale]/franchise/relances/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/reseau",
+      "file": "[locale]/franchise/reseau/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/services",
+      "file": "[locale]/franchise/services/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/services/[serviceId]",
+      "file": "[locale]/franchise/services/[serviceId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/services/nouveau",
+      "file": "[locale]/franchise/services/nouveau/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/validations",
+      "file": "[locale]/franchise/validations/page.tsx"
+    },
+    {
+      "template": "/[locale]/franchise/validations/[bucket]",
+      "file": "[locale]/franchise/validations/[bucket]/page.tsx"
+    },
+    {
+      "template": "/[locale]/indisponible",
+      "file": "[locale]/indisponible/page.tsx"
+    },
+    {
+      "template": "/[locale]/inscription",
+      "file": "[locale]/(public)/inscription/page.tsx"
+    },
+    {
+      "template": "/[locale]/invitation/[code]",
+      "file": "[locale]/(public)/invitation/[code]/page.tsx"
+    },
+    {
+      "template": "/[locale]/invitations",
+      "file": "[locale]/invitations/page.tsx"
+    },
+    {
+      "template": "/[locale]/mentions-legales",
+      "file": "[locale]/(public)/mentions-legales/page.tsx"
+    },
+    {
+      "template": "/[locale]/messagerie",
+      "file": "[locale]/messagerie/page.tsx"
+    },
+    {
+      "template": "/[locale]/notifications",
+      "file": "[locale]/notifications/page.tsx"
+    },
+    {
+      "template": "/[locale]/organisation",
+      "file": "[locale]/organisation/page.tsx"
+    },
+    {
+      "template": "/[locale]/organisation/rattachements",
+      "file": "[locale]/organisation/rattachements/page.tsx"
+    },
+    {
+      "template": "/[locale]/organisation/roles",
+      "file": "[locale]/organisation/roles/page.tsx"
+    },
+    {
+      "template": "/[locale]/rejoindre-reseau",
+      "file": "[locale]/rejoindre-reseau/page.tsx"
+    },
+    {
+      "template": "/[locale]/securite/compte",
+      "file": "[locale]/securite/compte/page.tsx"
+    },
+    {
+      "template": "/[locale]/securite/sessions",
+      "file": "[locale]/securite/sessions/page.tsx"
+    },
+    {
+      "template": "/[locale]/services",
+      "file": "[locale]/(public)/services/page.tsx"
+    },
+    {
+      "template": "/[locale]/services/[code]",
+      "file": "[locale]/(public)/services/[code]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/[...slug]",
+      "file": "[locale]/sous-traitant/[...slug]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/achats",
+      "file": "[locale]/sous-traitant/achats/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/consultations",
+      "file": "[locale]/sous-traitant/consultations/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/consultations/[consultationId]",
+      "file": "[locale]/sous-traitant/consultations/[consultationId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/contrats",
+      "file": "[locale]/sous-traitant/contrats/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/contrats/[contractId]",
+      "file": "[locale]/sous-traitant/contrats/[contractId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/devis",
+      "file": "[locale]/sous-traitant/devis/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/devis/[quoteId]",
+      "file": "[locale]/sous-traitant/devis/[quoteId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/devis/[quoteId]/apercu",
+      "file": "[locale]/sous-traitant/devis/[quoteId]/apercu/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/devis/[quoteId]/revision",
+      "file": "[locale]/sous-traitant/devis/[quoteId]/revision/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/devis/nouveau",
+      "file": "[locale]/sous-traitant/devis/nouveau/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/documents",
+      "file": "[locale]/sous-traitant/documents/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/documents/[documentId]",
+      "file": "[locale]/sous-traitant/documents/[documentId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/entreprise",
+      "file": "[locale]/sous-traitant/entreprise/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/entreprise/contrat",
+      "file": "[locale]/sous-traitant/entreprise/contrat/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/facturation",
+      "file": "[locale]/sous-traitant/facturation/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/facturation/[invoiceId]",
+      "file": "[locale]/sous-traitant/facturation/[invoiceId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/facturation/commissions",
+      "file": "[locale]/sous-traitant/facturation/commissions/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/facturation/echeancier",
+      "file": "[locale]/sous-traitant/facturation/echeancier/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/facturation/factures-matricia",
+      "file": "[locale]/sous-traitant/facturation/factures-matricia/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/facturation/pre-releve",
+      "file": "[locale]/sous-traitant/facturation/pre-releve/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/identite",
+      "file": "[locale]/sous-traitant/identite/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/litiges",
+      "file": "[locale]/sous-traitant/litiges/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/litiges/[caseId]",
+      "file": "[locale]/sous-traitant/litiges/[caseId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/marketing",
+      "file": "[locale]/sous-traitant/marketing/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/messages",
+      "file": "[locale]/sous-traitant/messages/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/messages/[threadId]",
+      "file": "[locale]/sous-traitant/messages/[threadId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/missions",
+      "file": "[locale]/sous-traitant/missions/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/missions/[missionId]",
+      "file": "[locale]/sous-traitant/missions/[missionId]/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/mode-client",
+      "file": "[locale]/sous-traitant/mode-client/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/parametres",
+      "file": "[locale]/sous-traitant/parametres/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/planning",
+      "file": "[locale]/sous-traitant/planning/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/qualification",
+      "file": "[locale]/sous-traitant/qualification/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/qualification/certifications",
+      "file": "[locale]/sous-traitant/qualification/certifications/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/questionnaires",
+      "file": "[locale]/sous-traitant/questionnaires/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/reputation",
+      "file": "[locale]/sous-traitant/reputation/page.tsx"
+    },
+    {
+      "template": "/[locale]/sous-traitant/services",
+      "file": "[locale]/sous-traitant/services/page.tsx"
+    },
+    {
+      "template": "/[locale]/tableau-de-bord",
+      "file": "[locale]/tableau-de-bord/page.tsx"
+    }
+  ],
+  "seeds": [],
+  "rejected": [],
+  "missingSeedTemplates": [
+    "/[locale]/client/abonnement/cycles/[cycleId]",
+    "/[locale]/franchise/finance/releves/[closureId]",
+    "/[locale]/sous-traitant/[...slug]",
+    "/[locale]/sous-traitant/consultations/[consultationId]",
+    "/[locale]/sous-traitant/facturation/[invoiceId]"
+  ],
+  "scopeEvidence": "Manifest scope matching only; database ownership, RLS and HTTP behavior require native authenticated tests.",
+  "conditions": [
+    {
+      "id": "MAT-FUNC-001",
+      "status": "VERIFIED",
+      "classification": "EXISTING_EVIDENCE_REQUIRES_CURRENT_COMMIT_REVIEW",
+      "implementationReferences": "[Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md, apps/web/app/[locale]/organisation/actions.ts, apps/web/app/[locale]/invitations/actions.ts, supabase/migrations/20260911001400_identity_workflows.sql, supabase/migrations/20260911001900_identity_role_requests.sql, supabase/migrations/20260911002000_invitation_decline.sql]",
+      "testReferences": "[apps/web/app/[locale]/organisation/actions.test.ts, apps/web/app/[locale]/invitations/actions.test.ts, supabase/tests/0010_p04_identity_workflows.test.sql, supabase/tests/0013_p04_role_requests.test.sql, supabase/tests/0014_p04_invitation_decline.test.sql, tests/e2e/p04-identity.spec.ts]",
+      "evidenceReferences": "[docs/evidence/p04/identity-security-completion.md]",
+      "owner": "auth_identity_agent",
+      "releaseSignoff": "APPROVED:requirements_traceability_auditor:docs/evidence/p04/identity-security-completion.md",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-002",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007200_diagnostics_opportunities.sql, apps/web/app/[locale]/client/diagnostics/page.tsx]",
+      "testReferences": "[supabase/tests/0054_p07_diagnostics_opportunities.test.sql, tests/e2e/p21-questionnaires-diagnostics.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-003",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010000_assisted_intelligence_quality.sql, apps/web/app/[locale]/client/diagnostics/assistance/page.tsx]",
+      "testReferences": "[supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0084_assistance_role_authorization_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-004",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010000_assisted_intelligence_quality.sql, supabase/migrations/20260912010500_assisted_intelligence_runtime_hardening.sql]",
+      "testReferences": "[supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0079_assisted_intelligence_runtime_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-005",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260911003700_question_engine_persistence.sql, supabase/migrations/20260912007200_diagnostics_opportunities.sql]",
+      "testReferences": "[supabase/tests/0025_p06_question_engine_persistence.test.sql, supabase/tests/0054_p07_diagnostics_opportunities.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-006",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007100_admin_command_center.sql, apps/web/app/[locale]/actions/page.tsx]",
+      "testReferences": "[supabase/tests/0053_p17_admin_command_center.test.sql, tests/e2e/p22-universal-actions.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "admin_command_center_agent",
+      "releaseSignoff": "PENDING:E2E-provider-franchise-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-007",
+      "status": "VERIFIED",
+      "classification": "EXISTING_EVIDENCE_REQUIRES_CURRENT_COMMIT_REVIEW",
+      "implementationReferences": "[supabase/migrations/20260912014000_internal_object_messaging.sql, apps/web/modules/shared/lib/internal-messaging/server-repository.ts, apps/web/app/[locale]/messagerie/page.tsx, apps/web/app/[locale]/messagerie/actions.ts]",
+      "testReferences": "[supabase/tests/0154_messaging_comparison_functional.test.sql, tests/e2e/final-core-product.spec.ts]",
+      "evidenceReferences": "[docs/evidence/0154-messaging-comparison-functional-run.json, docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-007-013-018.md]",
+      "owner": "notifications_agent",
+      "releaseSignoff": "APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-007-013-018.md",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-008",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010000_assisted_intelligence_quality.sql, docs/specs/sections/catalog-question-engine.md]",
+      "testReferences": "[supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0082_assistance_pii_minimization_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "rfq_matching_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-009",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010100_solution_bundles_benchmarks.sql, apps/web/app/[locale]/client/diagnostics/solutions/page.tsx]",
+      "testReferences": "[supabase/tests/0075_solution_bundles_benchmarks.test.sql, tests/e2e/p21-questionnaires-diagnostics.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-010",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010100_solution_bundles_benchmarks.sql, supabase/migrations/20260912011600_benchmark_registry_and_bundle_concurrency.sql]",
+      "testReferences": "[supabase/tests/0075_solution_bundles_benchmarks.test.sql, supabase/tests/0085_benchmark_registry_and_bundle_concurrency.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "library_catalog_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-011",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, apps/web/app/[locale]/client/portefeuille/page.tsx]",
+      "testReferences": "[supabase/tests/0065_client_projects_budgets_calendar.test.sql, tests/e2e/p22-client-portfolio.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-012",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, supabase/migrations/20260912009600_client_portfolio_integrity_hardening.sql]",
+      "testReferences": "[supabase/tests/0065_client_projects_budgets_calendar.test.sql, supabase/tests/0070_client_portfolio_integrity_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "client_onboarding_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-013",
+      "status": "VERIFIED",
+      "classification": "EXISTING_EVIDENCE_REQUIRES_CURRENT_COMMIT_REVIEW",
+      "implementationReferences": "[supabase/migrations/20260912006000_quotes_comparison.sql, apps/web/modules/client/data/rfq/server-repository.ts, apps/web/app/[locale]/client/demandes/[requestId]/comparaison/page.tsx, apps/web/modules/client/screens/demandes/comparison-panel.tsx]",
+      "testReferences": "[supabase/tests/0044_p07_quotes_comparison.test.sql, supabase/tests/0154_messaging_comparison_functional.test.sql, apps/web/modules/client/data/rfq/repository.test.ts, tests/e2e/final-core-product.spec.ts]",
+      "evidenceReferences": "[docs/evidence/0154-messaging-comparison-functional-run.json, docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-007-013-018.md]",
+      "owner": "quote_agent",
+      "releaseSignoff": "APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-007-013-018.md",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-014",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006000_quotes_comparison.sql, apps/web/modules/provider/screens/devis/quote-panel.tsx]",
+      "testReferences": "[supabase/tests/0044_p07_quotes_comparison.test.sql, tests/e2e/p23-provider-quotes.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "quote_agent",
+      "releaseSignoff": "PENDING:E2E-champs-obligatoires-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-015",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql, supabase/migrations/20260912009800_provider_feedback_outbox_backfill.sql]",
+      "testReferences": "[supabase/tests/0066_provider_reputation_badges_favorites.test.sql, supabase/tests/0072_provider_feedback_outbox_backfill.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "quote_agent",
+      "releaseSignoff": "PENDING:E2E-anonymisation-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-016",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql, apps/web/app/[locale]/sous-traitant/reputation/page.tsx]",
+      "testReferences": "[supabase/tests/0066_provider_reputation_badges_favorites.test.sql, supabase/tests/0068_provider_feedback_privacy_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "provider_qualification_agent",
+      "releaseSignoff": "PENDING:E2E-reputation-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-017",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql]",
+      "testReferences": "[supabase/tests/0066_provider_reputation_badges_favorites.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "provider_qualification_agent",
+      "releaseSignoff": "PENDING:E2E-badges-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-018",
+      "status": "VERIFIED",
+      "classification": "EXISTING_EVIDENCE_REQUIRES_CURRENT_COMMIT_REVIEW",
+      "implementationReferences": "[supabase/migrations/20260912005900_rfq_matching_foundation.sql, supabase/migrations/20260912015400_rfq_versioned_provider_eligibility.sql, apps/web/modules/client/data/rfq/server-repository.ts, apps/web/modules/client/screens/demandes/request-id/matching-history.tsx]",
+      "testReferences": "[supabase/tests/0043_p07_rfq_matching_foundation.test.sql, supabase/tests/0100_admin_revocation_and_rfq_versioned_eligibility.test.sql, apps/web/modules/client/data/rfq/repository.test.ts, apps/web/modules/client/screens/demandes/request-id/matching-history.test.tsx, tests/e2e/final-core-product.spec.ts]",
+      "evidenceReferences": "[docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-007-013-018.md]",
+      "owner": "rfq_matching_agent",
+      "releaseSignoff": "APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-007-013-018.md",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-019",
+      "status": "VERIFIED",
+      "classification": "EXISTING_EVIDENCE_REQUIRES_CURRENT_COMMIT_REVIEW",
+      "implementationReferences": "[supabase/migrations/20260912005900_rfq_matching_foundation.sql, supabase/migrations/20260912014800_rfq_fair_rotation_recurring_scheduler.sql, supabase/migrations/20260912015400_rfq_versioned_provider_eligibility.sql, apps/web/modules/client/data/rfq/server-repository.ts, apps/web/modules/client/screens/demandes/request-id/matching-history.tsx]",
+      "testReferences": "[supabase/tests/0043_p07_rfq_matching_foundation.test.sql, supabase/tests/0098_rfq_fair_rotation_recurring_scheduler.test.sql, supabase/tests/0155_matching_rotation_behavioral.test.sql, apps/web/modules/client/screens/demandes/request-id/matching-history.test.tsx, tests/e2e/final-core-product.spec.ts]",
+      "evidenceReferences": "[docs/evidence/0155-matching-rotation-behavioral-run.json, docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-019.md]",
+      "owner": "rfq_matching_agent",
+      "releaseSignoff": "APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-019.md",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-020",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006200_provider_qualification.sql, apps/web/app/[locale]/sous-traitant/qualification/page.tsx]",
+      "testReferences": "[supabase/tests/0046_p09_provider_qualification.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "provider_qualification_agent",
+      "releaseSignoff": "PENDING:E2E-capacite-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-021",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, apps/web/app/[locale]/client/portefeuille/page.tsx]",
+      "testReferences": "[supabase/tests/0065_client_projects_budgets_calendar.test.sql, tests/e2e/p22-client-portfolio.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-022",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006100_contracts_missions_core.sql, apps/web/modules/shared/lib/contracts-missions/model.ts]",
+      "testReferences": "[supabase/tests/0045_p08_contracts_missions_core.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:E2E-jalons-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-023",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006100_contracts_missions_core.sql, supabase/migrations/20260912012500_assistance_purge_execution_hardening.sql]",
+      "testReferences": "[supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0125_delivery_proof_trusted_scan.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:E2E-preuve-scan-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-024",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006100_contracts_missions_core.sql, supabase/migrations/20260913015900_contract_mission_checklist_snapshot.sql]",
+      "testReferences": "[supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0104_contract_mission_checklist_snapshot.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:E2E-checklist-figee-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-025",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006100_contracts_missions_core.sql, apps/web/modules/client/screens/missions/actions.ts]",
+      "testReferences": "[supabase/tests/0045_p08_contracts_missions_core.test.sql, apps/web/modules/client/screens/missions/actions.test.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:E2E-acceptation-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-026",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006100_contracts_missions_core.sql, supabase/migrations/20260912011800_assistance_null_input_retention.sql]",
+      "testReferences": "[supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0118_contract_amendment_activation.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:E2E-avenant-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-027",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260910000400_financial_ledger.sql, supabase/migrations/20260912006100_contracts_missions_core.sql]",
+      "testReferences": "[supabase/tests/0003_immutable_ledgers.test.sql, supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0385_immutable_inventory_ledger_guard.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-027-immutable-inventory-run.json]",
+      "owner": "domain_modeler",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-028",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260911002900_client_compliance_documents.sql, supabase/migrations/20260912011900_benchmark_verified_value_binding.sql]",
+      "testReferences": "[supabase/tests/0020_p05_client_compliance_documents.test.sql, tests/e2e/p05-client-compliance.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "privacy_data_agent",
+      "releaseSignoff": "PENDING:E2E-reutilisation-document-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-029",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006200_provider_qualification.sql, supabase/migrations/20260912007500_notifications_preferences_delivery.sql]",
+      "testReferences": "[supabase/tests/0046_p09_provider_qualification.test.sql, supabase/tests/0056_p17_notifications_preferences_delivery.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "notifications_agent",
+      "releaseSignoff": "PENDING:E2E-expiration-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-030",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260910000400_financial_ledger.sql, supabase/migrations/20260910000500_credit_ledger.sql]",
+      "testReferences": "[supabase/tests/0003_immutable_ledgers.test.sql, supabase/tests/0004_financial_rpcs.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "provider_finance_agent",
+      "releaseSignoff": "PENDING:E2E-ledgers-separes-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-031",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006300_provider_billing_reconciliation.sql, supabase/migrations/20260912008000_morocco_tax_engine.sql]",
+      "testReferences": "[supabase/tests/0047_p10_provider_billing_reconciliation.test.sql, supabase/tests/0060_p14_morocco_tax_engine.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "provider_finance_agent",
+      "releaseSignoff": "PENDING:E2E-accrual-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-032",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912006300_provider_billing_reconciliation.sql]",
+      "testReferences": "[supabase/tests/0047_p10_provider_billing_reconciliation.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "payments_agent",
+      "releaseSignoff": "PENDING:E2E-rapprochement-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-033",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260910000500_credit_ledger.sql, supabase/migrations/20260912007300_boxes_credits_security.sql]",
+      "testReferences": "[supabase/tests/0055_p08_boxes_credits_security.test.sql, supabase/tests/0057_p08_credit_wallet_client_admin_rls.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "boxes_credits_agent",
+      "releaseSignoff": "PENDING:E2E-credits-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-034",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009700_rewards_referral_audience_hardening.sql]",
+      "testReferences": "[supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0071_rewards_referral_audience_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "boxes_credits_agent",
+      "releaseSignoff": "PENDING:E2E-recompenses-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-035",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009900_referral_conversion_anti_oracle.sql]",
+      "testReferences": "[supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0073_referral_conversion_anti_oracle.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "subscription_agent",
+      "releaseSignoff": "PENDING:E2E-parrainage-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-036",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007900_franchise_crm_performance.sql, supabase/migrations/20260912008700_franchise_crm_security_hardening.sql]",
+      "testReferences": "[supabase/tests/0059_p10_franchise_crm_performance.test.sql, supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "franchise_governance_agent",
+      "releaseSignoff": "PENDING:E2E-crm-franchise-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-037",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007900_franchise_crm_performance.sql]",
+      "testReferences": "[supabase/tests/0059_p10_franchise_crm_performance.test.sql, supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "franchise_governance_agent",
+      "releaseSignoff": "PENDING:E2E-pipeline-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-038",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912014100_franchise_followup_scheduler.sql]",
+      "testReferences": "[supabase/tests/0059_p10_franchise_crm_performance.test.sql, supabase/tests/0383_franchise_followup_lease_retry_dead_letter.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-038-sql-relance-run.json]",
+      "owner": "notifications_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-039",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007500_notifications_preferences_delivery.sql, supabase/migrations/20260912007600_notification_required_variables_hotfix.sql]",
+      "testReferences": "[supabase/tests/0056_p17_notifications_preferences_delivery.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "notifications_agent",
+      "releaseSignoff": "PENDING:E2E-modeles-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-040",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260911005100_question_builder_commands.sql]",
+      "testReferences": "[supabase/tests/0039_p06_question_builder_commands.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "question_engine_agent",
+      "releaseSignoff": "PENDING:E2E-clonage-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-041",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010000_assisted_intelligence_quality.sql, supabase/migrations/20260912011500_assistance_role_authorization_hardening.sql]",
+      "testReferences": "[supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0086_assistance_role_helper_acl.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "question_engine_agent",
+      "releaseSignoff": "PENDING:E2E-revue-qualite-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-042",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010000_assisted_intelligence_quality.sql, supabase/migrations/20260912010700_assisted_intelligence_deployment_reconciliation.sql]",
+      "testReferences": "[supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0084_assistance_role_authorization_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "question_engine_agent",
+      "releaseSignoff": "PENDING:E2E-similarite-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-043",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912008400_question_rule_advanced_engine.sql, supabase/migrations/20260912008800_question_rule_simulation_canonical_fix.sql]",
+      "testReferences": "[supabase/tests/0061_p06_question_rule_advanced_engine.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "question_engine_agent",
+      "releaseSignoff": "PENDING:E2E-sandbox-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-044",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009000_questionnaire_sessions.sql, supabase/migrations/20260912014200_questionnaire_abandonment_analytics.sql]",
+      "testReferences": "[supabase/tests/0064_p06_questionnaire_sessions.test.sql, supabase/tests/0384_questionnaire_abandonment_analytics.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-044-sql-abandons-run.json]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-045",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010100_solution_bundles_benchmarks.sql, supabase/migrations/20260912011900_benchmark_verified_value_binding.sql]",
+      "testReferences": "[supabase/tests/0075_solution_bundles_benchmarks.test.sql, supabase/tests/0088_benchmark_verified_value_binding.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:E2E-benchmark-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-046",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007200_diagnostics_opportunities.sql, supabase/migrations/20260912007900_franchise_crm_performance.sql]",
+      "testReferences": "[supabase/tests/0054_p07_diagnostics_opportunities.test.sql, supabase/tests/0059_p10_franchise_crm_performance.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:E2E-evolution-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-047",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009700_rewards_referral_audience_hardening.sql]",
+      "testReferences": "[supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0071_rewards_referral_audience_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "diagnostics_agent",
+      "releaseSignoff": "PENDING:E2E-roi-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-048",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql, supabase/migrations/20260912009400_provider_feedback_privacy_hardening.sql]",
+      "testReferences": "[supabase/tests/0066_provider_reputation_badges_favorites.test.sql, supabase/tests/0068_provider_feedback_privacy_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "rfq_matching_agent",
+      "releaseSignoff": "PENDING:E2E-favoris-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-049",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010200_rfq_clone_recurring_services.sql, supabase/migrations/20260912010600_rfq_recurring_runtime_hardening.sql]",
+      "testReferences": "[supabase/tests/0076_rfq_clone_recurring_services.test.sql, supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "rfq_matching_agent",
+      "releaseSignoff": "PENDING:E2E-clonage-demande-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-050",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010200_rfq_clone_recurring_services.sql, supabase/migrations/20260912011300_recurring_plan_alias_compatibility.sql]",
+      "testReferences": "[supabase/tests/0076_rfq_clone_recurring_services.test.sql, supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "contract_mission_agent",
+      "releaseSignoff": "PENDING:E2E-recurrence-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-051",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, supabase/migrations/20260921160000_client_site_and_rfq_open_entitlement.sql]",
+      "testReferences": "[supabase/tests/0065_client_projects_budgets_calendar.test.sql, supabase/tests/0165_client_site_and_rfq_open_entitlement.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "auth_identity_agent",
+      "releaseSignoff": "PENDING:visa-independant",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-052",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260911001900_identity_role_requests.sql, supabase/migrations/20260912007100_admin_command_center.sql]",
+      "testReferences": "[supabase/tests/0013_p04_role_requests.test.sql, supabase/tests/0053_p17_admin_command_center.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "auth_identity_agent",
+      "releaseSignoff": "PENDING:E2E-approbation-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-053",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, supabase/migrations/20260912012200_franchise_digest_idempotency_scope.sql]",
+      "testReferences": "[supabase/tests/0065_client_projects_budgets_calendar.test.sql, supabase/tests/0122_typed_cost_center_financial_links.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "client_onboarding_agent",
+      "releaseSignoff": "PENDING:E2E-centres-cout-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-054",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/app/globals.css, packages/ui/src/index.ts]",
+      "testReferences": "[tests/e2e/p05-client-compliance.spec.ts, tests/e2e/p06-catalog.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "i18n_rtl_accessibility_agent",
+      "releaseSignoff": "PENDING:matrice-360-exhaustive-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-055",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260911003700_question_engine_persistence.sql]",
+      "testReferences": "[supabase/tests/0025_p06_question_engine_persistence.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "question_engine_agent",
+      "releaseSignoff": "PENDING:E2E-autosave-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-056",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/modules/client/screens/spaces/boards.tsx]",
+      "testReferences": "[tests/e2e/p21-questionnaires-diagnostics.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "ux_information_architect",
+      "releaseSignoff": "PENDING:contrat-progression-transversal-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-057",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912012400_assistance_purge_audit_correlation.sql]",
+      "testReferences": "[supabase/tests/0124_versioned_prefill_freshness.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "question_engine_agent",
+      "releaseSignoff": "PENDING:E2E-prefill-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-058",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/modules/shared/lib/i18n/locale.ts]",
+      "testReferences": "[tests/e2e/p05-client-compliance.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "ux_information_architect",
+      "releaseSignoff": "PENDING:aides-champs-critiques-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-059",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/modules/shared/lib/i18n/locale.ts]",
+      "testReferences": "[tests/e2e/p05-client-compliance.spec.ts, tests/e2e/p21-questionnaires-diagnostics.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "i18n_rtl_accessibility_agent",
+      "releaseSignoff": "PENDING:couverture-FR-AR-exhaustive-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-060",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/modules/shared/lib/i18n/locale.ts]",
+      "testReferences": "[tests/e2e/public-experience.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "i18n_rtl_accessibility_agent",
+      "releaseSignoff": "PENDING:texte-simplifie-systematique-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-061",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[packages/ui/src/index.ts]",
+      "testReferences": "[tests/e2e/p05-client-compliance.spec.ts]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "i18n_rtl_accessibility_agent",
+      "releaseSignoff": "PENDING:audit-accessibilite-complet-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-062",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009700_rewards_referral_audience_hardening.sql]",
+      "testReferences": "[supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0071_rewards_referral_audience_hardening.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "provider_finance_agent",
+      "releaseSignoff": "PENDING:E2E-economies-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-063",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007500_notifications_preferences_delivery.sql, apps/web/app/[locale]/notifications/page.tsx]",
+      "testReferences": "[supabase/tests/0056_p17_notifications_preferences_delivery.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "notifications_agent",
+      "releaseSignoff": "PENDING:E2E-preferences-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-064",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912010300_franchise_daily_digest.sql, supabase/migrations/20260912012600_franchise_digest_scheduler_bounding.sql]",
+      "testReferences": "[supabase/tests/0077_franchise_daily_digest.test.sql, supabase/tests/0092_franchise_digest_scheduler_bounding.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "notifications_agent",
+      "releaseSignoff": "PENDING:E2E-digest-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-065",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007100_admin_command_center.sql, apps/web/app/[locale]/administration/command-center/page.tsx]",
+      "testReferences": "[supabase/tests/0053_p17_admin_command_center.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "admin_command_center_agent",
+      "releaseSignoff": "PENDING:E2E-file-du-jour-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-066",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007100_admin_command_center.sql, supabase/migrations/20260912008000_morocco_tax_engine.sql]",
+      "testReferences": "[supabase/tests/0053_p17_admin_command_center.test.sql, supabase/tests/0060_p14_morocco_tax_engine.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "admin_command_center_agent",
+      "releaseSignoff": "PENDING:E2E-exceptions-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-067",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912005900_rfq_matching_foundation.sql, supabase/migrations/20260912014000_internal_object_messaging.sql]",
+      "testReferences": "[supabase/tests/0043_p07_rfq_matching_foundation.test.sql, supabase/tests/0154_messaging_comparison_functional.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "rfq_matching_agent",
+      "releaseSignoff": "PENDING:E2E-masquage-contacts-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MAT-FUNC-068",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007100_admin_command_center.sql, supabase/migrations/20260913017700_transversal_abuse_detection.sql]",
+      "testReferences": "[supabase/tests/0053_p17_admin_command_center.test.sql, supabase/tests/0123_transversal_abuse_detection.test.sql]",
+      "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]",
+      "owner": "security_architect",
+      "releaseSignoff": "PENDING:E2E-anti-abus-et-visa",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-001",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007800_marketing_autopilot.sql, supabase/migrations/20260913018700_marketing_content_attribution_completion.sql, apps/web/app/[locale]/sous-traitant/marketing/page.tsx, apps/web/app/[locale]/franchise/marketing/page.tsx, apps/web/modules/shared/lib/marketing-autopilot/brand-defaults.ts, scripts/provision-marketing-demo.mjs]",
+      "testReferences": "[supabase/tests/0058_p18_marketing_autopilot.test.sql, apps/web/modules/shared/lib/marketing-autopilot/brand-defaults-model.test.ts, apps/web/modules/shared/testing/marketing-demo-plan.test.ts]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-content-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-E2E",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-002",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/modules/shared/lib/marketing-autopilot/content-engine.ts, supabase/migrations/20260913018700_marketing_content_attribution_completion.sql]",
+      "testReferences": "[apps/web/modules/shared/lib/marketing-autopilot/content-engine.test.ts]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-content-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-E2E",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-003",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007800_marketing_autopilot.sql]",
+      "testReferences": "[supabase/tests/0058_p18_marketing_autopilot.test.sql]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-content-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-E2E",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-004",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260913018100_marketing_calendar_scheduler.sql, apps/web/modules/admin/screens/marketing-autopilot/calendar-management.tsx, supabase/migrations/20260929100000_marketing_workspaces_funnel.sql]",
+      "testReferences": "[supabase/tests/0058_p18_marketing_autopilot.test.sql, supabase/tests/0171_marketing_workspaces_funnel.test.sql]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-automation-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-E2E",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-005",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[apps/web/modules/shared/lib/marketing-autopilot/publisher.ts, supabase/migrations/20260913018000_marketing_publication_worker.sql]",
+      "testReferences": "[apps/web/modules/shared/lib/marketing-autopilot/publisher.test.ts]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "social-integration-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-credentials-live",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-006",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260913018700_marketing_content_attribution_completion.sql, apps/web/modules/shared/lib/marketing-autopilot/funnel.ts, apps/web/app/api/marketing/cta/[token]/route.ts]",
+      "testReferences": "[supabase/tests/0058_p18_marketing_autopilot.test.sql, apps/web/modules/shared/lib/marketing-autopilot/funnel.test.ts, apps/web/modules/shared/lib/marketing-autopilot/funnel-touch.test.ts]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-analytics-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-E2E",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-007",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260913018600_marketing_weekly_trends.sql, apps/web/app/api/workers/marketing-trends/route.ts, apps/web/vercel.json]",
+      "testReferences": "[supabase/tests/0132_marketing_weekly_trends.test.sql, apps/web/app/api/workers/marketing-trends/route.test.ts]",
+      "evidenceReferences": "[docs/traceability/V1_ATOMIC_GAP_AUDIT_2026-09-13.md, docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-automation-agent",
+      "releaseSignoff": "PENDING:E2E-authentifie-et-preuve-operationnelle",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    },
+    {
+      "id": "MARKETING-008",
+      "status": "IN_PROGRESS",
+      "classification": "MISSING_EVIDENCE_OR_SIGNOFF",
+      "implementationReferences": "[supabase/migrations/20260912007800_marketing_autopilot.sql, apps/web/modules/shared/lib/marketing-autopilot/repository.ts, apps/web/modules/shared/lib/marketing-autopilot/dimension-labels.ts, apps/web/app/api/workers/marketing-frequency/route.ts]",
+      "testReferences": "[supabase/tests/0058_p18_marketing_autopilot.test.sql, apps/web/modules/admin/screens/marketing-autopilot/marketing-workspace.test.tsx, apps/web/app/api/workers/marketing-frequency/route.test.ts]",
+      "evidenceReferences": "[docs/progress/PROJECT_STATE.md]",
+      "owner": "marketing-analytics-agent",
+      "releaseSignoff": "PENDING:visa-independant-et-E2E",
+      "note": "Classification follows the registry claim; it does not prove implementation completeness or an external approval."
+    }
+  ],
+  "variables": [
+    {
+      "name": "NODE_ENV",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "APP_ENV",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "NEXT_PUBLIC_APP_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SUPABASE_ACCESS_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SUPABASE_PROJECT_REF",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SUPABASE_REGION",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SUPABASE_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SUPABASE_ANON_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "DATABASE_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "DIRECT_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "GITHUB_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "GITHUB_OWNER",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "GITHUB_REPO",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "VERCEL_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "VERCEL_ORG_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "VERCEL_PROJECT_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RAILWAY_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RAILWAY_PROJECT_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RAILWAY_ENVIRONMENT_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RESEND_API_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RESEND_FROM_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RESEND_FROM_NAME",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PUBLIC_CONTACT_NOTIFICATION_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_ENV",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_CLIENT_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_CLIENT_SECRET",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_WEBHOOK_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_WEBHOOK_CERT_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_WEBHOOK_CERTIFICATE_PEM_BASE64",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYPAL_ALLOWED_CURRENCIES",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CMI_ENV",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CMI_MERCHANT_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CMI_STORE_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CMI_GATEWAY_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CMI_GATEWAY_ALLOWED_HOSTS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "APP_ENCRYPTION_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CRON_SECRET",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "INTERNAL_WEBHOOK_SECRET",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "WORKER_DISPATCH_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "WORKER_DISPATCH_ALLOWED_HOSTS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_HOST",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_ALLOWED_HOSTS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_NETWORK_MODE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_PORT",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_ENGINE_VERSION",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_MAX_DATABASE_AGE_HOURS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_TIMEOUT_MS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "CLAMAV_CHUNK_BYTES",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MALWARE_SCANNER_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MALWARE_SCANNER_ALLOWED_HOSTS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MALWARE_SCANNER_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "DELIVERY_PROOF_SCANNER_MODE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYMENT_PROVIDER",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYMENT_PROVIDER_ALLOWLIST",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYMENT_LIVE_ENABLED",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "PAYMENT_WEBHOOK_SECRET_DEMO",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "EMAIL_DELIVERY_MODE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "EMAIL_LIVE_DELIVERY_ENABLED",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "EMAIL_RECIPIENT_ALLOWLIST",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "EMAIL_PROVIDER_ENDPOINT",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "EMAIL_PROVIDER_ENDPOINT_ALLOWLIST",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "EMAIL_PROVIDER_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_AUTOPILOT_ENABLED",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_PUBLISH_MODE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_LIVE_PUBLISHING_ENABLED",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CONTENT_PROVIDER_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CONTENT_PROVIDER_ENDPOINT_ALLOWLIST",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CONTENT_PROVIDER_API_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CTA_SIGNING_SECRET",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_SOCIAL_LINKEDIN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_SOCIAL_META",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_ACCESS_ENABLED",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_CLIENT_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_CLIENT_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_PROVIDER_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_PROVIDER_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_ADMIN_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_ADMIN_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_FRANCHISE_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_FRANCHISE_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_MARKETING_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_DEMO_MARKETING_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "RESEND_WEBHOOK_SECRET",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CONTENT_FALLBACK_PROVIDER_URL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CONTENT_FALLBACK_PROVIDER_ENDPOINT_ALLOWLIST",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MARKETING_CONTENT_FALLBACK_PROVIDER_API_KEY",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "READINESS_REQUIRED_SERVICES",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "INTERNAL_METRICS_TOKEN",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "WORKER_LOCAL_SUPABASE_ENABLED",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "WORKER_LOCAL_SUPABASE_PROJECT_ID",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SIGNATURE_PROVIDER_MODE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "SIGNATURE_PROVIDER_CODE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "BILLING_ISSUER_LEGAL_NAME",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "BILLING_ISSUER_ADDRESS",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "BILLING_ISSUER_ICE",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "BILLING_ISSUER_VERSION",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "AUTH_EMAIL_OTP_LENGTH",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_PARCOURS_CLIENT_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_PARCOURS_CLIENT_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_PARCOURS_PROVIDER_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_PARCOURS_PROVIDER_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_PARCOURS_FRANCHISE_EMAIL",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    },
+    {
+      "name": "MATRICIA_PARCOURS_FRANCHISE_PASSWORD",
+      "documented": true,
+      "stagingPresence": "NOT_OBSERVED",
+      "productionPresence": "NOT_OBSERVED"
+    }
+  ],
+  "externalDecisions": {
+    "signatureProvider": "Yousign",
+    "signatureEnvironment": "sandbox",
+    "realAdapterValidated": false,
+    "stagingIdentityConfirmed": false,
+    "legalApprovalsObserved": false
+  }
+}

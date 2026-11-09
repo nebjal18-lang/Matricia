@@ -1331,3 +1331,36 @@ compte externe empêche la preuve CI tant qu'elle n'est pas levée; elle ne vaut
 - Même PDF privé repris après alignement Origin du runtime : UPLOADED,816octets/hash vérifiés,1upload,0rapprochement ; scannerERROR et refus55000 de coût nul maintiennent la sécurité faute de moteur réel.
 - Focus12cas FR/AR375/390 PASS enDEV, clavier réel et0axe/0JS. Pas de nouvelle campagne optimisée192 ni de déploiementprod.
 - AdminCalendrier560 exploitable FR/AR ; dates sérialisées serveur contre divergenceTZdata ;56testsWeb et28SQL PASS, revue indépendante favorable. Reçus finaux dans docs/franchise-completion/evidence/browser.
+
+
+## 2026-11-09 — Clôture V1 : corrections et recette locale, release non certifiée
+
+- Synchronisation `version-2` avec le head GitHub `10c4fc3`, sans écrasement des changements entrants ; code candidat local `888bcaf`.
+- Corrections : champ de report optionnel pour accepter/refuser une solution, conservation stricte du tenant client, récupération FR/AR des références franchise sans mandat, origine CMI HTTPS explicitement autorisée par CSP, dépendance `server-only` et contexte de tests serveur explicites.
+- Préparation des recettes : inventaire filesystem, gardes de manifest org/franchise/bibliothèque, données manquantes signalées. Les cinq templates de recette sans IDs restent ouverts. Le scan ne certifie plus une 404, un refus inattendu, une redirection de connexion ou un contexte de tenant modifié. Les deux refus fiscaux attendus sont distingués des parcours métier réussis.
+- Preuves locales vertes : 4 076 tests unitaires réussis, un test Storage opt-in existant non exécuté ; 63 tests d’outillage ; intégration 3/3 ; Chromium public 18/18, FR/AR, 360/ordinateur, axe et quatre captures ; CMI intercepté 2/2 sans PSP réel ; build Next/Turbopack Node22 avec TypeScript ; lint 0 erreur et 4 avertissements existants.
+- SQL : environnement neuf séparé, 575 migrations + seed verts. Correctif additif de version finale CRM et assertion 0193 renforcée. Suite SQL globale complète : 360 fichiers, 9 301 assertions et quatre scénarios de concurrence verts sur la base isolée ; reçu `docs/evidence/v1-closure-sql-full-20261109.json`.
+- Revue technique indépendante conservée ; preuve principale : `docs/evidence/v1-closure-20261109.json`. Plan, lots et limites : `docs/release/V1_CLOSURE_2026-11-09.md`.
+- Aucun changement de production, aucun dossier IT existant réutilisé, aucun secret copié. Yousign sandbox retenu par le demandeur, sans activation EXTERNAL ni validation juridique déduite de ce choix.
+- Gate V1 : **REFUSÉ**, 73 conditions restantes sur worktree figé, toujours **5/76 VERIFIED**, aucune promotion. Staging/bindings, KYC, politiques four-eyes, signature réelle, CNDP/fiscalité, données de recette et parcours natifs C1–C8 restent à prouver.
+- Prochaine étape unique : confirmer la cible de staging et ses bindings autorisés pour alimenter les acteurs de recette puis exécuter les parcours natifs du plan.
+
+- Complément CI : correctif `60e6b1c` après le timeout du test navigateur devis dans le premier run. La CI installe désormais Chromium avec Playwright et le test ne dépend plus d’un chemin système implicite. 10 tests ciblés verts avec le navigateur Playwright et 10 avec l’override local, sans retry ni hausse de délai. **Run GitHub 42644570334 : quality, browser-public et database tous verts** sur le code courant. Le gate métier reste refusé indépendamment de cette validation technique.
+
+## 2026-11-09 — Réparation du staging et transport YouSign
+
+Statut : **code validé, activation externe et production non certifiées**. Source contrôlée : `c0578a098ba51806af245342a0e3e4dd6dd1b49f` (application identique à `d8c3a75`, décision Vercel de construire à chaque push ajoutée).
+
+- Staging distinct créé sans données de production : `matricia-staging.vercel.app`, Supabase `vuwvkpfprixzysjfpgkw`, branche Git `codex/staging-repair-20261109` et 30 bindings Preview propres.
+- Reconstruction canonique après divergence du schéma initial ; 577 migrations réellement appliquées, 686 tables publiques et 149 privées, 12 buckets et 29 politiques Storage. Références JWT et trois empreintes de fonctions vérifiées ; base de confiance `STAGING`.
+- OTP à 8 chiffres et URLs Auth alignés ; garde de build contre les backends partagés avec Production ; Node 22 et build Vercel automatique.
+- Worker : scanner authentifié, requêtes bornées, preuves de readiness expirantes et heartbeats coalescés ; image non privilégiée reconstruite et démarrage sans réseau vérifié.
+- YouSign : transport SIMPLE sandbox, webhook HMAC, claims durables et preuve PDF/consentement/audit vérifiée ; aucune attestation juridique ni activation réelle inventée.
+- Vérification : **4 183 tests unitaires PASS**, un test Storage natif optionnel existant ignoré ; **103 tests d’outillage PASS**, **58 assertions SQL positives** et **21 contrôles SQL de droits** ; build Next.js/TypeScript, phase00, frontières et ESLint des fichiers d’intégration PASS. Deux contrôles globaux standalone TSC/lint ont été interrompus pour ressources ; TypeScript a ensuite terminé dans le build et les fichiers modifiés ont passé ESLint.
+- Revue indépendante sans P1 statique ouvert dans le périmètre revu. Les statuts d’exigences restent **5/76 VERIFIED** ; aucune certification externe ajoutée.
+
+Restants : credentials et recette Resend/SMTP, PayPal et YouSign ; hébergement worker/ClamAV et scan natif ; réseau du navigateur d’audit ; comptes et contenu de recette ; deux administrateurs AAL2 distincts ; validations métier/juridique/CNDP/fiscales, restauration/pentest, visas indépendants et décision de production. Voir `docs/release/STAGING_REPAIR_2026-11-09.md` et `docs/evidence/staging-repair-20261109.json`.
+
+Complément confidentialité et validation finale : la première CI a détecté le défaut réel 0243 lié aux nouveaux fichiers YouSign. La migration additive `20261109101000` raccorde les fichiers et sept familles de métadonnées au sujet exact, en conservant `UNTRUSTED` et les revues indépendantes. **108 assertions natives RGPD passent**. La campagne locale interrompue par le redémarrage a été terminée sur les 110 fichiers restants après les 251 premiers, sans omission. Le job GitHub `database` du run `42673774172`, sur `1a99fcda15862932b331f29c0e3051899568d674`, confirme indépendamment **361 fichiers SQL, 9 323 assertions et quatre scénarios de concurrence PASS** après reconstruction des 577 migrations. Reçu : `docs/evidence/staging-repair-sql-final-20261109.json`.
+
+Les jobs qualité et navigateur ont réussi dans le run `42666211494` sur `1d0eb0b94a0734407ffc8fe72fe37ae25a1e7fcc` : lint global, types, unités, intégration, outillage et build. Les arbres `apps`, `packages`, le manifeste racine, le lockfile et le workflow sont identiques sur le candidat SQL final ; Vercel y réussit également. Le run final demeure globalement rouge : GitHub affiche une erreur interne de planification (`7c94913a-4819-40d3-a3bd-a8c7bb9af940`) et n’a pas démarré les jobs qualité/navigateur. Aucun contrôle n’est désactivé pour masquer ce problème externe. L’activation des fournisseurs et la production restent non certifiées.

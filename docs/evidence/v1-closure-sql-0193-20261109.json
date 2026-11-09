@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-09T14:37:06.701Z",
+  "environment": "development",
+  "outcome": "PASS",
+  "files": [
+    "0193_franchise_provider_bridge_delivery.test.sql"
+  ],
+  "assertions": 17,
+  "concurrencyScenarios": 4
+}

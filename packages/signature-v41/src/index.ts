@@ -1,3 +1,4 @@
-export * from "./provider.js";
-export * from "./mock-provider.js";
-export * from "./workflow.js";
+export * from "./provider";
+export * from "./mock-provider";
+export * from "./workflow";
+export * from "./yousign-provider";

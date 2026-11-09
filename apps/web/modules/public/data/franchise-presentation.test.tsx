@@ -4,7 +4,8 @@ import PublicFranchise from "@/app/[locale]/(public)/franchise/page";
 import Candidature from "@/app/[locale]/franchise/candidature/page";
 import { FranchiseApplicationForm } from "@/app/[locale]/(public)/franchise/franchise-application-form";
 import { getFranchisePresentation } from "./franchise-presentation";
-vi.mock("@/app/[locale]/(public)/contact/actions", () => ({ submitContactRequest: vi.fn(async () => ({ status: "idle" })) }));
+vi.mock("@/app/[locale]/(public)/franchise/actions", () => ({ submitFranchiseApplication: vi.fn(async () => ({ status: "idle" })) }));
+vi.mock("@/modules/franchise/data/candidature/repository", () => ({ loadMyFranchiseApplications: vi.fn(async () => ({ status: "unauthenticated" })) }));
 vi.mock("@/modules/public/ui/site/public-navigation", () => ({ PublicNavigation: () => null }));
 vi.mock("@/modules/public/ui/site/public-footer", () => ({ PublicFooter: () => null }));
 
@@ -20,7 +21,6 @@ for (const locale of ["fr", "ar"] as const) describe(`professional Franchise mod
   it("keeps the actual application contract while asking for a professional service domain", () => {
     const html = renderToStaticMarkup(<FranchiseApplicationForm locale={locale} />);
     expect(html).toContain(getFranchisePresentation(locale).domain);
-    expect(html).toContain('name="category" value="FRANCHISE"'); expect(html).toContain('name="domain"');
-    expect(html).toContain('name="message"'); expect(html).toContain('name="motivation"');
+    for (const name of ["locale","displayName","replyEmail","zone","profile","domain","availability","motivation"]) expect(html).toContain(`name="${name}"`);
   });
 });

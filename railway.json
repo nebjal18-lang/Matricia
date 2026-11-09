@@ -1,8 +1,8 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
-    "builder": "RAILPACK",
-    "buildCommand": "corepack enable && pnpm install --frozen-lockfile && pnpm --filter @matricia/worker build"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "apps/worker/Dockerfile"
   },
   "deploy": {
     "startCommand": "corepack pnpm --filter @matricia/worker start",

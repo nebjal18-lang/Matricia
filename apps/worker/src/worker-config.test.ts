@@ -9,6 +9,7 @@ const base = {
   WORKER_DISPATCH_URL: "https://api.matricia.test/events",
   WORKER_DISPATCH_ALLOWED_HOSTS: "api.matricia.test",
   INTERNAL_WEBHOOK_SECRET: "w".repeat(40),
+  MALWARE_SCANNER_TOKEN: "m".repeat(40),
   PORT: "8080",
 };
 
@@ -18,6 +19,17 @@ describe("worker runtime configuration", () => {
     expect(config.supabaseProjectRef).toBe(base.SUPABASE_PROJECT_REF);
     expect(config.dispatchUrl.origin).toBe("https://api.matricia.test");
     expect(config.port).toBe(8080);
+    expect(config.scannerToken).toBe(base.MALWARE_SCANNER_TOKEN);
+  });
+
+  it.each([undefined, "", " "])("requires scanner authentication before starting HTTP readiness: %s", (value) => {
+    expect(() => readWorkerRuntimeConfig({ ...base, MALWARE_SCANNER_TOKEN: value }))
+      .toThrow("WORKER_CONFIG_MALWARE_SCANNER_TOKEN_REQUIRED");
+  });
+
+  it.each(["m".repeat(31), "m".repeat(4_097), `${"m".repeat(32)}\n${"m".repeat(32)}`, `${"m".repeat(32)} ${"m".repeat(32)}`, ` ${"m".repeat(32)}`, `${"m".repeat(32)}\n`])("rejects scanner tokens that cannot authenticate a bounded HTTP request", (value) => {
+    expect(() => readWorkerRuntimeConfig({ ...base, MALWARE_SCANNER_TOKEN: value }))
+      .toThrow("WORKER_CONFIG_MALWARE_SCANNER_TOKEN_INVALID");
   });
 
   it.each([

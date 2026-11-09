@@ -2,6 +2,8 @@ import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
 import { resolve } from "node:path";
 import { resolvePublicSupabaseEnvironment } from "./modules/shared/lib/public-supabase-environment";
+import { paymentFormActionPolicy } from "./modules/shared/lib/payment-form-policy";
+import { assertPreviewIsolation } from "./modules/shared/lib/preview-isolation";
 
 loadEnvConfig(resolve(import.meta.dirname, "../.."), process.env.NODE_ENV !== "production", console, true);
 
@@ -18,6 +20,13 @@ const {
 });
 
 const supabaseOrigin = new URL(supabaseUrl).origin;
+assertPreviewIsolation({
+  VERCEL_ENV: process.env.VERCEL_ENV,
+  APP_ENV: process.env.APP_ENV,
+  NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+  STAGING_SUPABASE_PROJECT_REF: process.env.STAGING_SUPABASE_PROJECT_REF,
+  PRODUCTION_SUPABASE_PROJECT_REF: process.env.PRODUCTION_SUPABASE_PROJECT_REF,
+});
 const isProduction = process.env.NODE_ENV === "production";
 const isVercelPreview = process.env.VERCEL_ENV === "preview";
 const vercelLive = "https://vercel.live";
@@ -26,7 +35,7 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
-  "form-action 'self'",
+  paymentFormActionPolicy({PAYMENT_PROVIDER:process.env.PAYMENT_PROVIDER,CMI_GATEWAY_URL:process.env.CMI_GATEWAY_URL,CMI_GATEWAY_ALLOWED_HOSTS:process.env.CMI_GATEWAY_ALLOWED_HOSTS}),
   "object-src 'none'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
