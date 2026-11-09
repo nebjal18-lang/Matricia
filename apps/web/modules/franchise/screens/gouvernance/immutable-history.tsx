@@ -29,4 +29,10 @@ export function FinanceHistory({ book, locale, m, franchiseeOnly = false }: { bo
 }
 
 function Hash({ label, value }: { label: string; value: string }) { return <p className="mt-2 break-all font-mono text-xs text-muted-foreground" dir="ltr">{label}: {value}</p>; }
-function formatDate(value: string, locale: Locale) { return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)); }
+function formatDate(value: string, _locale: Locale) {
+  // Manual UTC stamp: Intl dateStyle differs between Node SSR and Chromium hydration.
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+}

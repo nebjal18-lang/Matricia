@@ -627,7 +627,7 @@ export function DocumentsBoard({ locale, query, children, documents, toHandle, r
   );
 }
 
-export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: string; organizationName?: string | null; rows?: Array<{ id: string; title: string; folder: string; status: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }> }) {
+export function FinancesBoard({ locale, query, rows, omitRegister = false }: { locale: Locale; query: string; organizationName?: string | null; rows?: Array<{ id: string; title: string; folder: string; status: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }>; omitRegister?: boolean }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, query);
   const preferDemo = canApplyClientSpaceDemo() && (!rows || rows.length === 0);
@@ -655,7 +655,7 @@ export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: 
         </article>
       </section>
       <section className="client-board client-board-compare">
-        <article className="client-card">
+        {omitRegister ? null : <article className="client-card">
           <header className="client-priority-head"><h2>{c.finDocs}</h2><Link href={`/${locale}/client/abonnement${query}`} className="client-text-link">{c.seeAllToHandle}</Link></header>
           <p>{c.finDocsLead}</p>
           {list.length === 0 ? <p>{c.emptyBoard}</p> : (
@@ -677,7 +677,7 @@ export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: 
             </div>
           )}
           <Link href={`/${locale}/client/abonnement${query}`} className="client-text-link">{c.seeAllFin}</Link>
-        </article>
+        </article>}
         <div className="client-stack">
           <article className="client-card">
             <header><h2>{c.understand}</h2></header>

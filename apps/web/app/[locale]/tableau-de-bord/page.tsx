@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Building2 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -19,6 +20,12 @@ import { resolveWorkspaceLanding, workspaceLandingPath } from "@/modules/shared/
 import { availableWorkspaces } from "@/modules/shared/lib/auth/workspace-navigation";
 import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { signOut } from "./actions";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  return { title: dashboardHomeCopy[locale].title };
+}
 
 const membershipRows = z.array(
   z.object({

@@ -3,8 +3,11 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import type { AdminFinanceMessages } from "./messages";
 
-function formatDate(value: string, locale: Locale) {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(value));
+function formatDate(value: string, _locale: Locale) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
 }
 
 export function FinanceSorties({

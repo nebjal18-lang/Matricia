@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { canApplyClientSpaceDemo, demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { MilestoneDecisionForm } from "@/modules/client/screens/missions/milestone-decision-form";
+import { DeliverableReceipt } from "@/modules/client/screens/missions/mission-panel";
 import type { MissionMessages } from "@/modules/client/screens/missions/messages";
 import type { ContractMissionDashboard } from "@/modules/shared/lib/contracts-missions/model";
 import { AssistanceCue } from "@/modules/client/screens/diagnostics/assistance-cue";
@@ -66,10 +67,13 @@ export function JalonsBoard({
     title: item.label,
     file: item.label,
     kind: "file" as const,
-    scan: item.proofScanStatus === "CLEAN" ? "ok" as const : "wait" as const,
+    scan: item.proofScanStatus === "CLEAN" ? "ok" as const : item.proofScanStatus === "NONE" ? "none" as const : "wait" as const,
+    submitted: item.status === "SUBMITTED" || item.status === "ACCEPTED" || item.status === "REJECTED",
     href: `/${locale}/client/documents${query}`,
   }));
-  const submittedCount = files.filter((file) => file.scan === "ok").length;
+  const contractIsSigned = mission ? mission.contractSnapshot.signatures.length > 0 : true;
+  const submittedCount = preferDemo ? files.filter((file) => file.scan === "ok").length : files.filter((file) => "submitted" in file && file.submitted).length;
+  const pendingReceipts = (mission?.deliverables ?? []).filter((item) => item.status === "SUBMITTED" && !item.retirement);
   const progressPct = files.length === 0 ? 0 : Math.round((submittedCount / files.length) * 100);
   const started = mission?.startedAt
     ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(mission.startedAt))
@@ -98,7 +102,7 @@ export function JalonsBoard({
           <p className="client-mission-participants"><Users className="size-4" aria-hidden /> {c.yourCompany} · {c.matriciaTeam} · {c.partners}</p>
         </div>
         <div className="client-mission-mast-foot">
-          <span className="client-status-chip" data-tone="mint">{c.contractSigned}</span>
+          <span className="client-status-chip" data-tone={contractIsSigned ? "mint" : "peach"}>{contractIsSigned ? c.contractSigned : c.contractUnsigned}</span>
           <span className="client-access-note"><Shield className="size-4" aria-hidden />{c.immutableVersion}</span>
           {mission ? <Link href={`/${locale}/client/missions/${mission.id}${query}`} className="client-text-link">{c.seeAmendment}</Link> : null}
         </div>
@@ -161,7 +165,7 @@ export function JalonsBoard({
                         <td dir="ltr">{index + 1}</td>
                         <td><span className="client-doc-cell"><FileText className="size-4" aria-hidden />{file.title}</span></td>
                         <td>{file.file}</td>
-                        <td><span className="client-status-chip" data-tone={file.scan === "ok" ? "mint" : "peach"}>{file.scan === "ok" ? c.scanOk : c.scanWait}</span></td>
+                        <td><span className="client-status-chip" data-tone={file.scan === "ok" ? "mint" : "peach"}>{file.scan === "ok" ? c.scanOk : file.scan === "none" ? c.scanNone : c.scanWait}</span></td>
                         <td><Link href={file.href} className="client-text-link">{c.open}</Link></td>
                       </tr>
                     ))}
@@ -179,17 +183,24 @@ export function JalonsBoard({
                 <div className="client-jalon-history">
                   <h3>{c.jalonHistory}</h3>
                   <ol className="client-mediation">
-                    <li data-state="done"><span><strong>{c.contractSigned}</strong><small>{started}</small></span></li>
+                    <li data-state={contractIsSigned ? "done" : "current"}><span><strong>{contractIsSigned ? c.contractSigned : c.contractUnsigned}</strong><small>{started}</small></span></li>
                     <li data-state={selected.state === "done" ? "done" : "current"}><span><strong>{selected.title}</strong><small>{selected.due}</small></span></li>
                   </ol>
                 </div>
               </div>
               <div className="client-jalon-actions">
-                {selectedLive && selectedLive.status === "SUBMITTED" ? (
+                {pendingReceipts.map((deliverable) => (
+                  <section key={deliverable.id} aria-labelledby={`receipt-${deliverable.id}`}>
+                    <h3 id={`receipt-${deliverable.id}`}>{deliverable.label}</h3>
+                    <DeliverableReceipt deliverable={deliverable} locale={locale} m={messages} />
+                  </section>
+                ))}
+                {pendingReceipts.length === 0 && selectedLive && selectedLive.status === "SUBMITTED" ? (
                   <p className="client-access-note">{locale === "ar" ? "سجّلوا قراركم في النموذج أعلاه." : "Enregistrez votre décision dans le formulaire ci-dessus."}</p>
-                ) : (
+                ) : null}
+                {pendingReceipts.length === 0 && !(selectedLive && selectedLive.status === "SUBMITTED") ? (
                   <p className="client-access-note">{locale === "ar" ? "لا يوجد قرار معلّق على هذا المعلم." : "Aucune décision en attente sur ce jalon."}</p>
-                )}
+                ) : null}
                 <Link href={`/${locale}/messagerie${query}`} className="client-jalon-btn" data-tone="peach">{c.requestChanges}</Link>
               </div>
             </>

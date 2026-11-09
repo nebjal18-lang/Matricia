@@ -348,7 +348,7 @@ export function ClientDashboardHome({
                     {progressRows.map((row, index) => {
                       const height = Math.round((row.value / progressMax) * 80);
                       const color = index === 0 ? "#1d4ed8" : index === 1 ? "#9a3412" : "#166534";
-                      return <g key={row.label}><title>{row.label}: {row.value}</title><rect x={24 + index * 100} y={100 - height} height={height} width={64} fill={color} rx={4} /></g>;
+                      return <g key={row.label}><title>{`${row.label}: ${row.value}`}</title><rect x={24 + index * 100} y={100 - height} height={height} width={64} fill={color} rx={4} /></g>;
                     })}
                   </svg>
                   <ul className="client-home-progress">

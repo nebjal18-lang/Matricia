@@ -1,4 +1,4 @@
-import {catalogPageArguments,catalogPageSchema,scopedIds,referencedQuestionVersions,type CatalogPageInput} from "./server-page";
+import {catalogPageArguments,catalogPageSchema,type CatalogPageInput} from "./server-page";
 import { collectCatalogPages } from "./paged-query";
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { catalogEffectiveStatus } from "./workspace-model";
@@ -209,79 +209,67 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
   if (selection.status === "error") return selection;
   const { client, selected, availableMandates, allowed } = selection;
   const libraryId = selected.library_id;
-  const pageResponse=await client.rpc("franchise_catalog_page",catalogPageArguments(selected.id,input.catalog));
-  if(pageResponse.error)return{status:"error",reason:pageResponse.error.code==="42501"?"FORBIDDEN":"QUERY_FAILED"};
-  const pageParsed=catalogPageSchema.safeParse(pageResponse.data);if(!pageParsed.success)return{status:"error",reason:"INVALID_RESPONSE"};
-  const serverPage=pageParsed.data;const groups=serverPage.groups;
-  const ids=(kind:keyof typeof groups)=>scopedIds(groups[kind].ids);
-  const scopedQuestionnaireVersions=scopedIds(groups.QUESTIONNAIRE.versionIds);
-  const loadBank=input.catalog?.kind==="QUESTIONNAIRE"||input.catalog?.kind==="RULE";
-  const bankReplies=loadBank?await Promise.all([client.rpc("franchise_catalog_bank",{p_franchise_id:selected.id,p_kind:"QUESTION",p_search:"",p_page:1}),client.rpc("franchise_catalog_bank",{p_franchise_id:selected.id,p_kind:"RULE",p_search:"",p_page:1})]):[];
-  const bankSchema=z.object({items:z.array(z.object({id,objectId:id}))});
-  const banks=bankReplies.map(response=>{const parsed=bankSchema.safeParse(response.data);if(response.error)throw new Error("FRANCHISE_CATALOG_QUERY_FAILED");if(!parsed.success)throw new Error("FRANCHISE_CATALOG_INVALID_RESPONSE");return parsed.data.items;});
-  const questionBankIds=banks[0]?.map(item=>item.id)??[];const ruleBankIds=banks[1]?.map(item=>item.id)??[];
-  const sectionsResult = await collectCatalogPages((from, to) => client.from("questionnaire_sections").select("id,questionnaire_version_id,section_key,label_fr,label_ar,help_fr,help_ar,sort_order,questionnaire_versions!inner(library_id)").eq("questionnaire_versions.library_id", libraryId).in("questionnaire_version_id",scopedQuestionnaireVersions).order("sort_order").order("id").range(from, to));
-  if (sectionsResult.error) return { status: "error", reason: "QUERY_FAILED" };
-  const sectionsParsed = z.array(z.object({id, questionnaire_version_id:id,section_key:z.string(),label_fr:z.string(),label_ar:z.string(),help_fr:z.string().nullable(),help_ar:z.string().nullable(),sort_order:z.number()})).safeParse(sectionsResult.data);
-  if (!sectionsParsed.success) return { status: "error", reason: "INVALID_RESPONSE" };
-  const compositionRulesResult = await collectCatalogPages((from,to)=>client.from("questionnaire_version_rules").select("questionnaire_version_id,rule_version_id,evaluation_order").eq("library_id",libraryId).in("questionnaire_version_id",scopedQuestionnaireVersions).order("questionnaire_version_id").order("evaluation_order").range(from,to));
-  if(compositionRulesResult.error)return{status:"error",reason:"QUERY_FAILED"};
-  const compositionRules=z.array(z.object({questionnaire_version_id:id,rule_version_id:id,evaluation_order:z.number().int()})).safeParse(compositionRulesResult.data);
-  if(!compositionRules.success)return{status:"error",reason:"INVALID_RESPONSE"};
-  const [libraryResult, libraryVersionsResult, servicesResult, serviceVersionsResult, questionnairesResult, questionnaireVersionsResult, rulesResult, ruleVersionsResult, questionsResult, questionVersionsResult, questionnaireQuestionsResult, categoriesResult, categoryVersionsResult, subcategoriesResult, subcategoryVersionsResult, releasesResult, changesResult] = await Promise.all([
-    client.from("catalog_libraries").select("id,code,status,row_version,current_draft_version_id,current_published_version_id,current_release_id").eq("id", libraryId).limit(1),
-    collectCatalogPages((from,to)=>client.from("catalog_library_versions").select("id,library_id,name_fr,name_ar,version").eq("library_id", libraryId).order("version", { ascending: false }).order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_services").select("id,library_id,primary_subcategory_id,code,slug,status,row_version,current_draft_version_id,current_published_version_id").eq("library_id", libraryId).in("id",ids("SERVICE")).order("code").order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_service_versions").select("id,service_id,version,status,row_version,name_fr,name_ar,short_description_fr,short_description_ar,long_description_fr,long_description_ar,service_type,unit_label_fr,unit_label_ar,credit_eligible,volume_eligible,recurring_eligible,trial_eligible,rfq_required,fixed_fulfillment_allowed,base_currency,sort_order,fulfillment_config,visibility_rules,sensitive,slug").eq("library_id", libraryId).in("service_id",ids("SERVICE")).order("version", { ascending: false }).order("id").range(from,to)),
-    collectCatalogPages((from, to) => client.from("questionnaires").select("id,library_id,code,status,row_version,current_draft_version_id,current_published_version_id").eq("library_id", libraryId).in("id",ids("QUESTIONNAIRE")).order("code").order("id").range(from, to)),
-    collectCatalogPages((from, to) => client.from("questionnaire_versions").select("id,questionnaire_id,version,status,row_version,title_fr,title_ar").eq("library_id", libraryId).in("questionnaire_id",ids("QUESTIONNAIRE")).order("version", { ascending: false }).order("id").range(from, to)),
-    collectCatalogPages((from, to) => client.from("question_rules").select("id,library_id,rule_key,status,row_version,current_draft_version_id,current_published_version_id").eq("library_id", libraryId).in("id",ids("RULE")).order("rule_key").order("id").range(from, to)),
-    collectCatalogPages((from, to) => client.from("question_rule_versions").select("id,rule_id,version,status,row_version,actions,condition_ast,dependency_graph,priority,sensitive").eq("library_id", libraryId).in("rule_id",ids("RULE")).order("version", { ascending: false }).order("id").range(from, to)),
-    collectCatalogPages((from, to) => client.from("question_bank_questions").select("id,library_id,question_key,status,current_draft_version_id,current_published_version_id").eq("library_id", libraryId).in("id",ids("QUESTION")).order("question_key").order("id").range(from, to)),
-    collectCatalogPages((from, to) => client.from("question_versions").select("id,question_id,version,status,label_fr,label_ar,help_fr,help_ar,answer_type,required_by_default,source_service_id").eq("library_id", libraryId).in("question_id",ids("QUESTION")).order("version", { ascending: false }).order("id").range(from, to)),
-    collectCatalogPages((from, to) => client.from("questionnaire_version_questions").select("questionnaire_version_id,question_version_id,section_id,required_override,sort_order").eq("library_id", libraryId).in("questionnaire_version_id",scopedQuestionnaireVersions).order("questionnaire_version_id").order("sort_order").range(from, to)),
-    collectCatalogPages((from,to)=>client.from("catalog_categories").select("id,library_id,code,status,row_version,current_draft_version_id,current_published_version_id").eq("library_id", libraryId).order("code").order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_category_versions").select("id,category_id,name_fr,name_ar,status,row_version").eq("library_id", libraryId).order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_subcategories").select("id,library_id,category_id,code,status,row_version,current_draft_version_id,current_published_version_id").eq("library_id", libraryId).order("code").order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_subcategory_versions").select("id,subcategory_id,name_fr,name_ar,status,row_version").eq("library_id", libraryId).order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_releases").select("id,library_id,release_key,status").eq("library_id", libraryId).order("created_at", { ascending: false }).order("id").range(from,to)),
-    collectCatalogPages((from,to)=>client.from("catalog_change_requests").select("id,target_id,target_type,target_version_id,status,requested_at,reviewed_at,review_comment").eq("library_id",libraryId).in("target_id",scopedIds([...groups.SERVICE.ids,...groups.QUESTIONNAIRE.ids,...groups.RULE.ids])).order("requested_at",{ascending:false}).order("id").range(from,to)),
-  ]);
-  if (libraryResult.error) return { status: "error", reason: "QUERY_FAILED" };
-  const library = z.array(libraryRow).max(1).safeParse(libraryResult.data ?? []);
-  if (!library.success || !library.data[0]) return { status: "error", reason: "FORBIDDEN" };
-  if (library.data[0].id !== libraryId) return { status: "error", reason: "FORBIDDEN" };
-  const optional = <T,>(result: { data: unknown; error: unknown }, schema: z.ZodType<T[]>) => {
-    if (result.error) throw new Error("FRANCHISE_CATALOG_QUERY_FAILED");
-    const parsed = schema.safeParse(result.data);
-    if (!parsed.success) throw new Error("FRANCHISE_CATALOG_INVALID_RESPONSE");
-    return parsed.data;
-  };
-  const libraryVersions = optional(libraryVersionsResult, z.array(libraryVersionRow));
-  const services = optional(servicesResult, z.array(serviceRow));
-  const serviceVersions = optional(serviceVersionsResult, z.array(serviceVersionRow));
-  const questionnaires = optional(questionnairesResult, z.array(questionnaireRow));
-  const questionnaireVersions = optional(questionnaireVersionsResult, z.array(questionnaireVersionRow));
-  let rules = optional(rulesResult, z.array(ruleRow));
-  let ruleVersions = optional(ruleVersionsResult, z.array(ruleVersionRow));
-  const questions = optional(questionsResult, z.array(questionRow));
-  let questionVersions = optional(questionVersionsResult, z.array(questionVersionRow));
-  const questionnaireQuestions = optional(questionnaireQuestionsResult, z.array(questionnaireQuestionRow));
-  const categoryItems = optional(categoriesResult, z.array(categoryRow));
-  const categoryVersions = optional(categoryVersionsResult, z.array(categoryVersionRow));
-  const subcategoryItems = optional(subcategoriesResult, z.array(subcategoryRow));
-  const subcategoryVersions = optional(subcategoryVersionsResult, z.array(subcategoryVersionRow));
-  const releases = optional(releasesResult, z.array(releaseRow));
-  const changes = optional(changesResult, z.array(changeRow));
+  // One security-definer bundle avoids N parallel RLS catalog reads that hit
+  // statement_timeout on the IT library (~600 questions).
+  const bundleResponse = await client.rpc("franchise_catalog_workspace_v1", catalogPageArguments(selected.id, input.catalog));
+  if (bundleResponse.error) {
+    return { status: "error", reason: bundleResponse.error.code === "42501" ? "FORBIDDEN" : "QUERY_FAILED" };
+  }
+  const bankSchema = z.object({ items: z.array(z.object({ id, objectId: id })).default([]) }).passthrough();
+  const sectionRow = z.object({ id, questionnaire_version_id: id, section_key: z.string(), label_fr: z.string(), label_ar: z.string(), help_fr: z.string().nullable(), help_ar: z.string().nullable(), sort_order: z.number() });
+  const compositionRuleRow = z.object({ questionnaire_version_id: id, rule_version_id: id, evaluation_order: z.number().int() });
+  const bundleSchema = z.object({
+    page: catalogPageSchema,
+    library: libraryRow,
+    libraryVersions: z.array(libraryVersionRow),
+    services: z.array(serviceRow),
+    serviceVersions: z.array(serviceVersionRow),
+    questionnaires: z.array(questionnaireRow),
+    questionnaireVersions: z.array(questionnaireVersionRow),
+    rules: z.array(ruleRow),
+    ruleVersions: z.array(ruleVersionRow),
+    questions: z.array(questionRow),
+    questionVersions: z.array(questionVersionRow),
+    categories: z.array(categoryRow),
+    categoryVersions: z.array(categoryVersionRow),
+    subcategories: z.array(subcategoryRow),
+    subcategoryVersions: z.array(subcategoryVersionRow),
+    releases: z.array(releaseRow),
+    changes: z.array(changeRow),
+    sections: z.array(sectionRow),
+    compositionRules: z.array(compositionRuleRow),
+    questionnaireQuestions: z.array(questionnaireQuestionRow),
+    questionBank: bankSchema,
+    ruleBank: bankSchema,
+  });
+  const bundleParsed = bundleSchema.safeParse(bundleResponse.data);
+  if (!bundleParsed.success) return { status: "error", reason: "INVALID_RESPONSE" };
+  const bundle = bundleParsed.data;
+  if (bundle.library.id !== libraryId) return { status: "error", reason: "FORBIDDEN" };
+  const serverPage = bundle.page;
+  const groups = serverPage.groups;
+  const library = { success: true as const, data: [bundle.library] };
+  const libraryVersions = bundle.libraryVersions;
+  const services = bundle.services;
+  const serviceVersions = bundle.serviceVersions;
+  const questionnaires = bundle.questionnaires;
+  const questionnaireVersions = bundle.questionnaireVersions;
+  const rules = bundle.rules;
+  const ruleVersions = bundle.ruleVersions;
+  const questions = bundle.questions;
+  const questionVersions = bundle.questionVersions;
+  const questionnaireQuestions = bundle.questionnaireQuestions;
+  const categoryItems = bundle.categories;
+  const categoryVersions = bundle.categoryVersions;
+  const subcategoryItems = bundle.subcategories;
+  const subcategoryVersions = bundle.subcategoryVersions;
+  const releases = bundle.releases;
+  const changes = bundle.changes;
+  const sectionsParsed = { success: true as const, data: bundle.sections };
+  const compositionRules = { success: true as const, data: bundle.compositionRules };
   const locale = input.locale;
   const namedLibrary = libraryVersions.find((item) => item.id === library.data[0]!.current_published_version_id) ?? libraryVersions.find((item) => item.id === library.data[0]!.current_draft_version_id) ?? libraryVersions[0];
   const q = `?organizationId=${selected.operator_organization_id}&franchiseId=${selected.id}`;
-  const pinnedRuleIds=[...new Set([...compositionRules.data.map(r=>r.rule_version_id),...ruleBankIds])].filter(id=>!ruleVersions.some(r=>r.id===id));
-  for(let offset=0;offset<pinnedRuleIds.length;offset+=100){const response=await client.from("question_rule_versions").select("id,rule_id,version,status,row_version,actions,condition_ast,dependency_graph,priority,sensitive").eq("library_id",libraryId).in("id",pinnedRuleIds.slice(offset,offset+100));ruleVersions=[...ruleVersions,...optional(response,z.array(ruleVersionRow))];}
-  const missingRuleIdentities=[...new Set(ruleVersions.map(r=>r.rule_id))].filter(id=>!rules.some(r=>r.id===id));
-  if(missingRuleIdentities.length){const response=await client.from("question_rules").select("id,library_id,rule_key,status,row_version,current_draft_version_id,current_published_version_id").eq("library_id",libraryId).in("id",missingRuleIdentities);rules=[...rules,...optional(response,z.array(ruleRow))];}
-  const pinnedQuestionIds=[...new Set([...questionnaireQuestions.map(q=>q.question_version_id),...questionBankIds,...referencedQuestionVersions(ruleVersions)])].filter(id=>!questionVersions.some(q=>q.id===id));
-  for(let offset=0;offset<pinnedQuestionIds.length;offset+=100){const response=await client.from("question_versions").select("id,question_id,version,status,label_fr,label_ar,help_fr,help_ar,answer_type,required_by_default,source_service_id").eq("library_id",libraryId).in("id",pinnedQuestionIds.slice(offset,offset+100));questionVersions=[...questionVersions,...optional(response,z.array(questionVersionRow))];}
   const pickName = (version: { name_fr: string; name_ar: string } | undefined, fallback: string) => {
     if (!version) return fallback;
     const primary = locale === "ar" ? version.name_ar : version.name_fr;

@@ -5,12 +5,20 @@ import type{z}from"zod";
 import type{Locale}from"@/modules/shared/lib/i18n/locale";
 import{getSupabaseBrowserClient}from"@/modules/shared/lib/supabase/client";
 import{manualCreditConsole,manualCreditRequest,manualCreditOutcome}from"./manual-credit-model";
+import{loadManualCreditConsoleAction}from"./actions";
 const control="block min-h-11 w-full rounded border p-2";
 const text=(f:FormData,k:string)=>String(f.get(k)??"");
 export function ManualCreditGrantPanel({locale,wallets}:{locale:Locale;wallets:Array<{wallet_id:string;organization_id:string;organization_name:string;wallet_type:string}>}){
  const tr=useCallback((fr:string,ar:string)=>locale==="ar"?ar:fr,[locale]),router=useRouter(),[data,setData]=useState<z.infer<typeof manualCreditConsole>|null>(null),[page,setPage]=useState(1),[status,setStatus]=useState("ALL"),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const version=useRef(0),pending=useRef<{fingerprint:string;key:string}|null>(null);
- const fetchConsole=useCallback(async()=>{const r=await getSupabaseBrowserClient().rpc("get_manual_credit_grant_console_v1",{p_page:page,p_status:status});if(r.error)throw Error(r.error.message);return manualCreditConsole.parse(r.data);},[page,status]);
+ const fetchConsole=useCallback(async()=>{
+  const result=await loadManualCreditConsoleAction({page,status});
+  if(result.status==="error"){
+   if(result.reason==="MFA_REQUIRED"||result.reason==="FORBIDDEN")throw Error("MANUAL_CREDIT_FINANCE_AAL2_REQUIRED");
+   throw Error(result.reason);
+  }
+  return result.value;
+ },[page,status]);
  useEffect(()=>{const current=++version.current;void fetchConsole().then(v=>{if(current===version.current){setData(v);setError("");}}).catch(()=>{if(current===version.current){setData(null);setError(tr("La console exige une habilitation Finance et une session MFA active.","تتطلب اللوحة تفويض المالية وجلسة تحقق معزز نشطة."));}});return()=>{version.current+=1;};},[fetchConsole,tr]);
  function failure(message:string){if(/CURRENT_AUTHORITIES|FINANCE|42501/u.test(message))return tr("Les habilitations Finance actuelles et la MFA des acteurs sont requises.","تلزم صلاحيات المالية الحالية والتحقق المعزز للأطراف.");if(message.includes("STALE_"))return tr("La preuve affichée est périmée. Rechargez le dossier avant de décider.","انتهت صلاحية الدليل المعروض. حدّث الملف قبل القرار.");if(message.includes("ENVIRONMENT"))return tr("L’environnement fiable de déploiement ne correspond pas à la demande.","بيئة النشر الموثوقة لا تطابق الطلب.");if(message.includes("INDEPENDENT"))return tr("Une autre personne habilitée doit effectuer la revue.","يجب أن يجري المراجعة شخص مخول آخر.");if(/EXPIRY|ORGANIZATION/u.test(message))return tr("L’organisation doit être active et l’expiration future.","يجب أن تكون المؤسسة نشطة والانتهاء في المستقبل.");return tr("Commande refusée. Vérifiez les termes et rechargez le dossier.","رفض الأمر. تحقق من الشروط وحدّث الملف.");}
  async function run(name:string,args:Record<string,unknown>,idempotent=false){if(busy)return;setBusy(true);setError("");setNotice("");try{const fp=JSON.stringify({name,args});if(idempotent&&pending.current?.fingerprint!==fp)pending.current={fingerprint:fp,key:crypto.randomUUID()};const r=await getSupabaseBrowserClient().rpc(name,{...args,...(idempotent?{p_idempotency_key:pending.current!.key}:{})});if(r.error)throw Error(r.error.message);const result=manualCreditOutcome(r.data);setNotice(result.status==="EXECUTED"?tr("Crédits réellement attribués, preuve de lot enregistrée.","منحت الأرصدة فعليا وسجل دليل الدفعة."):result.status==="APPROVED"?tr("Demande approuvée. Une exécution explicite reste nécessaire.","اعتمد الطلب. لا يزال التنفيذ الصريح مطلوبا."):result.status==="REJECTED"?tr("Demande refusée sans attribution.","رفض الطلب دون منح."):tr("Demande figée, en attente d’une autre personne habilitée.","جمد الطلب بانتظار شخص مخول آخر."));pending.current=null;setData(await fetchConsole());router.refresh();}catch(e){setError(failure(e instanceof Error?e.message:String(e)));}finally{setBusy(false);}}

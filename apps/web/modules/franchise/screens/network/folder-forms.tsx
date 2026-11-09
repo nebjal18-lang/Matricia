@@ -162,7 +162,9 @@ export function FranchiseFolderTimeline({
   const c = franchiseCopy(locale);
   const stamp = (value: string) => {
     const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? value : new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeStyle: "short" }).format(parsed);
+    if (Number.isNaN(parsed.getTime())) return value;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())} ${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())} UTC`;
   };
   return (
     <>

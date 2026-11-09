@@ -93,6 +93,6 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
     expect(restored.classification?.serviceCode).toBe("BTP-RENOV");
     expect(restored.classification?.libraryCode).toBe("BTP");
     expect(restored.step).toBe(3);
-    if (locale === "ar") expect(restored.classification?.serviceName).toContain("الاسم العربي غير متاح");
+    if (locale === "ar") expect(restored.classification?.serviceName).toBe("تجديد مبنى أو محل");
   });
 });

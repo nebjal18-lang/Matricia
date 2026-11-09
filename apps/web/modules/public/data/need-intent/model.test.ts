@@ -47,11 +47,11 @@ describe("public need intent", () => {
     expect(rankPublicNeedServices("court", "fr")).toEqual([]);
   });
 
-  it("signals missing approved Arabic service labels rather than silently returning French", () => {
+  it("uses the approved Arabic service name rather than the French label", () => {
     const fr = canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "fr");
     const ar = canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "ar");
-    expect(ar?.serviceName).toContain("الاسم العربي");
-    expect(ar?.serviceName).not.toBe(canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "fr")?.serviceName);
+    expect(ar?.serviceName).toBe("تدقيق نظام المعلومات وخارطة الطريق");
+    expect(ar?.serviceName).not.toBe(fr?.serviceName);
     expect(fr?.serviceName ?? "").not.toContain("الاسم العربي");
   });
 
