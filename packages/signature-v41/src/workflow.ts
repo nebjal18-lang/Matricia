@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { assessSignatureProviderReadiness, type CreateEnvelopeInput, type SignatureEvidence, type SignatureProvider, type VerifiedSignatureEvent } from "./provider.js";
+import { assessSignatureProviderReadiness, type CreateEnvelopeInput, type SignatureEvidence, type SignatureProvider, type VerifiedSignatureEvent } from "./provider";
 
 export interface SignatureEvidencePolicy {
   readonly version: string;

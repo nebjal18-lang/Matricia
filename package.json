@@ -27,7 +27,7 @@
     "release:validate": "node --experimental-strip-types scripts/validate-release.ts",
     "demo:provision": "node scripts/provision-demo-library-personas.mjs",
     "verify:phase00": "pnpm catalog:validate && pnpm spec:validate && pnpm traceability:validate && pnpm server-actions:validate",
-    "test:tooling": "node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/db-test-support.test.mjs",
+    "test:tooling": "node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/staging/*.test.mjs scripts/db-test-support.test.mjs",
     "release:prepare": "node scripts/prepare-release.mjs",
     "release:structure": "node --experimental-strip-types scripts/validate-release.ts --structure-only",
     "test:e2e:public": "node scripts/run-browser-acceptance.mjs public",
