@@ -22,6 +22,7 @@ import { pollOutboxOnce } from "./poller";
 import { readWorkerRuntimeConfig } from "./worker-config";
 import { buildWorkerReadiness, createWorkerCycle, workerHeartbeatHealthy } from "./worker-cycle";
 import { createFranchiseFollowupScheduler } from "./franchise-followups";
+import { createBoundedFetch } from "./bounded-fetch";
 
 async function start(): Promise<void> {
   const config = readWorkerRuntimeConfig(process.env);
@@ -29,6 +30,7 @@ async function start(): Promise<void> {
   const log = createJsonLogger((record) => process.stderr.write(`${record}\n`));
   const serviceClient = createClient(config.supabaseUrl, config.supabaseServiceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: createBoundedFetch() },
   });
   const repository = createSupabaseOutboxRepository(serviceClient);
   const documentScanConsumer = createDocumentScanOutboxConsumer(createDocumentScanProcessor({
@@ -68,7 +70,7 @@ async function start(): Promise<void> {
   });
 
   const scannerConfig=readClamAvTcpConfig(process.env);
-  const scanHttp=createScannerHttpHandler({token:process.env.MALWARE_SCANNER_TOKEN??"",available:()=>antivirusAvailable,scanner:createClamAvTcpScanner({...scannerConfig,timeoutMs:Math.min(scannerConfig.timeoutMs,12_000)})});
+  const scanHttp=createScannerHttpHandler({token:config.scannerToken,available:()=>antivirusAvailable,scanner:createClamAvTcpScanner({...scannerConfig,timeoutMs:Math.min(scannerConfig.timeoutMs,12_000)})});
   const server = createServer((request, response) => {
     response.setHeader("content-type", "application/json");
     response.setHeader("cache-control", "no-store");
@@ -95,7 +97,7 @@ async function start(): Promise<void> {
     const result = await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "MATRICIA_WORKER", p_healthy: workerHeartbeatHealthy(state, billing, runFranchisePerformance.getState(), runFranchiseFollowups.getState()), p_expires_after_seconds: 60 });
     if (result.error) log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "worker.heartbeat", outcome: "failure", errorCode: "HEARTBEAT_RECORD_FAILED" });
     await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "CLAMAV", p_healthy: Boolean(state.antivirus?.ok), p_expires_after_seconds: 60 });
-    await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "SCANNER_HTTP", p_healthy: Boolean(state.antivirus?.ok) && (process.env.MALWARE_SCANNER_TOKEN?.length ?? 0) >= 32, p_expires_after_seconds: 60 });
+    await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "SCANNER_HTTP", p_healthy: Boolean(state.antivirus?.ok), p_expires_after_seconds: 60 });
   };
   void cycle.run().then(recordHeartbeat).catch(() => {});
   const timer = setInterval(() => void cycle.run().then(recordHeartbeat).catch(() => {}), 5_000);
