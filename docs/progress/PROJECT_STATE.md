@@ -1352,7 +1352,7 @@ compte externe empêche la preuve CI tant qu'elle n'est pas levée; elle ne vaut
 Statut : **code validé, activation externe et production non certifiées**. Source contrôlée : `c0578a098ba51806af245342a0e3e4dd6dd1b49f` (application identique à `d8c3a75`, décision Vercel de construire à chaque push ajoutée).
 
 - Staging distinct créé sans données de production : `matricia-staging.vercel.app`, Supabase `vuwvkpfprixzysjfpgkw`, branche Git `codex/staging-repair-20261109` et 30 bindings Preview propres.
-- Reconstruction canonique après divergence du schéma initial ; 576 migrations réellement appliquées, 686 tables publiques et 149 privées, 12 buckets et 29 politiques Storage. Références JWT et trois empreintes de fonctions vérifiées ; base de confiance `STAGING`.
+- Reconstruction canonique après divergence du schéma initial ; 577 migrations réellement appliquées, 686 tables publiques et 149 privées, 12 buckets et 29 politiques Storage. Références JWT et trois empreintes de fonctions vérifiées ; base de confiance `STAGING`.
 - OTP à 8 chiffres et URLs Auth alignés ; garde de build contre les backends partagés avec Production ; Node 22 et build Vercel automatique.
 - Worker : scanner authentifié, requêtes bornées, preuves de readiness expirantes et heartbeats coalescés ; image non privilégiée reconstruite et démarrage sans réseau vérifié.
 - YouSign : transport SIMPLE sandbox, webhook HMAC, claims durables et preuve PDF/consentement/audit vérifiée ; aucune attestation juridique ni activation réelle inventée.
@@ -1360,3 +1360,5 @@ Statut : **code validé, activation externe et production non certifiées**. Sou
 - Revue indépendante sans P1 statique ouvert dans le périmètre revu. Les statuts d’exigences restent **5/76 VERIFIED** ; aucune certification externe ajoutée.
 
 Restants : credentials et recette Resend/SMTP, PayPal et YouSign ; hébergement worker/ClamAV et scan natif ; réseau du navigateur d’audit ; comptes et contenu de recette ; deux administrateurs AAL2 distincts ; validations métier/juridique/CNDP/fiscales, restauration/pentest, visas indépendants et décision de production. Voir `docs/release/STAGING_REPAIR_2026-11-09.md` et `docs/evidence/staging-repair-20261109.json`.
+
+Complément confidentialité : la première CI a détecté le défaut réel 0243 lié aux nouveaux fichiers YouSign. La migration additive `20261109101000` raccorde les fichiers et sept familles de métadonnées au sujet exact, en conservant `UNTRUSTED` et les revues indépendantes. **108 assertions natives RGPD passent**. Après un redémarrage de l’environnement, la campagne SQL reprend après 251 fichiers déjà validés ; aucune assertion en échec n’est ignorée. Les jobs qualité et navigateur ainsi que Vercel étaient réussis sur le candidat applicatif précédent, inchangé par cette correction SQL.

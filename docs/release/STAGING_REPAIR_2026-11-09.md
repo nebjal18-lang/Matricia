@@ -27,7 +27,9 @@ Après contrôle de vacuité, seuls les objets applicatifs de cette nouvelle bra
 
 Les 575 migrations canoniques ont été exécutées et enregistrées avec leur source exacte. Contrôle effectué avant la migration YouSign : 686 tables publiques, 142 privées, 26 rôles de référence, 11 buckets et 28 politiques Storage. Trois empreintes de fonctions sensibles correspondent à la base locale canonique, dont le reçu final du lien franchise/prestataire. Le contrôle de seed de référence a réussi et l’environnement privé de la base est explicitement `STAGING`.
 
-La migration additive `20261109100000_yousign_sandbox_transport.sql` a ensuite été appliquée : historique distant **576 migrations**. L’ancien échec du pipeline automatique ne doit pas être confondu avec une certification du nouveau schéma ou effacé comme preuve historique.
+La migration additive `20261109100000_yousign_sandbox_transport.sql` a ensuite été appliquée, puis le raccordement des données YouSign à l’inventaire personnel a été complété : historique distant **577 migrations**, après la correction additive de confidentialité `20261109101000_yousign_subject_privacy_inventory.sql`. L’ancien échec du pipeline automatique ne doit pas être confondu avec une certification du nouveau schéma ou effacé comme preuve historique.
+
+La campagne CI complète a détecté que le nouveau stockage natif n’était pas raccordé à l’inventaire DSR : le scénario 0243 refusait donc correctement de déclarer une réponse complète. Le correctif ajoute une vraie collecte des fichiers et sept projections personnelles limitées au signataire et à son organisation, sans information de l’autre signataire. Les fichiers restent `UNTRUSTED` avant revue ; les extractions déjà approuvées doivent être reproposées après le changement du hash de catalogue. Aucun visa ni statut CLEAN n’est créé automatiquement.
 
 ## Corrections du code
 
