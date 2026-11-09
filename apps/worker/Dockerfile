@@ -9,16 +9,17 @@ WORKDIR /app
 RUN --mount=type=secret,id=proxy_ca,required=false \
     if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
     corepack enable && NODE_USE_ENV_PROXY=1 corepack prepare pnpm@10.17.1 --activate
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
-COPY apps/worker ./apps/worker
-COPY packages/observability ./packages/observability
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY --chown=node:node apps/worker ./apps/worker
+COPY --chown=node:node packages/observability ./packages/observability
 
 # The worker executes workspace TypeScript with tsx. Keep its runtime and
 # compiler tools even when the hosting service builds with NODE_ENV=production.
 RUN --mount=type=secret,id=proxy_ca,required=false \
     if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
     NODE_USE_ENV_PROXY=1 pnpm --filter @matricia/worker... install --frozen-lockfile --prod=false \
-    && pnpm --filter @matricia/worker build
+    && pnpm --filter @matricia/worker build \
+    && chmod -R a+rX /pnpm/corepack /app/node_modules /app/apps/worker/node_modules
 
 ENV NODE_ENV=production
 ENV PORT=8080
