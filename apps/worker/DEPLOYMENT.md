@@ -86,8 +86,15 @@ le nonce, le hash et la vérification HMAC existants.
 
 Le worker valide ses bindings avant d’écouter. Les appels Supabase disposent
 d’une limite réseau de 30 secondes qui reste active pendant la lecture du corps
-de réponse : un RPC suspendu ne peut pas conserver indéfiniment le dernier cycle
-réussi. Le dispatcher web dispose de sa propre limite de 10 secondes.
+de réponse. Le dispatcher web dispose de sa propre limite de 10 secondes. Un lot
+Outbox peut néanmoins contenir plusieurs appels consécutifs : à chaque lecture
+de readiness, les derniers résultats antivirus et Outbox expirent après 60
+secondes, y compris pendant un lot encore en cours. Les codes
+`ANTIVIRUS_CHECK_STALE` et `OUTBOX_POLL_STALE` distinguent un succès trop ancien
+d’un échec explicite. Un cycle normal en cours ne dégrade donc pas immédiatement
+la readiness ; un ancien succès ne la maintient pas indéfiniment. Les heartbeats
+antivirus/scanner relisent cet état avant leur envoi. `/health` reste un contrôle
+de vie du processus, distinct de la readiness des dépendances.
 
 Les emails ne s’activent pas avec le seul nom `EMAIL_PROVIDER`. L’adaptateur web
 exige `EMAIL_DELIVERY_MODE=EXTERNAL`, `EMAIL_LIVE_DELIVERY_ENABLED=true`, une

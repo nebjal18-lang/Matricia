@@ -96,8 +96,8 @@ async function start(): Promise<void> {
     const billing = runProviderBilling.getState();
     const result = await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "MATRICIA_WORKER", p_healthy: workerHeartbeatHealthy(state, billing, runFranchisePerformance.getState(), runFranchiseFollowups.getState()), p_expires_after_seconds: 60 });
     if (result.error) log("error", { requestId: randomUUID(), correlationId: randomUUID(), event: "worker.heartbeat", outcome: "failure", errorCode: "HEARTBEAT_RECORD_FAILED" });
-    await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "CLAMAV", p_healthy: Boolean(state.antivirus?.ok), p_expires_after_seconds: 60 });
-    await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "SCANNER_HTTP", p_healthy: Boolean(state.antivirus?.ok), p_expires_after_seconds: 60 });
+    await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "CLAMAV", p_healthy: Boolean(cycle.getState().antivirus?.ok), p_expires_after_seconds: 60 });
+    await serviceClient.rpc("record_operational_heartbeat_v1", { p_service_code: "SCANNER_HTTP", p_healthy: Boolean(cycle.getState().antivirus?.ok), p_expires_after_seconds: 60 });
   };
   void cycle.run().then(recordHeartbeat).catch(() => {});
   const timer = setInterval(() => void cycle.run().then(recordHeartbeat).catch(() => {}), 5_000);
