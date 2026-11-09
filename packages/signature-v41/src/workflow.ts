@@ -73,7 +73,7 @@ export function createSignatureWorkflow(dependencies: { provider?: SignatureProv
       requireMatchingProvider(envelope, provider);
       if (envelope.providerEnvelopeId !== event.providerEnvelopeId || event.signerId && !envelope.input.signers.some(signer => signer.signerId === event.signerId)) throw new Error("SIGNATURE_EVENT_ENVELOPE_MISMATCH");
       let evidence: SignatureEvidence | undefined;
-      if (event.type === "SIGNER_SIGNED" && envelope.remainingSignerIds.length <= 1) {
+      if (event.type === "SIGNER_SIGNED" && (envelope.remainingSignerIds.length <= 1 || event.finalEvidenceRequired === true)) {
         evidence = await provider.fetchEvidencePackage(event.providerEnvelopeId);
         validateEvidence(envelope, evidence);
       }

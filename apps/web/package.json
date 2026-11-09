@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@matricia/signature-v41": "workspace:*",
     "@base-ui/react": "^1.7.0",
     "@fontsource/noto-sans-arabic": "5.2.8",
     "@hookform/resolvers": "^5.7.1",

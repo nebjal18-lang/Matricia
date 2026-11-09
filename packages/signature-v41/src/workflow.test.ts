@@ -43,6 +43,19 @@ it("passes verified events and exact evidence to the durable replay inbox", asyn
   await expect(createSignatureWorkflow({ provider, repository, env }).webhook(raw, {})).resolves.toEqual({ replayed: false });
   expect(repository.recordVerifiedEvent).toHaveBeenCalledWith(envelope, event, expect.objectContaining({ documentHashes: ["a".repeat(64)] }));
 });
+it("requires final evidence for a verified completed request even when another callback raced the local count", async () => {
+  repository.resolveProviderEnvelope.mockResolvedValue({ ...envelope, remainingSignerIds: ["signer-1", "signer-2"] });
+  vi.mocked(provider.verifyWebhook).mockResolvedValue({ ...event, finalEvidenceRequired: true });
+  await expect(createSignatureWorkflow({ provider, repository, env }).webhook(raw, {})).resolves.toEqual({ replayed: false });
+  expect(provider.fetchEvidencePackage).toHaveBeenCalledWith("provider-envelope-1");
+  expect(repository.recordVerifiedEvent).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ finalEvidenceRequired: true }), expect.objectContaining({ documentHashes: ["a".repeat(64)] }));
+});
+it("keeps a verified intermediate signature independent of unfinished final evidence", async () => {
+  repository.resolveProviderEnvelope.mockResolvedValue({ ...envelope, remainingSignerIds: ["signer-1", "signer-2"] });
+  await expect(createSignatureWorkflow({ provider, repository, env }).webhook(raw, {})).resolves.toEqual({ replayed: false });
+  expect(provider.fetchEvidencePackage).not.toHaveBeenCalled();
+  expect(repository.recordVerifiedEvent).toHaveBeenCalledWith(expect.anything(), event, undefined);
+});
 it("rejects provider verification that does not bind the actual raw body", async () => {
   vi.mocked(provider.verifyWebhook).mockResolvedValue({ ...event, payloadSha256: "f".repeat(64) });
   await expect(createSignatureWorkflow({ provider, repository, env }).webhook(raw, {})).rejects.toThrow("SIGNATURE_EVENT_VERIFICATION_INVALID"); expect(repository.recordVerifiedEvent).not.toHaveBeenCalled();
