@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-11-09T17:13:48.621578+00:00",
+  "sourceHead": "2c420705c5ef72e6a700d5d0ad9865f676679018",
+  "commits": [
+    "691978e8a472654dfc1f2661598c0915db6d0227",
+    "671025a",
+    "a5f4d24",
+    "dd12bd0159463fef62aa0d46c6c4916ff8195516",
+    "2c420705c5ef72e6a700d5d0ad9865f676679018"
+  ],
+  "unitTests": {
+    "command": "corepack pnpm --filter @matricia/worker test --maxWorkers=2",
+    "passed": 183,
+    "failed": 0,
+    "files": 17,
+    "node": "22.23.4"
+  },
+  "typecheck": "PASS",
+  "dockerBuild": {
+    "status": "PASS",
+    "image": "sha256:05bd08272bae1f76593d80e31b84bb82f9e8a2c8eaba95c4e6b17159767e9410",
+    "log": "/workspace/outputs/staging-runtime-docker-build-final.log",
+    "validatedSourceHead": "2c420705c5ef72e6a700d5d0ad9865f676679018",
+    "readinessFollowupImageRebuilt": true,
+    "workerRuntimeFilesComparedWithRoot": 47,
+    "differentRuntimeFilesFromRoot": [],
+    "runtimeFilesAggregateSha256": "0bff3e793bc742fcd05f0ceefb7b0592da31d976da37b9d8fa0d3889492aa87c",
+    "lockfileSource": "Own version-2-derived worker branch; root web signature importer changes are outside selected worker dependency scope."
+  },
+  "offlineContainerCheck": {
+    "uid": 1000,
+    "node": "v22.23.4",
+    "pnpm": "10.17.1",
+    "corepackPnpm": "10.17.1",
+    "startWithoutConfig": "FAILED_CLOSED",
+    "network": "none",
+    "log": "/workspace/outputs/staging-runtime-offline-check-final.log"
+  },
+  "independentSourceReview": "Original scanner/auth/bounds fixes and subsequent TTL/coalescing-loop changes reviewed independently; no remaining blocker reported. Final Docker rebuilt with both follow-ups and offline non-root startup rechecked.",
+  "externalValidation": {
+    "performed": false,
+    "needed": [
+      "Worker hosting access and real HTTPS staging endpoint",
+      "ClamAV native private service, exact engine pin and fresh database",
+      "Isolated Supabase and matching service-role/dispatch secrets",
+      "Native CLEAN/EICAR, quarantine, retry/DLQ and heartbeat recipes"
+    ]
+  },
+  "secretsIncluded": false,
+  "productionModified": false,
+  "freshnessRegression": {
+    "status": "PASS",
+    "maximumEvidenceAgeMs": 60000,
+    "clock": "injected monotonic; no timing sleeps",
+    "scenarios": [
+      "fresh success retained during short pending cycle",
+      "pending batch expires at exact TTL",
+      "failure after pending remains not_ready",
+      "new success restores readiness",
+      "antivirus expires independently",
+      "idle cycle evidence expires"
+    ]
+  },
+  "heartbeatRegression": {
+    "status": "PASS",
+    "concurrentTicks": 100,
+    "scenarios": [
+      "one shared cycle promise and one completion heartbeat",
+      "independent heartbeat during pending cycle",
+      "coalesced periodic and completion heartbeat",
+      "failed cycle records once and can recover"
+    ]
+  }
+}

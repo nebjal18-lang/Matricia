@@ -1346,3 +1346,17 @@ compte externe empêche la preuve CI tant qu'elle n'est pas levée; elle ne vaut
 - Prochaine étape unique : confirmer la cible de staging et ses bindings autorisés pour alimenter les acteurs de recette puis exécuter les parcours natifs du plan.
 
 - Complément CI : correctif `60e6b1c` après le timeout du test navigateur devis dans le premier run. La CI installe désormais Chromium avec Playwright et le test ne dépend plus d’un chemin système implicite. 10 tests ciblés verts avec le navigateur Playwright et 10 avec l’override local, sans retry ni hausse de délai. **Run GitHub 42644570334 : quality, browser-public et database tous verts** sur le code courant. Le gate métier reste refusé indépendamment de cette validation technique.
+
+## 2026-11-09 — Réparation du staging et transport YouSign
+
+Statut : **code validé, activation externe et production non certifiées**. Source contrôlée : `c0578a098ba51806af245342a0e3e4dd6dd1b49f` (application identique à `d8c3a75`, décision Vercel de construire à chaque push ajoutée).
+
+- Staging distinct créé sans données de production : `matricia-staging.vercel.app`, Supabase `vuwvkpfprixzysjfpgkw`, branche Git `codex/staging-repair-20261109` et 30 bindings Preview propres.
+- Reconstruction canonique après divergence du schéma initial ; 576 migrations réellement appliquées, 686 tables publiques et 149 privées, 12 buckets et 29 politiques Storage. Références JWT et trois empreintes de fonctions vérifiées ; base de confiance `STAGING`.
+- OTP à 8 chiffres et URLs Auth alignés ; garde de build contre les backends partagés avec Production ; Node 22 et build Vercel automatique.
+- Worker : scanner authentifié, requêtes bornées, preuves de readiness expirantes et heartbeats coalescés ; image non privilégiée reconstruite et démarrage sans réseau vérifié.
+- YouSign : transport SIMPLE sandbox, webhook HMAC, claims durables et preuve PDF/consentement/audit vérifiée ; aucune attestation juridique ni activation réelle inventée.
+- Vérification : **4 183 tests unitaires PASS**, un test Storage natif optionnel existant ignoré ; **103 tests d’outillage PASS**, **58 assertions SQL positives** et **21 contrôles SQL de droits** ; build Next.js/TypeScript, phase00, frontières et ESLint des fichiers d’intégration PASS. Deux contrôles globaux standalone TSC/lint ont été interrompus pour ressources ; TypeScript a ensuite terminé dans le build et les fichiers modifiés ont passé ESLint.
+- Revue indépendante sans P1 statique ouvert dans le périmètre revu. Les statuts d’exigences restent **5/76 VERIFIED** ; aucune certification externe ajoutée.
+
+Restants : credentials et recette Resend/SMTP, PayPal et YouSign ; hébergement worker/ClamAV et scan natif ; réseau du navigateur d’audit ; comptes et contenu de recette ; deux administrateurs AAL2 distincts ; validations métier/juridique/CNDP/fiscales, restauration/pentest, visas indépendants et décision de production. Voir `docs/release/STAGING_REPAIR_2026-11-09.md` et `docs/evidence/staging-repair-20261109.json`.

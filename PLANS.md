@@ -199,7 +199,7 @@ La carte détaillée et les gates sont dans `docs/specs/sections/phase-map.md`.
 ```yaml
 id: STAGING-REPAIR-20261109
 title: Corriger les écarts de configuration hébergée et terminer les adaptateurs exécutables
-status: IN_PROGRESS
+status: BLOCKED
 goal: Isoler la recette du backend public et traiter les onze constats de l’inventaire Vercel/Supabase.
 scope: configuration Preview dédiée, OTP, migrations additives staging, preflight, worker et YouSign sandbox
 requirements: [MAT-FUNC-001, MAT-FUNC-015, MAT-FUNC-020, MAT-FUNC-023, hardening P19]
@@ -225,7 +225,7 @@ validation_commands: [pnpm test:tooling, pnpm typecheck, tests ciblés worker/si
 evidence_paths: [docs/evidence/staging-repair-20261109.json, /workspace/outputs/staging-repair]
 progress_log:
   - 2026-11-09: GitHub synchronisé sur 4962ce7; worktrees indépendants; correction demandée par le propriétaire.
-results: IN_PROGRESS
-independent_signoff: PENDING
+results: Code et build validés; 4183 tests unitaires PASS, 103 outillage, 58 SQL positives et 21 contrôles SQL. Staging isolé réel; activation externe bloquée par credentials, hébergement, réseau et décisions humaines.
+independent_signoff: REVUES_AUTOMATISEES_SANS_P1_STATIQUE_DANS_PERIMETRE; AUCUN_VISA_PRODUCTION
 next_phase: Recette du staging avec services externes réellement configurés, puis gate de production séparé.
 ```

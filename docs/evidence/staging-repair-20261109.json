@@ -1,0 +1,255 @@
+{
+  "id": "STAGING-REPAIR-20261109",
+  "generatedAt": "2026-11-09T17:34:20Z",
+  "status": "IMPLEMENTED_STAGING_EXTERNAL_ACTIVATION_PENDING",
+  "sourceCommit": "c0578a098ba51806af245342a0e3e4dd6dd1b49f",
+  "productionCertified": false,
+  "productionMutations": 0,
+  "secretValuesIncluded": false,
+  "apiCredentialProcessTerminated": true,
+  "staging": {
+    "url": "https://matricia-staging.vercel.app",
+    "branch": "codex/staging-repair-20261109",
+    "supabaseRef": "vuwvkpfprixzysjfpgkw",
+    "schema": {
+      "public_tables": 686,
+      "private_tables": 149,
+      "migrations": 576,
+      "storage_policies": 29,
+      "buckets": 12,
+      "trusted_environment": "STAGING",
+      "provider_evidence_bucket_public": false,
+      "users": 0,
+      "organizations": 0
+    },
+    "vercelBranchSpecificBindings": 30,
+    "originalProductionBindingsModified": false
+  },
+  "checks": {
+    "workspaceUnit": {
+      "status": "PASS",
+      "passed": 4183,
+      "skipped": 1,
+      "countsByExecutedProject": [
+        2,
+        36,
+        4,
+        38,
+        38,
+        3,
+        57,
+        5,
+        3817,
+        183
+      ],
+      "note": "The pre-existing native Storage opt-in recipe is not external Storage certification."
+    },
+    "tooling": {
+      "status": "PASS",
+      "passed": 103
+    },
+    "webIntegrationTargeted": {
+      "status": "PASS",
+      "passed": 146
+    },
+    "worker": {
+      "status": "PASS",
+      "passed": 183
+    },
+    "signaturePackage": {
+      "status": "PASS",
+      "passed": 57
+    },
+    "yousignSqlPositive": {
+      "status": "PASS",
+      "assertions": 58,
+      "database": "owned disposable MatriciaV1Closure20261109",
+      "rollback": true,
+      "syntheticEvidence": true
+    },
+    "yousignSqlAclAndRls": {
+      "status": "PASS",
+      "assertions": 21,
+      "source": "author run and independently reviewed migration/test sources"
+    },
+    "nextBuild": {
+      "status": "PASS",
+      "nextVersion": "16.4.1",
+      "nodeVersion": "22.23.4",
+      "typeScript": "PASS",
+      "bindings": "hermetic build bindings; no external service called"
+    },
+    "phase00": {
+      "status": "PASS",
+      "sourceFilesChecked": 2011,
+      "requirementStatusUnchanged": "5/76 VERIFIED"
+    },
+    "boundaries": {
+      "status": "PASS",
+      "packages": 14
+    },
+    "eslintChangedIntegrationFiles": {
+      "status": "PASS",
+      "errors": 0,
+      "warnings": 0
+    },
+    "docker": {
+      "status": "PASS",
+      "image": "sha256:05bd08272bae1f76593d80e31b84bb82f9e8a2c8eaba95c4e6b17159767e9410",
+      "runtimeSourceFilesMatch": 47,
+      "uid": 1000,
+      "offlineFailClosedStartup": true
+    },
+    "fullStandaloneLintAndTsc": {
+      "status": "INTERRUPTED_FOR_RESOURCE_BUDGET",
+      "note": "Next build completed TypeScript; changed files passed ESLint; final CI checks remain authoritative."
+    },
+    "stagingPreflight": {
+      "status": "EXTERNAL_REQUIREMENTS_PENDING",
+      "passed": false,
+      "findings": [
+        {
+          "code": "AUTH_SMTP_NOT_CONFIGURED",
+          "status": "FAIL",
+          "fields": []
+        },
+        {
+          "code": "EMAIL_CONFIGURATION_MISSING",
+          "status": "FAIL",
+          "fields": [
+            "EMAIL_RECIPIENT_ALLOWLIST"
+          ]
+        },
+        {
+          "code": "EMAIL_DELIVERY_DISABLED",
+          "status": "FAIL",
+          "fields": [
+            "EMAIL_LIVE_DELIVERY_ENABLED"
+          ]
+        },
+        {
+          "code": "EMAIL_TRANSPORT_MISSING",
+          "status": "FAIL",
+          "fields": []
+        },
+        {
+          "code": "PAYMENT_EXTERNAL_DELIVERY_DISABLED",
+          "status": "FAIL",
+          "fields": [
+            "PAYMENT_LIVE_ENABLED"
+          ]
+        },
+        {
+          "code": "PAYPAL_CONFIGURATION_MISSING",
+          "status": "FAIL",
+          "fields": [
+            "PAYPAL_CLIENT_ID",
+            "PAYPAL_CLIENT_SECRET",
+            "PAYPAL_WEBHOOK_ID",
+            "PAYPAL_WEBHOOK_CERT_URL",
+            "PAYPAL_WEBHOOK_CERTIFICATE_PEM_BASE64",
+            "PAYPAL_ALLOWED_CURRENCIES"
+          ]
+        },
+        {
+          "code": "SCANNER_CONFIGURATION_MISSING",
+          "status": "FAIL",
+          "fields": [
+            "MALWARE_SCANNER_URL",
+            "MALWARE_SCANNER_ALLOWED_HOSTS"
+          ]
+        },
+        {
+          "code": "YOUSIGN_CONFIGURATION_MISSING",
+          "status": "FAIL",
+          "fields": [
+            "YOUSIGN_API_KEY",
+            "YOUSIGN_WEBHOOK_SECRET"
+          ]
+        },
+        {
+          "code": "WORKER_CONFIGURATION_UNOBSERVED",
+          "status": "UNVERIFIED",
+          "fields": []
+        }
+      ]
+    },
+    "hostedBrowser": {
+      "status": "BLOCKED_AUDIT_NETWORK",
+      "reason": "Tunnel connection failed: 403 Forbidden",
+      "originStatusEstablished": false
+    }
+  },
+  "signatureLimits": [
+    "SIMPLE sandbox only",
+    "Real YouSign API and native receipt recipe not executed",
+    "Explicit signer preparation API; visual placement UI not delivered",
+    "Unknown remote outcome requires manual reconciliation",
+    "Native expiration/cancellation and provider-specific legal consent policies not certified"
+  ],
+  "remaining": [
+    "Resend API key, sender/domain verification, webhook and recipient allowlist; separate Auth SMTP",
+    "PayPal sandbox credentials, webhook/certificate and allowed currencies",
+    "YouSign sandbox API key/webhook plus independently attested legal/provider policy",
+    "Worker/ClamAV hosting, TLS, endpoint/engine/version/freshness and native CLEAN/EICAR recipe",
+    "Audit runtime network host additions",
+    "Authorized four-role test accounts, two distinct enrolled AAL2 administrators and staged business/reference content",
+    "Business, legal/CNDP/fiscal, independent auditor, restore/pentest evidence and separate production authorization"
+  ],
+  "sources": {
+    "localSchemaComparison": "staging-schema-verification.json",
+    "finalHostedSchema": "staging-schema-final.json",
+    "hostedConfiguration": "staging-configuration-redacted.json",
+    "configurationGate": "preflight-final.json",
+    "workerReview": "independent-review.json",
+    "signatureReview": "yousign-independent-review.json"
+  },
+  "sourceFileSha256": {
+    ".dockerignore": "78dbe93810fa91a1c254dfcc5e5b9ee8c382e57cf5fe04b4d6a68cbfa045ebba",
+    ".env.example": "d9c3c0610a568c4316b1d3d7382c09bf0d7a1d12051de43ee2eada8641d5942b",
+    ".node-version": "0c4bf84f9bedd485b2c4eac05f59e35addc86ce7dbf0d90435528e04384c6314",
+    "PLANS.md": "d94f7af2436f13cfd90569b58354706b1274347fdd14dea1018f51beaa2d5f37",
+    "apps/web/app/api/internal/outbox/route.test.ts": "24efbb102e04ba04faeeb5ad51f44bf2b95336643eeaee2e6c8d9baff5543f53",
+    "apps/web/app/api/internal/outbox/route.ts": "44e059685638854b39741ca13d09f7b181a6fd79ee02a7e3efe2d79ced4f8df9",
+    "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.test.ts": "73013ac129cc6d1067636ee4b0b0254df24a3f7d834f85c3a110cc528cd5da8e",
+    "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.ts": "4d9d5bc70c1e9773b838be912ddbbc0b8703eda9e85606d583ca0a19908d70c3",
+    "apps/web/app/api/webhooks/yousign/route.test.ts": "a0d253edefded744f426e90135286d5caaf79da06c8c3a570602375cb838dc02",
+    "apps/web/app/api/webhooks/yousign/route.ts": "8c475e80538aa035227a465d77ba1bb6acb7f3a036af177d02786ae4d260607c",
+    "apps/web/modules/shared/lib/preview-isolation.test.ts": "ea481c801e9be80dc815f7156e07b602c803929f47fea7e893d8f21e9b2cbf92",
+    "apps/web/modules/shared/lib/preview-isolation.ts": "3d5aec4577b20df6e57464cc91a85f67929282dd3188b36530f1ff25f4298e96",
+    "apps/web/modules/shared/lib/signature-runtime/yousign.test.ts": "41aa65eaaa2e57f8a139f2b131ca6069100d36cc6387f7fd162b170bf0f850b1",
+    "apps/web/modules/shared/lib/signature-runtime/yousign.ts": "e795b5ba17f6799ed2cb88f7514b5a3ee3ee3808b4e29eb6584fad827d428be0",
+    "apps/web/next.config.ts": "793f3ef0d3d77b6759ed07ea472b6bac6026759365073a41bb3551e54a40ffd1",
+    "apps/web/package.json": "eb8409e1acdfb07f9905fd76606ecf88c7e58c0ba0f00fd7f0b4ae0da3ae1e43",
+    "apps/worker/DEPLOYMENT.md": "80173d4177c31763d0517f904e1b82df75bb96a7b19b342d643f34e265a2bb6b",
+    "apps/worker/Dockerfile": "9b8c10aa63506e5817ca180ae20e1f1fc302ed58447fa8f27570805a4f3276c5",
+    "apps/worker/src/bounded-fetch.test.ts": "0e9b671b784ef67f8a695a2f5d39213f0692eb3ab63c0dd420910254ffc0754f",
+    "apps/worker/src/bounded-fetch.ts": "09b3a7212db32c359a8c04c893d919ed8237b7baf499390d3e1eacfa8ca063f9",
+    "apps/worker/src/main.ts": "e21d82734d17ab26559a022e81783dedca1e470c6e5465f15d713861df339b6d",
+    "apps/worker/src/worker-config.test.ts": "11f2962b0f04715ae09d01db8dc4fdaccdf7776b19ff7877bb073dc88f3d1fa5",
+    "apps/worker/src/worker-config.ts": "e2ce5972a4a6bdaf06b13b26d43d5a0a2cccc911db55cd261b88797775979fcb",
+    "apps/worker/src/worker-cycle.test.ts": "70c93ff539b6eaf0a76a45bd78ca71fd855a09d6c604a720201ac39877f1a7f5",
+    "apps/worker/src/worker-cycle.ts": "0b896133147340d40db9d4920fd2f34a866db2658e9bcee0076e2333046685a4",
+    "apps/worker/src/worker-loop.test.ts": "a9945d7edd84abe7a0504e8c5579ee6d0373a2fc731c88f1fd6c1dcb6436023d",
+    "apps/worker/src/worker-loop.ts": "c36929a06f7a5cce6c81ba8c8b1c5bc62ffcd4fed494f2f15bea0c8410b8c0d2",
+    "package.json": "13888b9698bdc9aa07216a04fc313161bf80a4661689fd213353e665d5dcf038",
+    "packages/domain/package.json": "6c9718f2f1506880eda12abfa59651957374ccd8efe8d32e4087f13a1f33fd56",
+    "packages/domain/vercel.json": "2edfcd6871f96c3ef486c3461811620d42aee5fe6211c8b3cb8a7f787eb01d9c",
+    "packages/signature-v41/src/index.ts": "4a056d571f97dedb64c4a4a8e9b49f6efb4b6ffb6c62ff513608f35509c5d1d1",
+    "packages/signature-v41/src/provider.test.ts": "3907696f8d47cdde8d00ce27da9f82f856c48c991165312f7a664626291f1237",
+    "packages/signature-v41/src/provider.ts": "11935cc8a6e7e377ebfc0bd9e1db806595a3adb2c08d711aba6a0b1cb7e288ba",
+    "packages/signature-v41/src/workflow.test.ts": "a3856138f5d33d83df0ac72484af5f87e726bdfe5f407de572c161cc40609bca",
+    "packages/signature-v41/src/workflow.ts": "90d415f8314753d63e8eba7f6f5b05d2ceba3367064b5ea584ce7aada733002d",
+    "packages/signature-v41/src/yousign-provider.test.ts": "abc55611466b5309650f72e669e53ea2f08bd15613e599773014532fa3045fe2",
+    "packages/signature-v41/src/yousign-provider.ts": "5c72a8e17b8ce7f616a0129633e4dc0bd4e76795e88ccd57cc1e676eda7fa6af",
+    "pnpm-lock.yaml": "ec1128425c48fccf0b711644e7daa26cd512a331fc301a0088ff7d2ac1d10295",
+    "railway.json": "91e1baf184108b0fc05c98745f1a39670f790d286bff9da351cee9204a177279",
+    "scripts/release/yousign-transport-acceptance.mjs": "7fed7bdd586b87721ccf1be2f8b9728290a774d752f67929ee9c119b3b3ce74d",
+    "scripts/staging/README.md": "48f2f369c6ab7fcf5d341abe6281cdd789ea8c1c8ef9e7fbfec17e1d4d6809a6",
+    "scripts/staging/preflight.mjs": "3441c9d4d835c55e4069dafde73a1ab2af4964420b0dd21ade0bd926012ce496",
+    "scripts/staging/preflight.test.mjs": "638378f76ae82ac0d699fd09a14c5f72c9fac32a98a36b02defefcbaa610f939",
+    "supabase/migrations/20261109100000_yousign_sandbox_transport.sql": "0592fc09805b1dc9d48de00e6d4029579949a8dce93bd8bdbe4af7605abd3be2",
+    "supabase/tests/0390_yousign_sandbox_transport.test.sql": "e764d4f54523b36a1e25b4a5b95f23c2823a72592a5644983b4b8a488a8bb4a0",
+    "supabase/tests/helpers/yousign-transport-acceptance.sql": "f1964dbf92e4b1e507bd1ff367b773e03e8a94b3d368820df45cbc648a28b3b8"
+  }
+}
