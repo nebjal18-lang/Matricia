@@ -43,6 +43,11 @@ describe("Admin configuration UI", () => {
     const data = dashboard(); data.sections[1]!.revisions[0] = { ...revision, probe: { status: "PASS", code: "CONNECTED", checked_at: "2026-11-09T10:10:00Z", valid_until: "2026-11-09T10:40:00Z" } };
     const approved = render("fr", data); expect(approved).not.toMatch(/<button[^>]*value="approve"[^>]*disabled=""/u); expect(approved).toContain("Connexion vérifiée");
   });
+  it("submits the actual active revision when deactivation is requested", () => {
+    const data = dashboard(); data.sections[1] = { ...data.sections[1]!, active_revision_id: other, revisions: [{ ...revision, status: "ACTIVE", approved_by: actor, approved_at: "2026-11-09T10:10:00Z" }] };
+    const html = render("fr", data);
+    expect(html).toContain('name="expectedActiveId" value="'+other+'"'); expect(html).toContain('value="disable"');
+  });
   it("does not show self-approval or mutating controls to a read-only administrator", () => {
     const own = dashboard(); own.actor_id = other;
     expect(render("fr", own)).not.toContain('value="approve"'); expect(render("fr", own)).toContain("Un autre administrateur");

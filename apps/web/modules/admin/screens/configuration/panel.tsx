@@ -38,7 +38,7 @@ function useConfigurationCommand(locale: Locale, initialIntent: string, formId: 
 }
 
 function Hidden({ locale, section, keyValue, revision }: { locale: Locale; section: ConfigurationSection; keyValue: string; revision?: ConfigurationRevision }) {
-  return <><input type="hidden" name="locale" value={locale}/><input type="hidden" name="section" value={section}/><input type="hidden" name="idempotencyKey" value={keyValue}/>{revision ? <><input type="hidden" name="revisionId" value={revision.id}/><input type="hidden" name="contentHash" value={revision.content_hash}/></> : null}</>;
+  return <><input type="hidden" name="locale" value={locale}/><input type="hidden" name="section" value={section}/><input type="hidden" name="idempotencyKey" value={keyValue}/>{revision ? <><input type="hidden" name="revisionId" value={revision.id}/><input type="hidden" name="contentHash" value={revision.content_hash}/>{revision.status === "ACTIVE" ? <input type="hidden" name="expectedActiveId" value={revision.id}/> : null}</> : null}</>;
 }
 function SectionStatus({ value, locale }: { value: ConfigurationRevision["status"] | null; locale: Locale }) {
   const c = configurationCopy(locale), text = value === "ACTIVE" ? c.active : value === "DRAFT" ? c.draft : value === "REJECTED" ? c.rejected : value === "RETIRED" ? c.retired : c.missing;
@@ -59,7 +59,7 @@ function Field({ section, field, settings, saved, locale, disabled, onChange }: 
 function SectionEditor({ locale, section, keyValue, canWrite }: { locale: Locale; section: ConfigurationSectionData; keyValue: string; canWrite: boolean }) {
   const c = configurationCopy(locale), copy = sectionCopy(section.section, locale), Icon = sectionIcons[section.section], source = editableRevision(section), active = activeRevision(section);
   const command = useConfigurationCommand(locale, "save", `form-save-${section.section}`);
-  const [settings, setSettings] = useState<Record<string, string>>(source?.settings ?? {}), [reason, setReason] = useState("");
+  const [settings, setSettings] = useState<Record<string, string>>(source?.settings ?? {});
   return <section id={`configuration-${section.section.toLowerCase()}`} aria-labelledby={`title-${section.section}`} className={`${card} scroll-mt-24`}>
     <div className="flex flex-wrap items-start justify-between gap-3"><div className="flex min-w-0 items-start gap-3"><span className="rounded-xl bg-blue-50 p-3 text-blue-800 dark:bg-blue-950 dark:text-blue-200"><Icon aria-hidden="true" className="size-5"/></span><div className="min-w-0"><h3 id={`title-${section.section}`} className="text-lg font-semibold">{copy.title}</h3><p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{copy.lead}</p></div></div><SectionStatus value={source?.status ?? null} locale={locale}/></div>
     {active ? <p className="mt-3 text-sm text-emerald-900 dark:text-emerald-200">{c.current} · {displayTimestamp(active.approved_at ?? active.created_at)}</p> : null}
@@ -69,7 +69,7 @@ function SectionEditor({ locale, section, keyValue, canWrite }: { locale: Locale
     <form id={command.formId} action={command.action} onSubmit={command.onSubmit} aria-busy={command.pending} className="mt-3 space-y-5">
       <Hidden locale={locale} section={section.section} keyValue={keyValue}/><input type="hidden" name="intent" value="save"/><input type="hidden" name="expectedActiveId" value={section.active_revision_id ?? ""}/>{source ? <><input type="hidden" name="sourceRevisionId" value={source.id}/><input type="hidden" name="sourceHash" value={source.content_hash}/></> : null}
       <fieldset disabled={command.pending || !canWrite}><legend className="sr-only">{copy.title}</legend><div className="grid min-w-0 gap-4 sm:grid-cols-2">{sectionFields[section.section].map(field => <Field key={field.key} section={section.section} field={field} settings={settings} saved={source?.secret_keys.includes(field.key) ?? false} locale={locale} disabled={!canWrite} onChange={(key, value) => setSettings(previous => ({ ...previous, [key]: value }))}/>)}</div></fieldset>
-      {canWrite ? <><div><label className="text-sm font-semibold" htmlFor={`reason-${section.section}`}>{c.reason}</label><textarea id={`reason-${section.section}`} name="reason" value={reason} onChange={event => setReason(event.currentTarget.value)} required minLength={10} maxLength={2000} rows={2} className={control} disabled={command.pending} aria-describedby={`reason-help-${section.section}`}/><p id={`reason-help-${section.section}`} className="mt-1 text-xs text-slate-600 dark:text-slate-300">{c.reasonHelp}</p></div><div className="flex flex-wrap items-center gap-3"><button className={button} disabled={command.pending}>{command.pending ? c.saving : c.save}</button><p className="max-w-xl text-xs leading-5 text-slate-600 dark:text-slate-300">{c.saveHint}</p></div></> : <p className="text-sm">{c.readOnly}</p>}
+      {canWrite ? <><div className="flex flex-wrap items-center gap-3"><button className={button} disabled={command.pending}>{command.pending ? c.saving : c.save}</button><p className="max-w-xl text-xs leading-5 text-slate-600 dark:text-slate-300">{c.saveHint}</p></div></> : <p className="text-sm">{c.readOnly}</p>}
     </form>
   </section>;
 }
