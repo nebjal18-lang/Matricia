@@ -225,7 +225,7 @@ validation_commands: [pnpm test:tooling, pnpm typecheck, tests ciblés worker/si
 evidence_paths: [docs/evidence/staging-repair-20261109.json, /workspace/outputs/staging-repair]
 progress_log:
   - 2026-11-09: GitHub synchronisé sur 4962ce7; worktrees indépendants; correction demandée par le propriétaire.
-results: Code et build validés; 4183 tests unitaires PASS, 103 outillage, 58 SQL positives et 21 contrôles SQL. Staging isolé réel; activation externe bloquée par credentials, hébergement, réseau et décisions humaines.
+results: Code et build validés; 4183 tests unitaires PASS (1 opt-in ignoré), 103 outillage, 108 assertions natives confidentialité; job GitHub database PASS sur 361 fichiers SQL, 9323 assertions et 4 concurrences après 577 migrations. Staging isolé réel; CI globale affectée par une erreur interne GitHub avant deux jobs; activation externe bloquée par credentials, hébergement, réseau et décisions humaines.
 independent_signoff: REVUES_AUTOMATISEES_SANS_P1_STATIQUE_DANS_PERIMETRE; AUCUN_VISA_PRODUCTION
 next_phase: Recette du staging avec services externes réellement configurés, puis gate de production séparé.
 ```

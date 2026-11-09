@@ -62,6 +62,12 @@ pnpm build:vercel
 
 Le runner SQL refuse les conteneurs qui ne correspondent pas au préfixe de base jetable de clôture. Le préflight est un contrôle de configuration, pas un visa de production.
 
+Validation finale : **4 183 tests unitaires réussis**, un test Storage natif opt-in ignoré, **103 tests d’outillage**, build Next.js/TypeScript, image worker non privilégiée et **108 assertions de confidentialité YouSign** réussis. Les sous-suites et les assertions de confidentialité ne sont pas additionnées aux totaux globaux.
+
+Le [job GitHub database](https://github.com/nebjal18-lang/Matricia/actions/runs/42673774172/job/129351112028), sur `1a99fcda15862932b331f29c0e3051899568d674`, réussit après reconstruction des 577 migrations : **361 fichiers SQL, 9 323 assertions, quatre scénarios de concurrence**. Le reçu `docs/evidence/staging-repair-sql-final-20261109.json` attribue ce total au log GitHub. Localement, les 251 fichiers antérieurs au redémarrage et les 110 fichiers repris constituent une validation complète distincte ; aucun total d’assertions n’est reconstitué à partir de plans partiels.
+
+Le [run qualité précédent](https://github.com/nebjal18-lang/Matricia/actions/runs/42666211494) a réussi lint, types, tests unitaires/intégration/outillage, build et navigateur public sur le même code applicatif. Le candidat final conserve exactement les arbres `apps` et `packages`, le manifeste, le lockfile et le workflow ; les corrections suivantes portent sur SQL et ses outils de preuve. Le build Vercel du candidat final réussit. Le run final reste globalement rouge à cause d’une **erreur interne GitHub**, corrélation `7c94913a-4819-40d3-a3bd-a8c7bb9af940`, avant le démarrage de qualité et navigateur. Une relance par commit vide a déjà été tentée ; aucun job ni assertion n’est supprimé pour obtenir artificiellement un statut vert.
+
 ## Restants qui exigent de vrais accès ou des décisions
 
 | Sujet | À fournir ou valider |
