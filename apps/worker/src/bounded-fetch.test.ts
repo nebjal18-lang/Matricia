@@ -45,7 +45,7 @@ describe("worker bounded HTTP", () => {
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
     const { port } = server.address() as AddressInfo;
     const response = await createBoundedFetch(500)(`http://127.0.0.1:${port}/rpc`);
-    await expect(response.json()).rejects.toMatchObject({ name: "AbortError" });
+    await expect(response.json()).rejects.toMatchObject({ name: "TimeoutError" });
   });
 
   it.each([0, -1, 120_001, 1.5, NaN])("rejects an unbounded or invalid deadline %s", timeout => {
