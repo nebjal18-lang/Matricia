@@ -12,12 +12,6 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      # Public, deliberately non-secret values for hermetic Next.js validation.
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-local-publishable-key-not-a-secret
-      NEXT_PUBLIC_APP_URL: https://matricia.example
-      SUPABASE_SERVICE_ROLE_KEY: ci-local-service-role-key-not-a-secret
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +36,13 @@ jobs:
       - run: pnpm test:tooling
       - run: pnpm no-placeholders
       - run: pnpm build
+        env:
+          # Hermetic build bindings belong only to the build. Unit tests inject
+          # their dependencies; a fake service key must not imply a live vault.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-local-publishable-key-not-a-secret
+          NEXT_PUBLIC_APP_URL: https://matricia.example
+          SUPABASE_SERVICE_ROLE_KEY: ci-local-service-role-key-not-a-secret
 
   database:
     runs-on: ubuntu-latest
