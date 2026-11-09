@@ -145,7 +145,7 @@ try {
     await current.page.locator('a[href="#configuration-step-review"]').focus(); await current.page.keyboard.press('Enter');
     await expect(current.page).toHaveURL(url => url.hash === '#configuration-step-review');
     const audit = await new AxeBuilder({ page: current.page }).analyze();
-    proof.browser.push({ locale, width, axeViolations: audit.violations.map(v => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })), axeIncomplete: audit.incomplete.map(v => ({ id: v.id, nodes: v.nodes.length })), keyboardStepNavigation: true, overflow: false });
+    proof.browser.push({ locale, width, axeViolations: audit.violations.map(v => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, targets: v.nodes.map(node => node.target) })), axeIncomplete: audit.incomplete.map(v => ({ id: v.id, nodes: v.nodes.length })), keyboardStepNavigation: true, overflow: false });
     check(audit.violations.length === 0, 'CONFIGURATION_ACCESSIBILITY_VIOLATION');
     await current.page.screenshot({ path: resolve(directory, `configuration-${locale}-${width}.png`), fullPage: true });
     const html = await current.page.content(); for (const secret of knownSecrets) check(!html.includes(secret), 'SAVED_SECRET_IN_BROWSER_DOM');
