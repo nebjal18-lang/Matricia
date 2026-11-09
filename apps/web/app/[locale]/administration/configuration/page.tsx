@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function ConfigurationPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const c = configurationCopy(locale), context = await sensitivePageContext({ locale, path: "configuration", active: "settings", title: c.title, lead: c.lead, roles: ["SUPER_ADMIN", "MATRICIA_ADMIN"] });
+  const c = configurationCopy(locale), context = await sensitivePageContext({ locale, path: "configuration", active: "settings", title: c.title, lead: c.lead, roles: ["SUPER_ADMIN", "MATRICIA_ADMIN"], mainLandmark: true });
   if (context.status === "blocked") return context.view;
   let data: Awaited<ReturnType<typeof loadConfigurationDashboard>> | undefined;
   let failure: WorkspaceFailureReason = "QUERY_FAILED";
