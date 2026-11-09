@@ -18,6 +18,53 @@ insert into public.data_subject_requests(id,organization_id,request_type,subject
  select request_id,organization_id,'ACCESS',encode(extensions.digest(convert_to(organization_id::text||':'||actor_id::text,'UTF8'),'sha256'),'hex'),'ENHANCED','fr-MA','IN_REVIEW',now()+interval '1 day',now()-interval '1 hour',extensions.gen_random_uuid(),'a2200000-0000-4000-8000-000000000002'
  from y392_subjects;
 select pg_temp.y391_user('a2200000-0000-4000-8000-000000000002');
+
+-- Exercise the actual ALL capture and pending manifest, with two distinct
+-- synthetic AAL2 legal actors. These rollback-only policy decisions certify no
+-- real legal basis and never alter an approved deployment inventory.
+create temporary table y392_capture(k text primary key,v jsonb);
+grant all on y392_capture to authenticated;
+insert into public.platform_user_roles(user_id,role_code) values('f2120000-0000-4000-8000-000000000002','SUPER_ADMIN') on conflict do nothing;
+set local role authenticated;
+select pg_temp.y391_user('a2200000-0000-4000-8000-000000000001');
+insert into y392_capture values('client-scope',public.confirm_my_dsr_scope_v1('d3920000-0000-4000-8000-000000000001',array['ALL'],'TEST-Y392-client-scope'));
+select pg_temp.y391_user('fa120000-0000-4000-8000-000000000001');
+insert into y392_capture values('provider-scope',public.confirm_my_dsr_scope_v1('d3920000-0000-4000-8000-000000000002',array['ALL'],'TEST-Y392-provider-scope'));
+select pg_temp.y391_user('a2200000-0000-4000-8000-000000000002');
+insert into y392_capture values('draft',public.create_dsr_all_inventory_draft_v1('TEST ONLY synthetic native signature disclosure policy, never an actual legal approval','TEST-Y392-inventory-draft'));
+reset role;
+create function pg_temp.y392_classify() returns void language plpgsql as $$
+declare source jsonb;fields jsonb;excluded jsonb;configuration jsonb;begin
+ for source in select value from public.dsr_all_inventory_drafts_v1 d cross join lateral jsonb_array_elements(d.catalog_json) where d.id=(select(v->>'draft_id')::uuid from y392_capture where k='draft') loop
+  fields:='[]';
+  if source->>'key'='@subject_financial_records_v1' then select coalesce(jsonb_agg(c->>'name'),'[]') into fields from jsonb_array_elements(source->'columns')c where(c->>'exportable')::boolean;end if;
+  select coalesce(jsonb_object_agg(c->>'name',jsonb_build_object('basis_code',case when(c->>'security_secret')::boolean then'SECURITY_SECRET'else'THIRD_PARTY_RIGHTS'end,'legal_reference','TEST-ONLY-Y392-SYNTHETIC-DISCLOSURE','reason','TEST ONLY synthetic duplicate or third party source exclusion; subject fields use the curated verified-signatory source')),'{}') into excluded from jsonb_array_elements(source->'columns')c where not fields?(c->>'name');
+  configuration:=jsonb_build_object('mode',case when source->>'key'='@subject_financial_records_v1' then'EXTRACT'else'EXCLUDE'end,'subject_path_id',case when source->>'key'='@subject_financial_records_v1'then source#>>'{subject_paths,0,id}'end,'organization_path_ids',case when source->>'key'='@subject_financial_records_v1'then jsonb_build_array(source#>>'{organization_paths,0,id}')else'[]'::jsonb end,'account_global',false,'include_null_organization',false,'fields',fields,'excluded_fields',excluded,'legal_reference','TEST-ONLY-Y392-SYNTHETIC-DISCLOSURE','reason','TEST ONLY synthetic isolated disclosure policy; no real legal approval');
+  perform public.configure_dsr_all_inventory_source_v1((select(v->>'draft_id')::uuid from y392_capture where k='draft'),source->>'key',0,configuration,'TEST-Y392-classify:'||(source->>'key'));
+ end loop;
+end$$;
+select pg_temp.y392_classify();
+set local role authenticated;
+insert into y392_capture values('inventory',public.submit_dsr_all_inventory_v1((select(v->>'draft_id')::uuid from y392_capture where k='draft'),(select v->>'catalog_hash' from y392_capture where k='draft'),'TEST-ONLY-Y392-SYNTHETIC-DISCLOSURE','TEST-Y392-submit'));
+select throws_ok($$select public.decide_dsr_all_inventory_v1((select(v->>'inventory_version_id')::uuid from y392_capture where k='inventory'),(select v->>'content_hash' from y392_capture where k='inventory'),true,true,'TEST-ONLY-Y392-SYNTHETIC-DISCLOSURE','TEST ONLY same author must not approve native classifications')$$,'42501','DSR_INVENTORY_INDEPENDENT_REVIEW_REQUIRED','native signature disclosure classifications still require four-eyes review');
+select pg_temp.y391_user('f2120000-0000-4000-8000-000000000002');
+select public.decide_dsr_all_inventory_v1((select(v->>'inventory_version_id')::uuid from y392_capture where k='inventory'),(select v->>'content_hash' from y392_capture where k='inventory'),true,true,'TEST-ONLY-Y392-SYNTHETIC-DISCLOSURE','TEST ONLY independent rollback policy review, never actual legal approval');
+insert into y392_capture values('client-package',public.capture_admin_dsr_all_v1('d3920000-0000-4000-8000-000000000001',(select(v->>'scope_version_id')::uuid from y392_capture where k='client-scope'),(select(v->>'inventory_version_id')::uuid from y392_capture where k='inventory'),'TEST-Y392-client-capture'));
+insert into y392_capture values('provider-package',public.capture_admin_dsr_all_v1('d3920000-0000-4000-8000-000000000002',(select(v->>'scope_version_id')::uuid from y392_capture where k='provider-scope'),(select(v->>'inventory_version_id')::uuid from y392_capture where k='inventory'),'TEST-Y392-provider-capture'));
+reset role;
+insert into y392_capture select replace(c.k,'-package','-snapshot'),p.snapshot_json::jsonb from y392_capture c join public.dsr_all_packages_v1 p on p.id=(c.v->>'package_id')::uuid where c.k in('client-package','provider-package');
+insert into y392_capture select replace(c.k,'-package','-manifest'),private.dsr_all_file_manifest_v1((c.v->>'package_id')::uuid) from y392_capture c where c.k in('client-package','provider-package');
+select is((select v->>'catalog_hash' from y392_capture where k='client-snapshot'),(select v->>'catalog_hash' from y392_capture where k='draft'),'captured ALL package binds the technical catalog including the new native projection fields');
+select is((select count(*)::integer from y392_capture c cross join lateral jsonb_array_elements(c.v->'sources')s cross join lateral jsonb_array_elements(s->'records')r where c.k='client-snapshot' and s->>'source_key'='@subject_financial_records_v1' and r#>>'{fields,source}' like 'YOUSIGN\_%' escape '\'),8,'actual client ALL capture retains all eight native subject rows across seven families');
+select is((select count(*)::integer from y392_capture c cross join lateral jsonb_array_elements(c.v->'sources')s cross join lateral jsonb_array_elements(s->'records')r where c.k='provider-snapshot' and s->>'source_key'='@subject_financial_records_v1' and r#>>'{fields,source}' like 'YOUSIGN\_%' escape '\'),8,'actual provider ALL capture retains all eight native subject rows across seven families');
+select ok(not exists(select 1 from y392_capture c cross join lateral jsonb_array_elements(c.v->'sources')s cross join lateral jsonb_array_elements(s->'records')r where c.k='client-snapshot' and(r::text like '%ab910000-0000-4000-8000-000000000006%' or r#>>'{fields,first_name}'='Provider')),'actual client capture contains neither the counterparty name nor their native audit reference');
+select ok(not exists(select 1 from y392_capture c cross join lateral jsonb_array_elements(c.v->'sources')s cross join lateral jsonb_array_elements(s->'records')r where c.k='provider-snapshot' and(r::text like '%ab910000-0000-4000-8000-000000000005%' or r#>>'{fields,first_name}'='Client')),'actual provider capture contains neither the counterparty name nor their native audit reference');
+select is((select count(*)::integer from y392_capture c cross join lateral jsonb_array_elements(c.v#>'{file_sources,entries}')e where c.k='client-snapshot' and e->>'bucket'='signature-provider-evidence'),2,'actual client snapshot freezes exactly the shared PDF and their personal native audit candidate');
+select is((select count(*)::integer from y392_capture c cross join lateral jsonb_array_elements(c.v#>'{file_sources,entries}')e where c.k='provider-snapshot' and e->>'bucket'='signature-provider-evidence'),2,'actual provider snapshot freezes exactly the shared PDF and their personal native audit candidate');
+select ok((select(v->>'coverage_complete')::boolean from(select private.dsr_all_collect_file_sources_v1('d3920000-0000-4000-8000-000000000001')v)coverage),'the native family is covered by the real technical file collector');
+select ok(not exists(select 1 from y392_capture where k in('client-manifest','provider-manifest') and coalesce((v->>'complete')::boolean,false)),'captured native files cannot produce a complete manifest before content and third-party review');
+select ok(not exists(select 1 from y392_capture c cross join lateral jsonb_array_elements(c.v->'entries')e where c.k in('client-manifest','provider-manifest') and(e->>'disposition' is distinct from 'PENDING' or coalesce((e->>'ready')::boolean,false))),'every unreviewed captured file remains explicitly PENDING and unavailable');
+select ok(not exists(select 1 from y392_capture where k in('client-manifest','provider-manifest') and v::text~'"(bucket|path|storage_object_id|source_aliases)"'),'actual delivered-shape manifests omit private source locators and raw source aliases');
 select is(private.dsr_account_subject_v1(request_id),actor_id,'verified account subject resolves honestly: '||label) from y392_subjects order by label;
 select is((select status from public.signature_envelopes where id=(select(v->>'envelope_id')::uuid from y391 where k='envelope')),'SIGNED','privacy cases use the completed guarded transport fixture');
 
