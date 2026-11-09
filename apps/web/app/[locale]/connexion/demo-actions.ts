@@ -8,6 +8,7 @@ import { demoPersonaEmail, isPublicDemoAccessEnabled } from "./demo-policy";
 import type { DemoPersona } from "./demo-personas";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { postLoginDestination } from "./actions";
+import { elevateDemoSession } from "./demo-assurance";
 
 const personaConfig = {
   client: { destination: "tableau-de-bord" },
@@ -35,7 +36,10 @@ export async function connectDemoPersona(formData: FormData): Promise<void> {
   if (error || !tokenHash) redirect(failure("unavailable"));
 
   const supabase = await getSupabaseServerClient();
-  const { error: sessionError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-  if (sessionError) redirect(failure("unavailable"));
+  const { data: session, error: sessionError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+  const userId = session?.user?.id;
+  if (sessionError || !userId) redirect(failure("unavailable"));
+  const elevated = await elevateDemoSession({ email, userId, supabase, admin });
+  if (!elevated) redirect(failure("unavailable"));
   redirect(await postLoginDestination(locale, next ?? `/${locale}/${personaConfig[persona].destination}`));
 }

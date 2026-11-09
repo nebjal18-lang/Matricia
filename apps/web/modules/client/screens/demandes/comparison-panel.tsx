@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { ArrowLeft, ArrowRight, FileText, Info, Scale } from "lucide-react";
 import { formatMinorExact, type QuoteComparison, type QuoteComparisonRow } from "@/modules/client/data/rfq/model";
 import { canApplyDemoOffer } from "@/modules/client/data/rfq/quote-detail-demo";
-import { formatCompletenessBasisPoints, type QuoteCompleteness } from "@/modules/client/data/rfq/quote-completeness";
+import { formatCompletenessBasisPoints, missingCompletenessLabels, type QuoteCompleteness } from "@/modules/client/data/rfq/quote-completeness";
 import type { ComparisonOfferFacts } from "@/modules/client/data/rfq/comparison-facts";
 import { demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
@@ -63,6 +63,7 @@ type CompareColumn = {
   selectable: boolean;
   completeness: QuoteCompleteness | null;
   revisionInProgress?:boolean;
+  retained?:boolean;
 };
 
 export function ComparisonPanel({
@@ -82,6 +83,7 @@ export function ComparisonPanel({
   offerFacts = {},
   assistanceHref,
   revisingQuoteIds=[],
+  retainedQuoteVersionIds=[],
 }: {
   locale: Locale;
   requestId: string;
@@ -99,6 +101,7 @@ export function ComparisonPanel({
   offerFacts?: Record<string, ComparisonOfferFacts>;
   assistanceHref?: string;
   revisingQuoteIds?:string[];
+  retainedQuoteVersionIds?:string[];
 }) {
   const [state, action, pending] = useActionState(compareQuotesAction, compareIdle);
   const c = spaceCopy(locale);
@@ -130,7 +133,7 @@ export function ComparisonPanel({
           completeness: null,
         };
       })
-    : rows.map((row, index) => mapRow(row, index, locale, c, messages, nowIso, offerFacts[row.quoteVersionId]))).map(column=>({...column,revisionInProgress:revisingQuoteIds.includes(column.quoteId),selectable:column.selectable&&!revisingQuoteIds.includes(column.quoteId)}));
+    : rows.map((row, index) => mapRow(row, index, locale, c, messages, nowIso, offerFacts[row.quoteVersionId]))).map(column=>({...column,retained:retainedQuoteVersionIds.includes(column.quoteVersionId),revisionInProgress:revisingQuoteIds.includes(column.quoteId),selectable:column.selectable&&!revisingQuoteIds.includes(column.quoteId)&&!retainedQuoteVersionIds.includes(column.quoteVersionId)}));
   const snapshotId = state.status === "success" ? state.snapshotId : initialComparison?.snapshotId ?? "";
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
   const askHref = `/${locale}/messagerie${selectedQuery}`;
@@ -272,6 +275,7 @@ function QuoteColumn({
   const c = spaceCopy(locale);
   const detailHref = `/${locale}/client/demandes/${requestId}/offres/${column.quoteId}?${new URLSearchParams({...Object.fromEntries(new URLSearchParams(selectedQuery.replace(/^\?/,""))),versionId:column.quoteVersionId})}`;
   const canSelect = column.selectable && canManage && !column.expired && Boolean(snapshotId);
+  const missingChecks = column.completeness && column.completeness.basisPoints < 10_000 ? missingCompletenessLabels(column.completeness.checks, locale) : [];
   return (
     <article className="client-card client-offer-col" data-recommended={column.recommended ? "true" : undefined}>
       {column.recommended ? <p className="client-offer-badge">{c.recommendedOffer}</p> : null}
@@ -336,7 +340,8 @@ function QuoteColumn({
       </div>
       {column.revisionInProgress?<p role="status" className="client-access-note">{locale==="ar"?"المراجعة قيد الإعداد؛ هذه النسخة المنشورة محفوظة للاطلاع ولا يمكن اختيارها.":"Révision en préparation ; cette version publiée reste consultable et ne peut pas être sélectionnée."}</p>:null}
       {!column.completeness ? <p role="alert" className="client-access-note">{locale==="ar"?"تفاصيل المقارنة غير متاحة. أعد تحميل الصفحة قبل الاختيار.":"Les détails nécessaires à la comparaison sont indisponibles. Rechargez la page avant de choisir."}</p>:null}
-      {column.completeness && column.completeness.basisPoints < 10_000 ? <p role="status" className="client-access-note">{messages.incompleteQuote}</p> : null}
+      {column.retained?<p role="status" className="client-access-note">{locale==="ar"?"هذا العرض مرتبط بعقد قائم. لم يعد الاختيار مفتوحاً على هذه النسخة.":"Cette offre est déjà reprise par un contrat. La sélection n’est plus ouverte sur cette version."} <Link href={`/${locale}/client/contrats${selectedQuery}`}>{locale==="ar"?"عرض العقد":"Voir le contrat"}</Link></p>:null}
+      {column.completeness && column.completeness.basisPoints < 10_000 ? <p role="status" className="client-access-note">{messages.incompleteQuote}{missingChecks.length ? ` ${locale==="ar"?"الناقص":"Il manque"} : ${missingChecks.join(locale==="ar"?"، ":", ")}.` : ""}</p> : null}
       {column.expired ? <p role="status" className="client-access-note">{messages.expiredQuote}</p> : null}
       {state.status === "error" ? <p role="alert" className="client-access-note">{state.reason === "VALIDATION" ? messages.validation : messages.actionError}</p> : null}
       {state.status === "approval_required" ? <p role="status" className="client-access-note">{state.approvalStatus==="REJECTED"?(locale==="ar"?"تم رفض طلب الموافقة. راجع القرار قبل المحاولة.":"La demande d’approbation a été refusée. Consultez la décision avant de réessayer."):(locale==="ar"?"أُرسل الطلب إلى المعتمدين. لم يتم اختيار العرض بعد.":"Demande transmise aux approbateurs. Le devis n’est pas encore retenu.")} <Link href={`/${locale}/client/actions${selectedQuery}`}>{locale==="ar"?"عرض الإجراءات":"Consulter les actions"}</Link></p>:null}

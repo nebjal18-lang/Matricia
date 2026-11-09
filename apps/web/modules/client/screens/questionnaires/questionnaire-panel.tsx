@@ -19,7 +19,12 @@ type QuestionnaireRuntime={basePath:string;canEdit:boolean;actions:{start:typeof
 const QuestionnaireRuntimeContext=createContext<QuestionnaireRuntime>({basePath:"",canEdit:true,actions:{start:startQuestionnaireAction,save:saveQuestionnaireAnswerAction,submit:submitQuestionnaireAction}});
 type Props = {runtime?:Partial<QuestionnaireRuntime>; locale: "fr" | "ar"; dashboard: QuestionnaireDashboard; messages: QuestionnaireMessages; identities: { start: CommandIdentity; submit: CommandIdentity; answers: Record<string, CommandIdentity> }; sites?: SiteOption[] };
 const localized = (locale: "fr" | "ar", fr: string, ar: string) => locale === "ar" ? ar : fr;
-const displayDate = (value: string, locale: "fr" | "ar") => new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+function displayDate(value: string, _locale: "fr" | "ar") {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+}
 
 function IdentityFields({ locale, identity }: { locale: "fr" | "ar"; identity: CommandIdentity }) { return <><input type="hidden" name="locale" value={locale} /><input type="hidden" name="idempotencyKey" value={identity.idempotencyKey} /><input type="hidden" name="correlationId" value={identity.correlationId} /></>; }
 function Feedback({ state, messages, success, id }: { state: QuestionnaireActionState; messages: QuestionnaireMessages; success: string; id?: string }) { if (state.status === "idle") return null; return state.status === "success" ? <p id={id} role="status" className="text-sm font-medium text-primary">{success}</p> : <p id={id} role="alert" className="text-sm font-medium text-destructive">{failureMessage(messages, state.reason)}</p>; }

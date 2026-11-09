@@ -1208,9 +1208,9 @@ button.client-cta {
 @media (max-width: 959px) {
   .client-side-nav {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0.4rem;
-    overflow-x: auto;
+    overflow: visible;
   }
 
   .client-side-nav-label {
@@ -1233,8 +1233,9 @@ button.client-cta {
   }
 
   .client-side-nav a {
-    flex: 0 0 auto;
-    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
   }
 }
 

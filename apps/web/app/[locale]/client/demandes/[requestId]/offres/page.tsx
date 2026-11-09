@@ -10,6 +10,7 @@ import { getClientRfqMessages } from "@/modules/client/screens/demandes/messages
 import { createServerClientRfqRepository } from "@/modules/client/data/rfq/server-repository";
 import { uuidSchema } from "@/modules/client/data/rfq/model";
 import { loadComparisonOfferFacts } from "@/modules/client/data/rfq/comparison-facts";
+import { loadContractMissions } from "@/modules/shared/lib/contracts-missions/repository";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { RequestsBoard } from "@/modules/client/screens/spaces/boards";
@@ -76,6 +77,11 @@ export default async function CompareOffersPage({
     ? await loadComparisonOfferFacts(comparison.value.rows.map((row) => row.quoteVersionId), locale)
     : new Map();
   const offerFacts = Object.fromEntries(facts);
+  const contracts = await loadContractMissions(locale, space.selectedOrganizationId);
+  const comparedVersions = new Set(comparison.value?.rows.map((row) => row.quoteVersionId) ?? []);
+  const retainedQuoteVersionIds = contracts.status === "success"
+    ? contracts.dashboard.contracts.map((contract) => contract.selectedQuoteVersionId).filter((versionId) => comparedVersions.has(versionId))
+    : [];
 
   return (
     <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}/offres?${new URLSearchParams({organizationId:space.selectedOrganizationId,...(query.rfq?{rfq:query.rfq}:{})})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.comparePageTitle} lead={c.comparePageLead} kicker={c.kicker}>
@@ -98,6 +104,7 @@ export default async function CompareOffersPage({
           requestHref={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`}
           organizationName={space.organizationName}
           offerFacts={offerFacts}
+          retainedQuoteVersionIds={retainedQuoteVersionIds}
           assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}
         />
         {["PROVIDER_SELECTED","CONTRACT_PENDING","CONTRACTED"].includes(detail.value.status)?<SelectedQuoteContract navigationQuery={query} locale={locale} organizationId={space.selectedOrganizationId} requestId={requestId}/>:null}
