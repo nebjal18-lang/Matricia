@@ -18,6 +18,7 @@ const codes = report => report.findings.map(finding => finding.code);
 function complete() {
   const bindings = [
     binding('APP_ENV', 'staging'), binding('NEXT_PUBLIC_APP_URL', undefined, { configuredOrigin: stageOrigin }),
+    binding('STAGING_SUPABASE_PROJECT_REF', stageRef), binding('PRODUCTION_SUPABASE_PROJECT_REF', prodRef),
     binding('NEXT_PUBLIC_SUPABASE_URL', undefined, { configuredOrigin: `https://${stageRef}.supabase.co` }),
     binding('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'), masked('SUPABASE_SERVICE_ROLE_KEY'), masked('CRON_SECRET'), masked('INTERNAL_WEBHOOK_SECRET'), masked('APP_ENCRYPTION_KEY'),
     binding('AUTH_EMAIL_OTP_LENGTH', '8'), binding('EMAIL_DELIVERY_MODE', 'EXTERNAL'), binding('EMAIL_LIVE_DELIVERY_ENABLED', 'true'), binding('EMAIL_RECIPIENT_ALLOWLIST', 'qa@example.com'),
@@ -68,6 +69,40 @@ test('shared production backend and app origins fail isolation even with APP_ENV
   const report = validateStagingConfiguration(snapshot, options);
   assert.ok(codes(report).includes('STAGING_APP_ORIGIN_SHARED_WITH_PRODUCTION'));
   assert.ok(codes(report).includes('STAGING_SUPABASE_SHARED_WITH_PRODUCTION'));
+});
+
+for (const key of ['STAGING_SUPABASE_PROJECT_REF', 'PRODUCTION_SUPABASE_PROJECT_REF']) {
+  test(`Preview isolation requires the ${key} binding`, () => {
+    const snapshot = complete(); remove(snapshot, key);
+    const missing = validateStagingConfiguration(snapshot, options).findings.find(row => row.code === 'PREVIEW_REFERENCE_CONFIGURATION_MISSING');
+    assert.deepEqual(missing?.fields, [key]);
+  });
+}
+
+test('Preview references must be observed, exact lowercase 20-character values and distinct', () => {
+  let snapshot = complete(); set(snapshot, 'STAGING_SUPABASE_PROJECT_REF', prodRef);
+  assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('PREVIEW_DATABASE_REFERENCES_NOT_DISTINCT'));
+  for (const reference of ['invalid', stageRef.toUpperCase(), ` ${stageRef}`, `${stageRef} `]) {
+    snapshot = complete(); set(snapshot, 'STAGING_SUPABASE_PROJECT_REF', reference);
+    assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('PREVIEW_DATABASE_REFERENCE_INVALID'), reference);
+  }
+  snapshot = complete(); delete snapshot.bindings.find(row => row.key === 'PRODUCTION_SUPABASE_PROJECT_REF').configuredValue;
+  const report = validateStagingConfiguration(snapshot, options);
+  assert.equal(report.passed, false);
+  assert.ok(report.findings.some(row => row.code === 'PREVIEW_DATABASE_REFERENCES_UNOBSERVED' && row.status === 'UNVERIFIED'));
+});
+
+test('Preview reference declarations must match both selected staging backend and observed production baseline', () => {
+  const snapshot = complete(); set(snapshot, 'STAGING_SUPABASE_PROJECT_REF', 't'.repeat(20)); set(snapshot, 'PRODUCTION_SUPABASE_PROJECT_REF', 'q'.repeat(20));
+  const found = codes(validateStagingConfiguration(snapshot, options));
+  assert.ok(found.includes('PREVIEW_STAGING_REFERENCE_MISMATCH'));
+  assert.ok(found.includes('PREVIEW_PRODUCTION_REFERENCE_MISMATCH'));
+});
+
+test('Preview-only reference bindings do not impose a build policy on the development target', () => {
+  const snapshot = complete(); remove(snapshot, 'STAGING_SUPABASE_PROJECT_REF'); remove(snapshot, 'PRODUCTION_SUPABASE_PROJECT_REF');
+  snapshot.bindings = snapshot.bindings.map(row => ({ ...row, target: ['development'] }));
+  assert.equal(validateStagingConfiguration(snapshot, { ...options, target: 'development' }).passed, true);
 });
 
 test('missing production baseline cannot produce a passing staging verdict', () => {

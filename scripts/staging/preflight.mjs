@@ -13,6 +13,7 @@ const VALUES = new Set([
   'MALWARE_SCANNER_URL', 'MALWARE_SCANNER_ALLOWED_HOSTS', 'DELIVERY_PROOF_SCANNER_MODE',
   'SIGNATURE_PROVIDER_MODE', 'SIGNATURE_PROVIDER_CODE', 'YOUSIGN_ENVIRONMENT',
   'SUPABASE_PROJECT_REF', 'WORKER_DISPATCH_URL', 'WORKER_DISPATCH_ALLOWED_HOSTS',
+  'STAGING_SUPABASE_PROJECT_REF', 'PRODUCTION_SUPABASE_PROJECT_REF',
 ]);
 const list = value => Array.isArray(value) ? value : [];
 const object = value => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
@@ -116,6 +117,7 @@ export function validateStagingConfiguration(input, options = {}) {
   const value = key => {
     if (!has(key) || !VALUES.has(key)) return null;
     const candidate = env(key).configuredValue ?? runtime[key];
+    if (['STAGING_SUPABASE_PROJECT_REF', 'PRODUCTION_SUPABASE_PROJECT_REF'].includes(key)) return typeof candidate === 'string' ? candidate : null;
     return typeof candidate === 'string' || typeof candidate === 'number' ? String(candidate).trim() : null;
   };
   const requireBindings = (code, names) => {
@@ -143,6 +145,20 @@ export function validateStagingConfiguration(input, options = {}) {
   requireBindings('WEB_CONFIGURATION_MISSING', ['APP_ENV', 'NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'CRON_SECRET', 'INTERNAL_WEBHOOK_SECRET', 'APP_ENCRYPTION_KEY']);
   if (!['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'].some(has)) add('PUBLIC_SUPABASE_KEY_MISSING');
   expect('APP_ENV', ['staging'], 'APP_ENV_NOT_STAGING');
+  if (target === 'preview') {
+    const referenceNames = ['STAGING_SUPABASE_PROJECT_REF', 'PRODUCTION_SUPABASE_PROJECT_REF'];
+    requireBindings('PREVIEW_REFERENCE_CONFIGURATION_MISSING', referenceNames);
+    const unobserved = referenceNames.filter(key => has(key) && value(key) === null);
+    if (unobserved.length) add('PREVIEW_DATABASE_REFERENCES_UNOBSERVED', unobserved, 'UNVERIFIED');
+    const invalid = referenceNames.filter(key => value(key) !== null && !/^[a-z0-9]{20}$/u.test(value(key)));
+    if (invalid.length) add('PREVIEW_DATABASE_REFERENCE_INVALID', invalid);
+    const stagingReference = value('STAGING_SUPABASE_PROJECT_REF'), productionReference = value('PRODUCTION_SUPABASE_PROJECT_REF');
+    if (/^[a-z0-9]{20}$/u.test(stagingReference ?? '') && /^[a-z0-9]{20}$/u.test(productionReference ?? '')) {
+      if (stagingReference === productionReference) add('PREVIEW_DATABASE_REFERENCES_NOT_DISTINCT', referenceNames);
+      if (projectRef(supabaseUrl) !== stagingReference) add('PREVIEW_STAGING_REFERENCE_MISMATCH', ['STAGING_SUPABASE_PROJECT_REF', 'NEXT_PUBLIC_SUPABASE_URL']);
+      if (projectRef(productionSupabase) && projectRef(productionSupabase) !== productionReference) add('PREVIEW_PRODUCTION_REFERENCE_MISMATCH', ['PRODUCTION_SUPABASE_PROJECT_REF']);
+    }
+  }
   const auth = object(snapshot.auth);
   if (!snapshot.auth) add('AUTH_CONFIGURATION_UNOBSERVED', [], 'UNVERIFIED');
   else {
