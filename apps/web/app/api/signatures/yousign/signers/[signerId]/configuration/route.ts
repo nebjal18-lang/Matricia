@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { signerPreparationSchema } from "@/modules/shared/lib/signer-preparation/model";
+import { validateSignerPlacements } from "@/modules/shared/lib/signer-preparation/placement";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 const headers = { "cache-control": "private, no-store", "x-content-type-options": "nosniff" };
 const schema = z.object({
   firstName: z.string().trim().min(1).max(100).regex(/^[^\u0000-\u001f\u007f]+$/u),
@@ -38,6 +41,16 @@ export async function PUT(request: Request, { params }: { params: Promise<{ sign
   const client = await getSupabaseServerClient();
   const auth = await client.auth.getUser();
   if (auth.error || !auth.data.user) return Response.json({ code: "UNAUTHENTICATED" }, { status: 401, headers });
+  const projection = await client.rpc("get_my_yousign_preparation_for_signer_v1", { p_signer_id: signerId });
+  if (projection.error) return Response.json({ code: "YOUSIGN_SIGNER_CONFIGURATION_UNAVAILABLE" }, { status: projection.error.code === "42501" ? 403 : 503, headers });
+  const workspace = signerPreparationSchema.safeParse(projection.data);
+  if (!workspace.success || workspace.data.signerId !== signerId) return Response.json({ code: "YOUSIGN_SIGNER_CONFIGURATION_UNAVAILABLE" }, { status: 503, headers });
+  if (!workspace.data.canConfigure) return Response.json({ code: "YOUSIGN_SIGNER_CONFIGURATION_FROZEN" }, { status: 409, headers });
+  try { await validateSignerPlacements(client, auth.data.user.id, workspace.data, parsed.data); }
+  catch (error) {
+    const invalid = error instanceof Error && error.message === "INVALID_PLACEMENT";
+    return Response.json({ code: invalid ? "YOUSIGN_SIGNATURE_PLACEMENT_INVALID" : "YOUSIGN_SIGNER_DOCUMENT_UNAVAILABLE" }, { status: invalid ? 400 : 409, headers });
+  }
   const result = await client.rpc("configure_yousign_signer_v1", { p_signer_id: signerId, p_first_name: parsed.data.firstName, p_last_name: parsed.data.lastName, p_locale: parsed.data.locale, p_fields: parsed.data.fields });
   if (result.error || result.data?.outcome !== "YOUSIGN_SIGNER_CONFIGURED") return Response.json({ code: "YOUSIGN_SIGNER_CONFIGURATION_UNAVAILABLE" }, { status: result.error?.code === "42501" ? 403 : 409, headers });
   return Response.json({ outcome: "YOUSIGN_SIGNER_CONFIGURED", signerId }, { headers });

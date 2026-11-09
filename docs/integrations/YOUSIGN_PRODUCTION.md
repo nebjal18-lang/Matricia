@@ -28,7 +28,7 @@ Chaque nouvelle révision de clés crée une version technique fournisseur disti
 
 Les tests HTTP sont synthétiques. La recette SQL native utilise des acteurs, attestations et objets de Storage synthétiques dans une transaction annulée ; elle ne constitue pas une certification du fournisseur ni une validation juridique. Aucun endpoint réel de production n’a été appelé pendant ce développement.
 
-SIMPLE est le seul niveau pris en charge. Les politiques exigeant ADVANCED, QUALIFIED, un certificat PDF ou un horodatage qualifié restent refusées. L’éditeur visuel de placement n’est pas inclus ; les coordonnées sont préparées par l’API existante. Les issues distantes inconnues exigent une réconciliation avant reprise.
+SIMPLE est le seul niveau pris en charge. Les politiques exigeant ADVANCED, QUALIFIED, un certificat PDF ou un horodatage qualifié restent refusées. Chaque signataire utilise **Préparer mes signatures**, depuis les contrats Client, Sous-traitant ou Franchise, ou directement `/{fr|ar}/signatures/preparation`. Il consulte le PDF privé exact, saisit son prénom et son nom, choisit la langue de l’invitation et indique les emplacements sur les pages du document. Aucun appel API manuel n’est nécessaire. La validation serveur compare le SHA-256, les pages et les dimensions réelles du PDF avant enregistrement. La préparation est relue après sauvegarde et se verrouille dès le premier envoi. Les coordonnées restent saisies dans des champs guidés ; aucun placement automatique ni glisser-déposer n’est effectué. Les issues distantes inconnues exigent une réconciliation avant reprise.
 
 ## Rejeu local strict
 

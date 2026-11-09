@@ -60,9 +60,7 @@ identités, méthodes d'authentification et emplacements acceptés par YouSign s
 empreints et relus avant activation puis lors de l'extraction des preuves.
 Une configuration absente bloque l'envoi sans email ni enveloppe externe créée.
 
-La préparation est une API de recette/intégration ; aucun écran de saisie des
-positions PDF n'est livré dans ce lot. L'acceptation navigateur complète de ce
-parcours reste à produire, avec les vrais signataires et le PDF courant.
+La préparation est disponible dans l’application depuis **Préparer mes signatures**, sur les pages Contrats, ou `/{fr|ar}/signatures/preparation`. Chaque signataire consulte uniquement ses documents privés exacts et renseigne son identité, sa langue et les emplacements relus dans le PDF. Le formulaire utilise l’API existante puis relit les valeurs enregistrées avant de confirmer le résultat. Le serveur vérifie le SHA-256 et les limites réelles des pages avec un parseur PDF avant sauvegarde ; une position hors document est refusée avant tout envoi fournisseur. Un espace de 85 × 37 points correspond aux dimensions par défaut du fournisseur. La préparation est verrouillée dès un claim d’envoi. Aucun placement automatique ni éditeur par glisser-déposer n’est utilisé.
 
 ## Outbox, webhooks et preuves
 
