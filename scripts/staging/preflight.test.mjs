@@ -33,8 +33,9 @@ function complete() {
     auth: { site_url: stageOrigin, uri_allow_list: `${stageOrigin}/fr/auth/callback,${stageOrigin}/ar/auth/callback`, mailer_otp_length: 8, smtpCredentialsConfigured: true, smtp_host: 'smtp.example.com', otpTemplateUsesToken: true, mfa_totp_enroll_enabled: true, mfa_totp_verify_enabled: true },
     appliedMigrations: ['20260101000100', '20260101000200'], migrationInventoryObserved: true,
     worker: {
-      bindings: [binding('APP_ENV'), binding('NEXT_PUBLIC_SUPABASE_URL', undefined, { configuredOrigin: `https://${stageRef}.supabase.co` }), binding('SUPABASE_PROJECT_REF'), masked('SUPABASE_SERVICE_ROLE_KEY'), binding('WORKER_DISPATCH_URL'), binding('WORKER_DISPATCH_ALLOWED_HOSTS'), masked('INTERNAL_WEBHOOK_SECRET')],
-      runtime: { APP_ENV: 'staging', SUPABASE_PROJECT_REF: stageRef, WORKER_DISPATCH_URL: `${stageOrigin}/api/internal/outbox`, WORKER_DISPATCH_ALLOWED_HOSTS: 'stage.example.com' },
+      nodeVersion: '22.23.4',
+      bindings: [binding('APP_ENV'), binding('NEXT_PUBLIC_SUPABASE_URL', undefined, { configuredOrigin: `https://${stageRef}.supabase.co` }), binding('SUPABASE_PROJECT_REF'), masked('SUPABASE_SERVICE_ROLE_KEY'), binding('WORKER_DISPATCH_URL'), binding('WORKER_DISPATCH_ALLOWED_HOSTS'), masked('INTERNAL_WEBHOOK_SECRET'), masked('MALWARE_SCANNER_TOKEN'), binding('CLAMAV_HOST'), binding('CLAMAV_ALLOWED_HOSTS'), binding('CLAMAV_NETWORK_MODE'), binding('CLAMAV_ENGINE_VERSION')],
+      runtime: { APP_ENV: 'staging', SUPABASE_PROJECT_REF: stageRef, WORKER_DISPATCH_URL: `${stageOrigin}/api/internal/outbox`, WORKER_DISPATCH_ALLOWED_HOSTS: 'stage.example.com', CLAMAV_HOST: '10.20.30.40', CLAMAV_ALLOWED_HOSTS: '10.20.30.40', CLAMAV_NETWORK_MODE: 'PRIVATE', CLAMAV_ENGINE_VERSION: '1.4.3' },
     },
   };
 }
@@ -163,6 +164,102 @@ test('worker dispatch allowlist rejects wildcards and duplicates that prevent wo
     snapshot.worker.runtime.WORKER_DISPATCH_ALLOWED_HOSTS = hosts;
     assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_DISPATCH_TARGET_INVALID'));
   }
+});
+
+for (const key of ['MALWARE_SCANNER_TOKEN', 'CLAMAV_HOST', 'CLAMAV_ALLOWED_HOSTS', 'CLAMAV_NETWORK_MODE', 'CLAMAV_ENGINE_VERSION']) {
+  test(`worker startup requires the ${key} binding`, () => {
+    const snapshot = complete(); snapshot.worker.bindings = snapshot.worker.bindings.filter(row => row.key !== key);
+    const missing = validateStagingConfiguration(snapshot, options).findings.find(row => row.code === 'WORKER_CONFIGURATION_MISSING');
+    assert.deepEqual(missing?.fields, [key]);
+  });
+}
+
+test('worker scanner credentials remain presence-only and their masked values are never required', () => {
+  const snapshot = complete();
+  const scanner = snapshot.worker.bindings.find(row => row.key === 'MALWARE_SCANNER_TOKEN');
+  assert.equal(scanner.storedValuePresent, false);
+  assert.equal(scanner.type, 'sensitive');
+  assert.equal(validateStagingConfiguration(snapshot, options).passed, true);
+});
+
+test('worker Node version must be observed and stay within Node22', () => {
+  const snapshot = complete(); delete snapshot.worker.nodeVersion;
+  let report = validateStagingConfiguration(snapshot, options);
+  assert.ok(codes(report).includes('WORKER_NODE_VERSION_UNOBSERVED'));
+  assert.equal(report.findings.find(row => row.code === 'WORKER_NODE_VERSION_UNOBSERVED').status, 'UNVERIFIED');
+  for (const version of ['20.19.0', '24.13.0', '26.0.0', '22.x']) {
+    snapshot.worker.nodeVersion = version;
+    assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_NODE_VERSION_UNSUPPORTED'), version);
+  }
+  snapshot.worker.nodeVersion = 'v22.23.4';
+  assert.equal(validateStagingConfiguration(snapshot, options).passed, true);
+});
+
+test('worker ClamAV nonsecret values must be observed even when their bindings are present', () => {
+  for (const key of ['CLAMAV_HOST', 'CLAMAV_ALLOWED_HOSTS', 'CLAMAV_NETWORK_MODE', 'CLAMAV_ENGINE_VERSION']) {
+    const snapshot = complete(); delete snapshot.worker.runtime[key];
+    const report = validateStagingConfiguration(snapshot, options);
+    assert.equal(report.passed, false);
+    assert.ok(report.findings.some(row => row.code === 'WORKER_CLAMAV_VALUES_UNOBSERVED' && row.status === 'UNVERIFIED' && row.fields.includes(key)), key);
+  }
+});
+
+test('ClamAV allowlist must be well formed, contain its host and not have duplicate entries', () => {
+  for (const allowed of ['', '*', '10.20.30.41', '10.20.30.40,10.20.30.40', '10.20.30.40,https://clamav.internal']) {
+    const snapshot = complete(); snapshot.worker.runtime.CLAMAV_ALLOWED_HOSTS = allowed;
+    assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_ALLOWLIST_INVALID'), allowed);
+  }
+});
+
+test('ClamAV host and network mode reject malformed targets and public native TCP endpoints', () => {
+  for (const host of ['https://clamav.internal', 'clamav.internal/scan', 'clamav .internal']) {
+    const snapshot = complete(); snapshot.worker.runtime.CLAMAV_HOST = host; snapshot.worker.runtime.CLAMAV_ALLOWED_HOSTS = host;
+    assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_HOST_INVALID'), host);
+  }
+  for (const address of ['8.8.8.8', '169.254.169.254', '100.64.0.1', '2001:4860:4860::8888', '::ffff:10.0.0.1']) {
+    const snapshot = complete(); snapshot.worker.runtime.CLAMAV_HOST = address; snapshot.worker.runtime.CLAMAV_ALLOWED_HOSTS = address;
+    assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_ADDRESS_NOT_PRIVATE'), address);
+  }
+  const snapshot = complete(); snapshot.worker.runtime.CLAMAV_NETWORK_MODE = 'PUBLIC';
+  assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_NETWORK_MODE_INVALID'));
+});
+
+test('ClamAV DNS metadata must match its host and every resolved address must be private', () => {
+  const snapshot = complete(); snapshot.worker.runtime.CLAMAV_HOST = 'clamav.internal'; snapshot.worker.runtime.CLAMAV_ALLOWED_HOSTS = 'clamav.internal';
+  assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_DNS_UNOBSERVED'));
+  snapshot.worker.clamavResolution = { host: 'another.internal', addresses: ['10.0.0.4'] };
+  assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_DNS_UNOBSERVED'));
+  snapshot.worker.clamavResolution = { host: 'clamav.internal', addresses: ['10.0.0.4', '8.8.8.8'] };
+  assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_ADDRESS_NOT_PRIVATE'));
+  snapshot.worker.clamavResolution.addresses = ['10.0.0.4', 'fd00::1'];
+  assert.equal(validateStagingConfiguration(snapshot, options).passed, true);
+});
+
+test('LOCAL ClamAV accepts loopback and refuses nonloopback private addresses', () => {
+  const snapshot = complete(); snapshot.worker.runtime.CLAMAV_NETWORK_MODE = 'LOCAL';
+  assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_ADDRESS_NOT_PRIVATE'));
+  for (const address of ['127.0.0.1', '::1']) {
+    snapshot.worker.runtime.CLAMAV_HOST = address; snapshot.worker.runtime.CLAMAV_ALLOWED_HOSTS = address;
+    assert.equal(validateStagingConfiguration(snapshot, options).passed, true, address);
+  }
+});
+
+test('ClamAV requires an exact engine version pin instead of a wildcard or stale attestation string', () => {
+  for (const pin of ['', '*', 'latest', '1.4', '1.4.3/db:123@2026-11-09', '1.4.3-' + 'a'.repeat(80)]) {
+    const snapshot = complete(); snapshot.worker.runtime.CLAMAV_ENGINE_VERSION = pin;
+    assert.ok(codes(validateStagingConfiguration(snapshot, options)).includes('WORKER_CLAMAV_ENGINE_PIN_INVALID'), pin);
+  }
+});
+
+test('ClamAV optional settings use runtime bounds and unknown bound values remain unverified', () => {
+  for (const [key, invalid] of [['CLAMAV_PORT', '0'], ['CLAMAV_PORT', '65536'], ['CLAMAV_TIMEOUT_MS', '99'], ['CLAMAV_TIMEOUT_MS', '120001'], ['CLAMAV_CHUNK_BYTES', '1023'], ['CLAMAV_CHUNK_BYTES', '1048577'], ['CLAMAV_MAX_DATABASE_AGE_HOURS', '0'], ['CLAMAV_MAX_DATABASE_AGE_HOURS', '169'], ['PORT', '8080x'], ['PORT', ' 8080 ']]) {
+    const snapshot = complete(); snapshot.worker.bindings.push(binding(key)); snapshot.worker.runtime[key] = invalid;
+    assert.ok(validateStagingConfiguration(snapshot, options).findings.some(row => row.code === 'WORKER_NUMERIC_SETTING_INVALID' && row.fields.includes(key)), `${key}:${invalid}`);
+  }
+  const snapshot = complete(); snapshot.worker.bindings.push(binding('CLAMAV_PORT'));
+  assert.ok(validateStagingConfiguration(snapshot, options).findings.some(row => row.code === 'WORKER_CLAMAV_VALUES_UNOBSERVED' && row.fields.includes('CLAMAV_PORT')));
+  snapshot.worker.runtime.CLAMAV_PORT = '3310'; snapshot.worker.runtime.CLAMAV_MAX_DATABASE_AGE_HOURS = ' ';
+  assert.equal(validateStagingConfiguration(snapshot, options).passed, true);
 });
 
 test('inventory adapter merges individual decrypted origins and never uses a masked sensitive value as absence', () => {

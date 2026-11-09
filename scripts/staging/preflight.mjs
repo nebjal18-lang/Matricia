@@ -225,9 +225,12 @@ export function validateStagingConfiguration(input, options = {}) {
   function validateWorker(worker) {
     const workerBindings = list(worker.bindings).filter(row => NAME.test(string(row?.key)));
     const workerHas = key => workerBindings.some(row => row.key === key && bindingPresent(row));
-    const missing = ['APP_ENV', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_PROJECT_REF', 'SUPABASE_SERVICE_ROLE_KEY', 'WORKER_DISPATCH_URL', 'WORKER_DISPATCH_ALLOWED_HOSTS', 'INTERNAL_WEBHOOK_SECRET'].filter(key => !workerHas(key));
+    const missing = ['APP_ENV', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_PROJECT_REF', 'SUPABASE_SERVICE_ROLE_KEY', 'WORKER_DISPATCH_URL', 'WORKER_DISPATCH_ALLOWED_HOSTS', 'INTERNAL_WEBHOOK_SECRET', 'MALWARE_SCANNER_TOKEN', 'CLAMAV_HOST', 'CLAMAV_ALLOWED_HOSTS', 'CLAMAV_NETWORK_MODE', 'CLAMAV_ENGINE_VERSION'].filter(key => !workerHas(key));
     if (missing.length) add('WORKER_CONFIGURATION_MISSING', missing);
     const values = object(worker.runtime);
+    const nodeVersion = string(worker.nodeVersion);
+    if (!nodeVersion) add('WORKER_NODE_VERSION_UNOBSERVED', [], 'UNVERIFIED');
+    else if (!/^v?22\.[0-9]+\.[0-9]+$/u.test(nodeVersion)) add('WORKER_NODE_VERSION_UNSUPPORTED');
     if (values.APP_ENV !== 'staging') add('WORKER_ENV_NOT_STAGING', ['APP_ENV']);
     if (!projectRef(supabaseUrl) || values.SUPABASE_PROJECT_REF !== projectRef(supabaseUrl)) add('WORKER_PROJECT_MISMATCH', ['SUPABASE_PROJECT_REF']);
     const workerUrl = workerBindings.find(row => row.key === 'NEXT_PUBLIC_SUPABASE_URL')?.configuredOrigin;
@@ -236,6 +239,61 @@ export function validateStagingConfiguration(input, options = {}) {
     const allowed = string(values.WORKER_DISPATCH_ALLOWED_HOSTS).split(',').map(item => item.trim().toLowerCase());
     const validHosts = allowed.every(host => /^(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|::1)$/u.test(host)) && new Set(allowed).size === allowed.length;
     if (!dispatch || dispatch.origin !== appOrigin || !allowed.includes(dispatch.hostname) || !validHosts) add('WORKER_DISPATCH_TARGET_INVALID', ['WORKER_DISPATCH_URL', 'WORKER_DISPATCH_ALLOWED_HOSTS']);
+    validateClamAv();
+
+    function validateClamAv() {
+      const configValue = key => {
+        const candidate = values[key];
+        return typeof candidate === 'string' || typeof candidate === 'number' ? String(candidate).trim() : null;
+      };
+      const requiredNames = ['CLAMAV_HOST', 'CLAMAV_ALLOWED_HOSTS', 'CLAMAV_NETWORK_MODE', 'CLAMAV_ENGINE_VERSION'];
+      const unobserved = requiredNames.filter(key => workerHas(key) && configValue(key) === null);
+      if (unobserved.length) add('WORKER_CLAMAV_VALUES_UNOBSERVED', unobserved, 'UNVERIFIED');
+      const normalizedHost = raw => {
+        const host = string(raw).trim().toLowerCase();
+        return host && !host.includes('://') && !/[\s/\\]/u.test(host)
+          && (isIP(host) || /^[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?$/u.test(host)) ? host : null;
+      };
+      const hostValue = configValue('CLAMAV_HOST'), allowedValue = configValue('CLAMAV_ALLOWED_HOSTS');
+      const host = hostValue === null ? null : normalizedHost(hostValue);
+      if (hostValue !== null && !host) add('WORKER_CLAMAV_HOST_INVALID', ['CLAMAV_HOST']);
+      if (allowedValue !== null) {
+        const hosts = allowedValue.split(',').map(normalizedHost);
+        if (!hosts.length || hosts.includes(null) || new Set(hosts).size !== hosts.length || !host || !hosts.includes(host)) add('WORKER_CLAMAV_ALLOWLIST_INVALID', ['CLAMAV_HOST', 'CLAMAV_ALLOWED_HOSTS']);
+      }
+      const mode = configValue('CLAMAV_NETWORK_MODE');
+      if (mode !== null && !['PRIVATE', 'LOCAL'].includes(mode)) add('WORKER_CLAMAV_NETWORK_MODE_INVALID', ['CLAMAV_NETWORK_MODE']);
+      const engine = configValue('CLAMAV_ENGINE_VERSION');
+      if (engine !== null && (engine.length > 80 || !/^[0-9]+\.[0-9]+\.[0-9]+(?:[-.][A-Za-z0-9.-]+)?$/u.test(engine))) add('WORKER_CLAMAV_ENGINE_PIN_INVALID', ['CLAMAV_ENGINE_VERSION']);
+      for (const [key, minimum, maximum] of [['CLAMAV_PORT', 1, 65_535], ['CLAMAV_TIMEOUT_MS', 100, 120_000], ['CLAMAV_CHUNK_BYTES', 1_024, 1_048_576], ['CLAMAV_MAX_DATABASE_AGE_HOURS', 1, 168], ['PORT', 1, 65_535]]) {
+        const raw = values[key];
+        const actual = typeof raw === 'string' || typeof raw === 'number' ? (key === 'CLAMAV_MAX_DATABASE_AGE_HOURS' ? String(raw).trim() : String(raw)) : null;
+        if (key === 'CLAMAV_MAX_DATABASE_AGE_HOURS' && actual === '') continue;
+        if (workerHas(key) && actual === null) add('WORKER_CLAMAV_VALUES_UNOBSERVED', [key], 'UNVERIFIED');
+        else if (actual !== null && (!/^[0-9]+$/u.test(actual) || !Number.isSafeInteger(Number(actual)) || Number(actual) < minimum || Number(actual) > maximum)) add('WORKER_NUMERIC_SETTING_INVALID', [key]);
+      }
+      if (!host || !['PRIVATE', 'LOCAL'].includes(mode)) return;
+      let addresses;
+      if (isIP(host)) addresses = [host];
+      else {
+        const resolution = object(worker.clamavResolution);
+        if (normalizedHost(resolution.host) !== host || !Array.isArray(resolution.addresses) || resolution.addresses.length === 0) {
+          add('WORKER_CLAMAV_DNS_UNOBSERVED', ['CLAMAV_HOST'], 'UNVERIFIED');
+          return;
+        }
+        addresses = resolution.addresses;
+      }
+      const validAddress = raw => {
+        const address = string(raw).toLowerCase();
+        if (isIP(address) === 4) {
+          const [a, b] = address.split('.').map(Number);
+          return mode === 'LOCAL' ? a === 127 : a === 10 || a === 127 || a === 172 && b >= 16 && b <= 31 || a === 192 && b === 168;
+        }
+        if (isIP(address) !== 6) return false;
+        return mode === 'LOCAL' ? address === '::1' : address === '::1' || /^f[cd][0-9a-f]{2}:/u.test(address) || /^fe[89ab][0-9a-f]:/u.test(address);
+      };
+      if (addresses.some(address => !validAddress(address))) add('WORKER_CLAMAV_ADDRESS_NOT_PRIVATE', ['CLAMAV_HOST', 'CLAMAV_NETWORK_MODE']);
+    }
   }
   function result() {
     return { schemaVersion: 1, passed: findings.length === 0, target: TARGETS.has(target) ? target : 'invalid',
