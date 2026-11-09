@@ -23,7 +23,7 @@ export function configurationProgress(data: ConfigurationDashboardView) {
   return { active, total: sections.size, percent: Math.round(active * 100 / sections.size) };
 }
 export function mayReview(revision: ConfigurationRevision, data: ConfigurationDashboardView) {
-  return data.can_write && revision.status === "DRAFT" && revision.created_by !== data.actor_id;
+  return data.can_write && revision.status === "DRAFT" && revision.created_by !== data.actor_id && data.sections.some(section => section.section === revision.section && section.latest_revision_id === revision.id);
 }
 /** A saved password is deliberately never a form default, even if an invalid
  * upstream DTO accidentally includes an unrecognised private property. */

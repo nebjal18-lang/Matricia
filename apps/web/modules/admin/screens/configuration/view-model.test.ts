@@ -27,6 +27,7 @@ describe("configuration progress and independent review", () => {
     expect(mayReview(revision, { ...data, actor_id: author })).toBe(false);
     expect(mayReview(revision, { ...data, can_write: false })).toBe(false);
     expect(mayReview({ ...revision, status: "ACTIVE" }, data)).toBe(false);
+    expect(mayReview(revision, { ...data, sections: [{ ...section, latest_revision_id: reviewer }] })).toBe(false);
   });
   it("does not reuse a failed, missing, expired or invalid-dated connection probe", () => {
     const now = Date.parse("2026-11-09T12:15:00Z");
