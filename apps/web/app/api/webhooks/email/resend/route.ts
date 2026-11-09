@@ -4,7 +4,7 @@ import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-con
 export async function POST(request: Request) {
   const headers = { "cache-control": "no-store" };
   let secret: string | undefined;
-  try { secret = (await getPlatformRuntimeEnvironment()).RESEND_WEBHOOK_SECRET; }
+  try { secret = (await getPlatformRuntimeEnvironment(process.env, ["RESEND"])).RESEND_WEBHOOK_SECRET; }
   catch { return Response.json({ code: "EMAIL_RECEIPT_UNCONFIGURED" }, { status: 503, headers }); }
   if (!secret) return Response.json({ code: "EMAIL_RECEIPT_UNCONFIGURED" }, { status: 503, headers });
   const reader = request.body?.getReader();

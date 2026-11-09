@@ -6,7 +6,7 @@ import { processPaymentWebhook } from "../_shared";
 
 export async function POST(request: Request) {
   try {
-    const gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));
+    const gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(process.env, ["PAYPAL"])));
     if (gateway.code !== "DEMO") return NextResponse.json({ error: "PAYMENT_PROVIDER_DISABLED" }, { status: 404 });
     return processPaymentWebhook(request, gateway, {
       "x-matricia-signature": request.headers.get("x-matricia-signature") ?? undefined,

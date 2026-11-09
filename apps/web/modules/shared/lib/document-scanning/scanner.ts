@@ -17,12 +17,12 @@ async function boundedResponse(response:Response){
 }
 export async function scanDocumentBytes(bytes:Buffer,sha256:string,mediaType:unknown,dependencies:Dependencies={}):Promise<ScanVerdict>{
  if(bytes.length<1||bytes.length>MAX_SCAN_BYTES||sha256!==createHash("sha256").update(bytes).digest("hex"))return failure();
- let environment:NodeJS.ProcessEnv;try{environment=await getPlatformRuntimeEnvironment();}catch{return failure("SCANNER_UNAVAILABLE");}
+ let environment:Record<string, string | undefined>;try{environment=await getPlatformRuntimeEnvironment(process.env, ["SCANNER"]);}catch{return failure("SCANNER_UNAVAILABLE");}
  return scanDocumentBytesWithEnvironment(bytes,sha256,mediaType,environment,dependencies);
 }
 /** Draft probes use the same pinned, signed protocol as operational scans.
  * The caller must supply the independently restricted endpoint/host policy. */
-export async function scanDocumentBytesWithEnvironment(bytes:Buffer,sha256:string,mediaType:unknown,environment:NodeJS.ProcessEnv,dependencies:Dependencies={}):Promise<ScanVerdict>{
+export async function scanDocumentBytesWithEnvironment(bytes:Buffer,sha256:string,mediaType:unknown,environment:Record<string, string | undefined>,dependencies:Dependencies={}):Promise<ScanVerdict>{
  if(bytes.length<1||bytes.length>MAX_SCAN_BYTES||sha256!==createHash("sha256").update(bytes).digest("hex"))return failure();
  if(environment.DELIVERY_PROOF_SCANNER_MODE==="SANDBOX"&&environment.NODE_ENV!=="production"&&environment.APP_ENV?.trim().toLowerCase()!=="production")return sandboxInspect(bytes,mediaType);
  const endpoint=environment.MALWARE_SCANNER_URL??"",token=environment.MALWARE_SCANNER_TOKEN??"";

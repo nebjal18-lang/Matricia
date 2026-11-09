@@ -24,8 +24,8 @@ function requesterHash(headerStore: Headers) {
 }
 
 async function notifySupport(requestId: string, input: z.infer<typeof inputSchema>) {
-  let environment: NodeJS.ProcessEnv;
-  try { environment = await getPlatformRuntimeEnvironment(); }
+  let environment: Record<string, string | undefined>;
+  try { environment = await getPlatformRuntimeEnvironment(process.env, ["COMPANY", "RESEND"]); }
   catch { return; } // The intake is already persisted; do not invent delivery.
   const recipientEmail = environment.PUBLIC_CONTACT_NOTIFICATION_EMAIL?.trim() || null;
   if (!recipientEmail) return;

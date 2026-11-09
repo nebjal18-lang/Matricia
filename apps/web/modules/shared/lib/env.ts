@@ -31,7 +31,7 @@ export function getDemoPaymentWebhookSecret() {
   return z.string().min(32).parse(process.env.PAYMENT_WEBHOOK_SECRET_DEMO);
 }
 
-export function getPaymentRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): PaymentRuntimeConfig {
+export function getPaymentRuntimeConfig(environment: Record<string, string | undefined> = process.env): PaymentRuntimeConfig {
   const provider = z.enum(["DEMO", "CMI", "PAYPAL"]).parse(environment.PAYMENT_PROVIDER?.toUpperCase());
   const allowedProviders = parseEnumSet(environment.PAYMENT_PROVIDER_ALLOWLIST, ["DEMO", "CMI", "PAYPAL"] as const);
   const liveEnabled = environment.PAYMENT_LIVE_ENABLED === "true";

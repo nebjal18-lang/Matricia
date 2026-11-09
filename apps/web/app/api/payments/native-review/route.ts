@@ -12,7 +12,7 @@ const inputSchema=z.object({purchaseKind:z.enum(["SUBSCRIPTION","CREDIT_PACK"]),
 const expectedSchema=z.object({preparation_id:z.string().uuid(),organization_id:z.string().uuid(),plan_version_id:z.string().uuid().optional(),pack_version_id:z.string().uuid().optional(),billing_interval:z.enum(["MONTHLY","ANNUAL"]).optional(),amount_minor:z.string().regex(/^[1-9]\d*$/),currency:z.string().regex(/^[A-Z]{3}$/),idempotency_key:z.string().uuid(),gateway:z.literal("PAYPAL"),provider_environment:z.enum(["LIVE","SANDBOX"]),provider_intent_id:z.string().nullable().optional(),payment_intent_id:z.string().uuid().nullable().optional()});
 const respond=(body:unknown,status:number)=>Response.json(body,{status,headers:paymentResponseHeaders});
 export async function POST(request:Request){
- let gateway:ReturnType<typeof createPaymentGateway>;let appUrl:string;try{gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));appUrl=getServerEnvironment().NEXT_PUBLIC_APP_URL;}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
+ let gateway:ReturnType<typeof createPaymentGateway>;let appUrl:string;try{gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(process.env, ["PAYPAL"])));appUrl=getServerEnvironment().NEXT_PUBLIC_APP_URL;}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
  if(gateway.code!=="PAYPAL")return respond({error:"PAYMENT_NATIVE_REVIEW_UNAVAILABLE"},404);
  if(!paymentOriginAllowed(request,appUrl))return respond({error:"REQUEST_ORIGIN_DENIED"},403);
  const body=await readPaymentJson(request,8192);if(!body.ok)return respond({error:body.status===413?"REQUEST_TOO_LARGE":"INVALID_REQUEST"},body.status);

@@ -11,7 +11,7 @@ const preparedSchema=z.object({payment_intent_id:z.string().uuid(),provider_inte
 const respond=(body:unknown,status:number)=>Response.json(body,{status,headers:paymentResponseHeaders});
 export async function POST(request:Request){
  let gateway:ReturnType<typeof createPaymentGateway>;let appUrl:string;
- try{gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));appUrl=getServerEnvironment().NEXT_PUBLIC_APP_URL;}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
+ try{gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(process.env, ["PAYPAL"])));appUrl=getServerEnvironment().NEXT_PUBLIC_APP_URL;}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
  if(gateway.code!=="PAYPAL")return respond({error:"PAYMENT_PROVIDER_DISABLED"},404);
  if(!paymentOriginAllowed(request,appUrl))return respond({error:"REQUEST_ORIGIN_DENIED"},403);
  const body=await readPaymentJson(request,8192);if(!body.ok)return respond({error:body.status===413?"REQUEST_TOO_LARGE":"INVALID_REQUEST"},body.status);

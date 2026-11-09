@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   let gateway: ReturnType<typeof createPaymentGateway>;
   let appUrl: string;
   try {
-    gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment()));
+    gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(process.env, ["PAYPAL"])));
     appUrl = getServerEnvironment().NEXT_PUBLIC_APP_URL;
   } catch {
     return NextResponse.json({ error: "PAYMENT_CONFIGURATION_UNAVAILABLE" }, { status: 503 });

@@ -72,8 +72,8 @@ export async function submitFranchiseApplication(_: FranchiseApplicationActionSt
     ctaPath: `/${parsed.data.locale}/franchise/candidature`,
     providerIdempotencyKey: `franchise-application:${applicationId}`,
   }, { env: process.env, fetch });
-  let environment: NodeJS.ProcessEnv = {};
-  try { environment = await getPlatformRuntimeEnvironment(); }
+  let environment: Record<string, string | undefined> = {};
+  try { environment = await getPlatformRuntimeEnvironment(process.env, ["COMPANY", "RESEND"]); }
   catch { /* Keep the persisted application; no unverified fallback mailbox. */ }
   const support = environment.PUBLIC_CONTACT_NOTIFICATION_EMAIL?.trim();
   if (support) {

@@ -17,13 +17,14 @@ const sectionKeys = {
   SCANNER: ["MALWARE_SCANNER_URL", "MALWARE_SCANNER_TOKEN", "MALWARE_SCANNER_ALLOWED_HOSTS", "DELIVERY_PROOF_SCANNER_MODE"],
 } as const;
 const legacyOnlyKeys = new Set(["EMAIL_PROVIDER_ENDPOINT", "EMAIL_PROVIDER_ENDPOINT_ALLOWLIST", "EMAIL_PROVIDER_TOKEN", "PAYMENT_WEBHOOK_SECRET_DEMO"]);
+export type RuntimeConfigurationSection = keyof typeof sectionKeys;
 
 /** Pure overlay: infrastructure identity and the process environment remain
  * immutable. Reject unexpected keys rather than silently accepting overposts. */
 export function applyPlatformConfiguration(
-  base: NodeJS.ProcessEnv,
+  base: Record<string, string | undefined>,
   configuration: ActiveConfigurationEnvironment,
-): NodeJS.ProcessEnv {
+): Record<string, string | undefined> {
   const environment = base.APP_ENV?.trim().toUpperCase();
   if (!environment || environment !== configuration.environment || !["DEVELOPMENT", "STAGING", "PRODUCTION"].includes(configuration.environment)) {
     throw new Error("PLATFORM_CONFIGURATION_ENVIRONMENT_MISMATCH");
@@ -66,7 +67,7 @@ export function applyPlatformConfiguration(
   return output;
 }
 
-export async function getPlatformRuntimeEnvironment(base: NodeJS.ProcessEnv = process.env): Promise<NodeJS.ProcessEnv> {
+export async function getPlatformRuntimeEnvironment(base: Record<string, string | undefined> = process.env, sections?: readonly RuntimeConfigurationSection[]): Promise<Record<string, string | undefined>> {
   // Dependency-injected unit adapters and an unprovisioned local install have
   // no private backend. Once any private bootstrap is present, all failures are
   // blocking, including a missing master key; never fall back after a DB error.
@@ -80,12 +81,15 @@ export async function getPlatformRuntimeEnvironment(base: NodeJS.ProcessEnv = pr
     throw new Error("PLATFORM_CONFIGURATION_BOOTSTRAP_REQUIRED");
   }
   const { loadActiveConfigurationEnvironment } = await import("./repository");
-  const configuration = await loadActiveConfigurationEnvironment(base);
+  if (sections?.some(section => !Object.hasOwn(sectionKeys, section))) throw new Error("PLATFORM_CONFIGURATION_SECTION_INVALID");
+  const configuration = sections
+    ? await loadActiveConfigurationEnvironment(base, sections)
+    : await loadActiveConfigurationEnvironment(base);
   return applyPlatformConfiguration(base, configuration);
 }
 
 /** Used by server routes that need the approved current payment configuration. */
-export async function getConfiguredPaymentRuntimeConfig(base: NodeJS.ProcessEnv = process.env) {
+export async function getConfiguredPaymentRuntimeConfig(base: Record<string, string | undefined> = process.env) {
   const { getPaymentRuntimeConfig } = await import("../env");
-  return getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(base));
+  return getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(base, ["PAYPAL"]));
 }

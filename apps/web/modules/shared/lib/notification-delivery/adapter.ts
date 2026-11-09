@@ -140,7 +140,7 @@ export async function deliverNotification(job: NotificationDeliveryJob, dependen
     return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_DEMO_FORBIDDEN", evidence: { adapter: "EMAIL" } };
   }
   try {
-    dependencies = { ...dependencies, env: await getPlatformRuntimeEnvironment(dependencies.env) };
+    dependencies = { ...dependencies, env: await getPlatformRuntimeEnvironment(dependencies.env, ["RESEND"]) };
   } catch {
     return { outcome: "RETRYABLE_FAILURE", errorCode: "EMAIL_CONFIGURATION_UNAVAILABLE", evidence: { adapter: "EMAIL" } };
   }
