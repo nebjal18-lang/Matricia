@@ -24,7 +24,15 @@ function mission(overrides: { signatures?: number; criteria?: number } = {}): Co
       changeReason: "Démonstration",
       createdAt: "2026-09-21T00:00:00.000Z",
       items: [],
-      signatures: Array.from({ length: overrides.signatures ?? 0 }, () => ({ party: "CLIENT", signedAt: "2026-09-21T00:00:00.000Z" })),
+      signatures: Array.from({ length: overrides.signatures ?? 0 }, () => ({
+        id,
+        organizationId: id,
+        signerRole: "CLIENT",
+        contractHash: "a".repeat(64),
+        signedAt: "2026-09-21T00:00:00.000Z",
+        method: "SIMPLE",
+        evidenceHash: "b".repeat(64),
+      })),
     },
     milestones: [{ id, key: "DELIVERY", title: "Livraison", status: "PENDING", dueAt: null, rowVersion: 1 }],
     deliverables: [{
@@ -36,7 +44,7 @@ function mission(overrides: { signatures?: number; criteria?: number } = {}): Co
       proofScanStatus: "NONE",
       criteria: Array.from({ length: overrides.criteria ?? 0 }, () => ({ key: "SCOPE_MATCH", label: "Périmètre", status: "PENDING" })),
     }],
-  } as ContractMissionDashboard["missions"][number];
+  };
 }
 
 describe("jalon receipt truth", () => {

@@ -18,7 +18,7 @@ type DemoSessionClient = {
 type DemoAdminClient = {
   auth: {
     admin: {
-      generateLink: (input: { type: "magiclink"; email: string }) => Promise<{ data: { properties?: { hashed_token?: string } } | null; error: AuthError }>;
+      generateLink: (input: { type: "magiclink"; email: string }) => Promise<{ data: { properties?: { hashed_token?: string } | null } | null; error: AuthError }>;
       mfa: {
         deleteFactor: (input: { id: string; userId: string }) => Promise<{ error: AuthError }>;
       };
