@@ -1,5 +1,6 @@
 import "server-only";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { signerPreparationSchema, signerPreparationsSchema } from "./model";
 export class PreparationReadError extends Error {
   constructor(readonly code: "UNAUTHENTICATED" | "NOT_FOUND" | "UNAVAILABLE") { super(code); }
@@ -7,7 +8,8 @@ export class PreparationReadError extends Error {
 async function clientForUser() {
   const client = await getSupabaseServerClient();
   const auth = await client.auth.getUser();
-  if (auth.error || !auth.data.user) throw new PreparationReadError("UNAUTHENTICATED");
+  if (auth.error) throw new PreparationReadError(classifyAuthReadFailure(auth.error) ?? "UNAVAILABLE");
+  if (!auth.data.user) throw new PreparationReadError("UNAUTHENTICATED");
   return client;
 }
 export async function readSignerPreparation(envelopeId: string) {
