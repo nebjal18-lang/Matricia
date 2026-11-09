@@ -89,6 +89,10 @@ export async function testConfigurationForm(form:FormData){
   const result=await checkConfigurationConnection(row.section,row.settings,values,row.environment);
   const recorded=await leased.admin.rpc("record_admin_configuration_probe_v1",{p_probe_token:leased.token,p_status:result.status,p_code:result.code});
   if(recorded.error)throw rpcError(recorded.error);
+  const receipt=z.object({outcome:z.literal("CONFIGURATION_PROBE_RECORDED"),revision_id:uuid,status:z.enum(["PASS","FAIL"]),code:z.string(),checked_at:z.string(),valid_until:z.string()}).safeParse(recorded.data);
+  if(!receipt.success||receipt.data.revision_id!==row.id||receipt.data.status!==result.status||receipt.data.code!==result.code)throw new ConfigurationError("CONFIGURATION_UNAVAILABLE");
+  const checked=Date.parse(receipt.data.checked_at),until=Date.parse(receipt.data.valid_until),now=Date.now();
+  if(!Number.isFinite(checked)||!Number.isFinite(until)||checked<now-300000||checked>now+60000||until<=now||until>checked+86400000)throw new ConfigurationError("CONFIGURATION_UNAVAILABLE");
   if(result.status!=="PASS")throw new ConfigurationError(result.code);
   return {outcome:"CONFIGURATION_CHECKED",probeCode:result.code};
 }
