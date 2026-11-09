@@ -1,7 +1,7 @@
 import { createHash, createHmac } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
-import type { CreateEnvelopeInput } from "./provider.js";
-import { YousignSandboxSignatureProvider, type YousignProviderRequestState, type YousignSandboxProviderDependencies } from "./yousign-provider.js";
+import { assessSignatureProviderReadiness, type CreateEnvelopeInput } from "./provider.js";
+import { YousignSandboxSignatureProvider, YousignSignatureProvider, type YousignProviderRequestState, type YousignSandboxProviderDependencies } from "./yousign-provider.js";
 
 const envelopeId = "10000000-0000-4000-8000-000000000001";
 const requestId = "20000000-0000-4000-8000-000000000001";
@@ -168,7 +168,7 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
   });
 
   it.each([
-    [{ sandbox: false }, "YOUSIGN_WEBHOOK_INVALID"],
+    [{ sandbox: false }, "YOUSIGN_WEBHOOK_ENVIRONMENT_MISMATCH"],
     [{ event_time: String(receivedAt.getTime() / 1000 - 301) }, "YOUSIGN_WEBHOOK_STALE"],
     [{ event_time: String(receivedAt.getTime() / 1000 + 31) }, "YOUSIGN_WEBHOOK_STALE"],
     [{ event_name: "signature_request.done" }, "YOUSIGN_WEBHOOK_EVENT_UNSUPPORTED"],
@@ -323,5 +323,49 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
     expect(() => new YousignSandboxSignatureProvider({ ...dependencies, webhookMaxAgeSeconds: 901 })).toThrow("YOUSIGN_WEBHOOK_TOLERANCE_INVALID");
     await expect(provider.createEnvelope({ ...input, requestedLevel: "QUALIFIED" })).rejects.toThrow("SIGNATURE_LEVEL_NOT_SUPPORTED");
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("YouSign fixed live endpoint capability (synthetic HTTP, no provider operation)", () => {
+  it("permits live only on PRODUCTION and sandbox only outside production", () => {
+    const {dependencies} = setup();
+    expect(() => new YousignSignatureProvider({...dependencies, apiEnvironment: "live", deploymentEnvironment: "STAGING"})).toThrow("YOUSIGN_DEPLOYMENT_ENVIRONMENT_MISMATCH");
+    expect(() => new YousignSignatureProvider({...dependencies, apiEnvironment: "sandbox", deploymentEnvironment: "PRODUCTION"})).toThrow("YOUSIGN_DEPLOYMENT_ENVIRONMENT_MISMATCH");
+    expect(() => new YousignSignatureProvider({...dependencies, apiEnvironment: "live", deploymentEnvironment: "PRODUCTION"})).not.toThrow();
+  });
+  it("refuses reuse of a live provider in a staging workflow even with valid credentials", () => {
+    const {dependencies} = setup();
+    const provider = new YousignSignatureProvider({...dependencies, apiEnvironment: "live", deploymentEnvironment: "PRODUCTION"});
+    expect(assessSignatureProviderReadiness(provider, {APP_ENV: "staging", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "YOUSIGN"})).toMatchObject({status: "not_ready", code: "SIGNATURE_LIVE_PROVIDER_FORBIDDEN"});
+    expect(assessSignatureProviderReadiness(provider, {APP_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "YOUSIGN"})).toMatchObject({status: "ready"});
+  });
+  it("uses the fixed live host for the exact same durable creation protocol", async () => {
+    const {dependencies, fetch} = setup([
+      json({data: [], meta: {next_cursor: null}}), json({id: requestId, status: "draft"}, 201),
+      json({id: documentId, sha256: sourceHash, nature: "signable_document"}, 201),
+      json(remoteSigner(signerId1, "local-provider"), 201), json(remoteSigner(signerId2, "local-client"), 201),
+    ]);
+    const provider = new YousignSignatureProvider({...dependencies, apiEnvironment: "live", deploymentEnvironment: "PRODUCTION"});
+    await expect(provider.createEnvelope(input)).resolves.toMatchObject({status: "READY_FOR_SIGNATURE"});
+    expect(provider.sandboxOnly).toBe(false);
+    for (const [url, options] of fetch.mock.calls) {
+      expect(String(url)).toMatch(/^https:\/\/api\.yousign\.app\/v3\/signature_requests/u);
+      expect(options?.redirect).toBe("error");
+    }
+    expect(dependencies.state.saveRequest).toHaveBeenCalledOnce();
+  });
+  it("requires the authenticated webhook environment to match the live deployment", async () => {
+    const {dependencies} = setup();
+    const provider = new YousignSignatureProvider({...dependencies, apiEnvironment: "live", deploymentEnvironment: "PRODUCTION"});
+    const live = rawEvent({sandbox: false});
+    await expect(provider.verifyWebhook(live, signed(live), receivedAt)).resolves.toMatchObject({type: "SIGNER_SIGNED"});
+    const sandbox = rawEvent({sandbox: true});
+    await expect(provider.verifyWebhook(sandbox, signed(sandbox), receivedAt)).rejects.toThrow("YOUSIGN_WEBHOOK_ENVIRONMENT_MISMATCH");
+  });
+  it("rejects a correctly authenticated live callback on the sandbox adapter", async () => {
+    const {provider} = setup();
+    const live = rawEvent({sandbox: false});
+    await expect(provider.verifyWebhook(live, signed(live), receivedAt)).rejects.toThrow("YOUSIGN_WEBHOOK_ENVIRONMENT_MISMATCH");
   });
 });

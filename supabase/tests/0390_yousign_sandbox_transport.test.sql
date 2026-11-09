@@ -17,7 +17,7 @@ select throws_ok($$select public.finish_yousign_dispatch_v1('018bbbbb-2222-4333-
 select throws_ok($$select public.record_yousign_verified_event_v1('018bbbbb-2222-4333-8444-555555555555','{}')$$,'42501','YOUSIGN_SERVICE_REQUIRED','forged JWT cannot attest an external signature event');
 select throws_ok($$select public.configure_yousign_signer_v1('018bbbbb-2222-4333-8444-555555555555','Mina','Alami','fr','[]')$$,'42501','YOUSIGN_SIGNER_CONFIGURATION_DENIED','unknown or foreign signer cannot be configured');
 select set_config('request.jwt.claims','{"role":"service_role"}',true);
-select throws_ok($$select public.begin_yousign_dispatch_v1('018bbbbb-2222-4333-8444-555555555555','SEND','test-operation-key')$$,'55000','YOUSIGN_SANDBOX_POLICY_REQUIRED','service role cannot turn a missing governed envelope into a remote signature');
+select throws_ok($$select public.begin_yousign_dispatch_v1('018bbbbb-2222-4333-8444-555555555555','SEND','test-operation-key')$$,'55000','YOUSIGN_GOVERNED_PROVIDER_POLICY_REQUIRED','service role cannot turn a missing governed envelope into a remote signature');
 select throws_ok($$select public.finish_yousign_dispatch_v1('018bbbbb-2222-4333-8444-555555555555','SEND','test-operation-key','ACCEPTED')$$,'55000','YOUSIGN_OPERATION_NOT_CLAIMED','an unclaimed remote operation cannot be acknowledged');
 select throws_ok($$select public.finish_yousign_dispatch_v1('018bbbbb-2222-4333-8444-555555555555','SEND','test-operation-key','SIGNED')$$,'22023','YOUSIGN_OUTCOME_INVALID','transport acceptance cannot be promoted to a signed legal result');
 select throws_ok($$select public.get_yousign_envelope_v1(null,null)$$,'22023','YOUSIGN_EXACT_REFERENCE_REQUIRED','lookup requires exactly one local or remote identifier');

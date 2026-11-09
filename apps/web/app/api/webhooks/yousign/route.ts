@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<Response> {
     for (const chunk of chunks) { raw.set(chunk, offset); offset += chunk.byteLength; }
     const signature = request.headers.get("x-yousign-signature-256");
     if (!signature || !/^sha256=[a-f0-9]{64}$/iu.test(signature)) return Response.json({ code: "YOUSIGN_WEBHOOK_INVALID" }, { status: 401, headers });
-    const result = await createYousignRuntime().webhook(raw, { "x-yousign-signature-256": signature }, new Date());
+    const result = await (await createYousignRuntime()).webhook(raw, { "x-yousign-signature-256": signature }, new Date());
     return Response.json({ outcome: "YOUSIGN_EVENT_RECORDED", replayed: result.replayed }, { status: 200, headers });
   } catch (error) {
     const code = error instanceof Error ? error.message : "";

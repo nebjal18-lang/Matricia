@@ -1,7 +1,8 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { createSignatureWorkflow, YousignSandboxSignatureProvider, type SignatureWorkflowEnvelope, type SignatureWorkflowRepository, type YousignProviderRequestState, type YousignProviderState } from "@matricia/signature-v41";
+import { createSignatureWorkflow, YousignSignatureProvider, type SignatureWorkflowEnvelope, type SignatureWorkflowRepository, type YousignProviderRequestState, type YousignProviderState } from "@matricia/signature-v41";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 
 const uuid = z.string().uuid();
@@ -34,13 +35,20 @@ async function rpc(admin: Admin, name: string, args: Record<string, unknown>) {
   return result.data as unknown;
 }
 
-/** Fixed sandbox endpoints, separate APP_ENV, and governed database policy all
+/** Fixed provider endpoints, separate APP_ENV, and governed database policy all
  * have to agree. NODE_ENV=production alone is normal for a Vercel preview. */
-export function createYousignRuntime() {
-  const configured = process.env.APP_ENV?.trim().toUpperCase();
-  if (!configured || !["STAGING", "DEVELOPMENT"].includes(configured) || process.env.YOUSIGN_ENVIRONMENT !== "sandbox" || process.env.SIGNATURE_PROVIDER_MODE !== "EXTERNAL" || process.env.SIGNATURE_PROVIDER_CODE !== "YOUSIGN") throw new Error("YOUSIGN_SANDBOX_CONFIGURATION_REQUIRED");
-  const deploymentEnvironment = configured as "STAGING" | "DEVELOPMENT";
+export async function createYousignRuntime() {
+  const env = await getPlatformRuntimeEnvironment(process.env, ["YOUSIGN"]);
+  const configured = env.APP_ENV?.trim().toUpperCase();
+  const apiEnvironment = env.YOUSIGN_ENVIRONMENT;
+  const sandbox = apiEnvironment === "sandbox" && ["STAGING", "DEVELOPMENT"].includes(configured ?? "");
+  const live = apiEnvironment === "live" && configured === "PRODUCTION";
+  if ((!sandbox && !live) || env.SIGNATURE_PROVIDER_MODE !== "EXTERNAL" || env.SIGNATURE_PROVIDER_CODE !== "YOUSIGN") throw new Error("YOUSIGN_CONFIGURATION_REQUIRED");
+  const deploymentEnvironment = configured as "STAGING" | "DEVELOPMENT" | "PRODUCTION";
   const admin = getSupabaseAdminClient({ timeoutMs: 10_000 });
+  // A caller-controlled APP_ENV can never relabel the trusted database. This
+  // check occurs before constructing an HTTP adapter or making provider calls.
+  if (await rpc(admin, "get_yousign_runtime_environment_v1", {}) !== deploymentEnvironment) throw new Error("YOUSIGN_DEPLOYMENT_ENVIRONMENT_MISMATCH");
   const deadline = AbortSignal.timeout(48_000);
   const getContext = async (args: { p_envelope_id?: string; p_provider_request_id?: string }) => contextSchema.parse(await rpc(admin, "get_yousign_envelope_v1", args));
   let activeContext: Context | undefined;
@@ -80,9 +88,9 @@ export function createYousignRuntime() {
       }
     },
   };
-  const provider = new YousignSandboxSignatureProvider({
-    apiKey: process.env.YOUSIGN_API_KEY ?? "", webhookSecret: process.env.YOUSIGN_WEBHOOK_SECRET ?? "", deploymentEnvironment,
-    ...(process.env.YOUSIGN_WORKSPACE_ID ? { workspaceId: process.env.YOUSIGN_WORKSPACE_ID } : {}),
+  const provider = new YousignSignatureProvider({
+    apiKey: env.YOUSIGN_API_KEY ?? "", webhookSecret: env.YOUSIGN_WEBHOOK_SECRET ?? "", deploymentEnvironment, apiEnvironment: sandbox ? "sandbox" : "live",
+    ...(env.YOUSIGN_WORKSPACE_ID ? { workspaceId: env.YOUSIGN_WORKSPACE_ID } : {}),
     fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.any([deadline, ...(init?.signal ? [init.signal] : [])]) }),
     async loadDocument(document) {
       if (!activeContext?.input.documents.some(current => current.sha256 === document.sha256 && current.storagePath === document.storagePath && current.contractVersionId === document.contractVersionId)) throw new Error("YOUSIGN_DOCUMENT_SCOPE_INVALID");
@@ -123,7 +131,7 @@ export function createYousignRuntime() {
       return { replayed: result.replayed };
     },
   };
-  return createSignatureWorkflow({ provider, repository, env: process.env });
+  return createSignatureWorkflow({ provider, repository, env });
 }
 
 export async function consumeGovernedSignatureEnvelope(envelopeId: string): Promise<{ ok: boolean; code: string; developmentMock: boolean }> {
@@ -132,7 +140,7 @@ export async function consumeGovernedSignatureEnvelope(envelopeId: string): Prom
     const admin = getSupabaseAdminClient({ timeoutMs: 5_000 });
     const code = await rpc(admin, "get_signature_dispatch_provider_v1", { p_envelope_id: envelopeId });
     if (code === "YOUSIGN") {
-      const result = await createYousignRuntime().execute(envelopeId, "SEND", `yousign-send:${envelopeId}`);
+      const result = await (await createYousignRuntime()).execute(envelopeId, "SEND", `yousign-send:${envelopeId}`);
       return { ok: result.outcome === "COMPLETED" || result.outcome === "AWAITING_VERIFIED_WEBHOOK", code: result.outcome === "COMPLETED" ? "SIGNATURE_DISPATCH_ACCEPTED_REPLAY" : result.outcome === "AWAITING_VERIFIED_WEBHOOK" ? "SIGNATURE_AWAITING_VERIFIED_WEBHOOK" : "SIGNATURE_RECONCILIATION_REQUIRED", developmentMock: false };
     }
     // The existing SQL mock retains its own trusted-environment/governance gate.

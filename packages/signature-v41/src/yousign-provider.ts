@@ -1,7 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { CreateEnvelopeInput, ProviderEnvelope, SignatureDocumentInput, SignatureEvidence, SignatureLevel, SignatureProvider, SignatureSignerInput, VerifiedSignatureEvent } from "./provider.js";
 
-const BASE_URL = "https://api-sandbox.yousign.app/v3";
+const BASE_URLS = { sandbox: "https://api-sandbox.yousign.app/v3", live: "https://api.yousign.app/v3" } as const;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const HASH = /^[0-9a-f]{64}$/u;
 const MAX_PDF_BYTES = 20 * 1024 * 1024;
@@ -40,10 +40,11 @@ export interface YousignProviderState {
   archiveEvidence(providerRequestId: string, artifacts: readonly YousignEvidenceArtifact[]): Promise<void>;
 }
 
-export interface YousignSandboxProviderDependencies {
+export interface YousignProviderDependencies {
   readonly apiKey: string;
   readonly webhookSecret: string;
-  readonly deploymentEnvironment: "STAGING" | "DEVELOPMENT";
+  readonly deploymentEnvironment: "STAGING" | "DEVELOPMENT" | "PRODUCTION";
+  readonly apiEnvironment: "sandbox" | "live";
   readonly fetch: typeof globalThis.fetch;
   readonly loadDocument: (document: SignatureDocumentInput) => Promise<Uint8Array>;
   readonly loadSigner: (signer: SignatureSignerInput) => Promise<YousignSignerIdentity>;
@@ -52,6 +53,9 @@ export interface YousignSandboxProviderDependencies {
   /** Keep aligned with the governed provider's database tolerance. */
   readonly webhookMaxAgeSeconds?: number;
 }
+
+/** Compatibility constructor is always restricted to non-production sandbox. */
+export type YousignSandboxProviderDependencies = Omit<YousignProviderDependencies, "apiEnvironment" | "deploymentEnvironment"> & { readonly deploymentEnvironment: "STAGING" | "DEVELOPMENT" };
 
 function fail(code: string): never { throw new Error(code); }
 function sha(bytes: string | Uint8Array): string { return createHash("sha256").update(bytes).digest("hex"); }
@@ -134,20 +138,28 @@ function validateAudit(audit: Record<string, unknown>, requestId: string, state:
 }
 
 /**
- * Real YouSign v3 HTTP adapter, deliberately restricted to sandbox and SIMPLE.
+ * Real YouSign v3 HTTP adapter, explicitly scoped to one fixed environment and SIMPLE.
+ * Deployment and provider environments must agree. Legal/provider approval and
+ * exact current source/party authority remain the durable repository’s responsibility.
  * It never infers a legal level, signer identity, PDF placement, certificate or TSA.
  * Provider POSTs have no assumed idempotency guarantee. The caller owns a durable
  * operation claim and must reconcile every unknown outcome before another write.
  */
-export class YousignSandboxSignatureProvider implements SignatureProvider {
+export class YousignSignatureProvider implements SignatureProvider {
   readonly code = "YOUSIGN";
-  readonly sandboxOnly = true;
+  readonly sandboxOnly: boolean;
+  readonly productionOnly: boolean;
   readonly supportedLevels = ["SIMPLE"] as const;
-  readonly #dependencies: YousignSandboxProviderDependencies;
+  readonly #dependencies: YousignProviderDependencies;
+  readonly #baseUrl: string;
   readonly #maxAge: number;
 
-  constructor(dependencies: YousignSandboxProviderDependencies) {
-    if (!["STAGING", "DEVELOPMENT"].includes(dependencies.deploymentEnvironment)) fail("YOUSIGN_SANDBOX_DEPLOYMENT_REQUIRED");
+  constructor(dependencies: YousignProviderDependencies) {
+    const sandbox = dependencies.apiEnvironment === "sandbox";
+    if (!(sandbox && ["STAGING", "DEVELOPMENT"].includes(dependencies.deploymentEnvironment) || dependencies.apiEnvironment === "live" && dependencies.deploymentEnvironment === "PRODUCTION")) fail("YOUSIGN_DEPLOYMENT_ENVIRONMENT_MISMATCH");
+    this.sandboxOnly = sandbox;
+    this.productionOnly = !sandbox;
+    this.#baseUrl = BASE_URLS[dependencies.apiEnvironment];
     if (!dependencies.apiKey.trim() || /[\r\n]/u.test(dependencies.apiKey) || dependencies.apiKey.length > 4096 || Buffer.byteLength(dependencies.webhookSecret) < 32 || dependencies.webhookSecret.length > 4096) fail("YOUSIGN_CREDENTIALS_INVALID");
     if (dependencies.workspaceId !== undefined) id(dependencies.workspaceId);
     this.#maxAge = dependencies.webhookMaxAgeSeconds ?? 300;
@@ -267,7 +279,8 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
     if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) fail("YOUSIGN_WEBHOOK_SIGNATURE_INVALID");
     let payload: Record<string, unknown>;
     try { payload = record(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(rawBody))); } catch { return fail("YOUSIGN_WEBHOOK_INVALID"); }
-    if (payload.sandbox !== true || typeof payload.event_time !== "string" || !/^\d{1,12}$/u.test(payload.event_time)) fail("YOUSIGN_WEBHOOK_INVALID");
+    if (payload.sandbox !== this.sandboxOnly) fail("YOUSIGN_WEBHOOK_ENVIRONMENT_MISMATCH");
+    if (typeof payload.event_time !== "string" || !/^\d{1,12}$/u.test(payload.event_time)) fail("YOUSIGN_WEBHOOK_INVALID");
     const eventId = id(payload.event_id);
     const timestamp = Number(payload.event_time);
     const age = Math.floor(receivedAt.getTime() / 1000) - timestamp;
@@ -358,7 +371,7 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
       if (!auditedDocumentHashes.get(documentId)?.has(finalHash)) fail("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
     }
     await this.#dependencies.state.archiveEvidence(requestId, artifacts);
-    return { providerEnvelopeId: requestId, achievedLevel: "SIMPLE", finalHash: sha(JSON.stringify({ provider: this.code, sandbox: true, requestId, artifacts: manifest })), documentHashes: state.documents.map(document => document.sourceSha256) };
+    return { providerEnvelopeId: requestId, achievedLevel: "SIMPLE", finalHash: sha(JSON.stringify({ provider: this.code, sandbox: this.sandboxOnly, requestId, artifacts: manifest })), documentHashes: state.documents.map(document => document.sourceSha256) };
   }
 
   async #load(requestId: string): Promise<YousignProviderRequestState> {
@@ -398,7 +411,7 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
     const form = body instanceof FormData;
     let response: Response;
     try {
-      response = await this.#dependencies.fetch(BASE_URL + path, {
+      response = await this.#dependencies.fetch(this.#baseUrl + path, {
         method, redirect: "error", signal: AbortSignal.timeout(8000),
         headers: { authorization: `Bearer ${this.#dependencies.apiKey}`, accept, ...(body && !form ? { "content-type": "application/json" } : {}) },
         ...(body ? { body: form ? body : JSON.stringify(body) } : {}),
@@ -426,5 +439,13 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
     let offset = 0;
     for (const part of parts) { bytes.set(part, offset); offset += part.byteLength; }
     return bytes;
+  }
+}
+
+/** Existing sandbox callers cannot select a live endpoint by overposting. */
+export class YousignSandboxSignatureProvider extends YousignSignatureProvider {
+  constructor(dependencies: YousignSandboxProviderDependencies) {
+    if (!["STAGING", "DEVELOPMENT"].includes(dependencies.deploymentEnvironment)) fail("YOUSIGN_SANDBOX_DEPLOYMENT_REQUIRED");
+    super({ ...dependencies, apiEnvironment: "sandbox" });
   }
 }
