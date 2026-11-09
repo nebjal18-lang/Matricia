@@ -27,8 +27,30 @@ using(private.delivery_proof_storage_owner_unbound_v1(bucket_id,name));
 -- Historical absent objects are not certified by this additive constraint;
 -- every new binding and every deletion is nevertheless checked immediately.
 create index delivery_proofs_storage_binding_v1_idx on public.delivery_proofs(storage_bucket,storage_path)where storage_path is not null;
-alter table public.delivery_proofs add constraint delivery_proofs_storage_object_binding_v1
- foreign key(storage_bucket,storage_path)references storage.objects(bucket_id,name)on delete restrict not valid;
+-- Object versioning keeps several rows for one bucket path, so (bucket_id, name)
+-- is not unique there and cannot be the target of this foreign key.
+do $binding$
+begin
+  if exists (
+    select 1
+    from pg_index index
+    join pg_class relation on relation.oid = index.indrelid
+    join pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'storage'
+      and relation.relname = 'objects'
+      and index.indisunique
+      and index.indpred is null
+      and (
+        select array_agg(attribute.attname::text order by key.ordinality)
+        from unnest(index.indkey) with ordinality key(attnum, ordinality)
+        join pg_attribute attribute on attribute.attrelid = relation.oid and attribute.attnum = key.attnum
+      ) = array['bucket_id', 'name']::text[]
+  ) then
+    alter table public.delivery_proofs add constraint delivery_proofs_storage_object_binding_v1
+      foreign key (storage_bucket, storage_path) references storage.objects (bucket_id, name) on delete restrict not valid;
+  end if;
+end
+$binding$;
 
 create or replace function private.bind_delivery_proof_storage()
 returns trigger language plpgsql security definer set search_path=pg_catalog as $$

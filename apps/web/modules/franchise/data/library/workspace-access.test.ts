@@ -47,13 +47,13 @@ for (const locale of ["fr", "ar"] as const) describe(`Franchise workspace access
     expect(mocks.rpc).not.toHaveBeenCalled();
     mocks.rpc.mockResolvedValue({data:null,error:{code:"42501"}});
     expect(await loadFranchiseLibraryWorkspace({locale,organizationId,libraryId,franchiseId:second})).toEqual({status:"error",reason:"FORBIDDEN"});
-    expect(mocks.rpc).toHaveBeenCalledWith("franchise_catalog_page",expect.objectContaining({p_franchise_id:second}));
+    expect(mocks.rpc).toHaveBeenCalledWith("franchise_catalog_workspace_v1",expect.objectContaining({p_franchise_id:second}));
   });
   it("keeps an authorized-context RPC denial distinct from a server failure", async () => {
     mocks.franchises = [{ id: franchiseId, library_id: libraryId, operator_organization_id: organizationId, franchise_type: "STANDARD", operator_code: "SYNTHETIC", status: "ACTIVE" }];
     mocks.memberships = [{ organization_id: organizationId, organization_member_roles: [{ role_code: "FRANCHISE_OWNER", franchise_id: franchiseId, revoked_at: null }] }];
     mocks.rpc.mockResolvedValue({ data: null, error: { code: "42501", message: "FRANCHISE_CATALOG_SCOPE_DENIED" } });
     expect(await loadFranchiseLibraryWorkspace({ locale, organizationId })).toEqual({ status: "error", reason: "FORBIDDEN" });
-    expect(mocks.rpc).toHaveBeenCalledWith("franchise_catalog_page", expect.objectContaining({ p_franchise_id: franchiseId }));
+    expect(mocks.rpc).toHaveBeenCalledWith("franchise_catalog_workspace_v1", expect.objectContaining({ p_franchise_id: franchiseId }));
   });
 });

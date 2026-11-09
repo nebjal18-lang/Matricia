@@ -1,0 +1,16 @@
+{
+  "requirement": "MAT-FUNC-027",
+  "closedGap": "inventaire-immutabilite-et-visa",
+  "newSignoff": "PENDING:visa-independant",
+  "executedAt": "2026-11-09T14:46:00Z",
+  "command": "DB_TEST_PATTERN=0385_immutable node scripts/run-db-tests.mjs",
+  "result": "PASS 0385_immutable_inventory_ledger_guard.test.sql",
+  "assertions": 10,
+  "covers": [
+    "financial entries/journals reject UPDATE/DELETE",
+    "credit ledger reject UPDATE/DELETE",
+    "audit events reject UPDATE/DELETE",
+    "immutability trigger inventory on ledgers/contracts/volume tables",
+    "authenticated denied direct ledger mutation"
+  ]
+}
