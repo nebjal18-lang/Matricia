@@ -1,8 +1,8 @@
 {
   "reviewedBranch": "version-2",
-  "reviewedHead": "361ecedd47665789d8101847b8c602e8a85de8e4",
+  "reviewedHead": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
   "scope": "Independent review of the current closure inventory and client/franchise UI patch; read-only application review.",
-  "verdict": "NO_STATIC_BLOCKER_FINAL_GLOBAL_SUITES_PENDING",
+  "verdict": "NO_STATIC_BLOCKER_LATEST_CI_PENDING",
   "findings": [
     {
       "id": "CLOSURE-REVIEW-001",
@@ -64,10 +64,10 @@
     "Missing franchise query recovery avoids backend access and preserves FR/AR direction."
   ],
   "limitations": [
-    "No global suite or live production workflow executed by the reviewer.",
-    "SQL target execution is observed through parent-run evidence and logs; reviewer performed no DDL or mutation.",
-    "The historical229-migration local database remains untouched by the reviewed migration.",
-    "Review covers the current diff and does not certify all prompt items complete."
+    "No global suite or production workflow started by the reviewer during latest CI.",
+    "Previously generated whole-project evidence is not presented as a fresh complete CI run for60e6b1c.",
+    "One existing opt-in native Storage test remains skipped; no native Storage acceptance is inferred.",
+    "Yousign integration, staging activation and external legal decisions remain outside the proof supplied by this CI fix."
   ],
   "sqlReview": {
     "file": "supabase/migrations/20261109090000_franchise_link_final_row_version.sql",
@@ -112,10 +112,24 @@
     "externalValidation": "Yousign selection is correctly distinguished from integration, staging identity and legal approval."
   },
   "globalValidation": {
-    "build": "Canonical Node22/Turbopack build log reports routes rendered successfully; final build log also reaches route summary. Review does not infer deployment.",
-    "fullSqlSuite": "Still producing PASS lines at review time (observed through0239); not certified complete.",
-    "fullAppUnits": "Final rerun in progress at review time; not certified complete.",
-    "previousWebpackAttempt": "Earlier webpack nft evaluator error is historical; it is not the current canonical build result."
+    "priorCandidateLocalEvidence": {
+      "source": "docs/evidence/v1-closure-20261109.json",
+      "webUnitsPassed": 3780,
+      "otherWorkspaceUnitsPassed": 296,
+      "existingOptInStorageSkip": 1,
+      "toolingPassed": 63,
+      "integrationPassed": 3,
+      "publicBrowserPassed": 18,
+      "freshMigrations": 575,
+      "sqlFiles": 360,
+      "sqlAssertions": 9301,
+      "sqlConcurrencyScenarios": 4,
+      "canonicalBuild": "PASS Node22/Turbopack",
+      "lint": "PASS with4existingwarnings"
+    },
+    "latestCommitTargetedBrowserTests": "10PASS bundled Chromium and10PASS explicit executable, observed logs",
+    "latestCommitRemoteCi": "IN_PROGRESS; no final remote verdict available to this review",
+    "hostedBrowser": "Not verified; prior deployment status is distinct from hosted workflow validation."
   },
   "lastReview": {
     "scope": [
@@ -135,7 +149,7 @@
       "The scanner compares final browser URL with the expected origin/path and explicit organization/franchise query context."
     ],
     "pendingCorrection": null,
-    "tested": "18 Node tests across inventory/outcome PASS, including unexpected denial codes, combined FORBIDDEN+UNAVAILABLE and origin/path/tenant changes."
+    "tested": "Previously reviewed outcome/inventory18NodePASS; this CI-only follow-up performs no suite execution and reads targeted browser logs."
   },
   "observedToolingSuite": {
     "source": "work/v1-closure/tooling-final.log",
@@ -151,6 +165,26 @@
     "scripts/release/surface-outcome.test.mjs": "57c6c840d388d5c6cce503bc8064b1946781e06de5dff887fe1b0ec8a27100dc",
     "tests/e2e/parcours-dynamic-surfaces.spec.ts": "253344f547faebe2269ad937bd2bf68f2d7f9fe870cbd0433996c0b977bd2786",
     "apps/web/vitest.setup.ts": "b6dc72931ed327eaa168432d3d903c4ca85e567cd3cfb42873b66dd6efe71f89",
-    "apps/web/modules/client/data/spaces/context.ts": "c65ad42d7e5d0fac7fd5e3a1737db21f248e40464489d6c58a1a402711ba7c48"
+    "apps/web/modules/client/data/spaces/context.ts": "c65ad42d7e5d0fac7fd5e3a1737db21f248e40464489d6c58a1a402711ba7c48",
+    ".github/workflows/ci.yml": "c0deaa41dc9a2256c8b9733ac6faf9ce2f0d6f78e1387d2479a994fa84f5edfa",
+    "apps/web/modules/provider/screens/devis/quote-panel.test.tsx": "8b7fdceaa836ed3cb1e5de1532a3708dc610cd1cbdce565c3c7b6b501d8e65ee"
+  },
+  "ciBrowserReview": {
+    "scope": "Commit60e6b1c: .github/workflows/ci.yml and apps/web/modules/provider/screens/devis/quote-panel.test.tsx only.",
+    "verdict": "No concrete defect identified in this change.",
+    "observations": [
+      "The quality job now installs Chromium through the same lockfile-installed Playwright CLI used by the tests.",
+      "The installation occurs before the workspace unit suite that exercises real browser FormData.",
+      "The test defaults to the Playwright-managed executable; an explicit PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH remains supported.",
+      "No assertion, timeout, retry setting, test case or cleanup path is removed or weakened.",
+      "Browser closing remains in finally.",
+      "Both local targeted logs show all10quote-panel tests passing, using the bundled browser and the explicit /usr/bin/chromium path respectively."
+    ],
+    "evidenceObserved": [
+      "work/v1-closure/quote-bundled-browser.log",
+      "work/v1-closure/quote-explicit-browser.log"
+    ],
+    "reviewerStartedSuites": false,
+    "remoteStatus": "Latest CI in progress according to parent task; no new commit CI success inferred from local or prior-commit evidence."
   }
 }

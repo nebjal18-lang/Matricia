@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": "LOCAL_CODE_CORRECTIONS_AND_VALIDATION_NOT_PRODUCTION_RELEASE",
   "incomingVersion2Head": "10c4fc32e8aabcd9b89c29ffef1ed41ef4050bf7",
-  "candidateCodeCommit": "888bcaf4a26979ddcba0511981290f05ee3b6d26",
+  "candidateCodeCommit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
   "sourceFileSha256": {
     "apps/web/app/[locale]/franchise/candidature/page.tsx": "36a5e84103f8e9eef9b6dd82f8d37b3b530b7695c9599e48847f44c7086604ca",
     "apps/web/app/[locale]/franchise/documents/[documentId]/page.tsx": "3d0eaeec1943f7c72970494e99c5b2d82b9bfc5f8f9a632383d7fc237752cb09",
@@ -29,7 +29,10 @@
     "scripts/release/surface-outcome.test.mjs": "57c6c840d388d5c6cce503bc8064b1946781e06de5dff887fe1b0ec8a27100dc",
     "supabase/migrations/20261109090000_franchise_link_final_row_version.sql": "0faa4393729d752a0e9754a5f0d698d47d676655b9fdeae2011ecf95569cf153",
     "supabase/tests/0193_franchise_provider_bridge_delivery.test.sql": "28f6140a97e555e1ff567f6193202d1db6039e953ed9c91aac69cb2b64cae89f",
-    "tests/e2e/parcours-dynamic-surfaces.spec.ts": "253344f547faebe2269ad937bd2bf68f2d7f9fe870cbd0433996c0b977bd2786"
+    "tests/e2e/parcours-dynamic-surfaces.spec.ts": "253344f547faebe2269ad937bd2bf68f2d7f9fe870cbd0433996c0b977bd2786",
+    ".github/workflows/ci.yml": "c0deaa41dc9a2256c8b9733ac6faf9ce2f0d6f78e1387d2479a994fa84f5edfa",
+    "apps/web/modules/provider/screens/devis/quote-panel.test.tsx": "8b7fdceaa836ed3cb1e5de1532a3708dc610cd1cbdce565c3c7b6b501d8e65ee",
+    ".env.example": "d5443eaca4607393ad1bdbb4518a517027ea45581280e0bd3cc6d01c508cd059"
   },
   "productionModified": false,
   "existingItDossierModified": false,
@@ -47,7 +50,8 @@
       "skipped": 1,
       "filesPassed": 604,
       "scope": "web unit suite, not native Storage acceptance",
-      "skipReason": "Existing RUN_LOCAL_SIGNATURE_STORAGE_TEST opt-in source-PDF Storage recipe, not exercised without its dedicated native Storage setup."
+      "skipReason": "Existing RUN_LOCAL_SIGNATURE_STORAGE_TEST opt-in source-PDF Storage recipe, not exercised without its dedicated native Storage setup.",
+      "localFullSuiteCommit": "888bcaf4a26979ddcba0511981290f05ee3b6d26"
     },
     "otherWorkspaceUnits": {
       "status": "PASS",
@@ -147,6 +151,32 @@
       "previewUrl": "https://matricia-domain-git-codex-db015e-epitaphemarket-5584s-projects.vercel.app",
       "hostedBrowserVerified": false,
       "hostedProbe": "Audit proxy denies destination before HTTPS CONNECT; not a website outage diagnosis."
+    },
+    "githubInitialRun": {
+      "runId": 42641637545,
+      "commit": "888bcaf4a26979ddcba0511981290f05ee3b6d26",
+      "database": "PASS",
+      "publicBrowser": "PASS",
+      "quality": "FAIL: quote form native browser timeout, addressed by ciBrowserDependencyFix"
+    },
+    "githubCI": {
+      "status": "PASS",
+      "commit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+      "runId": 42644570334,
+      "url": "https://github.com/nebjal18-lang/Matricia/actions/runs/42644570334",
+      "jobs": {
+        "quality": "PASS",
+        "browser-public": "PASS",
+        "database": "PASS"
+      },
+      "qualityUnitSummary": {
+        "webPassed": 3780,
+        "webSkipped": 1,
+        "otherWorkspacePassed": 296,
+        "nativeQuoteFormTests": 10,
+        "nativeQuoteFormDurationMs": 1070
+      },
+      "ciBrowserInstall": "Playwright-matched Chromium installed before unit tests"
     }
   },
   "artifacts": {
@@ -233,6 +263,22 @@
     "work/v1-closure/release-final.log": {
       "sha256": "d62f9b6ce525cdd6959191b6ca4604e49d72364c5970ac52556af165223f83fc",
       "bytes": 3146
+    },
+    "work/v1-closure/quote-bundled-browser.log": {
+      "sha256": "905efacb2d51cb25f1e75ca7f727eaec42da6072a0223e1797dbf5d7c2f11c7e",
+      "bytes": 195
+    },
+    "work/v1-closure/quote-explicit-browser.log": {
+      "sha256": "0da3c4e452c03469bed685fda597da52819984cd5ba914e74c702b3c1974b87e",
+      "bytes": 195
+    },
+    "work/v1-closure/playwright-install.log": {
+      "sha256": "344ece9d85e5f4064cb5b21387c4d293a1d8e873b11ad556064a5c79add19837",
+      "bytes": 8217
+    },
+    "work/v1-closure/release-ci-final.log": {
+      "sha256": "d62f9b6ce525cdd6959191b6ca4604e49d72364c5970ac52556af165223f83fc",
+      "bytes": 3146
     }
   },
   "release": {
@@ -242,7 +288,7 @@
     "newVerifiedRequirements": 0,
     "exitCode": 1,
     "conditionsNotSatisfied": 73,
-    "evaluatedCommit": "fffb00f8e3fd7fb8aa54ba5b774111e8c04cc4a1",
+    "evaluatedCommit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
     "worktreeWasFrozen": true,
     "failureCodes": [
       "INTERACTION_RUNTIME_PROOF_REQUIRED",
@@ -858,6 +904,27 @@
       "cwd": "."
     }
   },
-  "applicationTree": "b44e18dd4d3b7df4f7a7b8a1cb07ae2c549ffc31",
-  "inventoryEvidence": "docs/evidence/v1-closure-inventory-20261109.json"
+  "applicationTree": "29b758e5af0b609a5f70f6b7d0070dcdb325017a",
+  "inventoryEvidence": "docs/evidence/v1-closure-inventory-20261109.json",
+  "ciBrowserDependencyFix": {
+    "commit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+    "changedFiles": [
+      ".github/workflows/ci.yml",
+      "apps/web/modules/provider/screens/devis/quote-panel.test.tsx"
+    ],
+    "productionLogicChanged": false,
+    "reason": "GitHub quality failed one native quote form browser test at its existing 30-second deadline; the job used an implicit system Chromium path.",
+    "fix": "Install the Playwright-matched Chromium in quality and use it by default; keep an explicit executable override.",
+    "assertionsRemoved": 0,
+    "timeoutIncreased": false,
+    "retryAdded": false,
+    "localTargetedValidation": {
+      "bundledBrowserTestsPassed": 10,
+      "explicitBrowserTestsPassed": 10
+    },
+    "githubRun": 42644570334,
+    "githubQuality": "PASS",
+    "githubDatabase": "PASS",
+    "githubPublicBrowser": "PASS"
+  }
 }
