@@ -134,6 +134,25 @@ relève de la politique indépendante approuvée.
 
 ## Validation locale reproductible
 
+La migration additive `20261109101000_yousign_subject_privacy_inventory.sql`
+intègre les sept états natifs au parcours DSR ALL. La projection contractuelle
+curatée existante expose uniquement les noms/prénoms et références du
+signataire vérifié dans l'organisation exacte, ainsi que ses métadonnées de
+demande, document, envoi et preuve. Les clés d'opération, chemins privés et
+manifestes bruts contenant d'autres parties restent hors de cette projection.
+Le catalogue technique conserve les sept sources physiques et les nouveaux
+champs exigent une classification et une revue indépendantes ; aucune décision
+juridique n'est créée par la migration.
+
+Les fichiers sont des candidats de revue : PDF partagé du contrat concerné et
+audit JSON du seul signataire vérifié. Le digest et les métadonnées Storage
+sont conservés, mais le fournisseur ne reçoit aucun verdict antivirus inventé.
+Ces originaux restent `UNTRUSTED` pour la remise DSR ; une copie expurgée réellement
+contrôlée, scannée et revue ou une exclusion documentée restent nécessaires.
+Une nouvelle famille de fichiers inconnue continue de bloquer la couverture
+complète. Les archives de signature et états immuables ne sont ni purgés ni
+modifiés pour satisfaire une demande d'effacement.
+
 Le runner `node scripts/release/yousign-transport-acceptance.mjs
 supabase_db_MatriciaV1Closure20261109` n'accepte qu'un nom de conteneur local
 jetable explicite. Il réutilise le contrat canonique et l'archive FR/AR de la
