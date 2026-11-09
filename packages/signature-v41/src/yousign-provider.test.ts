@@ -25,8 +25,11 @@ function remoteSigner(remoteId: string, localName: string) {
 function identityHash(localName: string) {
   return createHash("sha256").update(JSON.stringify({ firstName: localName, lastName: "Signer", email: `${localName}@example.test`, locale: "fr", level: "electronic_signature", authentication: "otp_email", fields: [{ type: "signature", document_id: documentId, page: 1, x: 42, y: 100 }] })).digest("hex");
 }
-function signerAudit(remoteId: string, localName: string) {
-  return { version: 5, signature_request: { id: requestId }, signer: { id: remoteId, first_name: localName, last_name: "Signer", email_address: `${localName}@example.test`, signature_process_completed_at: "2026-11-09T12:00:00Z" }, documents: [{ id: documentId, initial_hash: sourceHash, signatures: [{ hash: "a".repeat(64) }] }], authentication: { mode: "email" }, electronic_signature_level: { level: "Simple electronic signature" } };
+function signerAudit(remoteId: string, localName: string, signedHash = "a".repeat(64)) {
+  return { version: 5, signature_request: { id: requestId }, signer: { id: remoteId, first_name: localName, last_name: "Signer", email_address: `${localName}@example.test`, signature_process_completed_at: "2026-11-09T12:00:00Z" }, documents: [{ id: documentId, initial_hash: sourceHash, signatures: [{ hash: signedHash }] }], authentication: { mode: "email" }, electronic_signature_level: { level: "Simple electronic signature" } };
+}
+function signedMetadata(bytes: Uint8Array) {
+  return { id: documentId, nature: "signable_document", content_type: "application/pdf", is_signed: true, sha256: createHash("sha256").update(bytes).digest("hex") };
 }
 const state: YousignProviderRequestState = {
   envelopeId, requestedLevel: "SIMPLE", documents: [{ sourceSha256: sourceHash, providerDocumentId: documentId }],
@@ -143,9 +146,17 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
   it("verifies the raw-body HMAC, signed sandbox and signer mapping with case-insensitive headers", async () => {
     const { provider, fetch } = setup();
     const raw = rawEvent();
-    await expect(provider.verifyWebhook(raw, signed(raw), receivedAt)).resolves.toMatchObject({ providerEventId: eventId, nonce: eventId, providerEnvelopeId: requestId, type: "SIGNER_SIGNED", signerId: "local-provider", achievedLevel: "SIMPLE", payloadSha256: createHash("sha256").update(raw).digest("hex") });
+    await expect(provider.verifyWebhook(raw, signed(raw), receivedAt)).resolves.toMatchObject({ providerEventId: eventId, nonce: eventId, providerEnvelopeId: requestId, type: "SIGNER_SIGNED", signerId: "local-provider", achievedLevel: "SIMPLE", finalEvidenceRequired: true, payloadSha256: createHash("sha256").update(raw).digest("hex") });
     expect(fetch).not.toHaveBeenCalled();
     await expect(provider.verifyWebhook(rawEvent({ sandbox: false }), signed(raw), receivedAt)).rejects.toThrow("YOUSIGN_WEBHOOK_SIGNATURE_INVALID");
+  });
+
+  it("does not request final evidence from an authenticated intermediate signing event", async () => {
+    const { provider } = setup();
+    const raw = rawEvent({ data: { signature_request: { id: requestId, status: "ongoing", external_id: envelopeId }, signer: { id: signerId1, status: "signed" } } });
+    const event = await provider.verifyWebhook(raw, signed(raw), receivedAt);
+    expect(event.type).toBe("SIGNER_SIGNED");
+    expect(event).not.toHaveProperty("finalEvidenceRequired");
   });
 
   it("rejects signatures using the wrong timestamp-dot-body algorithm and ambiguous duplicate headers", async () => {
@@ -205,12 +216,13 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
     expect(second.fetch.mock.calls.some(call => String(call[0]).endsWith("/activate"))).toBe(false);
   });
 
-  it("archives real signed PDF and audit bytes before returning bound hashes without certificate or timestamp claims", async () => {
+  it("binds the final PDF to signed metadata and the later signer's audit, accepting an earlier intermediate hash", async () => {
     const pdf = new TextEncoder().encode("%PDF-1.7\nsigned provider bytes\n%%EOF");
     const audit1 = signerAudit(signerId1, "local-provider");
-    const audit2 = signerAudit(signerId2, "local-client");
+    const audit2 = signerAudit(signerId2, "local-client", createHash("sha256").update(pdf).digest("hex"));
     const { provider, fetch, dependencies } = setup([
       json({ id: requestId, external_id: envelopeId, status: "done", documents: [{ id: documentId, nature: "signable_document" }], signers: state.signers.map(s => ({ id: s.providerSignerId, status: "signed" })) }),
+      json(signedMetadata(pdf)),
       new Response(pdf, { headers: { "content-type": "application/pdf" } }),
       json({ ...remoteSigner(signerId1, "local-provider"), status: "signed" }), json(audit1),
       json({ ...remoteSigner(signerId2, "local-client"), status: "signed" }), json(audit2),
@@ -223,8 +235,9 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
     expect(artifacts).toHaveLength(3);
     expect(artifacts?.[0]).toMatchObject({ kind: "SIGNED_PDF", providerReference: documentId, bytes: pdf });
     expect(JSON.parse(new TextDecoder().decode(artifacts?.[1]?.bytes))).toEqual(audit1);
-    expect(fetch.mock.calls[1]?.[0]).toContain(`/documents/${documentId}/download`);
-    expect(fetch.mock.calls[3]?.[0]).toContain(`/signers/${signerId1}/audit_trails`);
+    expect(fetch.mock.calls[1]?.[0]).toBe(`https://api-sandbox.yousign.app/v3/signature_requests/${requestId}/documents/${documentId}`);
+    expect(fetch.mock.calls[2]?.[0]).toContain(`/documents/${documentId}/download`);
+    expect(fetch.mock.calls[4]?.[0]).toContain(`/signers/${signerId1}/audit_trails`);
   });
 
   it("does not archive incomplete or unrelated provider evidence", async () => {
@@ -241,8 +254,34 @@ describe("YouSign sandbox v3 adapter (HTTP contract unit tests, no live provider
     if (change === "signer") audit.signer.email_address = "attacker@example.test";
     if (change === "level") audit.electronic_signature_level.level = "Qualified electronic signature";
     const pdf = new TextEncoder().encode("%PDF-1.7\nsigned bytes\n%%EOF");
-    const { provider, dependencies } = setup([json(remoteRequest("done")), new Response(pdf, { headers: { "content-type": "application/pdf" } }), json({ ...remoteSigner(signerId1, "local-provider"), status: "signed" }), json(audit)]);
+    const { provider, dependencies } = setup([json(remoteRequest("done")), json(signedMetadata(pdf)), new Response(pdf, { headers: { "content-type": "application/pdf" } }), json({ ...remoteSigner(signerId1, "local-provider"), status: "signed" }), json(audit)]);
     await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_AUDIT_BINDING_MISMATCH");
+    expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
+  });
+
+  it("rejects arbitrary final PDF bytes whose digest appears in none of the authenticated audits", async () => {
+    const pdf = new TextEncoder().encode("%PDF-1.7\nunrelated signed-looking bytes\n%%EOF");
+    const { provider, dependencies } = setup([
+      json(remoteRequest("done")), json(signedMetadata(pdf)), new Response(pdf, { headers: { "content-type": "application/pdf" } }),
+      json({ ...remoteSigner(signerId1, "local-provider"), status: "signed" }), json(signerAudit(signerId1, "local-provider")),
+      json({ ...remoteSigner(signerId2, "local-client"), status: "signed" }), json(signerAudit(signerId2, "local-client")),
+    ]);
+    await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
+    expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unchanged source PDF when metadata attests a different signed version", async () => {
+    const signed = new TextEncoder().encode("%PDF-1.7\nactually completed version\n%%EOF");
+    const { provider, dependencies, fetch } = setup([json(remoteRequest("done")), json(signedMetadata(signed)), new Response(source, { headers: { "content-type": "application/pdf" } })]);
+    await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
+  });
+
+  it("rejects source metadata claiming no completed signature before downloading", async () => {
+    const { provider, dependencies, fetch } = setup([json(remoteRequest("done")), json({ ...signedMetadata(source), is_signed: false })]);
+    await expect(provider.fetchEvidencePackage(requestId)).rejects.toThrow("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
+    expect(fetch).toHaveBeenCalledTimes(2);
     expect(dependencies.state.archiveEvidence).not.toHaveBeenCalled();
   });
 

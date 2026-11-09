@@ -92,7 +92,7 @@ function signerFingerprint(value: Record<string, unknown>): string {
 
 /** YouSign's documented JSON audit format binds initial document hashes to the
  * actual request and signer. An arbitrary JSON object is never sufficient. */
-function validateAudit(audit: Record<string, unknown>, requestId: string, state: YousignProviderRequestState, providerSignerId: string, remoteSigner: Record<string, unknown>): void {
+function validateAudit(audit: Record<string, unknown>, requestId: string, state: YousignProviderRequestState, providerSignerId: string, remoteSigner: Record<string, unknown>): ReadonlyMap<string, readonly string[]> {
   const request = record(audit.signature_request), signer = record(audit.signer), identity = record(remoteSigner.info);
   const documents = list(audit.documents);
   if (typeof audit.version !== "number" || !Number.isFinite(audit.version) || audit.version < 1
@@ -102,12 +102,15 @@ function validateAudit(audit: Record<string, unknown>, requestId: string, state:
     || record(audit.electronic_signature_level).level !== "Simple electronic signature"
     || documents.length !== state.documents.length || new Set(documents.map(document => document.id)).size !== documents.length) fail("YOUSIGN_AUDIT_BINDING_MISMATCH");
   record(audit.authentication);
+  const signedHashes = new Map<string, readonly string[]>();
   for (const expected of state.documents) {
     const document = documents.find(candidate => candidate.id === expected.providerDocumentId);
     if (!document || document.initial_hash !== expected.sourceSha256) fail("YOUSIGN_AUDIT_BINDING_MISMATCH");
     const signatures = list(document.signatures);
     if (!signatures.length || signatures.some(signature => typeof signature.hash !== "string" || !HASH.test(signature.hash))) fail("YOUSIGN_AUDIT_BINDING_MISMATCH");
+    signedHashes.set(expected.providerDocumentId, signatures.map(signature => String(signature.hash)));
   }
+  return signedHashes;
 }
 
 /**
@@ -275,6 +278,7 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
       providerEventId: eventId, nonce: eventId, providerEnvelopeId: requestId, type: mapped.type,
       occurredAt: new Date(timestamp * 1000).toISOString(), payloadSha256: sha(rawBody), signatureFingerprint: sha(supplied),
       ...(signerId ? { signerId } : {}), ...(mapped.type === "SIGNER_SIGNED" ? { achievedLevel: "SIMPLE" as const } : {}),
+      ...(mapped.type === "SIGNER_SIGNED" && remoteRequest.status === "done" ? { finalEvidenceRequired: true } : {}),
     };
   }
 
@@ -291,14 +295,22 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
       || state.signers.some(signer => !remoteSigners.some(remote => remote.id === signer.providerSignerId && remote.status === "signed"))) fail("YOUSIGN_EVIDENCE_BINDING_MISMATCH");
     const artifacts: YousignEvidenceArtifact[] = [];
     const manifest: { kind: string; providerReference: string; sourceSha256?: string; sha256: string }[] = [];
+    const finalDocumentHashes = new Map<string, string>();
+    const auditedDocumentHashes = new Map<string, Set<string>>();
     let total = 0;
     // A document must never be downloaded in parallel with itself.
     for (const document of [...state.documents].sort((a, b) => a.providerDocumentId.localeCompare(b.providerDocumentId))) {
+      const metadata = record(await this.#json(`/signature_requests/${requestId}/documents/${id(document.providerDocumentId)}`));
+      if (id(metadata.id) !== document.providerDocumentId || metadata.nature !== "signable_document" || metadata.content_type !== "application/pdf" || metadata.is_signed !== true
+        || typeof metadata.sha256 !== "string" || !HASH.test(metadata.sha256)) fail("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
       const bytes = await this.#bytes(`/signature_requests/${requestId}/documents/${id(document.providerDocumentId)}/download`, MAX_PDF_BYTES, "application/pdf");
       total += bytes.byteLength;
       if (!isPdf(bytes) || total > MAX_TOTAL_BYTES) fail("YOUSIGN_EVIDENCE_INVALID");
+      const finalHash = sha(bytes);
+      if (finalHash !== metadata.sha256) fail("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
+      finalDocumentHashes.set(document.providerDocumentId, finalHash);
       artifacts.push({ kind: "SIGNED_PDF", providerReference: document.providerDocumentId, bytes });
-      manifest.push({ kind: "SIGNED_PDF", providerReference: document.providerDocumentId, sourceSha256: document.sourceSha256, sha256: sha(bytes) });
+      manifest.push({ kind: "SIGNED_PDF", providerReference: document.providerDocumentId, sourceSha256: document.sourceSha256, sha256: finalHash });
     }
     for (const signer of [...state.signers].sort((a, b) => a.providerSignerId.localeCompare(b.providerSignerId))) {
       const remote = record(await this.#json(`/signature_requests/${requestId}/signers/${id(signer.providerSignerId)}`));
@@ -307,10 +319,23 @@ export class YousignSandboxSignatureProvider implements SignatureProvider {
       total += bytes.byteLength;
       let audit: Record<string, unknown>;
       try { audit = record(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes))); } catch { return fail("YOUSIGN_EVIDENCE_INVALID"); }
-      validateAudit(audit, requestId, state, signer.providerSignerId, remote);
+      for (const [documentId, hashes] of validateAudit(audit, requestId, state, signer.providerSignerId, remote)) {
+        const existing = auditedDocumentHashes.get(documentId) ?? new Set<string>();
+        for (const hash of hashes) existing.add(hash);
+        auditedDocumentHashes.set(documentId, existing);
+      }
       if (total > MAX_TOTAL_BYTES) fail("YOUSIGN_EVIDENCE_INVALID");
       artifacts.push({ kind: "AUDIT_JSON", providerReference: signer.providerSignerId, bytes });
       manifest.push({ kind: "AUDIT_JSON", providerReference: signer.providerSignerId, sha256: sha(bytes) });
+    }
+    // An earlier signer may attest only an intermediate revision. At least one
+    // authenticated audit must bind the exact final bytes for EACH source PDF.
+    // The public reference does not fully define signatures[].hash semantics;
+    // incompatible provider formats stay closed pending a real sandbox recipe.
+    // These checks bind provider-attested artifacts; they do not validate PDF
+    // certificates or trusted timestamps, and cannot satisfy those policies.
+    for (const [documentId, finalHash] of finalDocumentHashes) {
+      if (!auditedDocumentHashes.get(documentId)?.has(finalHash)) fail("YOUSIGN_FINAL_DOCUMENT_EVIDENCE_MISMATCH");
     }
     await this.#dependencies.state.archiveEvidence(requestId, artifacts);
     return { providerEnvelopeId: requestId, achievedLevel: "SIMPLE", finalHash: sha(JSON.stringify({ provider: this.code, sandbox: true, requestId, artifacts: manifest })), documentHashes: state.documents.map(document => document.sourceSha256) };
