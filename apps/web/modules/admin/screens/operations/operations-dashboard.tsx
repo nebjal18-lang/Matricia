@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {SubscriptionCredits} from "./subscription-credits";
 import { PaymentReceipts } from "./payment-receipts";
 import { MediaAssetForm, MediaInvestigationForm } from "./media-forms";
@@ -73,7 +74,8 @@ export function OperationsDashboard({ dashboard, locale, messages: m }: { dashbo
     </section>
     <section id="parametres" className="scroll-mt-24 rounded-xl border bg-card p-5">
       <h2 className="text-xl font-semibold">{locale === "ar" ? "إعدادات المنصة" : "Paramètres plateforme"}</h2>
-      <p className="mt-2 leading-7 text-muted-foreground">{locale === "ar" ? "لا محرر إعدادات عام هنا. التغييرات الحساسة تمر بطلب تحقق بأربعة أعين." : "Aucun éditeur de configuration générale ici. Les changements sensibles passent par une demande à quatre yeux."}</p>
+      <p className="mt-2 leading-7 text-muted-foreground">{locale === "ar" ? "أدخلوا بيانات المؤسسة ومفاتيح المزوّدين في الإعداد المخصص، ثم اختبروا الاتصال واعتمدوا النسخة المحددة بواسطة مسؤول آخر." : "Renseignez votre entreprise et vos connexions dans la configuration dédiée, testez les services puis faites approuver la version exacte par un autre administrateur."}</p>
+      <Link href={`/${locale}/administration/configuration`} className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground">{locale === "ar" ? "فتح الإعداد" : "Ouvrir la configuration"}</Link>
     </section>
     <section id="archives" className="scroll-mt-24 rounded-xl border bg-card p-5">
       <h2 className="text-xl font-semibold">{locale === "ar" ? "الأرشيف والاستعادة" : "Archives et restauration"}</h2>

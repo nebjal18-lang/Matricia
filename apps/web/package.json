@@ -14,12 +14,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@matricia/signature-v41": "workspace:*",
     "@base-ui/react": "^1.7.0",
     "@fontsource/noto-sans-arabic": "5.2.8",
     "@hookform/resolvers": "^5.7.1",
     "@matricia/infrastructure": "workspace:*",
     "@matricia/observability": "workspace:*",
+    "@matricia/signature-v41": "workspace:*",
     "@matricia/ui": "workspace:*",
     "@next/env": "16.4.1",
     "@shadcn/react": "^0.3.0",
@@ -34,6 +34,7 @@
     "lucide-react": "^1.31.0",
     "next": "16.4.1",
     "next-themes": "^0.4.6",
+    "pdf-lib": "1.17.1",
     "pdfmake": "0.2.20",
     "radix-ui": "^1.6.7",
     "react": "19.2.6",

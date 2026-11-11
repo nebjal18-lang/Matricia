@@ -21,6 +21,9 @@ import { getAdminFinanceMessages } from "@/modules/admin/screens/finance/message
 import { PnlPanel } from "@/modules/admin/screens/finance/pnl-panel";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
+import { loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
+import { financeAuditOrganizationContext } from "@/modules/admin/screens/finance/audit-organization-context";
+import { FinanceAuditOrganizationSelector } from "@/modules/admin/screens/finance/audit-organization-selector";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +36,14 @@ export default async function AdminFinancePage({
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const [result, boxes, pnl, closure, catalog, access] = await Promise.all([
+  const [result, boxes, pnl, closure, catalog, access, supervision] = await Promise.all([
     loadAdminFinanceDashboard(),
     loadAdminBoxesDashboard(),
     loadAdminPnlDashboard(),
     loadAdminClosureDashboard(),
     loadAdminCommerceCatalog(),
     loadMyPlatformAccess(),
+    loadAdminSupervisionDashboard(100),
   ]);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/finance` }));
   const m = getAdminFinanceMessages(locale);
@@ -48,14 +52,16 @@ export default async function AdminFinancePage({
   const ar = locale === "ar";
   const mfaBlocked = access.status === "ok" && !access.requirementSatisfied;
   const blockedCopy = (reason: string) => mfaBlocked && reason === "FORBIDDEN" ? mfaRequiredMessage(locale) : reason === "FORBIDDEN" ? m.forbidden : m.unavailable;
-  const auditOrganizationId = query.organizationId
-    ?? (boxes.status === "success" ? boxes.value.wallets[0]?.organization_id ?? null : null)
-    ?? (result.status === "success" ? result.value.subscriptions[0]?.organization_id ?? null : null);
+  const organizationContext = financeAuditOrganizationContext(query.organizationId, supervision.status === "success"
+    ? { status: "success", organizations: supervision.value.organizations }
+    : { status: "error" });
+  const auditOrganizationId = organizationContext.organizationId;
 
   return (
     <AdminModulePage locale={locale} active="finance" path="finance" title={m.title} lead={c.hubFinanceLead} hubGroup="finance">
       <Link className="admin-btn-outline inline-flex min-h-11 items-center" href={`/${locale}/administration/finance/recompenses`}>{ar?"مراجعة مكافآت إحالة العملاء":"Examiner les récompenses du parrainage Client"}</Link>
       <Link className="admin-btn-outline inline-flex min-h-11 items-center" href={`/${locale}/administration/finance/rapprochements-couts`}>{financeCostProofCopy[locale].openReconciliation}</Link>
+      <FinanceAuditOrganizationSelector locale={locale} context={organizationContext}/>
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "MFA_REQUIRED" ? mfaRequiredMessage(locale) : result.reason === "FORBIDDEN" ? m.forbidden : m.unavailable}</AlertTitle>

@@ -79,7 +79,16 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: supabasePublishableKey,
   },
   async headers() {
-    return [{ source: "/:path*", headers: [...securityHeaders] }];
+    return [
+      { source: "/:path*", headers: [...securityHeaders] },
+      {
+        source: "/api/signatures/yousign/envelopes/:envelopeId/documents/:documentId",
+        headers: [
+          { key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+    ];
   },
   async rewrites() {
     return [{ source: "/favicon.ico", destination: "/favicon.svg" }];

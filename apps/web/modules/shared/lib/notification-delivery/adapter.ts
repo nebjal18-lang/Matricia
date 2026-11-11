@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { isIP } from "node:net";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 
 export type NotificationDeliveryJob = {
   deliveryId: string;
@@ -134,6 +135,15 @@ async function providerMessageId(response: Response, adapter: EmailProviderReque
 export async function deliverNotification(job: NotificationDeliveryJob, dependencies: Dependencies): Promise<NotificationDeliveryResult> {
   if (job.channel === "IN_APP") return { outcome: "DELIVERED", providerMessageId: `in-app-${job.deliveryId}`, evidence: { adapter: "IN_APP" } };
   if (!job.recipientEmail || !job.providerIdempotencyKey) return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_RECIPIENT_INVALID", evidence: { adapter: "EMAIL" } };
+  if (dependencies.env.EMAIL_DELIVERY_MODE === "DEMO" && !dependencies.env.SUPABASE_SERVICE_ROLE_KEY && !dependencies.env.APP_ENCRYPTION_KEY
+    && (dependencies.env.NODE_ENV === "production" || dependencies.env.APP_ENV?.trim().toLowerCase() === "production")) {
+    return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_DEMO_FORBIDDEN", evidence: { adapter: "EMAIL" } };
+  }
+  try {
+    dependencies = { ...dependencies, env: await getPlatformRuntimeEnvironment(dependencies.env, ["RESEND"]) };
+  } catch {
+    return { outcome: "RETRYABLE_FAILURE", errorCode: "EMAIL_CONFIGURATION_UNAVAILABLE", evidence: { adapter: "EMAIL" } };
+  }
   const mode = dependencies.env.EMAIL_DELIVERY_MODE;
   if (mode === "DEMO") return (dependencies.env.NODE_ENV === "production" || dependencies.env.APP_ENV?.trim().toLowerCase() === "production")
     ? { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_DEMO_FORBIDDEN", evidence: { adapter: "EMAIL" } }
