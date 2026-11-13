@@ -22,6 +22,7 @@ import {
 } from "@/modules/admin/data/spaces/layout-blueprint";
 import { spaceHref, spaceSpec, statusTone, type SpaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
 import type { SpaceRow } from "@/modules/admin/data/spaces/space-data";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { PipelineGlyph } from "./pipeline-step";
 import {
   CompanyDecisionForm,
@@ -101,7 +102,7 @@ export function SpaceQueueBoard({
                 <select name="vue" defaultValue={vue ?? ""}>
                   <option value="">{t(locale, "Tous", "الكل")}</option>
                   {vue&&!statuses.includes(vue)?<option value={vue}>{pills.find((_,index)=>adminPillCode(space,index)===vue)??vue}</option>:null}
-                  {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                  {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status, locale)}</option>)}
                 </select>
               </label>
             ) : vue ? <input type="hidden" name="vue" value={vue} /> : null}
@@ -130,7 +131,7 @@ export function SpaceQueueBoard({
                           {index === 0 ? (
                             <Link href={row.href}><strong>{row.title}</strong></Link>
                           ) : columnLooksLikeStatus(column) ? (
-                            <span className="client-status-chip" data-tone={statusTone(row.cells[index] ?? row.status)}>{row.cells[index] ?? "—"}</span>
+                            <span className="client-status-chip" data-tone={statusTone(row.cells[index] ?? row.status)}>{localizeStatus(row.cells[index] ?? row.status, locale)}</span>
                           ) : (row.cells[index] ?? "—")}
                         </td>
                       ))}
@@ -166,7 +167,7 @@ export function SpaceQueueBoard({
                   <li key={row.id}>
                     <span>
                       <strong>{row.title}</strong>
-                      <small>{row.status}</small>
+                      <small>{localizeStatus(row.status, locale)}</small>
                     </span>
                     <Link href={row.href}>{t(locale, "Ouvrir", "فتح")}</Link>
                   </li>

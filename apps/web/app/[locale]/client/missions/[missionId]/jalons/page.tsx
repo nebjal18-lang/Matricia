@@ -42,7 +42,7 @@ export default async function ClientMissionJalonsPage({
     <ClientAppShell languagePath={`/${locale}/client/missions/${missionId}/jalons?${languageParams}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
       <JalonsBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} mission={mission} messages={messages} selectedJalonId={query.jalonId} assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>
         {result.status === "error" ? (
-          <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
+          <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason === "FORBIDDEN_ORGANIZATION" || result.reason === "FORBIDDEN" ? messages.forbidden : result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.failed}</AlertDescription></Alert>
         ) : dashboard && dashboard.missions.length === 0 ? (
           <p role="status">{messages.empty}</p>
         ) : dashboard ? (

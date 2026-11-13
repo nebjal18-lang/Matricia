@@ -26,7 +26,7 @@ export default async function Page({
   const providerOptions = providers.status === "success" ? providers.dashboard.providers.map((item) => ({ id: item.organizationId, name: item.organizationName })) : [];
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/achats-groupes` }));
   return (
-    <AdminModulePage locale={locale} active="finance" path="achats-groupes" title={m.title} lead={m.description}>
+    <AdminModulePage locale={locale} active="parcours" parcoursCurrent="recurring" path="achats-groupes" title={m.title} lead={m.description}>
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "FORBIDDEN" ? m.forbidden : m.unavailable}</AlertTitle>

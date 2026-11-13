@@ -49,8 +49,7 @@ export default async function AdminCommandCenterPage({
       kicker={c.kicker}
     >
       {query.q?.trim() ? <AdminSearchResults locale={locale} query={query.q.trim()} organizationQuery={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} /> : null}
-      <details className="client-ops" id="command-today" open>
-        <summary>{m.today}</summary>
+      <div id="command-today" className="admin-command-surface">
         {result.status === "error" ? (
           <Alert variant="destructive">
             <AlertTitle>{result.reason === "FORBIDDEN" ? m.forbiddenPage : result.reason === "MFA_REQUIRED" ? m.mfaRequired : m.loadError}</AlertTitle>
@@ -67,7 +66,7 @@ export default async function AdminCommandCenterPage({
             keys={Array.from({ length: keyCount }, () => crypto.randomUUID())}
           />
         )}
-      </details>
+      </div>
       <AdminDirectoryBoard locale={locale} query={space.selectedQuery} />
     </AdminAppShell>
   );

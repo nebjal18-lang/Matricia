@@ -47,7 +47,7 @@ export default async function ProviderDisputesPage({
         cases={result.value.cases}
         selected={selected.status === "success" ? selected.value : null}
         messages={m}
-        canOpen={false}
+        canOpen
         hrefPrefix={`/${locale}/sous-traitant/litiges`}
       />
     </ProviderAppShell>

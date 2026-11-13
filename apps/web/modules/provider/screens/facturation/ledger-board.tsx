@@ -1,3 +1,4 @@
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import{PagedBillingTable}from"./paged-history";
 import{workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import Link from "next/link";
@@ -175,7 +176,7 @@ function CommissionsTable({ locale, query, receipts, m }: { locale: Locale; quer
             <td><Link href={`/${locale}/sous-traitant/facturation/${row.invoiceId}${query}`} className="client-text-link" dir="ltr">{row.invoiceNumber}</Link></td>
             <td dir="ltr">{formatMinor(row.commissionMinor, row.currency, locale)}</td>
             <td dir="ltr">{formatMinor(row.taxMinor, row.currency, locale)}</td>
-            <td dir="ltr">{row.recordedAt.slice(0, 10)}</td>
+            <td dir="ltr">{formatDateTimeCasablanca(row.recordedAt, locale)}</td>
           </tr>
         ))}
       </tbody>

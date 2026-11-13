@@ -64,8 +64,8 @@ export async function loadProviderHomeSnapshot(input: {
       loadProviderQuotes(input.organizationId ?? undefined, { mode: "consultations", tab: "answer", page: 1 }),
       loadProviderDashboard(input.organizationId ?? undefined),
       loadProviderMissions(input.locale, input.organizationId ?? undefined),
-      withSoftBudget(loadProviderBilling(input.organizationId ?? undefined), { status: "error", reason: "QUERY_FAILED" }, 1500),
-      withSoftBudget(loadProviderReputation(input.organizationId ?? undefined), { status: "error", reason: "QUERY_FAILED" }, 1500),
+      withSoftBudget(loadProviderBilling(input.organizationId ?? undefined), { status: "error", reason: "QUERY_FAILED" }, 800),
+      withSoftBudget(loadProviderReputation(input.organizationId ?? undefined), { status: "error", reason: "QUERY_FAILED" }, 800),
     ]);
 
     if (quotes.status === "error" && quotes.reason === "UNAUTHENTICATED") {

@@ -421,7 +421,6 @@ export function OrganizationFicheBoard({
             <div><dt>{locale === "ar" ? "البلد" : "Pays"}</dt><dd dir="ltr">{org.country_code}</dd></div>
             <div><dt>{locale === "ar" ? "المعرّف الضريبي (IF)" : "Identifiant fiscal (IF)"}</dt><dd dir="ltr">{org.client_legal_profile?.if_number ?? unknown}</dd></div>
             <div><dt>{locale === "ar" ? "السجل التجاري (RC)" : "Registre de commerce (RC)"}</dt><dd dir="ltr">{org.client_legal_profile?.rc_number ?? unknown}</dd></div>
-            <div><dt>{locale === "ar" ? "المعرّف" : "Réf."}</dt><dd dir="ltr">{org.id.slice(0, 8)}…</dd></div>
           </dl>
         </article>
         <article className="client-card">

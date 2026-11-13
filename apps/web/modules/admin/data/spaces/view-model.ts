@@ -34,9 +34,13 @@ export function localizeStatus(status: string, locale: Locale) {
   const c = adminCopy(locale);
   const key = status.toUpperCase();
   if (key === "ACTIVE") return c.statusActive;
-  if (key === "PENDING") return c.statusPending;
+  if (key === "PENDING" || key === "PENDING_APPROVAL") return c.statusPending;
+  if (key === "PROPOSED") return locale === "ar" ? "مقترح" : "Proposé";
   if (key === "SUSPENDED") return c.statusSuspended;
-  if (key === "ARCHIVED") return locale==="ar"?"مؤرشفة":"Archivée";
+  if (key === "ARCHIVED" || key === "RETIRED") return locale === "ar" ? "مؤرشفة" : "Archivée";
+  if (key === "APPROVED" || key === "AUTHORIZED") return locale === "ar" ? "مصادق" : "Approuvé";
+  if (key === "REJECTED") return locale === "ar" ? "مرفوض" : "Refusé";
+  if (key === "INFORMATION_REQUIRED") return locale === "ar" ? "معلومات مطلوبة" : "Complément demandé";
   return status;
 }
 

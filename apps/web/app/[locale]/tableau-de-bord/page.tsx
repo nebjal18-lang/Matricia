@@ -5,21 +5,16 @@ import type { ReactNode } from "react";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { z } from "zod";
-import { Alert, AlertDescription } from "@/modules/shared/ui/alert";
 import { dashboardHomeCopy, isCatalogFixtureOrganizationName, resolveOrganizationContext } from "@/modules/shared/module-hub-copy";
-import { filterDashboardActions, summarizeDashboardActions } from "@/modules/shared/lib/action-center/dashboard-summary";
 import { loadUserActionCenterWithinBudget } from "@/modules/shared/lib/action-center/repository";
 import { loadClientHomeSnapshot } from "@/modules/client/data/home/repository";
-import { applyDemoClientHome } from "@/modules/client/data/home/demo-scenario";
-import { filterClientFacingActions } from "@/modules/client/data/home/view-model";
 import { loadProviderHomeSnapshot } from "@/modules/provider/data/home/repository";
-import { filterProviderFacingActions } from "@/modules/provider/data/home/view-model";
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
 import { loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
 import { resolveWorkspaceLanding, workspaceLandingPath } from "@/modules/shared/lib/connected-space/workspace-landing";
 import { availableWorkspaces } from "@/modules/shared/lib/auth/workspace-navigation";
 import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
-import { signOut } from "./actions";
+import { StreamedClientDashboard, StreamedProviderDashboard } from "./dashboard-stream";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -167,13 +162,14 @@ export default async function DashboardPage({
   const alternate = locale === "fr" ? "ar" : "fr";
   let selectedQuery = context.selected ? `?organizationId=${encodeURIComponent(context.selected.organizationId)}` : "";
   const hasPlatformRole = access.status === "ok" && access.requirementSatisfied && access.roles.size > 0;
+  const organizationId = context.selected?.organizationId ?? null;
 
-  const [membershipRoles, actionCenter] = await Promise.all([
-    context.selected
-      ? supabase.from("organization_member_roles").select("role_code").eq("membership_id", context.selected.membershipId).is("revoked_at", null).limit(20)
-      : Promise.resolve({ data: [] as Array<{ role_code: string }>, error: null }),
-    loadUserActionCenterWithinBudget(locale, now, context.selected?.organizationId ?? null, { includeAdmin: hasPlatformRole }),
-  ]);
+  // Start action-center early; do not block routing or the home snapshot on it.
+  const actionCenterPromise = loadUserActionCenterWithinBudget(locale, now, organizationId, { includeAdmin: hasPlatformRole });
+
+  const membershipRoles = context.selected
+    ? await supabase.from("organization_member_roles").select("role_code").eq("membership_id", context.selected.membershipId).is("revoked_at", null).limit(20)
+    : { data: [] as Array<{ role_code: string }>, error: null };
   if (membershipRoles.error) return <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6"><WorkspaceFailure locale={locale} reason="QUERY_FAILED" returnPath={`/${locale}/tableau-de-bord${selectedQuery}`} /></main>;
   const roleCodes = new Set((membershipRoles.data ?? []).map((row) => String(row.role_code)));
   const defaultLanding = resolveWorkspaceLanding({
@@ -181,7 +177,7 @@ export default async function DashboardPage({
     platformRoleCodes: access.status === "ok" ? access.roles : [],
   });
   const allowed = availableWorkspaces(roleCodes, access.roles);
-  const requestedWorkspace = allowed.find(kind => kind === query.workspace);
+  const requestedWorkspace = allowed.find((kind) => kind === query.workspace);
   const landing = requestedWorkspace ?? defaultLanding;
   if (requestedWorkspace) selectedQuery += `${selectedQuery ? "&" : "?"}workspace=${requestedWorkspace}`;
   const roleFallback = Boolean(query.workspace && !requestedWorkspace) || query.navigation === "role-fallback";
@@ -189,12 +185,6 @@ export default async function DashboardPage({
   const navigationNotice = roleFallback ? <p role="status" className="mx-4 mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">{locale === "ar" ? "المساحة المطلوبة غير متاحة لحسابكم. تم فتح مساحتكم المسموح بها." : "L’espace demandé n’est pas habilité pour votre compte. Votre espace autorisé a été ouvert."}</p> : null;
   const isProviderSpace = [...roleCodes].some((role) => PROVIDER_ROLES.has(role));
   const preferProvider = landing === "provider" && isProviderSpace;
-
-  const scopedRaw = actionCenter.status === "success" ? filterDashboardActions(actionCenter.value.items, context.selected?.organizationId ?? null) : [];
-  const scopedItems = preferProvider ? filterProviderFacingActions(scopedRaw, hasPlatformRole) : filterClientFacingActions(scopedRaw, hasPlatformRole);
-  const search = typeof query.q === "string" ? query.q.trim().toLowerCase() : "";
-  const searchedItems = search ? scopedItems.filter((item) => `${item.title} ${item.detail} ${item.organizationName ?? ""}`.toLowerCase().includes(search)) : scopedItems;
-  const summary = summarizeDashboardActions(searchedItems, now);
 
   const switcher = (compact: boolean) => (
     <OrganizationSwitcher
@@ -207,81 +197,39 @@ export default async function DashboardPage({
     />
   );
 
+  const shared = {
+    locale,
+    organizationId,
+    organizationName: selectedMembership?.organizations.display_name ?? null,
+    selectedQuery,
+    alternate: alternate as "fr" | "ar",
+    searchRaw: typeof query.q === "string" ? query.q : "",
+    hasPlatformRole,
+    now,
+    userEmail: access.status === "ok" ? access.email : null,
+    membershipSwitcher: switcher(preferProvider ? false : true),
+    showSignoutError: query.signout === "failed",
+    contextRejected: context.rejected,
+    actionCenterPromise,
+  };
+
   if (preferProvider) {
-    const snapshot = await loadProviderHomeSnapshot({
-      organizationId: context.selected?.organizationId ?? null,
+    const snapshotPromise = loadProviderHomeSnapshot({
+      organizationId,
       locale,
-      actionItems: searchedItems,
+      actionItems: [],
       now,
     });
-    const { ProviderDashboardHome } = await import("@/modules/provider/screens/dashboard");
-    return (
-      <>
-        {navigationNotice}
-        {query.signout === "failed" || context.rejected ? (
-          <div className="space-y-2 px-4 pt-4">
-            {query.signout === "failed" ? <Alert variant="destructive"><AlertDescription>{m.signOutError}</AlertDescription></Alert> : null}
-            {context.rejected ? <Alert variant="destructive"><AlertDescription>{m.contextRejected}</AlertDescription></Alert> : null}
-          </div>
-        ) : null}
-        <ProviderDashboardHome
-          locale={locale}
-          userEmail={access.status === "ok" ? access.email : null}
-          organizationName={selectedMembership?.organizations.display_name ?? (snapshot.status === "success" ? snapshot.organizationName : null)}
-          selectedQuery={selectedQuery}
-          alternate={alternate}
-          search={typeof query.q === "string" ? query.q : ""}
-          searchedItems={searchedItems}
-          summary={summary}
-          snapshot={snapshot}
-          membershipSwitcher={switcher(false)}
-          signOutAction={signOut}
-        />
-      </>
-    );
+    return <StreamedProviderDashboard snapshotPromise={snapshotPromise} shared={shared} navigationNotice={navigationNotice} />;
   }
 
   const isTeamLead = [...roleCodes].some((role) => role === "CLIENT_OWNER" || role === "CLIENT_ADMIN");
-  const snapshot = await loadClientHomeSnapshot({
-    organizationId: context.selected?.organizationId ?? null,
+  const snapshotPromise = loadClientHomeSnapshot({
+    organizationId,
     locale,
-    actionItems: scopedItems,
+    actionItems: [],
     now,
     isTeamLead,
   });
-  const demoHome = applyDemoClientHome({
-    locale,
-    organizationId: context.selected?.organizationId ?? null,
-    organizationName: selectedMembership?.organizations.display_name ?? (snapshot.status === "success" ? snapshot.organizationName : null),
-    selectedQuery,
-    now,
-    items: scopedItems,
-    snapshot,
-  });
-  const visibleItems = search
-    ? demoHome.items.filter((item) => `${item.title} ${item.detail} ${item.organizationName ?? ""}`.toLowerCase().includes(search))
-    : demoHome.items;
-  const demoSummary = summarizeDashboardActions(visibleItems, now);
-  const { ClientDashboardHome } = await import("@/modules/client/screens/dashboard");
-
-  return (
-    <ClientDashboardHome
-      locale={locale}
-      userEmail={access.status === "ok" ? access.email : null}
-      organizationName={selectedMembership?.organizations.display_name ?? null}
-      selectedOrganizationId={context.selected?.organizationId ?? null}
-      selectedQuery={selectedQuery}
-      alternate={alternate}
-      search={typeof query.q === "string" ? query.q : ""}
-      searchedItems={visibleItems}
-      summary={demoSummary}
-      snapshot={demoHome.snapshot}
-      membershipSwitcher={switcher(true)}
-      actionCenterError={actionCenter.status === "error"}
-      showSignoutError={query.signout === "failed"}
-      contextRejected={context.rejected}
-      signOutAction={signOut}
-      now={now}
-    />
-  );
+  return <StreamedClientDashboard snapshotPromise={snapshotPromise} shared={shared} />;
 }

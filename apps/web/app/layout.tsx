@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { directionFor, normalizeLocale } from "@/modules/shared/lib/i18n/locale";
-import { getPublicSiteUrl, publicStructuredData } from "@/modules/shared/lib/seo/metadata";
+import { getPublicSiteUrl } from "@/modules/shared/lib/seo/metadata";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,20 +16,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const requestHeaders = await headers();
-  const locale = normalizeLocale(requestHeaders.get("x-matricia-locale"));
-  const structuredData = publicStructuredData(locale);
+  // Locale attributes are synchronized by DocumentLocaleSync; avoid headers() here so
+  // public routes are not forced fully dynamic at the root boundary.
   return (
-    <html lang={locale} dir={directionFor(locale)}>
-      <body className="antialiased">
-        {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
-      </body>
+    <html lang="fr" dir="ltr" suppressHydrationWarning>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

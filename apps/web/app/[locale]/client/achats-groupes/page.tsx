@@ -38,7 +38,7 @@ export default async function VolumePage({
         {result.status === "error" ? (
           <Alert variant={result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? "default" : "destructive"}>
             <AlertTitle>{result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertTitle>
-            <AlertDescription>{result.reason}</AlertDescription>
+            <AlertDescription>{result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : result.reason === "FORBIDDEN" ? messages.forbidden : messages.loadError}</AlertDescription>
           </Alert>
         ) : (
           <VolumePanel dashboard={result.dashboard} locale={locale} m={messages} keys={[crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()]} />

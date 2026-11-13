@@ -9,3 +9,56 @@ it.each(["fr", "ar"] as const)("keeps organization and search when changing the 
   expect(filterForm).not.toContain('name="actionPage"');
   expect(html).toContain(`/${locale}/administration/devis/quote-123?organizationId=org-1`);
 });
+
+it("surfaces SLA breach and keeps claim collapsed until opened", () => {
+  const html = renderToStaticMarkup(
+    <CommandCenterPanel
+      dashboard={dashboard}
+      locale="fr"
+      m={getCommandCenterMessages("fr")}
+      keys={keys}
+      currentTime="2026-11-13T12:00:00.000Z"
+    />,
+  );
+  expect(html).toContain("SLA dépassé");
+  expect(html).toContain('data-overdue="true"');
+  expect(html).toContain("<summary>Prendre en charge</summary>");
+  expect(html).toMatch(/<details class="admin-work-action-form">\s*<summary>Prendre en charge<\/summary>/);
+  expect(html).not.toMatch(/<details class="admin-work-action-form" open>\s*<summary>Prendre en charge<\/summary>/);
+  expect(html.indexOf("<summary>Prendre en charge</summary>")).toBeLessThan(html.indexOf('name="reason"'));
+});
+
+it("humanizes executed sensitive actions without dumping raw technical payloads", () => {
+  const resourceId = "5a4a029f-1234-4abc-8def-abcdef012345";
+  const resultHash = "ea42a6c0123456789abcdef0123456789abcdef0123456789abcdef012345678";
+  const html = renderToStaticMarkup(
+    <CommandCenterPanel
+      dashboard={{
+        ...dashboard,
+        actions: [{
+          ...dashboard.actions[0]!,
+          actionType: "MANUAL_EXCEPTION",
+          targetEnvironment: "DEVELOPMENT",
+          resourceType: "ORGANIZATION",
+          resourceId,
+          status: "EXECUTED",
+          executedAt: "2026-11-08T01:10:27.679938+00:00",
+          resultHash,
+          reason: "Révision canonique de l’identité prestataire pour le parcours de développement",
+        }],
+      }}
+      locale="fr"
+      m={getCommandCenterMessages("fr")}
+      keys={keys}
+      currentTime="2026-11-08T12:00:00.000Z"
+    />,
+  );
+  expect(html).toContain("Entreprise");
+  expect(html).toContain("Preuve d’exécution");
+  expect(html).toContain('data-tone="ok"');
+  expect(html).toContain(`title="${resourceId}"`);
+  expect(html).toContain(`title="${resultHash}"`);
+  expect(html).not.toContain(`ORGANIZATION/${resourceId}`);
+  expect(html).not.toMatch(new RegExp(`>${resultHash}<`));
+  expect(html).not.toMatch(/>2026-11-08T01:10:27/);
+});

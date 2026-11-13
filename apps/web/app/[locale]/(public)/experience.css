@@ -145,7 +145,11 @@
 .journey-preview-options li.is-selected::before{border-color:var(--jp-blue);box-shadow:inset 0 0 0 4px var(--jp-blue)}
 .journey-script{margin:0 0 12px;color:var(--jp-blue);font-family:Georgia,"Times New Roman",serif;font-size:.95rem;font-style:italic;font-weight:500}
 .journey-script-inline{margin:12px 0 0}
+.premium-nav-brand{color:var(--mat-navy)}
 .premium-nav-brand-text{display:grid;line-height:1.1}
+.premium-nav-brand-name{font-size:1.25rem;line-height:1.1;color:inherit}
+.premium-nav-mark{color:#642bef;flex:0 0 auto}
+.premium-lang-current{color:var(--mat-navy);font-weight:700}
 .premium-nav-tagline{color:var(--jp-muted);font-size:.62rem;font-weight:600;letter-spacing:.01em}
 .journey-six-steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:32px 0 0;padding:0;list-style:none}
 .journey-six-steps li{display:grid;gap:8px;text-align:center}
@@ -326,19 +330,31 @@
 .premium-nav{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--mat-border);background:rgb(247 243 234 / .94);backdrop-filter:blur(16px)}
 .premium-nav-inner{display:flex;width:min(100% - 40px,1180px);min-height:72px;margin-inline:auto;align-items:center;justify-content:space-between;gap:16px}
 .public-root:has(.home-premium-page){background:none}
-.public-root:has(.home-premium-page) .premium-nav{border-bottom-color:transparent;background:transparent;backdrop-filter:none}
-.public-root:has(.home-premium-page) .premium-nav-inner{width:min(100% - 40px,1630px)}
-.public-root:has(.home-premium-page) .premium-nav-tagline{display:none}
-.public-root:has(.home-premium-page) .premium-nav-action{
-  background:var(--mat-gradient);
-  box-shadow:0 12px 26px rgb(190 32 140 / .28);
+.premium-nav--on-home,.public-root:has(.home-premium-page) .premium-nav{
+  border-bottom-color:transparent;
+  background:linear-gradient(180deg,rgb(14 22 48 / .78) 0%,rgb(14 22 48 / .35) 72%,transparent);
+  backdrop-filter:none;
 }
-.public-root:has(.home-premium-page) .premium-nav-action:hover{background:linear-gradient(97deg,#f7784d 0%,var(--mat-rose) 52%,var(--mat-violet) 100%);transform:translateY(-1px)}
-.public-root:has(.home-premium-page) .premium-nav-login{border-color:rgb(20 28 80 / .14);background:rgb(255 255 255 / .9);color:var(--mat-navy)}
-.public-root:has(.home-premium-page) .premium-lang{
-  gap:8px;border:1px solid rgb(20 28 80 / .1);border-radius:999px;background:rgb(255 255 255 / .72);padding:0 12px
+.premium-nav--on-home .premium-nav-inner,.public-root:has(.home-premium-page) .premium-nav-inner{width:min(100% - 32px,1180px)}
+.premium-nav--on-home .premium-nav-tagline,.public-root:has(.home-premium-page) .premium-nav-tagline{display:none}
+.premium-nav--on-home .premium-nav-brand,.public-root:has(.home-premium-page) .premium-nav-brand{color:#fff}
+.premium-nav--on-home .premium-nav-mark,.public-root:has(.home-premium-page) .premium-nav-mark{color:#f3c7b4}
+.premium-nav--on-home .premium-nav-link,.public-root:has(.home-premium-page) .premium-nav-link{color:rgb(255 255 255 / .92)}
+.premium-nav--on-home .premium-nav-link:hover,.public-root:has(.home-premium-page) .premium-nav-link:hover{background:rgb(255 255 255 / .14);color:#fff}
+.premium-nav--on-home .premium-nav-link[aria-current=page],.public-root:has(.home-premium-page) .premium-nav-link[aria-current=page]{box-shadow:inset 0 -2px 0 #f3c7b4;color:#fff}
+.premium-nav--on-home .premium-nav-action,.public-root:has(.home-premium-page) .premium-nav-action{
+  background:var(--mat-coral-ink);
+  box-shadow:0 12px 26px rgb(184 55 62 / .28);
 }
-.public-root:has(.home-premium-page) .premium-lang::after{content:"▾";color:rgb(26 35 64 / .55);font-size:.7rem}
+.premium-nav--on-home .premium-nav-action:hover,.public-root:has(.home-premium-page) .premium-nav-action:hover{background:var(--mat-coral);color:#fff;transform:translateY(-1px)}
+.premium-nav--on-home .premium-nav-login,.public-root:has(.home-premium-page) .premium-nav-login{border-color:rgb(255 255 255 / .45);background:rgb(255 255 255 / .14);color:#fff}
+.premium-nav--on-home .premium-lang,.public-root:has(.home-premium-page) .premium-lang{
+  gap:8px;border:1px solid rgb(255 255 255 / .32);border-radius:999px;background:rgb(255 255 255 / .14);padding:0 12px;color:#fff
+}
+.premium-nav--on-home .premium-lang a,.premium-nav--on-home .premium-lang-current,.public-root:has(.home-premium-page) .premium-lang a,.public-root:has(.home-premium-page) .premium-lang-current{color:#fff}
+.premium-nav--on-home .premium-lang::after,.public-root:has(.home-premium-page) .premium-lang::after{content:"▾";color:rgb(255 255 255 / .8);font-size:.7rem}
+.premium-nav--on-home .premium-menu-trigger,.public-root:has(.home-premium-page) .premium-menu-trigger{color:#fff;border-color:rgb(255 255 255 / .45);background:rgb(255 255 255 / .1)}
+.premium-nav--on-home .premium-nav-account,.public-root:has(.home-premium-page) .premium-nav-account{color:#fff}
 .public-root:has(.diagnostic-premium-page){background:#fff}
 .public-root:has(.diagnostic-premium-page) .premium-nav{border-bottom-color:transparent;background:transparent;backdrop-filter:none}
 .public-root:has(.diagnostic-premium-page) .premium-nav-inner{width:min(100% - 48px,1180px)}
@@ -368,6 +384,49 @@
 /* Match the lg desktop navigation; keep the account entry visible on tablets. */
 @media(max-width:1023px){.premium-nav-account{display:grid}}
 .premium-lang{display:inline-flex;min-height:44px;align-items:center;gap:6px;padding:0 8px;color:rgb(26 35 64 / .7);font-size:.82rem;font-weight:700}
+/* Home overrides after base nav rules so light-on-dark wins the cascade. */
+.premium-nav.premium-nav--on-home,
+.public-root:has(.home-premium-page) .premium-nav{
+  border-bottom-color:transparent;
+  background:linear-gradient(180deg,rgb(14 22 48 / .78) 0%,rgb(14 22 48 / .35) 72%,transparent);
+  backdrop-filter:none;
+}
+.premium-nav.premium-nav--on-home .premium-nav-brand,
+.premium-nav.premium-nav--on-home .premium-nav-brand-name,
+.premium-nav.premium-nav--on-home .premium-nav-link,
+.premium-nav.premium-nav--on-home .premium-nav-login,
+.premium-nav.premium-nav--on-home .premium-nav-account,
+.premium-nav.premium-nav--on-home .premium-lang,
+.premium-nav.premium-nav--on-home .premium-lang a,
+.premium-nav.premium-nav--on-home .premium-lang-current,
+.public-root:has(.home-premium-page) .premium-nav-brand,
+.public-root:has(.home-premium-page) .premium-nav-brand-name,
+.public-root:has(.home-premium-page) .premium-nav-link,
+.public-root:has(.home-premium-page) .premium-nav-login,
+.public-root:has(.home-premium-page) .premium-nav-account,
+.public-root:has(.home-premium-page) .premium-lang,
+.public-root:has(.home-premium-page) .premium-lang a,
+.public-root:has(.home-premium-page) .premium-lang-current{color:#fff !important}
+.premium-nav.premium-nav--on-home .premium-nav-mark,
+.public-root:has(.home-premium-page) .premium-nav-mark{color:#f3c7b4}
+.premium-nav.premium-nav--on-home .premium-nav-link:hover,
+.public-root:has(.home-premium-page) .premium-nav-link:hover{background:rgb(255 255 255 / .14);color:#fff}
+.premium-nav.premium-nav--on-home .premium-nav-link[aria-current=page],
+.public-root:has(.home-premium-page) .premium-nav-link[aria-current=page]{box-shadow:inset 0 -2px 0 #f3c7b4;color:#fff}
+.premium-nav.premium-nav--on-home .premium-nav-action,
+.public-root:has(.home-premium-page) .premium-nav-action{
+  background:var(--mat-coral-ink);
+  color:#fff;
+  box-shadow:0 12px 26px rgb(184 55 62 / .28);
+}
+.premium-nav.premium-nav--on-home .premium-nav-login,
+.public-root:has(.home-premium-page) .premium-nav-login{border-color:rgb(255 255 255 / .45);background:rgb(255 255 255 / .14)}
+.premium-nav.premium-nav--on-home .premium-lang,
+.public-root:has(.home-premium-page) .premium-lang{
+  gap:8px;border:1px solid rgb(255 255 255 / .32);border-radius:999px;background:rgb(255 255 255 / .14);padding:0 12px
+}
+.premium-nav.premium-nav--on-home .premium-menu-trigger,
+.public-root:has(.home-premium-page) .premium-menu-trigger{color:#fff;border-color:rgb(255 255 255 / .45);background:rgb(255 255 255 / .1)}
 .public-footer{border-top:1px solid var(--mat-border);background:var(--mat-navy);color:#fff}
 .journey-provider-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:22px 0;padding:0;list-style:none}
 .journey-provider-steps li{display:grid;gap:6px;padding:12px;border-radius:16px;background:var(--mat-canvas);color:var(--jp-ink);font-size:.78rem;font-weight:650}

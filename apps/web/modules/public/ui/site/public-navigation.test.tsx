@@ -71,7 +71,7 @@ describe("PublicNavigation", () => {
   it("résout strictement les routes actives", () => {
     expect(isPublicNavLinkActive("/fr/services/IT-001", "/fr/services")).toBe(true);
     expect(isPublicNavLinkActive("/fr/fournisseur", "/fr/services")).toBe(false);
-    expect(isPublicNavLinkActive("/fr", "/fr#comment-ca-marche")).toBe(true);
+    expect(isPublicNavLinkActive("/fr", "/fr#comment-ca-marche")).toBe(false);
     expect(isPublicNavLinkActive("/franchise", "/fr")).toBe(false);
   });
 

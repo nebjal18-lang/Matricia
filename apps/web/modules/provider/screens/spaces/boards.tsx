@@ -134,11 +134,17 @@ export function ProviderHomeBoard({
   const journey = (() => {
     const fr = locale === "fr";
     const stage = snapshot?.status === "success" ? snapshot.stage : null;
+    const counts = snapshot?.status === "success" ? snapshot.counts : null;
+    const reputationPublished = snapshot?.status === "success" ? snapshot.reputation.published : null;
     const pending = fr ? "À venir" : "قادمة";
     const done = fr ? "Complété" : "مكتمل";
     const current = fr ? "En cours" : "جارٍ";
     const unknown = fr ? "Non disponible" : "غير متاح";
     type JourneyState = "done" | "current" | "todo";
+    const quotesActive = (counts?.quotesInProgress ?? 0) > 0;
+    const missionsActive = (counts?.activeMissions ?? 0) > 0;
+    const reputationReady = (reputationPublished ?? 0) > 0;
+    const opportunitiesOpen = (counts?.consultationsDue ?? 0) > 0 || stage === "qualified";
     return [
       { id: "j1", title: fr ? "Profil" : "الملف", detail: stage ? done : unknown, state: (stage ? "done" : "todo") as JourneyState },
       {
@@ -150,12 +156,27 @@ export function ProviderHomeBoard({
       {
         id: "j3",
         title: fr ? "Opportunités" : "الفرص",
-        detail: stage === "qualified" ? current : pending,
-        state: (stage === "qualified" ? "current" : "todo") as JourneyState,
+        detail: stage === "qualified" ? (opportunitiesOpen ? current : done) : pending,
+        state: (stage === "qualified" ? (opportunitiesOpen ? "current" : "done") : "todo") as JourneyState,
       },
-      { id: "j4", title: fr ? "Devis" : "العروض", detail: pending, state: "todo" as JourneyState },
-      { id: "j5", title: fr ? "Missions" : "المهام", detail: pending, state: "todo" as JourneyState },
-      { id: "j6", title: fr ? "Réputation" : "السمعة", detail: pending, state: "todo" as JourneyState },
+      {
+        id: "j4",
+        title: fr ? "Devis" : "العروض",
+        detail: counts?.quotesInProgress === null ? unknown : quotesActive ? current : stage === "qualified" ? pending : pending,
+        state: (quotesActive ? "current" : stage === "qualified" && (counts?.quotesInProgress === 0) ? "done" : "todo") as JourneyState,
+      },
+      {
+        id: "j5",
+        title: fr ? "Missions" : "المهام",
+        detail: counts?.activeMissions === null ? unknown : missionsActive ? current : stage === "qualified" ? pending : pending,
+        state: (missionsActive ? "current" : stage === "qualified" && counts?.activeMissions === 0 ? "done" : "todo") as JourneyState,
+      },
+      {
+        id: "j6",
+        title: fr ? "Réputation" : "السمعة",
+        detail: reputationPublished === null ? unknown : reputationReady ? done : pending,
+        state: (reputationReady ? "done" : stage === "qualified" ? "todo" : "todo") as JourneyState,
+      },
     ];
   })();
   return (
@@ -294,16 +315,13 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
     ? [
         { id: "profile", title: c.checkActivity, status: profileReady ? c.statusSent : c.statusOpen, tone: profileReady ? "mint" : "peach", href: `/${locale}/sous-traitant/qualification${query}#qualification`, action: profileReady ? "open" : "complete" },
         { id: "services", title: c.checkServices, status: servicesReady ? c.statusSent : c.statusOpen, tone: servicesReady ? "mint" : "peach", href: `/${locale}/sous-traitant/services${query}`, action: "open" as const },
-        { id: "capacity", title: c.checkCapacity, status: capacityReady ? c.statusSent : c.statusOpen, tone: capacityReady ? "mint" : "peach", href: `/${locale}/sous-traitant/services${query}`, action: capacityReady ? "open" : "complete" },
+        { id: "capacity", title: c.checkCapacity, status: capacityReady ? c.statusSent : c.statusOpen, tone: capacityReady ? "mint" : "peach", href: `/${locale}/sous-traitant/qualification${query}#capacite`, action: capacityReady ? "open" : "complete" },
         { id: "docs", title: c.checkDocs, status: docsReady ? c.statusSent : c.statusOpen, tone: docsReady ? "mint" : "peach", href: `/${locale}/sous-traitant/documents${query}`, action: docsReady ? "open" : "complete" },
         { id: "decision", title: c.checkDecision, status: c.statusReview, tone: "violet" as const, href: `/${locale}/sous-traitant/qualification${query}`, action: "open" as const },
       ]
     : demo.checklist;
-  const verifiedCategories = [c.verifiedIdentity, c.verifiedDocuments, c.verifiedServices, c.verifiedCapacity, c.verifiedRules];
   const verified = live
-    ? (documents.filter((item) => item.status === "VERIFIED").map((item) => item.code).length
-        ? documents.filter((item) => item.status === "VERIFIED").map((item) => item.code)
-        : verifiedCategories)
+    ? documents.filter((item) => item.status === "VERIFIED").map((item) => item.code)
     : demo.verified;
   const history = live
     ? documents.map((item) => ({ id: item.id, title: item.code, detail: `${item.kind} · ${item.status}` }))
@@ -368,11 +386,15 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
         <article className="client-card">
           <header><h2>{c.verified}</h2></header>
           <p>{c.verifiedLead}</p>
-          <ul className="client-feed">
-            {verified.map((item) => (
-              <li key={item}><FileText className="size-4" aria-hidden /><span>{item}</span></li>
-            ))}
-          </ul>
+          {verified.length === 0 ? (
+            <p role="status" className="franchise-empty-panel">{locale === "ar" ? "لا توجد وثيقة موثّقة بعد." : "Aucune pièce encore vérifiée."}</p>
+          ) : (
+            <ul className="client-feed">
+              {verified.map((item) => (
+                <li key={item}><FileText className="size-4" aria-hidden /><span>{item}</span></li>
+              ))}
+            </ul>
+          )}
           <p className="client-access-note">{c.notCert}</p>
         </article>
       </section>

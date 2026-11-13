@@ -20,6 +20,7 @@ import { getComplianceMessages } from "@/modules/admin/screens/conformite-client
 import { ActorIntentForm } from "@/modules/admin/screens/spaces/actor-forms";
 import { PipelineGlyph } from "./pipeline-step";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 
 function matchClientCase(cases: AdminClientCase[], org: { display_name: string; legal_name: string }) {
   return cases.find((item) => item.organizationName === org.display_name || item.organizationName === org.legal_name)
@@ -436,7 +437,7 @@ export function UserFicheBoard({
             <h2>{a.auditHistory}</h2>
             <ul className="admin-history">
               {(fiche?.timeline ?? []).slice(0, 5).map((item) => (
-                <li key={item.ref}><span className="client-history-dot" data-tone="violet" /><span><strong>{item.label}</strong><small dir="ltr">{item.at?.slice(0, 16) ?? "—"}</small></span></li>
+                <li key={item.ref}><span className="client-history-dot" data-tone="violet" /><span><strong>{item.label}</strong><small dir="ltr">{item.at ? formatDateTimeCasablanca(item.at, locale) : "—"}</small></span></li>
               ))}
               {(fiche?.timeline.length ?? 0) === 0 ? <li><span>{c.lastChangeLead}</span></li> : null}
             </ul>
@@ -692,7 +693,7 @@ export function ClientFicheBoard({
         <article className="client-card">
           <header><h2>{a.dossierActivity}</h2></header>
           <ul className="client-feed">
-            {fiche.timeline.slice(0, 4).map((item) => <li key={item.ref}><span><strong>{item.label}</strong><small dir="ltr">{item.at?.slice(0, 16) ?? "—"}</small></span></li>)}
+            {fiche.timeline.slice(0, 4).map((item) => <li key={item.ref}><span><strong>{item.label}</strong><small dir="ltr">{item.at ? formatDateTimeCasablanca(item.at, locale) : "—"}</small></span></li>)}
             {fiche.timeline.length === 0 ? <li><span>{c.lastChangeLead}</span></li> : null}
           </ul>
           <Cta href={`/${locale}/administration/operations${query}`}>{a.seeActivity}</Cta>
@@ -703,7 +704,6 @@ export function ClientFicheBoard({
           <header><h2>{c.documents}</h2></header>
           <ul className="client-feed">
             <li><span><strong>{c.state}</strong><small>{org.status}</small></span></li>
-            <li><span><strong>{c.ids}</strong><small dir="ltr">{org.id.slice(0, 8)}…</small></span></li>
           </ul>
           <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}` : `/${locale}/administration/conformite-clients${query}`}>{a.manageDocs}</Cta>
         </article>
@@ -726,7 +726,7 @@ export function ClientFicheBoard({
         <article className="client-card">
           <header><h2>{c.audit}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{c.lastChange}</strong><small>{fiche.organization.updated_at?.slice(0, 16) ?? "—"}</small></span></li>
+            <li><span><strong>{c.lastChange}</strong><small>{fiche.organization.updated_at ? formatDateTimeCasablanca(fiche.organization.updated_at, locale) : "—"}</small></span></li>
             <li><span><strong>{c.actor}</strong><small>{c.actorYou}</small></span></li>
           </ul>
           <Cta href={`/${locale}/administration/operations${query}`}>{c.seeAudit}</Cta>
@@ -893,8 +893,8 @@ export function ComplianceDecisionBoard({
           <Link href={`/${locale}/administration/conformite-clients${query}`} className="admin-soft-cta">{a.seeDossier}</Link>
         </div>
         <dl className="admin-hero-meta">
-          <div><strong>{locale === "ar" ? "أُنشئ" : "Créé le"}</strong>{item.createdAt.slice(0, 16)}</div>
-          <div><strong>{messages.updated}</strong>{item.updatedAt.slice(0, 16)}</div>
+          <div><strong>{locale === "ar" ? "أُنشئ" : "Créé le"}</strong>{formatDateTimeCasablanca(item.createdAt, locale)}</div>
+          <div><strong>{messages.updated}</strong>{formatDateTimeCasablanca(item.updatedAt, locale)}</div>
           <div><strong>{locale === "ar" ? "المرحلة" : "Étape actuelle"}</strong>{messages.statuses[item.status]}</div>
         </dl>
       </article>

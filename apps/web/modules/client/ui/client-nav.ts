@@ -11,6 +11,7 @@ import {
   ListTodo,
   MessageSquare,
   Package,
+  Receipt,
   Scale,
   ScrollText,
   Star,
@@ -37,6 +38,7 @@ export type ClientNavKey =
   | "credits"
   | "memberBoxes"
   | "volume"
+  | "subscription"
   | "favorites";
 
 export type ClientNavItem = {
@@ -87,6 +89,7 @@ export function buildClientUtilityNav(input: { locale: Locale; selectedQuery: st
     { key: "credits", href: `/${input.locale}/client/credits${q}`, label: c.navCredits, icon: CreditCard, group: "utility" },
     { key: "memberBoxes", href: `/${input.locale}/client/boxes/mon-enveloppe${q}`, label: input.locale === "ar" ? "مخصصاتي في الصندوق" : "Mon enveloppe Box", icon: Gift, group: "utility" },
     { key: "volume", href: `/${input.locale}/client/achats-groupes${q}`, label: c.navVolume, icon: Package, group: "utility" },
+    { key: "subscription", href: `/${input.locale}/client/abonnement${q}`, label: c.navSubscription, icon: Receipt, group: "utility" },
     { key: "favorites", href: `/${input.locale}/client/favoris${q}`, label: c.navFavorites, icon: Star, group: "utility" },
   ];
 }

@@ -34,7 +34,7 @@ export default async function SubscriptionPage({ params, searchParams }: { param
   const c = spaceCopy(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="finance" title={c.subPageTitle} lead={c.subPageLead} kicker={c.kicker}>
+      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="subscription" title={c.subPageTitle} lead={c.subPageLead} kicker={c.kicker}>
         <p role="alert" className="client-card">{messages.error}</p>
       </ClientAppShell>
     );
@@ -47,7 +47,7 @@ export default async function SubscriptionPage({ params, searchParams }: { param
   const catalog = creditsResult.status === "success" ? creditsResult.value.boxes : [];
   const redemptions = creditsResult.status === "success" ? creditsResult.value.redemptions.filter((item) => item.organizationId === selectedId) : [];
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="finance" title={c.subPageTitle} lead={c.subPageLead} kicker={result.dashboard.organizationName}>
+    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="subscription" title={c.subPageTitle} lead={c.subPageLead} kicker={result.dashboard.organizationName}>
       {creditsResult.status === "success" && creditsResult.value.catalogUnavailable ? <p role="alert" className="client-card">{locale === "fr" ? "Les versions des Boxes n’ont pas pu être chargées. Les quantités de crédits restent consultables." : "تعذر تحميل نسخ الصناديق. يمكن الاطلاع على كميات الأرصدة."}</p> : null}
       <SubscriptionUpgradeOptions locale={locale} organizationId={selectedId}/>
       <SubscriptionFundingNotice funding={funding} locale={locale} organizationId={selectedId} />

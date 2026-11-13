@@ -314,6 +314,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
   const people = paged.rows;
   const filterOptions=networkFilterOptions(demo.people);
   const networkSegment = networkBase === "reseau" ? "reseau" : "fournisseurs";
+  const providerBase = `/${locale}/franchise/${networkSegment}`;
   const networkPath=`/${locale}/franchise/${networkSegment}${view&&view!=="inviter"?`/${view}`:""}`;
   const networkQuery=filterQuery(query,{q:search,...networkFilters});
   const network=demo.metrics?.network;
@@ -343,7 +344,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
               <em className="client-status-chip" data-tone="sky">{dossier?networkStateLabel(dossier.status,locale):unknown}</em>
               <p>{selected.email ?? selected.services}</p>
             </div>
-            <Link href={`/${locale}/franchise/fournisseurs/${selected.id}${query}`} className="franchise-tool franchise-tool-primary">{c.openProviderFolder}</Link>
+            <Link href={`${providerBase}/${selected.id}${query}`} className="franchise-tool franchise-tool-primary">{c.openProviderFolder}</Link>
           </div>
           <dl className="franchise-props franchise-provider-meta">
             <div><dt>{c.providerType}</dt><dd>{c.serviceTypeLabel}</dd></div>
@@ -356,11 +357,11 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
           </dl>
         </article>
         <nav className="franchise-pill-tabs" aria-label={selected.name}>
-          <Link href={`/${locale}/franchise/fournisseurs/${selected.id}/qualification${query}`} className="franchise-pill-tab" data-active={!view || view === "qualification" ? "true" : undefined}><span>{c.stepQual}</span></Link>
-          <Link href={`/${locale}/franchise/fournisseurs/${selected.id}/services${query}`} className="franchise-pill-tab" data-active={view === "services" ? "true" : undefined}><span>{c.servicesTab}</span></Link>
-          <Link href={`/${locale}/franchise/fournisseurs/${selected.id}/capacite${query}`} className="franchise-pill-tab" data-active={view === "capacite" ? "true" : undefined}><span>{c.capacityAvailability}</span></Link>
-          <Link href={`/${locale}/franchise/fournisseurs/${selected.id}/documents${query}`} className="franchise-pill-tab" data-active={view === "documents" ? "true" : undefined}><span>{c.providerDocs}</span></Link>
-          <Link href={`/${locale}/franchise/fournisseurs/${selected.id}/historique${query}`} className="franchise-pill-tab" data-active={view === "historique" ? "true" : undefined}><span>{c.historyTab}</span></Link>
+          <Link href={`${providerBase}/${selected.id}/qualification${query}`} className="franchise-pill-tab" data-active={!view || view === "qualification" ? "true" : undefined}><span>{c.stepQual}</span></Link>
+          <Link href={`${providerBase}/${selected.id}/services${query}`} className="franchise-pill-tab" data-active={view === "services" ? "true" : undefined}><span>{c.servicesTab}</span></Link>
+          <Link href={`${providerBase}/${selected.id}/capacite${query}`} className="franchise-pill-tab" data-active={view === "capacite" ? "true" : undefined}><span>{c.capacityAvailability}</span></Link>
+          <Link href={`${providerBase}/${selected.id}/documents${query}`} className="franchise-pill-tab" data-active={view === "documents" ? "true" : undefined}><span>{c.providerDocs}</span></Link>
+          <Link href={`${providerBase}/${selected.id}/historique${query}`} className="franchise-pill-tab" data-active={view === "historique" ? "true" : undefined}><span>{c.historyTab}</span></Link>
         </nav>
         <section className="franchise-dossier-grid">
           <article className="client-card">
@@ -392,7 +393,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
                           <td>{row.title}</td>
                           <td>{row.meta ?? "—"}</td>
                           <td><span className="client-status-chip">{networkStateLabel(row.status,locale)}</span></td>
-                          <td><Cta href={`/${locale}/franchise/fournisseurs/${selected.id}/services${query}`} soft>{c.open}</Cta></td>
+                          <td><Cta href={`${providerBase}/${selected.id}/services${query}`} soft>{c.open}</Cta></td>
                         </tr>
                       ))}
                     </tbody>
@@ -435,7 +436,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
                 {canMutateFranchiseFolder(selected.id, demo.canWrite&&Boolean(selected.rowVersion)) ? (
                   <FranchiseFolderActivityForm locale={locale} organizationId={organizationIdFromQuery(query) || null} prospectId={selected.id} defaultType="NOTE" />
                 ) : null}
-                {demo.permissions.canDecideQualifications ? (
+                {demo.permissions.canDecideQualifications && canMutateFranchiseFolder(selected.id, demo.canWrite && Boolean(selected.rowVersion)) ? (
                   <FranchiseQualificationDecisionForm
                     locale={locale}
                     organizationId={organizationId || organizationIdFromQuery(query) || null}
@@ -466,7 +467,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
               )}
             </article>
             <article className="client-card">
-              <header className="client-priority-head"><h2>{c.providerDocs}</h2><Link href={`/${locale}/franchise/fournisseurs/${selected.id}/documents${query}`} className="client-soft-link">{c.seeAllDocs}</Link></header>
+              <header className="client-priority-head"><h2>{c.providerDocs}</h2><Link href={`${providerBase}/${selected.id}/documents${query}`} className="client-soft-link">{c.seeAllDocs}</Link></header>
               {docs.length === 0 && folderEvidence(selected).length === 0 ? (
                 <p className="franchise-empty-panel">{c.emptyProviderDocs}</p>
               ) : (
@@ -543,7 +544,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
                     <td>{row.dossier?.capacities.map((c)=>`${c.serviceCode}: ${c.status}`).join(" · ")||"—"}</td>
                     <td>{row.dossier?.documents.map((d)=>d.status).join(" · ")||"—"}</td>
                     <td dir="ltr">—</td>
-                    <td><Cta href={`/${locale}/franchise/fournisseurs/${row.id}${query}`} soft>{c.openFolder}</Cta></td>
+                    <td><Cta href={`${providerBase}/${row.id}${query}`} soft>{c.openFolder}</Cta></td>
                   </tr>
                 ))}
               </tbody>
@@ -558,7 +559,7 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
               <li key={`prio-${row.id}`}>
                 <span className="franchise-dot" data-tone={row.tone} />
                 <span><strong>{row.name}</strong><small>{networkStateLabel(row.status,locale)}</small></span>
-                <Cta href={`/${locale}/franchise/fournisseurs/${row.id}${query}`} soft>{c.openProviderFolder}</Cta>
+                <Cta href={`${providerBase}/${row.id}${query}`} soft>{c.openProviderFolder}</Cta>
               </li>
             ))}
           </ul>
@@ -818,7 +819,7 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
             <Link href={`/${locale}/franchise/qualite/actions${query}`} className="franchise-pill-tab" data-active={view === "actions" ? "true" : undefined}><span>{c.corrective}</span><em dir="ltr">{correctiveCount}</em></Link>
           </nav>
           <nav className="franchise-inspector-tabs franchise-quality-subnav" aria-label={c.toExamine}>
-            <Link href={`/${locale}/franchise/qualite${query}`} data-active={!view ? "true" : undefined}>{c.toExamine}</Link>
+            <Link href={`/${locale}/franchise/qualite${query}`} data-active={!view || view === "revues" ? "true" : undefined}>{c.toExamine}</Link>
             <Link href={`/${locale}/franchise/qualite/anomalies${query}`} data-active={view === "anomalies" ? "true" : undefined}>{c.anomalies}</Link>
             <Link href={`/${locale}/franchise/qualite/recommandations${query}`} data-active={view === "recommandations" ? "true" : undefined}>{c.recommendations}</Link>
             <Link href={`/${locale}/franchise/qualite/opportunites${query}`} data-active={view === "opportunites" ? "true" : undefined}>{c.opportunities}</Link>
@@ -1220,7 +1221,6 @@ export function GovernanceBoard({ locale, query, mandateName, view, board }: Spa
   if(sourceUnavailable(board,['GOVERNANCE']))return <UnavailableSection locale={locale} query={query}/>;
   const perimetreView = view === "perimetre";
   const historiqueView = view === "historique";
-  const decisionsView = !perimetreView && !historiqueView;
   return (
     <main className="client-page">
       <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
@@ -1293,11 +1293,7 @@ export function GovernanceBoard({ locale, query, mandateName, view, board }: Spa
                     <td>{row.title}</td>
                     <td>{row.type}</td>
                     <td><span className="client-status-chip" data-tone="peach">{networkStateLabel(row.status,locale)}</span></td>
-                    <td>
-                      {view === "approbations" || decisionsView
-                        ? row.status
-                        : <Cta href={`/${locale}/franchise/gouvernance/approbations${query}#decisions`} soft>{c.prepare}</Cta>}
-                    </td>
+                    <td><Cta href={`/${locale}/franchise/gouvernance/approbations${query}#decisions`} soft>{c.prepare}</Cta></td>
                   </tr>
                 ))}
               </tbody>
@@ -1404,15 +1400,22 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
                 </ul>
               )}
               <p className="client-access-note">{c.proposeVolume}</p>
-              {demo.permissions.canProposeVolume && libraryId ? (
-                <FranchiseVolumeProposeForm
-                  locale={locale}
-                  libraryId={libraryId}
-                  franchiseId={new URLSearchParams(query.replace(/^\?/,"")).get("franchiseId")??demo.franchiseId??""}
-                  organizationId={organizationId || organizationIdFromQuery(query) || null}
-                  skus={demo.volume.filter((row) => row.status === "ACTIVE").map((row) => ({ id: row.id, title: row.title }))}
-                />
-              ) : null}
+              {(() => {
+                const franchiseId = new URLSearchParams(query.replace(/^\?/, "")).get("franchiseId") ?? demo.franchiseId ?? "";
+                if (!franchiseId) {
+                  return <p role="status">{locale === "ar" ? "حدّدوا تفويض امتياز نشطاً قبل اقتراح شراء مجمّع." : "Sélectionnez un mandat de franchise actif avant de proposer un achat groupé."}</p>;
+                }
+                if (!demo.permissions.canProposeVolume || !libraryId) return null;
+                return (
+                  <FranchiseVolumeProposeForm
+                    locale={locale}
+                    libraryId={libraryId}
+                    franchiseId={franchiseId}
+                    organizationId={organizationId || organizationIdFromQuery(query) || null}
+                    skus={demo.volume.filter((row) => row.status === "ACTIVE").map((row) => ({ id: row.id, title: row.title }))}
+                  />
+                );
+              })()}
             </>
           ) : (
             <div tabIndex={0} className="client-table-wrap">

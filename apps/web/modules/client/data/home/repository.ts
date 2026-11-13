@@ -14,6 +14,7 @@ import {
   type ClientHomeStage,
 } from "./view-model";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
+import { loadClientHomeSnapshotRpc } from "./snapshot-rpc";
 
 export type ClientHomeSnapshot =
   | {
@@ -36,6 +37,16 @@ const emptyInsights: ClientHomeInsights = {
   messagesToHandle: null,
 };
 
+function emptyUnavailableCounts(): ClientHomeCounts {
+  return {
+    openRequests: null,
+    quotesToReview: null,
+    activeMissions: null,
+    pendingDecisions: null,
+    upcomingDue: null,
+  };
+}
+
 export async function loadClientHomeSnapshot(input: {
   organizationId: string | null;
   locale: "fr" | "ar";
@@ -45,14 +56,83 @@ export async function loadClientHomeSnapshot(input: {
   /** When false, skip the quote comparison RPC on the home path (default). */
   includeComparison?: boolean;
 }): Promise<ClientHomeSnapshot> {
-  const emptyUnavailable: ClientHomeCounts = {
-    openRequests: null,
-    quotesToReview: null,
-    activeMissions: null,
-    pendingDecisions: null,
-    upcomingDue: null,
-  };
+  if (!input.organizationId) {
+    return {
+      status: "success",
+      stage: "new",
+      counts: computeClientHomeCounts({ actionItems: input.actionItems, now: input.now, requests: [], missions: [], contracts: [] }),
+      lastRequestId: null,
+      organizationName: null,
+      featuredProject: null,
+      comparison: null,
+      insights: toClientHomeInsights({ actionItems: input.actionItems, milestones: [], now: input.now }),
+    };
+  }
 
+  const rpc = await loadClientHomeSnapshotRpc(input.organizationId, input.locale);
+  if (rpc.status === "error" && rpc.reason === "UNAUTHENTICATED") {
+    return { status: "error", reason: "UNAUTHENTICATED", counts: emptyUnavailableCounts(), insights: emptyInsights };
+  }
+  if (rpc.status === "error" && rpc.reason === "FORBIDDEN") {
+    return { status: "error", reason: "FORBIDDEN", counts: emptyUnavailableCounts(), insights: emptyInsights };
+  }
+  if (rpc.status === "success") {
+    const actionPending = input.actionItems.filter((item) => item.requiresHumanReview || item.kind === "APPROVAL").length;
+    const actionUpcoming = input.actionItems.filter((item) => item.dueAt && Date.parse(item.dueAt) >= Date.parse(input.now) && Date.parse(item.dueAt) <= Date.parse(input.now) + 7 * 86_400_000).length;
+    const featured = rpc.value.featured;
+    const featuredProject: ClientFeaturedProject | null = featured
+      ? {
+          requestId: featured.id,
+          title: featured.description,
+          status: featured.status,
+          createdAt: featured.created_at,
+          quoteCount: featured.quote_count,
+          href: `/${input.locale}/client/demandes/${featured.id}`,
+          steps: clientJourneySteps(featured.status),
+        }
+      : null;
+    return {
+      status: "success",
+      stage: resolveClientHomeStage({
+        hasOrganization: true,
+        openRequests: rpc.value.open_requests,
+        activeMissions: rpc.value.active_missions,
+        isTeamLead: input.isTeamLead,
+      }),
+      counts: {
+        openRequests: rpc.value.open_requests,
+        quotesToReview: rpc.value.quotes_to_review,
+        activeMissions: rpc.value.active_missions,
+        pendingDecisions: rpc.value.pending_decisions + actionPending,
+        upcomingDue: rpc.value.upcoming_due + actionUpcoming,
+      },
+      lastRequestId: featured?.id ?? null,
+      organizationName: rpc.value.organization_name,
+      featuredProject,
+      comparison: null,
+      insights: toClientHomeInsights({
+        actionItems: input.actionItems,
+        milestones: rpc.value.next_milestone
+          ? [{ title: rpc.value.next_milestone.title, status: "PENDING", dueAt: rpc.value.next_milestone.due_at }]
+          : [],
+        now: input.now,
+      }),
+    };
+  }
+
+  // Fallback when the aggregate RPC is not yet applied or temporarily unavailable.
+  return loadClientHomeSnapshotLegacy(input);
+}
+
+async function loadClientHomeSnapshotLegacy(input: {
+  organizationId: string | null;
+  locale: "fr" | "ar";
+  actionItems: readonly UserActionItem[];
+  now: string;
+  isTeamLead: boolean;
+  includeComparison?: boolean;
+}): Promise<ClientHomeSnapshot> {
+  const emptyUnavailable = emptyUnavailableCounts();
   if (!input.organizationId) {
     return {
       status: "success",

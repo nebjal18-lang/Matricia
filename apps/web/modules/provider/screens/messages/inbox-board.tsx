@@ -60,7 +60,7 @@ export function ProviderInboxBoard({
   const m = getMessagingMessages(locale);
   const n = getNotificationMessages(locale);
   const filteredOptions = preferredRfqId ? options.filter((item) => item.rfqId === preferredRfqId) : options;
-  const openOptions = filteredOptions.map(item => ({...item,label:`${item.context === "CONTRACT" ? (locale === "ar" ? "ملف عقد" : "Dossier contractuel") : (locale === "ar" ? "استشارة" : "Consultation")} ${item.rfqId.slice(0,8).toUpperCase()}`}));
+  const openOptions = filteredOptions.map(item => ({...item,label:item.context === "CONTRACT" ? (locale === "ar" ? "ملف عقد" : "Dossier contractuel") : (locale === "ar" ? "استشارة" : "Consultation")}));
   const empty = locale === "ar" ? "لا توجد محادثة مرتبطة باستشارة." : "Aucune conversation liée à une consultation.";
   const tr = (fr: string, ar: string) => locale === "ar" ? ar : fr;
   const base = `/${locale}/sous-traitant/messages`;

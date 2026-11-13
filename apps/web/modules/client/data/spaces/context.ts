@@ -1,11 +1,11 @@
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { notFound, redirect } from "next/navigation";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export async function resolveClientSpace(input: { locale: Locale; organizationId?: string }) {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth, error: authError } = authResult;
   const failure = classifyAuthReadFailure(authError);
   if (failure === "UNAVAILABLE") throw new Error("CLIENT_CONTEXT_UNAVAILABLE");
   if (failure === "UNAUTHENTICATED") return { status: "unauthenticated" as const };

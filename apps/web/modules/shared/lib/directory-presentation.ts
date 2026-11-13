@@ -103,7 +103,7 @@ export function personDisplayLabel(
 
 export function personContactLine(row: { email?: string | null; phone?: string | null; preferredLocale?: string | null; userId?: string }): string {
   const parts = [row.email?.trim(), row.phone?.trim(), row.preferredLocale?.trim()].filter(Boolean);
-  return parts.join(" · ") || (row.userId ? row.userId.slice(0, 8) : "—");
+  return parts.join(" · ") || "—";
 }
 
 /** Stable avatar glyph from given name first, never from an org/email blob when a person name exists. */

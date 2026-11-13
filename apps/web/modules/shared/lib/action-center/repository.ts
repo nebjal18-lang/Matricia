@@ -17,7 +17,7 @@ export type ActionCenterLoadOptions = {
 };
 
 /** Soft ceiling so a slow notification fan-out cannot hold the dashboard forever. */
-const ACTION_CENTER_BUDGET_MS = 2500;
+const ACTION_CENTER_BUDGET_MS = 1200;
 
 function kind(source: string): UserActionItem["kind"] {
   if (source === "RISK_FLAG") return "RISK_REVIEW";

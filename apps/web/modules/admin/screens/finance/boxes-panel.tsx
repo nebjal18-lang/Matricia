@@ -7,6 +7,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import type { AdminBoxesDashboard } from "@/modules/admin/data/boxes/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import {
   activateBenefitAction,
@@ -55,6 +56,13 @@ export function BoxesPanel({
   return (
     <div className="space-y-6">
       <p className="text-sm leading-6 text-muted-foreground">{m.boxesHint}</p>
+      {dashboard.capabilities.can_write && !auditOrganizationId ? (
+        <p role="status" className="text-sm text-amber-800">
+          {locale === "ar"
+            ? "اختر مؤسسة تدقيق في شريط السياق قبل إنشاء أو نشر مزايا وصناديق أو فتح محفظة."
+            : "Sélectionnez une organisation d’audit dans la barre de contexte avant de créer ou publier des avantages, boxes ou d’ouvrir un wallet."}
+        </p>
+      ) : null}
       <a className="inline-flex min-h-11 items-center rounded border px-3 underline" href={`/${locale}/administration/avantages/regles`}>{locale==="ar"?"مراجعة قواعد الأهلية والحصص والقدرات":"Revoir les règles d’admission, quotas et capacités"}</a>
       <a className="inline-flex min-h-11 items-center rounded border px-3 underline" href={`/${locale}/administration/avantages/livraisons`}>{locale==="ar"?"تنفيذ المزايا ومراجعة أدلة التسليم":"Exécuter les avantages et revoir les preuves de livraison"}</a>
       <section className="grid gap-3 sm:grid-cols-3">
@@ -106,7 +114,7 @@ export function BoxesPanel({
         {dashboard.lots.map((item) => (
           <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
             <p>{item.source_type} · {item.quantity}</p>
-            <time dateTime={item.expires_at}>{item.expires_at.slice(0, 10)}</time>
+            <time dateTime={item.expires_at}>{formatDateTimeCasablanca(item.expires_at, locale)}</time>
           </article>
         ))}
       </DataList>

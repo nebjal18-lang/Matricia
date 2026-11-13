@@ -3,14 +3,14 @@ import {obligationRetirementRow,milestoneRetirementRow,retirementColumns,milesto
 import { readAllPages, readRelatedPages } from "@/modules/shared/lib/data/read-pages";
 import { selectProviderMembership } from "@/modules/provider/data/spaces/organization-context";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { providerMissionRows as row, type ProviderMissionDashboard } from "./model";
 
 export type ProviderMissionsResult = { status: "success"; dashboard: ProviderMissionDashboard } | { status: "error"; reason: "UNAUTHENTICATED" | "NO_PROVIDER_ORGANIZATION" | "CONTEXT_REQUIRED" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
 export async function loadProviderMissions(locale: "fr" | "ar", requestedOrganizationId?: string, requestedMissionId?: string, requestedPage=1, requestedSearch=""): Promise<ProviderMissionsResult> {
-  const client = await getSupabaseServerClient();
-  const { data: auth } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth } = authResult;
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const membershipResult = await readAllPages((from,to)=>client.from("organization_memberships").select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user!.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_MANAGER", "PROVIDER_TECHNICIAN", "PROVIDER_VIEWER", "PROVIDER_SALES", "PROVIDER_ACCOUNTING"]).order("id").range(from,to));
   if (membershipResult.error) return { status: "error", reason: "QUERY_FAILED" };

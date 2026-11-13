@@ -1,3 +1,4 @@
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import Link from "next/link";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { franchiseAxes, type NativeControlResult } from "@/modules/franchise/data/performance/native-control";
@@ -43,7 +44,7 @@ export function FranchiseNativePerformancePanel({ locale, result, returnPath }: 
       <NativePlanOwnerControls locale={locale} planId={plan.id} context={plan.ownerContext}/>
       <ul>{plan.objectives.map(objective => <li key={objective.axis}>{axisLabels[locale][objective.axis]} : {format(objective.observedScoreBps)} → {format(objective.targetScoreBps)}</li>)}</ul>
       <p>{ar ? "لا تصبح الخطة معتمدة إلا بقرار إدارة مخوّلة. تُقبل النتيجة بعد إعادة قياس مصادرها." : "La proposition attend une décision d’un administrateur habilité. L’achèvement se vérifie par une nouvelle mesure des sources."}</p>
-      <ol>{plan.events.map(event => <li key={event.id}><time dateTime={event.created_at}>{event.created_at.slice(0, 10)}</time> · <span dir="auto">{event.comment}</span>{event.progress_percent !== null ? ` · ${event.progress_percent}%` : ""}</li>)}</ol>
+      <ol>{plan.events.map(event => <li key={event.id}><time dateTime={event.created_at}>{formatDateTimeCasablanca(event.created_at, locale)}</time> · <span dir="auto">{event.comment}</span>{event.progress_percent !== null ? ` · ${event.progress_percent}%` : ""}</li>)}</ol>
       {plan.nextEventAfter ? <Link className="franchise-tool" href={planEventsHref(plan.id, plan.nextEventAfter)}>{ar ? "الجزء التالي من سجل المتابعة" : "Suite de l’historique de suivi"}</Link> : null}
       {dashboard.capabilities.canWrite ? <NativePlanProgressForm locale={locale} planId={plan.id} canProgress={plan.ownerContext.canProgress}/> : null}
       {dashboard.capabilities.canDecide && (plan.ownerContext.canApprovePlan || plan.ownerContext.canCompletePlan || plan.ownerContext.canRejectPlan) ? <NativePlanDecisionForm locale={locale} planId={plan.id} canApprove={plan.ownerContext.canApprovePlan} canReject={plan.ownerContext.canRejectPlan} canComplete={plan.ownerContext.canCompletePlan}/> : null}

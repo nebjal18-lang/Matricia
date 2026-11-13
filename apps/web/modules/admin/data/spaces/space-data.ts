@@ -9,6 +9,7 @@ import type { AdminGovernanceDashboard } from "@/modules/admin/data/governance-d
 import { loadAdminSupervisionDashboard, type AdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import type { AdminSpaceId } from "./admin-nav";
 import { canApplyAdminDemo, buildDemoSpaceRows } from "./demo-overlay";
+import { franchiseListTitle, franchiseOperatorLabel, franchiseTerritoryLabel } from "./franchise-presentation";
 import { spaceHref, statusTone, type SpaceTone } from "./screen-catalog";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
@@ -114,18 +115,20 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "capacite" && providerDash) {
-    snapshot.rows = providerDash.documents.map((item) => documentRow(locale, query, item));
+    snapshot.rows = providerDash.documents.map((item) => capacityRow(locale, query, item));
     snapshot.treat = snapshot.rows.filter((row) => /SUBMITTED|UNDER_REVIEW|EXPIRED|REJECTED/.test(row.status));
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "franchises" && gov?.franchise) {
     snapshot.rows = gov.franchise.franchises.map((item) => {
-      const label = locale === "ar" ? item.libraryNameAr : item.libraryNameFr;
+      const libraryName = locale === "ar" ? item.libraryNameAr : item.libraryNameFr;
+      const territoryName = franchiseTerritoryLabel(item, locale);
+      const operatorName = franchiseOperatorLabel(item.operatorCode, locale);
       return {
         id: item.id,
         href: spaceHref(locale, "franchises", query, item.id),
-        title: label,
-        cells: [label, item.operatorCode, item.territoryCode, item.mandate ? `v${item.mandate.version}` : "—", item.type, item.status, item.mandate?.status ?? "—", item.status],
+        title: franchiseListTitle(item, locale),
+        cells: [libraryName, operatorName, territoryName, item.mandate ? `v${item.mandate.version}` : "—", item.type === "IT" ? "IT" : (locale === "ar" ? "قياسي" : "Standard"), item.status, item.mandate?.status ?? "—", item.status],
         status: item.status,
         tone: statusTone(item.status),
         organizationId: item.organizationId,
@@ -139,16 +142,18 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
   if (space === "territoires" && gov?.franchise) {
     snapshot.rows = gov.franchise.franchises.flatMap((item) => {
       const versions = item.mandateVersions.length ? item.mandateVersions : item.mandate ? [item.mandate] : [];
+      const libraryName = locale === "ar" ? item.libraryNameAr : item.libraryNameFr;
+      const territoryName = franchiseTerritoryLabel(item, locale);
+      const title = franchiseListTitle(item, locale);
       return versions.map((mandate) => ({
         id: mandate.id,
         href: spaceHref(locale, "territoires", query, mandate.id),
-        title: `${item.operatorCode} · ${item.territoryCode}`,
+        title,
         cells: [
-          locale === "ar" ? item.libraryNameAr : item.libraryNameFr,
-          item.territoryCode,
-          item.libraryCode,
+          title,
+          territoryName,
+          libraryName,
           `v${mandate.version}`,
-          String(mandate.version),
           mandate.effectiveFrom.slice(0, 10),
           "effectiveUntil" in mandate && mandate.effectiveUntil ? String(mandate.effectiveUntil).slice(0, 10) : "—",
           mandate.status,
@@ -157,7 +162,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
         tone: statusTone(mandate.status),
         organizationId: item.organizationId,
         treat: mandate.status !== "ACTIVE",
-        extras: { franchiseId: item.id, type: item.type },
+        extras: { franchiseId: item.id, type: item.type, libraryCode: item.libraryCode, territoryCode: item.territoryCode },
       }));
     });
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
@@ -166,12 +171,13 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
   if (space === "gouvernance" && gov?.franchise) {
     snapshot.rows = gov.franchise.approvals.map((item) => {
       const franchise = gov.franchise?.franchises.find((entry) => entry.id === item.franchiseId);
-      const name = franchise ? (locale === "ar" ? franchise.libraryNameAr : franchise.libraryNameFr) : sliceId(item.franchiseId);
+      const name = franchise ? franchiseListTitle(franchise, locale) : sliceId(item.franchiseId);
+      const territory = franchise ? franchiseTerritoryLabel(franchise, locale) : "—";
       return {
         id: item.id,
         href: spaceHref(locale, "gouvernance", query, item.id, "decision"),
         title: item.requestType,
-        cells: [sliceId(item.id), name, item.requestType, franchise?.territoryCode ?? "—", String(item.rowVersion), item.status, item.status, item.decision ? item.decision.decision : "—"],
+        cells: [sliceId(item.id), name, item.requestType, territory, String(item.rowVersion), item.status, item.status, item.decision ? item.decision.decision : "—"],
         status: item.status,
         tone: statusTone(item.status),
         organizationId: franchise?.organizationId,
@@ -355,11 +361,13 @@ function overlayDemo(locale: Locale, space: AdminSpaceId, query: string, snapsho
 function providerRow(locale: Locale, query: string, item: AdminProvider, dashboard: AdminProviderDashboard): SpaceRow {
   const services = dashboard.services.filter((row) => row.providerOrganizationId === item.organizationId);
   const docs = dashboard.documents.filter((row) => row.providerOrganizationId === item.organizationId);
+  const serviceLabel = [...new Set(services.map((row) => row.serviceCode).filter(Boolean))].slice(0, 3).join(", ") || "—";
   return {
     id: item.organizationId,
     href: `/${locale}/administration/providers/${item.organizationId}${query}`,
     title: item.organizationName,
-    cells: [item.organizationName, services[0]?.serviceCode ?? "—", item.overallStatus, item.companyStatus, String(docs.length), item.partnerContractStatus, item.overallStatus],
+    // Prestataire, Services déclarés, Qualification, Capacité, Documents, Missions
+    cells: [item.organizationName, serviceLabel, item.overallStatus, item.companyStatus, String(docs.length), "—"],
     status: item.overallStatus,
     tone: statusTone(item.companyStatus),
     organizationId: item.organizationId,
@@ -373,12 +381,43 @@ function qualificationRow(locale: Locale, query: string, item: AdminProviderServ
     id: item.qualificationId ?? item.id,
     href: spaceHref(locale, "qualification", query, item.qualificationId ?? item.id, "decision"),
     title: item.providerName,
-    cells: [item.providerName, item.serviceCode, item.requestStatus, item.eligible ? "éligible" : "non éligible", item.qualificationStatus, item.eligibilityReasons[0] ?? "—", item.qualificationStatus],
+    // Prestataire, Services, Documents, Capacité, État, Raison
+    cells: [
+      item.providerName,
+      item.serviceCode,
+      item.requestStatus,
+      item.eligible ? (locale === "ar" ? "مؤهل" : "éligible") : (locale === "ar" ? "غير مؤهل" : "non éligible"),
+      item.qualificationStatus,
+      item.eligibilityReasons[0] ?? "—",
+    ],
     status: item.qualificationStatus,
     tone: statusTone(item.qualificationStatus),
     organizationId: item.providerOrganizationId,
     extras: { serviceId: item.id, rowVersion: String(item.qualificationRowVersion ?? 1) },
     treat: item.qualificationStatus !== "APPROVED",
+  };
+}
+
+function capacityRow(locale: Locale, query: string, item: AdminProviderDocument): SpaceRow {
+  return {
+    id: item.id,
+    href: spaceHref(locale, "capacite", query, item.id),
+    title: `${item.providerName} · ${item.code}`,
+    // Prestataire, Service, Statut capacité, Zones, Délai, Documents requis, Expiration
+    cells: [
+      item.providerName,
+      item.code,
+      item.status,
+      "—",
+      "—",
+      `${item.kind} · ${item.code}`,
+      item.expiresOn ?? "—",
+    ],
+    status: item.status,
+    tone: statusTone(item.status),
+    organizationId: item.providerOrganizationId,
+    extras: { kind: item.kind, version: String(item.version), rowVersion: "1" },
+    treat: /SUBMITTED|UNDER_REVIEW|EXPIRED/.test(item.status),
   };
 }
 

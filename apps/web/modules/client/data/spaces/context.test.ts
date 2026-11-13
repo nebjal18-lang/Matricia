@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ from: vi.fn(), getUser: vi.fn() }));
 vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("NOT_FOUND"); }, redirect: (path: string) => { throw new Error(`REDIRECT:${path}`); } }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ from: mocks.from, auth: { getUser: mocks.getUser } }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ from: mocks.from, auth: { getUser: mocks.getUser } }), getServerAuthUser: async () => mocks.getUser() }));
 import { resolveClientSpace } from "./context";
 const org = "11111111-1111-4111-8111-111111111111";
 function table(data: unknown[], error: unknown = null) {

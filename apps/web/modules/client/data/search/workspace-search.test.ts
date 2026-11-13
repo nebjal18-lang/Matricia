@@ -10,8 +10,8 @@ describe("Lot 0 — navigation et recherche Client", () => {
     expect(primary.map((item) => item.key)).toEqual([
       "home", "needs", "requests", "missions", "documents", "messages", "finance", "rewards", "company",
     ]);
-    expect(extra.map((item) => item.key)).toEqual(["actions", "contracts", "disputes", "portfolio", "credits", "memberBoxes", "volume", "favorites"]);
-    expect(buildClientNav({ locale: "fr", selectedQuery: "" })).toHaveLength(17);
+    expect(extra.map((item) => item.key)).toEqual(["actions", "contracts", "disputes", "portfolio", "credits", "memberBoxes", "volume", "subscription", "favorites"]);
+    expect(buildClientNav({ locale: "fr", selectedQuery: "" })).toHaveLength(18);
     expect(extra.find((item) => item.key === "contracts")?.href).toContain("/client/contrats");
     expect(extra.find((item) => item.key === "disputes")?.href).toContain("/client/litiges");
     expect(clientDashboardCopy.fr.navActions).toBe("À traiter");

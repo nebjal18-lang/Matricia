@@ -1,7 +1,7 @@
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { ficheSchema, supervisionSchema, type AdminOrganizationFiche, type AdminSupervisionDashboard, type AdminSupervisionResult } from "./types";
 import { supervisionChartSeries } from "./series";
 
@@ -17,8 +17,8 @@ function rpcFailure(code?: string): "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILAB
 
 export async function loadAdminSupervisionDashboard(limit = 50, consistent = false): Promise<AdminSupervisionResult<AdminSupervisionDashboard>> {
   try {
-    const client = await getSupabaseServerClient();
-    const { data: auth, error: authError } = await client.auth.getUser();
+    const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+    const { data: auth, error: authError } = authResult;
     if (authError) return { status: "error", reason: classifyAuthReadFailure(authError) ?? "UNAVAILABLE" };
     if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
     if (consistent) {
@@ -59,8 +59,8 @@ export async function loadAdminOrganizationFiche(organizationId: string): Promis
   const id = uuid.safeParse(organizationId);
   if (!id.success) return { status: "error", reason: "NOT_FOUND" };
   try {
-    const client = await getSupabaseServerClient();
-    const { data: auth, error: authError } = await client.auth.getUser();
+    const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+    const { data: auth, error: authError } = authResult;
     if (authError) return { status: "error", reason: classifyAuthReadFailure(authError) ?? "UNAVAILABLE" };
     if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
     const response = await client.rpc("get_admin_organization_fiche", { p_organization_id: id.data });

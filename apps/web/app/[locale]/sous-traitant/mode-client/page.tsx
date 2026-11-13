@@ -5,8 +5,10 @@ import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { listOrganizationRoles } from "@/app/[locale]/organisation/roles/actions";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { ActivateClientRoleForm } from "@/modules/provider/screens/mode-client/activate-form";
 import { ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 const CLIENT_ROLES = new Set(["CLIENT_OWNER", "CLIENT_ADMIN", "CLIENT_BUYER", "CLIENT_ACCOUNTING", "CLIENT_MEMBER", "CLIENT_VIEWER"]);
@@ -22,10 +24,22 @@ export default async function ProviderModeClientPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/mode-client` }));
+  const ar = locale === "ar";
+  const copy = ar
+    ? { title: "وضع العميل", lead: "سياقان، منصة واحدة — دون إنشاء مؤسسة ثانية.", current: "السياق المهني الحالي", switch: "متابعة كعميل", request: "تفعيل دور العميل", pending: "طلب دور العميل معلّق.", isolated: "الاستشارات والعروض المهنية تبقى في فضاء المقدّم." }
+    : { title: "Mode Client", lead: "Deux contextes, une seule plateforme — sans recréer l’organisation.", current: "Contexte professionnel actuel", switch: "Continuer en Mode Client", request: "Activer le rôle Client", pending: "Une demande de rôle Client est en attente.", isolated: "Vos consultations et devis professionnels restent dans l’espace prestataire." };
+  const contextState = providerContextReadState(space, query.organizationId);
+  if (contextState) {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="modeClient" title={copy.title} lead={copy.lead}>
+        <ProviderReadState locale={locale} state={contextState} retryHref={`/${locale}/sous-traitant/mode-client${space.selectedQuery}`} reason={space.readError ?? undefined} />
+      </ProviderAppShell>
+    );
+  }
   const roles = await listOrganizationRoles();
   if (roles.status === "error" && roles.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/mode-client` }));
-  const organizationId = space.selectedOrganizationId ?? (roles.status === "success" ? roles.organizations[0]?.id : null);
-  const current = roles.status === "success" ? roles.organizations.find((item) => item.id === organizationId) ?? roles.organizations[0] : null;
+  const organizationId = space.selectedOrganizationId;
+  const current = organizationId && roles.status === "success" ? roles.organizations.find((item) => item.id === organizationId) ?? null : null;
   const hasClient = current?.currentRoles.some((role) => CLIENT_ROLES.has(role)) ?? false;
   const pending = roles.status === "success"
     ? roles.requests.find((item) => item.isOwn && item.status === "PENDING" && item.requestedRole.startsWith("CLIENT_"))
@@ -34,10 +48,6 @@ export default async function ProviderModeClientPage({
   const clientQuery = new URLSearchParams(space.selectedQuery);
   if (organizationId) clientQuery.set("organizationId", organizationId);
   const clientHref = withDashboardWorkspaceHint(`/${locale}/tableau-de-bord?${clientQuery}`, locale, "client");
-  const ar = locale === "ar";
-  const copy = ar
-    ? { title: "وضع العميل", lead: "سياقان، منصة واحدة — دون إنشاء مؤسسة ثانية.", current: "السياق المهني الحالي", switch: "متابعة كعميل", request: "تفعيل دور العميل", pending: "طلب دور العميل معلّق.", isolated: "الاستشارات والعروض المهنية تبقى في فضاء المقدّم." }
-    : { title: "Mode Client", lead: "Deux contextes, une seule plateforme — sans recréer l’organisation.", current: "Contexte professionnel actuel", switch: "Continuer en Mode Client", request: "Activer le rôle Client", pending: "Une demande de rôle Client est en attente.", isolated: "Vos consultations et devis professionnels restent dans l’espace prestataire." };
 
   return (
     <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="modeClient" title={copy.title} lead={copy.lead}>

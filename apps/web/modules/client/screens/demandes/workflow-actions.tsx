@@ -12,9 +12,21 @@ export function WorkflowActions({ locale, organizationId,requestId, rowVersion, 
   const [ready, readyAction, readyPending] = useActionState(readyRequestAction, idle);
   const [match, matchAction, matchPending] = useActionState(matchRequestAction, idle);
   const [opened, openAction, openPending] = useActionState(openRfqAction, idle);
-  const runId = match.status === "success" ? match.matchingRunId ?? matchingRunId : matchingRunId;
-  const workflowStatus = match.status === "success" ? "MATCHING" : status;
+  const matchSucceeded = match.status === "success" && match.message === "MATCHED";
+  const noProvider = matchSucceeded && match.matchOutcome === "NO_MATCHING_PROVIDER";
+  const workflowStatus = noProvider
+    ? "NO_PROVIDER_AVAILABLE"
+    : matchSucceeded
+      ? "MATCHING"
+      : status;
+  const runId = matchSucceeded && !noProvider
+    ? match.matchingRunId ?? matchingRunId
+    : matchSucceeded
+      ? null
+      : matchingRunId;
   const canReady = ["DRAFT", "INFORMATION_REQUIRED"].includes(status) && canMarkReady;
+  const showMatch = status === "READY" && !matchSucceeded && workflowStatus !== "NO_PROVIDER_AVAILABLE";
+  const showOpen = Boolean(runId) && workflowStatus === "MATCHING";
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       {canReady ? (
@@ -27,7 +39,7 @@ export function WorkflowActions({ locale, organizationId,requestId, rowVersion, 
           <Feedback state={ready} messages={messages} locale={locale} organizationId={organizationId} requestId={requestId} />
         </form>
       ) : null}
-      {status === "READY" ? (
+      {showMatch ? (
         <form action={matchAction} className="space-y-3 rounded-xl border p-4">
           <Hidden locale={locale} requestId={requestId} keyValue={keys.match} />
           <Label htmlFor="panel">{messages.panelSize}</Label>
@@ -37,10 +49,16 @@ export function WorkflowActions({ locale, organizationId,requestId, rowVersion, 
           <Feedback state={match} messages={messages} locale={locale} organizationId={organizationId} requestId={requestId} />
         </form>
       ) : null}
-      {runId && workflowStatus === "MATCHING" ? (
+      {matchSucceeded && noProvider ? (
+        <p role="status" className="rounded-xl border p-4 text-sm text-primary">{messages.statuses.NO_PROVIDER_AVAILABLE}</p>
+      ) : null}
+      {status === "NO_PROVIDER_AVAILABLE" && !matchSucceeded ? (
+        <p role="status" className="rounded-xl border p-4 text-sm text-muted-foreground">{messages.statuses.NO_PROVIDER_AVAILABLE}</p>
+      ) : null}
+      {showOpen ? (
         <form action={openAction} className="space-y-3 rounded-xl border p-4">
           <Hidden locale={locale} requestId={requestId} keyValue={keys.open} />
-          <input type="hidden" name="matchingRunId" value={runId} />
+          <input type="hidden" name="matchingRunId" value={runId!} />
           <Label htmlFor="deadline">{messages.deadline}</Label>
           <Input id="deadline" name="deadlineLocal" type="datetime-local" required aria-describedby="deadline-help" />
           <small id="deadline-help" className="block text-muted-foreground">{messages.deadlineHelp}</small>
@@ -48,6 +66,7 @@ export function WorkflowActions({ locale, organizationId,requestId, rowVersion, 
           <Feedback state={opened} messages={messages} locale={locale} organizationId={organizationId} requestId={requestId} />
         </form>
       ) : null}
+      {matchSucceeded && !noProvider ? <Feedback state={match} messages={messages} locale={locale} organizationId={organizationId} requestId={requestId} /> : null}
     </div>
   );
 }

@@ -156,7 +156,7 @@ function OrganizationPortfolio({ locale, data, m, keys, organizationId }: Props 
         {contracts.length === 0 ? <p>{m.empty}</p> : contracts.map((contract) => (
           <div key={contract.id} className="client-portfolio-item">
             <div className="client-portfolio-item-head">
-              <strong>{m.contract} <span dir="ltr">{contract.id.slice(0, 8)}</span></strong>
+              <strong>{m.contract} v{contract.version}</strong>
               <Badge variant="outline">{contract.status}</Badge>
             </div>
             <p>{m.version} {contract.version} · {contract.projectId ? projectCode(contract.projectId) : m.unlinked}</p>
@@ -365,7 +365,7 @@ function ContractForm({ locale, projects, contracts, m, keyValue }: { locale: "f
         <form action={action} className="grid gap-3">
           <Hidden locale={locale} keyValue={keyValue} />
           <Select name="projectId" label={m.project}>{projects.map((item) => <option key={item.id} value={item.id}>{item.code} · {nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
-          <Select name="contractId" label={m.contract}>{contracts.map((item) => <option key={item.id} value={item.id}>{item.id.slice(0, 8)} · {item.status}</option>)}</Select>
+          <Select name="contractId" label={m.contract}>{contracts.map((item) => <option key={item.id} value={item.id}>{m.contract} v{item.version} · {item.status}</option>)}</Select>
           <Button disabled={pending || projects.length === 0 || contracts.length === 0}>{m.link}</Button>
           <Feedback state={state} m={m} />
         </form>
@@ -437,7 +437,7 @@ function AllocationForm({ locale, orgId, projects, tasks, contracts, targets, ta
           <AllocationTargetSearch organizationId={orgId} locale={locale} initial={targets} label={m.referenceType}>
             <optgroup label={m.projects}>{projects.map(item => <option key={item.id} value={`PROJECT:${item.id}`}>{item.code} · {nameOf(locale, item.nameFr, item.nameAr)}</option>)}</optgroup>
             <optgroup label={m.tasks}>{tasks.map(item => <option key={item.id} value={`PROJECT_TASK:${item.id}`}>{item.key} · {nameOf(locale, item.titleFr, item.titleAr)}</option>)}</optgroup>
-            <optgroup label={m.contracts}>{contracts.map(item => <option key={item.id} value={`CONTRACT:${item.id}`}>{m.contracts} · {item.id.slice(0, 8)} · v{item.version}</option>)}</optgroup>
+            <optgroup label={m.contracts}>{contracts.map(item => <option key={item.id} value={`CONTRACT:${item.id}`}>{m.contracts} · v{item.version} · {item.status}</option>)}</optgroup>
           </AllocationTargetSearch>
           <Field label={m.amount}><Input name="amount" inputMode="decimal" dir="ltr" required /></Field>
           <Field label={m.evidence}><Input name="evidenceFile" type="file" accept="application/pdf,image/png,image/jpeg" required /></Field>

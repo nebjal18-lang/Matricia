@@ -46,7 +46,7 @@ export function QuotePreviewWorkbench({
   const checklist = [
     { ok: Boolean(organizationName), label: w.quoteCheckOrg, detail: organizationName || "—" },
     { ok: true, label: w.quoteCheckClient, detail: w.quoteClientMasked },
-    { ok: Boolean(quote?.id), label: w.quoteCheckRef, detail: quote ? `${quote.id.slice(0, 8)} (v${quote.versionNumber})` : "—" },
+    { ok: Boolean(quote?.id), label: w.quoteCheckRef, detail: quote ? `v${quote.versionNumber}` : "—" },
     { ok: lineCount > 0 && quote?.totalMinor != null, label: w.quoteCheckItems, detail: `${lineCount} ${w.quoteLinesCount}` },
     { ok: Boolean(prefill?.proposedStartDate || prefill?.durationDays), label: w.quoteCheckPlanning, detail: prefill?.proposedStartDate ? formatDay(locale, prefill.proposedStartDate) : "—" },
     { ok: Boolean(prefill?.paymentTerms), label: w.quoteCheckTerms, detail: w.quoteFilled },
@@ -63,7 +63,7 @@ export function QuotePreviewWorkbench({
       <header className="provider-workbench-hero">
         <div>
           <div className="provider-chip-row">
-            <h2>{w.quotePreviewTitle}{quote?.id ? <span className="client-space-label" dir="ltr">{quote.id.slice(0, 12)}</span> : null}</h2>
+            <h2>{w.quotePreviewTitle}{quote?.versionNumber != null ? <span className="client-space-label" dir="ltr">v{quote.versionNumber}</span> : null}</h2>
             {quote?.status ? <span className="client-status-chip" data-tone="violet">{workflowStatusLabel(quote.status,locale)}</span> : null}
           </div>
           <p>{invitation?.description ?? w.quotePreviewLead}</p>

@@ -7,16 +7,14 @@ import type { FollowupDashboard } from "@/modules/franchise/data/followups/model
 import { FOLLOWUP_STAGES } from "@/modules/franchise/data/followups/model";
 import { isDirectoryFixture, personDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import { configurePreference, decidePolicy, proposePolicy, type FollowupActionState } from "./actions";
 import type { FollowupMessages } from "./messages";
 
 const idle: FollowupActionState = { status: "idle" };
 
-function stableStamp(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+function stableStamp(value: string, locale: Locale) {
+  return formatDateTimeCasablanca(value, locale);
 }
 
 function Feedback({ s, m }: { s: FollowupActionState; m: FollowupMessages }) {
@@ -86,9 +84,9 @@ export function FollowupPanel({
         <div className="mt-4 space-y-2">
           {d.jobs.map((j) => (
             <div key={j.id} className="grid gap-2 rounded-xl border bg-card p-3 text-sm sm:grid-cols-3">
-              <span dir="ltr">{j.id.slice(0, 8)}</span>
-              <span>{m.status}: {j.status}</span>
-              <time dateTime={j.nextAttemptAt}>{m.next}: {stableStamp(j.nextAttemptAt)}</time>
+              <span>{m.status}: {j.status} · #{j.reminderOrdinal}</span>
+              <span>{j.attemptCount} {locale === "ar" ? "محاولات" : "tentatives"}</span>
+              <time dateTime={j.nextAttemptAt}>{m.next}: {stableStamp(j.nextAttemptAt, locale)}</time>
             </div>
           ))}
         </div>

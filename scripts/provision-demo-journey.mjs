@@ -403,9 +403,9 @@ async function main() {
       }
 
       const work = [
-        ["EXECUTIVE_TODAY", "DISPUTE", "dispute_case", dispute, "Litige de démonstration à instruire", "نزاع تجريبي للمعالجة", "HIGH"],
-        ["CENTRAL_APPROVALS", "APPROVAL", "provider_service", providerOrg, "Qualification prestataire de démonstration", "تأهيل مقاول تجريبي", "MEDIUM"],
-        ["EXCEPTIONS", "EXCEPTION", "service_request", request.id, "Demande IT de démonstration avec devis", "طلب تجريبي مع عروض", "MEDIUM"],
+        ["EXECUTIVE_TODAY", "DISPUTE", "dispute_case", dispute, "Litige client à instruire", "نزاع عميل للمعالجة", "HIGH"],
+        ["CENTRAL_APPROVALS", "APPROVAL", "provider_service", providerOrg, "Qualification prestataire à décider", "تأهيل مقاول للقرار", "MEDIUM"],
+        ["EXCEPTIONS", "EXCEPTION", "service_request", request.id, "Demande IT avec devis à comparer", "طلب تقني مع عروض للمقارنة", "MEDIUM"],
         ["RISK_FLAGS", "RISK_FLAG", "diagnostic_run", diagnostic, "Score diagnostic IT sous le seuil", "درجة التشخيص تحت الحد", "HIGH"],
       ];
       for (const [queueKey, source, resourceType, resourceId, titleFr, titleAr, priority] of work) {
@@ -413,7 +413,13 @@ async function main() {
         if (!queue) continue;
         await tx`insert into public.admin_work_items(id,queue_version_id,organization_id,source_kind,resource_type,resource_id,title_fr,title_ar,priority,due_at,created_by)
           values(${id(`${projectRef}:demo:journey:work:${queueKey}`)}::uuid,${queue.id}::uuid,${clientOrg}::uuid,${source},${resourceType},${resourceId},${titleFr},${titleAr},${priority},clock_timestamp()+interval '2 days',${adminUser}::uuid)
-          on conflict(id) do nothing`;
+          on conflict(id) do update set
+            title_fr = excluded.title_fr,
+            title_ar = excluded.title_ar,
+            priority = excluded.priority,
+            due_at = excluded.due_at,
+            row_version = public.admin_work_items.row_version + 1
+          where public.admin_work_items.status in ('OPEN', 'CLAIMED', 'WAITING_INFORMATION')`;
       }
 
       await tx`insert into public.franchise_followup_policy_versions(id,franchise_id,version,status,eligible_stages,reminder_delays_minutes,retry_delays_minutes,maximum_attempts,maximum_reminders_per_7_days,lease_seconds,effective_from,change_reason,content_hash,proposed_by)

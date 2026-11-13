@@ -465,7 +465,7 @@ export function buildFranchiseSpaceBoard(input: {
       id: item.id,
       title: item.paymentModel,
       status: item.status,
-      meta: item.skuId.slice(0, 8),
+      meta: item.paymentModel,
       href: `/${locale}/franchise/finance/volume${q}`,
     })),
   ];
@@ -489,7 +489,7 @@ export function buildFranchiseSpaceBoard(input: {
       id: item.id,
       title: locale === "ar" ? item.titleAr : item.titleFr,
       status: item.solutionLevel,
-      meta: item.serviceId.slice(0, 8),
+      meta: item.solutionLevel,
       href: `/${locale}/franchise/qualite/recommandations${q}`,
     })),
   ];

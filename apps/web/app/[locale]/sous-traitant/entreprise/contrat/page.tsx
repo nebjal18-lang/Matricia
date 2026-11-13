@@ -3,8 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { loadProviderDashboard } from "@/modules/provider/data/qualification/repository";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { getProviderStatusLabel } from "@/modules/provider/screens/qualification/messages";
 import { ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 export default async function ProviderPartnerContractPage({
@@ -18,15 +20,30 @@ export default async function ProviderPartnerContractPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/entreprise/contrat` }));
-  const result = await loadProviderDashboard(query.organizationId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/entreprise/contrat` }));
-  const profile = result.status === "success" ? result.dashboard.profile : null;
-  const proofs = result.status === "success" ? result.dashboard.documents.filter((item) => item.kind === "PARTNER_CONTRACT") : [];
-  const status = profile?.partnerContractStatus ?? "NOT_SIGNED";
+  const contextState = providerContextReadState(space, query.organizationId);
   const ar = locale === "ar";
   const copy = ar
     ? { title: "عقد الشراكة Matricia", lead: "يجب أن يكون العقد سارياً قبل استلام استشارات جديدة.", status: "حالة العقد", proofs: "نسخ مودعة", empty: "لا نسخة عقد مودعة في الملف.", add: "إيداع إثبات", note: "التوقيع يُسجَّل بقرار إداري. لا تُختلق وثيقة هنا.", error: "تعذر تحميل العقد." }
     : { title: "Contrat partenaire Matricia", lead: "Le contrat doit être valide avant de recevoir de nouvelles consultations.", status: "Statut du contrat", proofs: "Versions déposées", empty: "Aucune version de contrat n’est déposée dans le dossier.", add: "Déposer une preuve", note: "La signature est enregistrée par une décision administrative. Aucun document n’est inventé ici.", error: "Impossible de charger le contrat." };
+  if (contextState) {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="company" title={copy.title} lead={copy.lead}>
+        <ProviderReadState locale={locale} state={contextState} retryHref={`/${locale}/sous-traitant/entreprise/contrat${space.selectedQuery}`} reason={space.readError ?? undefined} />
+      </ProviderAppShell>
+    );
+  }
+  const result = await loadProviderDashboard(space.selectedOrganizationId ?? undefined);
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/entreprise/contrat` }));
+  if (result.status === "error") {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="company" title={copy.title} lead={copy.lead} kicker={copy.error}>
+        <ProviderReadState locale={locale} state={result.reason === "FORBIDDEN" ? "forbidden" : result.reason === "NO_PROVIDER_ORGANIZATION" ? "no-organization" : "unavailable"} retryHref={`/${locale}/sous-traitant/entreprise/contrat${space.selectedQuery}`} reason={result.reason} />
+      </ProviderAppShell>
+    );
+  }
+  const profile = result.dashboard.profile;
+  const proofs = result.dashboard.documents.filter((item) => item.kind === "PARTNER_CONTRACT");
+  const status = profile?.partnerContractStatus ?? "NOT_SIGNED";
 
   return (
     <ProviderAppShell
@@ -37,15 +54,14 @@ export default async function ProviderPartnerContractPage({
       active="company"
       title={copy.title}
       lead={copy.lead}
-      kicker={result.status === "error" ? copy.error : getProviderStatusLabel(locale, status)}
+      kicker={getProviderStatusLabel(locale, status)}
     >
       <main className="client-page provider-partner-contract">
-        {result.status === "error" ? <p role="alert" className="client-card">{copy.error}</p> : null}
         <section className="client-board client-board-compare">
           <article className="client-card">
             <header><h2>{copy.status}</h2></header>
             <p className="client-status-chip" data-tone={status === "SIGNED" || status === "ACTIVE" ? "mint" : "peach"}>{getProviderStatusLabel(locale, status)}</p>
-            <p>{result.status === "success" ? result.dashboard.organizationName : space.organizationName}</p>
+            <p>{result.dashboard.organizationName}</p>
             <p className="client-access-note">{copy.note}</p>
           </article>
           <article className="client-card">

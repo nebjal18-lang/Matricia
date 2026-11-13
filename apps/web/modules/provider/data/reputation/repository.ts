@@ -1,7 +1,7 @@
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { z } from "zod";
 import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { reputationDimensions, type ClientFavoritesDashboard, type FeedbackAxis, type ProviderReputationDashboard } from "./model";
 
 const id = z.string().uuid();
@@ -20,8 +20,8 @@ const request = z.object({ id, service_id: id, status: z.string() });
 type Failure = { status: "error"; reason: "UNAUTHENTICATED" | "NO_ORGANIZATION" | "ORGANIZATION_SELECTION_REQUIRED" | "FORBIDDEN_ORGANIZATION" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
 async function activeMembership(roleCodes: string[], requestedOrganizationId?: string, requireExplicitSelection = false) {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth, error: authError } = authResult;
   const authFailure = classifyAuthReadFailure(authError);
   if (authFailure) return { client, failure: { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" } as Failure };
   if (!auth.user) return { client, failure: { status: "error", reason: "UNAUTHENTICATED" } as Failure };

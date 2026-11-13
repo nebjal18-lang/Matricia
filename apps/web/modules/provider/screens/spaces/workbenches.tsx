@@ -35,9 +35,10 @@ import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail
 import { BillingPanel } from "@/modules/provider/screens/facturation/billing-panel";
 import type { BillingMessages } from "@/modules/provider/screens/facturation/messages";
 import type { MissionOption } from "@/modules/provider/screens/facturation/options";
-import { QuotePanel } from "@/modules/provider/screens/devis/quote-panel";
+import { InvitationDecisionForm, QuotePanel } from "@/modules/provider/screens/devis/quote-panel";
 import type { QuotePrefill } from "@/modules/provider/screens/devis/prefill";
 import type { ProviderQuoteMessages } from "@/modules/provider/screens/devis/messages";
+import { getProviderQuoteMessages } from "@/modules/provider/screens/devis/messages";
 import { MissionsPanel } from "@/modules/provider/screens/missions/missions-panel";
 import type { ProviderMissionMessages } from "@/modules/provider/screens/missions/messages";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -86,14 +87,19 @@ export function ConsultationDetailWorkbench({
   consultationId,
   invitation,
   quotePanel,
+  canManage = false,
+  decisionIdentity,
 }: {
   locale: Locale;
   query: string;
   consultationId: string;
   invitation?: ProviderQuoteDashboard["invitations"][number] | null;
   quotePanel?: ReactNode;
+  canManage?: boolean;
+  decisionIdentity?: { decision: string; correlation: string };
 }) {
   const w = workbenchCopy(locale);
+  const quoteMessages = getProviderQuoteMessages(locale);
   const pack = invitation?.pack;
   const title = invitation?.description ?? w.consultDetailTitle;
   const deadline = invitation ? formatMedium(locale, invitation.deadline, true) : "—";
@@ -101,6 +107,8 @@ export function ConsultationDetailWorkbench({
     ? `/${locale}/sous-traitant/messages${query}${query.includes("?") ? "&" : "?"}rfq=${encodeURIComponent(invitation.rfqId)}`
     : `/${locale}/sous-traitant/messages${query}`;
   const quoteHref = `/${locale}/sous-traitant/devis/${invitation?.quote?.id ?? invitation?.id ?? consultationId}${query}`;
+  const needsDecision = Boolean(invitation && canManage && decisionIdentity && (invitation.status === "INVITED" || invitation.status === "VIEWED"));
+  const canStartQuote = invitation?.status === "ACCEPTED";
   const objective = pack?.objective ?? invitation?.description ?? w.consultDetailLead;
   const scopeItems = pack?.scope.length
     ? pack.scope
@@ -123,12 +131,12 @@ export function ConsultationDetailWorkbench({
       </p>
       <header className="provider-workbench-hero">
         <div>
-          <p className="client-space-label" dir="ltr">#{consultationId.slice(0, 12)}</p>
+          <p className="client-space-label">{w.breadcrumbConsultDetail}</p>
           <h2>{title}</h2>
           <p>{w.consultDetailLead}</p>
           <div className="provider-chip-row">
             <span className="provider-meta-chip"><MapPin className="size-3.5" aria-hidden />{region}</span>
-            <span className="client-status-chip" data-tone="mint">{w.consultOnInvite}</span>
+            <span className="client-status-chip" data-tone="mint">{invitation ? quoteStatusLabel(invitation.status, locale) : w.consultOnInvite}</span>
           </div>
         </div>
         <div className="provider-workbench-meta">
@@ -145,7 +153,7 @@ export function ConsultationDetailWorkbench({
         <a href="#consult-overview" aria-current="page">{w.consultOverview}</a>
         <a href="#consult-docs">{w.consultDocs}{documents.length ? ` (${documents.length})` : ""}</a>
         <a href={messagesHref}>{w.consultExchanges}</a>
-        <a href={quoteHref}>{w.consultMyQuote}</a>
+        <a href={canStartQuote ? quoteHref : "#invitation-decision"}>{w.consultMyQuote}</a>
       </nav>
       <section className="provider-workbench-layout" id="consult-overview">
         <div className="provider-workbench-main">
@@ -217,15 +225,16 @@ export function ConsultationDetailWorkbench({
           </div>
         </div>
         <aside className="provider-workbench-rail client-stack">
-          <article className="client-card provider-invite-banner">
+          <article className="client-card provider-invite-banner" id="invitation-decision">
             <p className="client-status"><strong>{w.consultInProgress}</strong> — {w.consultInviteOpen}</p>
-            {quotePanel && (invitation?.status === "INVITED" || invitation?.status === "VIEWED") ? (
-              <div className="provider-workbench-actions provider-workbench-actions-stack">
-                <a href="#invitation-decision" className="client-cta"><Check className="size-4" aria-hidden />{w.consultAccept}</a>
-                <a href="#invitation-decision" className="client-ghost-link">{w.consultDecline}</a>
-              </div>
+            {needsDecision && invitation && decisionIdentity ? (
+              <InvitationDecisionForm item={invitation} locale={locale} m={quoteMessages} identity={decisionIdentity} />
             ) : null}
-            <Link href={quoteHref} className="client-cta provider-cta-soft">{w.consultStartQuote}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>
+            {canStartQuote ? (
+              <Link href={quoteHref} className="client-cta provider-cta-soft">{w.consultStartQuote}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>
+            ) : needsDecision ? (
+              <p className="client-access-note" role="status">{locale === "ar" ? "اقبلوا الدعوة قبل فتح العرض." : "Acceptez l’invitation avant d’ouvrir le devis."}</p>
+            ) : null}
             <p className="client-access-note">{w.consultNoCompetitor}</p>
           </article>
           <article className="client-card">
@@ -246,7 +255,7 @@ export function ConsultationDetailWorkbench({
           </article>
         </aside>
       </section>
-      {quotePanel ? <div id="invitation-decision">{quotePanel}</div> : null}
+      {quotePanel ? <div id="consult-quote-panel">{quotePanel}</div> : null}
     </main>
   );
 }
@@ -301,7 +310,7 @@ export function QuoteMultilineWorkbench({
           <article className="client-card">
             <header className="client-priority-head">
               <h3>{w.quoteLines}</h3>
-              {invitation ? (
+              {invitation?.status === "ACCEPTED" ? (
                 <Link href={`/${locale}/sous-traitant/devis/${invitation.quote?.id ?? invitation.id}/revision${query}`} className="client-ghost-link">
                   <Plus className="size-4" aria-hidden />{w.quoteAddLine}
                 </Link>
@@ -337,7 +346,7 @@ export function QuoteMultilineWorkbench({
             <div className="provider-workbench-actions">
               <Link href={`/${locale}/sous-traitant/devis${query}`} className="client-ghost-link">{w.breadcrumbQuotes}</Link>
               {invitation?.quote?.id ? <Link href={`/${locale}/sous-traitant/devis/${invitation.quote.id}/apercu${query}`} className="client-ghost-link">{w.quotePreview}</Link> : null}
-              {invitation ? <Link href={`/${locale}/sous-traitant/devis/${invitation.quote?.id ?? invitation.id}/revision${query}`} className="client-cta">{w.quoteContinue}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link> : null}
+              {invitation?.status === "ACCEPTED" ? <Link href={`/${locale}/sous-traitant/devis/${invitation.quote?.id ?? invitation.id}/revision${query}`} className="client-cta">{w.quoteContinue}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link> : null}
             </div>
           </article>
         </aside>
@@ -384,7 +393,7 @@ export function QuoteRevisionWorkbench({
         </div>
         <article className="provider-consult-summary client-card">
           <p><strong>{invitation?.description ?? w.quoteCreateTitle}</strong></p>
-          <p dir="ltr">{invitation?.id ? `${locale === "ar" ? "مرجع" : "Réf."} ${invitation.id.slice(0, 8)}` : null}</p>
+          <p>{invitation ? quoteStatusLabel(invitation.status, locale) : null}</p>
           <Link href={`/${locale}/sous-traitant/consultations/${invitation?.id ?? quoteId}${query}`} className="client-ghost-link">{w.quoteSeeConsult}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>
         </article>
       </header>
@@ -393,7 +402,7 @@ export function QuoteRevisionWorkbench({
           <article className="client-card">
             <header><h3>{w.quoteVersionHistory}</h3></header>
             {history === null ? <p role="alert">{locale === "ar" ? "تعذر تحميل سجل النسخ." : "Impossible de charger l’historique des versions."}</p> : !history?.length ? <p role="status">{locale === "ar" ? "لا توجد نسخة محفوظة." : "Aucune version enregistrée."}</p> : <ol className="client-journey provider-version-rail">
-              {history.map((item,index) => {const previous=history[index+1];const differences=item.snapshot&&previous?.snapshot?compareQuoteRevisions(previous.snapshot,item.snapshot,locale):null;return <li key={item.id} data-state={item.id === invitation?.quote?.currentVersionId ? "current" : "done"}><span>v{item.version}</span><time dateTime={item.createdAt}>{formatMedium(locale, item.createdAt, true)}</time><small>{item.changeReason}</small><small>{locale==="ar"?"المؤلف":"Auteur"}: <code dir="ltr">{item.authorId}</code></small><details><summary>{locale==="ar"?"بصمة النسخة":"Empreinte de la version"}</summary><code dir="ltr">{item.contentHash}</code></details>{previous?<details><summary>{locale==="ar"?"مقارنة":"Comparer"} v{previous.version} → v{item.version}</summary>{differences===null?<p role="status">{locale==="ar"?"تعذر تحميل بيانات المقارنة.":"Données de comparaison indisponibles."}</p>:differences.length===0?<p>{locale==="ar"?"لا اختلاف في المحتوى التجاري.":"Aucun changement de contenu commercial."}</p>:<dl>{differences.map(change=><div key={change.field}><dt>{revisionFieldLabel(change.field,locale)}</dt><dd><del className="whitespace-pre-wrap">{change.before||"—"}</del> → <ins className="whitespace-pre-wrap">{change.after||"—"}</ins></dd></div>)}</dl>}</details>:null}</li>;})}
+              {history.map((item,index) => {const previous=history[index+1];const differences=item.snapshot&&previous?.snapshot?compareQuoteRevisions(previous.snapshot,item.snapshot,locale):null;return <li key={item.id} data-state={item.id === invitation?.quote?.currentVersionId ? "current" : "done"}><span>v{item.version}</span><time dateTime={item.createdAt}>{formatMedium(locale, item.createdAt, true)}</time><small>{item.changeReason}</small><small>{locale==="ar"?"المؤلف":"Auteur"}: {locale==="ar"?"مسجّل":"enregistré"}</small><details><summary>{locale==="ar"?"بصمة النسخة":"Empreinte de la version"}</summary><code dir="ltr">{item.contentHash}</code></details>{previous?<details><summary>{locale==="ar"?"مقارنة":"Comparer"} v{previous.version} → v{item.version}</summary>{differences===null?<p role="status">{locale==="ar"?"تعذر تحميل بيانات المقارنة.":"Données de comparaison indisponibles."}</p>:differences.length===0?<p>{locale==="ar"?"لا اختلاف في المحتوى التجاري.":"Aucun changement de contenu commercial."}</p>:<dl>{differences.map(change=><div key={change.field}><dt>{revisionFieldLabel(change.field,locale)}</dt><dd><del className="whitespace-pre-wrap">{change.before||"—"}</del> → <ins className="whitespace-pre-wrap">{change.after||"—"}</ins></dd></div>)}</dl>}</details>:null}</li>;})}
             </ol>}
             <p className="client-access-note">{w.quoteReviseNotice}</p>
             {quotePanel}
@@ -433,7 +442,7 @@ export function MissionDeliveryWorkbench({
 }) {
   const w = workbenchCopy(locale);
   const title = mission
-    ? (mission.deliverables[0]?.label || mission.milestones[0]?.title || mission.id.slice(0, 8))
+    ? (mission.deliverables[0]?.label || mission.milestones[0]?.title || w.missionDeliveryTitle)
     : w.missionDeliveryTitle;
   const steps = mission?.milestones.length
     ? mission.milestones.map((item) => ({
@@ -456,7 +465,7 @@ export function MissionDeliveryWorkbench({
       <p className="provider-breadcrumb">
         <Crumb href={`/${locale}/sous-traitant/missions${query}`}>{w.breadcrumbMissions}</Crumb>
         <span aria-hidden>›</span>
-        <span dir="ltr">{missionId.slice(0, 12)}</span>
+        <span>{title}</span>
       </p>
       <header className="provider-workbench-hero">
         <div>
@@ -467,7 +476,7 @@ export function MissionDeliveryWorkbench({
       </header>
       <article className="client-card provider-mission-overview">
         <div>
-          <p className="client-space-label" dir="ltr">{missionId.slice(0, 12)}</p>
+          <p className="client-space-label">{w.missionDeliveryTitle}</p>
           <h3>{title}</h3>
           <div className="provider-chip-row">
             <span className="client-status-chip" data-tone="mint">{mission?.status ? workflowStatusLabel(mission.status,locale):w.missionInProgress}</span>
@@ -479,14 +488,14 @@ export function MissionDeliveryWorkbench({
         <div>
           <h4>{w.missionClientAccess}</h4>
           <ul className="client-feed provider-access-checks">
-            <li><Link href={`/${locale}/sous-traitant/missions/${missionId}${query}`}><span>{w.missionAccessDeliverables}</span></Link></li>
+            <li><Link href={`/${locale}/sous-traitant/missions/${missionId}${query}#livraison`}><span>{w.missionAccessDeliverables}</span></Link></li>
             <li><Link href={messagesHref}><span>{w.missionAccessMessages}</span></Link></li>
             <li><Link href={`/${locale}/sous-traitant/documents${query}`}><span>{w.missionAccessDocs}</span></Link></li>
-            <li><Link href={`/${locale}/sous-traitant/missions/${missionId}${query}`}><span>{w.missionAccessMilestones}</span></Link></li>
+            <li><Link href={`/${locale}/sous-traitant/missions/${missionId}${query}#jalons`}><span>{w.missionAccessMilestones}</span></Link></li>
           </ul>
         </div>
       </article>
-      <section className="client-card">
+      <section className="client-card" id="jalons">
         <header><h3>{w.missionMilestones}</h3></header>
         {steps.length === 0 ? <p role="status">{w.missionNoMilestones}</p> : (
           <ol className="provider-milestone-rail">
@@ -500,7 +509,7 @@ export function MissionDeliveryWorkbench({
           </ol>
         )}
       </section>
-      <section className="provider-workbench-layout">
+      <section className="provider-workbench-layout" id="livraison">
         <div className="provider-workbench-main">
           <article className="client-card">
             <header className="client-priority-head">
@@ -571,7 +580,7 @@ export function InvoiceSettlementWorkbench({
         <article className="client-card provider-invoice-summary">
           <header className="client-priority-head">
             <div>
-              <p className="client-space-label" dir="ltr">{invoice?.number ?? invoiceId.slice(0, 12)}</p>
+              <p className="client-space-label" dir="ltr">{invoice?.number ?? (locale === "ar" ? "فاتورة" : "Facture")}</p>
               <span className="client-status-chip" data-tone={settled ? "mint" : "peach"}>{settled ? w.invoiceSettled : (invoice?workflowStatusLabel(invoice.paymentStatus,locale):"—")}</span>
             </div>
           </header>
@@ -692,9 +701,9 @@ export function CompanySecurityWorkbench({
       </header>
       <nav className="client-tabs" aria-label={w.companyTitle}>
         <Link href={`/${locale}/sous-traitant/identite${query}`}>{w.tabProfile}</Link>
-        <Link href={`/${locale}/organisation/roles${query}`}>{w.tabTeam}</Link>
-        <Link href={`/${locale}/organisation/roles${query}`}>{w.tabRoles}</Link>
-        <Link href={`/${locale}/organisation/roles${query}`}>{w.tabInvites}</Link>
+        <Link href={`/${locale}/sous-traitant/entreprise${query}#equipe`}>{w.tabTeam}</Link>
+        <Link href={`/${locale}/organisation/roles${query}#roles`}>{w.tabRoles}</Link>
+        <Link href={`/${locale}/organisation/roles${query}#invitations`}>{w.tabInvites}</Link>
         <Link href={`/${locale}/securite/compte${query}`} aria-current="page">{w.tabSecurity}</Link>
         <Link href={`/${locale}/securite/sessions${query}`}>{w.tabSessions}</Link>
         <Link href={`/${locale}/notifications${query}`}>{w.tabPrefs}</Link>
@@ -783,6 +792,7 @@ export function ProviderLiveQuotePanel(props: {
   m: ProviderQuoteMessages;
   identities: Record<string, { decision: string; revision: string; submit: string; correlation: string }>;
   prefills?: Record<string, QuotePrefill>;
+  hideDecision?: boolean;
 }) {
   return <section className="provider-live-ops"><QuotePanel {...props} /></section>;
 }

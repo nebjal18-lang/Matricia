@@ -35,7 +35,7 @@ export async function CreditPackCatalogue({ locale, organizationId }: { locale: 
           {pack.payment_intent_id ? <CreditPackStatus locale={locale} organizationId={organizationId} paymentIntentId={pack.payment_intent_id} /> : null}
           {pack.pending ? <p role="status" className="my-2">{ar ? "توجد عملية شراء قيد الانتظار؛ لا تنشئوا دفعة أخرى." : "Un achat est déjà en cours ; ne créez pas une nouvelle charge."}</p> : null}
           {parsed.data.can_purchase && (!pack.pending || pack.attempt_key) ? <PaymentIntentButton locale={locale} organizationId={organizationId} packVersionId={pack.id} attemptKey={pack.attempt_key ?? undefined} billingInterval="MONTHLY" messages={messages} /> : null}
-          {pack.pending && !pack.attempt_key ? <Link className="underline" href={`/${locale}/client/assistance?organizationId=${organizationId}`}>{messages.contactSupport}</Link> : null}
+          {pack.pending && !pack.attempt_key ? <Link className="underline" href={`/${locale}/client/diagnostics/assistance?organizationId=${organizationId}`}>{messages.contactSupport}</Link> : null}
         </li>)}</ul>}
   </section>;
 }

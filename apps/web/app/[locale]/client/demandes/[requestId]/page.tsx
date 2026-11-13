@@ -80,7 +80,7 @@ export default async function RequestDetailPage({
         {q.canManage ? (
           <section className="client-card" aria-labelledby="workflow">
             <h2 id="workflow">{messages.workflow}</h2>
-            <WorkflowActions organizationId={q.organizationId} locale={locale} requestId={q.id} rowVersion={information?.rowVersion ?? q.rowVersion} status={q.status} canMarkReady={Boolean(information?.complete && information.regionCode)} matchingRunId={q.matchingRunId} messages={messages} keys={{ ready: randomUUID(), match: randomUUID(), open: randomUUID() }} />
+            <WorkflowActions organizationId={q.organizationId} locale={locale} requestId={q.id} rowVersion={information?.rowVersion ?? q.rowVersion} status={q.status} canMarkReady={information ? Boolean(information.complete && information.regionCode) : editable} matchingRunId={q.status === "MATCHING" ? q.matchingRunId : null} messages={messages} keys={{ ready: randomUUID(), match: randomUUID(), open: randomUUID() }} />
           </section>
         ) : (
           <p role="status" className="client-card">{messages.readOnly}</p>

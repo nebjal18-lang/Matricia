@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ getUser: vi.fn(), from: vi.fn(), rpc: vi.fn(), selects: [] as string[] }));
 vi.mock("@/modules/shared/lib/supabase/server", () => ({
   getSupabaseServerClient: async () => ({ auth: { getUser: mocks.getUser }, from: mocks.from, rpc: mocks.rpc }),
+  getServerAuthUser: async () => mocks.getUser(),
 }));
 
 import { loadAdminProviders } from "./repository";
@@ -111,8 +112,8 @@ describe("loadAdminProviders", () => {
     const result = await loadAdminProviders();
     expect(result.status).toBe("success");
     if (result.status !== "success") return;
-    expect(result.dashboard.services[0]?.serviceCode).toBe(serviceId.slice(0, 8));
+    expect(result.dashboard.services[0]?.serviceCode).toBe("SERVICE");
     expect(result.dashboard.services[0]?.eligibilityReasons).toEqual(["ELIGIBILITY_UNAVAILABLE"]);
-    expect(result.dashboard.providers[0]?.organizationName).toBe(orgId.slice(0, 8));
+    expect(result.dashboard.providers[0]?.organizationName).toBe("Organisation");
   });
 });

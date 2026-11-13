@@ -11,8 +11,10 @@ import {
   ymdInZone,
 } from "@/modules/provider/data/planning/events";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { PlanningWeekBoard } from "@/modules/provider/screens/planning/planning-board";
 import { ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 
 function requestedMonday(week: string | undefined, today: string): string {
   if (week && z.string().date().safeParse(week).success) return mondayOnOrBefore(week);
@@ -31,6 +33,18 @@ export default async function ProviderPlanningPage({
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/planning` }));
+  const copy =
+    locale === "ar"
+      ? { title: "التخطيط", eyebrow: "المواعيد الحقيقية", lead: "الاستشارات والعروض والمعالم والفواتير وتجديد الوثائق والعقود — كل حدث يفتح ملفه.", unavailable: "تعذر تحميل المواعيد. أعد المحاولة." }
+      : { title: "Planning", eyebrow: "Échéances réelles", lead: "Consultations, devis, jalons, factures et renouvellements documentaires ou contractuels — chaque événement ouvre son dossier.", unavailable: "Impossible de charger les échéances. Réessayez." };
+  const contextState = providerContextReadState(space, query.organizationId);
+  if (contextState) {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="planning" title={copy.title} lead={copy.lead} kicker={copy.eyebrow}>
+        <ProviderReadState locale={locale} state={contextState} retryHref={`/${locale}/sous-traitant/planning${space.selectedQuery}`} reason={space.readError ?? undefined} />
+      </ProviderAppShell>
+    );
+  }
   const today = ymdInZone(new Date().toISOString());
   const monday = requestedMonday(query.week, today);
   const days = weekDays(monday);
@@ -44,10 +58,6 @@ export default async function ProviderPlanningPage({
     const encoded = params.toString();
     return encoded ? `?${encoded}` : `?week=${week}`;
   };
-  const copy =
-    locale === "ar"
-      ? { title: "التخطيط", eyebrow: "المواعيد الحقيقية", lead: "الاستشارات والعروض والمعالم والفواتير وتجديد الوثائق والعقود — كل حدث يفتح ملفه.", unavailable: "تعذر تحميل المواعيد. أعد المحاولة." }
-      : { title: "Planning", eyebrow: "Échéances réelles", lead: "Consultations, devis, jalons, factures et renouvellements documentaires ou contractuels — chaque événement ouvre son dossier.", unavailable: "Impossible de charger les échéances. Réessayez." };
   const partialFail = planning.status === "error";
 
   return (
