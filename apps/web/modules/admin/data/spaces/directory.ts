@@ -115,11 +115,29 @@ export function adminDirectoryGroup(locale: Locale, q: string, id: AdminDirector
   return adminDirectoryGroups(locale, q).find((group) => group.id === id) ?? null;
 }
 
+export const ORG_TYPE_CODES = ["CLIENT", "PROVIDER", "FRANCHISE", "INTERNAL"] as const;
+export type OrgTypeCode = (typeof ORG_TYPE_CODES)[number];
+export const ORG_TYPE_NONE = "NONE";
+
+export function normalizeOrgTypeCodes(roleCodes: readonly string[] = []): OrgTypeCode[] {
+  const labels = new Set<string>(ORG_TYPE_CODES);
+  return [...new Set(roleCodes.map((code) => (code.split("_")[0] ?? code).toUpperCase()))].filter((code): code is OrgTypeCode => labels.has(code));
+}
+
+export function orgTypeFilterCodes(roleCodes: readonly string[] = []): string[] {
+  const codes = normalizeOrgTypeCodes(roleCodes);
+  return codes.length ? codes : [ORG_TYPE_NONE];
+}
+
 export function inferOrgType(name: string, locale: Locale, roleCodes: readonly string[] = []) {
   void name;
   const labels: Record<string, string> = locale === "ar"
-    ? { CLIENT: "عميل", PROVIDER: "مقدّم خدمات", FRANCHISE: "امتياز", INTERNAL: "داخلي" }
-    : { CLIENT: "Client", PROVIDER: "Prestataire", FRANCHISE: "Franchisé", INTERNAL: "Interne" };
-  const roles = [...new Set(roleCodes.map((code) => code.split("_")[0] ?? code))].filter((code) => labels[code]);
-  return roles.length ? roles.map((code) => labels[code]).join(" · ") : locale === "ar" ? "غير محدد" : "Non renseigné";
+    ? { CLIENT: "عميل", PROVIDER: "مقدّم خدمات", FRANCHISE: "امتياز", INTERNAL: "داخلي", NONE: "غير محدد" }
+    : { CLIENT: "Client", PROVIDER: "Prestataire", FRANCHISE: "Franchisé", INTERNAL: "Interne", NONE: "Non renseigné" };
+  const roles = normalizeOrgTypeCodes(roleCodes);
+  return roles.length ? roles.map((code) => labels[code]!).join(" · ") : labels.NONE!;
+}
+
+export function orgTypeOptionLabel(code: string, locale: Locale) {
+  return inferOrgType("", locale, code === ORG_TYPE_NONE ? [] : [code]);
 }

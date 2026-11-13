@@ -63,5 +63,5 @@ export async function completeRequestInformationAction(_: CompleteInformationSta
   const output = outputSchema.safeParse(result.data);
   if (!output.success) return { status: "error", reason: "UNAVAILABLE" };
   revalidatePath(`/${parsed.data.locale}/client/demandes/${parsed.data.requestId}`);
-  return { status: "success", complete: output.data.missing_quote_keys.length === 0 && output.data.status === "DRAFT", missing: output.data.missing_quote_keys };
+  return { status: "success", complete: output.data.missing_quote_keys.length === 0, missing: output.data.missing_quote_keys };
 }

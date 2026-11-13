@@ -189,12 +189,12 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       title: item.organization_name,
       cells: [
         sliceId(item.request_id),
-        item.policy_version,
+        item.organization_name,
         String(item.eligible_count),
         String(item.excluded_count),
-        item.eligible_count > 0 ? (locale === "ar" ? "مراجعة" : "revue") : "—",
+        item.eligible_count > 0 ? (locale === "ar" ? "مراجعة" : "Revue") : "—",
         String(item.rfq_count),
-        String(item.eligible_count),
+        String(item.candidates.length || item.rfq_count),
         item.status,
       ],
       status: item.status,
@@ -215,7 +215,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "contrats", query, item.id),
       title: `${item.client_name} → ${item.provider_name}`,
-      cells: [sliceId(item.id), item.mission_id ? sliceId(item.mission_id) : "—", item.client_name, item.provider_name, String(item.current_version), String(item.signature_count), item.status, item.status, item.status],
+      cells: [sliceId(item.id), "—", item.client_name, item.provider_name, String(item.current_version), String(item.signature_count), item.signature_count > 0 ? (locale === "ar" ? "موقّع جزئياً/كلياً" : "Signatures en cours") : (locale === "ar" ? "بانتظار التوقيع" : "En attente de signature"), item.status === "ACTIVE" ? (locale === "ar" ? "مفعّل" : "Activé") : "—", item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.client_organization_id,
@@ -230,7 +230,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "avenants", query, item.id),
       title: `${item.client_name} → ${item.provider_name}`,
-      cells: [sliceId(item.id), sliceId(item.contract_id), item.status, String(item.amendment_number), item.price_delta_minor, "—", "—", item.status],
+      cells: [sliceId(item.id), sliceId(item.contract_id), locale === "ar" ? `تعديل تعاقدي` : `Modification contractuelle`, String(item.amendment_number), "—", "—", item.price_delta_minor ? `${item.price_delta_minor} (minor)` : "—", item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.client_organization_id,
@@ -245,7 +245,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "documents", query, item.id),
       title: `${item.kind} · ${item.code}`,
-      cells: [item.organization_name, item.code, item.status, "—", "—", `${item.kind} v${item.version}`, item.expires_on ?? "—", item.status],
+      cells: [item.code, item.organization_name, item.kind, "—", "—", `v${item.version}`, "—", "—", item.expires_on ?? "—", item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.organization_id,
@@ -260,7 +260,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "messagerie", query, item.id),
       title: item.subject,
-      cells: [item.client_name, item.provider_name, sliceId(item.service_request_id), "in-app", item.created_at.slice(0, 16), "—", item.status, item.status],
+      cells: [`${item.client_name} · ${item.provider_name}`, `${item.client_name} / ${item.provider_name}`, sliceId(item.service_request_id), "in-app", item.created_at.slice(0, 16), "—", item.status, "—"],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.client_organization_id,
@@ -275,7 +275,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "diagnostics", query, item.id),
       title: item.organization_name,
-      cells: [item.organization_name, sliceId(item.id), item.rating, String(item.overall_score), item.rating, item.completed_at?.slice(0, 16) ?? "—", item.status],
+      cells: [item.organization_name, sliceId(item.id), "—", `${item.overall_score}%`, item.rating ? (locale === "ar" ? `أولوية ${item.rating}` : `Priorité ${item.rating}`) : "—", item.completed_at?.slice(0, 16) ?? "—", item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.organization_id,
@@ -290,8 +290,8 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       href: spaceHref(locale, space, query, item.id),
       title: item.organization_name,
       cells: space === "matching"
-        ? [sliceId(item.id), sliceId(item.service_id), String(item.matching_runs), "—", item.matching_runs > 0 ? "revue" : "—", String(item.rfq_count), String(item.quote_count), item.status]
-        : [sliceId(item.id), item.organization_name, sliceId(item.service_id), sliceId(item.library_id), "RFQ", `${item.rfq_count}`, String(item.matching_runs), String(item.quote_count), item.status],
+        ? [sliceId(item.id), sliceId(item.service_id), String(item.matching_runs), "—", item.matching_runs > 0 ? (locale === "ar" ? "مراجعة" : "Revue") : "—", String(item.rfq_count), String(item.quote_count), item.status]
+        : [sliceId(item.id), item.organization_name, sliceId(item.service_id), sliceId(item.library_id), "RFQ", item.rfq_count > 0 ? `${item.rfq_count}` : "0", String(item.matching_runs), String(item.quote_count), item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.organization_id,
@@ -305,7 +305,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "devis", query, item.id),
       title: `${item.client_name} · ${item.provider_name}`,
-      cells: [sliceId(item.id), sliceId(item.request_id), item.provider_name, item.version_number?.toString()??"—", item.subtotal_minor??"—",item.tax_minor??"—",item.total_minor?`${item.total_minor} ${item.currency??""} (minor)`:"—",item.duration_days?.toString()??"—",item.valid_until??"—","—",item.status],
+      cells: [sliceId(item.id), sliceId(item.request_id), item.provider_name, item.version_number?.toString() ?? "—", "—", item.subtotal_minor ?? "—", item.tax_minor ?? "—", item.total_minor ? `${item.total_minor} ${item.currency ?? ""} (minor)` : "—", item.valid_until ?? "—", "—", item.status],
       status: item.status,
       tone: statusTone(item.status),
       organizationId: item.provider_organization_id,
@@ -314,8 +314,8 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if(space==="jalons"&&dash){snapshot.rows=(dash.milestones??[]).map(item=>({id:item.id,href:spaceHref(locale,space,query,item.id),title:locale==="ar"?item.title_ar:item.title_fr,cells:[locale==="ar"?item.title_ar:item.title_fr,sliceId(item.mission_id),item.milestone_key,item.owner_name,item.due_at??"—",String(item.deliverable_count),item.status,String(item.proof_count),item.status],status:item.status,tone:statusTone(item.status),organizationId:item.organization_id,extras:{missionId:item.mission_id,statusCodes:item.due_at&&new Date(item.due_at)<new Date()&&!["ACCEPTED","REJECTED"].includes(item.status)?"OVERDUE":""},treat:item.status==="SUBMITTED"||item.status==="REJECTED"}));snapshot.treat=snapshot.rows.filter(row=>row.treat);return overlayDemo(locale,space,query,snapshot);}
-  if(space==="missions"&&dash){snapshot.rows=dash.missions.map(item=>({id:item.id,href:spaceHref(locale,space,query,item.id),title:`${item.client_name} → ${item.provider_name}`,cells:[sliceId(item.id),sliceId(item.contract_id),item.client_name,item.provider_name,String(item.milestone_count),String(item.deliverable_count),"—","—",item.status],status:item.status,tone:statusTone(item.status),organizationId:item.client_organization_id,extras:{contractId:item.contract_id,providerId:item.provider_organization_id},treat:/BLOCKED|PENDING|START|CLOSUR/.test(item.status)}));snapshot.treat=snapshot.rows.filter(row=>row.treat);return overlayDemo(locale,space,query,snapshot);}
+  if(space==="jalons"&&dash){snapshot.rows=(dash.milestones??[]).map(item=>({id:item.id,href:spaceHref(locale,space,query,item.id),title:locale==="ar"?item.title_ar:item.title_fr,cells:[sliceId(item.mission_id),locale==="ar"?item.title_ar:item.title_fr,item.deliverable_count>0?(locale==="ar"?`${item.deliverable_count} تسليم`:`${item.deliverable_count} livrable(s)`):"—",item.owner_name,item.due_at??"—",String(item.proof_count),item.status,"—",item.status],status:item.status,tone:statusTone(item.status),organizationId:item.organization_id,extras:{missionId:item.mission_id,statusCodes:item.due_at&&new Date(item.due_at)<new Date()&&!["ACCEPTED","REJECTED"].includes(item.status)?"OVERDUE":""},treat:item.status==="SUBMITTED"||item.status==="REJECTED"}));snapshot.treat=snapshot.rows.filter(row=>row.treat);return overlayDemo(locale,space,query,snapshot);}
+  if(space==="missions"&&dash){snapshot.rows=dash.missions.map(item=>({id:item.id,href:spaceHref(locale,space,query,item.id),title:`${item.client_name} → ${item.provider_name}`,cells:[sliceId(item.id),sliceId(item.contract_id),item.client_name,item.provider_name,`${item.milestone_count}`,item.milestone_count>0?(locale==="ar"?`التالي ضمن ${item.milestone_count}`:`Prochain parmi ${item.milestone_count}`):"—",String(item.deliverable_count),"—",item.status],status:item.status,tone:statusTone(item.status),organizationId:item.client_organization_id,extras:{contractId:item.contract_id,providerId:item.provider_organization_id},treat:/BLOCKED|PENDING|START|CLOSUR/.test(item.status)}));snapshot.treat=snapshot.rows.filter(row=>row.treat);return overlayDemo(locale,space,query,snapshot);}
   if (space === "documents" && providerDash) {
     snapshot.rows = providerDash.documents.map((item) => documentRow(locale, query, item));
     snapshot.treat = snapshot.rows.filter((row) => /SUBMITTED|UNDER_REVIEW|EXPIRED/.test(row.status));
@@ -329,7 +329,7 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
       id: item.id,
       href: spaceHref(locale, "litiges", query, item.id),
       title: item.obligationKey,
-      cells: [sliceId(item.id), sliceId(item.missionId), item.obligationKey, item.obligationKey, item.latestDecision ? String(item.latestDecision.evidenceCount) : "—", item.status, item.reassignment?.status ?? "—", item.latestDecision?.outcome ?? "—", item.status],
+      cells: [sliceId(item.id), sliceId(item.missionId), "—", item.obligationKey, item.latestDecision ? String(item.latestDecision.evidenceCount) : "—", "—", item.reassignment?.status ?? "—", item.latestDecision?.outcome ?? "—", item.status],
       status: item.status,
       tone: item.urgency === "URGENT" ? "peach" : statusTone(item.status),
       treat: item.urgency === "URGENT" || !item.latestDecision,
@@ -387,7 +387,7 @@ function documentRow(locale: Locale, query: string, item: AdminProviderDocument)
     id: item.id,
     href: spaceHref(locale, "documents", query, item.id),
     title: `${item.kind} · ${item.code}`,
-    cells: [item.providerName, item.code, item.status, "—", "—", `${item.kind} v${item.version}`, item.expiresOn ?? "—", item.status],
+    cells: [item.code, item.providerName, item.kind, "—", "—", `v${item.version}`, "—", "—", item.expiresOn ?? "—", item.status],
     status: item.status,
     tone: statusTone(item.status),
     organizationId: item.providerOrganizationId,

@@ -66,6 +66,18 @@ describe("requestOtp", () => {
     await expect(requestOtp("personne@example.ma", "fr")).resolves.toEqual({ accepted: false, reason: "RATE_LIMITED" });
   });
 
+  it("ne révèle pas un courriel inconnu quand GoTrue renvoie otp_disabled", async () => {
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
+    mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "otp_disabled", status: 422, message: "Signups not allowed for otp" } });
+    await expect(requestOtp("inconnu@example.ma", "fr")).resolves.toEqual({ accepted: true });
+  });
+
+  it("ne masque pas otp_disabled pendant l’inscription", async () => {
+    mocks.rpc.mockResolvedValueOnce({ data: [{ allowed: true }], error: null }).mockResolvedValueOnce({ data: "a2010000-0000-4000-8000-000000000001", error: null });
+    mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "otp_disabled", status: 422, message: "Signups not allowed for otp" } });
+    await expect(requestOtp("nouveau@example.ma", "fr", undefined, "registration", legalConsent)).resolves.toEqual({ accepted: false, reason: "UNAVAILABLE" });
+  });
+
   it("interdit la création implicite et envoie un OTP sans lien magique", async () => {
     mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
     mocks.signInWithOtp.mockResolvedValue({ data: {}, error: null });
@@ -128,6 +140,14 @@ describe("requestOtp", () => {
         data: { locale: "fr" },
       },
     });
+    expect(mocks.setCookie).toHaveBeenCalledWith("matricia.registration-consent", "a2010000-0000-4000-8000-000000000001", expect.objectContaining({ httpOnly: true, maxAge: 1800 }));
+  });
+
+  it("ne pose le cookie de consentement qu’après envoi OTP réussi", async () => {
+    mocks.rpc.mockResolvedValueOnce({ data: [{ allowed: true }], error: null }).mockResolvedValueOnce({ data: "a2010000-0000-4000-8000-000000000001", error: null });
+    mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "unexpected_failure", status: 500 } });
+    await expect(requestOtp("nouveau@example.ma", "fr", undefined, "registration", legalConsent)).resolves.toEqual({ accepted: false, reason: "UNAVAILABLE" });
+    expect(mocks.setCookie).not.toHaveBeenCalled();
   });
 });
 
@@ -138,7 +158,12 @@ describe("post login assurance routing", () => {
   });
   it("keeps a verified AAL2 dossier and query", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal2",nextLevel:"aal2"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:true,current_aal:"aal2",requirement_satisfied:true}],error:null});const next="/ar/client/demandes/id?organizationId=org&tab=offres";await expect(postLoginDestination("ar",next)).resolves.toBe(next); });
   it("preserves a deep return during the MFA challenge", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1",nextLevel:"aal2"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:true,current_aal:"aal1",requirement_satisfied:false}],error:null});const next="/fr/client/demandes/id?organizationId=org";const result=new URL(await postLoginDestination("fr",next),"https://test.invalid");expect(result.pathname).toBe("/fr/securite/compte");expect(result.searchParams.get("next")).toBe(next); });
-  it("requires enrollment when the role policy requires MFA", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1",nextLevel:"aal1"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:true,current_aal:"aal1",requirement_satisfied:false}],error:null});expect(await postLoginDestination("fr","/fr/administration")).toContain("/fr/securite/compte?"); });
+  it("requires enrollment when the role policy requires MFA", async () => {
+    mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: false, navigation: { signedIn: true, landing: "administration", options: [{ kind: "administration", href: "/fr/administration/command-center" }] } });
+    mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1",nextLevel:"aal1"},error:null});
+    expect(await postLoginDestination("fr","/fr/administration")).toContain("/fr/securite/compte?");
+    expect(mocks.userRpc).not.toHaveBeenCalled();
+  });
   it("never resumes an Administration target for a client-only account", async () => {
     mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
     mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });

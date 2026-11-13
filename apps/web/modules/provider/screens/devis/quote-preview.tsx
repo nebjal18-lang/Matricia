@@ -6,6 +6,7 @@ import type { ProviderQuoteDashboard } from "@/modules/provider/data/quotes/mode
 import { workbenchCopy } from "@/modules/provider/data/spaces/workbench-copy";
 import type { QuotePrefill } from "@/modules/provider/screens/devis/prefill";
 import { getProviderQuoteMessages } from "@/modules/provider/screens/devis/messages";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ReactNode } from "react";
 
@@ -114,7 +115,7 @@ export function QuotePreviewWorkbench({
                 <div className="provider-doc-parties">
                   <div>
                     <small>{w.quoteIssuer}</small>
-                    <strong>{organizationName}</strong>
+                    <strong>{organizationDisplayLabel(organizationName, locale)}</strong>
                   </div>
                   <div>
                     <small>{w.quoteClient}</small>

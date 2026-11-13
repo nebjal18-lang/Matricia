@@ -200,3 +200,8 @@ it("does not invent a LIVE environment attestation for a CMI merchant hostname",
  const gateway=new CmiPaymentGateway({environment:"live",gatewayUrl:"https://merchant.cmi.co.ma/fim/est3Dgate",allowedGatewayHosts:new Set(["merchant.cmi.co.ma"]),merchantId:"merchant-test",storeKey:"store-key-long-enough"});
  expect(gateway.providerEnvironment).toBe("UNVERIFIED");expect((await gateway.createIntent(request)).providerEnvironment).toBe("UNVERIFIED");
 });
+it("does not invent LIVE for payment.cmi.co.ma and rejects live+sandbox host mismatch",async()=>{
+ expect(()=>new CmiPaymentGateway({environment:"live",gatewayUrl:"https://testpayment.cmi.co.ma/fim/est3Dgate",allowedGatewayHosts:new Set(["testpayment.cmi.co.ma"]),merchantId:"merchant-test",storeKey:"store-key-long-enough"})).toThrow(PaymentGatewayError);
+ const gateway=new CmiPaymentGateway({environment:"live",gatewayUrl:"https://payment.cmi.co.ma/fim/est3Dgate",allowedGatewayHosts:new Set(["payment.cmi.co.ma"]),merchantId:"merchant-test",storeKey:"store-key-long-enough"});
+ expect(gateway.providerEnvironment).toBe("UNVERIFIED");
+});

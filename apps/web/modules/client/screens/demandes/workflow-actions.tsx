@@ -13,9 +13,11 @@ export function WorkflowActions({ locale, organizationId,requestId, rowVersion, 
   const [match, matchAction, matchPending] = useActionState(matchRequestAction, idle);
   const [opened, openAction, openPending] = useActionState(openRfqAction, idle);
   const runId = match.status === "success" ? match.matchingRunId ?? matchingRunId : matchingRunId;
+  const workflowStatus = match.status === "success" ? "MATCHING" : status;
+  const canReady = ["DRAFT", "INFORMATION_REQUIRED"].includes(status) && canMarkReady;
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      {status === "DRAFT" && canMarkReady ? (
+      {canReady ? (
         <form action={readyAction} className="space-y-3 rounded-xl border p-4">
           <Hidden locale={locale} requestId={requestId} keyValue={keys.ready} />
           <input type="hidden" name="rowVersion" value={rowVersion} />
@@ -35,7 +37,7 @@ export function WorkflowActions({ locale, organizationId,requestId, rowVersion, 
           <Feedback state={match} messages={messages} locale={locale} organizationId={organizationId} requestId={requestId} />
         </form>
       ) : null}
-      {runId && ["MATCHING", "READY"].includes(status) ? (
+      {runId && workflowStatus === "MATCHING" ? (
         <form action={openAction} className="space-y-3 rounded-xl border p-4">
           <Hidden locale={locale} requestId={requestId} keyValue={keys.open} />
           <input type="hidden" name="matchingRunId" value={runId} />

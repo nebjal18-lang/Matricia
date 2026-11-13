@@ -172,7 +172,7 @@ export default async function DashboardPage({
     context.selected
       ? supabase.from("organization_member_roles").select("role_code").eq("membership_id", context.selected.membershipId).is("revoked_at", null).limit(20)
       : Promise.resolve({ data: [] as Array<{ role_code: string }>, error: null }),
-    loadUserActionCenterWithinBudget(locale, now, context.selected?.organizationId ?? null),
+    loadUserActionCenterWithinBudget(locale, now, context.selected?.organizationId ?? null, { includeAdmin: hasPlatformRole }),
   ]);
   if (membershipRoles.error) return <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6"><WorkspaceFailure locale={locale} reason="QUERY_FAILED" returnPath={`/${locale}/tableau-de-bord${selectedQuery}`} /></main>;
   const roleCodes = new Set((membershipRoles.data ?? []).map((row) => String(row.role_code)));

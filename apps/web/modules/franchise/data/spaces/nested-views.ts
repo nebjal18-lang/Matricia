@@ -27,7 +27,11 @@ export type FranchiseNestedView = {
   create: boolean;
 };
 
-const tools = new Set(["versions", "simulation", "validation", "apercu", "qualification", "capacite", "documents", "matching", "consultation", "suivi"]);
+const tools = new Set(["versions", "simulation", "validation", "apercu", "qualification", "services", "historique", "capacite", "documents", "matching", "consultation", "suivi"]);
+
+/** Placeholders for nested nav smoke paths (not demo mutation ids). */
+export const FRANCHISE_NAV_SAMPLE_PROVIDER_ID = "f1000000-0000-4000-8000-000000000001";
+export const FRANCHISE_NAV_SAMPLE_REQUEST_ID = "d1000000-0000-4000-8000-000000000001";
 
 const spaceViews: Record<string, { kind: FranchiseNestedKind; active: FranchiseNavKey; views?: string[] }> = {
   actions: { kind: "home", active: "home" },
@@ -92,32 +96,23 @@ export const FRANCHISE_NESTED_NAV_PATHS = [
   "bibliotheque/categories",
   "bibliotheque/version",
   "bibliotheque/historique",
-  "services/demo/versions",
-  "services/demo/simulation",
-  "services/demo/validation",
-  "questionnaires/demo/apercu",
-  "questionnaires/demo/simulation",
-  "questionnaires/demo/versions",
-  "questionnaires/demo/validation",
   "questions",
-  "regles/demo",
-  "regles/demo/simulation",
-  "regles/demo/versions",
-  "regles/demo/validation",
   "fournisseurs/inviter",
   "clients/inviter",
   "fournisseurs/accompagnement",
   "fournisseurs/incomplets",
   "fournisseurs/qualifies",
   "fournisseurs/inactifs",
-  "fournisseurs/pr1",
-  "fournisseurs/pr1/qualification",
-  "fournisseurs/pr1/capacite",
-  "fournisseurs/pr1/documents",
-  "demandes/d1",
-  "demandes/d1/matching",
-  "demandes/d1/consultation",
-  "demandes/d1/suivi",
+  `fournisseurs/${FRANCHISE_NAV_SAMPLE_PROVIDER_ID}`,
+  `fournisseurs/${FRANCHISE_NAV_SAMPLE_PROVIDER_ID}/qualification`,
+  `fournisseurs/${FRANCHISE_NAV_SAMPLE_PROVIDER_ID}/services`,
+  `fournisseurs/${FRANCHISE_NAV_SAMPLE_PROVIDER_ID}/capacite`,
+  `fournisseurs/${FRANCHISE_NAV_SAMPLE_PROVIDER_ID}/documents`,
+  `fournisseurs/${FRANCHISE_NAV_SAMPLE_PROVIDER_ID}/historique`,
+  `demandes/${FRANCHISE_NAV_SAMPLE_REQUEST_ID}`,
+  `demandes/${FRANCHISE_NAV_SAMPLE_REQUEST_ID}/matching`,
+  `demandes/${FRANCHISE_NAV_SAMPLE_REQUEST_ID}/consultation`,
+  `demandes/${FRANCHISE_NAV_SAMPLE_REQUEST_ID}/suivi`,
   "demandes/devis",
   "demandes/missions",
   "qualite/revues",

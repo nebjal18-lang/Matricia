@@ -10,6 +10,8 @@ import {
   Landmark,
   ListTodo,
   MessageSquare,
+  Package,
+  Scale,
   ScrollText,
   Star,
   Wallet,
@@ -30,9 +32,11 @@ export type ClientNavKey =
   | "company"
   | "actions"
   | "contracts"
+  | "disputes"
   | "portfolio"
   | "credits"
   | "memberBoxes"
+  | "volume"
   | "favorites";
 
 export type ClientNavItem = {
@@ -55,6 +59,7 @@ export function buildClientPrimaryNav(input: {
     { key: "home", href: `/${input.locale}/tableau-de-bord${q}`, label: c.navHome, icon: Home, group: "primary" },
     { key: "needs", href: `/${input.locale}/client/diagnostics${q}`, label: c.navNeeds, icon: ClipboardList, group: "primary" },
     { key: "requests", href: `/${input.locale}/client/demandes${q}`, label: c.navRequests, icon: FolderKanban, group: "primary" },
+
     { key: "missions", href: `/${input.locale}/client/missions${q}`, label: c.navMissions, icon: Landmark, group: "primary" },
     { key: "documents", href: `/${input.locale}/client/documents${q}`, label: c.navDocuments, icon: FileText, group: "primary" },
     {
@@ -77,9 +82,11 @@ export function buildClientUtilityNav(input: { locale: Locale; selectedQuery: st
   return [
     { key: "actions", href: `/${input.locale}/client/actions${q}`, label: c.navActions, icon: ListTodo, group: "utility" },
     { key: "contracts", href: `/${input.locale}/client/contrats${q}`, label: c.navContracts, icon: ScrollText, group: "utility" },
+    { key: "disputes", href: `/${input.locale}/client/litiges${q}`, label: c.navDisputes, icon: Scale, group: "utility" },
     { key: "portfolio", href: `/${input.locale}/client/portefeuille${q}`, label: c.navPortfolio, icon: Briefcase, group: "utility" },
     { key: "credits", href: `/${input.locale}/client/credits${q}`, label: c.navCredits, icon: CreditCard, group: "utility" },
     { key: "memberBoxes", href: `/${input.locale}/client/boxes/mon-enveloppe${q}`, label: input.locale === "ar" ? "مخصصاتي في الصندوق" : "Mon enveloppe Box", icon: Gift, group: "utility" },
+    { key: "volume", href: `/${input.locale}/client/achats-groupes${q}`, label: c.navVolume, icon: Package, group: "utility" },
     { key: "favorites", href: `/${input.locale}/client/favoris${q}`, label: c.navFavorites, icon: Star, group: "utility" },
   ];
 }

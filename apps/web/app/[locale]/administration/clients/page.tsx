@@ -18,7 +18,7 @@ export default async function AdminClientsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; q?: string; status?: string; compliance?: string }>;
+  searchParams: Promise<{ organizationId?: string; q?: string; status?: string; compliance?: string; fixtures?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -29,9 +29,10 @@ export default async function AdminClientsPage({
   const a = actorCopy(locale);
   const m = getAdminClientMessages(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
+  const includeFixtures = query.fixtures === "1" || query.fixtures === "true";
   const boardFilters = { status: query.status, compliance: query.compliance };
   const paramsForUi = new URLSearchParams(space.selectedQuery);
-  for (const key of ["q", "status", "compliance"] as const) if (query[key]) paramsForUi.set(key, query[key]!);
+  for (const key of ["q", "status", "compliance", "fixtures"] as const) if (query[key]) paramsForUi.set(key, query[key]!);
   const uiQuery = paramsForUi.size ? `?${paramsForUi}` : "";
 
   return (
@@ -43,7 +44,7 @@ export default async function AdminClientsPage({
       active="actors"
       actorCurrent="clients"
       searchAction={`/${locale}/administration/clients`}
-      searchPlaceholder={a.searchUsers}
+      searchPlaceholder={locale === "ar" ? "البحث عن عميل" : "Rechercher un client"}
       alternateHref={`/${alternate}/administration/clients${uiQuery}`}
       crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/entreprises${space.selectedQuery}`, label: locale === "ar" ? "الفاعلون" : "Acteurs" }, { label: a.clientsTitle }]} />}
       title={a.clientsTitle}
@@ -74,7 +75,7 @@ export default async function AdminClientsPage({
         </main>
       ) : directory.reason ? <main className="client-page"><AdminReadError locale={locale} reason={directory.reason === "QUERY_FAILED" ? "UNAVAILABLE" : directory.reason} retryHref={`/${locale}/administration/clients${uiQuery}`} /></main> : (
         <>
-          <ClientsBoard locale={locale} query={uiQuery} organizations={directory.organizations} cases={directory.cases} diagnostics={directory.diagnostics} search={query.q} filters={boardFilters} />
+          <ClientsBoard locale={locale} query={uiQuery} organizations={directory.organizations} cases={directory.cases} diagnostics={directory.diagnostics} search={query.q} filters={boardFilters} includeFixtures={includeFixtures} />
           {directory.dashboard ? (
             <details className="client-ops">
               <summary>{m.title}</summary>

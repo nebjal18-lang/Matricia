@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { ArrowRight, CheckCircle2, Pencil, Plus, ShieldCheck } from "lucide-react";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
@@ -723,9 +723,15 @@ export function NeedResult({
   const copy = getPublicJourneyCopy(locale).need;
   const stages = getNeedStages(locale);
   const [state, action, pending] = useActionState(saveAction ?? unavailable, { status: "idle" } as SaveNeedState);
+  const autoAttachStarted = useRef(false);
   useEffect(() => {
-    if (state.status === "success") erase();
-  }, [state.status, erase]);
+    if (state.status !== "success") return;
+    erase();
+    // Lot 3: after durable attach, open the prefilled demande when a published service is known.
+    if (draft.classification?.serviceCode) {
+      window.location.assign(publicNeedRequestHref(locale, state.intakeId, draft.classification.serviceCode, organizationId || null));
+    }
+  }, [draft.classification?.serviceCode, erase, locale, organizationId, state]);
   const next = `/${locale}/besoin?resume=1`;
   const taxonomy = useMemo(() => getPublicProviderTaxonomy(locale), [locale]);
   const libraryCode = draft.classification?.libraryCode ?? "";
@@ -745,6 +751,28 @@ export function NeedResult({
     .filter(Boolean)
     .join("\n")
     .slice(0, 1200);
+
+  // Lot 3: after OTP, a confirmed local draft is attached once via the same idempotent RPC as the manual save.
+  useEffect(() => {
+    if (autoAttachStarted.current || !authenticated || !draft.confirmed || !saveAction || !organizationId || organizations.length === 0) return;
+    if (state.status !== "idle" || pending) return;
+    autoAttachStarted.current = true;
+    const data = new FormData();
+    data.set("locale", locale);
+    data.set("organizationId", organizationId);
+    data.set("payload", JSON.stringify({
+      need: draft.need,
+      location: draft.location,
+      timing: draft.timing,
+      constraints: extraConstraints,
+      classification: draft.classification
+        ? { libraryCode: draft.classification.libraryCode, serviceCode: draft.classification.serviceCode }
+        : null,
+    }));
+    startTransition(() => {
+      action(data);
+    });
+  }, [action, authenticated, draft.classification, draft.confirmed, draft.location, draft.need, draft.timing, extraConstraints, locale, organizationId, organizations.length, pending, saveAction, state.status]);
 
   function setLibrary(code: string) {
     if (!code) {

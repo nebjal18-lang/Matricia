@@ -170,7 +170,10 @@ describe("authoritative work-item and execution acknowledgements", () => {
     expect((await POST(request({ ...envelope, eventType: "AdminActionAuthorizedV1", payload: { action_request_id: envelope.aggregateId } }))).status).toBe(503);
   });
   it("does not acknowledge a privacy export on mere observation", async () => {
-    expect((await POST(request({ ...envelope, eventType: "PrivacyExportRequestedV1" }))).status).toBe(503); expect(mocks.rpc).not.toHaveBeenCalled();
+    const response = await POST(request({ ...envelope, eventType: "PrivacyExportRequestedV1" }));
+    expect(response.status).toBe(503);
+    expect(response.headers.get("x-matricia-outbox-consumer")).toBe("PRIVACY_DISPOSITION");
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 });
 

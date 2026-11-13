@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   IT_FRANCHISE_ECONOMICS,
+  PLATFORM_CORE_POT_ECONOMICS,
+  allocatePlatformCorePotRemainder,
   authorityIsValid,
   canPublishMarketing,
   franchiseFinancialProposalNeedsIndependentApproval,
@@ -31,5 +33,16 @@ describe("V4.1 legal and governance invariants", () => {
     expect(franchiseFinancialProposalNeedsIndependentApproval("proposer", "approver")).toBe(true);
     expect(franchiseFinancialProposalNeedsIndependentApproval("same", "same")).toBe(false);
     expect(IT_FRANCHISE_ECONOMICS).toEqual({ operator: "HATIM_AHMITECH", entryFeeMinor: 0n, hatimShareBasisPoints: 5_000, neoxaJalilShareBasisPoints: 5_000, asmaMatriciaShareBasisPoints: 0 });
+  });
+
+  it("splits the Core+entry pot 50/50 after charges with Asma remainder", () => {
+    expect(PLATFORM_CORE_POT_ECONOMICS.neoxaJalilShareBasisPoints).toBe(5_000);
+    expect(PLATFORM_CORE_POT_ECONOMICS.asmaMatriciaShareBasisPoints).toBe(5_000);
+    expect(allocatePlatformCorePotRemainder(10_001n)).toEqual({
+      neoxaJalilMinor: 5_000n,
+      asmaMatriciaMinor: 5_001n,
+      roundingAdjustmentMinor: 1n,
+    });
+    expect(() => allocatePlatformCorePotRemainder(-1n)).toThrow("DISTRIBUTABLE_MUST_BE_NON_NEGATIVE");
   });
 });

@@ -221,7 +221,7 @@ export async function POST(request: Request): Promise<Response> {
     const result=await getSupabaseAdminClient().rpc("dispatch_governed_signature_envelope_v1",{p_envelope_id:id.data});
     const outcome=(result.data as {outcome?:unknown}|null)?.outcome;
     if(result.error||!["SIGNATURE_ENVELOPE_SENT","SIGNATURE_DISPATCH_CANCELLED"].includes(String(outcome)))return Response.json({code:"SIGNATURE_PROVIDER_DISPATCH_UNAVAILABLE"},{status:503,headers});
-    return Response.json({outcome,development_mock:true},{status:202,headers:{...headers,"x-matricia-outbox-consumer":"SIGNATURE_PROVIDER"}});
+    return Response.json({outcome},{status:202,headers:{...headers,"x-matricia-outbox-consumer":"SIGNATURE_PROVIDER"}});
   }
   if (parsed.data.eventType === "ProviderInvoiceIssuedV1" || parsed.data.eventType === "ProviderStatementIssuedV1" || parsed.data.eventType === "ProviderCreditNoteIssuedV1") {
     const kind = parsed.data.eventType === "ProviderInvoiceIssuedV1" ? "invoice" : parsed.data.eventType === "ProviderCreditNoteIssuedV1" ? "credit_note" : "statement";
@@ -278,9 +278,10 @@ export async function POST(request: Request): Promise<Response> {
     if (result.error || !outcome.success) return Response.json({ code: "ADMIN_ACTION_EXECUTION_FAILED" }, { status: 503, headers });
     return Response.json({ outcome: outcome.data, eventId: parsed.data.id }, { status: 202, headers: { ...headers, "x-matricia-outbox-consumer": "ADMIN_OPERATIONAL_ACTION" } });
   }
-  // These events require a registered domain consumer; observing them is not execution.
+  // These three names are not emitted by current SQL (DSR uses Dsr* / PrivacyRetention* / PrivacyDataSubject*).
+  // Fail closed until a dedicated PRIVACY_DISPOSITION executor exists — never ack as mere observation.
   if (["PrivacyDispositionRequestedV1", "PrivacyExportRequestedV1", "PrivacyErasureRequestedV1"].includes(parsed.data.eventType)) {
-    return Response.json({ code: "DOMAIN_CONSUMER_REQUIRED" }, { status: 503, headers });
+    return Response.json({ code: "DOMAIN_CONSUMER_REQUIRED" }, { status: 503, headers: { ...headers, "x-matricia-outbox-consumer": "PRIVACY_DISPOSITION" } });
   }
 
   // The authoritative account commands have already persisted their effects and audit.

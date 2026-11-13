@@ -2,21 +2,24 @@ import { summarizeAdminWork } from "@/modules/admin/data/command-center/view-mod
 import type { AdminWorkItem } from "@/modules/admin/data/command-center/model";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { actorOrganizationLabel, isAdminOrgDirectoryFixture } from "./actor-presentation";
 import { adminCopy } from "./copy";
-import { inferOrgType } from "./directory";
+import { inferOrgType, normalizeOrgTypeCodes, ORG_TYPE_NONE, orgTypeFilterCodes } from "./directory";
 
 export type AdminOrgRow = {
   id: string;
   name: string;
   legalName: string;
   type: string;
+  typeTone?: "mint" | "sky" | "peach" | "violet";
   typeCodes?:string[];statusCode?:string;complianceCode?:"CURRENT"|"REVIEW"|"UNKNOWN";planCode?:string;
   status: string;
   statusTone: "mint" | "sky" | "peach" | "violet";
   compliance: string;
-  complianceTone: "mint" | "peach";
+  complianceTone: "mint" | "peach" | "sky";
   plan: string;
   lastAction: string;
+  fixture?: boolean;
 };
 
 export type AdminTreatItem = {
@@ -37,36 +40,56 @@ export function localizeStatus(status: string, locale: Locale) {
   return status;
 }
 
+function normalizeTypeFilter(value: string | undefined) {
+  if (!value || value === "all") return null;
+  if (value === ORG_TYPE_NONE || value === "Non renseigné" || value === "غير محدد") return ORG_TYPE_NONE;
+  return (value.split("_")[0] ?? value).toUpperCase();
+}
+
 export function mapAdminOrgRows(orgs: AdminSupervisionDashboard["organizations"], locale: Locale): AdminOrgRow[] {
   const c = adminCopy(locale);
   return orgs.map((org) => {
-    const states:Array<boolean|null>=[];
-    if(org.role_codes?.includes("CLIENT"))states.push(org.client_compliance_status?org.client_compliance_status==="VERIFIED":null);
-    if(org.role_codes?.includes("PROVIDER"))states.push(org.provider_identity_verified??null);
-    const complianceCode: "CURRENT"|"REVIEW"|"UNKNOWN" = states.length&&states.every(v=>v===true)&&org.canonical_identity_verified===true?"CURRENT":states.some(v=>v!==null)?"REVIEW":"UNKNOWN";
+    const typeCodes = normalizeOrgTypeCodes(org.role_codes);
+    const states: Array<boolean | null> = [];
+    if (typeCodes.includes("CLIENT")) states.push(org.client_compliance_status ? org.client_compliance_status === "VERIFIED" : null);
+    if (typeCodes.includes("PROVIDER")) states.push(org.provider_identity_verified ?? null);
+    const complianceCode: "CURRENT" | "REVIEW" | "UNKNOWN" = states.length && states.every((v) => v === true) && org.canonical_identity_verified === true ? "CURRENT" : states.some((v) => v !== null) ? "REVIEW" : "UNKNOWN";
+    const type = inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes);
+    const typeUnset = typeCodes.length === 0;
     return ({
     id: org.id,
-    name: org.display_name,
+    name: actorOrganizationLabel(org.display_name, locale),
     legalName: org.legal_name,
-    type: inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes),
-    status: localizeStatus(org.status, locale),statusCode:org.status,typeCodes:org.role_codes??[],complianceCode,planCode:"UNKNOWN",
+    type,
+    typeTone: typeUnset ? "peach" : "violet",
+    status: localizeStatus(org.status, locale),
+    statusCode: org.status,
+    typeCodes,
+    complianceCode,
+    planCode: "UNKNOWN",
     statusTone: org.status.toUpperCase() === "ACTIVE" ? "mint" : org.status.toUpperCase() === "PENDING" ? "sky" : "peach",
-    compliance: complianceCode==="CURRENT"?c.complianceOk:complianceCode==="REVIEW"?c.complianceReview:locale==="ar"?"غير متحقق":"Non vérifié",
-    complianceTone: complianceCode==="CURRENT"?"mint":"peach",
+    compliance: complianceCode === "CURRENT" ? c.complianceOk : complianceCode === "REVIEW" ? c.complianceReview : locale === "ar" ? "غير متحقق" : "Non vérifié",
+    complianceTone: complianceCode === "CURRENT" ? "mint" : complianceCode === "REVIEW" ? "sky" : "peach",
     plan: c.unknownPlan,
     lastAction: org.open_disputes > 0 ? c.lastDispute : org.open_requests > 0 ? c.lastOpenRequest : c.lastCreated,
+    fixture: isAdminOrgDirectoryFixture(org.display_name, org.legal_name),
   });});
 }
 
-export function filterAdminOrgRows(rows:AdminOrgRow[],filters:{type?:string;status?:string;compliance?:string;plan?:string},search?:string,includeArchived=false){
- return rows.filter(row=>{
-  if(!includeArchived&&row.statusCode==="ARCHIVED")return false;
-  if(filters.type&&filters.type!=="all"&&!row.typeCodes?.includes(filters.type)&&row.type!==filters.type)return false;
-  if(filters.status&&filters.status!=="all"&&row.statusCode!==filters.status&&row.status!==filters.status)return false;
-  if(filters.compliance&&filters.compliance!=="all"&&row.complianceCode!==filters.compliance&&row.compliance!==filters.compliance)return false;
-  if(filters.plan&&filters.plan!=="all"&&row.planCode!==filters.plan&&row.plan!==filters.plan)return false;
-  return!search||`${row.name} ${row.legalName} ${row.type} ${row.status} ${row.id}`.toLocaleLowerCase().includes(search.toLocaleLowerCase());
- });
+export function filterAdminOrgRows(rows: AdminOrgRow[], filters: { type?: string; status?: string; compliance?: string; plan?: string }, search?: string, includeArchived = false) {
+  const wantedType = normalizeTypeFilter(filters.type);
+  const wantedStatus = filters.status && filters.status !== "all" ? filters.status.toUpperCase() : null;
+  const wantedCompliance = filters.compliance && filters.compliance !== "all" ? filters.compliance.toUpperCase() : null;
+  const wantedPlan = filters.plan && filters.plan !== "all" ? filters.plan.toUpperCase() : null;
+  const needle = search?.trim().toLocaleLowerCase();
+  return rows.filter((row) => {
+    if (!includeArchived && row.statusCode === "ARCHIVED") return false;
+    if (wantedType && !orgTypeFilterCodes(row.typeCodes ?? []).includes(wantedType) && row.type !== filters.type) return false;
+    if (wantedStatus && (row.statusCode ?? "").toUpperCase() !== wantedStatus && row.status.toUpperCase() !== wantedStatus && row.status !== filters.status) return false;
+    if (wantedCompliance && (row.complianceCode ?? "").toUpperCase() !== wantedCompliance && row.compliance !== filters.compliance) return false;
+    if (wantedPlan && (row.planCode ?? "").toUpperCase() !== wantedPlan && row.plan !== filters.plan) return false;
+    return !needle || `${row.name} ${row.legalName} ${row.type} ${row.status} ${row.id}`.toLocaleLowerCase().includes(needle);
+  });
 }
 
 export function mapAdminTreatQueue(input: {
@@ -80,7 +103,7 @@ export function mapAdminTreatQueue(input: {
   const tones = ["sky", "peach", "mint", "violet"] as const;
   const fromWork = summarizeAdminWork(workItems, new Date().toISOString()).ordered.slice(0, 6).map((item, index) => ({
     id: item.id,
-    title: locale === "ar" ? item.titleAr : item.titleFr,
+    title: actorOrganizationLabel(locale === "ar" ? item.titleAr : item.titleFr, locale),
     detail: item.resourceType,
     href: `/${locale}/administration/command-center${query}#work-${encodeURIComponent(item.id)}`,
     tone: tones[index % tones.length]!,
@@ -88,7 +111,7 @@ export function mapAdminTreatQueue(input: {
   if (fromWork.length > 0) return fromWork;
   const fromRequests = requests.slice(0, 6).map((item, index) => ({
     id: item.id,
-    title: item.organization_name,
+    title: actorOrganizationLabel(item.organization_name, locale),
     detail: item.status,
     href: `/${locale}/administration/demandes/${item.id}${query}`,
     tone: tones[index % tones.length]!,
@@ -96,7 +119,7 @@ export function mapAdminTreatQueue(input: {
   if (fromRequests.length > 0) return fromRequests;
   return organizations.filter((org) => org.open_disputes > 0 || org.open_requests > 0).slice(0, 6).map((org, index) => ({
     id: org.id,
-    title: org.display_name,
+    title: actorOrganizationLabel(org.display_name, locale),
     detail: org.open_disputes > 0 ? adminCopy(locale).lastDispute : adminCopy(locale).lastOpenRequest,
     href: `/${locale}/administration/entreprises/${org.id}${query}`,
     tone: tones[index % tones.length]!,

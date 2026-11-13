@@ -14,6 +14,7 @@ import type { ProviderDashboard, ProviderDocument, ProviderService } from "@/mod
 import type { ProviderReputationDashboard } from "@/modules/provider/data/reputation/model";
 import { getEligibilityReason, getProviderStatusLabel } from "@/modules/provider/screens/qualification/messages";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -176,7 +177,7 @@ export function ProviderHomeBoard({
             <h2 id="provider-treat-now"><Zap aria-hidden className="size-4" />{c.treatNow}</h2>
             <p>{c.treatLead}</p>
           </div>
-          <Link href={`/${locale}/sous-traitant/consultations${query}`} className="client-text-link">{c.seeAll} →</Link>
+          <Link href={`/${locale}/sous-traitant/consultations${providerSearchQuery(query, { tab: "answer" })}`} className="client-text-link">{c.seeAll} →</Link>
         </header>
         <div className="provider-treat">
           {treatRows.length === 0 ? <p role="status">{c.treatEmpty}</p> : treatRows.map((item) => {
@@ -221,7 +222,7 @@ export function ProviderHomeBoard({
               <h2>{c.adapted}</h2>
               <p>{c.adaptedLead}</p>
             </div>
-            <Link href={`/${locale}/sous-traitant/consultations${query}`} className="client-text-link">{c.seeAllConsult}</Link>
+            <Link href={`/${locale}/sous-traitant/consultations${providerSearchQuery(query, { tab: "answer" })}`} className="client-text-link">{c.seeAllConsult}</Link>
           </header>
           {consultRows.length === 0 ? <p role="status">{c.adaptedEmpty}</p> : (
           <ul className="client-feed">
@@ -313,7 +314,9 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
         <article className="client-card provider-identity-card">
           <div className="provider-identity-main">
             <p className="client-space-label">{c.space}</p>
-            <h2>{live && dashboard?.organizationName ? dashboard.organizationName : (locale === "ar" ? "ملفكم المهني" : "Votre profil professionnel")}</h2>
+            <h2>{live && dashboard?.organizationName
+              ? organizationDisplayLabel(dashboard.organizationName, locale)
+              : (locale === "ar" ? "ملفكم المهني" : "Votre profil professionnel")}</h2>
             <p>{live && dashboard?.profile?.activitySummary
               ? dashboard.profile.activitySummary.slice(0, 220)
               : (locale === "ar" ? "صفوا نشاطكم وكفاءاتكم لاستكمال الملف." : "Décrivez votre activité et vos compétences pour compléter le dossier.")}</p>

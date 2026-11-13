@@ -281,9 +281,9 @@ describe("alignement maquettes constructeurs et espaces (06–20)", () => {
 
   it("résout toutes les destinations NAVIGATION imbriquées", () => {
     expect(resolveFranchiseNestedView(["bibliotheque", "categories"])?.kind).toBe("library");
-    expect(resolveFranchiseNestedView(["demandes", "d1", "matching"])?.tool).toBe("matching");
+    expect(resolveFranchiseNestedView(["demandes", "d1000000-0000-4000-8000-000000000001", "matching"])?.tool).toBe("matching");
     expect(resolveFranchiseNestedView(["notifications"])?.view).toBe("notifications");
-    expect(FRANCHISE_NESTED_NAV_PATHS).toHaveLength(57);
+    expect(FRANCHISE_NESTED_NAV_PATHS).toHaveLength(48);
     expect(resolveFranchiseNestedView(["clients", "inviter"])?.view).toBe("inviter");
     expect(resolveFranchiseNestedView(["demandes", "devis"])?.view).toBe("devis");
     expect(resolveFranchiseNestedView(["qualite", "anomalies"])?.view).toBe("anomalies");

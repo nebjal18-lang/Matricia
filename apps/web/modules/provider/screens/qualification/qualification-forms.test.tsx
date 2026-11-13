@@ -9,7 +9,7 @@ vi.mock("@/modules/shared/ui/input",()=>({Input:(props:ComponentPropsWithoutRef<
 vi.mock("@/modules/shared/ui/label",()=>({Label:({children,...props}:ComponentPropsWithoutRef<"label">)=><label {...props}>{children}</label>}));
 vi.mock("@/modules/shared/ui/textarea",()=>({Textarea:(props:ComponentPropsWithoutRef<"textarea">)=><textarea {...props}/>}));
 vi.mock("./actions",()=>({declareProviderCapacity:async()=>({status:"idle"}),recordProviderDocument:async()=>({status:"idle"}),requestProviderService:async()=>({status:"idle"}),submitProviderProfile:async()=>({status:"idle"})}));
-vi.mock("./provider-intent",()=>({clearProviderIntent:vi.fn(),readProviderIntent:()=>"",readStructuredProviderIntent:()=>null}));
+vi.mock("./provider-intent",()=>({activitySummaryFromProviderStorage:()=>"",clearProviderIntent:vi.fn(),readStructuredProviderIntent:()=>null}));
 
 import { QualificationForms } from "./qualification-forms";
 import { getProviderMessages } from "./messages";

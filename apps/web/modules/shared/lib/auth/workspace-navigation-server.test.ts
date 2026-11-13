@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ user: vi.fn(), rpc: vi.fn(), from: vi.fn(), membershipEq: vi.fn() }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ auth: { getUser: mocks.user }, rpc: mocks.rpc, from: mocks.from }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ auth: { getUser: mocks.user }, rpc: mocks.rpc, from: mocks.from }), getServerAuthUser: async () => mocks.user() }));
 vi.mock("next/navigation", () => ({ unstable_rethrow: vi.fn() }));
 import { readWorkspaceNavigation } from "./workspace-navigation-server";
 function query(data: unknown, eq = vi.fn(), error: unknown = null) {

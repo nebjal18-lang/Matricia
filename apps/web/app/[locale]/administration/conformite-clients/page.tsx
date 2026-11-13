@@ -60,7 +60,6 @@ export default async function ClientComplianceAdministrationPage({
                 <Link href={`/${locale}/securite/compte`} className="admin-primary-cta">{messages.configureMfa}</Link>
               </AlertDescription>
             </Alert>
-            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={cases} filter={filter} serverCounts={serverCounts} />
           </main>
         ) : blocked ? (
           <main className="client-page">
@@ -68,7 +67,6 @@ export default async function ClientComplianceAdministrationPage({
               <AlertTitle>{messages.forbiddenTitle}</AlertTitle>
               <AlertDescription><p>{messages.forbiddenDescription}</p></AlertDescription>
             </Alert>
-            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={[]} filter={filter} serverCounts={serverCounts} />
           </main>
         ) : result.status === "error" && cases.length === 0 ? (
           <main className="client-page">
@@ -79,7 +77,6 @@ export default async function ClientComplianceAdministrationPage({
                 <Link href={`/${locale}/administration/conformite-clients`} className="admin-soft-cta">{messages.retry}</Link>
               </AlertDescription>
             </Alert>
-            <ComplianceBoard locale={locale} query={space.selectedQuery} cases={[]} filter={filter} serverCounts={serverCounts} />
           </main>
         ) : (
         <ComplianceBoard locale={locale} query={space.selectedQuery} cases={cases} filter={filter} serverCounts={serverCounts} />

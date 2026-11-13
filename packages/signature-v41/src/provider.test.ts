@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { DevelopmentMockSignatureProvider } from "./mock-provider.js";
+import { YousignSandboxSignatureProvider } from "./yousign-sandbox-provider.js";
 import { assessSignatureProviderReadiness, verifyHmacSha256Webhook } from "./provider.js";
 
 const document = { contractVersionId: "contract-v1", sha256: "a".repeat(64), fileName: "contract.pdf", storagePath: "contracts/v1.pdf" };
@@ -54,5 +55,21 @@ describe("SignatureProvider V4.1", () => {
     const external = { ...new DevelopmentMockSignatureProvider(), code: "MOROCCO_SIGNATURE_PROVIDER", developmentOnly: false } as unknown as import("./provider.js").SignatureProvider;
     expect(assessSignatureProviderReadiness(external, { NODE_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "OTHER" })).toEqual({ status: "not_ready", code: "SIGNATURE_PROVIDER_CODE_MISMATCH" });
     expect(assessSignatureProviderReadiness(external, { NODE_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "MOROCCO_SIGNATURE_PROVIDER" })).toMatchObject({ status: "ready", providerCode: "MOROCCO_SIGNATURE_PROVIDER" });
+  });
+
+  it("refuses a YouSign sandbox adapter without credentials and never invents envelopes", async () => {
+    expect(() => new YousignSandboxSignatureProvider({ apiKey: "short", webhookSecret: "also-short" })).toThrow("SIGNATURE_PROVIDER_NOT_CONFIGURED");
+    const provider = new YousignSandboxSignatureProvider({ apiKey: "sandbox-key-long-enough", webhookSecret: "webhook-secret-long" });
+    expect(assessSignatureProviderReadiness(provider, { NODE_ENV: "production", SIGNATURE_PROVIDER_MODE: "EXTERNAL", SIGNATURE_PROVIDER_CODE: "YOUSIGN" })).toMatchObject({ status: "ready", providerCode: "YOUSIGN" });
+    await expect(provider.createEnvelope({
+      envelopeId: "e1",
+      requestedLevel: "SIMPLE",
+      documents: [{ contractVersionId: "c1", sha256: "a".repeat(64), fileName: "c.pdf", storagePath: "contracts/c.pdf" }],
+      signers: [
+        { signerId: "s1", organizationId: "o1", userId: "u1", signingOrder: 1 },
+        { signerId: "s2", organizationId: "o2", userId: "u2", signingOrder: 2 },
+      ],
+      idempotencyKey: "k1",
+    })).rejects.toThrow("SIGNATURE_PROVIDER_SANDBOX_NOT_ACTIVATED");
   });
 });

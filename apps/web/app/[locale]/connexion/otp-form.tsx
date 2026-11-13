@@ -52,9 +52,19 @@ export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = 
     if (!normalizedToken) { setMessage(messages.invalidCode); return; }
     setStatus("pending"); setMessage("");
     try {
-      const { error } = await getSupabaseBrowserClient().auth.verifyOtp({ email, token: normalizedToken, type: "email" });
+      const supabase = getSupabaseBrowserClient();
+      const { error } = await supabase.auth.verifyOtp({ email, token: normalizedToken, type: "email" });
       if (error) { setStatus("error"); setMessage(error.code === "otp_expired" ? messages.rejectedCode : messages.genericError); return; }
-      if (intent === "registration" && !await confirmRegistrationConsent()) { setStatus("error"); setMessage(locale === "fr" ? "Votre acceptation doit être confirmée. Reprenez l’inscription." : "يجب تأكيد قبولكم. يرجى إعادة التسجيل."); return; }
+      if (intent === "registration" && !await confirmRegistrationConsent()) {
+        const { error: signOutError } = await supabase.auth.signOut();
+        setStatus("error");
+        setMessage(
+          signOutError
+            ? (locale === "fr" ? "Votre acceptation n’est pas confirmée et la session n’a pas pu être fermée. Déconnectez-vous puis reprenez l’inscription." : "لم يُؤكد قبولكم وتعذر إنهاء الجلسة. سجّلوا الخروج ثم أعيدوا التسجيل.")
+            : (locale === "fr" ? "Votre acceptation doit être confirmée. Reprenez l’inscription." : "يجب تأكيد قبولكم. يرجى إعادة التسجيل."),
+        );
+        return;
+      }
       router.replace(await postLoginDestination(locale, nextPath));
       router.refresh();
     } catch { setStatus("error"); setMessage(messages.genericError); }

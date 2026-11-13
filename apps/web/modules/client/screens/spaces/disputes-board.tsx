@@ -104,7 +104,7 @@ export function DisputesBoard({
             <LiveDisputeDetail locale={locale} query={query} selected={selected} messages={messages} actions={children} />
           ) : (
             <article className="client-card">
-              <p>{messages.empty}</p>
+              <p>{cases.length > 0 ? messages.selectCase : messages.empty}</p>
             </article>
           )}
         </div>

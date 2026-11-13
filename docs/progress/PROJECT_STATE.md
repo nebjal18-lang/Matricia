@@ -1,3 +1,12 @@
+## 2026-11-12 — Pot Core + droits d’entrée (50/50 Jalil–Asmaa)
+
+- Autorité : `docs/finance/REGLE_ECONOMIQUE_PARTENARIAT_CORE_ENTREE_V1.md` + Gold Master décision prioritaire §5.
+- Migration additive `supabase/migrations/20261112200000_platform_core_pot_finance.sql` : livre plateforme, écritures Core/entrée/marketing/charges, clôture, allocations 50/50, ledger de distribution, exclusion IT entry fee.
+- pgTAP structurel : `supabase/tests/0386_platform_core_pot_finance.test.sql` (IT 50/50 et STANDARD 50/25/25 non modifiés).
+- Miroir TS : `PLATFORM_CORE_POT_ECONOMICS` + `allocatePlatformCorePotRemainder` dans `packages/legal-v41`.
+- Ingestion callable V1 : `public.ingest_platform_core_pot_sources_v1` (`20261113100000_platform_core_pot_ingest_sources_v1.sql`) — une ligne `credit_revenue_ledger_v1` (classe `CORE_SUBSCRIPTION_REVENUE`) ou `franchise_entry_fee_ledger_entries` (PAYMENT/WITHHOLDING hors IT) + journal plateforme → `post_platform_core_pot_entry`. Tests : `0387_platform_core_pot_ingest_sources.test.sql` ; wrapper admin `apps/web/modules/admin/data/core-pot/`.
+- Prochaine étape : batch/auto-scan des sources non encore ingérées + écran admin Finance.
+
 ## Avancement 100 % implémenté non certifié (2026-11-09)
 
 - **IMPLEMENTED_NON_CERTIFIED = 76/76 (100 %)** : 71 `PENDING:visa-independant` + 5 `VERIFIED`.

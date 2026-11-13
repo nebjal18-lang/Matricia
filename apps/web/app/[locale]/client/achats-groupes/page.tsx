@@ -29,7 +29,7 @@ export default async function VolumePage({
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
-      active="finance"
+      active="volume"
       title={messages.title}
       lead={messages.description}
       kicker={spaceCopy(locale).kicker}

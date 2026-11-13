@@ -14,9 +14,10 @@ Les règles suivantes ont priorité sur toute formulation ancienne résiduelle :
 2. **Droit d’entrée IT** : Hatim Ahmitech est totalement exempté : montant 0, aucun acompte, aucun étalement, aucune retenue sur gains au titre du droit d’entrée.
 3. **Partage IT** : ce n’est pas un partage du chiffre d’affaires. Le **bénéfice distribuable IT** est partagé **50 % Hatim Ahmitech / 50 % Jalil-NEOXA** ; Mme Asma/Matricia = 0 % de cette distribution IT spécifique.
 4. **Autres franchises** : sauf règle contractuelle versionnée plus spécifique, 50 % franchisé / 25 % Jalil-NEOXA / 25 % Mme Asma-Matricia sur la base distribuable définie.
-5. **Fiscalité Maroc** : intégrer un moteur fiscal marocain versionné. Pour les prestations soumises au taux normal, le taux de référence/démo est 20 %, mais aucun taux n’est codé en dur ; chaque ligne utilise une catégorie fiscale et une règle datée d’effet. Les factures doivent être capables de satisfaire les mentions et séries continues requises par le CGI 2026, sous réserve de validation finale par l’expert-comptable.
-6. **Facturation sous-traitants** : la clôture mensuelle est automatique : pré-relevé → résolution des exceptions → relevé officiel → facture → PDF → envoi in-app/email → délai de paiement standard 7 jours → rappels → restriction financière si impayé. L’humain n’intervient que pour les exceptions/contestations.
-7. **Contrôle franchisé** : chaque franchisé fait l’objet d’un contrôle continu sur acquisition, qualité de bibliothèque, réseau de sous-traitants, opérations, satisfaction, conformité et finance ; score, alertes, plan correctif, audit mensuel et supervision admin sont obligatoires. Un score/flag ne résilie jamais automatiquement une franchise.
+5. **Pot Core + droits d’entrée (hors IT)** — décision Jalil 2026-11-12 : `CORE_SUBSCRIPTION_REVENUE` et les droits d’entrée franchise (ledger `franchise_entry_fee`, IT = 0) forment un **pot Matricia distinct** des P&L franchise. Ordre obligatoire : (a) encaissements HT acquis de ce pot ; (b) déduction marketing + charges d’exploitation clairement affectées à ce pot (versionnées, auditées, sans float) ; (c) le **reste distribuable** est partagé **50 % Jalil-NEOXA / 50 % Mme Asma-Matricia**. Ce pot ne modifie pas les parts IT 50/50 Hatim–Jalil ni les parts 50/25/25 des autres franchises. La TVA n’entre jamais dans ce pot comme revenu.
+6. **Fiscalité Maroc** : intégrer un moteur fiscal marocain versionné. Pour les prestations soumises au taux normal, le taux de référence/démo est 20 %, mais aucun taux n’est codé en dur ; chaque ligne utilise une catégorie fiscale et une règle datée d’effet. Les factures doivent être capables de satisfaire les mentions et séries continues requises par le CGI 2026, sous réserve de validation finale par l’expert-comptable.
+7. **Facturation sous-traitants** : la clôture mensuelle est automatique : pré-relevé → résolution des exceptions → relevé officiel → facture → PDF → envoi in-app/email → délai de paiement standard 7 jours → rappels → restriction financière si impayé. L’humain n’intervient que pour les exceptions/contestations.
+8. **Contrôle franchisé** : chaque franchisé fait l’objet d’un contrôle continu sur acquisition, qualité de bibliothèque, réseau de sous-traitants, opérations, satisfaction, conformité et finance ; score, alertes, plan correctif, audit mensuel et supervision admin sont obligatoires. Un score/flag ne résilie jamais automatiquement une franchise.
 
 Avant toute phase métier :
 
@@ -1387,9 +1388,11 @@ L’organisation créée conserve `referred_by_franchise_id` sans donner au fran
 
 IT : la franchise est opérée par `HATIM_AHMITECH`. Le **bénéfice distribuable IT** est partagé `HATIM_AHMITECH = 50 %`, `NEOXA_JALIL = 50 %`, `ASMA_MATRICIA = 0 %`. Hatim ne paie aucun droit d’entrée pour IT.
 
-Le bénéfice distribuable IT est calculé par défaut comme : revenus HT IT effectivement encaissés et définitivement acquis − remboursements/avoirs IT − coûts directs des sous-traitants/fulfillment IT − coûts de contrats volume IT − frais de paiement directement attribuables − coûts marketing directs spécifiquement affectés à IT − autres coûts directs explicitement approuvés. **La TVA collectée n’est jamais un revenu ni un bénéfice.** Les coûts centraux partagés de la plateforme ne sont pas déduits par défaut ; ils ne le deviennent que si une règle d’allocation approuvée et versionnée les affecte explicitement à IT.
+Le bénéfice distribuable IT est calculé par défaut comme : revenus HT IT effectivement encaissés et définitivement acquis − remboursements/avoirs IT − coûts directs des sous-traitants/fulfillment IT − coûts de contrats volume IT − frais de paiement directement attribuables − coûts marketing directs spécifiquement affectés à IT − autres coûts directs explicitement approuvés. **La TVA collectée n’est jamais un revenu ni un bénéfice.** Les coûts centraux partagés de la plateforme ne sont pas déduits par défaut du P&L IT ; ils alimentent le pot Core/charges ci-dessous, sauf règle d’allocation approuvée et versionnée qui les affecte explicitement à IT.
 
 Autres franchises : `FRANCHISEE = 50 %`, `NEOXA = 25 %`, `ASMA_MATRICIA = 25 %` sur leur base distribuable versionnée.
+
+**Pot Core + droits d’entrée (distinct des P&L franchise)** : `CORE_SUBSCRIPTION_REVENUE` + droits d’entrée encaissés (IT = 0) − marketing − charges d’exploitation versionnées affectées à ce pot = **reste distribuable plateforme**, partagé `NEOXA_JALIL = 50 %`, `ASMA_MATRICIA = 50 %`. Ne pas fusionner ce reste avec le bénéfice IT ni avec une base 50/25/25 franchise.
 
 Conserve le snapshot de la règle économique et de la formule de coûts sur chaque clôture. Le pouvoir technique d’un admin ne modifie jamais ces droits.
 
@@ -2401,6 +2404,7 @@ La totalité du texte ci-dessous constitue le cahier des charges métier intégr
 | Boxes & crédits          | Avantages spécifiques, Boxes personnalisables et wallet de crédits avec achat de crédits supplémentaires.         |
 | Franchise IT             | Hatim Ahmitech opère la franchise IT sans droit d’entrée ; bénéfice distribuable IT : 50 % Hatim / 50 % Jalil-NEOXA ; 0 % Asma. |
 | Autres franchises        | 50 % franchisé, 25 % NEOXA/Jalil, 25 % Mme Asma/Matricia sur la base de revenu distribuable définie.              |
+| Pot Core + droits d’entrée | Après marketing/charges versionnées du pot : 50 % Jalil-NEOXA / 50 % Mme Asma ; distinct des P&L franchise. |
 | Sous-traitants           | Devis libres, qualification par service, commission Matricia facturée séparément, délai de paiement 7 jours.      |
 | Non-conformité confirmée | Pénalité contractuelle + commission Matricia due + retrait de mission + réaffectation.                            |
 | Stack cible              | Next.js/TypeScript + Vercel; Supabase PostgreSQL/Auth/Storage/RLS; Resend; adaptateur de paiement multi-provider. |

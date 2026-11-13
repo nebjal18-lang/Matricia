@@ -26,7 +26,7 @@ export default async function FranchiseDigestPage({ params, searchParams }: { pa
   const keys: Record<string, string> = {};
   if (result.status === "success") for (const franchise of result.dashboard.franchises) keys[franchise.id] = randomUUID();
   return (
-    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="home" title={c.homeTitle} lead={c.homeLead} kicker={c.kicker} mandateName={mandateName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="followups" title={c.homeTitle} lead={c.homeLead} kicker={c.kicker} mandateName={mandateName}>
       <FranchiseHomeBoard board={board} locale={locale} query={space.selectedQuery} mandateName={mandateName} />
       <details className="client-ops">
         <summary>{c.opsDigest}</summary>

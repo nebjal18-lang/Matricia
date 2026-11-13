@@ -5,6 +5,7 @@ import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
 import type { FollowupDashboard } from "@/modules/franchise/data/followups/model";
 import { FOLLOWUP_STAGES } from "@/modules/franchise/data/followups/model";
+import { isDirectoryFixture, personDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { configurePreference, decidePolicy, proposePolicy, type FollowupActionState } from "./actions";
 import type { FollowupMessages } from "./messages";
@@ -77,7 +78,7 @@ export function FollowupPanel({
       <section>
         <h2 className="text-2xl font-semibold">{m.prospects}</h2>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {d.prospects.map((p) => <Preference key={p.id} p={p} locale={locale} m={m} keyValue={keys.preference[p.id]} />)}
+          {d.prospects.filter((p) => !isDirectoryFixture({ displayName: p.displayName })).map((p) => <Preference key={p.id} p={p} locale={locale} m={m} keyValue={keys.preference[p.id]} />)}
         </div>
       </section>
       <section>
@@ -145,7 +146,7 @@ function Preference({
       <input type="hidden" name="uiLocale" value={locale} />
       <input type="hidden" name="prospectId" value={p.id} />
       <input type="hidden" name="idempotencyKey" value={keyValue} />
-      <h3 className="font-semibold">{p.displayName}</h3>
+      <h3 className="font-semibold">{personDisplayLabel({ displayName: p.displayName }, locale)}</h3>
       <label className="flex min-h-11 items-center gap-2">
         <input type="checkbox" name="contactAllowed" defaultChecked={p.preference?.contactAllowed ?? false} />
         {m.contactAllowed}

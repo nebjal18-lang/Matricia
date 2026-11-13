@@ -9,6 +9,7 @@ import type { FranchiseCorrectivePlan } from "@/modules/franchise/data/quality/r
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { franchiseStageLabel } from "@/modules/franchise/data/spaces/labels";
 import { demoFranchiseSpaces, type FinanceRow, type FranchiseSpaceBoardData, type MessageRow, type PersonRow, type QualityRow, type RequestRow, type SupervisionRow } from "@/modules/franchise/data/spaces/demo";
+import { isDirectoryFixture, isDirectoryOrgFixture, organizationDisplayLabel, personDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 
@@ -139,11 +140,19 @@ export function buildFranchiseSpaceBoard(input: {
     status: mandate.status,
   })));
   const providerByOrganization=new Map((input.operations?.providerDossiers??[]).map(dossier=>[dossier.organizationId,dossier]));
-  const people: PersonRow[] = providers.map((item) => {
+  const people: PersonRow[] = providers
+    .filter((item) => !isDirectoryFixture({
+      email: item.contactEmail,
+      displayName: item.displayName,
+      organizationName: item.organizationName,
+    }) && !isDirectoryOrgFixture(item.organizationName ?? item.displayName ?? ""))
+    .map((item) => {
     const dossier=providerByOrganization.get(item.linkedOrganizationId??"");
     return ({
     id: item.id,
-    name: item.organizationName || item.displayName,
+    name: organizationDisplayLabel(item.organizationName, locale) !== (locale === "ar" ? "بدون مؤسسة" : "Sans organisation")
+      ? organizationDisplayLabel(item.organizationName, locale)
+      : personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
     linkedOrganizationId:item.linkedOrganizationId,
     createdAt:item.createdAt,
     dossier,
@@ -160,8 +169,9 @@ export function buildFranchiseSpaceBoard(input: {
     pipelineEvents: folderEvents(item),
   });});
   for(const dossier of input.operations?.providerDossiers??[]){
+    if(isDirectoryOrgFixture(dossier.name))continue;
     if(people.some(row=>row.linkedOrganizationId===dossier.organizationId))continue;
-    people.push({id:dossier.organizationId,linkedOrganizationId:dossier.organizationId,createdAt:dossier.createdAt,dossier,name:dossier.name,services:dossier.qualifications.map(q=>q.serviceCode).join(", "),status:networkStateLabel(dossier.status,locale),next:locale==="ar"?"ملف مقدم الخدمة":"Dossier prestataire",tone:dossier.status==="ACTIVE"?"mint":"sky",stage:dossier.status,source:"PROVIDER_PROFILE",activities:[],pipelineEvents:[]});
+    people.push({id:dossier.organizationId,linkedOrganizationId:dossier.organizationId,createdAt:dossier.createdAt,dossier,name:organizationDisplayLabel(dossier.name, locale),services:dossier.qualifications.map(q=>q.serviceCode).join(", "),status:networkStateLabel(dossier.status,locale),next:locale==="ar"?"ملف مقدم الخدمة":"Dossier prestataire",tone:dossier.status==="ACTIVE"?"mint":"sky",stage:dossier.status,source:"PROVIDER_PROFILE",activities:[],pipelineEvents:[]});
   }
   const operationalMatching = (input.operations?.matching ?? []).map((item) => ({
     id: item.id,
@@ -173,11 +183,19 @@ export function buildFranchiseSpaceBoard(input: {
     tone: item.eligible ? "mint" as const : "peach" as const,
     requestId: item.requestId,
   }));
-  const crmRequests = clients.map((item) => ({
+  const crmRequests = clients
+    .filter((item) => !isDirectoryFixture({
+      email: item.contactEmail,
+      displayName: item.displayName,
+      organizationName: item.organizationName,
+    }) && !isDirectoryOrgFixture(item.organizationName ?? item.displayName ?? ""))
+    .map((item) => ({
     id: item.id,
-    title: item.organizationName || item.displayName,
+    title: organizationDisplayLabel(item.organizationName, locale) !== (locale === "ar" ? "بدون مؤسسة" : "Sans organisation")
+      ? organizationDisplayLabel(item.organizationName, locale)
+      : personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
     stage: franchiseStageLabel(item.stage, locale),
-    owner: item.displayName,
+    owner: personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
     flag: [item.nextFollowupAt ? item.nextFollowupAt.slice(0, 10) : item.sourceCode,franchiseInvitationLabel(item.invitation,locale)].filter(Boolean).join(" · "),
     tone: providerTone(item.stage),
     stageCode: item.stage,
@@ -221,9 +239,11 @@ export function buildFranchiseSpaceBoard(input: {
       meta: item.severity,
       href: `/${locale}/franchise/qualite${q}`,
     })),
-    ...followupRows.map((item) => ({
+    ...followupRows
+      .filter((item) => !isDirectoryFixture({ displayName: item.displayName }))
+      .map((item) => ({
       id: item.id,
-      title: item.displayName,
+      title: personDisplayLabel({ displayName: item.displayName }, locale),
       meta: (item.nextFollowupAt ?? "").slice(0, 10),
       href: `/${locale}/franchise/relances${q}`,
     })),
@@ -234,11 +254,19 @@ export function buildFranchiseSpaceBoard(input: {
       href: `/${locale}/franchise/digest${q}`,
     })),
   ];
-  const journal = [...providers, ...clients].flatMap((item) => item.pipelineEvents.map((event) => ({
+  const journal = [...providers, ...clients]
+    .filter((item) => !isDirectoryFixture({
+      email: item.contactEmail,
+      displayName: item.displayName,
+      organizationName: item.organizationName,
+    }))
+    .flatMap((item) => item.pipelineEvents.map((event) => ({
     id: event.id,
     date: event.occurredAt.slice(0, 10),
     event: `${event.from ?? "—"} → ${event.to}`,
-    doc: item.organizationName || item.displayName,
+    doc: organizationDisplayLabel(item.organizationName, locale) !== (locale === "ar" ? "بدون مؤسسة" : "Sans organisation")
+      ? organizationDisplayLabel(item.organizationName, locale)
+      : personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
   })));
   const quality: QualityRow[] = [
     ...alerts.map((item) => ({
@@ -271,7 +299,13 @@ export function buildFranchiseSpaceBoard(input: {
   }));
   const followups = (followupRows.length ? followupRows : jobs.map((job) => {
     const prospect = input.followups?.prospects.find((item) => item.id === job.prospectId);
-    return { id: job.id, displayName: prospect?.displayName ?? job.prospectId, nextFollowupAt: job.nextAttemptAt };
+    return {
+      id: job.id,
+      displayName: personDisplayLabel({ displayName: prospect?.displayName }, locale),
+      nextFollowupAt: job.nextAttemptAt,
+    };
+  })).filter((item) => !isDirectoryFixture({
+    displayName: "displayName" in item ? item.displayName : "",
   })).map((item, index) => {
     const prospect = input.followups?.prospects.find((row) => row.id === item.id);
     const href = prospect?.type === "PROVIDER"
@@ -295,7 +329,9 @@ export function buildFranchiseSpaceBoard(input: {
     void now;
     return {
       id: "id" in item && typeof item.id === "string" ? item.id : String(index),
-      title: "displayName" in item ? item.displayName : "",
+      title: "displayName" in item
+        ? personDisplayLabel({ displayName: item.displayName }, locale)
+        : "",
       due: (dueAt ?? "").slice(0, 10) || "—",
       action: c.contact,
       tone,

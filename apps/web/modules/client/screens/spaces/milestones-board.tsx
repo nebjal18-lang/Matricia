@@ -31,6 +31,20 @@ function statusLabel(state: "done" | "current" | "todo", status: string, locale:
   return c.comingSoon;
 }
 
+function missionMastLabel(status: string | undefined, completedAt: string | null | undefined, locale: Locale, c: ReturnType<typeof spaceCopy>) {
+  if (status === "COMPLETED" || completedAt) return locale === "ar" ? "مكتملة" : "Terminée";
+  if (status === "CANCELLED") return locale === "ar" ? "ملغاة" : "Annulée";
+  if (status === "SUSPENDED" || status === "ON_HOLD") return locale === "ar" ? "موقوفة" : "En pause";
+  return c.inProgress;
+}
+
+function withJalonQuery(query: string, jalonId: string) {
+  const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+  params.set("jalonId", jalonId);
+  const encoded = params.toString();
+  return encoded ? `?${encoded}` : "";
+}
+
 export function JalonsBoard({
   locale,
   query,
@@ -38,6 +52,7 @@ export function JalonsBoard({
   mission,
   messages,
   assistanceHref,
+  selectedJalonId,
   children,
 }: {
   locale: Locale;
@@ -46,6 +61,7 @@ export function JalonsBoard({
   mission: ContractMissionDashboard["missions"][number] | null;
   messages: MissionMessages;
   assistanceHref?: string;
+  selectedJalonId?: string | null;
   children?: ReactNode;
 }) {
   const c = spaceCopy(locale);
@@ -60,20 +76,29 @@ export function JalonsBoard({
         status: item.status,
         state: milestoneState(item.status),
       }));
-  const selected = jalons.find((item) => item.state === "current") ?? jalons[0] ?? null;
+  const selected =
+    (selectedJalonId ? jalons.find((item) => item.id === selectedJalonId) : null)
+    ?? jalons.find((item) => item.state === "current")
+    ?? jalons[0]
+    ?? null;
   const selectedLive = mission?.milestones.find((item) => item.id === selected?.id) ?? null;
-  const files = preferDemo ? demo.jalonFiles : (mission?.deliverables ?? []).map((item) => ({
-    id: item.id,
-    title: item.label,
-    file: item.label,
-    kind: "file" as const,
-    scan: item.proofScanStatus === "CLEAN" ? "ok" as const : item.proofScanStatus === "NONE" ? "none" as const : "wait" as const,
-    submitted: item.status === "SUBMITTED" || item.status === "ACCEPTED" || item.status === "REJECTED",
-    href: `/${locale}/client/documents${query}`,
-  }));
-  const contractIsSigned = mission ? mission.contractSnapshot.signatures.length > 0 : true;
+  const scopedDeliverables = preferDemo
+    ? null
+    : (mission?.deliverables ?? []).filter((item) => !selected?.id || item.milestoneId === selected.id || item.milestoneId === null);
+  const files = preferDemo
+    ? demo.jalonFiles
+    : (scopedDeliverables ?? []).map((item) => ({
+        id: item.id,
+        title: item.label,
+        file: item.label,
+        kind: "file" as const,
+        scan: item.proofScanStatus === "CLEAN" ? "ok" as const : item.proofScanStatus === "NONE" ? "none" as const : "wait" as const,
+        submitted: item.status === "SUBMITTED" || item.status === "ACCEPTED" || item.status === "REJECTED",
+        href: `/${locale}/client/documents${query}`,
+      }));
+  const contractIsSigned = mission ? mission.contractSnapshot.signatures.length >= 2 : true;
   const submittedCount = preferDemo ? files.filter((file) => file.scan === "ok").length : files.filter((file) => "submitted" in file && file.submitted).length;
-  const pendingReceipts = (mission?.deliverables ?? []).filter((item) => item.status === "SUBMITTED" && !item.retirement);
+  const pendingReceipts = (scopedDeliverables ?? []).filter((item) => item.status === "SUBMITTED" && !item.retirement);
   const progressPct = files.length === 0 ? 0 : Math.round((submittedCount / files.length) * 100);
   const started = mission?.startedAt
     ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(mission.startedAt))
@@ -82,6 +107,8 @@ export function JalonsBoard({
     ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(mission.completedAt))
     : "—";
   const selectedIndex = selected ? jalons.findIndex((item) => item.id === selected.id) + 1 : 0;
+  const mastLabel = missionMastLabel(mission?.status, mission?.completedAt, locale, c);
+  const mastTone = mission?.status === "COMPLETED" || mission?.completedAt ? "mint" : mission?.status === "CANCELLED" ? "peach" : "mint";
 
   return (
     <main className="client-page">
@@ -94,7 +121,7 @@ export function JalonsBoard({
           </div>
         </div>
         <div className="client-mission-mast-meta">
-          <span className="client-status-chip" data-tone="mint">{c.inProgress}</span>
+          <span className="client-status-chip" data-tone={mastTone}>{mastLabel}</span>
           <p dir="ltr">{started} → {ended}</p>
         </div>
         <div>
@@ -118,21 +145,29 @@ export function JalonsBoard({
       <section className="client-dispute-layout" id="jalons">
         <article className="client-card">
           <ol className="client-mediation client-jalon-rail">
-            {jalons.map((item, index) => (
-              <li key={item.id} data-state={item.state} data-selected={selected?.id === item.id ? "true" : undefined}>
-                <span className="client-jalon-marker" aria-hidden>
-                  {item.state === "done" ? <CheckCircle2 className="size-4" /> : <span>{index + 1}</span>}
-                </span>
-                <span>
-                  <strong>{locale === "ar" ? `المرحلة ${index + 1}` : `Jalon ${index + 1}`} — {item.title}</strong>
-                  <small>{c.dueOn} : {item.due}</small>
-                </span>
-                <span className="client-status-chip" data-tone={toneFor(item.state)}>{statusLabel(item.state, item.status, locale, c)}</span>
-              </li>
-            ))}
+            {jalons.map((item, index) => {
+              const href = mission
+                ? `/${locale}/client/missions/${mission.id}/jalons${withJalonQuery(query, item.id)}`
+                : `#jalon-${item.id}`;
+              const isSelected = selected?.id === item.id;
+              return (
+                <li key={item.id} data-state={item.state} data-selected={isSelected ? "true" : undefined}>
+                  <Link href={href} aria-current={isSelected ? "true" : undefined} className="client-jalon-rail-link">
+                    <span className="client-jalon-marker" aria-hidden>
+                      {item.state === "done" ? <CheckCircle2 className="size-4" /> : <span>{index + 1}</span>}
+                    </span>
+                    <span>
+                      <strong>{locale === "ar" ? `المرحلة ${index + 1}` : `Jalon ${index + 1}`} — {item.title}</strong>
+                      <small>{c.dueOn} : {item.due}</small>
+                    </span>
+                    <span className="client-status-chip" data-tone={toneFor(item.state)}>{statusLabel(item.state, item.status, locale, c)}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ol>
         </article>
-        <article className="client-card">
+        <article className="client-card" id={selected ? `jalon-${selected.id}` : undefined}>
           {selected ? (
             <>
               <header className="client-priority-head">

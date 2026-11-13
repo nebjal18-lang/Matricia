@@ -1,7 +1,12 @@
 import { FranchiseAccessPage } from "@/modules/franchise/ui/franchise-access-page";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
+import { loadNativeFranchiseControl } from "@/modules/franchise/data/performance/native-control";
+import { FranchiseNativePerformancePanel } from "@/modules/franchise/screens/performance/native-control-panel";
+import { loadFranchiseGovernanceSignals } from "@/modules/franchise/data/governance-signals/repository";
+import { FranchiseGovernanceSignalsPanel } from "@/modules/franchise/screens/performance/governance-signals-panel";
 import { FranchiseAccessState, FranchiseOrganizationSelector } from "@/modules/franchise/ui/franchise-access-state";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import { resolveFranchiseNestedView } from "@/modules/franchise/data/spaces/nested-views";
@@ -30,6 +35,7 @@ import {
 } from "@/modules/franchise/screens/spaces/boards";
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
+import type { ReactNode } from "react";
 
 function commandIdentity() {
   return { idempotencyKey: randomUUID(), correlationId: randomUUID() };
@@ -68,7 +74,7 @@ export async function FranchiseNestedPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; slug: string[] }>;
-  searchParams: Promise<{ organizationId?: string; franchiseId?:string; q?: string; stage?: string; owner?: string; page?: string; bucket?: string;type?:string;category?:string;selected?:string;service?:string;status?:string;capacity?:string;zone?:string;docs?:string }>;
+  searchParams: Promise<{ organizationId?: string; franchiseId?: string; q?: string; stage?: string; owner?: string; page?: string; bucket?: string; type?: string; category?: string; selected?: string; service?: string; status?: string; capacity?: string; zone?: string; docs?: string; before?: string; beforeId?: string; eventPlanId?: string; afterEventId?: string }>;
 }) {
   const [{ locale, slug }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale) || !slug?.length) notFound();
@@ -91,6 +97,23 @@ export async function FranchiseNestedPage({
   const shellActions = nested.kind === "network" && nested.itemId ? (
     <Link href={`/${locale}/franchise/fournisseurs${space.selectedQuery}`} className="franchise-tool">{franchiseCopy(locale).providerFolderBack}</Link>
   ) : undefined;
+  let performancePanels: ReactNode = null;
+  if (result.status === "success" && nested.kind === "performance") {
+    const franchiseId = result.workspace.mandate.franchiseId;
+    const [nativeControl, governanceSignals] = await Promise.all([
+      loadNativeFranchiseControl(franchiseId, { before: query.before, id: query.beforeId, eventPlanId: query.eventPlanId, afterEventId: query.afterEventId }),
+      loadFranchiseGovernanceSignals(franchiseId),
+    ]);
+    if ([nativeControl, governanceSignals].some((load) => load.status === "error" && load.reason === "UNAUTHENTICATED")) {
+      redirect(connexionHref(locale, { next: space.currentPath }));
+    }
+    performancePanels = (
+      <>
+        <FranchiseNativePerformancePanel locale={locale} result={nativeControl} returnPath={space.currentPath} />
+        <FranchiseGovernanceSignalsPanel locale={locale} result={governanceSignals} returnPath={space.currentPath} />
+      </>
+    );
+  }
   return (
     <FranchiseAppShell languagePath={space.currentPath}
       locale={locale}
@@ -140,7 +163,10 @@ export async function FranchiseNestedPage({
       ) : nested.kind === "quality" ? (
         <QualityBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} view={nested.view} search={query.q} page={query.page} board={board} libraryId={commandScope.libraryId} organizationId={commandScope.organizationId} services={commandScope.services} />
       ) : nested.kind === "performance" ? (
-        <PerformanceBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} view={nested.view} board={board} />
+        <>
+          {performancePanels}
+          <PerformanceBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} view={nested.view} board={board} />
+        </>
       ) : nested.kind === "followups" ? (
         <FollowupsBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} view={nested.view} page={query.page} board={board} />
       ) : nested.kind === "documents" ? (

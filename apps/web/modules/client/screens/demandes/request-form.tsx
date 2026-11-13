@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, CheckCircle2, Coins, Lightbulb, MapPin, Save, Sparkles, Target } from "lucide-react";
+import { CalendarDays, CheckCircle2, Coins, Lightbulb, MapPin, Save, Sparkles, Target } from "lucide-react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Textarea } from "@/modules/shared/ui/textarea";
@@ -43,18 +43,11 @@ export function RequestForm({
 }) {
   const [state, action, pending] = useActionState(createRequestAction, idle);
   const c = spaceCopy(locale);
-  const steps = [
-    { id: "need", label: c.stepNeed, hint: locale === "ar" ? "هدفكم" : "Votre objectif" },
-    { id: "scope", label: c.stepScope, hint: locale === "ar" ? "تفاصيل المهمة" : "Détails de la mission" },
-    { id: "constraints", label: c.stepConstraints, hint: locale === "ar" ? "آجال، ميزانية، وسائل" : "Délais, budget, moyens" },
-    { id: "docs", label: c.stepDocs, hint: locale === "ar" ? "وثائق مفيدة" : "Pièces utiles" },
-    { id: "recap", label: c.stepRecap, hint: locale === "ar" ? "تحقق وإرسال" : "Vérification et envoi" },
-  ] as const;
   const siteLabel = sites.find((site) => site.id === context.siteId);
   const siteName = siteLabel ? (locale === "ar" ? siteLabel.nameAr : siteLabel.nameFr) : context.organizationName;
 
   return (
-    <form action={action} className="client-wizard" noValidate>
+    <form action={action} className="client-wizard">
       <input type="hidden" name="locale" value={locale} />
       {context.source === "opportunity" ? (
         <input type="hidden" name="opportunityId" value={context.opportunityId} />
@@ -67,15 +60,7 @@ export function RequestForm({
       <input type="hidden" name="organizationId" value={context.organizationId} />
       <input type="hidden" name="currency" value="MAD" />
 
-      <ol className="client-wizard-steps">
-        {steps.map((step, index) => (
-          <li key={step.id} data-state={index === 0 ? "current" : "todo"}>
-            <span>{index + 1}</span>
-            <strong>{step.label}</strong>
-            <small>{step.hint}</small>
-          </li>
-        ))}
-      </ol>
+      <p className="client-access-note" role="status">{messages.draftNotice}</p>
 
       <div className="client-wizard-layout">
         <article className="client-card">
@@ -99,7 +84,7 @@ export function RequestForm({
           </section>
           <div className="client-wizard-fields">
             <div className="client-wizard-grid">
-              <Field label={c.yourObjective} required>
+              <Field label={c.yourObjective}>
                 <Input name="objectiveDisplay" defaultValue={context.title} disabled aria-describedby="objective-help" />
                 <span id="objective-help">{c.objectiveHelp}</span>
               </Field>
@@ -109,7 +94,7 @@ export function RequestForm({
               </Field>
             </div>
             <div className="client-wizard-grid">
-              <Field label={c.siteConcerned} required>
+              <Field label={c.siteConcerned}>
                 {sites.length === 0 ? (
                   <p>{messages.noCompanySite}</p>
                 ) : (
@@ -122,12 +107,12 @@ export function RequestForm({
                 )}
                 <span>{c.siteHelp}</span>
               </Field>
-              <Field label={c.desiredStart} required>
+              <Field label={c.desiredStart}>
                 <Input type="date" name="desiredDate" />
                 <span>{c.startHelp}</span>
               </Field>
-              <Field label={c.budgetRange} required>
-                <Input name="budget" inputMode="decimal" dir="ltr" placeholder="15 000,00" aria-describedby="budget-help" />
+              <Field label={c.budgetRange}>
+                <Input name="budget" inputMode="decimal" dir="ltr" placeholder="15 000,00…" aria-describedby="budget-help" autoComplete="off" />
                 <span id="budget-help">{c.budgetHelpRange}</span>
               </Field>
               <Field label={messages.urgency}>
@@ -162,13 +147,9 @@ export function RequestForm({
             </p>
           ) : null}
           <div className="client-wizard-actions">
-            <Button type="submit" disabled={pending} className="client-ghost-link">
+            <Button type="submit" disabled={pending} className="client-cta">
               <Save className="size-4" aria-hidden />
               {pending ? messages.creating : c.saveDraft}
-            </Button>
-            <Button type="submit" disabled={pending} className="client-cta">
-              {pending ? messages.creating : c.wizardContinue}
-              <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
             </Button>
           </div>
         </article>

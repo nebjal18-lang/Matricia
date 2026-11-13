@@ -80,7 +80,7 @@ export async function loadAdminProviders(): Promise<Result> {
 
   async function allRows(table:string,columns:string,order:string,ascending=false,filter?:{column:string;ids:string[]}){
     const rows:unknown[]=[];
-    for(let offset=0;offset<20000;offset+=500){
+    for(let offset=0;offset<2000;offset+=500){
       let query=client.from(table).select(columns).order(order,{ascending});
       const tie=table==="provider_profiles"?"provider_organization_id":table==="provider_document_scan_jobs"?"storage_object_path":"id";if(order!==tie)query=query.order(tie);
       if(filter)query=query.in(filter.column,filter.ids);

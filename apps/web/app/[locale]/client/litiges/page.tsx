@@ -32,15 +32,11 @@ export default async function DisputesPage({
   const selfHref = `/${locale}/client/litiges${space.selectedQuery}`;
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} title={m.title} lead={m.intro} kicker={space.organizationName ?? c.kicker}>
+      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="disputes" title={m.title} lead={m.intro} kicker={space.organizationName ?? c.kicker}>
         <WorkspaceFailure locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={selfHref} supportReference="CLIENT-DISPUTES" />
       </ClientAppShell>
     );
   }
-
-  const selectedId = result.value.cases[0]?.id;
-  const selected = selectedId ? await repository.detail(selectedId) : { status: "success" as const, value: null };
-  if (selected.status === "error" && selected.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/litiges` }));
 
   return (
     <ClientAppShell
@@ -48,6 +44,7 @@ export default async function DisputesPage({
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
+      active="disputes"
       title={m.title}
       lead={m.intro}
       kicker={space.organizationName ?? c.kicker}
@@ -63,13 +60,12 @@ export default async function DisputesPage({
         )
       }
     >
-      {selected.status === "error" ? <WorkspaceFailure locale={locale} reason={selected.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={selfHref} supportReference="CLIENT-DISPUTE-DETAIL" /> : null}
       <DisputesBoard
         locale={locale}
         query={space.selectedQuery}
         organizationName={space.organizationName}
         cases={result.value.cases}
-        selected={selected.status === "success" ? selected.value : null}
+        selected={null}
         messages={m}
         canOpen={result.value.canOpen}
       />

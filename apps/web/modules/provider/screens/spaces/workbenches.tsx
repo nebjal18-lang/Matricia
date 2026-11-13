@@ -1,4 +1,5 @@
 import { quoteStatusLabel } from "@/modules/provider/screens/devis/status-labels";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import { SignedScopePendingNotice } from "@/modules/shared/ui/signed-scope-pending-notice";
 import {workflowStatusLabel}from"@/modules/shared/lib/i18n/workflow-statuses";
 import { InvoiceFacts } from "@/modules/provider/screens/facturation/invoice-facts";
@@ -672,7 +673,9 @@ export function CompanySecurityWorkbench({
   securityUnavailable?: boolean;
 }) {
   const w = workbenchCopy(locale);
-  const name = organizationName ?? (locale === "ar" ? "مؤسستكم" : "Votre entreprise");
+  const name = organizationName
+    ? organizationDisplayLabel(organizationName, locale)
+    : (locale === "ar" ? "مؤسستكم" : "Votre entreprise");
   const mfaLabel = mfaEnabled === true ? w.mfaOn : mfaEnabled === false ? w.mfaOff : "—";
   return (
     <main className="client-page provider-workbench provider-company-security">

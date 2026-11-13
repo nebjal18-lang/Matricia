@@ -37,6 +37,7 @@ function mission(overrides: { signatures?: number; criteria?: number } = {}): Co
     milestones: [{ id, key: "DELIVERY", title: "Livraison", status: "PENDING", dueAt: null, rowVersion: 1 }],
     deliverables: [{
       id,
+      milestoneId: id,
       key: "DEMO",
       label: "Livrable de démonstration",
       status: "SUBMITTED",
@@ -55,10 +56,14 @@ describe("jalon receipt truth", () => {
     expect(html).toContain("1 sur 1 livrables soumis");
     expect(html).toContain("Aucune preuve");
     expect(html).toContain("aucun critère d’acceptation");
+    expect(html).toContain(`/client/missions/${id}/jalons?jalonId=${id}`);
   });
 
-  it("keeps the signed chip when a signature exists", () => {
-    const html = renderToStaticMarkup(<JalonsBoard locale="fr" query="" organizationName="Client" mission={mission({ signatures: 1 })} messages={getMissionMessages("fr")} />);
-    expect(html).toContain("Contrat signé");
+  it("keeps unsigned until both contractual signatures exist", () => {
+    const one = renderToStaticMarkup(<JalonsBoard locale="fr" query="" organizationName="Client" mission={mission({ signatures: 1 })} messages={getMissionMessages("fr")} />);
+    expect(one).toContain("Signature non enregistrée");
+    expect(one).not.toContain("Contrat signé");
+    const both = renderToStaticMarkup(<JalonsBoard locale="fr" query="" organizationName="Client" mission={mission({ signatures: 2 })} messages={getMissionMessages("fr")} />);
+    expect(both).toContain("Contrat signé");
   });
 });

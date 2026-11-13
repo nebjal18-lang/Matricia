@@ -13,11 +13,15 @@ describe("guided client request form", () => {
     for (const field of ["libraryId", "serviceId", "questionnaireVersionId", "catalogSnapshotHash", "questionnaireSnapshotHash", "idempotencyKey", "changeReason"]) expect(html).not.toContain(`name="${field}"`);
     expect(html).toContain('name="opportunityId"'); expect(html).toContain("Entreprise Test"); expect(html).toContain("Enregistrer le brouillon");
     expect(html).toContain("client-wizard");
-    expect(html).toContain("1. Votre besoin");
+    expect(html).toContain("Votre besoin");
+    expect(html).not.toContain("client-wizard-steps");
+    expect(html).not.toContain("Continuer");
     expect(html).toContain("Objectif de la demande");
     expect(html).toContain("Résultat attendu");
     expect(html).toContain("Ce que Matricia a compris");
     expect(html).toContain("Fourchette budgétaire estimée");
+    expect(html).toContain('name="description" required');
+    expect(html).toContain('name="regionCode" required');
     expect(html).not.toMatch(/exemple illustratif/i);
   });
 

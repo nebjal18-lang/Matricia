@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks=vi.hoisted(()=>({from:vi.fn(),getUser:vi.fn()}));
-vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({from:mocks.from,auth:{getUser:mocks.getUser}})}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({from:mocks.from,auth:{getUser:mocks.getUser}}),getServerAuthUser:async()=>mocks.getUser()}));
 vi.mock("next/navigation",()=>({notFound:()=>{throw new Error("NOT_FOUND");}}));
 import { resolveConnectedSpace } from "./connected-space";
 function response(data:unknown){const q={select:vi.fn(),eq:vi.fn(),order:vi.fn(),maybeSingle:vi.fn(),then:(resolve:(value:unknown)=>unknown)=>Promise.resolve({data,error:null}).then(resolve)};for(const f of[q.select,q.eq,q.order,q.maybeSingle])f.mockReturnValue(q);return q;}

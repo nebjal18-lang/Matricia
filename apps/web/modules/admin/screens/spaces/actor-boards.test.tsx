@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { ClientFicheBoard, ClientsBoard, ComplianceBoard, ComplianceDecisionBoard } from "./actor-boards";
+import { ClientFicheBoard, ClientsBoard, ComplianceBoard, ComplianceDecisionBoard, UserFicheBoard } from "./actor-boards";
 
 const orgId = "11111111-1111-4111-8111-111111111111";
 const caseId = "77777777-7777-4777-8777-777777777777";
@@ -64,5 +64,52 @@ describe("admin actor boards", () => {
     expect(html).toContain("/fr/administration/conformite-clients/" + caseId);
     expect(html).toContain("/fr/administration/entreprises/" + orgId + "/modifier");
     expect(html).not.toMatch(/exemple illustratif/i);
+  });
+
+  it("renders an ORG-002 user fiche with person initial, scopes and in-page sections", () => {
+    const userId = "55555555-5555-4555-8555-555555555555";
+    const html = renderToStaticMarkup(
+      <UserFicheBoard
+        locale="fr"
+        query=""
+        userId={userId}
+        fiche={null}
+        rows={[{
+          userId,
+          membershipId: "66666666-6666-4666-8666-666666666666",
+          organizationId: orgId,
+          organizationName: "Ahmitech Franchise IT",
+          roles: ["FRANCHISE_OWNER"],
+          status: "ACTIVE",
+          updatedAt: null,
+          displayName: "Hatim Ahmitech",
+          email: "hatim.ahmitech@matricia.test",
+          phone: "+212612000004",
+          preferredLocale: "fr-MA",
+          givenName: "Hatim",
+          familyName: "Ahmitech",
+          platformRoles: [],
+          libraryScopes: ["IT"],
+          franchiseScopes: ["IT:HATIM_AHMITECH · MA"],
+          accountStatus: "ACTIVE",
+          lastSignInAt: "2026-11-12T10:00:00.000Z",
+          mfaStatus: "DISABLED",
+          sessionCount: 1,
+        }]}
+      />,
+    );
+    expect(html).toContain("Hatim Ahmitech");
+    expect(html).toContain("hatim.ahmitech@matricia.test");
+    expect(html).toContain("Ahmitech Franchise IT");
+    expect(html).toContain("Propriétaire franchise");
+    expect(html).toContain("IT:HATIM_AHMITECH");
+    expect(html).toContain("Requis — non activée");
+    expect(html).toContain("#perimetres");
+    expect(html).toContain('aria-hidden="true">H</span>');
+    expect(html).toContain("Ouvrir les invitations");
+    const tabs = html.match(/<nav class="client-tabs"[\s\S]*?<\/nav>/)?.[0] ?? "";
+    expect(tabs).toContain("#securite-compte");
+    expect(tabs).not.toContain("/fr/invitations");
+    expect(html).not.toMatch(/Identité\s*:/);
   });
 });

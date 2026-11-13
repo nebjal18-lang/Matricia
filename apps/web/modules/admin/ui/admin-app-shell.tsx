@@ -7,6 +7,9 @@ import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { buildAdminNav, type AdminNavKey } from "@/modules/admin/ui/admin-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import "@/modules/client/ui/client-experience.css";
+import "@/modules/admin/ui/admin-experience.css";
+import "@/modules/shared/shell/admin-experience.css";
 
 export type { AdminNavKey };
 

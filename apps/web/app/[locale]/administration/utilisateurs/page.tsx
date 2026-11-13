@@ -14,7 +14,7 @@ export default async function AdminUsersPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; q?: string; page?: string; org?: string; role?: string; status?: string }>;
+  searchParams: Promise<{ organizationId?: string; q?: string; page?: string; org?: string; role?: string; status?: string; fixtures?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -24,6 +24,7 @@ export default async function AdminUsersPage({
   const a = actorCopy(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
   const users = directory.users;
+  const includeFixtures = query.fixtures === "1" || query.fixtures === "true";
   const exportParams=new URLSearchParams(space.selectedQuery);for(const[key,value]of Object.entries(query))if(value&&key!=="page")exportParams.set(key,value);
   const exportQuery=exportParams.size?`?${exportParams.toString()}`:"";
 
@@ -48,7 +49,7 @@ export default async function AdminUsersPage({
         </>
       }
     >
-      {directory.reason ? <p role="alert">{locale==="ar"?"بيانات المستخدمين غير متاحة. تحققوا من الصلاحيات والمصادقة.":"Annuaire indisponible. Vérifiez les habilitations et la MFA."}</p> : <UsersBoard page={Number(query.page??"1")} locale={locale} query={space.selectedQuery} users={users} invites={directory.invites} search={query.q} filters={{ org: query.org, role: query.role, status: query.status }} />}
+      {directory.reason ? <p role="alert">{locale==="ar"?"بيانات المستخدمين غير متاحة. تحققوا من الصلاحيات والمصادقة.":"Annuaire indisponible. Vérifiez les habilitations et la MFA."}</p> : <UsersBoard page={Number(query.page??"1")} locale={locale} query={space.selectedQuery} users={users} invites={directory.invites} search={query.q} includeFixtures={includeFixtures} filters={{ org: query.org, role: query.role, status: query.status }} />}
     </AdminAppShell>
   );
 }

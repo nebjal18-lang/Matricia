@@ -47,10 +47,8 @@ export default async function AdminFinancePage({
   const c = adminCopy(locale);
   const ar = locale === "ar";
   const mfaBlocked = access.status === "ok" && !access.requirementSatisfied;
-  const blockedCopy = (reason: string) => mfaBlocked && reason === "FORBIDDEN" ? mfaRequiredMessage(locale) : reason === "FORBIDDEN" ? m.forbidden : m.unavailable;
-  const auditOrganizationId = query.organizationId
-    ?? (boxes.status === "success" ? boxes.value.wallets[0]?.organization_id ?? null : null)
-    ?? (result.status === "success" ? result.value.subscriptions[0]?.organization_id ?? null : null);
+  const blockedCopy = (reason: string) => reason === "MFA_REQUIRED" || (mfaBlocked && reason === "FORBIDDEN") ? mfaRequiredMessage(locale) : reason === "FORBIDDEN" ? m.forbidden : m.unavailable;
+  const auditOrganizationId = query.organizationId ?? null;
 
   return (
     <AdminModulePage locale={locale} active="finance" path="finance" title={m.title} lead={c.hubFinanceLead} hubGroup="finance">

@@ -82,6 +82,17 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
     expect(html).toContain(`<h2 id="need-step-title">${step + 1}. ${stage.title}</h2>`);
     expect(html).toContain(`aria-valuenow="${step + 1}"`);
     expect(html.match(/aria-current="step"/g)).toHaveLength(1);
+    expect(html.match(/<h2 id="need-step-title">/g)).toHaveLength(1);
+  });
+
+  it("keeps PUB-NEED-001 numbering and wording on the understand step", () => {
+    const html = renderToStaticMarkup(<NeedComposer locale={locale} draft={draft(1)} setDraft={() => undefined} storageNotice={null} storageAvailable invalidSelection={false} authenticated={false} goRecap={() => undefined} />);
+    expect(html).toContain(`<h2 id="need-step-title">2. ${getNeedStages(locale)[1]!.title}</h2>`);
+    expect(html).not.toContain("<h2>3.");
+    if (locale === "fr") {
+      expect(html).toContain("vous pourrez");
+      expect(html).not.toContain("nous pourrez");
+    }
   });
 
   it("preserves user free text, answers and canonical codes when restoring in another language", () => {

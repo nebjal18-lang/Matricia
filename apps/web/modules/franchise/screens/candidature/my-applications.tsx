@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import type { FranchiseApplicationStatus, MyFranchiseApplication } from "@/modules/franchise/data/candidature/repository";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import { linkMyFranchiseApplicationOrganization, type CandidateLinkState } from "./actions";
 
@@ -61,7 +62,7 @@ export function MyFranchiseApplications({ locale, applications, organizations, i
           <li key={application.id} className="client-card">
             <p><strong dir="ltr">{application.reference}</strong> · {statusCopy[application.status][locale]}</p>
             <p className="text-sm text-slate-600">{moroccoRegionLabel(application.territoryCode, locale)} · {application.domainLabel}</p>
-            {application.organizationId ? <p className="text-sm">{fr ? "Société rattachée : " : "الشركة المرتبطة: "}{application.organizationName ?? (fr ? "société de votre compte" : "شركة من حسابكم")}</p> : null}
+            {application.organizationId ? <p className="text-sm">{fr ? "Société rattachée : " : "الشركة المرتبطة: "}{application.organizationName ? organizationDisplayLabel(application.organizationName, locale) : (fr ? "société de votre compte" : "شركة من حسابكم")}</p> : null}
             {!application.organizationId && linkable.includes(application.status) ? <LinkOrganization locale={locale} application={application} organizations={organizations} idempotencyKey={idempotencyKeys[application.id] ?? application.id} /> : null}
             {application.invitationId && ["CONTRACT_PENDING", "LIBRARY_ASSIGNED"].includes(application.status) ? (
               <p className="mt-3">

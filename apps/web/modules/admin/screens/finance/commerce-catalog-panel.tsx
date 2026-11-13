@@ -1,7 +1,7 @@
 "use client";
 import {commerceIdle}from"@/modules/admin/screens/finance/commerce-state";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Badge } from "@/modules/shared/ui/badge";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
@@ -120,9 +120,7 @@ export function CommerceCatalogPanel({
             <Field label={m.approval}><Input name="approvalReference" required minLength={3} className={control} /></Field>
           </Form>
           <Form title={m.grantPromotion} action={grantCreditPromotionAction} keyValue={keys.grantPromotion} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={activePromotions.length === 0 || wallets.length === 0}>
-            <Select name="promotionVersionId" label={m.promotions} values={activePromotions.map((item) => item.id)} labels={activePromotions.map((item) => `${item.code} v${item.version}`)} />
-            <Select name="walletId" label={m.wallet} values={wallets.map((item) => item.wallet_id)} labels={wallets.map((item) => item.organization_name)} />
-            <Select name="organizationId" label={m.organization} values={wallets.map((item) => item.organization_id)} labels={wallets.map((item) => item.organization_name)} />
+            <GrantPromotionFields activePromotions={activePromotions} wallets={wallets} m={m} />
           </Form>
           <Form title={m.createParameter} action={createPlatformParameterAction} keyValue={keys.parameter} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
             <Select name="parameterKey" label={m.parameterKey} values={parameterKeys} />
@@ -135,6 +133,34 @@ export function CommerceCatalogPanel({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function GrantPromotionFields({
+  activePromotions,
+  wallets,
+  m,
+}: {
+  activePromotions: AdminCommerceCatalog["promotions"];
+  wallets: AdminBoxesDashboard["wallets"];
+  m: CommerceMessages;
+}) {
+  const clientWallets = wallets.filter((item) => item.wallet_type === "CLIENT");
+  const [walletId, setWalletId] = useState("");
+  const organizationId = clientWallets.find((item) => item.wallet_id === walletId)?.organization_id ?? "";
+  return (
+    <>
+      <Select name="promotionVersionId" label={m.promotions} values={activePromotions.map((item) => item.id)} labels={activePromotions.map((item) => `${item.code} v${item.version}`)} />
+      <Field label={m.wallet}>
+        <select name="walletId" required className={control} value={walletId} onChange={(event) => setWalletId(event.target.value)} disabled={clientWallets.length === 0}>
+          <option value="" disabled>—</option>
+          {clientWallets.map((item) => (
+            <option key={item.wallet_id} value={item.wallet_id}>{item.organization_name} · {item.wallet_id.slice(0, 8)}</option>
+          ))}
+        </select>
+      </Field>
+      <input type="hidden" name="organizationId" value={organizationId} />
+    </>
   );
 }
 

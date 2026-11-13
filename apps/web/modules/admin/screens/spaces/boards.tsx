@@ -1,4 +1,5 @@
-import{filterAdminOrgRows,localizeStatus}from"@/modules/admin/data/spaces/view-model";
+import { adminFixturesHiddenLabel } from "@/modules/admin/data/spaces/actor-presentation";
+import { filterAdminOrgRows, localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import Link from "next/link";
 import {
   Archive,
@@ -31,6 +32,9 @@ import {
   adminDirectoryGroup,
   adminDirectoryGroups,
   inferOrgType,
+  ORG_TYPE_NONE,
+  orgTypeFilterCodes,
+  orgTypeOptionLabel,
   type AdminDirectoryGroup,
 } from "@/modules/admin/data/spaces/directory";
 import { organizationJourney, type AdminOrgRow, type AdminTreatItem } from "@/modules/admin/data/spaces/view-model";
@@ -180,6 +184,7 @@ export function OrganizationsBoard({
   search,
   archives,
   filters,
+  includeFixtures = false,
 }: {
   locale: Locale;
   query: string;
@@ -188,64 +193,109 @@ export function OrganizationsBoard({
   search?: string;
   archives?: boolean;
   filters?: { type?: string; status?: string; compliance?: string; plan?: string };
+  includeFixtures?: boolean;
 }) {
   const c = adminCopy(locale);
-  const types = [...new Set(rows.flatMap(row=>row.typeCodes?.length?row.typeCodes:[row.type]).filter(Boolean))].sort();
-  const statuses = [...new Set(rows.map(row=>row.statusCode??row.status).filter(Boolean))].sort();
-  const compliances = [...new Set(rows.map(row=>row.complianceCode??row.compliance).filter(Boolean))].sort();
-  const plans = [...new Set(rows.map(row=>row.planCode??row.plan).filter(Boolean))].sort();
-  const filtered = filterAdminOrgRows(rows,filters??{},search,archives);
+  const showFixtures = includeFixtures || Boolean(search?.trim());
+  const directory = showFixtures ? rows : rows.filter((row) => !row.fixture);
+  const hiddenFixtures = rows.length - directory.length;
+  const types = [...new Set(directory.flatMap((row) => orgTypeFilterCodes(row.typeCodes ?? [])))].sort();
+  const statuses = [...new Set(directory.map((row) => row.statusCode ?? row.status).filter(Boolean))].sort();
+  const compliances = [...new Set(directory.map((row) => row.complianceCode ?? row.compliance).filter(Boolean))].sort();
+  const plans = [...new Set(directory.map((row) => row.planCode ?? row.plan).filter(Boolean))].sort();
+  const filtered = filterAdminOrgRows(directory, filters ?? {}, search, archives);
   const orgParams = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
   const organizationId = orgParams.get("organizationId");
+  const activeFilters = Boolean(
+    (filters?.type && filters.type !== "all")
+    || (filters?.status && filters.status !== "all")
+    || (filters?.compliance && filters.compliance !== "all")
+    || (filters?.plan && filters.plan !== "all")
+    || archives
+    || search?.trim(),
+  );
+  const resetHref = `/${locale}/administration/entreprises${organizationId ? `?organizationId=${organizationId}` : ""}`;
+  const fixturesHref = (() => {
+    const params = new URLSearchParams(organizationId ? { organizationId } : undefined);
+    params.set("fixtures", "1");
+    if (search?.trim()) params.set("q", search.trim());
+    return `/${locale}/administration/entreprises?${params.toString()}`;
+  })();
   return (
     <main className="client-page">
       <section className="admin-org-layout">
         <article className="client-card">
-          <form className="admin-filters" method="get" action={`/${locale}/administration/entreprises`}>
+          <form
+            key={`org-filters:${filters?.type ?? "all"}:${filters?.status ?? "all"}:${filters?.compliance ?? "all"}:${filters?.plan ?? "all"}:${search ?? ""}:${archives ? "1" : "0"}:${includeFixtures ? "1" : "0"}`}
+            className="admin-filters"
+            data-layout="orgs"
+            data-active={activeFilters ? "true" : undefined}
+            method="get"
+            action={`/${locale}/administration/entreprises`}
+          >
             {organizationId ? <input type="hidden" name="organizationId" value={organizationId} /> : null}
-            {archives ? <input type="hidden" name="archives" value="1" /> : null}
-            <label>{c.type}
-              <select name="type" defaultValue={filters?.type ?? "all"}>
-                <option value="all">{c.all}</option>
-                {types.map((type) => <option key={type} value={type}>{["CLIENT","PROVIDER","FRANCHISE","INTERNAL"].includes(type)?inferOrgType("",locale,[type]):type}</option>)}
-              </select>
-            </label>
-            <label>{c.state}
-              <select name="status" defaultValue={filters?.status ?? "all"}>
-                <option value="all">{c.all}</option>
-                {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status,locale)}</option>)}
-              </select>
-            </label>
-            <label>{c.compliance}
-              <select name="compliance" defaultValue={filters?.compliance ?? "all"}>
-                <option value="all">{c.all}</option>
-                {compliances.map((compliance) => <option key={compliance} value={compliance}>{compliance==="CURRENT"?c.complianceOk:compliance==="REVIEW"?c.complianceReview:locale==="ar"?"غير متحقق":"Non vérifié"}</option>)}
-              </select>
-            </label>
-            <label>{c.plan}
-              <select name="plan" defaultValue={filters?.plan ?? "all"}>
-                <option value="all">{c.all}</option>
-                {plans.map((plan) => <option key={plan} value={plan}>{plan==="UNKNOWN"?c.unknownPlan:plan}</option>)}
-              </select>
-            </label>
-            <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={archives} />{c.includeArchived}</label>
-            <label className="client-top-search">
-              <Search className="size-4" aria-hidden />
-              <span className="sr-only">{c.searchList}</span>
-              <input name="q" defaultValue={search} placeholder={c.searchList} />
-            </label>
-            <button type="submit" className="admin-soft-cta">{locale === "ar" ? "تصفية" : "Filtrer"}</button>
-            <Link href={`/${locale}/administration/entreprises${organizationId ? `?organizationId=${organizationId}` : ""}`} className="client-ghost-link">{c.reset}</Link>
+            {includeFixtures ? <input type="hidden" name="fixtures" value="1" /> : null}
+            <div className="admin-filters-grid">
+              <label>{c.type}
+                <select name="type" defaultValue={filters?.type === "Non renseigné" || filters?.type === "غير محدد" ? ORG_TYPE_NONE : (filters?.type ?? "all")}>
+                  <option value="all">{c.all}</option>
+                  {types.map((type) => <option key={type} value={type}>{orgTypeOptionLabel(type, locale)}</option>)}
+                </select>
+              </label>
+              <label>{c.state}
+                <select name="status" defaultValue={filters?.status ?? "all"}>
+                  <option value="all">{c.all}</option>
+                  {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status, locale)}</option>)}
+                </select>
+              </label>
+              <label>{c.compliance}
+                <select name="compliance" defaultValue={filters?.compliance ?? "all"}>
+                  <option value="all">{c.all}</option>
+                  {compliances.map((compliance) => <option key={compliance} value={compliance}>{compliance === "CURRENT" ? c.complianceOk : compliance === "REVIEW" ? c.complianceReview : locale === "ar" ? "غير متحقق" : "Non vérifié"}</option>)}
+                </select>
+              </label>
+              <label>{c.plan}
+                <select name="plan" defaultValue={filters?.plan ?? "all"}>
+                  <option value="all">{c.all}</option>
+                  {plans.map((plan) => <option key={plan} value={plan}>{plan === "UNKNOWN" ? c.unknownPlan : plan}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="admin-filters-tools">
+              <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={archives} />{c.includeArchived}</label>
+              <Link href={`/${locale}/administration/operations${organizationId ? `?organizationId=${organizationId}` : ""}#archives`} className="client-ghost-link">{c.seeArchives}</Link>
+              <label className="client-top-search admin-filter-search">
+                <Search className="size-4" aria-hidden />
+                <input name="q" defaultValue={search} placeholder={c.searchList} aria-label={c.searchList} />
+              </label>
+              <button type="submit" className="admin-soft-cta">{locale === "ar" ? "تصفية" : "Filtrer"}</button>
+              <Link href={resetHref} className="client-ghost-link">{c.reset}</Link>
+            </div>
           </form>
+          {hiddenFixtures > 0 && !showFixtures ? (
+            <p role="status" className="client-access-note">
+              {adminFixturesHiddenLabel(hiddenFixtures, locale)}
+              {" "}
+              <Link className="client-text-link" href={fixturesHref}>
+                {locale === "ar" ? "إظهارها" : "Afficher les fixtures"}
+              </Link>
+            </p>
+          ) : null}
           <div className="admin-table-tools">
             <div>
               <h2>{c.allOrgs}</h2>
               <p>{c.allOrgsLead}</p>
             </div>
+            {filtered.length > 0 ? (
+              <p className="admin-result-count" role="status">
+                {locale === "ar" ? `${filtered.length} نتيجة` : `${filtered.length} résultat${filtered.length > 1 ? "s" : ""}`}
+                {activeFilters ? (locale === "ar" ? " · مصفّاة" : " · filtrés") : null}
+              </p>
+            ) : null}
           </div>
           {filtered.length === 0 ? null : (
             <div className="client-table-wrap" tabIndex={0} role="region" aria-label={c.allOrgs}>
-              <table className="client-space-table">
+              <table className="client-space-table admin-org-table">
                 <thead>
                   <tr>
                     <th>{c.orgs}</th>
@@ -263,10 +313,13 @@ export function OrganizationsBoard({
                       <td>
                         <span className="client-doc-cell">
                           <span className="client-avatar" data-tone={row.statusTone}>{row.name.slice(0, 1)}</span>
-                          {row.name}
+                          <span>
+                            <strong>{row.name}</strong>
+                            {row.legalName && row.legalName !== row.name ? <small>{row.legalName}</small> : null}
+                          </span>
                         </span>
                       </td>
-                      <td>{row.type}</td>
+                      <td><span className="client-status-chip" data-tone={row.typeTone ?? "violet"}>{row.type}</span></td>
                       <td><span className="client-status-chip" data-tone={row.statusTone}>{row.status}</span></td>
                       <td><span className="client-status-chip" data-tone={row.complianceTone}>{row.compliance}</span></td>
                       <td><span className="client-status-chip" data-tone="violet">{row.plan}</span></td>
@@ -294,13 +347,13 @@ export function OrganizationsBoard({
               <h3>{c.emptyOrgs}</h3>
               <p>{c.emptyOrgsLead}</p>
               <div className="admin-empty-actions">
-                <Link href={`/${locale}/administration/entreprises`} className="client-ghost-link">{c.reset}</Link>
+                <Link href={resetHref} className="client-ghost-link">{c.reset}</Link>
                 <Link href={`/${locale}/administration/entreprises/nouvelle${query}`} className="admin-primary-cta">{c.createOrg}</Link>
               </div>
             </div>
           ) : null}
           {archives ? (
-            <p className="client-access-note">{c.archivesNote} {c.noArchives}</p>
+            <p className="client-access-note">{c.archivesNote}</p>
           ) : null}
         </article>
         <aside className="client-card admin-treat-rail">

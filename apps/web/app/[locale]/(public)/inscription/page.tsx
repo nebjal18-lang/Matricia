@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { configuredEmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
+import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { notFound } from "next/navigation";
 import { Building2, Store, Landmark } from "lucide-react";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -28,16 +29,16 @@ export default async function PublicInscriptionPage({
   const chrome = getLoginMessages(locale);
   const role = query.role === "fournisseur" ? "fournisseur" : query.role === "franchise" ? "franchise" : "client";
   const plan = typeof query.plan === "string" && /^[A-Z0-9][A-Z0-9._-]{0,63}$/iu.test(query.plan) ? query.plan : undefined;
-  const nextPath = typeof query.next === "string" && query.next.startsWith("/" + locale + "/") && !query.next.startsWith("//") && !query.next.includes("\\")
-    ? query.next
-    : role === "fournisseur"
+  const safeNext = safeReturnPath(query.next, locale);
+  const nextPath = safeNext
+    ?? (role === "fournisseur"
       ? `/${locale}/organisation?role=fournisseur`
       : role === "franchise"
         ? `/${locale}/franchise/candidature`
-        : `/${locale}/organisation`;
+        : `/${locale}/organisation`);
   const profiles = [
-    { id: "client", href: withQuery(`/${locale}/inscription`, { role: "client", next: typeof query.next === "string" ? query.next : undefined, plan }), title: locale === "ar" ? "مؤسسة" : "Entreprise", text: locale === "ar" ? "أبحث عن مرافقة أو مهني" : "Je cherche un accompagnement ou un professionnel", icon: Building2 },
-    { id: "fournisseur", href: withQuery(`/${locale}/inscription`, { role: "fournisseur", next: typeof query.next === "string" ? query.next : undefined, plan }), title: locale === "ar" ? "مهني" : "Professionnel", text: locale === "ar" ? "أقترح كفاءاتي وخدماتي" : "Je propose mes compétences et mes services", icon: Store, alias: chrome.providerAccount },
+    { id: "client", href: withQuery(`/${locale}/inscription`, { role: "client", next: safeNext, plan }), title: locale === "ar" ? "مؤسسة" : "Entreprise", text: locale === "ar" ? "أبحث عن مرافقة أو مهني" : "Je cherche un accompagnement ou un professionnel", icon: Building2 },
+    { id: "fournisseur", href: withQuery(`/${locale}/inscription`, { role: "fournisseur", next: safeNext, plan }), title: locale === "ar" ? "مهني" : "Professionnel", text: locale === "ar" ? "أقترح كفاءاتي وخدماتي" : "Je propose mes compétences et mes services", icon: Store, alias: chrome.providerAccount },
     { id: "franchise", href: withQuery(`/${locale}/inscription`, { role: "franchise", plan }), title: locale === "ar" ? "مرشح امتياز" : "Candidat franchisé", text: locale === "ar" ? "أرغب في تطوير مكتبة ماتريسيا" : "Je souhaite développer une bibliothèque Matricia", icon: Landmark },
   ] as const;
 

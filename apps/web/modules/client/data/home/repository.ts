@@ -1,5 +1,5 @@
 import { createServerClientRfqRepository } from "@/modules/client/data/rfq/server-repository";
-import { loadContractMissions } from "@/modules/shared/lib/contracts-missions/repository";
+import { loadClientHomeMissionSummary } from "@/modules/shared/lib/contracts-missions/home-summary";
 import type { QuoteComparison } from "@/modules/client/data/rfq/model";
 import {
   clientJourneySteps,
@@ -42,6 +42,8 @@ export async function loadClientHomeSnapshot(input: {
   actionItems: readonly UserActionItem[];
   now: string;
   isTeamLead: boolean;
+  /** When false, skip the quote comparison RPC on the home path (default). */
+  includeComparison?: boolean;
 }): Promise<ClientHomeSnapshot> {
   const emptyUnavailable: ClientHomeCounts = {
     openRequests: null,
@@ -66,7 +68,7 @@ export async function loadClientHomeSnapshot(input: {
 
   try {
     const repo = await createServerClientRfqRepository({ organizationId: input.organizationId, allForOrganization: true });
-    const [rfq, missions] = await Promise.all([repo.list(), loadContractMissions(input.locale, input.organizationId)]);
+    const [rfq, missions] = await Promise.all([repo.list(), loadClientHomeMissionSummary(input.locale, input.organizationId)]);
 
     if ((rfq.status === "error" && rfq.reason === "UNAUTHENTICATED") || (missions.status === "error" && missions.reason === "UNAUTHENTICATED")) {
       return { status: "error", reason: "UNAUTHENTICATED", counts: emptyUnavailable, insights: emptyInsights };
@@ -76,7 +78,7 @@ export async function loadClientHomeSnapshot(input: {
     if (rfq.status === "error") partialSources.push({ source: "requests", reason: ["FORBIDDEN", "NO_CLIENT_ORGANIZATION", "ORGANIZATION_SELECTION_REQUIRED"].includes(rfq.reason) ? "FORBIDDEN" : "UNAVAILABLE" });
     if (missions.status === "error") partialSources.push({ source: "missions", reason: ["FORBIDDEN_ORGANIZATION", "NO_CLIENT_ORGANIZATION", "ORGANIZATION_SELECTION_REQUIRED"].includes(missions.reason) ? "FORBIDDEN" : "UNAVAILABLE" });
     if (partialSources.length === 2) return { status: "error", reason: partialSources.every((item) => item.reason === "FORBIDDEN") ? "FORBIDDEN" : "UNAVAILABLE", counts: emptyUnavailable, insights: emptyInsights };
-    const missionDashboard = missions.status === "success" ? missions.dashboard : null;
+    const missionDashboard = missions.status === "success" ? missions : null;
     const orgRequests = rfq.status === "success" ? rfq.value.requests.filter((item) => item.organizationId === input.organizationId) : [];
     const counts = computeClientHomeCounts({
       requests: orgRequests.map((item) => ({ status: item.status, quoteCount: item.quoteCount })),
@@ -95,7 +97,7 @@ export async function loadClientHomeSnapshot(input: {
 
     const featured = pickFeaturedRequest(orgRequests);
     let comparisonSnapshot: QuoteComparison | null = null;
-    if (featured?.rfqId) {
+    if (input.includeComparison && featured?.rfqId) {
       const compared = await repo.comparison(featured.rfqId);
       comparisonSnapshot = compared.status === "success" ? compared.value : null;
     }

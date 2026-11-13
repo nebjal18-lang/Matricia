@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocked = vi.hoisted(() => ({ rfq: vi.fn(), missions: vi.fn(), list: vi.fn() }));
 vi.mock("@/modules/client/data/rfq/server-repository", () => ({ createServerClientRfqRepository: mocked.rfq }));
-vi.mock("@/modules/shared/lib/contracts-missions/repository", () => ({ loadContractMissions: mocked.missions }));
+vi.mock("@/modules/shared/lib/contracts-missions/home-summary", () => ({ loadClientHomeMissionSummary: mocked.missions }));
 import { loadClientHomeSnapshot } from "./repository";
 beforeEach(() => {
  vi.clearAllMocks();
  mocked.rfq.mockResolvedValue({ list: mocked.list });
- mocked.missions.mockResolvedValue({status:"success", dashboard:{organizationName:"Current organization",contracts:[],missions:[]}});
+ mocked.missions.mockResolvedValue({status:"success", organizationName:"Current organization",contracts:[],missions:[]});
 });
 describe("organization-scoped home snapshot", () => {
  const input = { organizationId:"selected-org",locale:"fr" as const,actionItems:[],now:"2026-11-02T00:00:00Z",isTeamLead:false };

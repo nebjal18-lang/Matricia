@@ -4,7 +4,6 @@ import { ensureCurrentConsentDocuments } from "@/modules/shared/lib/auth/consent
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { authorizedReturnPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { readWorkspaceNavigation } from "@/modules/shared/lib/auth/workspace-navigation-server";
-import { z } from "zod";
 import { cookies } from "next/headers";
 import { isCurrentLegalConsent, TERMS_VERSION, PRIVACY_VERSION } from "@/modules/shared/lib/auth/legal-consent";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
@@ -39,11 +38,12 @@ export async function requestOtp(emailInput: string, localeInput: string, _nextP
     return quota?.allowed === false ? { accepted: false, reason: "RATE_LIMITED" } : { accepted: false, reason: "UNAVAILABLE" };
   }
 
+  let consentReceipt: string | null = null;
   if (isRegistration) {
     try { await ensureCurrentConsentDocuments(locale); } catch { return { accepted:false,reason:"UNAVAILABLE" }; }
     const receipt = await admin.rpc("reserve_registration_consent", { p_email: email, p_locale: locale, p_terms_version: TERMS_VERSION, p_privacy_version: PRIVACY_VERSION });
     if (receipt.error || typeof receipt.data !== "string") return { accepted: false, reason: "UNAVAILABLE" };
-    (await cookies()).set("matricia.registration-consent", receipt.data, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 1800 });
+    consentReceipt = receipt.data;
   }
 
   const { error: deliveryError } = await admin.auth.signInWithOtp({
@@ -57,7 +57,23 @@ export async function requestOtp(emailInput: string, localeInput: string, _nextP
     return { accepted: false, reason: "RATE_LIMITED" };
   }
 
-  if (deliveryError && deliveryError.code !== "user_not_found") return { accepted: false, reason: "UNAVAILABLE" };
+  // Login must not reveal whether the mailbox exists. Hosted GoTrue may return
+  // otp_disabled / signup-disabled equivalents instead of user_not_found.
+  if (
+    !isRegistration
+    && deliveryError
+    && (deliveryError.code === "user_not_found"
+      || deliveryError.code === "otp_disabled"
+      || /signups?\s+not\s+allowed/i.test(deliveryError.message ?? ""))
+  ) {
+    return { accepted: true };
+  }
+
+  if (deliveryError) return { accepted: false, reason: "UNAVAILABLE" };
+  // Persist the consent cookie only after OTP delivery succeeded — never before the send.
+  if (consentReceipt) {
+    (await cookies()).set("matricia.registration-consent", consentReceipt, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 1800 });
+  }
   return { accepted: true };
 }
 
@@ -94,8 +110,13 @@ export async function postLoginDestination(localeInput: string, requestedNext?: 
       target = `${url.pathname}${url.search}`;
     }
   }
-  const [assurance, policy] = await Promise.all([client.auth.mfa.getAuthenticatorAssuranceLevel(),client.rpc("get_my_account_security_requirement")]);
-  const requirements = z.array(z.object({ mfa_required: z.boolean(), current_aal: z.enum(["aal1","aal2"]), requirement_satisfied: z.boolean() }).passthrough()).length(1).safeParse(policy.data);
-  const needsChallenge = navigation.status === "error" || !navigation.requirementSatisfied || assurance.error || policy.error || !requirements.success || !requirements.data[0]!.requirement_satisfied || (assurance.data?.currentLevel !== "aal2" && (assurance.data?.nextLevel === "aal2" || requirements.data[0]!.mfa_required));
+  // A navigation read failure is a security incident: never resume the deep link unchecked.
+  if (navigation.status !== "ok") {
+    return `/${locale}/securite/compte?${new URLSearchParams({ next: target })}`;
+  }
+  const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  // navigation already resolved get_my_account_security_requirement — do not call it twice.
+  const needsChallenge = !navigation.requirementSatisfied || Boolean(assurance.error)
+    || (assurance.data?.currentLevel !== "aal2" && assurance.data?.nextLevel === "aal2");
   return needsChallenge ? `/${locale}/securite/compte?${new URLSearchParams({ next: target })}` : target;
 }
