@@ -30,6 +30,7 @@ export function AdminAppShell({
   actorCurrent,
   parcoursCurrent,
   children,
+  mainLandmark = false,
 }: {
   locale: Locale;
   selectedQuery: string;
@@ -47,6 +48,7 @@ export function AdminAppShell({
   actorCurrent?: string;
   parcoursCurrent?: string;
   children: ReactNode;
+  mainLandmark?: boolean;
 }): ReactNode {
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
@@ -55,6 +57,7 @@ export function AdminAppShell({
   const actors = adminActorLinks(locale, q);
   const parcours = adminParcoursLinks(locale, q);
   const nav = buildAdminNav(locale, q);
+  const Frame = mainLandmark ? "main" : "div";
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace admin-workspace">
@@ -116,7 +119,7 @@ export function AdminAppShell({
         </nav>
         <p className="client-side-foot"><span aria-hidden>◆</span>{locale === "ar" ? "منصة لريادة الأعمال معاً" : "Une plateforme pour entreprendre demain, ensemble."}</p>
       </aside>
-      <div className="client-frame">
+      <Frame className="client-frame">
         <div className="client-scene" aria-hidden>
           <div className="client-scene-arch" />
           <div className="client-scene-palms" />
@@ -160,7 +163,7 @@ export function AdminAppShell({
           </header>
         ) : null}
         {children}
-      </div>
+      </Frame>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { SignaturePreparationLink } from "@/modules/shared/ui/signer-preparation/link";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -45,6 +46,7 @@ export async function ProviderContractsPage({ params, searchParams }: { params: 
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `${path}${q.organizationId ? `?organizationId=${encodeURIComponent(q.organizationId)}` : ""}` }));
   return (
     <ProviderAppShell {...shell}>
+      <SignaturePreparationLink locale={locale} />
       {result.status === "error" ? (
         <section role="alert" className="rounded-xl border border-destructive p-5">
           <h2 className="font-semibold">{["FORBIDDEN", "CONTEXT_REQUIRED"].includes(result.reason) ? (ar ? "يلزم اختيار مؤسسة مخولة" : "Organisation autorisée à sélectionner") : (ar ? "تعذر تحميل العقود" : "Chargement des contrats indisponible")}</h2>

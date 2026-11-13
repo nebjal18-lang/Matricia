@@ -9,11 +9,13 @@ const mocks = vi.hoisted(() => ({
   clientIssued: vi.fn(),
   paymentDispatch:vi.fn(),
   networkInvitation: vi.fn(),
+  signatureDispatch: vi.fn(),
 }));
 
 vi.mock("@/modules/shared/lib/finance-cost-proofs/scan-consumer", () => ({ scanOneFinanceCostDocument: mocks.financeScan }));
 vi.mock("@/modules/franchise/data/network/invitation-consumer", () => ({ consumeFranchiseNetworkInvitation: mocks.networkInvitation }));
 vi.mock("@/modules/shared/lib/payment-dispatch/consumer",()=>({consumeVerifiedPaymentInbox:mocks.paymentDispatch}));
+vi.mock("@/modules/shared/lib/signature-runtime/yousign",()=>({consumeGovernedSignatureEnvelope:mocks.signatureDispatch}));
 vi.mock("@/modules/client/data/billing/issued-consumer", () => ({ consumeClientCommercialDocumentIssued: mocks.clientIssued }));
 vi.mock("@/modules/shared/lib/marketing-autopilot/native-verification-consumer", () => ({ consumeSocialNativeVerification: mocks.social }));
 vi.mock("@/modules/provider/data/billing/issued-consumer", () => ({ consumeProviderBillingIssued: mocks.issued }));
@@ -231,7 +233,11 @@ it.each(["ProviderPayableEvidenceArchivedV1","ProviderBillingIntentSavedV1","Pro
 });
 
 it.each(["ContractSignatureRequestedV1","ContractAmendmentSignatureRequestedV1"])("does not acknowledge %s through mere observation",async eventType=>{
- process.env.INTERNAL_WEBHOOK_SECRET=secret;mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"55000"}});expect((await POST(request({...envelope,eventType,payload:{envelope_id:envelope.aggregateId}}))).status).toBe(503);
+ process.env.INTERNAL_WEBHOOK_SECRET=secret;
+ mocks.signatureDispatch.mockResolvedValueOnce({ok:false,code:"SIGNATURE_PROVIDER_DISPATCH_UNAVAILABLE",developmentMock:false});
+ const response=await POST(request({...envelope,eventType,payload:{envelope_id:envelope.aggregateId}}));
+ expect(response.status).toBe(503);
+ expect(response.headers.get("x-matricia-outbox-consumer")).toBeNull();
 });
 it("observes explicit franchise simulation as simulation fact without issuing legal effects or email",async()=>{
  process.env.INTERNAL_WEBHOOK_SECRET=secret;vi.clearAllMocks();const write=vi.spyOn(process.stdout,"write").mockImplementation(()=>true);try{const response=await POST(request({...envelope,eventType:"FranchiseDemoActivatedV1",payload:{mode:"NON_CONTRACTUAL_DEMO"}}));expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("TERMINAL_OBSERVABILITY");expect(mocks.rpc).not.toHaveBeenCalled();expect(mocks.issued).not.toHaveBeenCalled();}finally{write.mockRestore();}
@@ -249,7 +255,28 @@ it("acknowledges a preserved corrected billing source without archiving or notif
 });
 
 it.each(["SignatureEnvelopeReadyV1","ContractSignatureRequestedV1","ContractAmendmentSignatureRequestedV1"])("acknowledges %s only after governed provider dispatch",async eventType=>{
- process.env.INTERNAL_WEBHOOK_SECRET=secret;mocks.rpc.mockResolvedValueOnce({data:{outcome:"SIGNATURE_ENVELOPE_SENT"},error:null});const response=await POST(request({...envelope,eventType,payload:{envelope_id:envelope.aggregateId}}));expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("SIGNATURE_PROVIDER");expect(mocks.rpc).toHaveBeenLastCalledWith("dispatch_governed_signature_envelope_v1",{p_envelope_id:envelope.aggregateId});
+ process.env.INTERNAL_WEBHOOK_SECRET=secret;
+ mocks.signatureDispatch.mockResolvedValueOnce({ok:true,code:"SIGNATURE_AWAITING_VERIFIED_WEBHOOK",developmentMock:false});
+ const response=await POST(request({...envelope,eventType,payload:{envelope_id:envelope.aggregateId}}));
+ expect(response.status).toBe(202);
+ expect(response.headers.get("x-matricia-outbox-consumer")).toBe("SIGNATURE_PROVIDER");
+ expect(mocks.signatureDispatch).toHaveBeenLastCalledWith(envelope.aggregateId);
+ expect(await response.json()).toEqual({outcome:"SIGNATURE_AWAITING_VERIFIED_WEBHOOK",development_mock:false});
+});
+it("keeps unavailable external signature dispatch retryable without acknowledging the effect",async()=>{
+ process.env.INTERNAL_WEBHOOK_SECRET=secret;
+ mocks.signatureDispatch.mockResolvedValueOnce({ok:false,code:"YOUSIGN_CONFIGURATION_REQUIRED",developmentMock:false});
+ const response=await POST(request({...envelope,eventType:"SignatureEnvelopeReadyV1",payload:{envelope_id:envelope.aggregateId}}));
+ expect(response.status).toBe(503);
+ expect(response.headers.get("x-matricia-outbox-consumer")).toBeNull();
+ expect(await response.json()).toEqual({outcome:"YOUSIGN_CONFIGURATION_REQUIRED",development_mock:false});
+});
+it("preserves an explicitly governed development signature dispatch result",async()=>{
+ process.env.INTERNAL_WEBHOOK_SECRET=secret;
+ mocks.signatureDispatch.mockResolvedValueOnce({ok:true,code:"SIGNATURE_ENVELOPE_SENT",developmentMock:true});
+ const response=await POST(request({...envelope,eventType:"ContractSignatureRequestedV1",payload:{envelope_id:envelope.aggregateId}}));
+ expect(response.status).toBe(202);
+ expect(await response.json()).toEqual({outcome:"SIGNATURE_ENVELOPE_SENT",development_mock:true});
 });
 it("does not acknowledge queued signature simulation before the exact step is executed",async()=>{
  process.env.INTERNAL_WEBHOOK_SECRET=secret;mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"55000"}}).mockResolvedValueOnce({data:{outcome:"SIGNATURE_ENVELOPE_PARTIALLY_SIGNED"},error:null});const event={...envelope,eventType:"SignatureSimulationStepRequestedV1",payload:{command_id:envelope.aggregateId}};expect((await POST(request(event))).status).toBe(503);const response=await POST(request(event));expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("SIGNATURE_SIMULATION");
@@ -325,6 +352,18 @@ it("does not mark an unresolved verified payment fact as terminally observed",as
 it("acknowledges a verified restriction skip without claiming a marketing conversion",async()=>{process.env.INTERNAL_WEBHOOK_SECRET=secret;vi.clearAllMocks();mocks.rpc.mockResolvedValueOnce({data:{outcome:"MARKETING_BUSINESS_SKIPPED_RESTRICTION"},error:null});const response=await POST(request({...envelope,eventType:"MarketingBusinessFactReadyV2",payload:{fact_id:envelope.aggregateId}}));expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("MARKETING_VERIFIED_CONVERSION");expect(await response.json()).toEqual({outcome:"MARKETING_BUSINESS_SKIPPED_RESTRICTION"});expect(mocks.deliver).not.toHaveBeenCalled();});
 
 it.each(["DsrErasureScopeConfirmedV1","DsrErasureDraftedV1","DsrErasureSourceConfiguredV1","DsrErasurePlanSubmittedV1","DsrErasurePlanReviewedV1","DsrErasureSourceExecutedV1","DsrErasureReportPreparedV1","DsrErasureReportReviewedV1","DsrErasureReportAcknowledgedV1","DsrErasurePlanRevokedV1"])("observes %s without claiming an additional erasure or logging source records",async eventType=>{process.env.INTERNAL_WEBHOOK_SECRET=secret;vi.clearAllMocks();const write=vi.spyOn(process.stdout,"write").mockImplementation(()=>true);try{const response=await POST(request({...envelope,eventType,payload:{private_source:"NEVER-LOG-ERASED-VALUE",subject_user_id:"NEVER-LOG-ERASURE-SUBJECT",all_data_erased:false}}));expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("TERMINAL_OBSERVABILITY");expect(mocks.rpc).not.toHaveBeenCalled();expect(mocks.deliver).not.toHaveBeenCalled();expect(mocks.issued).not.toHaveBeenCalled();expect(mocks.clientIssued).not.toHaveBeenCalled();expect(mocks.paymentDispatch).not.toHaveBeenCalled();const record=JSON.parse(String(write.mock.calls[0][0]));expect(record.data).toMatchObject({factClass:"PERSISTED_DSR_ERASURE_WORKFLOW"});expect(JSON.stringify(record)).not.toMatch(/NEVER-LOG|all_data_erased/);}finally{write.mockRestore();}});
+it("observes persisted configuration without exposing payloads or claiming provider delivery",async()=>{
+  process.env.INTERNAL_WEBHOOK_SECRET=secret;vi.clearAllMocks();
+  const write=vi.spyOn(process.stdout,"write").mockImplementation(()=>true);
+  try{
+    const response=await POST(request({...envelope,eventType:"PlatformConfigurationChangedV1",payload:{revision_id:envelope.aggregateId,private_value:"PRIVATE-CONFIGURATION-MUST-NOT-LEAK"}}));
+    expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("TERMINAL_OBSERVABILITY");
+    expect(mocks.deliver).not.toHaveBeenCalled();expect(mocks.rpc).not.toHaveBeenCalled();
+    const record=JSON.parse(String(write.mock.calls[0]?.[0]));expect(record.data.factClass).toBe("PERSISTED_PLATFORM_CONFIGURATION");
+    expect(JSON.stringify(record)).not.toContain("PRIVATE-CONFIGURATION-MUST-NOT-LEAK");
+  }finally{write.mockRestore();}
+});
+
 it("tracks paid subscription credit jobs only after canonical SQL attestation",async()=>{process.env.INTERNAL_WEBHOOK_SECRET=secret;vi.clearAllMocks();mocks.rpc.mockResolvedValueOnce({data:{outcome:"SUBSCRIPTION_CREDIT_JOBS_TRACKED"},error:null});const response=await POST(request({...envelope,eventType:"SubscriptionPaidV1",payload:{}}));expect(response.status).toBe(202);expect(response.headers.get("x-matricia-outbox-consumer")).toBe("SUBSCRIPTION_CREDIT_FULFILLMENT");expect(mocks.rpc).toHaveBeenCalledWith("track_subscription_paid_credit_jobs_v1",{p_outbox_id:envelope.id,p_subscription_id:envelope.aggregateId});expect(mocks.deliver).not.toHaveBeenCalled();});
 it("does not observe a paid subscription when canonical job tracking failed",async()=>{process.env.INTERNAL_WEBHOOK_SECRET=secret;vi.clearAllMocks();mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"55000"}});const response=await POST(request({...envelope,eventType:"SubscriptionPaidV1",payload:{}}));expect(response.status).toBe(503);expect(response.headers.get("x-matricia-outbox-consumer")).toBeNull();});
 

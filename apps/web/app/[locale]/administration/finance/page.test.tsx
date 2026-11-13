@@ -1,0 +1,27 @@
+import {beforeEach,describe,it,expect,vi} from "vitest";
+import {renderToStaticMarkup} from "react-dom/server";
+import type {ReactNode} from "react";
+const mocks=vi.hoisted(()=>({finance:vi.fn(),boxes:vi.fn(),supervision:vi.fn()}));
+vi.mock("next/navigation",()=>({notFound:()=>{throw new Error("NOT_FOUND");},redirect:(href:string)=>{throw new Error(`REDIRECT:${href}`);}}));
+vi.mock("@/modules/admin/data/finance/repository",()=>({loadAdminFinanceDashboard:mocks.finance}));
+vi.mock("@/modules/admin/data/boxes/repository",()=>({loadAdminBoxesDashboard:mocks.boxes}));
+vi.mock("@/modules/admin/data/supervision/repository",()=>({loadAdminSupervisionDashboard:mocks.supervision}));
+vi.mock("@/modules/admin/data/catalog/repository",()=>({loadAdminCommerceCatalog:async()=>({status:"success",value:{}})}));
+vi.mock("@/modules/admin/data/pnl/repository",()=>({loadAdminPnlDashboard:async()=>({status:"error",reason:"UNAVAILABLE"})}));
+vi.mock("@/modules/admin/data/closure/repository",()=>({loadAdminClosureDashboard:async()=>({status:"error",reason:"UNAVAILABLE"})}));
+vi.mock("@/modules/shared/lib/account-security/platform-access",()=>({loadMyPlatformAccess:async()=>({status:"ok",requirementSatisfied:true}),mfaRequiredMessage:()=>"MFA"}));
+vi.mock("@/modules/admin/ui/admin-module-page",()=>({AdminModulePage:({children}:{children:ReactNode})=><main>{children}</main>}));
+vi.mock("@/modules/admin/screens/finance/finance-panel",()=>({FinancePanel:()=><p>Existing financial records remain readable</p>}));
+vi.mock("@/modules/admin/screens/finance/finance-sorties",()=>({FinanceSorties:()=>null}));
+vi.mock("@/modules/admin/screens/finance/boxes-panel",()=>({BoxesPanel:({auditOrganizationId}:{auditOrganizationId:string|null})=><p data-testid="boxes-audit">{auditOrganizationId??"NO_WRITE_CONTEXT"}</p>}));
+vi.mock("@/modules/admin/screens/finance/commerce-catalog-panel",()=>({CommerceCatalogPanel:({auditOrganizationId}:{auditOrganizationId:string|null})=><p data-testid="catalog-audit">{auditOrganizationId??"NO_WRITE_CONTEXT"}</p>}));
+import Page from "./page";
+const id="11111111-1111-4111-8111-111111111111",walletOrg="22222222-2222-4222-8222-222222222222";
+const props=(organizationId?:string)=>({params:Promise.resolve({locale:"fr"}),searchParams:Promise.resolve({organizationId})});
+beforeEach(()=>{vi.clearAllMocks();mocks.finance.mockResolvedValue({status:"success",value:{subscriptions:[{organization_id:walletOrg}]}});mocks.boxes.mockResolvedValue({status:"success",value:{wallets:[{organization_id:walletOrg}]}});mocks.supervision.mockResolvedValue({status:"success",value:{organizations:[{id,display_name:"Real issuing company",legal_name:"Real company SARL",status:"ACTIVE"}]}});});
+describe("finance configuration bootstrap page",()=>{
+ it("preserves existing financial data when the organization projection fails without silently adopting its first wallet",async()=>{mocks.supervision.mockResolvedValue({status:"error",reason:"UNAVAILABLE"});const html=renderToStaticMarkup(await Page(props(walletOrg)));expect(html).toContain("Existing financial records remain readable");expect(html).toContain("Impossible de charger les organisations autorisées");expect(html.match(/NO_WRITE_CONTEXT/gu)).toHaveLength(2);expect(html).not.toContain("Aucune organisation de référence visible");});
+ it("supplies a deliberate visible organization to both configuration panels",async()=>{const html=renderToStaticMarkup(await Page(props(id)));expect(html).toContain('data-testid="boxes-audit">'+id);expect(html).toContain('data-testid="catalog-audit">'+id);expect(html).not.toContain("NO_WRITE_CONTEXT");expect(mocks.supervision).toHaveBeenCalledWith(100);});
+ it("keeps a fresh installation actionable through the company creation route",async()=>{mocks.supervision.mockResolvedValue({status:"success",value:{organizations:[]}});const html=renderToStaticMarkup(await Page(props()));expect(html).toContain("/fr/administration/entreprises/nouvelle");expect(html.match(/NO_WRITE_CONTEXT/gu)).toHaveLength(2);expect(html).toContain("Existing financial records remain readable");});
+ it("does not pass an invalid query UUID into write panels",async()=>{const html=renderToStaticMarkup(await Page(props("invalid-uuid")));expect(html).toContain("La sélection est invalide");expect(html.match(/NO_WRITE_CONTEXT/gu)).toHaveLength(2);expect(html).toContain("Existing financial records remain readable");});
+});

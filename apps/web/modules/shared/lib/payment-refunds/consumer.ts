@@ -1,3 +1,4 @@
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import { createPaymentGateway } from "@matricia/infrastructure";
 import { z } from "zod";
 import { getPaymentRuntimeConfig } from "@/modules/shared/lib/env";
@@ -6,7 +7,7 @@ const sendSchema = z.object({ outcome: z.literal("REFUND_SEND_AUTHORIZED"), capt
 export async function consumeSubscriptionRefund(requestId: string): Promise<{ ok: boolean; code: string }> {
   // Validate runtime configuration before changing the durable request into SENDING.
   let gateway;
-  try { gateway = createPaymentGateway(getPaymentRuntimeConfig()); } catch { return { ok: false, code: "REFUND_PROVIDER_UNCONFIGURED" }; }
+  try { gateway = createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(process.env, ["PAYPAL"]))); } catch { return { ok: false, code: "REFUND_PROVIDER_UNCONFIGURED" }; }
   if (gateway.code !== "PAYPAL" || !("requestRefund" in gateway)) return { ok: false, code: "REFUND_PROVIDER_UNSUPPORTED" };
   const client = getSupabaseAdminClient();
   const prepared = await client.rpc("prepare_subscription_refund_send_v2", { p_request_id: requestId,p_provider_environment:gateway.providerEnvironment });

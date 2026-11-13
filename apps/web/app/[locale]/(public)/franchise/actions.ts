@@ -1,4 +1,5 @@
 "use server";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 
 import { createHash, randomUUID } from "node:crypto";
 import { headers } from "next/headers";
@@ -71,7 +72,10 @@ export async function submitFranchiseApplication(_: FranchiseApplicationActionSt
     ctaPath: `/${parsed.data.locale}/franchise/candidature`,
     providerIdempotencyKey: `franchise-application:${applicationId}`,
   }, { env: process.env, fetch });
-  const support = process.env.PUBLIC_CONTACT_NOTIFICATION_EMAIL?.trim();
+  let environment: Record<string, string | undefined> = {};
+  try { environment = await getPlatformRuntimeEnvironment(process.env, ["COMPANY", "RESEND"]); }
+  catch { /* Keep the persisted application; no unverified fallback mailbox. */ }
+  const support = environment.PUBLIC_CONTACT_NOTIFICATION_EMAIL?.trim();
   if (support) {
     await deliverNotification({
       deliveryId: randomUUID(),
@@ -82,7 +86,7 @@ export async function submitFranchiseApplication(_: FranchiseApplicationActionSt
       body: `Référence : ${reference}\nCandidat : ${parsed.data.applicantName}\nAdresse : ${parsed.data.replyEmail}\nTerritoire : ${parsed.data.territoryCode}\nDomaine : ${parsed.data.domainLabel}`,
       ctaPath: `/${parsed.data.locale}/administration/candidatures-franchise`,
       providerIdempotencyKey: `franchise-application-support:${applicationId}`,
-    }, { env: process.env, fetch });
+    }, { env: environment, fetch });
   }
   const mailed = candidate.outcome === "SENT" || candidate.outcome === "DELIVERED";
   return { status: "success", reference, mailed };

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-09T18:45:16.529Z",
+  "validatedCommit": "1a99fcda15862932b331f29c0e3051899568d674",
+  "outcome": "PASS",
+  "migrations": 577,
+  "files": 361,
+  "assertions": 9323,
+  "concurrencyScenarios": 4,
+  "source": {
+    "workflowId": 42673774172,
+    "jobId": 129351112028,
+    "url": "https://github.com/nebjal18-lang/Matricia/actions/runs/42673774172/job/129351112028",
+    "logLine": "2026-11-09T18:36:51.1187344Z DB tests passed: 361 files, 9323 assertions, 4 concurrency scenarios"
+  },
+  "localValidation": {
+    "status": "PASS_TWO_DISJOINT_SEGMENTS",
+    "firstFiles": 251,
+    "resumedFiles": 110,
+    "resumedAssertions": 3731,
+    "concurrencyScenarios": 4,
+    "interruption": "Managed environment restart; resumed on same owned validation database without omitting any file.",
+    "assertionTotalNotInferredFromSegments": true
+  },
+  "productionMutations": 0,
+  "syntheticFixtureEvidence": true,
+  "externalServicesCertified": false
+}

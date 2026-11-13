@@ -21,6 +21,7 @@ export type YousignSandboxConfig = Readonly<{
 export class YousignSandboxSignatureProvider implements SignatureProvider {
   readonly code = "YOUSIGN";
   readonly developmentOnly = false;
+  readonly sandboxOnly = true;
   readonly supportedLevels = ["SIMPLE", "ADVANCED"] as const satisfies readonly SignatureLevel[];
   private readonly apiBaseUrl: string;
 

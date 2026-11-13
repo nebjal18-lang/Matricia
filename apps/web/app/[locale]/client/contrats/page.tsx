@@ -1,3 +1,4 @@
+import { SignaturePreparationLink } from "@/modules/shared/ui/signer-preparation/link";
 import{SelectedQuoteIdentity}from"@/modules/client/screens/missions/selected-quote-identity";
 import{SignatureReadinessNotice}from"@/modules/shared/ui/signature-readiness-notice";
 import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
@@ -56,6 +57,7 @@ export default async function ClientContractsPage({
       kicker={spaceC.kicker}
     >
       <main className="client-page space-y-5">
+        <SignaturePreparationLink locale={locale}/>
         {result.status === "error" ? (
           <Alert>
             <AlertTitle>{contractAccessIssue ? messages.noOrg : messages.loadError}</AlertTitle>

@@ -43,6 +43,9 @@ export interface VerifiedSignatureEvent {
   readonly signatureFingerprint: string;
   readonly achievedLevel?: SignatureLevel;
   readonly signerId?: string;
+  /** A verified provider payload can require final evidence independently of
+   * a concurrently loaded local remaining-signer count. */
+  readonly finalEvidenceRequired?: boolean;
 }
 
 export interface SignatureEvidence {
@@ -59,6 +62,8 @@ export interface SignatureProvider {
   readonly code: string;
   readonly supportedLevels: readonly SignatureLevel[];
   readonly developmentOnly?: boolean;
+  readonly sandboxOnly?: boolean;
+  readonly productionOnly?: boolean;
   createEnvelope(input: CreateEnvelopeInput): Promise<ProviderEnvelope>;
   sendEnvelope(providerEnvelopeId: string, idempotencyKey: string): Promise<ProviderEnvelope>;
   voidEnvelope(providerEnvelopeId: string, idempotencyKey: string): Promise<ProviderEnvelope>;
@@ -70,7 +75,7 @@ export type SignatureProviderReadiness =
   | { readonly status: "ready"; readonly providerCode: string; readonly supportedLevels: readonly SignatureLevel[] }
   | {
       readonly status: "not_ready";
-      readonly code: "SIGNATURE_PROVIDER_NOT_REGISTERED" | "SIGNATURE_PROVIDER_MODE_INVALID" | "SIGNATURE_PROVIDER_CODE_MISMATCH" | "SIGNATURE_DEVELOPMENT_PROVIDER_FORBIDDEN";
+      readonly code: "SIGNATURE_PROVIDER_NOT_REGISTERED" | "SIGNATURE_PROVIDER_MODE_INVALID" | "SIGNATURE_PROVIDER_CODE_MISMATCH" | "SIGNATURE_DEVELOPMENT_PROVIDER_FORBIDDEN" | "SIGNATURE_SANDBOX_PROVIDER_FORBIDDEN" | "SIGNATURE_LIVE_PROVIDER_FORBIDDEN";
     };
 
 /**
@@ -86,8 +91,15 @@ export function assessSignatureProviderReadiness(
   if (mode !== "DEVELOPMENT_MOCK" && mode !== "EXTERNAL") {
     return { status: "not_ready", code: "SIGNATURE_PROVIDER_MODE_INVALID" };
   }
+  if (mode === "DEVELOPMENT_MOCK" && !provider.developmentOnly) return { status: "not_ready", code: "SIGNATURE_PROVIDER_MODE_INVALID" };
   if ((env.NODE_ENV === "production" || env.APP_ENV?.trim().toLowerCase() === "production" || mode === "EXTERNAL") && provider.developmentOnly) {
     return { status: "not_ready", code: "SIGNATURE_DEVELOPMENT_PROVIDER_FORBIDDEN" };
+  }
+  if (provider.sandboxOnly && !["staging", "development"].includes(env.APP_ENV?.trim().toLowerCase() ?? "")) {
+    return { status: "not_ready", code: "SIGNATURE_SANDBOX_PROVIDER_FORBIDDEN" };
+  }
+  if (provider.productionOnly && env.APP_ENV?.trim().toLowerCase() !== "production") {
+    return { status: "not_ready", code: "SIGNATURE_LIVE_PROVIDER_FORBIDDEN" };
   }
   if (mode === "EXTERNAL" && env.SIGNATURE_PROVIDER_CODE?.trim() !== provider.code) {
     return { status: "not_ready", code: "SIGNATURE_PROVIDER_CODE_MISMATCH" };

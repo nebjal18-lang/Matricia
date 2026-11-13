@@ -88,6 +88,7 @@ export function adminDirectoryGroups(locale: Locale, q: string): AdminDirectoryG
       title: fr ? "Opérations, sécurité & configuration" : "التشغيل والأمن والإعداد",
       tone: "plum",
       links: [
+        { href: `${p}/administration/configuration${q}`, label: fr ? "Configuration initiale & connexions" : "الإعداد الأولي والاتصالات" },
         { href: `${p}/administration/preparation${q}`, label: fr ? "Préparation de la livraison" : "إعداد التسليم" },
         { href: `${p}/administration/operations${q}#operations-summary`, label: fr ? "Opérations & files de traitement" : "التشغيل وطوابير المعالجة" },
         { href: `${p}/administration/operations${q}#outbox`, label: fr ? "Event Outbox & workers" : "صندوق الأحداث والعاملون" },
@@ -104,7 +105,7 @@ export function adminDirectoryGroups(locale: Locale, q: string): AdminDirectoryG
         { href: `${p}/administration/anti-abus${q}#rls`, label: fr ? "RLS & contrôle des accès" : "الصفوف والتحكم في الوصول" },
         { href: `${p}/administration/operations${q}#stockage`, label: fr ? "Stockage & antivirus" : "التخزين ومضاد الفيروسات" },
         { href: `${p}/administration/operations${q}#sante`, label: fr ? "Santé des services" : "صحة الخدمات" },
-        { href: `${p}/administration/operations${q}#parametres`, label: fr ? "Paramètres plateforme" : "إعدادات المنصة" },
+        { href: `${p}/administration/configuration${q}`, label: fr ? "Paramètres plateforme" : "إعدادات المنصة" },
         { href: `${p}/administration/operations${q}#archives`, label: fr ? "Archives & restauration" : "الأرشيف والاستعادة" },
       ],
     },

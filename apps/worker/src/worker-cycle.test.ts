@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildWorkerReadiness, createWorkerCycle, workerHeartbeatHealthy } from "./worker-cycle";
+import { buildWorkerReadiness, createWorkerCycle, workerHeartbeatHealthy, WORKER_DEPENDENCY_FRESHNESS_MS } from "./worker-cycle";
 
 describe("worker dependency cycle", () => {
   it("continues independent Outbox work while reporting antivirus unavailable", async () => {
@@ -34,6 +34,93 @@ describe("worker dependency cycle", () => {
     await cycle.run();
 
     expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
+  });
+});
+
+it("expires a previous successful poll during a pending batch, then reports failure and recovers only after a new successful poll", async () => {
+  let now = 10;
+  let finishPending: (result: { failed: number }) => void = () => {};
+  const pending = new Promise<{ failed: number }>(resolve => { finishPending = resolve; });
+  const pollOutbox = vi.fn(async () => ({ failed: 0 }))
+    .mockResolvedValueOnce({ failed: 0 })
+    .mockImplementationOnce(() => pending);
+  const cycle = createWorkerCycle({
+    checkAntivirus: async () => {}, pollOutbox, onFailure: vi.fn(), monotonicNow: () => now,
+  });
+  const billing = { closing: { ok: true, latencyMs: 1 }, reminders: { ok: true, latencyMs: 1 } };
+  const control = { control: { ok: true, latencyMs: 1 } };
+  await cycle.run();
+  expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
+
+  // An ordinary in-flight cycle can reuse a still-fresh success without flapping.
+  now += WORKER_DEPENDENCY_FRESHNESS_MS - 1;
+  const running = cycle.run();
+  await Promise.resolve();
+  expect(pollOutbox).toHaveBeenCalledTimes(2);
+  expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
+  expect(workerHeartbeatHealthy(cycle.getState(), billing, control)).toBe(true);
+
+  // No timer or RPC completion is needed for the HTTP snapshot to reject old evidence.
+  now += 1;
+  expect(buildWorkerReadiness(cycle.getState())).toMatchObject({
+    status: "not_ready", checks: {
+      antivirus: { status: "up" },
+      outbox: { status: "down", code: "OUTBOX_POLL_STALE" },
+    },
+  });
+  expect(workerHeartbeatHealthy(cycle.getState(), billing, control)).toBe(false);
+  expect(pollOutbox).toHaveBeenCalledTimes(2);
+
+  finishPending({ failed: 1 });
+  await running;
+  expect(buildWorkerReadiness(cycle.getState())).toMatchObject({
+    status: "not_ready", checks: { outbox: { status: "down", code: "OUTBOX_POLL_FAILED" } },
+  });
+
+  now += 1;
+  await cycle.run();
+  expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
+  expect(workerHeartbeatHealthy(cycle.getState(), billing, control)).toBe(true);
+});
+
+it("expires antivirus evidence independently while its next check is pending", async () => {
+  let now = 100;
+  let finishPending: () => void = () => {};
+  const pending = new Promise<void>(resolve => { finishPending = resolve; });
+  const checkAntivirus = vi.fn(async () => {})
+    .mockResolvedValueOnce(undefined)
+    .mockImplementationOnce(() => pending);
+  const cycle = createWorkerCycle({
+    checkAntivirus, pollOutbox: async () => ({ failed: 0 }), onFailure: vi.fn(), monotonicNow: () => now,
+  });
+  await cycle.run();
+  now += WORKER_DEPENDENCY_FRESHNESS_MS - 1;
+  const running = cycle.run();
+  await Promise.resolve();
+  expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
+  now += 1;
+  expect(buildWorkerReadiness(cycle.getState())).toMatchObject({
+    status: "not_ready", checks: {
+      antivirus: { status: "down", code: "ANTIVIRUS_CHECK_STALE" },
+      outbox: { status: "up" },
+    },
+  });
+  finishPending();
+  await running;
+  expect(buildWorkerReadiness(cycle.getState()).status).toBe("ready");
+});
+
+it("expires successful dependency evidence when no new cycle runs", async () => {
+  let now = 0;
+  const cycle = createWorkerCycle({
+    checkAntivirus: async () => {}, pollOutbox: async () => ({ failed: 0 }), onFailure: vi.fn(), monotonicNow: () => now,
+  });
+  await cycle.run();
+  now = WORKER_DEPENDENCY_FRESHNESS_MS;
+  expect(buildWorkerReadiness(cycle.getState())).toMatchObject({
+    status: "not_ready", checks: {
+      antivirus: { code: "ANTIVIRUS_CHECK_STALE" }, outbox: { code: "OUTBOX_POLL_STALE" },
+    },
   });
 });
 

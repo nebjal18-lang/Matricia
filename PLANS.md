@@ -1,5 +1,29 @@
 # Matricia — ExecPlan permanent
 
+## Configuration Admin autonome — 2026-11-09
+
+```yaml
+id: ADMIN-DELIVERY-20261109
+status: GREEN
+goal: Permettre au client de saisir et activer ses informations depuis l’administration, avec des états réels.
+scope: identité plateforme, coffre de connexions, tests de connexion, approbation indépendante, consommation runtime, YouSign gouverné et recette FR/AR
+invariants: [aucun secret lisible dans les retours ou journaux, AAL2 et droits serveur, révisions exactes, aucune fausse preuve de livraison, aucune mutation de production]
+ownership:
+  database: delivery_configuration_db, migration 20261109110000
+  server: delivery_configuration_server, model/repository/vault/actions
+  interface: delivery_configuration_ui, écran configuration
+  runtime: delivery_configuration_runtime, email/paiements/scanner
+  signature: delivery_signature_production, adaptateur et migration 20261109111000
+  integration: root, navigation/recette/docs
+  review: delivery_independent_review, lecture seule
+dependencies: [13e4086 fusionné depuis GitHub, clé serveur du coffre, SMTP Auth et hébergement préparés avant premier accès]
+milestones: [contrats, implémentation parallèle, tests unitaires et SQL, contre-revue, build, recette navigateur, publication staging]
+risks: [credentials et comptes client absents, accès hébergé limité, approbations métier/juridiques non substituables par le code]
+validation_commands: [tests ciblés configuration et fournisseurs, SQL natif et refus de droits, pnpm typecheck, pnpm lint, pnpm build:vercel, recette FR/AR 360px]
+results: Code3d04c50 et CI complète PASS; 4331unitaires,365SQL/9429assertions/4concurrences;12gestesAdmin et4pagesFRARsansviolationaxe; vraiPDFStorage/formulaireSigner natif PASS; revue indépendante sans finding ouvert. Activation externe et production non certifiées.
+next_phase: Préparer les accès client et SMTP Auth, saisir les credentials dans Admin, effectuer les recettes fournisseurs et obtenir les validations de production séparées.
+```
+
 Autorité : `Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md`. Toute phase suit `SPECIFY → IMPLEMENT → TEST → REVIEW → RED TEAM → FIX → RETEST → INTEGRATE → VERIFY`. Une phase reste ouverte sans audit indépendant signé et preuves enregistrées.
 
 ## Format obligatoire d’un ExecPlan
@@ -193,3 +217,39 @@ next_phase: P05
 ```
 
 La carte détaillée et les gates sont dans `docs/specs/sections/phase-map.md`.
+
+## Staging repair — 2026-11-09
+
+```yaml
+id: STAGING-REPAIR-20261109
+title: Corriger les écarts de configuration hébergée et terminer les adaptateurs exécutables
+status: BLOCKED
+goal: Isoler la recette du backend public et traiter les onze constats de l’inventaire Vercel/Supabase.
+scope: configuration Preview dédiée, OTP, migrations additives staging, preflight, worker et YouSign sandbox
+requirements: [MAT-FUNC-001, MAT-FUNC-015, MAT-FUNC-020, MAT-FUNC-023, hardening P19]
+invariants:
+  - aucune mutation de production ni promotion sans autorisation de production distincte
+  - aucun secret dans Git, les journaux ou les preuves
+  - une intégration sans credentials et recette réelle reste non certifiée
+  - politiques de signature, four-eyes, RLS, scans et budgets de production conservés
+ownership:
+  - integration_manager: branche codex/staging-repair-20261109 et fichiers partagés
+  - staging_preflight_implementation: scripts/staging
+  - staging_runtime_implementation: apps/worker et recette de conteneurisation
+  - yousign_runtime_implementation: signature-v41, consommateur/webhook et migration additive signature
+dependencies: accès temporaires Vercel/Supabase; comptes tiers et décisions métier existantes
+milestones: [préparer, corriger, tester, revue indépendante, intégrer, déployer Preview si accès disponibles]
+decisions:
+  - inventaire source daté du 2026-11-09; aucune supposition de validité des valeurs masquées
+  - branch spécifique Preview sans copie de données de production
+risks:
+  - capacités du forfait Supabase et durée des accès temporaires
+  - credentials email/PSP/scanner/YouSign et choix juridiques non déductibles des jetons de gestion
+validation_commands: [pnpm test:tooling, pnpm typecheck, tests ciblés worker/signature/auth, pnpm build:vercel]
+evidence_paths: [docs/evidence/staging-repair-20261109.json, /workspace/outputs/staging-repair]
+progress_log:
+  - 2026-11-09: GitHub synchronisé sur 4962ce7; worktrees indépendants; correction demandée par le propriétaire.
+results: Code et build validés; 4183 tests unitaires PASS (1 opt-in ignoré), 103 outillage, 108 assertions natives confidentialité; job GitHub database PASS sur 361 fichiers SQL, 9323 assertions et 4 concurrences après 577 migrations. Staging isolé réel; CI globale affectée par une erreur interne GitHub avant deux jobs; activation externe bloquée par credentials, hébergement, réseau et décisions humaines.
+independent_signoff: REVUES_AUTOMATISEES_SANS_P1_STATIQUE_DANS_PERIMETRE; AUCUN_VISA_PRODUCTION
+next_phase: Recette du staging avec services externes réellement configurés, puis gate de production séparé.
+```

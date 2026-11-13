@@ -1,0 +1,211 @@
+{
+  "status": "NO_STATIC_BLOCKER_PRIVACY_FIX_EXECUTION_PROOFS_IN_PROGRESS",
+  "reviewedWorktree": "/workspace/work/matricia-staging-repair",
+  "reviewedCommits": [
+    "ae94fb7",
+    "e64f29d",
+    "b72ea71",
+    "ccb4a42"
+  ],
+  "mode": "Read-only code review and pure local reproductions; no external service or database writes.",
+  "findings": [
+    {
+      "id": "STAGING-REVIEW-001",
+      "severity": "P2",
+      "status": "RESOLVED",
+      "file": "scripts/staging/preflight.mjs",
+      "area": "validateWorker",
+      "title": "Passing metadata preflight omits mandatory scanner/ClamAV startup bindings",
+      "actual": "The complete passing test fixture omits worker MALWARE_SCANNER_TOKEN and all four mandatory CLAMAV_HOST/CLAMAV_ALLOWED_HOSTS/CLAMAV_NETWORK_MODE/CLAMAV_ENGINE_VERSION bindings. Worker startup requires them.",
+      "expected": "Missing mandatory worker bindings fail metadata validation without reading or reporting secret values.",
+      "recommendation": "Require their presence and verify non-secret ClamAV configuration semantics; add missing-binding cases.",
+      "resolution": "Worker metadata now requires the scanner token and all mandatory ClamAV bindings; non-secret engine/network/allowlist/DNS/bounds and Node22 metadata are validated with explicit unobserved states."
+    },
+    {
+      "id": "STAGING-REVIEW-002",
+      "severity": "P2",
+      "status": "RESOLVED",
+      "file": "apps/worker/src/worker-cycle.ts",
+      "title": "Readiness retains the previous successful poll while the current poll is pending",
+      "actual": "Pure local reproduction: successful first cycle => ready; begin a second unresolved Outbox poll => readiness still ready. Bounded fetch limits individual calls but a50-event sequential batch can remain active for many minutes.",
+      "expected": "A running, stale or failed cycle must not certify current readiness.",
+      "recommendation": "Invalidate or timestamp state on cycle start and test healthy→pending→failure transitions. Preserve scanner fail-closed behavior.",
+      "resolution": "Successful dependency evidence expires after60seconds on a monotonic clock. Pending cycles may retain a recent success within that explicit freshness window, but stale/pending evidence becomes not_ready after its lease. A non-overlapping worker loop prevents duplicate completion callbacks and publishes independent periodic heartbeat updates."
+    }
+  ],
+  "checks": [
+    {
+      "command": "node --test scripts/staging/preflight.test.mjs",
+      "passed": 40,
+      "failed": 0,
+      "networkUsed": false,
+      "log": "/workspace/outputs/staging-repair/preflight-review.log"
+    },
+    {
+      "command": "worker Vitest targeted: worker-cycle,worker-loop,bounded-fetch,worker-config",
+      "files": 4,
+      "passed": 58,
+      "failed": 0,
+      "networkUsed": "Only synthetic loopback HTTP timeout test; no external service."
+    },
+    {
+      "command": "web Vitest targeted: preview-isolation.test.ts",
+      "passed": 17,
+      "failed": 0,
+      "networkUsed": false
+    },
+    {
+      "name": "Pure injected-clock worker-cycle counterexample retest",
+      "networkUsed": false,
+      "firstCycle": "ready",
+      "pendingFreshGrace": "ready",
+      "pendingAt60000ms": "not_ready",
+      "staleCode": "OUTBOX_POLL_STALE",
+      "afterFailure": "not_ready"
+    }
+  ],
+  "observations": [
+    "No direct secret logging found in reviewed startup/preflight paths; preflight errors are fixed codes and findings use variable names.",
+    "Docker runtime uses non-root node, excludes private environment/key files and mounts proxy CA as a build secret. Real Docker execution reported by parent, not repeated by this reviewer.",
+    "Bounded fetch preserves caller cancellation and attaches a deadline to response-body consumption.",
+    "Preview app/backend origins and Auth metadata are compared against the production baseline; unknown baseline is not silently accepted.",
+    "Concurrent polling ticks share one completion Promise instead of attaching repeated heartbeat callbacks.",
+    "Periodic heartbeat updates are independently non-overlapping and re-read stale scanner state before scanner/ClamAV heartbeat RPCs.",
+    "The resulting health model intentionally permits a recent successful result for less than60seconds, rather than reporting every ordinary poll as immediately unavailable."
+  ],
+  "pending": [
+    "Parent must verify the final577fresh/relevantSQL/CI execution proofs for the reviewed privacy migration.",
+    "Native signed files remain UNTRUSTED for DSR byte delivery until real scanning/redaction/disposition or legally reviewed exclusion.",
+    "No hosted/legal/provider production validation is inferred from rollback-only SQL fixtures or static approval."
+  ],
+  "reviewedHead": "d8c3a751bc8853841b658d5860c710fc72b94f39",
+  "previewIsolationReview": {
+    "verdict": "No static blocker identified",
+    "observations": [
+      "Next configuration calls the guard after resolving supported public Supabase aliases to the canonical URL.",
+      "Only VERCEL_ENV=preview triggers the new guard; local and production paths retain their previous behavior.",
+      "Preview requires APP_ENV=staging, distinct explicitly configured20-character project references and the exact canonical HTTPS staging Supabase origin.",
+      "Credentials, query/hash, nondefault port, unexpected path and production/suffix-spoofed endpoints are refused with fixed error codes.",
+      "The guard is a configuration prerequisite; it does not authenticate the projects, activate external providers or authorize production."
+    ]
+  },
+  "fileSha256": {
+    "scripts/staging/preflight.mjs": "3441c9d4d835c55e4069dafde73a1ab2af4964420b0dd21ade0bd926012ce496",
+    "scripts/staging/preflight.test.mjs": "638378f76ae82ac0d699fd09a14c5f72c9fac32a98a36b02defefcbaa610f939",
+    "apps/worker/src/worker-cycle.ts": "0b896133147340d40db9d4920fd2f34a866db2658e9bcee0076e2333046685a4",
+    "apps/worker/src/worker-loop.ts": "c36929a06f7a5cce6c81ba8c8b1c5bc62ffcd4fed494f2f15bea0c8410b8c0d2",
+    "apps/worker/src/main.ts": "e21d82734d17ab26559a022e81783dedca1e470c6e5465f15d713861df339b6d",
+    "apps/worker/Dockerfile": "9b8c10aa63506e5817ca180ae20e1f1fc302ed58447fa8f27570805a4f3276c5",
+    "apps/web/modules/shared/lib/preview-isolation.ts": "3d5aec4577b20df6e57464cc91a85f67929282dd3188b36530f1ff25f4298e96",
+    "apps/web/next.config.ts": "793f3ef0d3d77b6759ed07ea472b6bac6026759365073a41bb3551e54a40ffd1",
+    "apps/web/app/api/internal/outbox/route.ts": "44e059685638854b39741ca13d09f7b181a6fd79ee02a7e3efe2d79ced4f8df9",
+    "apps/web/app/api/internal/outbox/route.test.ts": "24efbb102e04ba04faeeb5ad51f44bf2b95336643eeaee2e6c8d9baff5543f53"
+  },
+  "outboxIntegrationReview": {
+    "verdict": "No static blocker identified in the shared route/test delta.",
+    "scope": [
+      "apps/web/app/api/internal/outbox/route.ts",
+      "apps/web/app/api/internal/outbox/route.test.ts"
+    ],
+    "observations": [
+      "All three signature dispatch event types validate their envelope UUID before invoking the governed consumer.",
+      "Successful external command acceptance returnsHTTP202 andSIGNATURE_PROVIDER ACK with SIGNATURE_AWAITING_VERIFIED_WEBHOOK/development_mock:false; the route does not infer SIGNED or a legal signature from an HTTP response.",
+      "A failed governed consumer returnsHTTP503 without a consumer ACK, leaving dispatch retryable.",
+      "Explicit development mock responses remain labeleddevelopment_mock:true and retain the existing governed SQL environment checks.",
+      "The two legacy refusal tests now mock the invoked signature consumer, rather than queuing an unused RPC response that leaks into subsequent tests. Their503 assertion is retained and a no-ACK assertion is added.",
+      "No retries, skips, timeout inflation or weakened assertions introduced in this delta."
+    ],
+    "targetedEvidenceObserved": {
+      "source": "work/staging-secure/web-targeted-final.log",
+      "files": 7,
+      "passed": 146,
+      "reviewerStartedFullSuite": false
+    }
+  },
+  "dockerValidationObserved": {
+    "source": "/workspace/outputs/staging-runtime-validation.json",
+    "status": "PASS",
+    "image": "sha256:05bd08272bae1f76593d80e31b84bb82f9e8a2c8eaba95c4e6b17159767e9410",
+    "readinessFollowupImageRebuilt": true,
+    "runtimeFilesComparedWithRoot": 47,
+    "differentRuntimeFilesFromRoot": [],
+    "offlineContainerCheck": {
+      "uid": 1000,
+      "node": "v22.23.4",
+      "pnpm": "10.17.1",
+      "corepackPnpm": "10.17.1",
+      "startWithoutConfig": "FAILED_CLOSED",
+      "network": "none",
+      "log": "/workspace/outputs/staging-runtime-offline-check-final.log"
+    },
+    "reviewerRebuiltImage": false
+  },
+  "additionalEvidenceObserved": {
+    "workerUnitTests": {
+      "command": "corepack pnpm --filter @matricia/worker test --maxWorkers=2",
+      "passed": 183,
+      "failed": 0,
+      "files": 17,
+      "node": "22.23.4"
+    },
+    "workerTypecheck": "PASS",
+    "rootTooling": {
+      "source": "work/staging-secure/tooling-final.log",
+      "tests": 103,
+      "pass": 103,
+      "fail": 0,
+      "skipped": 0
+    },
+    "rootNextBuild": "work/staging-secure/build-final.log reaches completed route summary; deployment/hosted behavior is separate."
+  },
+  "privacyIntegrationReview": {
+    "reviewedRootHead": "1d0eb0b",
+    "mode": "Read-only source comparison; no database writes or external services.",
+    "confirmedCause": {
+      "id": "STAGING-REVIEW-003",
+      "severity": "P1",
+      "status": "RESOLVED_IN_REVIEWED_SOURCE",
+      "file": "supabase/migrations/20261103456100_dsr_finance_cost_document_family.sql",
+      "lines": "55-59",
+      "title": "YouSign evidence introduces an unmapped physical file family, blocking DSR ALL completeness",
+      "reason": "private.yousign_native_artifacts_v1 introduces storage_path and storage_object_id. The existing file-family detector flags it even when empty, but the registry does not collect it. coverage_complete=false cascades to the0243manifest/response/per-file acknowledgement/fulfilment assertions.",
+      "safeFixRequirement": "Add actual envelope/contract/organization-scoped candidate collection, retain unknown-family failure for future tables, and do not treat provider artifacts as AV-clean or legally approved without corresponding proof. Merely allowlisting/excluding the table would hide files.",
+      "resolution": "An actual native-artifact file collector is added, in addition to recognizing its physical family. Candidates require the verified signer and exact DSR organization, a contractual party and providerYOUSIGN; AUDIT_JSON is further bound to the subject own provider signer. Files remain UNTRUSTED and retain private byte references and independent personal/third-party review requirements."
+    },
+    "additionalRequiredProof": {
+      "status": "ADDRESSED_IN_REVIEWED_SOURCE_TARGETED_EXECUTION_REPORTED",
+      "issue": "Generic subject FK discovery only traverses a small personal-container whitelist; it does not traverse signature_signers/signature_envelopes/yousign_requests. New signer references and native transport metadata therefore need explicit subject-scope coverage or an accurately documented outstanding gap.",
+      "safeFixRequirement": "Use exact signer user and organization membership paths; never infer personal scope by walking through organization.created_by. Do not seed legal approval or retention exceptions.",
+      "resolution": "The existing reviewed financial/signature virtual DSR source is extended with seven exact-subject native metadata rowsets. It does not broaden generic FK traversal through organizations. Physical sources remain in the technical/legal catalog; operation keys, raw manifests and private paths are omitted from curated disclosure."
+    },
+    "reportedRemoteRegression": "Parent reports database job0243sixfailures; quality/publicbrowser/Vercelgreen. This review does not replace current CI proof.",
+    "authorFix": "Static source review approved; parent may apply only to explicitly authorized isolated/staging target. Fullfresh/relevantSQL/CI evidence remains separate.",
+    "reviewedFixCommit": "a321ae1cdb919d176076d23a2411382fa6c0574f",
+    "status": "STATIC_APPROVAL",
+    "staticChecks": [
+      "No old0243assertion removed or weakened; one positive known-family assertion is added while the synthetic future-family completeness refusal remains.",
+      "Existing file collector entries and physical deduplication remain; only the explicit native family is added to the known-family list.",
+      "Native PDF and audit files are not marked CLEAN, ready, disclosed or legally approved by the migration.",
+      "Curated metadata requires the exact verified signer user, exact DSR organization, a client/provider contract party and providerYOUSIGN.",
+      "Own native signer reference and audit identifiers are not mixed with the counterparty signer.",
+      "No delete/update bypass is added to immutable native evidence/state tables; erasure and legal-retention decisions remain governed.",
+      "Renamed prior extractors and current wrappers remain private with all application EXECUTE privileges revoked.",
+      "Extractor/catalog hash changes stale older approved inventories and require new independent review; no review/approval policy is seeded."
+    ],
+    "executionEvidence": {
+      "reviewerExecutedSql": false,
+      "authorReportedPrior0243Assertions": 73,
+      "authorReportedPrior0243Status": "PASS under rollback-only577schema",
+      "authorReportedNativePrivacyAssertions": 96,
+      "nativePrivacyBreakdown": "58existingcanonical+38privacyassertions",
+      "helperCommit": "879a23cffa7cea74e3a6cde85f26ffe3984fedee",
+      "new0243AssertionTotalExpected": 74,
+      "nativeCapturedAllManifestCase": "Author adding an additional actual capture case; not yet reviewed or claimed passed."
+    },
+    "fileSha256": {
+      "supabase/migrations/20261109101000_yousign_subject_privacy_inventory.sql": "f075c91d04febf1df1125f3039bd330d33615ba7ee92f750a441ddbcd1bc23a4",
+      "supabase/tests/0243_dsr_reviewed_private_files.test.sql": "ca27589e84098e177fd21b3ac78f25aa67e09753de8c6397e231c2a82d7094a0",
+      "supabase/tests/helpers/yousign-privacy-acceptance.sql": "84faf170e0ef7adb69da4e5c22ad807174ffc22ff87991f2267ce70cd5bc36a2"
+    }
+  }
+}

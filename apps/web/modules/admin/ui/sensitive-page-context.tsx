@@ -26,6 +26,7 @@ export async function sensitivePageContext(input: {
   roles?: readonly string[];
   actorCurrent?: string;
   parcoursCurrent?: string;
+  mainLandmark?: boolean;
 }) {
   const { locale } = input;
   const selfPath = `/${locale}/administration/${input.path}`;
@@ -44,6 +45,7 @@ export async function sensitivePageContext(input: {
     title: input.title,
     lead: input.lead,
     kicker: input.kicker,
+    ...(input.mainLandmark ? { mainLandmark: true } : {}),
   };
   const wrap = (children: ReactNode) => isAdmin ? <AdminAppShell {...shell}>{children}</AdminAppShell> : <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6">{children}</main>;
   if (access.status === "error") return { status: "blocked" as const, view: wrap(<WorkspaceFailure locale={locale} reason={access.reason} returnPath={selfPath} />) };

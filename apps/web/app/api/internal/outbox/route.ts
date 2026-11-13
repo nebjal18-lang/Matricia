@@ -1,6 +1,7 @@
 import { scanOneFinanceCostDocument } from "@/modules/shared/lib/finance-cost-proofs/scan-consumer";
 import { consumeFranchiseNetworkInvitation } from "@/modules/franchise/data/network/invitation-consumer";
 import { consumeVerifiedPaymentInbox } from "@/modules/shared/lib/payment-dispatch/consumer";
+import { consumeGovernedSignatureEnvelope } from "@/modules/shared/lib/signature-runtime/yousign";
 import { consumeClientCommercialDocumentIssued } from "@/modules/client/data/billing/issued-consumer";
 import { consumeSocialNativeVerification } from "@/modules/shared/lib/marketing-autopilot/native-verification-consumer";
 import { consumeProviderBillingIssued } from "@/modules/provider/data/billing/issued-consumer";
@@ -218,10 +219,8 @@ export async function POST(request: Request): Promise<Response> {
   if (["SignatureEnvelopeReadyV1", "ContractSignatureRequestedV1", "ContractAmendmentSignatureRequestedV1"].includes(parsed.data.eventType)) {
     const id=z.string().uuid().safeParse(parsed.data.payload.envelope_id);
     if(!id.success)return Response.json({code:"SIGNATURE_ENVELOPE_PAYLOAD_INVALID"},{status:400,headers});
-    const result=await getSupabaseAdminClient().rpc("dispatch_governed_signature_envelope_v1",{p_envelope_id:id.data});
-    const outcome=(result.data as {outcome?:unknown}|null)?.outcome;
-    if(result.error||!["SIGNATURE_ENVELOPE_SENT","SIGNATURE_DISPATCH_CANCELLED"].includes(String(outcome)))return Response.json({code:"SIGNATURE_PROVIDER_DISPATCH_UNAVAILABLE"},{status:503,headers});
-    return Response.json({outcome},{status:202,headers:{...headers,"x-matricia-outbox-consumer":"SIGNATURE_PROVIDER"}});
+    const result=await consumeGovernedSignatureEnvelope(id.data);
+    return Response.json({outcome:result.code,development_mock:result.developmentMock},{status:result.ok?202:503,headers:{...headers,...(result.ok?{"x-matricia-outbox-consumer":"SIGNATURE_PROVIDER"}:{})}});
   }
   if (parsed.data.eventType === "ProviderInvoiceIssuedV1" || parsed.data.eventType === "ProviderStatementIssuedV1" || parsed.data.eventType === "ProviderCreditNoteIssuedV1") {
     const kind = parsed.data.eventType === "ProviderInvoiceIssuedV1" ? "invoice" : parsed.data.eventType === "ProviderCreditNoteIssuedV1" ? "credit_note" : "statement";
@@ -315,6 +314,13 @@ export async function POST(request: Request): Promise<Response> {
       aggregateId: resource.data,
       data: { eventId: parsed.data.id, consumer: CONSUMER_CODE, factClass: benefitFact ? "PERSISTED_BENEFIT_FULFILLMENT" : "PERSISTED_MANUAL_CREDIT_GOVERNANCE" },
     });
+    return Response.json({ outcome: "OUTBOX_EVENT_OBSERVED", eventId: parsed.data.id, consumer: CONSUMER_CODE }, { status: 202, headers: { ...headers, "x-matricia-outbox-consumer": CONSUMER_CODE } });
+  }
+
+  // Configuration changes are facts already committed by the guarded database
+  // command. Observation does not claim provider delivery or release approval.
+  if (parsed.data.eventType === "PlatformConfigurationChangedV1") {
+    log("info", { requestId: parsed.data.correlationId, correlationId: parsed.data.correlationId, event: "outbox.event.observed", outcome: "success", aggregateType: parsed.data.eventType, aggregateId: parsed.data.aggregateId, data: { eventId: parsed.data.id, consumer: CONSUMER_CODE, factClass: "PERSISTED_PLATFORM_CONFIGURATION" } });
     return Response.json({ outcome: "OUTBOX_EVENT_OBSERVED", eventId: parsed.data.id, consumer: CONSUMER_CODE }, { status: 202, headers: { ...headers, "x-matricia-outbox-consumer": CONSUMER_CODE } });
   }
 
