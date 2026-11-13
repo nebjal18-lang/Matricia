@@ -51,7 +51,7 @@ export default async function RewardsPage({
       {result.status === "error" ? (
         <Alert variant={result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? "default" : "destructive"}>
           <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertTitle>
-          <AlertDescription>{result.reason}</AlertDescription>
+          <AlertDescription>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertDescription>
         </Alert>
       ) : (
         <RewardsBoard locale={locale} query={space.selectedQuery} dashboard={result.dashboard}>

@@ -42,8 +42,12 @@ function uniqueIds(values: readonly string[]): string[] {
   return [...new Set(values)];
 }
 
-function fallbackName(organizationId: string): string {
-  return organizationId.slice(0, 8);
+function fallbackName(_organizationId: string): string {
+  return "Organisation";
+}
+
+function fallbackServiceCode(_serviceId: string): string {
+  return "SERVICE";
 }
 
 function toMinor(value: string | number): string {
@@ -80,7 +84,7 @@ export async function loadAdminProviders(): Promise<Result> {
 
   async function allRows(table:string,columns:string,order:string,ascending=false,filter?:{column:string;ids:string[]}){
     const rows:unknown[]=[];
-    for(let offset=0;offset<20000;offset+=500){
+    for(let offset=0;offset<2000;offset+=500){
       let query=client.from(table).select(columns).order(order,{ascending});
       const tie=table==="provider_profiles"?"provider_organization_id":table==="provider_document_scan_jobs"?"storage_object_path":"id";if(order!==tie)query=query.order(tie);
       if(filter)query=query.in(filter.column,filter.ids);
@@ -183,7 +187,7 @@ export async function loadAdminProviders(): Promise<Result> {
   });
   const limitsReached:string[]=[];
 
-  const invoiceNumber = (invoiceId: string) => mappedInvoices.find((item) => item.id === invoiceId)?.number ?? invoiceId.slice(0, 8);
+  const invoiceNumber = (invoiceId: string) => mappedInvoices.find((item) => item.id === invoiceId)?.number ?? "Facture";
   const latestStatus = <T extends { status: string }>(rows: T[], key: (row: T) => string) => {
     const chosen = new Map<string, { version: number; status: string }>();
     for (const row of rows) {
@@ -211,7 +215,7 @@ export async function loadAdminProviders(): Promise<Result> {
           providerOrganizationId: item.provider_organization_id,
           providerName: name(item.provider_organization_id),
           serviceId: item.service_id,
-          serviceCode: catalogById.get(item.service_id) ?? fallbackName(item.service_id),
+          serviceCode: catalogById.get(item.service_id) ?? fallbackServiceCode(item.service_id),
           requestStatus: item.request_status,
           qualificationId: qualificationRow?.id ?? null,
           qualificationRowVersion: qualificationRow?.row_version ?? null,

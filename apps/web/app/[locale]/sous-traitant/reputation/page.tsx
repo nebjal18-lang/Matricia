@@ -2,12 +2,14 @@ import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import { loadProviderReputation } from "@/modules/provider/data/reputation/repository";
 import { ReputationBoard } from "@/modules/provider/screens/spaces/boards";
 import { getReputationMessages } from "@/modules/provider/screens/reputation/messages";
 import { ReputationView } from "@/modules/provider/screens/reputation/reputation-view";
 import { ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 export default async function ProviderReputationPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
@@ -15,9 +17,17 @@ export default async function ProviderReputationPage({ params, searchParams }: {
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/reputation` }));
+  const contextState = providerContextReadState(space, query.organizationId);
   const m = getReputationMessages(locale);
   const c = providerCopy(locale);
-  const result = await loadProviderReputation(query.organizationId);
+  if (contextState) {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="reputation" title={c.repTitle} lead={c.repLead} kicker={c.kicker}>
+        <ProviderReadState locale={locale} state={contextState} retryHref={`/${locale}/sous-traitant/reputation${space.selectedQuery}`} reason={space.readError ?? undefined} />
+      </ProviderAppShell>
+    );
+  }
+  const result = await loadProviderReputation(space.selectedOrganizationId ?? undefined);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/reputation` }));
   return (
     <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="reputation" title={c.repTitle} lead={c.repLead} kicker={c.kicker}>

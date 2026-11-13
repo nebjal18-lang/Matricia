@@ -17,6 +17,7 @@ const emptyToNull = (value: string) => (value.length ? value : null);
 
 function fail(reason: string): CommerceActionState {
   if (reason === "FORBIDDEN") return { status: "error", reason: "FORBIDDEN" };
+  if (reason === "MFA_REQUIRED") return { status: "error", reason: "MFA_REQUIRED" };
   if (reason === "UNAUTHENTICATED") return { status: "error", reason: "UNAUTHENTICATED" };
   if (reason === "INVALID_INPUT") return { status: "error", reason: "VALIDATION" };
   if (reason === "CONFLICT") return { status: "error", reason: "CONFLICT" };

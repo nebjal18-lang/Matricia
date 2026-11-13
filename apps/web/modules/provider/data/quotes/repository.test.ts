@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: vi.fn() }));
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: vi.fn(), getServerAuthUser: vi.fn() }));
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { loadConsultationSharedDocuments, loadProviderQuotes, parseQuoteVersionAmounts, sharedDocumentsFromRows, unambiguousTaxRules } from "./repository";
 
 describe("provider consultation and quote Auth reads", () => {
   it.each([[503, "AUTH_QUERY_FAILED"], [401, "UNAUTHENTICATED"]] as const)("preserves Auth %s before reading business data", async (status, reason) => {
     const from = vi.fn();
-    vi.mocked(getSupabaseServerClient).mockResolvedValue({ auth: { getUser: async () => ({ data: { user: null }, error: { status } }) }, from } as never);
+    vi.mocked(getServerAuthUser).mockResolvedValue({ data: { user: null }, error: { status } } as never);
+    vi.mocked(getSupabaseServerClient).mockResolvedValue({ from } as never);
     expect(await loadProviderQuotes()).toEqual({ status: "error", reason });
     expect(from).not.toHaveBeenCalled();
   });

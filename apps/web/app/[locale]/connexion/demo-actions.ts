@@ -12,7 +12,7 @@ import { elevateDemoSession } from "./demo-assurance";
 
 const personaConfig = {
   client: { destination: "tableau-de-bord" },
-  provider: { destination: "tableau-de-bord" },
+  provider: { destination: "sous-traitant/qualification" },
   franchise: { destination: "franchise/accueil" },
   admin: { destination: "administration/command-center" },
 } as const satisfies Record<DemoPersona, { destination: string }>;

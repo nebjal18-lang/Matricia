@@ -1,11 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { loadProviderDashboard } from "@/modules/provider/data/qualification/repository";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import { providerSearchQuery } from "@/modules/provider/data/spaces/list-rows";
 import { ServicesBoard } from "@/modules/provider/screens/spaces/boards";
 import { ProviderActions, ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 export default async function ProviderServicesPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; q?: string; domain?: string }> }) {
@@ -13,7 +15,8 @@ export default async function ProviderServicesPage({ params, searchParams }: { p
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/services` }));
-  const result = await loadProviderDashboard(query.organizationId);
+  const contextState = providerContextReadState(space, query.organizationId);
+  const result = contextState ? { status: "error" as const, reason: "NO_ORGANIZATION" as const } : await loadProviderDashboard(space.selectedOrganizationId ?? undefined);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/services` }));
   const c = providerCopy(locale);
   const needle = (query.q ?? "").trim().toLocaleLowerCase();
@@ -24,7 +27,11 @@ export default async function ProviderServicesPage({ params, searchParams }: { p
   const boardQuery = providerSearchQuery(space.selectedQuery, { q: query.q, domain: query.domain });
   return (
     <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="services" title={c.svcTitle} lead={c.svcLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/qualification${space.selectedQuery}#capacite`} label={c.addService} />}>
-      <ServicesBoard regions={result.status==="success"?result.dashboard.regionCodes:[]} interventionModes={result.status==="success"?result.dashboard.interventionModes:[]} locale={locale} query={boardQuery} services={services} domain={domain || undefined} />
+      {result.status === "success" ? (
+        <ServicesBoard regions={result.dashboard.regionCodes} interventionModes={result.dashboard.interventionModes} locale={locale} query={boardQuery} services={services} domain={domain || undefined} />
+      ) : (
+        <ProviderReadState locale={locale} state={contextState ?? (result.reason === "FORBIDDEN" ? "forbidden" : result.reason === "NO_ORGANIZATION" || result.reason === "NO_PROVIDER_ORGANIZATION" ? "no-organization" : "unavailable")} retryHref={`/${locale}/sous-traitant/services${space.selectedQuery}`} reason={space.readError ?? result.reason} />
+      )}
     </ProviderAppShell>
   );
 }

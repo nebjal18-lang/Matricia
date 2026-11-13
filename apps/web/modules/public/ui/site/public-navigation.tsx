@@ -23,6 +23,7 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
   const journey = getPublicJourneyCopy(locale).nav;
   const alternate = locale === "fr" ? "ar" : "fr";
   const pathname = usePathname();
+  const onHome = /^\/(fr|ar)\/?$/u.test(pathname);
   const [menuState, setMenuState] = useState({ open: false, pathname });
   const menuOpen = menuState.open && menuState.pathname === pathname;
   const menuButton = useRef<HTMLButtonElement>(null);
@@ -63,7 +64,7 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
     event.preventDefault();
     focusable[index]?.focus();
   };
-  return <header dir={locale === "ar" ? "rtl" : "ltr"} className="premium-nav" onKeyDown={event => { if (event.key === "Escape" && menuOpen) { closeMenu(); menuButton.current?.focus(); } }}>
+  return <header dir={locale === "ar" ? "rtl" : "ltr"} className={cn("premium-nav", onHome && "premium-nav--on-home")} onKeyDown={event => { if (event.key === "Escape" && menuOpen) { closeMenu(); menuButton.current?.focus(); } }}>
     <div className="premium-nav-inner">
       <div className="premium-mobile-cluster relative lg:hidden">
         <button ref={menuButton} type="button" aria-label={menuOpen ? journey.closeMenu : journey.openMenu} aria-expanded={menuOpen} aria-controls="public-mobile-navigation" onClick={() => setMenuState({ open: !menuOpen, pathname })} className={cn(buttonVariants({ variant: "outline", size: "icon" }), "premium-menu-trigger")}>{menuOpen ? <X aria-hidden="true"/> : <Menu aria-hidden="true"/>}</button>
@@ -75,17 +76,17 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
           </ul>
         </nav> : null}
       </div>
-      <Link href={`/${locale}`} aria-label={copy.brandLabel} className="premium-nav-brand flex min-h-11 items-center gap-2 rounded-md font-semibold tracking-tight text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-        <svg aria-hidden="true" width="32" height="32" viewBox="0 0 40 40" fill="none"><path d="M8 28 20 8l12 20M14 28l6-12 6 12" stroke="#642bef" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="20" cy="30" r="2.2" fill="#e65290"/></svg>
+      <Link href={`/${locale}`} aria-label={copy.brandLabel} className="premium-nav-brand flex min-h-11 items-center gap-2 rounded-md font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <svg className="premium-nav-mark" aria-hidden="true" width="32" height="32" viewBox="0 0 40 40" fill="none"><path d="M8 28 20 8l12 20M14 28l6-12 6 12" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="20" cy="30" r="2.2" fill="currentColor"/></svg>
         <span className="premium-nav-brand-text">
-          <span className="text-xl text-[var(--mat-navy)]">Matricia</span>
+          <span className="premium-nav-brand-name">Matricia</span>
           <small className="premium-nav-tagline">{copy.tagline}</small>
         </span>
       </Link>
       <nav aria-label={copy.navigationLabel} className="hidden items-center gap-1 lg:flex">
         {links.map(link => <Link key={link.href} href={link.href} aria-current={isPublicNavLinkActive(pathname, link.href) ? "page" : undefined} className="premium-nav-link">{link.label}</Link>)}
         <span className="premium-lang" aria-label={locale === "fr" ? "Langue" : "اللغة"}>
-          <Link href={pathname} hrefLang={locale} lang={locale} aria-current="true" className="text-[var(--mat-navy)]">{locale.toUpperCase()}</Link>
+          <Link href={pathname} hrefLang={locale} lang={locale} aria-current="true" className="premium-lang-current">{locale.toUpperCase()}</Link>
           <span aria-hidden="true">|</span>
           <Link href={alternatePath} onClick={preserveLocaleContext} hrefLang={alternate} lang={alternate}>{alternate.toUpperCase()}</Link>
         </span>
@@ -107,7 +108,8 @@ export function nextMenuFocusIndex(currentIndex: number, count: number, backward
 }
 
 export function isPublicNavLinkActive(pathname: string, href: string): boolean {
-  const target = href.split("#", 1)[0] ?? href;
+  const [target = href, hash] = href.split("#", 2);
+  if (hash) return false;
   if (/^\/(?:fr|ar)$/u.test(target)) return pathname === target;
   return pathname === target || pathname.startsWith(`${target}/`);
 }

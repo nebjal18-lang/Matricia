@@ -3,7 +3,10 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { AdminSpaceId } from "@/modules/admin/data/spaces/admin-nav";
 import type { SpaceSnapshot } from "@/modules/admin/data/spaces/space-data";
 
-export const governedPreparationSpaces: ReadonlySet<AdminSpaceId> = new Set(["devis", "contrats", "missions", "jalons", "territoires"]);
+export const governedPreparationSpaces: ReadonlySet<AdminSpaceId> = new Set([
+  "devis", "contrats", "missions", "jalons", "territoires",
+  "avenants", "diagnostics", "demandes", "matching", "litiges", "messagerie", "documents",
+]);
 export function CreationPreparation({ locale, query, space, snapshot }: { locale: Locale; query: string; space: AdminSpaceId; snapshot: SpaceSnapshot }) {
   const ar = locale === "ar";
   const data = snapshot.supervision;
@@ -24,6 +27,24 @@ export function CreationPreparation({ locale, query, space, snapshot }: { locale
   } else if (space === "territoires") {
     instructions = ar ? "يحدد التفويض المؤسسة والمكتبة والإقليم والمدة والحقوق التعاقدية. راجع الملف في الحوكمة؛ هذه الصفحة لا تنشئ تفويضاً من نص حر. يتطلب الاقتراح والمراجعة المستقلة والتفعيل أدلتها الخاصة." : "Un mandat lie une organisation, une bibliothèque, un territoire, une durée et des droits contractuels. Examinez le dossier dans la gouvernance ; cette page ne crée pas de mandat à partir d’un texte libre. Proposition, revue indépendante et activation nécessitent leurs propres preuves.";
     for (const item of snapshot.rows) candidates.push({id:item.id,label:item.title,status:item.status,href:item.href});
+  } else if (space === "avenants") {
+    instructions = ar ? "يُنشئ العميل المخوّل الملحق من عقد قائم. راجع العقد المصدر؛ الإدارة لا تكتب ملحقاً باسم الأطراف." : "Le Client habilité crée l’avenant depuis un contrat existant. Examinez le contrat source ; l’administration ne rédige pas d’avenant à la place des parties.";
+    for (const item of data?.contracts ?? []) candidates.push({id:item.id,label:`${item.client_name} · ${item.provider_name}`,status:item.status,href:`/${locale}/administration/contrats/${item.id}${query}`});
+  } else if (space === "diagnostics") {
+    instructions = ar ? "يشغّل العميل المخوّل التشخيص من مساحة العميل. راجع المنظمات المعنية؛ الإدارة لا تبدأ تشخيصاً وهمياً." : "Le Client habilité lance le diagnostic depuis son espace. Examinez les organisations concernées ; l’administration ne démarre pas de diagnostic fictif.";
+    for (const item of data?.organizations ?? []) candidates.push({id:item.id,label:item.display_name,status:item.status,href:`/${locale}/administration/entreprises/${item.id}${query}`});
+  } else if (space === "demandes" || space === "matching") {
+    instructions = ar ? "ينشئ العميل المخوّل الطلب والمطابقة من مساره. راجع الطلبات الجارية؛ لا يُنشأ طلب من نموذج إداري حر." : "Le Client habilité crée la demande et le matching depuis son parcours. Examinez les demandes en cours ; aucun besoin n’est créé depuis un formulaire admin libre.";
+    for (const item of data?.requests ?? []) candidates.push({id:item.id,label:item.organization_name,status:item.status,href:`/${locale}/administration/demandes/${item.id}${query}`});
+  } else if (space === "litiges") {
+    instructions = ar ? "يُفتح النزاع من المهمة المعنية بأدلته. راجع المهام والمنازعات الجارية." : "Le litige s’ouvre depuis la mission concernée avec ses preuves. Examinez les missions et litiges en cours.";
+    for (const item of data?.missions ?? []) candidates.push({id:item.id,label:`${item.client_name} · ${item.provider_name}`,status:item.status,href:`/${locale}/administration/missions/${item.id}${query}`});
+  } else if (space === "messagerie") {
+    instructions = ar ? "تُدار المراسلات من سياق الطلب أو المهمة. راجع المحادثات الموجودة؛ لا تُنشأ محادثة حرّة هنا." : "La messagerie s’administre depuis le contexte d’une demande ou d’une mission. Examinez les fils existants ; aucune conversation libre n’est créée ici.";
+    for (const item of snapshot.rows) candidates.push({id:item.id,label:item.title,status:item.status,href:item.href});
+  } else if (space === "documents") {
+    instructions = ar ? "يُستورد المستند من خزينة المالك ثم يُراجع. استخدم مسار المشاركة الخاضعة للرقابة." : "Le document est importé depuis le coffre du propriétaire puis revu. Utilisez le parcours de partage contrôlé.";
+    for (const item of snapshot.rows) candidates.push({id:item.id,label:item.title,status:item.status,href:`/${locale}/administration/documents/${item.id}/reutilisation${query}`});
   }
   return <main className="client-page" data-admin-layout="governed-preparation">
     <section className="client-card">

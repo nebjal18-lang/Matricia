@@ -50,9 +50,34 @@ describe("admin space boards", () => {
     expect(html).toContain("Studio Atlas");
     expect(html).toContain("Aucune suppression définitive");
     expect(html).toContain("À traiter");
+    expect(html).toContain("1 résultat");
+    expect(html).toContain('data-layout="orgs"');
     expect(html).toContain('data-tone="amber"');
     expect(html).toContain('data-tone="plum"');
     expect(html).not.toMatch(/exemple illustratif/i);
+  });
+
+  it("masque les fixtures E2E par défaut et nettoie l’affichage", () => {
+    const fixture = {
+      ...row,
+      id: "c7d9160c-c012-4926-8165-2aa6646f0f19",
+      name: "P05 A",
+      legalName: "P05 E2E A c7d9160c-c012-4926-8165-2aa6646f0f19",
+      type: "Non renseigné",
+      typeCodes: [] as string[],
+      typeTone: "peach" as const,
+      fixture: true,
+    };
+    const hidden = renderToStaticMarkup(<OrganizationsBoard locale="fr" query="" rows={[row, fixture]} treat={[]} />);
+    expect(hidden).toContain("Client · Communication");
+    expect(hidden).not.toContain("P05 A");
+    expect(hidden).toContain("1 élément(s) de test / démo masqué(s).");
+    expect(hidden).toContain("fixtures=1");
+    const shown = renderToStaticMarkup(<OrganizationsBoard locale="fr" query="?fixtures=1" rows={[row, fixture]} treat={[]} includeFixtures />);
+    expect(shown).toContain("P05 A");
+    expect(shown).toContain("Non renseigné");
+    expect(shown).toContain('value="NONE"');
+    expect(shown).toContain("2 résultats");
   });
 });
 

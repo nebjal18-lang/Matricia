@@ -3,6 +3,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { AdminCommandCenter } from "@/modules/admin/data/command-center/model";
 import { dossierHref } from "@/modules/admin/data/command-center/view-model";
 import { adminDirectoryGroups } from "@/modules/admin/data/spaces/directory";
+import { shortReference } from "@/modules/shared/lib/format/display";
 
 const normalize = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase().trim();
 export function searchAdminLoadedContent(locale: Locale, query: string, organizationQuery: string, dashboard: AdminCommandCenter | null) {
@@ -23,7 +24,7 @@ export function searchAdminLoadedContent(locale: Locale, query: string, organiza
     kind: "dossier" as const,
   }));
   const actions = (dashboard?.actions ?? []).filter(item => matches(`${item.reason} ${item.resourceType} ${item.resourceId} ${item.actionType}`)).map(item => ({
-    href: `#admin-action-${item.id}`, label: `${item.reason} · ${item.resourceId}`, kind: "action" as const,
+    href: `#admin-action-${item.id}`, label: `${item.reason} · ${shortReference(item.resourceId)}`, kind: "action" as const,
   }));
   return [...links, ...dossiers, ...actions];
 }

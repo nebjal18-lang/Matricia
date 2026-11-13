@@ -1,7 +1,8 @@
 "use client";
+import { formatMinorAmount } from "@/modules/shared/lib/format/display";
 import {commerceIdle}from"@/modules/admin/screens/finance/commerce-state";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Badge } from "@/modules/shared/ui/badge";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
@@ -40,6 +41,7 @@ export function CommerceCatalogPanel({
   keys: Record<string, string>;
 }) {
   const name = (fr: string, ar: string) => (locale === "ar" ? ar : fr);
+  const clientWallets = wallets.filter((item) => item.wallet_type === "CLIENT");
   const canWrite = catalog.capabilities.can_write && Boolean(auditOrganizationId);
   const draftPacks = catalog.packs.filter((item) => item.status === "DRAFT");
   const draftPromotions = catalog.promotions.filter((item) => item.status === "DRAFT");
@@ -49,6 +51,13 @@ export function CommerceCatalogPanel({
   return (
     <div className="mt-6 space-y-6">
       <p className="text-sm leading-6 text-muted-foreground">{m.catalogHint}</p>
+      {catalog.capabilities.can_write && !auditOrganizationId ? (
+        <p role="status" className="text-sm text-amber-800">
+          {locale === "ar"
+            ? "اختر مؤسسة تدقيق في شريط السياق قبل إنشاء أو تفعيل حزمة أو عرض أو معلمة."
+            : "Sélectionnez une organisation d’audit dans la barre de contexte avant de créer ou activer un pack, une promotion ou un paramètre."}
+        </p>
+      ) : null}
       <section aria-labelledby="credit-packs" className="space-y-3">
         <h3 id="credit-packs" className="text-lg font-semibold">{m.packs}</h3>
         {catalog.packs.length === 0 ? <p>{m.empty}</p> : (
@@ -56,7 +65,7 @@ export function CommerceCatalogPanel({
             {catalog.packs.map((item) => (
               <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
                 <div className="flex flex-wrap justify-between gap-2"><strong>{name(item.name_fr, item.name_ar)}</strong><Badge>{item.status} · v{item.version}</Badge></div>
-                <p dir="ltr">{item.code} · {item.quantity} cr · {item.price_minor} {item.currency} · {item.validity_days}j</p>
+                <p dir="ltr">{item.code} · {item.quantity} cr · {formatMinorAmount(item.price_minor, item.currency, locale)} · {item.validity_days}j</p>
               </article>
             ))}
           </div>
@@ -119,10 +128,8 @@ export function CommerceCatalogPanel({
             <Select name="promotionVersionId" label={m.promotions} values={draftPromotions.map((item) => item.id)} labels={draftPromotions.map((item) => `${item.code} v${item.version}`)} />
             <Field label={m.approval}><Input name="approvalReference" required minLength={3} className={control} /></Field>
           </Form>
-          <Form title={m.grantPromotion} action={grantCreditPromotionAction} keyValue={keys.grantPromotion} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={activePromotions.length === 0 || wallets.length === 0}>
-            <Select name="promotionVersionId" label={m.promotions} values={activePromotions.map((item) => item.id)} labels={activePromotions.map((item) => `${item.code} v${item.version}`)} />
-            <Select name="walletId" label={m.wallet} values={wallets.map((item) => item.wallet_id)} labels={wallets.map((item) => item.organization_name)} />
-            <Select name="organizationId" label={m.organization} values={wallets.map((item) => item.organization_id)} labels={wallets.map((item) => item.organization_name)} />
+          <Form title={m.grantPromotion} action={grantCreditPromotionAction} keyValue={keys.grantPromotion} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={activePromotions.length === 0 || clientWallets.length === 0}>
+            <GrantPromotionFields activePromotions={activePromotions} wallets={wallets} m={m} />
           </Form>
           <Form title={m.createParameter} action={createPlatformParameterAction} keyValue={keys.parameter} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
             <Select name="parameterKey" label={m.parameterKey} values={parameterKeys} />
@@ -135,6 +142,34 @@ export function CommerceCatalogPanel({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function GrantPromotionFields({
+  activePromotions,
+  wallets,
+  m,
+}: {
+  activePromotions: AdminCommerceCatalog["promotions"];
+  wallets: AdminBoxesDashboard["wallets"];
+  m: CommerceMessages;
+}) {
+  const clientWallets = wallets.filter((item) => item.wallet_type === "CLIENT");
+  const [walletId, setWalletId] = useState("");
+  const organizationId = clientWallets.find((item) => item.wallet_id === walletId)?.organization_id ?? "";
+  return (
+    <>
+      <Select name="promotionVersionId" label={m.promotions} values={activePromotions.map((item) => item.id)} labels={activePromotions.map((item) => `${item.code} v${item.version}`)} />
+      <Field label={m.wallet}>
+        <select name="walletId" required className={control} value={walletId} onChange={(event) => setWalletId(event.target.value)} disabled={clientWallets.length === 0}>
+          <option value="" disabled>—</option>
+          {clientWallets.map((item) => (
+            <option key={item.wallet_id} value={item.wallet_id} title={item.wallet_id}>{item.organization_name}</option>
+          ))}
+        </select>
+      </Field>
+      <input type="hidden" name="organizationId" value={organizationId} />
+    </>
   );
 }
 

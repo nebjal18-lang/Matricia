@@ -35,10 +35,23 @@ it("does not register a provider response from a mismatched environment",async()
  mocks.create.mockResolvedValueOnce({gateway:"PAYPAL",providerEnvironment:"LIVE",providerIntentId:"ORDER-12345678",status:"REQUIRES_CONFIRMATION",amountMinor:"12345",currency:"EUR"});
  expect((await POST(request())).status).toBe(502);expect(mocks.register).not.toHaveBeenCalled();
 });
+it("does not register a provider response with a mismatched amount or currency",async()=>{
+ mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"12345",currency:"EUR",create_authorized:true},error:null});
+ mocks.create.mockResolvedValueOnce({gateway:"PAYPAL",providerEnvironment:"SANDBOX",providerIntentId:"ORDER-12345678",status:"REQUIRES_CONFIRMATION",amountMinor:"99999",currency:"EUR"});
+ expect((await POST(request())).status).toBe(502);expect(mocks.register).not.toHaveBeenCalled();
+});
 
 it("does not create an order for a subscription that cannot accept a new payment",async()=>{mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"55000",message:"SUBSCRIPTION_NOT_ACTIVATABLE"}});const response=await POST(request());expect(response.status).toBe(409);expect(await response.json()).toEqual({error:"SUBSCRIPTION_NOT_ACTIVATABLE"});expect(mocks.create).not.toHaveBeenCalled();expect(mocks.register).not.toHaveBeenCalled();});
 
 it("keeps an unregistered ambiguous creation blocked even with the original key",async()=>{mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"12345",currency:"EUR",create_authorized:false},error:null});const response=await POST(request());expect(response.status).toBe(409);expect(await response.json()).toMatchObject({error:"PAYMENT_CREATION_RECONCILIATION_REQUIRED"});expect(mocks.create).not.toHaveBeenCalled();});
+it("surfaces providerIntentId for reconciliation when DB registration fails after PSP create",async()=>{
+ mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"12345",currency:"EUR",create_authorized:true},error:null});
+ mocks.create.mockResolvedValueOnce({gateway:"PAYPAL",providerEnvironment:"SANDBOX",providerIntentId:"ORDER-ORPHAN-1",status:"REQUIRES_CONFIRMATION",amountMinor:"12345",currency:"EUR",confirmation:null});
+ mocks.register.mockResolvedValueOnce({data:null,error:{code:"55000"}});
+ const response=await POST(request());
+ expect(response.status).toBe(409);
+ expect(await response.json()).toEqual({error:"PAYMENT_CREATION_RECONCILIATION_REQUIRED",preparationId:"55555555-5555-4555-8555-555555555555",providerIntentId:"ORDER-ORPHAN-1"});
+});
 it("resumes a registered order by native GET, never POST create",async()=>{mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"12345",currency:"EUR",create_authorized:false,payment_intent_id:"66666666-6666-4666-8666-666666666666",provider_intent_id:"ORDER-12345678"},error:null});mocks.lookup.mockResolvedValueOnce({orderId:"ORDER-12345678",status:"CREATED",currency:"EUR",confirmation:{method:"GET",url:"https://www.sandbox.paypal.com/checkoutnow?token=ORDER-12345678"}});expect((await POST(request())).status).toBe(200);expect(mocks.lookup).toHaveBeenCalledWith("ORDER-12345678",expect.objectContaining({planVersionId:input.planVersionId,idempotencyKey:input.idempotencyKey,amountMinor:"12345"}));expect(mocks.create).not.toHaveBeenCalled();expect(mocks.register).not.toHaveBeenCalled();});
 it("returns only the matching historical activation without contacting the PSP",async()=>{mocks.rpc.mockResolvedValueOnce({data:{preparation_id:"55555555-5555-4555-8555-555555555555",amount_minor:"12345",currency:"EUR",create_authorized:false,payment_intent_id:"66666666-6666-4666-8666-666666666666",payment_result:{outcome:"SUBSCRIPTION_ACTIVATED",payment_intent_id:"66666666-6666-4666-8666-666666666666"}},error:null});expect((await POST(request())).status).toBe(200);expect(mocks.create).not.toHaveBeenCalled();expect(mocks.lookup).not.toHaveBeenCalled();});
 

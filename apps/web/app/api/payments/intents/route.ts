@@ -50,11 +50,19 @@ export async function POST(request:Request){
   }
   try{
     const intent=await gateway.createIntent(expected);
-    if(intent.providerEnvironment!==gateway.providerEnvironment||intent.gateway!==gateway.code)return NextResponse.json({error:"PAYMENT_PROVIDER_CONTEXT_MISMATCH"},{status:502});
+    if(
+      intent.providerEnvironment!==gateway.providerEnvironment
+      || intent.gateway!==gateway.code
+      || intent.amountMinor!==amountMinor
+      || intent.currency!==prepared.data.currency
+    ) {
+      return NextResponse.json({error:"PAYMENT_PROVIDER_CONTEXT_MISMATCH"},{status:502});
+    }
     const{data,error}=await getSupabaseAdminClient().rpc("register_subscription_payment_intent_v2",{p_preparation_id:prepared.data.preparation_id,p_provider_environment:gateway.providerEnvironment,p_provider_intent_id:intent.providerIntentId,p_amount_minor:intent.amountMinor,p_currency:intent.currency,p_correlation_id:randomUUID()});
-    if(error)return NextResponse.json({error:error.code==="42501"?"FORBIDDEN":"PAYMENT_INTENT_UNAVAILABLE"},{status:error.code==="42501"?403:409});
+    // PSP already created the order: surface providerIntentId for reconciliation — never invent success.
+    if(error)return NextResponse.json({error:error.code==="42501"?"FORBIDDEN":"PAYMENT_CREATION_RECONCILIATION_REQUIRED",preparationId:prepared.data.preparation_id,providerIntentId:intent.providerIntentId},{status:error.code==="42501"?403:409});
     const paymentIntentId=isRecord(data)&&typeof data.payment_intent_id==="string"?data.payment_intent_id:null;
-    if(!paymentIntentId)return NextResponse.json({error:"PAYMENT_INTENT_UNAVAILABLE"},{status:502});
+    if(!paymentIntentId)return NextResponse.json({error:"PAYMENT_CREATION_RECONCILIATION_REQUIRED",preparationId:prepared.data.preparation_id,providerIntentId:intent.providerIntentId},{status:409});
     return NextResponse.json({paymentIntentId,providerIntentId:intent.providerIntentId,gateway:intent.gateway,status:intent.status,amountMinor:intent.amountMinor,currency:intent.currency,confirmation:intent.confirmation},{status:201});
   }catch(error){
     if(error instanceof PaymentGatewayError&&error.code==="PROVIDER_UNAVAILABLE")return NextResponse.json({error:"PAYMENT_PROVIDER_UNAVAILABLE"},{status:502});

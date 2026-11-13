@@ -70,6 +70,11 @@ describe("informations complémentaires pour les devis", () => {
     expect(mocks.revalidate).toHaveBeenCalledWith(`/fr/client/demandes/${uid(1)}`);
   });
 
+  it("signale complete quand les champs sont remplis même en INFORMATION_REQUIRED", async () => {
+    mocks.rpc.mockResolvedValue({ data: { status: "INFORMATION_REQUIRED", missing_quote_keys: [] }, error: null });
+    await expect(completeRequestInformationAction({ status: "idle" }, form({ locale: "fr", requestId: uid(1), rowVersion: "4", regionCode: "CASABLANCA_SETTAT", idempotencyKey: uid(5) }))).resolves.toEqual({ status: "success", complete: true, missing: [] });
+  });
+
   it("enregistre uniquement le mode canonique choisi et refuse un libellé traduit",async()=>{
     mocks.rpc.mockResolvedValue({data:{status:"DRAFT",missing_quote_keys:[]},error:null});
     const base={locale:"ar",requestId:uid(1),rowVersion:"3",idempotencyKey:uid(5),interventionMode:"HYBRID"};

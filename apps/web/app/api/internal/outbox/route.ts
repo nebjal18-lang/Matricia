@@ -277,9 +277,10 @@ export async function POST(request: Request): Promise<Response> {
     if (result.error || !outcome.success) return Response.json({ code: "ADMIN_ACTION_EXECUTION_FAILED" }, { status: 503, headers });
     return Response.json({ outcome: outcome.data, eventId: parsed.data.id }, { status: 202, headers: { ...headers, "x-matricia-outbox-consumer": "ADMIN_OPERATIONAL_ACTION" } });
   }
-  // These events require a registered domain consumer; observing them is not execution.
+  // These three names are not emitted by current SQL (DSR uses Dsr* / PrivacyRetention* / PrivacyDataSubject*).
+  // Fail closed until a dedicated PRIVACY_DISPOSITION executor exists — never ack as mere observation.
   if (["PrivacyDispositionRequestedV1", "PrivacyExportRequestedV1", "PrivacyErasureRequestedV1"].includes(parsed.data.eventType)) {
-    return Response.json({ code: "DOMAIN_CONSUMER_REQUIRED" }, { status: 503, headers });
+    return Response.json({ code: "DOMAIN_CONSUMER_REQUIRED" }, { status: 503, headers: { ...headers, "x-matricia-outbox-consumer": "PRIVACY_DISPOSITION" } });
   }
 
   // The authoritative account commands have already persisted their effects and audit.

@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ getUser: vi.fn(), rpc: vi.fn(), client: vi.fn() }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: mocks.client }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({
+  getSupabaseServerClient: mocks.client,
+  getServerAuthUser: async () => mocks.getUser(),
+}));
 import { loadMyPlatformAccess } from "./platform-access";
 beforeEach(() => { vi.clearAllMocks(); mocks.client.mockResolvedValue({ auth: { getUser: mocks.getUser }, rpc: mocks.rpc }); mocks.getUser.mockResolvedValue({ data: { user: { id: "user", email: "fixture@example.invalid" } }, error: null }); });
 describe("platform access read failure classification", () => {

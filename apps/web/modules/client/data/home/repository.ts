@@ -1,5 +1,5 @@
 import { createServerClientRfqRepository } from "@/modules/client/data/rfq/server-repository";
-import { loadContractMissions } from "@/modules/shared/lib/contracts-missions/repository";
+import { loadClientHomeMissionSummary } from "@/modules/shared/lib/contracts-missions/home-summary";
 import type { QuoteComparison } from "@/modules/client/data/rfq/model";
 import {
   clientJourneySteps,
@@ -14,6 +14,7 @@ import {
   type ClientHomeStage,
 } from "./view-model";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
+import { loadClientHomeSnapshotRpc } from "./snapshot-rpc";
 
 export type ClientHomeSnapshot =
   | {
@@ -36,21 +37,102 @@ const emptyInsights: ClientHomeInsights = {
   messagesToHandle: null,
 };
 
-export async function loadClientHomeSnapshot(input: {
-  organizationId: string | null;
-  locale: "fr" | "ar";
-  actionItems: readonly UserActionItem[];
-  now: string;
-  isTeamLead: boolean;
-}): Promise<ClientHomeSnapshot> {
-  const emptyUnavailable: ClientHomeCounts = {
+function emptyUnavailableCounts(): ClientHomeCounts {
+  return {
     openRequests: null,
     quotesToReview: null,
     activeMissions: null,
     pendingDecisions: null,
     upcomingDue: null,
   };
+}
 
+export async function loadClientHomeSnapshot(input: {
+  organizationId: string | null;
+  locale: "fr" | "ar";
+  actionItems: readonly UserActionItem[];
+  now: string;
+  isTeamLead: boolean;
+  /** When false, skip the quote comparison RPC on the home path (default). */
+  includeComparison?: boolean;
+}): Promise<ClientHomeSnapshot> {
+  if (!input.organizationId) {
+    return {
+      status: "success",
+      stage: "new",
+      counts: computeClientHomeCounts({ actionItems: input.actionItems, now: input.now, requests: [], missions: [], contracts: [] }),
+      lastRequestId: null,
+      organizationName: null,
+      featuredProject: null,
+      comparison: null,
+      insights: toClientHomeInsights({ actionItems: input.actionItems, milestones: [], now: input.now }),
+    };
+  }
+
+  const rpc = await loadClientHomeSnapshotRpc(input.organizationId, input.locale);
+  if (rpc.status === "error" && rpc.reason === "UNAUTHENTICATED") {
+    return { status: "error", reason: "UNAUTHENTICATED", counts: emptyUnavailableCounts(), insights: emptyInsights };
+  }
+  if (rpc.status === "error" && rpc.reason === "FORBIDDEN") {
+    return { status: "error", reason: "FORBIDDEN", counts: emptyUnavailableCounts(), insights: emptyInsights };
+  }
+  if (rpc.status === "success") {
+    const actionPending = input.actionItems.filter((item) => item.requiresHumanReview || item.kind === "APPROVAL").length;
+    const actionUpcoming = input.actionItems.filter((item) => item.dueAt && Date.parse(item.dueAt) >= Date.parse(input.now) && Date.parse(item.dueAt) <= Date.parse(input.now) + 7 * 86_400_000).length;
+    const featured = rpc.value.featured;
+    const featuredProject: ClientFeaturedProject | null = featured
+      ? {
+          requestId: featured.id,
+          title: featured.description,
+          status: featured.status,
+          createdAt: featured.created_at,
+          quoteCount: featured.quote_count,
+          href: `/${input.locale}/client/demandes/${featured.id}`,
+          steps: clientJourneySteps(featured.status),
+        }
+      : null;
+    return {
+      status: "success",
+      stage: resolveClientHomeStage({
+        hasOrganization: true,
+        openRequests: rpc.value.open_requests,
+        activeMissions: rpc.value.active_missions,
+        isTeamLead: input.isTeamLead,
+      }),
+      counts: {
+        openRequests: rpc.value.open_requests,
+        quotesToReview: rpc.value.quotes_to_review,
+        activeMissions: rpc.value.active_missions,
+        pendingDecisions: rpc.value.pending_decisions + actionPending,
+        upcomingDue: rpc.value.upcoming_due + actionUpcoming,
+      },
+      lastRequestId: featured?.id ?? null,
+      organizationName: rpc.value.organization_name,
+      featuredProject,
+      comparison: null,
+      insights: toClientHomeInsights({
+        actionItems: input.actionItems,
+        milestones: rpc.value.next_milestone
+          ? [{ title: rpc.value.next_milestone.title, status: "PENDING", dueAt: rpc.value.next_milestone.due_at }]
+          : [],
+        now: input.now,
+      }),
+    };
+  }
+
+  // Fallback when the aggregate RPC is not yet applied or temporarily unavailable.
+  return loadClientHomeSnapshotLegacy(input);
+}
+
+async function loadClientHomeSnapshotLegacy(input: {
+  organizationId: string | null;
+  locale: "fr" | "ar";
+  actionItems: readonly UserActionItem[];
+  now: string;
+  isTeamLead: boolean;
+  includeComparison?: boolean;
+}): Promise<ClientHomeSnapshot> {
+  const emptyUnavailable = emptyUnavailableCounts();
   if (!input.organizationId) {
     return {
       status: "success",
@@ -66,7 +148,7 @@ export async function loadClientHomeSnapshot(input: {
 
   try {
     const repo = await createServerClientRfqRepository({ organizationId: input.organizationId, allForOrganization: true });
-    const [rfq, missions] = await Promise.all([repo.list(), loadContractMissions(input.locale, input.organizationId)]);
+    const [rfq, missions] = await Promise.all([repo.list(), loadClientHomeMissionSummary(input.locale, input.organizationId)]);
 
     if ((rfq.status === "error" && rfq.reason === "UNAUTHENTICATED") || (missions.status === "error" && missions.reason === "UNAUTHENTICATED")) {
       return { status: "error", reason: "UNAUTHENTICATED", counts: emptyUnavailable, insights: emptyInsights };
@@ -76,7 +158,7 @@ export async function loadClientHomeSnapshot(input: {
     if (rfq.status === "error") partialSources.push({ source: "requests", reason: ["FORBIDDEN", "NO_CLIENT_ORGANIZATION", "ORGANIZATION_SELECTION_REQUIRED"].includes(rfq.reason) ? "FORBIDDEN" : "UNAVAILABLE" });
     if (missions.status === "error") partialSources.push({ source: "missions", reason: ["FORBIDDEN_ORGANIZATION", "NO_CLIENT_ORGANIZATION", "ORGANIZATION_SELECTION_REQUIRED"].includes(missions.reason) ? "FORBIDDEN" : "UNAVAILABLE" });
     if (partialSources.length === 2) return { status: "error", reason: partialSources.every((item) => item.reason === "FORBIDDEN") ? "FORBIDDEN" : "UNAVAILABLE", counts: emptyUnavailable, insights: emptyInsights };
-    const missionDashboard = missions.status === "success" ? missions.dashboard : null;
+    const missionDashboard = missions.status === "success" ? missions : null;
     const orgRequests = rfq.status === "success" ? rfq.value.requests.filter((item) => item.organizationId === input.organizationId) : [];
     const counts = computeClientHomeCounts({
       requests: orgRequests.map((item) => ({ status: item.status, quoteCount: item.quoteCount })),
@@ -95,7 +177,7 @@ export async function loadClientHomeSnapshot(input: {
 
     const featured = pickFeaturedRequest(orgRequests);
     let comparisonSnapshot: QuoteComparison | null = null;
-    if (featured?.rfqId) {
+    if (input.includeComparison && featured?.rfqId) {
       const compared = await repo.comparison(featured.rfqId);
       comparisonSnapshot = compared.status === "success" ? compared.value : null;
     }

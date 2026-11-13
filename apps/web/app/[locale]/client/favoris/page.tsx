@@ -42,7 +42,7 @@ export default async function FavoritesPage({
         {result.status === "error" ? (
           <Alert variant={result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? "default" : "destructive"}>
             <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertTitle>
-            <AlertDescription>{result.reason}</AlertDescription>
+            <AlertDescription>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : result.reason === "FORBIDDEN" ? messages.forbidden : messages.loadError}</AlertDescription>
           </Alert>
         ) : (
           <FavoritesPanel dashboard={result.dashboard} providerOptions={providerOptions} locale={locale} m={messages} />

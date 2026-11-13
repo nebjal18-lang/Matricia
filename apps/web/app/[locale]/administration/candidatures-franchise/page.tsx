@@ -49,6 +49,23 @@ const statusLabels: Record<string, { fr: string; ar: string }> = {
   TERMINATED: { fr: "Terminée", ar: "منتهٍ" },
 };
 
+function statusTone(status: string): "critical" | "high" | "ok" | "default" {
+  if (status === "ACTIVE") return "ok";
+  if (status === "CLOSED" || status === "TERMINATED" || status === "SUSPENDED" || status === "FINANCIAL_RESTRICTED") return "critical";
+  if (status === "CONTRACT_PENDING" || status === "LIBRARY_ASSIGNED" || status === "DOCUMENT_REVIEW" || status === "COMPANY_REVIEW") return "high";
+  return "default";
+}
+
+function formatCreatedAt(value: string, locale: "fr" | "ar") {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Africa/Casablanca",
+  }).format(date);
+}
+
 export default async function FranchiseApplicationsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -143,25 +160,64 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
       active="parcours"
+      parcoursCurrent="franchise-applications"
       alternateHref={`/${alternate}/administration/candidatures-franchise${space.selectedQuery}`}
       crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/command-center${space.selectedQuery}`, label: c.crumbAdmin }, { href: `/${locale}/administration/parcours${space.selectedQuery}`, label: c.navParcours }, { label: fr ? "Candidatures franchise" : "ترشيحات الامتياز" }]} />}
     >
-      <main className="client-page">
-        <h1>{fr ? "Candidatures franchise" : "ترشيحات الامتياز"}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{fr ? "Chaque dépôt ouvre un dossier inscrit. Après la revue société et les pièces, le mandat est proposé depuis le dossier, approuvé par un second administrateur, puis activé par le candidat avec son code privé." : "كل إيداع يفتح ملفاً بحالة مسجّل. بعد مراجعة الشركة والوثائق يُقترح التفويض من الملف، ويعتمده مسؤول ثانٍ، ثم يفعّله المترشح برمزه الخاص."}</p>
-        {loaded.error || !rows.success ? <p role="alert" className="client-card mt-4">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : list.length === 0 ? <p className="client-card mt-4">{fr ? "Aucune candidature enregistrée." : "لا يوجد ترشيح مسجّل."}</p> : (
-          <ul className="mt-4 grid gap-4">
-            {models.map(({ row, model, keys }) => (
-              <li key={row.id} className="client-card">
-                <h2>{row.applicant_name}</h2>
-                <p dir="ltr">{row.reply_email}</p>
-                <p>{moroccoRegionLabel(row.territory_code, locale) || row.territory_code} · {row.domain_label}</p>
-                <p><strong>{statusLabels[row.status]?.[locale] ?? row.status}</strong> · <span dir="ltr">{row.id.slice(0, 8).toUpperCase()}</span></p>
-                {row.organization_id ? <p>{fr ? "Organisation : " : "المؤسسة: "}{organizations.get(row.organization_id) ?? (fr ? "organisation rattachée" : "مؤسسة مرتبطة")}</p> : null}
-                {row.franchise_id ? <p><a className="client-text-link" href={`/${locale}/administration/territoires${space.selectedQuery}`}>{fr ? "Ouvrir la gouvernance du mandat" : "فتح حوكمة التفويض"}</a></p> : null}
-                <FranchiseApplicationReview locale={locale} application={model} copy={copy} keys={keys} />
-              </li>
-            ))}
+      <main className="client-page admin-franchise-applications">
+        <header className="admin-section-head">
+          <div>
+            <h1>{fr ? "Candidatures franchise" : "ترشيحات الامتياز"}</h1>
+            <p>{fr ? "Chaque dépôt ouvre un dossier inscrit. Après la revue société et les pièces, le mandat est proposé depuis le dossier, approuvé par un second administrateur, puis activé par le candidat avec son code privé." : "كل إيداع يفتح ملفاً بحالة مسجّل. بعد مراجعة الشركة والوثائق يُقترح التفويض من الملف، ويعتمده مسؤول ثانٍ، ثم يفعّله المترشح برمزه الخاص."}</p>
+          </div>
+        </header>
+        {loaded.error || !rows.success ? <p role="alert" className="admin-panel">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : list.length === 0 ? <p className="admin-panel">{fr ? "Aucune candidature enregistrée." : "لا يوجد ترشيح مسجّل."}</p> : (
+          <ul className="admin-franchise-applications__list">
+            {models.map(({ row, model, keys }) => {
+              const status = statusLabels[row.status]?.[locale] ?? row.status;
+              return (
+                <li key={row.id} className="admin-work-card admin-franchise-card">
+                  <div className="admin-work-card__head">
+                    <div className="admin-work-card__title-block">
+                      <h2>{row.applicant_name}</h2>
+                      <p className="admin-work-card__motif" dir="ltr">{row.reply_email}</p>
+                    </div>
+                    <div className="admin-work-card__flags">
+                      <span className="admin-badge" data-tone={statusTone(row.status)}>{status}</span>
+                      {model.isIt ? <span className="admin-badge" data-tone="default">IT</span> : null}
+                    </div>
+                  </div>
+                  <dl className="admin-work-meta">
+                    <div>
+                      <dt>{fr ? "Territoire" : "الإقليم"}</dt>
+                      <dd>{moroccoRegionLabel(row.territory_code, locale) || row.territory_code}</dd>
+                    </div>
+                    <div>
+                      <dt>{fr ? "Domaine" : "المجال"}</dt>
+                      <dd>{row.domain_label}</dd>
+                    </div>
+                    <div>
+                      <dt>{fr ? "Déposée le" : "أُودعت في"}</dt>
+                      <dd><time dateTime={row.created_at} dir="ltr">{formatCreatedAt(row.created_at, locale)}</time></dd>
+                    </div>
+                    {row.organization_id ? (
+                      <div>
+                        <dt>{fr ? "Organisation" : "المؤسسة"}</dt>
+                        <dd>{organizations.get(row.organization_id) ?? (fr ? "Organisation rattachée" : "مؤسسة مرتبطة")}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                  {row.franchise_id ? (
+                    <div className="admin-work-links">
+                      <a className="admin-btn-outline !min-h-10 !px-3 !text-sm" href={`/${locale}/administration/territoires${space.selectedQuery}`}>
+                        {fr ? "Ouvrir la gouvernance du mandat" : "فتح حوكمة التفويض"}
+                      </a>
+                    </div>
+                  ) : null}
+                  <FranchiseApplicationReview locale={locale} application={model} copy={copy} keys={keys} />
+                </li>
+              );
+            })}
           </ul>
         )}
       </main>

@@ -7,7 +7,7 @@ import { WorkspaceFailure } from "@/modules/shared/ui/workspace-failure";
 import { CapabilityResolutionForm } from "@/modules/admin/screens/capability-reviews/resolution-form";
 export default async function CapabilityReviewsPage({params}:{params:Promise<{locale:string}>}){
  const{locale}=await params;if(!isLocale(locale))notFound();const ar=locale==="ar";
- const context = await sensitivePageContext({ locale, path: "revues-capacites", active: "settings", title: ar ? "مراجعات القدرات" : "Revues de capacités", lead: ar ? "الصلاحيات الفعلية تتبع الأدوار المعتمدة وسياسات قاعدة البيانات." : "Les droits effectifs suivent les rôles autorisés et les politiques de la base.", roles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "READ_ONLY_AUDITOR"] });
+ const context = await sensitivePageContext({ locale, path: "revues-capacites", active: "actors", actorCurrent: "capability-reviews", title: ar ? "مراجعات القدرات" : "Revues de capacités", lead: ar ? "الصلاحيات الفعلية تتبع الأدوار المعتمدة وسياسات قاعدة البيانات." : "Les droits effectifs suivent les rôles autorisés et les politiques de la base.", roles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "READ_ONLY_AUDITOR"] });
  if (context.status === "blocked") return context.view;
  const r = await context.access.client.rpc("get_admin_capability_reviews_v1");
  const parsed=z.array(z.object({id:z.string().uuid(),userId:z.string().uuid(),organizationId:z.string().uuid(),organizationName:z.string(),requestedCapabilities:z.array(z.string()),status:z.string(),resolution:z.string().nullable(),roles:z.array(z.string())})).safeParse(r.data);

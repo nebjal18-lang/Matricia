@@ -28,7 +28,7 @@ export default async function NewDispute({
   const m = getDisputeMessages(locale);
   if (result.status === "error") {
     return (
-      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={m.newCase} kicker={spaceCopy(locale).kicker}>
+      <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="disputes" title={m.newCase} kicker={spaceCopy(locale).kicker}>
         <WorkspaceFailure locale={locale} reason={result.reason === "FORBIDDEN" ? "FORBIDDEN" : "UNAVAILABLE"} returnPath={`/${locale}/client/litiges/nouveau${space.selectedQuery}`} supportReference="CLIENT-DISPUTE-OPEN" />
       </ClientAppShell>
     );
@@ -41,7 +41,7 @@ export default async function NewDispute({
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
-      active="missions"
+      active="disputes"
       title={m.newCase}
       kicker={spaceCopy(locale).kicker}
     >

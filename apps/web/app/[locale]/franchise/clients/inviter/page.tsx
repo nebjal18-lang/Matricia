@@ -21,7 +21,7 @@ export default async function FranchiseInviteClientPage({ params, searchParams }
   const mandateName = franchiseMandateName(result);
   const writable = crm.status === "success" ? crm.dashboard.franchises.find((item) => item.canWrite && item.territory) : null;
   return (
-    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="requests" title={c.inviteClientTitle} lead={c.inviteClientLead} kicker={c.inviteHint} mandateName={mandateName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="network" title={c.inviteClientTitle} lead={c.inviteClientLead} kicker={c.inviteHint} mandateName={mandateName}>
       <main className="client-page">
         <MandateBanner locale={locale} name={mandateName ?? c.mandate} />
         <section className="franchise-workbench">

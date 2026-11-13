@@ -35,15 +35,12 @@ export function consultationRowsFromInvitations(
   const ar = locale === "ar";
   return invitations.map((item) => {
     const quoteStatus = item.quote?.status ?? null;
-    const status = quoteStatus
-      ? quoteStatusLabel(quoteStatus, locale)
-      : quoteStatusLabel(item.status, locale);
     return {
       id: item.id,
       title: item.description,
       scope: item.regionCode,
       deadline: formatDeadline(item.deadline, locale),
-      status,
+      status: quoteStatusLabel(item.status, locale),
       action: ar ? "فتح الملف" : "Ouvrir le dossier",
       tone: invitationTone(item.status, quoteStatus),
       href: `/${locale}/sous-traitant/consultations/${item.id}${query}`,
@@ -94,7 +91,7 @@ export function missionRowsFromDashboard(
   const ar = locale === "ar";
   return dashboard.missions.map((mission) => {
     const open = mission.milestones.find((item) => !["DONE", "COMPLETED"].includes(item.status));
-    const title = open?.title || mission.deliverables[0]?.label || mission.id.slice(0, 8);
+    const title = open?.title || mission.deliverables[0]?.label || (ar ? "مهمة" : "Mission");
     return {
       id: mission.id,
       title,

@@ -1,6 +1,6 @@
 import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { workspaceLandingPath, type WorkspaceLanding } from "@/modules/shared/lib/connected-space/workspace-landing";
 import { availableWorkspaces, type WorkspaceNavigation } from "./workspace-navigation";
@@ -13,8 +13,8 @@ export type WorkspaceNavigationResult =
 /** Only verified user-scoped reads decide the available navigation. Every destination keeps its own guards. */
 export async function readWorkspaceNavigation(locale: Locale, organizationId?: string | null, preferred?: string): Promise<WorkspaceNavigationResult> {
   try {
-    const client = await getSupabaseServerClient();
-    const { data: auth, error: authError } = await client.auth.getUser();
+    const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+    const { data: auth, error: authError } = authResult;
     if (authError) return { status: "error", reason: authError.status === 401 || authError.status === 403 || authError.name === "AuthSessionMissingError" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
     if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
     const [security, memberships] = await Promise.all([

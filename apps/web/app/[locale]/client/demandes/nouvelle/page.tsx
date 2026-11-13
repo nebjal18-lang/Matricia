@@ -131,8 +131,8 @@ export default async function NewRequestPage({
           <article className="client-card" role="status">
             <p>{query.benefitRedemptionId || query.opportunityId || query.intakeId ? messages.contextError : messages.contextRequired}</p>
             <div className="client-offer-actions">
-              <Link href={`/${locale}/client/diagnostics${space.selectedQuery}`} className="client-cta">{messages.openAnalysis}</Link>
-              <Link href={`/${locale}/besoin${space.selectedQuery}`} className="client-ghost-link">{messages.describeNeed}</Link>
+              <Link href={`/${locale}/besoin${space.selectedQuery}`} className="client-cta">{messages.describeNeed}</Link>
+              <Link href={`/${locale}/client/diagnostics${space.selectedQuery}`} className="client-ghost-link">{messages.openAnalysis}</Link>
             </div>
           </article>
         )}

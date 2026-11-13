@@ -4,7 +4,7 @@ const mocks=vi.hoisted(()=>({getUser:vi.fn(),rpc:vi.fn(),tables:{}as Record<stri
 vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mocks.getUser},rpc:mocks.rpc,from:(table:string)=>{
  let bounds:[number,number]|undefined,head=false,ids:string[]|undefined;const entry={table,filters:[]as Array<[string,unknown]>};mocks.queries.push(entry);
  const q={select:(_s:string,opts?:{head?:boolean})=>{head=Boolean(opts?.head);return q},eq:(key:string,value:unknown)=>{entry.filters.push([key,value]);return q},is:()=>q,gt:()=>q,in:(key:string,values:string[])=>{if(key==="id")ids=values;return q},order:()=>q,limit:()=>q,range:(from:number,to:number)=>{bounds=[from,to];return q},then:(resolve:(x:unknown)=>void)=>{let rows=mocks.tables[table]??[];if(ids)rows=rows.filter(x=>ids!.includes((x as{id:string}).id));const total=rows.length;if(bounds)rows=rows.slice(bounds[0],bounds[1]+1);return Promise.resolve({data:head?null:rows,error:null,count:head?total:null}).then(resolve)}};return q;
-}})}));
+}}),getServerAuthUser:async()=>mocks.getUser()}));
 vi.mock("@/modules/shared/lib/i18n/workflow-statuses",()=>({workflowStatusLabel:(value:string)=>value}));
 import{loadProviderBilling}from"./repository";
 import{ProviderLedgerBoard}from"@/modules/provider/screens/facturation/ledger-board";

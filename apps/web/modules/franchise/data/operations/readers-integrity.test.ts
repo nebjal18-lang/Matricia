@@ -6,12 +6,19 @@ function query(table:string){
  const chain={
   select:()=>chain,order:()=>chain,
   match:(value:Record<string,unknown>)=>{Object.assign(matches,value);return chain;},
+  in:(key:string,values:unknown[])=>{matches[key]={__in:values};return chain;},
   eq:(key:string,value:unknown)=>{matches[key]=value;return chain;},
   range:async(from:number,to:number)=>{
-   mocks.queries.push({table,from,to,matches});
+   mocks.queries.push({table,from,to,matches:{...matches}});
    const error=mocks.failPage(table,from);
    if(error)return{data:null,error};
-   const rows=(mocks.rows.get(table)??[]).filter(row=>Object.entries(matches).every(([key,value])=>typeof row==="object"&&row!==null&&(!(key in row)||(row as Record<string,unknown>)[key]===value)));
+   const rows=(mocks.rows.get(table)??[]).filter(row=>{
+    if(typeof row!=="object"||row===null)return false;
+    return Object.entries(matches).every(([key,value])=>{
+     if(value&&typeof value==="object"&&"__in" in value)return (value as {__in:unknown[]}).__in.includes((row as Record<string,unknown>)[key]);
+     return !(key in row)||(row as Record<string,unknown>)[key]===value;
+    });
+   });
    return{data:rows.slice(from,to+1),error:null};
   },
  };

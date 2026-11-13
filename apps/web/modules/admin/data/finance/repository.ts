@@ -37,12 +37,14 @@ export async function reconcileAdminProviderPayment(input: unknown): Promise<Adm
   const value = parsed.data;
   const [paymentQuery, allocationsQuery, invoiceQuery] = await Promise.all([
     access.client.from("provider_payments").select("id,provider_organization_id,currency,amount_minor::text").eq("id", value.paymentId).limit(1).maybeSingle(),
-    access.client.from("provider_payment_allocations").select("amount_minor::text").eq("payment_id", value.paymentId).limit(200),
+    access.client.from("provider_payment_allocations").select("amount_minor::text").eq("payment_id", value.paymentId).limit(201),
     access.client.from("provider_invoice_balances").select("id,provider_organization_id,currency,outstanding_minor::text").eq("id", value.invoiceId).limit(1).maybeSingle(),
   ]);
   if (paymentQuery.error || allocationsQuery.error || invoiceQuery.error) return { status: "error", reason: "UNAVAILABLE" };
-  const payment = paymentRow.safeParse(paymentQuery.data), allocations = z.array(allocationRow).max(200).safeParse(allocationsQuery.data), invoice = invoiceRow.safeParse(invoiceQuery.data);
+  const payment = paymentRow.safeParse(paymentQuery.data), allocations = z.array(allocationRow).max(201).safeParse(allocationsQuery.data), invoice = invoiceRow.safeParse(invoiceQuery.data);
   if (!payment.success || !allocations.success || !invoice.success) return { status: "error", reason: "INVALID_INPUT" };
+  // Fail closed when the pre-check page is saturated — never undercount allocated totals.
+  if (allocations.data.length > 200) return { status: "error", reason: "UNAVAILABLE" };
   if (payment.data.provider_organization_id !== invoice.data.provider_organization_id || payment.data.currency !== invoice.data.currency) return { status: "error", reason: "INVALID_INPUT" };
   const allocated = allocations.data.reduce((total, item) => total + BigInt(item.amount_minor), BigInt(0));
   const amount = BigInt(value.amountMinor);

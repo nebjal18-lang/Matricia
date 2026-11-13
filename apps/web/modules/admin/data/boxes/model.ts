@@ -43,5 +43,5 @@ export const adminBoxesDashboardSchema = z.object({
 });
 
 export type AdminBoxesDashboard = z.infer<typeof adminBoxesDashboardSchema>;
-export type AdminBoxesErrorReason = "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "INVALID_RESPONSE" | "INVALID_INPUT" | "CONFLICT";
+export type AdminBoxesErrorReason = "UNAUTHENTICATED" | "FORBIDDEN" | "MFA_REQUIRED" | "UNAVAILABLE" | "INVALID_RESPONSE" | "INVALID_INPUT" | "CONFLICT";
 export type AdminBoxesResult<T> = { status: "success"; value: T } | { status: "error"; reason: AdminBoxesErrorReason };

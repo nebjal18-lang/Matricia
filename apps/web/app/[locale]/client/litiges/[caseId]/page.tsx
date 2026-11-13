@@ -35,7 +35,7 @@ export default async function DisputePage({
   const m = getDisputeMessages(locale);
   const c = spaceCopy(locale);
   if (result.status === "error" && result.reason === "INVALID_INPUT") notFound();
-  if (result.status === "error") return <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={m.title} lead={m.intro} kicker={c.kicker}>
+  if (result.status === "error") return <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="disputes" title={m.title} lead={m.intro} kicker={c.kicker}>
     <section role="alert" className="client-card"><h2>{locale === "ar" ? "تعذر تحميل ملف النزاع" : "Le dossier de litige n’a pas pu être chargé"}</h2>
       <p>{result.reason === "FORBIDDEN" ? (locale === "ar" ? "لا تتيح صلاحياتكم الاطلاع على هذا الملف." : "Vos habilitations ne permettent pas de consulter ce dossier.") : (locale === "ar" ? "القراءة غير متاحة مؤقتا؛ لا يعني ذلك اختفاء الملف." : "La lecture est temporairement indisponible ; cela ne signifie pas que le dossier a disparu.")}</p>
       <Link href={`/${locale}/client/litiges/${caseId}${space.selectedQuery}`} className="client-text-link">{locale === "ar" ? "إعادة المحاولة" : "Réessayer"}</Link>
@@ -45,7 +45,7 @@ export default async function DisputePage({
   const keys = Object.fromEntries(["respond", "appeal", "decide", "propose", "approve", "activate"].map((x) => [x, randomUUID()]));
 
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={m.title} lead={d.obligationKey} kicker={c.kicker}>
+    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="disputes" title={m.title} lead={d.obligationKey} kicker={c.kicker}>
       {list.status === "error" ? <p role="alert" className="client-card">{locale === "ar" ? "تفاصيل هذا الملف متاحة، لكن تعذر تحديث قائمة النزاعات الأخرى." : "Ce dossier est disponible, mais la liste des autres litiges n’a pas pu être actualisée."}</p> : null}
       <DisputesBoard
         locale={locale}

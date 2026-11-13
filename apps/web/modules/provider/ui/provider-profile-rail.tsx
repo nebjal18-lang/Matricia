@@ -53,7 +53,7 @@ export function ProviderProfileRail({
 }) {
   const c = copy[locale];
   const items = [
-    { key: "profile" as const, href: `/${locale}/sous-traitant/qualification${query}#qualification`, label: c.profile, icon: UserRound },
+    { key: "profile" as const, href: `/${locale}/sous-traitant/identite${query}`, label: c.profile, icon: UserRound },
     { key: "services" as const, href: `/${locale}/sous-traitant/services${query}`, label: c.services, icon: Wrench },
     { key: "certs" as const, href: `/${locale}/sous-traitant/qualification/certifications${query}`, label: c.certs, icon: Award },
     { key: "capacity" as const, href: `/${locale}/sous-traitant/qualification${query}#capacite`, label: c.capacity, icon: ShieldCheck },

@@ -225,9 +225,13 @@ export default async function ClientOnboardingPage({ params, searchParams }: { p
         <p className="rounded-lg border border-primary/20 bg-card p-3 text-sm text-muted-foreground">{messages.privacyNotice}</p>
         {result.status === "error" ? (
           <Alert variant="destructive"><AlertTitle>{messages.loadErrorTitle}</AlertTitle><AlertDescription><p>{messages.loadError}</p><Link href={`/${locale}/client/onboarding${space.selectedQuery}`} className={cn(buttonVariants({ variant: "outline" }), "mt-3 min-h-11")}>{messages.retry}</Link></AlertDescription></Alert>
-        ) : result.organizations.length === 0 ? (
-          <Card><CardHeader><CardTitle>{messages.emptyTitle}</CardTitle><CardDescription>{messages.emptyDescription}</CardDescription></CardHeader><CardContent><Link href={`/${locale}/organisation${space.selectedQuery}`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.organizationAction}</Link></CardContent></Card>
-        ) : <div className="space-y-10">{result.organizations.map((organization) => <OrganizationOnboarding key={organization.id} organization={organization} locale={locale} messages={messages} />)}</div>}
+        ) : (() => {
+          const scoped = result.organizations.filter((organization) => organization.id === space.selectedOrganizationId);
+          if (scoped.length === 0) {
+            return <Card><CardHeader><CardTitle>{messages.emptyTitle}</CardTitle><CardDescription>{messages.emptyDescription}</CardDescription></CardHeader><CardContent><Link href={`/${locale}/organisation${space.selectedQuery}`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.organizationAction}</Link></CardContent></Card>;
+          }
+          return <div className="space-y-10">{scoped.map((organization) => <OrganizationOnboarding key={organization.id} organization={organization} locale={locale} messages={messages} />)}</div>;
+        })()}
       </main>
     </ClientAppShell>
   );

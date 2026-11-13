@@ -1,7 +1,44 @@
 import { describe, expect, it } from "vitest";
 import type { AdminWorkItem } from "./model";
-import { dossierHref, summarizeAdminWork } from "./view-model";
+import {
+  actionEnvironmentTone,
+  actionResourceLabel,
+  actionStatusTone,
+  dossierHref,
+  formatAdminDateTime,
+  isWorkOverdue,
+  shortReference,
+  summarizeAdminWork,
+  workItemDueTone,
+} from "./view-model";
 const base: AdminWorkItem = { id: "1", queueKey: "OPS", queueLabelFr: "Ops", queueLabelAr: "عمليات", organizationId: null, sourceKind: "EXCEPTION", resourceType: "case", resourceId: "1", titleFr: "Cas", titleAr: "حالة", priority: "LOW", status: "OPEN", dueAt: "2026-09-13T12:00:00Z", assignedTo: null, rowVersion: 1 };
+describe("action presentation helpers", () => {
+  it("labels resources and shortens technical references", () => {
+    expect(actionResourceLabel("ORGANIZATION", "fr")).toBe("Entreprise");
+    expect(actionResourceLabel("provider", "ar")).toBe("مقدم خدمة");
+    expect(shortReference("5a4a029f-1234-4abc-8def-abcdef012345")).toBe("5a4a029f…2345");
+    expect(formatAdminDateTime("2026-11-08T01:10:27.679938+00:00", "fr")).not.toContain("T01:10");
+    expect(actionStatusTone("EXECUTED")).toBe("ok");
+    expect(actionEnvironmentTone("PRODUCTION")).toBe("critical");
+    expect(isWorkOverdue("1998-09-15T10:00:00Z", "2026-11-13T12:00:00Z")).toBe(true);
+    expect(workItemDueTone("1998-09-15T10:00:00Z", "2026-11-13T12:00:00Z", "HIGH")).toBe("high");
+  });
+});
+
+describe("overdue-first ordering", () => {
+  it("surfaces overdue medium work ahead of a future critical deadline", () => {
+    const summary = summarizeAdminWork(
+      [
+        { ...base, id: "future-critical", priority: "CRITICAL", dueAt: "2026-11-20T12:00:00Z" },
+        { ...base, id: "overdue-medium", priority: "MEDIUM", dueAt: "2026-11-01T12:00:00Z" },
+      ],
+      "2026-11-13T12:00:00Z",
+    );
+    expect(summary.ordered.map((item) => item.id)).toEqual(["overdue-medium", "future-critical"]);
+    expect(summary.overdue).toBe(1);
+  });
+});
+
 describe("summarizeAdminWork", () => {
   it("priorise le jour et la criticité", () => {
     const summary = summarizeAdminWork([base, { ...base, id: "2", priority: "CRITICAL", sourceKind: "RISK_FLAG", dueAt: "2026-09-12T11:00:00Z" }, { ...base, id: "3", priority: "HIGH", dueAt: "2026-09-12T15:00:00Z" }], "2026-09-12T14:00:00Z");

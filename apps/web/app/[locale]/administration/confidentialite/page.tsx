@@ -11,7 +11,7 @@ import { PrivacyPanel } from "@/modules/admin/screens/privacy/panel";
 export const dynamic = "force-dynamic";
 export default async function PrivacyPage({params}: {params: Promise<{locale:string}>}) {
  const {locale} = await params; if(!isLocale(locale)) notFound();
- const context = await sensitivePageContext({ locale, path: "confidentialite", active: "settings", title: locale === "ar" ? "الخصوصية وحقوق الأشخاص" : "Confidentialité et droits des personnes", lead: locale === "ar" ? "معالجة موثقة ومحددة النطاق." : "Traitement traçable et limité au périmètre autorisé.", roles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "READ_ONLY_AUDITOR"] });
+ const context = await sensitivePageContext({ locale, path: "confidentialite", active: "actors", actorCurrent: "privacy", title: locale === "ar" ? "الخصوصية وحقوق الأشخاص" : "Confidentialité et droits des personnes", lead: locale === "ar" ? "معالجة موثقة ومحددة النطاق." : "Traitement traçable et limité au périmètre autorisé.", roles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "READ_ONLY_AUDITOR"] });
  if (context.status === "blocked") return context.view;
  const client = context.access.client;
  const [response, retentionResponse, rectificationResponse] = await Promise.all([client.rpc("get_admin_privacy_console_v1"),client.rpc("get_admin_retention_execution_console_v1"),client.rpc("get_admin_dsr_rectification_console_v1")]);

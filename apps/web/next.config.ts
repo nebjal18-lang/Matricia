@@ -60,6 +60,8 @@ const securityHeaders = [
     : []),
 ] as const;
 
+const longLivedAssetCache = [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] as const;
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Preview comments patch static files after upload. Immutable assets reject that patch.
@@ -69,8 +71,12 @@ const nextConfig: NextConfig = {
     "/api/**":["./node_modules/@fontsource/noto-sans-arabic/package.json","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-latin-400-normal.woff","./node_modules/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-400-normal.woff"],
   },
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   experimental: {
-    optimizePackageImports: ["lucide-react", "radix-ui", "date-fns", "recharts"],
+    optimizePackageImports: ["lucide-react", "radix-ui", "date-fns", "recharts", "@base-ui/react"],
     // Transport headroom only; the server action still enforces the 10 MiB document policy.
     serverActions: { bodySizeLimit: "12mb" },
   },
@@ -79,8 +85,15 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: supabasePublishableKey,
   },
   async headers() {
+    // Immutable static caching breaks Turbopack HMR in local/dev (stale JS/CSS).
+    const assetCache = isProduction ? longLivedAssetCache : [{ key: "Cache-Control", value: "no-store" }] as const;
     return [
       { source: "/:path*", headers: [...securityHeaders] },
+      { source: "/_next/static/:path*", headers: [...assetCache] },
+      { source: "/home-v2/:path*", headers: [...longLivedAssetCache] },
+      { source: "/scenes/:path*", headers: [...longLivedAssetCache] },
+      { source: "/favicon.svg", headers: [...longLivedAssetCache] },
+      { source: "/social-card.svg", headers: [...longLivedAssetCache] },
       {
         source: "/api/signatures/yousign/envelopes/:envelopeId/documents/:documentId",
         headers: [

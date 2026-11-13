@@ -55,7 +55,7 @@ export function WorkspaceAccountMenu({
         <Link href={`/${locale}/securite/sessions?${securityQuery}`}>{m.sessionsCta}</Link>
         <form action={signOutOfWorkspace}>
           <input type="hidden" name="locale" value={locale} />
-          <input type="hidden" name="returnTo" value={returnTo} />
+          <input type="hidden" name="returnTo" value={next} />
           <Button type="submit" className="client-ghost-btn">
             {m.signOut}
           </Button>

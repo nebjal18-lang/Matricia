@@ -14,6 +14,7 @@ import type { ProviderDashboard, ProviderDocument, ProviderService } from "@/mod
 import type { ProviderReputationDashboard } from "@/modules/provider/data/reputation/model";
 import { getEligibilityReason, getProviderStatusLabel } from "@/modules/provider/screens/qualification/messages";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -133,11 +134,17 @@ export function ProviderHomeBoard({
   const journey = (() => {
     const fr = locale === "fr";
     const stage = snapshot?.status === "success" ? snapshot.stage : null;
+    const counts = snapshot?.status === "success" ? snapshot.counts : null;
+    const reputationPublished = snapshot?.status === "success" ? snapshot.reputation.published : null;
     const pending = fr ? "À venir" : "قادمة";
     const done = fr ? "Complété" : "مكتمل";
     const current = fr ? "En cours" : "جارٍ";
     const unknown = fr ? "Non disponible" : "غير متاح";
     type JourneyState = "done" | "current" | "todo";
+    const quotesActive = (counts?.quotesInProgress ?? 0) > 0;
+    const missionsActive = (counts?.activeMissions ?? 0) > 0;
+    const reputationReady = (reputationPublished ?? 0) > 0;
+    const opportunitiesOpen = (counts?.consultationsDue ?? 0) > 0 || stage === "qualified";
     return [
       { id: "j1", title: fr ? "Profil" : "الملف", detail: stage ? done : unknown, state: (stage ? "done" : "todo") as JourneyState },
       {
@@ -149,12 +156,27 @@ export function ProviderHomeBoard({
       {
         id: "j3",
         title: fr ? "Opportunités" : "الفرص",
-        detail: stage === "qualified" ? current : pending,
-        state: (stage === "qualified" ? "current" : "todo") as JourneyState,
+        detail: stage === "qualified" ? (opportunitiesOpen ? current : done) : pending,
+        state: (stage === "qualified" ? (opportunitiesOpen ? "current" : "done") : "todo") as JourneyState,
       },
-      { id: "j4", title: fr ? "Devis" : "العروض", detail: pending, state: "todo" as JourneyState },
-      { id: "j5", title: fr ? "Missions" : "المهام", detail: pending, state: "todo" as JourneyState },
-      { id: "j6", title: fr ? "Réputation" : "السمعة", detail: pending, state: "todo" as JourneyState },
+      {
+        id: "j4",
+        title: fr ? "Devis" : "العروض",
+        detail: counts?.quotesInProgress === null ? unknown : quotesActive ? current : stage === "qualified" ? pending : pending,
+        state: (quotesActive ? "current" : stage === "qualified" && (counts?.quotesInProgress === 0) ? "done" : "todo") as JourneyState,
+      },
+      {
+        id: "j5",
+        title: fr ? "Missions" : "المهام",
+        detail: counts?.activeMissions === null ? unknown : missionsActive ? current : stage === "qualified" ? pending : pending,
+        state: (missionsActive ? "current" : stage === "qualified" && counts?.activeMissions === 0 ? "done" : "todo") as JourneyState,
+      },
+      {
+        id: "j6",
+        title: fr ? "Réputation" : "السمعة",
+        detail: reputationPublished === null ? unknown : reputationReady ? done : pending,
+        state: (reputationReady ? "done" : stage === "qualified" ? "todo" : "todo") as JourneyState,
+      },
     ];
   })();
   return (
@@ -176,7 +198,7 @@ export function ProviderHomeBoard({
             <h2 id="provider-treat-now"><Zap aria-hidden className="size-4" />{c.treatNow}</h2>
             <p>{c.treatLead}</p>
           </div>
-          <Link href={`/${locale}/sous-traitant/consultations${query}`} className="client-text-link">{c.seeAll} →</Link>
+          <Link href={`/${locale}/sous-traitant/consultations${providerSearchQuery(query, { tab: "answer" })}`} className="client-text-link">{c.seeAll} →</Link>
         </header>
         <div className="provider-treat">
           {treatRows.length === 0 ? <p role="status">{c.treatEmpty}</p> : treatRows.map((item) => {
@@ -221,7 +243,7 @@ export function ProviderHomeBoard({
               <h2>{c.adapted}</h2>
               <p>{c.adaptedLead}</p>
             </div>
-            <Link href={`/${locale}/sous-traitant/consultations${query}`} className="client-text-link">{c.seeAllConsult}</Link>
+            <Link href={`/${locale}/sous-traitant/consultations${providerSearchQuery(query, { tab: "answer" })}`} className="client-text-link">{c.seeAllConsult}</Link>
           </header>
           {consultRows.length === 0 ? <p role="status">{c.adaptedEmpty}</p> : (
           <ul className="client-feed">
@@ -293,16 +315,13 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
     ? [
         { id: "profile", title: c.checkActivity, status: profileReady ? c.statusSent : c.statusOpen, tone: profileReady ? "mint" : "peach", href: `/${locale}/sous-traitant/qualification${query}#qualification`, action: profileReady ? "open" : "complete" },
         { id: "services", title: c.checkServices, status: servicesReady ? c.statusSent : c.statusOpen, tone: servicesReady ? "mint" : "peach", href: `/${locale}/sous-traitant/services${query}`, action: "open" as const },
-        { id: "capacity", title: c.checkCapacity, status: capacityReady ? c.statusSent : c.statusOpen, tone: capacityReady ? "mint" : "peach", href: `/${locale}/sous-traitant/services${query}`, action: capacityReady ? "open" : "complete" },
+        { id: "capacity", title: c.checkCapacity, status: capacityReady ? c.statusSent : c.statusOpen, tone: capacityReady ? "mint" : "peach", href: `/${locale}/sous-traitant/qualification${query}#capacite`, action: capacityReady ? "open" : "complete" },
         { id: "docs", title: c.checkDocs, status: docsReady ? c.statusSent : c.statusOpen, tone: docsReady ? "mint" : "peach", href: `/${locale}/sous-traitant/documents${query}`, action: docsReady ? "open" : "complete" },
         { id: "decision", title: c.checkDecision, status: c.statusReview, tone: "violet" as const, href: `/${locale}/sous-traitant/qualification${query}`, action: "open" as const },
       ]
     : demo.checklist;
-  const verifiedCategories = [c.verifiedIdentity, c.verifiedDocuments, c.verifiedServices, c.verifiedCapacity, c.verifiedRules];
   const verified = live
-    ? (documents.filter((item) => item.status === "VERIFIED").map((item) => item.code).length
-        ? documents.filter((item) => item.status === "VERIFIED").map((item) => item.code)
-        : verifiedCategories)
+    ? documents.filter((item) => item.status === "VERIFIED").map((item) => item.code)
     : demo.verified;
   const history = live
     ? documents.map((item) => ({ id: item.id, title: item.code, detail: `${item.kind} · ${item.status}` }))
@@ -313,7 +332,9 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
         <article className="client-card provider-identity-card">
           <div className="provider-identity-main">
             <p className="client-space-label">{c.space}</p>
-            <h2>{live && dashboard?.organizationName ? dashboard.organizationName : (locale === "ar" ? "ملفكم المهني" : "Votre profil professionnel")}</h2>
+            <h2>{live && dashboard?.organizationName
+              ? organizationDisplayLabel(dashboard.organizationName, locale)
+              : (locale === "ar" ? "ملفكم المهني" : "Votre profil professionnel")}</h2>
             <p>{live && dashboard?.profile?.activitySummary
               ? dashboard.profile.activitySummary.slice(0, 220)
               : (locale === "ar" ? "صفوا نشاطكم وكفاءاتكم لاستكمال الملف." : "Décrivez votre activité et vos compétences pour compléter le dossier.")}</p>
@@ -365,11 +386,15 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
         <article className="client-card">
           <header><h2>{c.verified}</h2></header>
           <p>{c.verifiedLead}</p>
-          <ul className="client-feed">
-            {verified.map((item) => (
-              <li key={item}><FileText className="size-4" aria-hidden /><span>{item}</span></li>
-            ))}
-          </ul>
+          {verified.length === 0 ? (
+            <p role="status" className="franchise-empty-panel">{locale === "ar" ? "لا توجد وثيقة موثّقة بعد." : "Aucune pièce encore vérifiée."}</p>
+          ) : (
+            <ul className="client-feed">
+              {verified.map((item) => (
+                <li key={item}><FileText className="size-4" aria-hidden /><span>{item}</span></li>
+              ))}
+            </ul>
+          )}
           <p className="client-access-note">{c.notCert}</p>
         </article>
       </section>

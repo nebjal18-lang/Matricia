@@ -14,7 +14,8 @@ describe("client dashboard mockups", () => {
   });
 
   it("aligne les libellés de navigation sur les maquettes", () => {
-    expect(clientDashboardCopy.fr.navNeeds).toBe("Bilan & besoins");
+    expect(clientDashboardCopy.fr.navNeeds).toBe("Bilans");
+    expect(clientDashboardCopy.fr.navDisputes).toBe("Litiges");
     expect(clientDashboardCopy.fr.navRewards).toBe("Récompenses");
     expect(clientDashboardCopy.fr.brandTagline).toBe("Des entreprises plus loin.");
     expect(clientDashboardCopy.fr.brandFooter).toBe("Propulsons le savoir-faire marocain.");

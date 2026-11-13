@@ -28,13 +28,18 @@
 
 ## En cours
 
-- Lot 3 : rattachement serveur idempotent du brouillon après authentification, préremplissage de la demande et validation progressive.
-- Lot 4 : réutilisation du contexte d’activité dans la qualification fournisseur et hiérarchisation des consultations réellement accessibles.
+- Lot 4 : E2E authentifié besoin→demande FR/AR 360 px.
+
+## Terminé récemment
+
+- Lot 3 : rattachement auto du brouillon confirmé après OTP via `save_public_need_intake` (idempotent) + redirection vers la demande préremplie quand un `serviceCode` est connu (`need-flow.tsx` NeedResult).
+- Lot 4 (web) : préremplissage activité depuis intent v2, consultations home `tab=answer`, multi-services après succès.
+- UX-01 : `activitySummary` exposé par `franchise_provider_dossiers` + affichage qualification franchise (migration `20261112190000_franchise_provider_dossier_activity_summary.sql`).
 
 ## Bloqué
 
-- Aucun blocage technique pour le lot public. Les mutations Supabase additives seront préparées puis appliquées uniquement à un environnement non-production autorisé.
+- Aucun blocage technique pour le lot public. YouSign LIVE, CMI LIVE (dont remboursements sans spec API) et consumers Privacy*RequestedV1 restent hors ce lot (décisions / attestation externes).
 
 ## Prochaine action exacte
 
-Créer le contrat serveur et la migration additive de rattachement des brouillons publics, avec tests d’idempotence et RLS.
+E2E authentifié besoin→demande FR/AR 360 px.

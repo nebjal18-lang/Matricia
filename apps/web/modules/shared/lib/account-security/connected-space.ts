@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 /** Account security is available before an organization or a workspace role exists. */
 export async function resolveConnectedSpace(input: { locale: Locale; organizationId?: string; allowDirectoryFailure?: boolean }) {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth, error: authError } = authResult;
   if (authError) {
     if (classifyAuthReadFailure(authError) === "UNAUTHENTICATED") return { status: "unauthenticated" as const };
     throw new Error("WORKSPACE_CONTEXT_UNAVAILABLE");

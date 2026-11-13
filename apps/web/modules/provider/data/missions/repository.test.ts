@@ -1,6 +1,6 @@
 import{beforeEach,describe,expect,it,vi}from"vitest";
 const mocks=vi.hoisted(()=>({getUser:vi.fn(),from:vi.fn(),rpc:vi.fn()}));
-vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mocks.getUser},from:mocks.from,rpc:mocks.rpc})}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mocks.getUser},from:mocks.from,rpc:mocks.rpc}),getServerAuthUser:async()=>mocks.getUser()}));
 import{loadProviderMissions}from"./repository";
 function query(result:{data:unknown;error:unknown}){const chain:Record<string,unknown>={};for(const method of["select","eq","is","in","order","limit","range"])chain[method]=vi.fn(()=>chain);chain.maybeSingle=vi.fn(async()=>result);chain.then=(resolve:(v:unknown)=>unknown)=>resolve(result);return chain}
 beforeEach(()=>{vi.clearAllMocks();mocks.getUser.mockResolvedValue({data:{user:{id:"11111111-1111-4111-8111-111111111111"}}});mocks.rpc.mockImplementation(async(name,args)=>name==="get_mission_signed_scope_states_v1"?{data:args.p_mission_ids.map((mission_id:string)=>({mission_id,signed_scope_pending:false})),error:null}:{data:null,error:{code:"UNAVAILABLE"}})});

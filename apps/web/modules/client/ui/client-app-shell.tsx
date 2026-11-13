@@ -6,6 +6,7 @@ import { Bell, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { clientDashboardCopy } from "@/modules/client/data/home/copy";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ClientNavKey } from "@/modules/client/ui/client-nav";
 import { buildClientNav } from "@/modules/client/ui/client-nav";
@@ -63,7 +64,9 @@ export function ClientAppShell({
   const space = spaceCopy(locale);
   const alternate: Locale = locale === "fr" ? "ar" : "fr";
   const searchPath = searchAction ?? `/${locale}/client/recherche`;
-  const accountLabel = organizationName?.trim() || space.space;
+  const accountLabel = organizationName?.trim()
+    ? organizationDisplayLabel(organizationName, locale)
+    : space.space;
   const currentPath = safeReturnPath(languagePath,locale);
   const langHref = currentPath ? translateLocalPath(currentPath, locale, alternate) : localeSwitchHref(locale, selectedQuery, active);
   const switchBase = (currentPath ?? `/${locale}/tableau-de-bord`).split("?")[0]!;
@@ -108,7 +111,9 @@ export function ClientAppShell({
                 <ul>
                   {organizations.map((organization) => {
                     const current = organization.id === selectedOrganizationId;
-                    const href = `${switchBase}?organizationId=${encodeURIComponent(organization.id)}`;
+                    const params = new URLSearchParams((currentPath ?? "").includes("?") ? (currentPath!.split("?")[1] ?? "") : "");
+                    params.set("organizationId", organization.id);
+                    const href = `${switchBase}?${params.toString()}`;
                     return (
                       <li key={organization.id}>
                         {current ? <span data-selected="true">{organization.name}</span> : <Link href={href}>{organization.name}</Link>}

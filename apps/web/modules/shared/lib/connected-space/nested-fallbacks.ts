@@ -44,6 +44,17 @@ export function providerFallbackPath(slug: readonly string[]): string {
     facturation: "facturation",
     reputation: "reputation",
     planning: "planning",
+    messages: "messages",
+    notifications: "messages",
+    entreprise: "entreprise",
+    litiges: "litiges",
+    achats: "achats",
+    marketing: "marketing",
+    contrats: "contrats",
+    questionnaires: "questionnaires",
+    "mode-client": "mode-client",
+    parametres: "parametres",
+    identite: "identite",
   };
   return roots[head ?? ""] ?? "qualification";
 }

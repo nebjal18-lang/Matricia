@@ -29,7 +29,8 @@
 - Pour l’expérience commerciale, appliquer la refonte guidée documentée dans `docs/refonte-sans-catalogue/` : le catalogue reste un référentiel interne, jamais une étape imposée au client ou au fournisseur.
 - Travailler en multi-agents seulement pour des périmètres indépendants, avec une branche/worktree par domaine. Un seul propriétaire en écriture par fichier, migration et fichier partagé ; les agents d’audit restent indépendants du code audité.
 
-## Règles franchise
+## Règles franchise et pot plateforme
 
 - Franchise IT : Hatim Ahmitech, droit d’entrée nul ; partage du bénéfice distribuable IT à 50 % Hatim Ahmitech / 50 % Jalil-NEOXA. Mme Asma/Matricia : 0 % pour cette distribution IT.
 - Les autres franchises suivent les règles contractuelles versionnées du Gold Master ; à défaut : 50 % franchisé / 25 % Jalil-NEOXA / 25 % Mme Asma-Matricia, sur une base distribuable versionnée.
+- Pot distinct Core + droits d’entrée (hors IT) : après marketing et charges versionnées affectées à ce pot, le reste est partagé 50 % Jalil-NEOXA / 50 % Mme Asma-Matricia. Ce pot ne remplace pas les parts franchise ci-dessus. Détail : `docs/finance/REGLE_ECONOMIQUE_PARTENARIAT_CORE_ENTREE_V1.md`.

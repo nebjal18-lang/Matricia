@@ -17,12 +17,12 @@ export default async function AdminEntreprisesPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; q?: string; archives?: string; type?: string; status?: string; compliance?: string; plan?: string }>;
+  searchParams: Promise<{ organizationId?: string; q?: string; archives?: string; type?: string; status?: string; compliance?: string; plan?: string; fixtures?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const returnParams = new URLSearchParams();
-  for (const key of ["organizationId", "q", "archives", "type", "status", "compliance", "plan"] as const) {
+  for (const key of ["organizationId", "q", "archives", "type", "status", "compliance", "plan", "fixtures"] as const) {
     if (query[key]) returnParams.set(key, query[key]!);
   }
   const returnHref = `/${locale}/administration/entreprises${returnParams.size ? `?${returnParams}` : ""}`;
@@ -36,7 +36,7 @@ export default async function AdminEntreprisesPage({
   if (readError === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: returnHref }));
   if (command.status === "error" && command.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: returnHref }));
   const uiParams=new URLSearchParams(space.selectedQuery);
-  for(const key of ["q","archives","type","status","compliance","plan"]as const){if(query[key])uiParams.set(key,query[key]!);}
+  for(const key of ["q","archives","type","status","compliance","plan","fixtures"]as const){if(query[key])uiParams.set(key,query[key]!);}
   const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
@@ -94,6 +94,7 @@ export default async function AdminEntreprisesPage({
           treat={treat}
           search={query.q}
           archives={query.archives === "1"}
+          includeFixtures={query.fixtures === "1"}
           filters={{ type: query.type, status: query.status, compliance: query.compliance, plan: query.plan }}
         />
         </>

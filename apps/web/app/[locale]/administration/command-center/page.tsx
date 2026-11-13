@@ -54,8 +54,7 @@ export default async function AdminCommandCenterPage({
         <div><h2 id="initial-configuration-title" className="text-lg font-semibold">{locale === "ar" ? "إعداد منصتكم" : "Configurer votre plateforme"}</h2><p className="mt-1 text-sm text-muted-foreground">{locale === "ar" ? "بيانات المؤسسة والاتصالات ومراحل الإعداد قبل بدء التشغيل." : "Retrouvez les informations de votre entreprise, les connexions et les étapes avant mise en service."}</p></div>
         <Link href={`/${locale}/administration/configuration`} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground">{locale === "ar" ? "فتح الإعداد" : "Ouvrir la configuration"}</Link>
       </section>
-      <details className="client-ops" id="command-today" open>
-        <summary>{m.today}</summary>
+      <div id="command-today" className="admin-command-surface">
         {result.status === "error" ? (
           <Alert variant="destructive">
             <AlertTitle>{result.reason === "FORBIDDEN" ? m.forbiddenPage : result.reason === "MFA_REQUIRED" ? m.mfaRequired : m.loadError}</AlertTitle>
@@ -72,7 +71,7 @@ export default async function AdminCommandCenterPage({
             keys={Array.from({ length: keyCount }, () => crypto.randomUUID())}
           />
         )}
-      </details>
+      </div>
       <AdminDirectoryBoard locale={locale} query={space.selectedQuery} />
     </AdminAppShell>
   );

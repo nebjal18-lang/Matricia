@@ -1,30 +1,18 @@
 import { openAdminWorkItems } from "@/modules/shared/lib/admin-work-items/open-items";
-import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
-import { z } from "zod";
 import { commandCenterReadSchemas } from "./read-schemas";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
 import type { AdminCommandCenter } from "./model";
 
-const security = z.object({
-  requirement_satisfied: z.boolean(),
-  matched_role_codes: z.array(z.string()),
-}).passthrough();
 const commandRoles = ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "FINANCE_MANAGER", "DISPUTE_MANAGER", "LIBRARY_MANAGER", "SUPPORT_AGENT", "READ_ONLY_AUDITOR"] as const;
 export type AdminLoadResult = { status: "success"; dashboard: AdminCommandCenter } | { status: "error"; reason: "UNAUTHENTICATED" | "MFA_REQUIRED" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
 export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<AdminLoadResult> {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
-  const authFailure = classifyAuthReadFailure(authError);
-  if (authFailure) return { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
-  if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
-  const securityResult = await client.rpc("get_my_account_security_requirement");
-  if (securityResult.error) return { status: "error", reason: "QUERY_FAILED" };
-  const requirements = z.array(security).safeParse(securityResult.data);
-  if (!requirements.success || requirements.data.length !== 1) return { status: "error", reason: "INVALID_RESPONSE" };
-  const roles = new Set(requirements.data[0]!.matched_role_codes.filter((role) => commandRoles.includes(role as (typeof commandRoles)[number])));
+  const access = await loadMyPlatformAccess();
+  if (access.status === "error") return { status: "error", reason: access.reason === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
+  const client = access.client;
+  const roles = new Set([...access.roles].filter((role) => commandRoles.includes(role as (typeof commandRoles)[number])));
   if (roles.size === 0) return { status: "error", reason: "FORBIDDEN" };
-  if (!requirements.data[0]!.requirement_satisfied) return { status: "error", reason: "MFA_REQUIRED" };
+  if (!access.requirementSatisfied) return { status: "error", reason: "MFA_REQUIRED" };
   const readOnly = roles.has("READ_ONLY_AUDITOR") && ![...roles].some((item) => item !== "READ_ONLY_AUDITOR");
   const central = roles.has("SUPER_ADMIN") || roles.has("MATRICIA_ADMIN");
   const canRequest = !readOnly && [...roles].some((item) => ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "FINANCE_MANAGER", "DISPUTE_MANAGER", "LIBRARY_MANAGER", "SUPPORT_AGENT"].includes(item));
@@ -85,7 +73,7 @@ export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<Admin
           assignedTo: item.assigned_to,
           rowVersion: item.row_version,
           canClaim: !readOnly && item.status === "OPEN",
-          canResolve: !readOnly && ["CLAIMED", "WAITING_INFORMATION"].includes(item.status) && (item.assigned_to === auth.user.id || central),
+          canResolve: !readOnly && ["CLAIMED", "WAITING_INFORMATION"].includes(item.status) && (item.assigned_to === access.userId || central),
         }];
       }),
       actions: actionRows.data.map((item) => ({
@@ -102,7 +90,7 @@ export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<Admin
         requestedBy: item.requested_by,
         requestedAt: item.requested_at,
         rowVersion: item.row_version,
-        canDecide: item.status==="PENDING_APPROVAL" && decisionRole && item.requested_by !== auth.user.id,
+        canDecide: item.status==="PENDING_APPROVAL" && decisionRole && item.requested_by !== access.userId,
         resultHash:item.execution_result_hash??null,executedAt:item.executed_at??null,
       })),
     },

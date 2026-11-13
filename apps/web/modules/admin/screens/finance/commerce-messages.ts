@@ -136,7 +136,8 @@ const fr = {
   errors: {
     VALIDATION: "Vérifiez les champs et les montants exacts.",
     UNAUTHENTICATED: "Votre session a expiré.",
-    FORBIDDEN: "Votre rôle ou AAL2 ne permet pas cette commande.",
+    FORBIDDEN: "Votre rôle ne permet pas cette commande.",
+    MFA_REQUIRED: "Le second facteur (AAL2) est requis. Ouvrez la sécurité du compte.",
     CONFLICT: "L’état a changé ou la commande existe déjà. Actualisez.",
     FAILED: "La commande n’a pas abouti.",
   },
@@ -283,7 +284,8 @@ const ar: CommerceMessages = {
   errors: {
     VALIDATION: "تحقق من الحقول والمعرفات والمبالغ الدقيقة.",
     UNAUTHENTICATED: "انتهت الجلسة.",
-    FORBIDDEN: "دورك أو AAL2 لا يسمح بهذا الأمر.",
+    FORBIDDEN: "دورك لا يسمح بهذا الأمر.",
+    MFA_REQUIRED: "يلزم العامل الثاني (AAL2). افتحوا أمان الحساب.",
     CONFLICT: "تغيرت الحالة أو أن الأمر موجود. حدّث الصفحة.",
     FAILED: "لم ينجح الأمر.",
   },

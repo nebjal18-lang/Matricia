@@ -22,6 +22,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { dashboardHomeCopy } from "@/modules/shared/module-hub-copy";
 import type { DashboardActionSummary } from "@/modules/shared/lib/action-center/dashboard-summary";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { clientDashboardCopy } from "@/modules/client/data/home/copy";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
@@ -164,9 +165,11 @@ export function ClientDashboardHome({
   const progressMax = progressRows.reduce((max, row) => Math.max(max, row.value), 1);
   const notifCount = summary.total > 0 ? Math.min(summary.total, 9) : 0;
 
-  const helloName = organizationName?.trim() || space.space;
+  const helloName = organizationName?.trim()
+    ? organizationDisplayLabel(organizationName, locale)
+    : space.space;
   const messagesUnread = insights.messagesToHandle !== null && insights.messagesToHandle > 0;
-  const accountInitial = (organizationName?.trim()?.slice(0, 2) || userEmail?.slice(0, 1) || "M").toUpperCase();
+  const accountInitial = (helloName.slice(0, 2) || userEmail?.slice(0, 1) || "M").toUpperCase();
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace">
@@ -369,12 +372,25 @@ export function ClientDashboardHome({
                     const maxDeliverables = Math.max(...comparison.columns.map((item) => item.deliverablesCount), 1);
                     const durations = comparison.columns.map((item) => item.durationDays).filter((value) => value > 0);
                     const minDays = durations.length > 0 ? Math.min(...durations) : 0;
-                    const prices = comparison.columns.map((item) => Number(item.totalMinor) || 0).filter((value) => value > 0);
-                    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+                    const prices = comparison.columns
+                      .map((item) => {
+                        try {
+                          return BigInt(item.totalMinor);
+                        } catch {
+                          return 0n;
+                        }
+                      })
+                      .filter((value) => value > 0n);
+                    const minPrice = prices.length > 0 ? prices.reduce((left, right) => (left < right ? left : right)) : 0n;
                     const scopePct = Math.round((column.deliverablesCount / maxDeliverables) * 100);
                     const delayPct = column.durationDays > 0 && minDays > 0 ? Math.round((minDays / column.durationDays) * 100) : 0;
-                    const price = Number(column.totalMinor) || 0;
-                    const termsPct = price > 0 && minPrice > 0 ? Math.round((minPrice / price) * 100) : 0;
+                    let price = 0n;
+                    try {
+                      price = BigInt(column.totalMinor);
+                    } catch {
+                      price = 0n;
+                    }
+                    const termsPct = price > 0n && minPrice > 0n ? Number((minPrice * 100n) / price) : 0;
                     return (
                       <div key={column.quoteId} className="client-home-criteria-offer">
                         <strong>{column.label || (index === 0 ? c.offerA : c.offerB)}</strong>

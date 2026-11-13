@@ -90,7 +90,7 @@ describe("quatre espaces connectés — documentation et nav", () => {
 
   it("aligne client et prestataire sur buildClientNav / buildProviderNav", () => {
     expect(buildClientPrimaryNav({ locale: "fr", selectedQuery: "" })).toHaveLength(9);
-    expect(buildClientNav({ locale: "fr", selectedQuery: "" })).toHaveLength(15);
+    expect(buildClientNav({ locale: "fr", selectedQuery: "" })).toHaveLength(16);
     expect(buildClientNav({ locale: "fr", selectedQuery: "?organizationId=test" }).find((item) => item.key === "memberBoxes")?.href).toBe("/fr/client/boxes/mon-enveloppe?organizationId=test");
     expect(buildClientNav({ locale: "fr", selectedQuery: "" }).some((item) => item.key === "contracts")).toBe(true);
     expect(buildClientNav({ locale: "fr", selectedQuery: "" }).some((item) => item.key === "actions")).toBe(true);

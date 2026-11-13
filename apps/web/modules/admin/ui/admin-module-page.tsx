@@ -14,6 +14,8 @@ export async function AdminModulePage({
   kicker,
   querySuffix,
   hubGroup,
+  actorCurrent,
+  parcoursCurrent,
   children,
 }: {
   locale: Locale;
@@ -24,9 +26,20 @@ export async function AdminModulePage({
   kicker?: string;
   querySuffix?: string;
   hubGroup?: AdminDirectoryGroup["id"];
+  actorCurrent?: string;
+  parcoursCurrent?: string;
   children: ReactNode;
 }) {
-  const context = await sensitivePageContext({ locale, active, path: `${path}${querySuffix ? `?${querySuffix}` : ""}`, title, lead, kicker });
+  const context = await sensitivePageContext({
+    locale,
+    active,
+    path: `${path}${querySuffix ? `?${querySuffix}` : ""}`,
+    title,
+    lead,
+    kicker,
+    actorCurrent,
+    parcoursCurrent,
+  });
   if (context.status === "blocked") return context.view;
   return context.wrap(<>
     {hubGroup ? <div className="client-page admin-hub-wrap"><AdminHubStrip locale={locale} query="" groupId={hubGroup} /></div> : null}

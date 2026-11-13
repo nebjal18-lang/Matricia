@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("./regions-repository",()=>({loadProviderRegions:vi.fn()}));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: vi.fn() }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: vi.fn(), getServerAuthUser: vi.fn() }));
 
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { diagnoseProviderDashboardProjection, diagnoseProviderServiceLabelCoverage, loadProviderDashboard } from "./repository";
 
 const organizationId = "11111111-1111-4111-8111-111111111111";
@@ -82,13 +82,15 @@ function providerReadClient(qualification: unknown = fixtureProjection.services[
   }));
   const client = { auth: { getUser: vi.fn(async () => ({ data: { user: { id: organizationId } } })) }, from, rpc };
   vi.mocked(getSupabaseServerClient).mockResolvedValue(client as never);
+  vi.mocked(getServerAuthUser).mockResolvedValue({ data: { user: { id: organizationId } }, error: null } as never);
   return { responses, from,rpc };
 }
 
 describe("provider dashboard read contract", () => {
   it.each([[503, "AUTH_QUERY_FAILED"], [401, "UNAUTHENTICATED"]] as const)("classifies Auth %s before querying qualification records", async (status, reason) => {
     const from = vi.fn();
-    vi.mocked(getSupabaseServerClient).mockResolvedValue({ auth: { getUser: async () => ({ data: { user: null }, error: { status } }) }, from } as never);
+    vi.mocked(getSupabaseServerClient).mockResolvedValue({ from } as never);
+    vi.mocked(getServerAuthUser).mockResolvedValue({ data: { user: null }, error: { status } } as never);
     expect(await loadProviderDashboard(organizationId)).toEqual({ status: "error", reason });
     expect(from).not.toHaveBeenCalled();
   });

@@ -51,7 +51,7 @@ export default async function AdminFinancePage({
   const c = adminCopy(locale);
   const ar = locale === "ar";
   const mfaBlocked = access.status === "ok" && !access.requirementSatisfied;
-  const blockedCopy = (reason: string) => mfaBlocked && reason === "FORBIDDEN" ? mfaRequiredMessage(locale) : reason === "FORBIDDEN" ? m.forbidden : m.unavailable;
+  const blockedCopy = (reason: string) => reason === "MFA_REQUIRED" || (mfaBlocked && reason === "FORBIDDEN") ? mfaRequiredMessage(locale) : reason === "FORBIDDEN" ? m.forbidden : m.unavailable;
   const organizationContext = financeAuditOrganizationContext(query.organizationId, supervision.status === "success"
     ? { status: "success", organizations: supervision.value.organizations }
     : { status: "error" });

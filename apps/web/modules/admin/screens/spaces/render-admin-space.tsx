@@ -135,11 +135,11 @@ export async function renderAdminSpacePage({
     body = <NotificationPreferencesBoard locale={locale} query={uiQuery} templates={snapshot.supervision?.templates ?? []} />;
   } else if (reserved === "reutilisation" || action === "reutilisation") {
     body = row ? <DocumentReuseBoard locale={locale} query={uiQuery} row={row} /> : <DocumentSharePreparation locale={locale} query={uiQuery} snapshot={snapshot} />;
-  } else if (
-    reserved === "nouvelle"
-    || reserved === "preparer"
-    || action === "modifier"
-  ) {
+  } else if (action === "modifier") {
+    body = row
+      ? <SpaceWizardBoard locale={locale} query={uiQuery} space={space} itemId={row.id} row={row} />
+      : <MissingRecord locale={locale} space={space} query={uiQuery} />;
+  } else if (reserved === "nouvelle" || reserved === "preparer") {
     body = space === "documents" ? <DocumentSharePreparation locale={locale} query={uiQuery} snapshot={snapshot} />
       : space === "providers" ? await ProviderInvitationWorkspace({ locale, query: uiQuery, snapshot })
         : governedPreparationSpaces.has(space) ? <CreationPreparation locale={locale} query={uiQuery} space={space} snapshot={snapshot} />

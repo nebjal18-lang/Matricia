@@ -15,14 +15,28 @@ function dayInMorocco(value: string | Date) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Casablanca", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
 }
 
+export function isWorkOverdue(dueAt: string, currentTime: string) {
+  return new Date(dueAt).getTime() < new Date(currentTime).getTime();
+}
+
+export function workItemDueTone(dueAt: string, currentTime: string, priority: AdminWorkItem["priority"]): "critical" | "high" | "ok" | "default" {
+  if (isWorkOverdue(dueAt, currentTime)) return priority === "CRITICAL" ? "critical" : "high";
+  if (dayInMorocco(dueAt) === dayInMorocco(currentTime)) return "high";
+  return "default";
+}
+
 export function summarizeAdminWork(items: AdminWorkItem[], currentTime: string): AdminWorkSummary {
   const now = new Date(currentTime).getTime();
   const today = dayInMorocco(currentTime);
-  const ordered = [...items].sort(
-    (left, right) =>
+  const ordered = [...items].sort((left, right) => {
+    const leftOverdue = new Date(left.dueAt).getTime() < now ? 0 : 1;
+    const rightOverdue = new Date(right.dueAt).getTime() < now ? 0 : 1;
+    return (
+      leftOverdue - rightOverdue ||
       priorityRank[left.priority] - priorityRank[right.priority] ||
-      new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime(),
-  );
+      new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime()
+    );
+  });
   return {
     ordered,
     critical: items.filter((item) => item.priority === "CRITICAL").length,
@@ -101,6 +115,82 @@ const queueSpaces: Record<string, string> = {
   quote_version: "devis", contract_version: "contrats",
   provider_document: "documents", document: "documents",
 };
+
+const resourceTypeFr: Record<string, string> = {
+  organization: "Entreprise",
+  provider: "Sous-traitant",
+  client: "Client",
+  case: "Dossier",
+  user: "Utilisateur",
+  membership: "Adhésion",
+  release: "Publication",
+  configuration: "Configuration",
+  franchise: "Franchise",
+  mission: "Mission",
+  contract: "Contrat",
+  quote: "Devis",
+  dispute: "Litige",
+  diagnostic: "Diagnostic",
+};
+
+const resourceTypeAr: Record<string, string> = {
+  organization: "مؤسسة",
+  provider: "مقدم خدمة",
+  client: "عميل",
+  case: "ملف",
+  user: "مستخدم",
+  membership: "عضوية",
+  release: "نشر",
+  configuration: "إعداد",
+  franchise: "امتياز",
+  mission: "مهمة",
+  contract: "عقد",
+  quote: "عرض سعر",
+  dispute: "نزاع",
+  diagnostic: "تشخيص",
+};
+
+export function actionResourceLabel(resourceType: string, locale: "fr" | "ar") {
+  const key = resourceType.trim().toLowerCase();
+  const map = locale === "ar" ? resourceTypeAr : resourceTypeFr;
+  return map[key] ?? (locale === "ar" ? "مورد" : "Ressource");
+}
+
+export function shortReference(value: string, keep = 8) {
+  const clean = value.trim();
+  if (clean.length <= keep * 2 + 1) return clean;
+  return `${clean.slice(0, keep)}…${clean.slice(-4)}`;
+}
+
+/** Machine datetime for <time dateTime> without leaking raw high-precision payloads. */
+export function compactDateTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 19);
+  return date.toISOString().replace(/\.\d{3}Z$/u, "Z");
+}
+
+export function formatAdminDateTime(value: string, locale: "fr" | "ar") {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Africa/Casablanca",
+  }).format(date);
+}
+
+export function actionStatusTone(status: string): "critical" | "high" | "ok" | "default" {
+  if (status === "FAILED" || status === "REJECTED") return "critical";
+  if (status === "PENDING_APPROVAL" || status === "AUTHORIZED" || status === "REQUEST_TRACKED") return "high";
+  if (status === "EXECUTED") return "ok";
+  return "default";
+}
+
+export function actionEnvironmentTone(environment: string): "critical" | "high" | "default" {
+  if (environment === "PRODUCTION") return "critical";
+  if (environment === "STAGING") return "high";
+  return "default";
+}
 
 export function dossierHref(locale: "fr" | "ar", item: AdminWorkItem, query = "") {
   const type = item.resourceType.trim().toLowerCase();

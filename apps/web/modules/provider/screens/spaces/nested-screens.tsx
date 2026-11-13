@@ -140,6 +140,8 @@ export async function ProviderConsultationDetailPage({
     ? await loadQuotePrefills(result.dashboard.organizationId, [{ invitationId: invitation.id, versionId: invitation.quote.currentVersionId }], locale as Locale)
     : {};
   if(prefills===null)return <ProviderReadFailure locale={locale as Locale} space={space} active="consult" reason="QUERY_FAILED"/>;
+  const identities = invitation ? quoteIdentities([invitation.id]) : {};
+  const decision = invitation ? identities[invitation.id] : undefined;
   return (
     <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="consult" title={invitation?.description ?? w.consultDetailTitle} lead={w.consultDetailLead}>
       <ConsultationDetailWorkbench
@@ -147,7 +149,9 @@ export async function ProviderConsultationDetailPage({
         query={space.selectedQuery}
         consultationId={consultationId}
         invitation={invitation}
-        quotePanel={result.status === "success" && invitation ? <ProviderLiveQuotePanel dashboard={{ ...result.dashboard, invitations: [invitation] }} locale={locale as Locale} m={m} identities={quoteIdentities([invitation.id])} prefills={prefills} /> : null}
+        canManage={result.status === "success" ? result.dashboard.canManage : false}
+        decisionIdentity={decision ? { decision: decision.decision, correlation: decision.correlation } : undefined}
+        quotePanel={result.status === "success" && invitation ? <ProviderLiveQuotePanel dashboard={{ ...result.dashboard, invitations: [invitation] }} locale={locale as Locale} m={m} identities={identities} prefills={prefills} hideDecision /> : null}
       />
     </ProviderAppShell>
   );
@@ -178,7 +182,13 @@ export async function ProviderQuoteWorkbenchPage({
       </ProviderAppShell>
     );
   }
-  if(!invitation && quoteId==="nouveau")return <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.quoteCreateTitle}><main className="client-page"><section className="client-card"><h2>{locale==="ar"?"اختاروا الاستشارة المرتبطة بالعرض":"Choisissez la consultation à chiffrer"}</h2><p>{locale==="ar"?"يرتبط كل عرض باستشارة مصرح بها. افتحوا جميع الاستشارات للبحث والوصول إلى بقية الصفحات.":"Chaque devis reste lié à une consultation autorisée. Ouvrez toutes les consultations pour rechercher et parcourir les autres pages."}</p>{result.dashboard.invitations.length?<form method="get" action={`/${locale}/sous-traitant/devis/nouveau`} className="grid gap-3"><input type="hidden" name="organizationId" value={space.selectedOrganizationId??""}/><label htmlFor="quote-invitation">{locale==="ar"?"الاستشارة":"Consultation"}</label><select className="min-h-11 rounded border px-3" id="quote-invitation" name="invitationId" required><option value="">{locale==="ar"?"اختاروا استشارة":"Choisir une consultation"}</option>{result.dashboard.invitations.map(item=><option key={item.id} value={item.id}>{item.description??item.id.slice(0,8)}</option>)}</select><button className="client-cta" type="submit">{locale==="ar"?"فتح ملف العرض":"Ouvrir le devis"}</button></form>:<p role="status">{locale==="ar"?"لا توجد استشارة في هذه الصفحة.":"Aucune consultation sur cette page."}</p>}<a className="client-text-link" href={`/${locale}/sous-traitant/consultations${space.selectedQuery}`}>{locale==="ar"?"جميع الاستشارات":"Toutes les consultations"}</a></section></main></ProviderAppShell>;
+  if(!invitation && quoteId==="nouveau"){
+    const accepted=result.dashboard.invitations.filter(item=>item.status==="ACCEPTED");
+    return <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={w.quoteCreateTitle}><main className="client-page"><section className="client-card"><h2>{locale==="ar"?"اختاروا الاستشارة المرتبطة بالعرض":"Choisissez la consultation à chiffrer"}</h2><p>{locale==="ar"?"يرتبط كل عرض باستشارة مقبولة. افتحوا جميع الاستشارات للبحث والوصول إلى بقية الصفحات.":"Chaque devis reste lié à une consultation acceptée. Ouvrez toutes les consultations pour rechercher et parcourir les autres pages."}</p>{accepted.length?<form method="get" action={`/${locale}/sous-traitant/devis/nouveau`} className="grid gap-3"><input type="hidden" name="organizationId" value={space.selectedOrganizationId??""}/><label htmlFor="quote-invitation">{locale==="ar"?"الاستشارة":"Consultation"}</label><select className="min-h-11 rounded border px-3" id="quote-invitation" name="invitationId" required><option value="">{locale==="ar"?"اختاروا استشارة":"Choisir une consultation"}</option>{accepted.map(item=><option key={item.id} value={item.id}>{item.description || (locale==="ar"?"استشارة مقبولة":"Consultation acceptée")}</option>)}</select><button className="client-cta" type="submit">{locale==="ar"?"فتح ملف العرض":"Ouvrir le devis"}</button></form>:<p role="status">{locale==="ar"?"لا توجد استشارة مقبولة في هذه الصفحة.":"Aucune consultation acceptée sur cette page."}</p>}<a className="client-text-link" href={`/${locale}/sous-traitant/consultations${space.selectedQuery}`}>{locale==="ar"?"جميع الاستشارات":"Toutes les consultations"}</a></section></main></ProviderAppShell>;
+  }
+  if(invitation && invitation.status!=="ACCEPTED"){
+    redirect(`/${locale}/sous-traitant/consultations/${invitation.id}${space.selectedQuery}`);
+  }
   const m = getProviderQuoteMessages(locale as Locale);
   const prefills = result.status === "success" && invitation?.quote?.currentVersionId
     ? await loadQuotePrefills(result.dashboard.organizationId, [{ invitationId: invitation.id, versionId: invitation.quote.currentVersionId }], locale as Locale)
@@ -295,7 +305,7 @@ export async function ProviderInvoiceSettlementPage({
   const contextBoundary=providerContextBoundary(locale as Locale,space,"billing",query.organizationId);
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
-  const result = await loadProviderBilling(query.organizationId, invoiceId);
+  const result = await loadProviderBilling(space.selectedOrganizationId ?? undefined, invoiceId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="billing" reason={result.reason} />;
   const invoice = result.status === "success" ? result.dashboard.invoices.find((item) => item.id === invoiceId || item.number === invoiceId) ?? null : null;
@@ -397,6 +407,11 @@ export async function ProviderNestedPage({
   const nested = resolveProviderNestedView(slug);
   if (!nested) notFound();
   if (nested.kind === "consultations" && nested.itemId) {
+    if (nested.view === "documents" || nested.view === "echanges") {
+      const spaceForNested = await spaceOrRedirect(locale, query.organizationId);
+      if (nested.view === "documents") redirect(`/${locale}/sous-traitant/consultations/${nested.itemId}${spaceForNested.selectedQuery}#consult-docs`);
+      redirect(`/${locale}/sous-traitant/messages${spaceForNested.selectedQuery}${spaceForNested.selectedQuery.includes("?") ? "&" : "?"}rfq=${encodeURIComponent(nested.itemId)}`);
+    }
     return ProviderConsultationDetailPage({ params: Promise.resolve({ locale, consultationId: nested.itemId }), searchParams });
   }
   if (nested.kind === "devis" && nested.view === "apercu" && nested.itemId) {
@@ -410,6 +425,10 @@ export async function ProviderNestedPage({
     });
   }
   if (nested.kind === "missions" && nested.itemId) {
+    if (nested.view === "jalons" || nested.view === "livraison") {
+      const spaceForMission = await spaceOrRedirect(locale, query.organizationId);
+      redirect(`/${locale}/sous-traitant/missions/${nested.itemId}${spaceForMission.selectedQuery}#${nested.view}`);
+    }
     return ProviderMissionDeliveryPage({ params: Promise.resolve({ locale, missionId: nested.itemId }), searchParams });
   }
   if (nested.kind === "facturation" && nested.itemId) {
@@ -426,7 +445,7 @@ export async function ProviderNestedPage({
   if(contextBoundary)return contextBoundary;
   if (nested.kind === "documents") {
     const c = providerCopy(locale as Locale);
-    const documents = await loadProviderDashboard(query.organizationId);
+    const documents = await loadProviderDashboard(space.selectedOrganizationId ?? undefined);
     const view = query.vue === "qualification" ? "qualification" as const : "all" as const;
     return (
       <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="documents" title={c.docsTitle} lead={c.docsLead}>

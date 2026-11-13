@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getPublicEnvironment } from "@/modules/shared/lib/env";
+import { withRequestCache } from "./request-cache";
 
-export async function getSupabaseServerClient() {
+async function createSupabaseServerClient() {
   const cookieStore = await cookies();
   const environment = getPublicEnvironment();
   return createServerClient(environment.NEXT_PUBLIC_SUPABASE_URL, environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
@@ -18,3 +19,11 @@ export async function getSupabaseServerClient() {
     },
   });
 }
+
+export const getSupabaseServerClient = withRequestCache(createSupabaseServerClient);
+
+/** One Auth round-trip per request for all Server Components / loaders. */
+export const getServerAuthUser = withRequestCache(async () => {
+  const client = await getSupabaseServerClient();
+  return client.auth.getUser();
+});

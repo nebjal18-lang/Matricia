@@ -46,12 +46,26 @@ export async function loadProviderHomeSnapshot(input: {
   now: string;
 }): Promise<ProviderHomeSnapshot> {
   try {
+    const withSoftBudget = async <T,>(promise: Promise<T>, fallback: T, budgetMs: number): Promise<T> => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        return await Promise.race([
+          promise,
+          new Promise<T>((resolve) => {
+            timer = setTimeout(() => resolve(fallback), budgetMs);
+          }),
+        ]);
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    };
+
     const [quotes, qualification, missions, billing, reputation] = await Promise.all([
-      loadProviderQuotes(input.organizationId ?? undefined),
+      loadProviderQuotes(input.organizationId ?? undefined, { mode: "consultations", tab: "answer", page: 1 }),
       loadProviderDashboard(input.organizationId ?? undefined),
       loadProviderMissions(input.locale, input.organizationId ?? undefined),
-      loadProviderBilling(input.organizationId ?? undefined),
-      loadProviderReputation(input.organizationId ?? undefined),
+      withSoftBudget(loadProviderBilling(input.organizationId ?? undefined), { status: "error", reason: "QUERY_FAILED" }, 800),
+      withSoftBudget(loadProviderReputation(input.organizationId ?? undefined), { status: "error", reason: "QUERY_FAILED" }, 800),
     ]);
 
     if (quotes.status === "error" && quotes.reason === "UNAUTHENTICATED") {

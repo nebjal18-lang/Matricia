@@ -85,13 +85,12 @@ export function RewardsBoard({
           {conversions.length === 0 ? <p>{locale === "ar" ? "لا إحالات ظاهرة بعد." : "Aucun parrainage visible pour le moment."}</p> : (
             <div className="client-table-wrap">
               <table className="client-space-table">
-                <thead><tr><th>{locale === "ar" ? "المرحلة" : "Étape"}</th><th>{c.status}</th><th /></tr></thead>
+                <thead><tr><th>{locale === "ar" ? "المرحلة" : "Étape"}</th><th>{c.status}</th></tr></thead>
                 <tbody>
                   {conversions.slice(0, 6).map((item) => (
                     <tr key={item.id}>
                       <td>{stageLabel(item.conversion_stage)}</td>
                       <td><span className="client-status-chip" data-tone="mint">{stageLabel(item.conversion_stage)}</span></td>
-                      <td><span className="client-access-note" dir="ltr">{item.id.slice(0, 8)}</span></td>
                     </tr>
                   ))}
                 </tbody>

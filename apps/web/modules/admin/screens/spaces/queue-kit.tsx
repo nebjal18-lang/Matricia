@@ -22,6 +22,7 @@ import {
 } from "@/modules/admin/data/spaces/layout-blueprint";
 import { spaceHref, spaceSpec, statusTone, type SpaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
 import type { SpaceRow } from "@/modules/admin/data/spaces/space-data";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { PipelineGlyph } from "./pipeline-step";
 import {
   CompanyDecisionForm,
@@ -94,21 +95,20 @@ export function SpaceQueueBoard({
               ))}
             </nav>
           ) : null}
-          <form className="admin-filters" method="get" action={`/${locale}/administration/${space}`}>
+          <form key={`queue:${space}:${vue ?? ""}:${search ?? ""}:${orgId ?? ""}`} className="admin-filters" method="get" action={`/${locale}/administration/${space}`}>
             {orgId ? <input type="hidden" name="organizationId" value={orgId} /> : null}
             {statuses.length > 0 ? (
               <label>{t(locale, "Statut", "الحالة")}
                 <select name="vue" defaultValue={vue ?? ""}>
                   <option value="">{t(locale, "Tous", "الكل")}</option>
                   {vue&&!statuses.includes(vue)?<option value={vue}>{pills.find((_,index)=>adminPillCode(space,index)===vue)??vue}</option>:null}
-                  {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                  {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status, locale)}</option>)}
                 </select>
               </label>
             ) : vue ? <input type="hidden" name="vue" value={vue} /> : null}
-            <label className="client-top-search">
+            <label className="client-top-search admin-filter-search">
               <Search className="size-4" aria-hidden />
-              <span className="sr-only">{spec.search(locale)}</span>
-              <input name="q" defaultValue={search} placeholder={spec.search(locale)} />
+              <input name="q" defaultValue={search} placeholder={spec.search(locale)} aria-label={spec.search(locale)} />
             </label>
             <button type="submit" className="admin-soft-cta">{t(locale, "Filtrer", "تصفية")}</button>
             <Link href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
@@ -131,7 +131,7 @@ export function SpaceQueueBoard({
                           {index === 0 ? (
                             <Link href={row.href}><strong>{row.title}</strong></Link>
                           ) : columnLooksLikeStatus(column) ? (
-                            <span className="client-status-chip" data-tone={statusTone(row.cells[index] ?? row.status)}>{row.cells[index] ?? "—"}</span>
+                            <span className="client-status-chip" data-tone={statusTone(row.cells[index] ?? row.status)}>{localizeStatus(row.cells[index] ?? row.status, locale)}</span>
                           ) : (row.cells[index] ?? "—")}
                         </td>
                       ))}
@@ -148,7 +148,7 @@ export function SpaceQueueBoard({
             <div className="admin-empty-card">
               <h3>{spec.empty(locale)}</h3>
               <div className="admin-empty-actions">
-                <Link href={`/${locale}/administration/${space}${query}`} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
+                <Link href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
                 {spec.createLabel ? <Cta href={spaceHref(locale, space, query, spec.createView)} tone="primary">{spec.createLabel(locale)}</Cta> : null}
               </div>
             </div>
@@ -167,14 +167,14 @@ export function SpaceQueueBoard({
                   <li key={row.id}>
                     <span>
                       <strong>{row.title}</strong>
-                      <small>{row.status}</small>
+                      <small>{localizeStatus(row.status, locale)}</small>
                     </span>
                     <Link href={row.href}>{t(locale, "Ouvrir", "فتح")}</Link>
                   </li>
                 ))}
               </ul>
             )}
-            <Cta href={`/${locale}/administration/${space}${query}`}>{t(locale, "Voir tout", "عرض الكل")}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Cta>
+            <Cta href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`}>{t(locale, "Voir tout", "عرض الكل")}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Cta>
           </article>
           {family.list === "parcours-cycle" && pipeline.length ? (
             <article className="client-card">
@@ -386,7 +386,7 @@ function DocumentLayout({ locale, query, space, row }: { locale: Locale; query: 
                 <td>{row.extras?.version ?? "1"}</td>
                 <td>{row.extras?.kind ?? columns[2] ?? "—"}</td>
                 <td><span className="client-status-chip" data-tone={row.tone}>{row.status}</span></td>
-                <td>{row.cells[6] ?? row.cells[4] ?? "—"}</td>
+                <td>{row.cells[8] ?? row.cells[6] ?? row.cells[4] ?? "—"}</td>
               </tr>
             </tbody>
           </table>
@@ -467,7 +467,7 @@ export async function SpaceDecisionBoard({
         <section className="admin-form-layout">
           <div className="client-stack">
             {space === "qualification" ? (
-              <QualificationDecisionForm locale={locale} query={query} qualificationId={row.id} organizationId={row.organizationId} />
+              <QualificationDecisionForm locale={locale} query={query} qualificationId={row.id} organizationId={row.organizationId} rowVersion={row.extras?.rowVersion ?? "1"} />
             ) : space === "gouvernance" ? (
               <GovernanceDecisionForm locale={locale} query={query} approvalRequestId={row.id} rowVersion={row.extras?.rowVersion ?? "1"} />
             ) : space === "providers" ? (
@@ -542,14 +542,30 @@ export function SpaceWizardBoard({
   locale,
   query,
   space,
+  itemId,
+  row,
 }: {
   locale: Locale;
   query: string;
   space: AdminSpaceId;
+  itemId?: string;
+  row?: SpaceRow | null;
 }) {
   const spec = spaceSpec(space);
   const steps = spec.pipeline(locale);
   const fields = wizardFields(locale, space);
+  const targetId = itemId ?? row?.id;
+  if (!targetId) {
+    return (
+      <main className="client-page">
+        <article className="admin-empty-card">
+          <h3>{t(locale, "Création non disponible ici", "الإنشاء غير متاح هنا")}</h3>
+          <p>{t(locale, "Utilisez la préparation guidée ou ouvrez un dossier existant pour le modifier.", "استخدموا التحضير الموجّه أو افتحوا ملفاً موجوداً لتعديله.")}</p>
+          <Cta href={spaceHref(locale, space, query)}>{t(locale, "Retour à la liste", "العودة إلى القائمة")}</Cta>
+        </article>
+      </main>
+    );
+  }
   return (
     <main className="client-page admin-form-layout" data-admin-layout="wizard" data-admin-space={space}>
       <section className="client-stack">
@@ -568,9 +584,10 @@ export function SpaceWizardBoard({
           locale={locale}
           query={query}
           space={space}
-          itemId={crypto.randomUUID()}
+          itemId={targetId}
+          organizationId={row?.organizationId}
           resourceType={spec.resourceType}
-          title={spec.createLabel?.(locale) ?? spec.title(locale)}
+          title={itemId ? t(locale, "Modifier le dossier", "تعديل الملف") : (spec.createLabel?.(locale) ?? spec.title(locale))}
           submitLabel={t(locale, "Soumettre à validation", "إرسال للمصادقة")}
           fields={
             <>
@@ -578,15 +595,15 @@ export function SpaceWizardBoard({
                 <div key={field.id} className="admin-field" data-span={field.multiline ? "2" : undefined}>
                   <label htmlFor={field.id}>{field.label}{field.required ? " *" : ""}</label>
                   {field.multiline ? (
-                    <textarea id={field.id} name={field.name} required={field.required} minLength={3} defaultValue={field.value} />
+                    <textarea id={field.id} name={field.name} required={field.required} minLength={3} defaultValue={field.value ?? row?.title} />
                   ) : (
-                    <input id={field.id} name={field.name} required={field.required} minLength={3} defaultValue={field.value} />
+                    <input id={field.id} name={field.name} required={field.required} minLength={3} defaultValue={field.value ?? (field.name === "title" ? row?.title : undefined)} />
                   )}
                 </div>
               ))}
               <div className="admin-field">
                 <label htmlFor={`${space}-view`}>{t(locale, "Vue", "العرض")}</label>
-                <input id={`${space}-view`} name="view" defaultValue={spec.createView ?? "nouvelle"} readOnly />
+                <input id={`${space}-view`} name="view" defaultValue={itemId ? "modifier" : (spec.createView ?? "nouvelle")} readOnly />
               </div>
             </>
           }
@@ -596,6 +613,7 @@ export function SpaceWizardBoard({
         <article className="client-card">
           <h2>{t(locale, "Résumé", "ملخص")}</h2>
           <p>{spec.lead(locale)}</p>
+          {row ? <p><strong>{row.title}</strong><br /><small dir="ltr">{row.id}</small></p> : null}
         </article>
         <article className="admin-note">
           <p>{detailNote(locale, space)}</p>
