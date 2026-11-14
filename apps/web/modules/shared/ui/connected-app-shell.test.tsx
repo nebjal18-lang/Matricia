@@ -17,9 +17,11 @@ beforeEach(() => {
   mocks.navigation.mockResolvedValue({ status: "ok", navigation: { landing: "administration", options: [] } });
 });
 describe("shared account security shell", () => {
-  it("loads every role shell stylesheet on a direct shared security navigation", () => {
+  it("keeps shared security navigation free of space CSS so each shell owns its stylesheet", () => {
     const source = readFileSync(new URL("./connected-app-shell.tsx", import.meta.url), "utf8");
-    for (const sheet of ["client/ui/client-experience.css", "provider/ui/provider-experience.css", "franchise/ui/franchise-experience.css", "admin/ui/admin-experience.css", "shared/shell/admin-experience.css"]) expect(source).toContain(`import "@/modules/${sheet}"`);
+    for (const sheet of ["client-experience.css", "provider-experience.css", "franchise-experience.css", "admin-experience.css"]) {
+      expect(source).not.toContain(sheet);
+    }
   });
   it("resolves the Provider membership selected by the authorized preference rather than the first Client organization", async () => {
     mocks.navigation.mockResolvedValue({ status: "ok", navigation: { landing: "provider", options: [{ kind: "client", href: "/fr/tableau-de-bord?workspace=client&organizationId=org-client" }, { kind: "provider", href: "/fr/tableau-de-bord?workspace=provider&organizationId=org-provider" }] } });

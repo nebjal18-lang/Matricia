@@ -16,6 +16,7 @@ describe("franchise-presentation", () => {
   it("humanizes technical territory codes without dumping E2E noise", () => {
     expect(humanizeTechnicalCode("CASABLANCA_SETTAT", "fr")).toBe("Casablanca Settat");
     expect(humanizeTechnicalCode("E2E_SOUSS_ZONE", "fr")).toBe("Souss Zone");
+    expect(humanizeTechnicalCode("E2E_23317338B5C04F8286B6", "fr")).toBe("Territoire de test");
   });
 
   it("prefers the localized territory version name when available", () => {

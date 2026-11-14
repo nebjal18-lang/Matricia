@@ -7,7 +7,9 @@ import type { FollowupDashboard } from "@/modules/franchise/data/followups/model
 import { FOLLOWUP_STAGES } from "@/modules/franchise/data/followups/model";
 import { isDirectoryFixture, personDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
+import { franchiseStageLabel } from "@/modules/franchise/data/spaces/labels";
 import { configurePreference, decidePolicy, proposePolicy, type FollowupActionState } from "./actions";
 import type { FollowupMessages } from "./messages";
 
@@ -55,7 +57,7 @@ export function FollowupPanel({
                 {FOLLOWUP_STAGES.map((s) => (
                   <label key={s} className="flex min-h-11 items-center gap-2">
                     <input type="checkbox" name="eligibleStages" value={s} defaultChecked={s !== "RFQ_STARTED"} />
-                    <span dir="ltr">{s}</span>
+                    <span>{franchiseStageLabel(s, locale)}</span>
                   </label>
                 ))}
               </div>
@@ -84,7 +86,7 @@ export function FollowupPanel({
         <div className="mt-4 space-y-2">
           {d.jobs.map((j) => (
             <div key={j.id} className="grid gap-2 rounded-xl border bg-card p-3 text-sm sm:grid-cols-3">
-              <span>{m.status}: {j.status} · #{j.reminderOrdinal}</span>
+              <span>{m.status}: {m.jobStatusLabels[j.status] ?? workflowStatusLabel(j.status, locale)} · #{j.reminderOrdinal}</span>
               <span>{j.attemptCount} {locale === "ar" ? "محاولات" : "tentatives"}</span>
               <time dateTime={j.nextAttemptAt}>{m.next}: {stableStamp(j.nextAttemptAt, locale)}</time>
             </div>

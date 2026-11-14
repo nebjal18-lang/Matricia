@@ -82,7 +82,7 @@ describe("client space boards", () => {
     vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
     vi.stubEnv("APP_ENV", "test");
     const html = [
-      renderToStaticMarkup(<DiagnosticsBoard locale="fr" questionnaireHref="/fr/client/questionnaires" evolutionHref="/fr/client/diagnostics/evolution" score={null} ratingLabel={null} libraryScores={[]} findings={[]} opportunities={[]} runs={[]} hasSubmittedAssessment={false} />),
+      renderToStaticMarkup(<DiagnosticsBoard locale="fr" questionnaireHref="/fr/client/questionnaires" evolutionHref="/fr/client/diagnostics/evolution" analyseHref="/fr/client/diagnostics#analyse" score={null} ratingLabel={null} libraryScores={[]} findings={[]} opportunities={[]} runs={[]} hasSubmittedAssessment={false} />),
       renderToStaticMarkup(<RequestsBoard locale="fr" query="" compareHref="/fr/client/demandes" rows={[{ id: "x", title: "Demande de démonstration à ignorer", status: "Brouillon", last: "Hier", next: "Ouvrir", href: "/fr/client/demandes", tone: "violet" }]} organizationName="Client · Communication" />),
       renderToStaticMarkup(<MissionsBoard locale="fr" query="" />),
       renderToStaticMarkup(<DocumentsBoard locale="fr" query="" />),
@@ -123,6 +123,25 @@ describe("client space boards", () => {
     expect(disputes).toContain("Ouvrir un litige");
     expect(disputes).not.toContain("Retard de livraison livrables");
     expect(disputes).not.toMatch(/exemple illustratif/i);
+  });
+
+  it("pointe le calcul de santé globale vers #analyse et non l’évolution", () => {
+    const html = renderToStaticMarkup(
+      <DiagnosticsBoard
+        locale="fr"
+        questionnaireHref="/fr/client/questionnaires?organizationId=own"
+        evolutionHref="/fr/client/diagnostics/evolution?organizationId=own"
+        score={null}
+        ratingLabel={null}
+        libraryScores={[]}
+        findings={[]}
+        opportunities={[]}
+        runs={[]}
+        hasSubmittedAssessment
+      />,
+    );
+    expect(html).toContain('href="/fr/client/diagnostics?organizationId=own#analyse">Calculer la santé globale');
+    expect(html).not.toContain('href="/fr/client/diagnostics/evolution?organizationId=own">Calculer la santé globale');
   });
 
   it("tonifie les priorités diagnostic selon la maquette 01", () => {

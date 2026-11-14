@@ -36,8 +36,8 @@ export function WorkspaceAccountMenu({
   if (currentWorkspace) securityQuery.set("workspace", currentWorkspace);
   const initial = (userEmail?.slice(0, 1) || fallbackInitial).toUpperCase();
   return (
-    <details className={className}>
-      <summary aria-label={label}>
+    <details className={className} suppressHydrationWarning>
+      <summary aria-label={label} suppressHydrationWarning>
         {displayName ? (
           <>
             <span className="client-account-avatar" aria-hidden>

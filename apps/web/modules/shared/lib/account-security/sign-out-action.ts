@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
@@ -15,5 +16,5 @@ export async function signOutOfWorkspace(formData: FormData) {
     const separator = returnTo.includes("?") ? "&" : "?";
     redirect(`${returnTo}${separator}signout=failed`);
   }
-  redirect(`/${locale}/connexion`);
+  redirect(connexionHref(locale, { next: returnTo }));
 }

@@ -49,7 +49,11 @@ export function QuotePreviewWorkbench({
     { ok: Boolean(quote?.id), label: w.quoteCheckRef, detail: quote ? `v${quote.versionNumber}` : "—" },
     { ok: lineCount > 0 && quote?.totalMinor != null, label: w.quoteCheckItems, detail: `${lineCount} ${w.quoteLinesCount}` },
     { ok: Boolean(prefill?.proposedStartDate || prefill?.durationDays), label: w.quoteCheckPlanning, detail: prefill?.proposedStartDate ? formatDay(locale, prefill.proposedStartDate) : "—" },
-    { ok: Boolean(prefill?.paymentTerms), label: w.quoteCheckTerms, detail: w.quoteFilled },
+    {
+      ok: Boolean(prefill?.inclusions?.trim() || prefill?.exclusions?.trim()),
+      label: w.quoteCheckTerms,
+      detail: prefill?.inclusions?.trim() || prefill?.exclusions?.trim() ? w.quoteFilled : "—",
+    },
     { ok: Boolean(prefill?.warranty && prefill.validUntil), label: w.quoteCheckWarranty, detail: prefill?.warranty ?? "—" },
     { ok: true, label: w.quoteCheckAttachments, detail: prefill?.attachments?.length ? String(prefill.attachments.length) : locale==="ar"?"لا توجد مرفقات — اختيارية":"Aucune pièce jointe — facultatives" },
   ];

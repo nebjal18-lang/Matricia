@@ -26,7 +26,7 @@ export type ActorUserResult =
     fiche: AdminOrganizationFiche | null;
     organizations: AdminSupervisionDashboard["organizations"];
   }
-  | { status: "error"; reason: NonNullable<ActorDirectory["reason"]> | "NOT_FOUND" };
+  | { status: "error"; reason: NonNullable<ActorDirectory["reason"]> | "NOT_FOUND" | "ORG_SCOPE_MISS" };
 
 export async function loadAdminActorDirectory(consistent = false): Promise<ActorDirectory> {
   const [supervision, invitations] = await Promise.all([loadAdminSupervisionDashboard(80,consistent), listInvitations()]);
@@ -52,20 +52,30 @@ export async function loadAdminActorDirectory(consistent = false): Promise<Actor
 }
 
 export async function loadAdminActorUser(userId: string, organizationId?: string): Promise<ActorUserResult> {
-  const [directory, actorResult] = await Promise.all([loadAdminActorDirectory(), loadActorRows(userId)]);
-  const reason = actorResult.reason ?? directory.reason ?? (directory.forbidden ? "FORBIDDEN" : undefined);
-  if (reason) return { status: "error", reason };
-  const rows = organizationId === undefined
-    ? actorResult.users
-    : actorResult.users.filter((row) => row.organizationId === organizationId);
-  const first = rows[0];
+  const actorResult = await loadActorRows(userId);
+  if (actorResult.reason) return { status: "error", reason: actorResult.reason };
+  if (actorResult.users.length === 0) return { status: "error", reason: "NOT_FOUND" };
+  if (organizationId !== undefined) {
+    const scoped = actorResult.users.filter((row) => row.organizationId === organizationId);
+    if (scoped.length === 0) return { status: "error", reason: "ORG_SCOPE_MISS" };
+    const first = scoped[0];
+    const fiche = first?.organizationId ? await loadAdminOrganizationFiche(first.organizationId) : null;
+    if (fiche?.status === "error") return fiche;
+    return {
+      status: "success",
+      rows: scoped,
+      fiche: fiche?.status === "success" ? fiche.value : null,
+      organizations: [],
+    };
+  }
+  const first = actorResult.users[0];
   const fiche = first?.organizationId ? await loadAdminOrganizationFiche(first.organizationId) : null;
   if (fiche?.status === "error") return fiche;
   return {
     status: "success",
-    rows,
+    rows: actorResult.users,
     fiche: fiche?.status === "success" ? fiche.value : null,
-    organizations: directory.organizations,
+    organizations: [],
   };
 }
 

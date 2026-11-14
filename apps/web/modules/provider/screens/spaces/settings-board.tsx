@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import {capacitySummaryStatus} from "@/modules/provider/data/qualification/capacity-summary";
 import {interventionModeLabel} from "@/modules/provider/data/qualification/intervention-modes";
+import { queryWithWorkspace } from "@/modules/shared/lib/auth/workspace-navigation";
 import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import Link from "next/link";
 import { ArrowRight, Bell, MapPin, Settings2 } from "lucide-react";
@@ -9,6 +11,14 @@ import type { NotificationDashboard } from "@/modules/shared/lib/notifications/m
 import type { ProviderDashboard } from "@/modules/provider/data/qualification/model";
 import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+
+/** Stable UUID for preference idempotency across re-renders of the same channel. */
+function preferenceIdempotencyKey(seed: string): string {
+  const chars = createHash("sha256").update(seed).digest("hex").slice(0, 32).split("");
+  chars[12] = "4";
+  chars[16] = ((Number.parseInt(chars[16]!, 16) & 3) | 8).toString(16);
+  return `${chars.slice(0, 8).join("")}-${chars.slice(8, 12).join("")}-${chars.slice(12, 16).join("")}-${chars.slice(16, 20).join("")}-${chars.slice(20).join("")}`;
+}
 
 const copy = {
   fr: {
@@ -63,6 +73,7 @@ export function ProviderSettingsBoard({
 }) {
   const c = copy[locale];
   const n = getNotificationMessages(locale);
+  const notificationsQuery = queryWithWorkspace(query, "provider");
   const capacityHref = `/${locale}/sous-traitant/qualification${query}#capacite`;
   const capacityStatus=capacitySummaryStatus(dashboard?.services??[]);
 
@@ -101,7 +112,7 @@ export function ProviderSettingsBoard({
                 <h2><Bell className="size-4" aria-hidden /> {c.notifTitle}</h2>
                 <p>{c.notifLead}</p>
               </div>
-              <Link href={`/${locale}/notifications${query}`} className="client-text-link">{c.openCenter}</Link>
+              <Link href={`/${locale}/notifications${notificationsQuery}`} className="client-text-link">{c.openCenter}</Link>
             </header>
             {!notifications ? (
               <p role="status">{locale === "ar" ? "تعذر تحميل تفضيلات الإشعارات." : "Impossible de charger les préférences de notification."}</p>
@@ -127,7 +138,7 @@ export function ProviderSettingsBoard({
                             mandatory={category.mandatory}
                             current={notifications.preferences.find((p) => p.category_code === category.code && p.channel === channel)}
                             locale={locale}
-                            keyValue={crypto.randomUUID()}
+                            keyValue={preferenceIdempotencyKey(`${notifications.organizationId}:${category.code}:${channel}`)}
                             m={n}
                           />
                         ))}

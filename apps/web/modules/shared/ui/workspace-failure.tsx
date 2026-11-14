@@ -44,15 +44,15 @@ export function WorkspaceFailure({ locale, reason, returnPath, supportReference 
   if (technical || reason === "CONFIGURATION") console.error(JSON.stringify({ event: "workspace.read.failed", reference, category: reason, route: new URL(path, "https://matricia.invalid").pathname.split("/").slice(0, 4).map(segment => /^[a-z-]+$/.test(segment) ? segment : "resource").join("/") }));
   const title = m[reason][0];
   const description = m[reason][1];
-  return <section role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-amber-950" data-workspace-failure={reason}>
+  return <section role="alert" className="workspace-failure rounded-xl border border-amber-300 bg-amber-50 p-5 text-amber-950" data-workspace-failure={reason}>
     <h2 className="text-lg font-semibold">{title}</h2>
     <p className="mt-2 leading-7">{description}</p>
-    <div className="mt-4 flex flex-wrap gap-3">
-      {reason === "UNAUTHENTICATED" ? <Link className="min-h-11 rounded-md border px-3 py-2 font-semibold underline" href={connexionHref(locale, { next: path })}>{m.signIn}</Link> : null}
-      {reason === "MFA_REQUIRED" ? <Link className="min-h-11 rounded-md border px-3 py-2 font-semibold underline" href={`/${locale}/securite/compte?${new URLSearchParams({ next: path })}`}>{m.mfa}</Link> : null}
-      {technical || reason === "CONFIGURATION" ? <a className="min-h-11 rounded-md border px-3 py-2 font-semibold underline" href={path}>{m.retry}</a> : null}
-      {reason === "NO_ORGANIZATION" ? <Link className="min-h-11 rounded-md border px-3 py-2 font-semibold underline" href={`/${locale}/organisation`}>{m.organization}</Link> : null}
-      <Link className="min-h-11 rounded-md border px-3 py-2 font-semibold underline" href={`/${locale}/contact`}>{m.support}</Link>
+    <div className="workspace-failure-actions mt-4 flex flex-wrap gap-3">
+      {reason === "UNAUTHENTICATED" ? <Link className="workspace-failure-cta" href={connexionHref(locale, { next: path })}>{m.signIn}</Link> : null}
+      {reason === "MFA_REQUIRED" ? <Link className="workspace-failure-cta" href={`/${locale}/securite/compte?${new URLSearchParams({ next: path })}`}>{m.mfa}</Link> : null}
+      {technical || reason === "CONFIGURATION" ? <a className="workspace-failure-cta" href={path}>{m.retry}</a> : null}
+      {reason === "NO_ORGANIZATION" ? <Link className="workspace-failure-cta" href={`/${locale}/organisation`}>{m.organization}</Link> : null}
+      <Link className="workspace-failure-cta" href={`/${locale}/contact`}>{m.support}</Link>
     </div>
     {technical || reason === "CONFIGURATION" ? <p className="mt-3 text-sm">{m.reference} : <span className="font-mono" dir="ltr">{reference}</span></p> : null}
   </section>;

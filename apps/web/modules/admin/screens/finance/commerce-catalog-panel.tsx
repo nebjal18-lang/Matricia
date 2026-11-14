@@ -8,6 +8,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import type { AdminCommerceCatalog } from "@/modules/admin/data/catalog/model";
 import type { AdminBoxesDashboard } from "@/modules/admin/data/boxes/model";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import {
   activateCreditPackAction,
@@ -26,7 +27,7 @@ const parameterKeys = ["DOCUMENT_EXPIRY_WARNING_DAYS", "VOLUME_RESERVATION_DEFAU
 
 function Feedback({ state, m, locale }: { state: CommerceActionState; m: CommerceMessages; locale: Locale }) {
   if (state.status === "idle") return null;
-  if (state.status === "success") return <p role="status" className="text-sm text-primary">{state.outcome==="MANUAL_CREDIT_GRANT_REQUESTED"?(locale==="ar"?"جمد الطلب. راجعه شخص مالي آخر ثم نفذه من لوحة المنح تحت الرقابة المزدوجة.":"Demande figée. Une autre personne Finance doit la revoir puis l’exécuter dans les attributions sous double contrôle."):<>{m.success} {state.outcome}</>}</p>;
+  if (state.status === "success") return <p role="status" className="text-sm text-primary">{state.outcome==="MANUAL_CREDIT_GRANT_REQUESTED"?(locale==="ar"?"جمد الطلب. راجعه شخص مالي آخر ثم نفذه من لوحة المنح تحت الرقابة المزدوجة.":"Demande figée. Une autre personne Finance doit la revoir puis l’exécuter dans les attributions sous double contrôle."):<>{m.success} {localizeStatus(state.outcome, locale)}</>}</p>;
   return <p role="alert" className="text-sm text-destructive">{m.errors[state.reason]}</p>;
 }
 
@@ -64,7 +65,7 @@ export function CommerceCatalogPanel({
           <div className="grid gap-3 md:grid-cols-2">
             {catalog.packs.map((item) => (
               <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
-                <div className="flex flex-wrap justify-between gap-2"><strong>{name(item.name_fr, item.name_ar)}</strong><Badge>{item.status} · v{item.version}</Badge></div>
+                <div className="flex flex-wrap justify-between gap-2"><strong>{name(item.name_fr, item.name_ar)}</strong><Badge>{localizeStatus(item.status, locale)} · v{item.version}</Badge></div>
                 <p dir="ltr">{item.code} · {item.quantity} cr · {formatMinorAmount(item.price_minor, item.currency, locale)} · {item.validity_days}j</p>
               </article>
             ))}
@@ -77,7 +78,7 @@ export function CommerceCatalogPanel({
           <div className="grid gap-3 md:grid-cols-2">
             {catalog.promotions.map((item) => (
               <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
-                <div className="flex flex-wrap justify-between gap-2"><strong>{name(item.name_fr, item.name_ar)}</strong><Badge>{item.status} · v{item.version}</Badge></div>
+                <div className="flex flex-wrap justify-between gap-2"><strong>{name(item.name_fr, item.name_ar)}</strong><Badge>{localizeStatus(item.status, locale)} · v{item.version}</Badge></div>
                 <p dir="ltr">{item.code} · {item.bonus_credits} cr</p>
               </article>
             ))}
@@ -90,7 +91,7 @@ export function CommerceCatalogPanel({
           <div className="grid gap-3 md:grid-cols-2">
             {catalog.parameters.map((item) => (
               <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
-                <div className="flex flex-wrap justify-between gap-2"><strong dir="ltr">{item.parameter_key}</strong><Badge>{item.status} · v{item.version}</Badge></div>
+                <div className="flex flex-wrap justify-between gap-2"><strong dir="ltr">{item.parameter_key}</strong><Badge>{localizeStatus(item.status, locale)} · v{item.version}</Badge></div>
                 <p dir="ltr">{item.value_integer}</p>
               </article>
             ))}

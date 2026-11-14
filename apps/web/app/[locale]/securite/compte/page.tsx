@@ -97,6 +97,7 @@ export default async function AccountSecurityPage({
             id: member.id,
             name: member.isCurrentUser ? (locale === "ar" ? "أنتم" : "Vous") : (member.organizationName ?? roleMessages.anotherMember),
             role: member.roles[0] ? roleMessages.roles[member.roles[0]] : roleMessages.noRole,
+            access: member.organizationName ?? roleMessages.unknownOrganization,
             status: roleMessages.membershipStatuses[member.status],
           })) : []}
         >

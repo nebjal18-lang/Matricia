@@ -1,6 +1,7 @@
 "use server";
 import { ensureCurrentConsentDocuments } from "@/modules/shared/lib/auth/consent/current-documents";
 
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { authorizedReturnPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { readWorkspaceNavigation } from "@/modules/shared/lib/auth/workspace-navigation-server";
@@ -8,11 +9,15 @@ import { cookies } from "next/headers";
 import { isCurrentLegalConsent, TERMS_VERSION, PRIVACY_VERSION } from "@/modules/shared/lib/auth/legal-consent";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { headers } from "next/headers";
-import { normalizeEmail } from "@/modules/shared/lib/auth/otp";
+import { normalizeEmail, normalizeOtp } from "@/modules/shared/lib/auth/otp";
+import type { EmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 
 export type OtpRequestResult = { accepted: true } | { accepted: false; reason: "INVALID_EMAIL" | "RATE_LIMITED" | "CONSENT_REQUIRED" | "UNAVAILABLE" };
+export type CompleteLoginResult =
+  | { ok: true; destination: string }
+  | { ok: false; reason: "INVALID" | "EXPIRED" | "CONSENT" | "UNAVAILABLE" };
 
 function clientIp(headerStore: Headers): string | null {
   const candidate = headerStore.get("cf-connecting-ip") ?? headerStore.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -87,6 +92,49 @@ export async function confirmRegistrationConsent(): Promise<boolean> {
   return true;
 }
 
+/** Verify email OTP on the server so session cookies are visible to post-login routing. */
+export async function completeEmailLogin(
+  emailInput: string,
+  tokenInput: string,
+  localeInput: string,
+  nextPathInput?: string,
+  intentInput?: string,
+  otpLength: EmailOtpLength = 6,
+): Promise<CompleteLoginResult> {
+  const email = normalizeEmail(emailInput);
+  const token = normalizeOtp(tokenInput, otpLength);
+  const locale = isLocale(localeInput) ? localeInput : "fr";
+  if (!email || !token) return { ok: false, reason: "INVALID" };
+  const client = await getSupabaseServerClient();
+  const { error } = await client.auth.verifyOtp({ email, token, type: "email" });
+  if (error) {
+    return { ok: false, reason: error.code === "otp_expired" ? "EXPIRED" : "INVALID" };
+  }
+  if (intentInput === "registration") {
+    if (!(await confirmRegistrationConsent())) {
+      await client.auth.signOut();
+      return { ok: false, reason: "CONSENT" };
+    }
+  }
+  return { ok: true, destination: await postLoginDestination(locale, nextPathInput) };
+}
+
+/** Verify password on the server so session cookies are visible to post-login routing. */
+export async function completePasswordLogin(
+  emailInput: string,
+  passwordInput: string,
+  localeInput: string,
+  nextPathInput?: string,
+): Promise<CompleteLoginResult> {
+  const email = normalizeEmail(emailInput);
+  const locale = isLocale(localeInput) ? localeInput : "fr";
+  if (!email || passwordInput.length < 12 || passwordInput.length > 72) return { ok: false, reason: "INVALID" };
+  const client = await getSupabaseServerClient();
+  const { error } = await client.auth.signInWithPassword({ email, password: passwordInput });
+  if (error) return { ok: false, reason: "INVALID" };
+  return { ok: true, destination: await postLoginDestination(locale, nextPathInput) };
+}
+
 /** Resolve the next step from server-verified assurance and the role policy. */
 export async function postLoginDestination(localeInput: string, requestedNext?: string): Promise<string> {
   const locale = isLocale(localeInput) ? localeInput : "fr";
@@ -110,9 +158,12 @@ export async function postLoginDestination(localeInput: string, requestedNext?: 
       target = `${url.pathname}${url.search}`;
     }
   }
-  // A navigation read failure is a security incident: never resume the deep link unchecked.
+  // A navigation read failure is a technical incident — never pretend MFA is missing.
   if (navigation.status !== "ok") {
-    return `/${locale}/securite/compte?${new URLSearchParams({ next: target })}`;
+    if (navigation.reason === "UNAUTHENTICATED") {
+      return connexionHref(locale, { next: target });
+    }
+    return `/${locale}/indisponible?${new URLSearchParams({ next: target })}`;
   }
   const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
   // navigation already resolved get_my_account_security_requirement — do not call it twice.

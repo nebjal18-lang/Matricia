@@ -33,7 +33,12 @@ export function visibleFieldValue(settings: Record<string, string>, field: { key
 export function clearSecretFields(form: HTMLFormElement | null) {
   for (const control of form?.querySelectorAll<HTMLInputElement>("input[data-configuration-secret]") ?? []) control.value = "";
 }
-export function displayTimestamp(value: string) {
+export function displayTimestamp(value: string, locale: "fr" | "ar" = "fr") {
   const parsed = new Date(value);
-  return Number.isFinite(parsed.getTime()) ? `${parsed.toISOString().slice(0, 16).replace("T", " ")} UTC` : "—";
+  if (!Number.isFinite(parsed.getTime())) return "—";
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Africa/Casablanca",
+  }).format(parsed);
 }

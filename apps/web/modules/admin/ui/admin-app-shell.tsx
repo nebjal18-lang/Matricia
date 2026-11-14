@@ -79,8 +79,8 @@ export function AdminAppShell({
             const Icon = item.icon;
             if (item.key === "actors") {
               return (
-                <details key={item.key} className="admin-side-group" open={active === "actors"}>
-                  <summary data-active={active === "actors" ? "true" : undefined}>
+                <details key={item.key} className="admin-side-group" open={active === "actors"} suppressHydrationWarning>
+                  <summary data-active={active === "actors" ? "true" : undefined} suppressHydrationWarning>
                     <Users aria-hidden className="size-4" />
                     {item.label}
                     <ChevronDown aria-hidden className="size-3.5 admin-side-chevron" />
@@ -95,8 +95,8 @@ export function AdminAppShell({
             }
             if (item.key === "parcours") {
               return (
-                <details key={item.key} className="admin-side-group" open={active === "parcours"}>
-                  <summary data-active={active === "parcours" ? "true" : undefined}>
+                <details key={item.key} className="admin-side-group" open={active === "parcours"} suppressHydrationWarning>
+                  <summary data-active={active === "parcours" ? "true" : undefined} suppressHydrationWarning>
                     <Route aria-hidden className="size-4" />
                     {item.label}
                     <ChevronDown aria-hidden className="size-3.5 admin-side-chevron" />

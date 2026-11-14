@@ -1,3 +1,4 @@
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { readAllPages } from "@/modules/client/data/pagination";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
@@ -14,7 +15,7 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import "@/modules/client/screens/diagnostics/diagnostic-connected.css";
 export default async function AssistancePage({ params, searchParams }: { params: Promise<{locale:string}>; searchParams: Promise<{organizationId?:string;requestId?:string;page?:string}> }) {
  const [{locale},query]=await Promise.all([params,searchParams]);if(!isLocale(locale))notFound();
- const space=await resolveClientSpace({locale,organizationId:query.organizationId});if(space.status==='unauthenticated')redirect(`/${locale}/connexion`);
+ const space=await resolveClientSpace({locale,organizationId:query.organizationId});if(space.status==='unauthenticated')redirect(connexionHref(locale,{next:`/${locale}/client/diagnostics/assistance`}));
  const client=await getSupabaseServerClient(); const actor=(await client.auth.getUser()).data.user!;
  const page=Math.min(100000,Math.max(1,Number.parseInt(query.page??'1',10)||1));
  const [requests,vault,intelligence]=await Promise.all([client.from('client_assistance_requests').select('id,subject,body,status,row_version,document_ids,created_by,updated_at,consent_revoked_at').eq('organization_id',space.selectedOrganizationId).order('updated_at',{ascending:false}).order('id').range((page-1)*20,page*20),loadClientDocumentVault(space.selectedOrganizationId), (await createServerAssistedIntelligenceRepository()).dashboard()]);

@@ -9,8 +9,11 @@ const mocks = vi.hoisted(() => ({
   userRpc: vi.fn(),
   getUser: vi.fn(),
   assurance: vi.fn(),
-  ensureConsent:vi.fn(),
+  ensureConsent: vi.fn(),
   navigation: vi.fn(),
+  verifyOtp: vi.fn(),
+  signInWithPassword: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 vi.mock("@/modules/shared/lib/auth/workspace-navigation-server", () => ({ readWorkspaceNavigation: mocks.navigation }));
@@ -18,22 +21,26 @@ vi.mock("@/modules/shared/lib/auth/consent/current-documents",()=>({ensureCurren
 vi.mock("@/modules/shared/lib/supabase/admin", () => ({
   getSupabaseAdminClient: () => ({ rpc: mocks.rpc, auth: { signInWithOtp: mocks.signInWithOtp } }),
 }));
-vi.mock("@/modules/shared/lib/auth/otp", () => ({
-  normalizeEmail: (value: string) => {
-    const normalized = value.trim().toLowerCase();
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) ? normalized : null;
-  },
-}));
+vi.mock("@/modules/shared/lib/auth/otp", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/shared/lib/auth/otp")>();
+  return {
+    ...actual,
+    normalizeEmail: (value: string) => {
+      const normalized = value.trim().toLowerCase();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) ? normalized : null;
+    },
+  };
+});
 vi.mock("@/modules/shared/lib/i18n/locale", () => ({
   isLocale: (value: string) => value === "fr" || value === "ar",
 }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: () => ({ rpc: mocks.userRpc, auth: { getUser: mocks.getUser, mfa: { getAuthenticatorAssuranceLevel: mocks.assurance } } }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: () => ({ rpc: mocks.userRpc, auth: { getUser: mocks.getUser, verifyOtp: mocks.verifyOtp, signInWithPassword: mocks.signInWithPassword, signOut: mocks.signOut, mfa: { getAuthenticatorAssuranceLevel: mocks.assurance } } }) }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({ set: mocks.setCookie, delete: mocks.deleteCookie, get: mocks.getCookie }),
   headers: async () => new Headers({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }),
 }));
 
-import { requestOtp, confirmRegistrationConsent, postLoginDestination } from "./actions";
+import { requestOtp, confirmRegistrationConsent, postLoginDestination, completeEmailLogin, completePasswordLogin } from "./actions";
 import { legalConsent } from "@/modules/shared/lib/auth/legal-consent";
 
 describe("requestOtp", () => {
@@ -175,11 +182,61 @@ describe("post login assurance routing", () => {
     mocks.userRpc.mockResolvedValue({ data: [{ mfa_required: true, current_aal: "aal2", requirement_satisfied: true }], error: null });
     expect(await postLoginDestination("ar", "/ar/administration/entreprises/nouvelle?organizationId=org")).toBe("/ar/administration/entreprises/nouvelle?organizationId=org");
   });
-  it("keeps MFA closed if the role read fails", async () => {
+  it("routes a navigation query failure to recovery instead of a fake MFA challenge", async () => {
     mocks.navigation.mockResolvedValue({ status: "error", reason: "QUERY_FAILED" });
     mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
     mocks.userRpc.mockResolvedValue({ data: [{ mfa_required: false, current_aal: "aal2", requirement_satisfied: true }], error: null });
-    expect(await postLoginDestination("fr", "/fr/administration/entreprises/nouvelle")).toContain("/fr/securite/compte?next=");
+    expect(await postLoginDestination("fr", "/fr/administration/entreprises/nouvelle")).toBe("/fr/indisponible?next=%2Ffr%2Fadministration%2Fentreprises%2Fnouvelle");
   });
   it("rejects an external target", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal2",nextLevel:"aal2"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:false,current_aal:"aal2",requirement_satisfied:true}],error:null});await expect(postLoginDestination("fr","https://evil.invalid")).resolves.toBe("/fr/tableau-de-bord"); });
 });
+
+describe("completeEmailLogin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "actor" } } });
+    mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
+    mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
+    mocks.verifyOtp.mockResolvedValue({ error: null });
+    mocks.signOut.mockResolvedValue({ error: null });
+  });
+
+  it("verifies OTP on the server then returns the post-login destination", async () => {
+    await expect(completeEmailLogin("user@example.test", "123456", "fr", "/fr/client/demandes")).resolves.toEqual({
+      ok: true,
+      destination: "/fr/client/demandes",
+    });
+    expect(mocks.verifyOtp).toHaveBeenCalledWith({ email: "user@example.test", token: "123456", type: "email" });
+  });
+
+  it("maps an expired OTP without calling navigation", async () => {
+    mocks.verifyOtp.mockResolvedValue({ error: { code: "otp_expired" } });
+    await expect(completeEmailLogin("user@example.test", "123456", "fr")).resolves.toEqual({ ok: false, reason: "EXPIRED" });
+    expect(mocks.navigation).not.toHaveBeenCalled();
+  });
+
+  it("signs out and reports consent failure for registration", async () => {
+    mocks.getCookie.mockReturnValue(undefined);
+    await expect(completeEmailLogin("user@example.test", "123456", "fr", undefined, "registration")).resolves.toEqual({ ok: false, reason: "CONSENT" });
+    expect(mocks.signOut).toHaveBeenCalled();
+  });
+});
+
+describe("completePasswordLogin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "actor" } } });
+    mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
+    mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
+    mocks.signInWithPassword.mockResolvedValue({ error: null });
+  });
+
+  it("authenticates on the server then returns the destination", async () => {
+    await expect(completePasswordLogin("user@example.test", "password-long-enough", "ar", "/ar/client/demandes")).resolves.toEqual({
+      ok: true,
+      destination: "/ar/client/demandes",
+    });
+    expect(mocks.signInWithPassword).toHaveBeenCalledWith({ email: "user@example.test", password: "password-long-enough" });
+  });
+});
+

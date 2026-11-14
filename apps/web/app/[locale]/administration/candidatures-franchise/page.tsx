@@ -1,10 +1,22 @@
+import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
-import { FranchiseApplicationReview, type FranchiseApplicationReviewCopy, type FranchiseApplicationReviewModel } from "@/modules/admin/screens/franchise-applications/review-forms";
+import { adminFixturesHiddenLabel } from "@/modules/admin/data/spaces/actor-presentation";
+import {
+  FranchiseApplicationReview,
+  type FranchiseApplicationReviewCopy,
+  type FranchiseApplicationReviewModel,
+} from "@/modules/admin/screens/franchise-applications/review-forms";
+import {
+  filterFranchiseApplications,
+  isFranchiseApplicationSettled,
+  isFranchiseApplicationTreat,
+  organizationDisplayName,
+} from "@/modules/admin/screens/franchise-applications/model";
 import { AdminAppShell, AdminCrumb } from "@/modules/admin/ui/admin-app-shell";
 import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -56,6 +68,14 @@ function statusTone(status: string): "critical" | "high" | "ok" | "default" {
   return "default";
 }
 
+const pipelineSteps = ["REGISTERED", "COMPANY_REVIEW", "DOCUMENT_REVIEW", "CONTRACT_PENDING", "ACTIVE"] as const;
+
+function pipelineIndex(status: string): number {
+  if (status === "LIBRARY_ASSIGNED" || status === "ENTRY_FEE_SETUP") return 3;
+  if (status === "CLOSED" || status === "TERMINATED" || status === "SUSPENDED" || status === "FINANCIAL_RESTRICTED") return -1;
+  return pipelineSteps.indexOf(status as (typeof pipelineSteps)[number]);
+}
+
 function formatCreatedAt(value: string, locale: "fr" | "ar") {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -66,7 +86,23 @@ function formatCreatedAt(value: string, locale: "fr" | "ar") {
   }).format(date);
 }
 
-export default async function FranchiseApplicationsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
+function queueHref(locale: "fr" | "ar", baseQuery: string, next: { vue?: string; fixtures?: boolean }) {
+  const params = new URLSearchParams(baseQuery.startsWith("?") ? baseQuery.slice(1) : baseQuery);
+  if (!next.vue || next.vue === "all") params.delete("vue");
+  else params.set("vue", next.vue);
+  if (next.fixtures) params.set("fixtures", "1");
+  else params.delete("fixtures");
+  const qs = params.toString();
+  return `/${locale}/administration/candidatures-franchise${qs ? `?${qs}` : ""}`;
+}
+
+export default async function FranchiseApplicationsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ organizationId?: string; vue?: string; fixtures?: string }>;
+}) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
@@ -74,19 +110,22 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
   const fr = locale === "fr";
+  const includeFixtures = query.fixtures === "1";
+  const vue = query.vue?.trim() || "all";
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
   const loaded = await client.from("franchise_applications").select("id,applicant_name,reply_email,territory_code,domain_label,status,organization_id,franchise_id,row_version,created_at").order("created_at", { ascending: false }).order("id").limit(50);
   const rows = z.array(rowSchema).safeParse(loaded.data);
   const list = rows.success ? rows.data : [];
-  const candidateRows = list.filter((row) => !row.organization_id && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(row.status));
+  const { visible, hiddenFixtures, treatCount } = filterFranchiseApplications(list, { vue, includeFixtures });
+  const candidateRows = visible.filter((row) => !row.organization_id && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(row.status));
   const candidates = new Map(await Promise.all(candidateRows.map(async (row) => {
     const result = await client.rpc("franchise_application_organization_candidates", { p_application_id: row.id });
     const parsed = candidateSchema.safeParse(result.data);
     return [row.id, result.error || !parsed.success ? [] : parsed.data.map((item) => ({ id: item.organization_id, name: item.display_name }))] as const;
   })));
-  const organizationIds = [...new Set(list.flatMap((row) => row.organization_id ? [row.organization_id] : []))];
-  const franchiseIds = list.flatMap((row) => row.franchise_id ? [row.franchise_id] : []);
+  const organizationIds = [...new Set(visible.flatMap((row) => row.organization_id ? [row.organization_id] : []))];
+  const franchiseIds = visible.flatMap((row) => row.franchise_id ? [row.franchise_id] : []);
   const [organizationsResult, franchisesResult, approvalsResult, invitationsResult] = await Promise.all([
     organizationIds.length ? client.from("organizations").select("id,display_name").in("id", organizationIds) : Promise.resolve({ data: [], error: null }),
     organizationIds.length ? client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", organizationIds).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]) : Promise.resolve({ data: [], error: null }),
@@ -98,11 +137,12 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
   const approvals = approvalSchema.safeParse(approvalsResult.data).data ?? [];
   const invitations = invitationSchema.safeParse(invitationsResult.data).data ?? [];
   const bound = new Set(franchiseIds);
-  const models: Array<{ row: z.infer<typeof rowSchema>; model: FranchiseApplicationReviewModel; keys: { propose: string; approve: string; resend: string } }> = list.map((row) => {
+  const models: Array<{ row: z.infer<typeof rowSchema>; model: FranchiseApplicationReviewModel; keys: { propose: string; approve: string; resend: string }; organization: ReturnType<typeof organizationDisplayName> }> = visible.map((row) => {
     const approval = row.franchise_id ? approvals.find((item) => item.franchise_id === row.franchise_id) : undefined;
     const invitation = row.franchise_id ? invitations.find((item) => item.franchise_id === row.franchise_id) : undefined;
     return {
       row,
+      organization: organizationDisplayName(row.organization_id, organizations, locale),
       keys: { propose: randomUUID(), approve: randomUUID(), resend: randomUUID() },
       model: {
         id: row.id,
@@ -110,7 +150,7 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
         rowVersion: row.row_version,
         organizationId: row.organization_id,
         franchiseId: row.franchise_id,
-        isIt: row.domain_label.trim().toUpperCase().startsWith("IT —"),
+        isIt: row.domain_label.trim().toUpperCase().startsWith("IT —") || row.domain_label.trim().toUpperCase().startsWith("IT -"),
         organizations: candidates.get(row.id) ?? [],
         franchises: franchises.filter((item) => item.operator_organization_id === row.organization_id && !bound.has(item.id)).map((item) => ({ id: item.id, label: `${moroccoRegionLabel(item.territory_code, locale) || item.territory_code} · ${statusLabels[item.status]?.[locale] ?? item.status}` })),
         approval: approval ? { id: approval.id, rowVersion: approval.row_version, requestedByMe: approval.requested_by === auth.user?.id } : null,
@@ -121,12 +161,13 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
   });
   const copy: FranchiseApplicationReviewCopy = {
     reason: fr ? "Motif" : "السبب",
+    reasonHint: fr ? "Motif de la décision (obligatoire, 3 caractères min.)" : "سبب القرار (إلزامي، 3 أحرف على الأقل)",
     company: fr ? "Passer en revue société" : "الانتقال إلى مراجعة الشركة",
     documents: fr ? "Demander les pièces" : "طلب الوثائق",
     close: fr ? "Clore" : "إغلاق",
     link: fr ? "Lier l’organisation" : "ربط المؤسسة",
     organization: fr ? "Organisation du candidat" : "مؤسسة المترشح",
-    noOrganization: fr ? "Le candidat n’a pas encore créé sa société franchisée. Il la rattache depuis son dossier après connexion." : "لم ينشئ المترشح شركة الامتياز بعد. سيربطها من ملفه بعد تسجيل الدخول.",
+    noOrganization: fr ? "Organisation non liée : le candidat doit créer puis rattacher sa société franchisée depuis son dossier." : "مؤسسة غير مرتبطة: يجب أن ينشئ المترشح شركة الامتياز ويربطها من ملفه.",
     bind: fr ? "Rattacher ce mandat existant" : "ربط هذا التفويض الموجود",
     franchise: fr ? "Mandat déjà proposé pour cette organisation" : "تفويض مقترح سابقاً لهذه المؤسسة",
     pending: fr ? "Enregistrement…" : "جارٍ التسجيل…",
@@ -153,6 +194,16 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
     resend: fr ? "Envoyer un nouveau code" : "إرسال رمز جديد",
     resendTitle: fr ? "Code privé d’activation" : "رمز التفعيل الخاص",
   };
+  const pills = [
+    { id: "all", label: fr ? `Tous (${includeFixtures ? list.length : list.length - hiddenFixtures})` : `الكل (${includeFixtures ? list.length : list.length - hiddenFixtures})` },
+    { id: "treat", label: fr ? `À traiter (${treatCount})` : `للمعالجة (${treatCount})` },
+    { id: "REGISTERED", label: statusLabels.REGISTERED![locale] },
+    { id: "COMPANY_REVIEW", label: statusLabels.COMPANY_REVIEW![locale] },
+    { id: "DOCUMENT_REVIEW", label: statusLabels.DOCUMENT_REVIEW![locale] },
+    { id: "CONTRACT_PENDING", label: statusLabels.CONTRACT_PENDING![locale] },
+    { id: "ACTIVE", label: statusLabels.ACTIVE![locale] },
+    { id: "CLOSED", label: statusLabels.CLOSED![locale] },
+  ];
   return (
     <AdminAppShell
       locale={locale}
@@ -165,56 +216,137 @@ export default async function FranchiseApplicationsPage({ params, searchParams }
       crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/command-center${space.selectedQuery}`, label: c.crumbAdmin }, { href: `/${locale}/administration/parcours${space.selectedQuery}`, label: c.navParcours }, { label: fr ? "Candidatures franchise" : "ترشيحات الامتياز" }]} />}
     >
       <main className="client-page admin-franchise-applications">
-        <header className="admin-section-head">
+        <header className="admin-section-head admin-franchise-applications__head">
           <div>
+            <p className="admin-franchise-applications__kicker">{fr ? "Parcours métier" : "المسارات المهنية"}</p>
             <h1>{fr ? "Candidatures franchise" : "ترشيحات الامتياز"}</h1>
-            <p>{fr ? "Chaque dépôt ouvre un dossier inscrit. Après la revue société et les pièces, le mandat est proposé depuis le dossier, approuvé par un second administrateur, puis activé par le candidat avec son code privé." : "كل إيداع يفتح ملفاً بحالة مسجّل. بعد مراجعة الشركة والوثائق يُقترح التفويض من الملف، ويعتمده مسؤول ثانٍ، ثم يفعّله المترشح برمزه الخاص."}</p>
+            <p>{fr ? "Chaque dépôt ouvre un dossier inscrit. Après la revue société et les pièces, le mandat est proposé, approuvé à quatre yeux, puis activé par le candidat." : "كل إيداع يفتح ملفاً مسجّلاً. بعد مراجعة الشركة والوثائق يُقترح التفويض، ويُعتمد بأربعة أعين، ثم يفعّله المترشح."}</p>
           </div>
+          {!loaded.error && rows.success ? (
+            <div className="admin-franchise-applications__stats" aria-label={fr ? "Synthèse file" : "ملخص الطابور"}>
+              <div>
+                <span>{fr ? "Visibles" : "الظاهرة"}</span>
+                <strong>{visible.length}</strong>
+              </div>
+              <div data-tone={treatCount > 0 ? "high" : "ok"}>
+                <span>{fr ? "À traiter" : "للمعالجة"}</span>
+                <strong>{treatCount}</strong>
+              </div>
+            </div>
+          ) : null}
         </header>
-        {loaded.error || !rows.success ? <p role="alert" className="admin-panel">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : list.length === 0 ? <p className="admin-panel">{fr ? "Aucune candidature enregistrée." : "لا يوجد ترشيح مسجّل."}</p> : (
+        {!loaded.error && rows.success ? (
+          <nav className="admin-pills admin-franchise-applications__pills" aria-label={fr ? "Filtres candidatures" : "مرشحات الترشيحات"}>
+            {pills.map((pill) => (
+              <Link key={pill.id} href={queueHref(locale, space.selectedQuery, { vue: pill.id, fixtures: includeFixtures })} aria-current={vue === pill.id ? "page" : undefined}>
+                {pill.label}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
+        {hiddenFixtures > 0 ? (
+          <p role="status" className="client-access-note">
+            {adminFixturesHiddenLabel(hiddenFixtures, locale)}{" "}
+            <Link className="client-text-link" href={queueHref(locale, space.selectedQuery, { vue, fixtures: true })}>
+              {fr ? "Afficher les fixtures" : "إظهارها"}
+            </Link>
+          </p>
+        ) : null}
+        {loaded.error || !rows.success ? <p role="alert" className="admin-panel">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : visible.length === 0 ? (
+          <p className="admin-panel">
+            {list.length === 0
+              ? (fr ? "Aucune candidature enregistrée." : "لا يوجد ترشيح مسجّل.")
+              : (fr ? "Aucune candidature ne correspond à ce filtre." : "لا يوجد ترشيح مطابق لهذا المرشح.")}
+          </p>
+        ) : (
           <ul className="admin-franchise-applications__list">
-            {models.map(({ row, model, keys }) => {
+            {models.map(({ row, model, keys, organization }) => {
               const status = statusLabels[row.status]?.[locale] ?? row.status;
+              const settled = isFranchiseApplicationSettled(row.status);
+              const treat = isFranchiseApplicationTreat(row.status);
+              const tone = statusTone(row.status);
+              const step = pipelineIndex(row.status);
+              const initial = row.applicant_name.trim().slice(0, 1).toLocaleUpperCase(locale === "ar" ? "ar-MA" : "fr-MA") || "·";
+              const pipelineLabels = {
+                REGISTERED: statusLabels.REGISTERED![locale],
+                COMPANY_REVIEW: fr ? "Revue" : "مراجعة",
+                DOCUMENT_REVIEW: fr ? "Pièces" : "وثائق",
+                CONTRACT_PENDING: fr ? "Mandat" : "تفويض",
+                ACTIVE: statusLabels.ACTIVE![locale],
+              } as const;
               return (
-                <li key={row.id} className="admin-work-card admin-franchise-card">
-                  <div className="admin-work-card__head">
-                    <div className="admin-work-card__title-block">
-                      <h2>{row.applicant_name}</h2>
-                      <p className="admin-work-card__motif" dir="ltr">{row.reply_email}</p>
+                <li key={row.id} className="admin-work-card admin-franchise-card" data-status={row.status} data-tone={tone} data-treat={treat ? "true" : undefined}>
+                  <div className="admin-franchise-card__accent" aria-hidden />
+                  <div className="admin-franchise-card__body">
+                    <div className="admin-work-card__head">
+                      <div className="admin-franchise-card__identity">
+                        <span className="admin-franchise-card__avatar" data-tone={tone} aria-hidden>{initial}</span>
+                        <div className="admin-work-card__title-block">
+                          <h2>{row.applicant_name}</h2>
+                          <p className="admin-work-card__motif admin-franchise-card__email" dir="ltr">{row.reply_email}</p>
+                        </div>
+                      </div>
+                      <div className="admin-work-card__flags">
+                        <span className="admin-badge" data-tone={tone}>{status}</span>
+                        {model.isIt ? <span className="admin-badge" data-tone="default">IT</span> : null}
+                        {treat ? <span className="admin-badge" data-tone="high">{fr ? "À traiter" : "للمعالجة"}</span> : null}
+                      </div>
                     </div>
-                    <div className="admin-work-card__flags">
-                      <span className="admin-badge" data-tone={statusTone(row.status)}>{status}</span>
-                      {model.isIt ? <span className="admin-badge" data-tone="default">IT</span> : null}
-                    </div>
-                  </div>
-                  <dl className="admin-work-meta">
-                    <div>
-                      <dt>{fr ? "Territoire" : "الإقليم"}</dt>
-                      <dd>{moroccoRegionLabel(row.territory_code, locale) || row.territory_code}</dd>
-                    </div>
-                    <div>
-                      <dt>{fr ? "Domaine" : "المجال"}</dt>
-                      <dd>{row.domain_label}</dd>
-                    </div>
-                    <div>
-                      <dt>{fr ? "Déposée le" : "أُودعت في"}</dt>
-                      <dd><time dateTime={row.created_at} dir="ltr">{formatCreatedAt(row.created_at, locale)}</time></dd>
-                    </div>
-                    {row.organization_id ? (
+                    {step >= 0 ? (
+                      <ol className="admin-franchise-card__pipeline" aria-label={fr ? "Étapes du dossier" : "مراحل الملف"}>
+                        {pipelineSteps.map((id, index) => {
+                          const state = index < step ? "done" : index === step ? "current" : "todo";
+                          return (
+                            <li key={id} data-state={state}>
+                              <span className="admin-franchise-card__pipeline-dot" aria-hidden />
+                              <span>{pipelineLabels[id]}</span>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    ) : null}
+                    <dl className="admin-work-meta admin-franchise-card__meta">
+                      <div>
+                        <dt>{fr ? "Territoire" : "الإقليم"}</dt>
+                        <dd>{moroccoRegionLabel(row.territory_code, locale) || row.territory_code}</dd>
+                      </div>
+                      <div>
+                        <dt>{fr ? "Domaine" : "المجال"}</dt>
+                        <dd>{row.domain_label}</dd>
+                      </div>
+                      <div>
+                        <dt>{fr ? "Déposée le" : "أُودعت في"}</dt>
+                        <dd><time dateTime={row.created_at} dir="ltr">{formatCreatedAt(row.created_at, locale)}</time></dd>
+                      </div>
                       <div>
                         <dt>{fr ? "Organisation" : "المؤسسة"}</dt>
-                        <dd>{organizations.get(row.organization_id) ?? (fr ? "Organisation rattachée" : "مؤسسة مرتبطة")}</dd>
+                        <dd data-linked={organization.linked ? "true" : "false"}>
+                          <span>{organization.label}</span>
+                          <span className="admin-franchise-card__link-chip" data-linked={organization.linked ? "true" : "false"}>
+                            {organization.linked ? (fr ? "Liée" : "مرتبطة") : (fr ? "Non liée" : "غير مرتبطة")}
+                          </span>
+                        </dd>
+                      </div>
+                    </dl>
+                    {row.franchise_id ? (
+                      <div className="admin-franchise-card__toolbar">
+                        <a className="admin-franchise-card__gov-link" href={`/${locale}/administration/territoires${space.selectedQuery}`}>
+                          {fr ? "Gouvernance du mandat" : "حوكمة التفويض"}
+                        </a>
                       </div>
                     ) : null}
-                  </dl>
-                  {row.franchise_id ? (
-                    <div className="admin-work-links">
-                      <a className="admin-btn-outline !min-h-10 !px-3 !text-sm" href={`/${locale}/administration/territoires${space.selectedQuery}`}>
-                        {fr ? "Ouvrir la gouvernance du mandat" : "فتح حوكمة التفويض"}
-                      </a>
+                    <div className="admin-franchise-card__footer" data-kind={settled ? "settled" : "action"} data-tone={settled ? tone : undefined}>
+                      {settled ? (
+                        <p className="admin-franchise-settled" role="status">
+                          {row.status === "ACTIVE"
+                            ? (fr ? "Franchise active — aucune action de revue sur cette candidature." : "امتياز نشط — لا إجراء مراجعة على هذا الترشيح.")
+                            : (fr ? "Dossier clos ou restreint — aucune action de revue." : "ملف مغلق أو مقيّد — لا إجراء مراجعة.")}
+                        </p>
+                      ) : (
+                        <FranchiseApplicationReview locale={locale} application={model} copy={copy} keys={keys} />
+                      )}
                     </div>
-                  ) : null}
-                  <FranchiseApplicationReview locale={locale} application={model} copy={copy} keys={keys} />
+                  </div>
                 </li>
               );
             })}

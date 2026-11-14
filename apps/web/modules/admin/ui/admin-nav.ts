@@ -18,7 +18,7 @@ export function buildAdminNav(locale: Locale, selectedQuery: string): AdminNavIt
   const q = selectedQuery;
   return [
     { key: "home", href: `${p}/administration/command-center${q}`, label: c.navHome, icon: Home },
-    { key: "actors", href: `${p}/administration/entreprises${q}`, label: c.navActors, icon: Users },
+    { key: "actors", href: `${p}/administration/acteurs${q}`, label: c.navActors, icon: Users },
     { key: "parcours", href: `${p}/administration/parcours${q}`, label: c.navParcours, icon: Route },
     { key: "catalog", href: `${p}/administration/catalogue${q}`, label: c.navCatalog, icon: BookOpen },
     { key: "finance", href: `${p}/administration/finance${q}`, label: c.navFinance, icon: Landmark },

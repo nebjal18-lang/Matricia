@@ -43,7 +43,7 @@ function ValidationEvidence({ state, messages, locale }: { state: RuleValidation
       <div><dt className="text-muted-foreground">{messages.policy}</dt><dd className={technical} dir="ltr">{report.policy_version}</dd></div>
     </dl>
     <h4 className="font-medium">{messages.errors}</h4>
-    {report.errors.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noErrors}</p> : <ul className="space-y-2">{report.errors.map((error) => <li key={`${error.rule_version_id}-${error.code}`} className="rounded-md border border-destructive/40 p-3 text-sm"><bdi className={technical}>{error.rule_version_id}</bdi><span className="mt-1 block">{localized(messages.validationCodes, error.code, messages.failed)}</span></li>)}</ul>}
+    {report.errors.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noErrors}</p> : <ul className="space-y-2">{report.errors.map((error) => <li key={`${error.rule_version_id}-${error.code}`} className="rounded-md border border-destructive/40 p-3 text-sm"><span className="font-medium">{localized(messages.validationCodes, error.code, messages.failed)}</span><details className="mt-1"><summary className="cursor-pointer text-xs text-muted-foreground">{locale === "ar" ? "مرجع تقني" : "Référence technique"}</summary><bdi className={`mt-1 block ${technical}`}>{error.rule_version_id}</bdi></details></li>)}</ul>}
   </section>;
 }
 
@@ -59,7 +59,7 @@ function SimulationEvidence({ state, messages, locale }: { state: RuleValidation
       <div><dt className="text-muted-foreground">{messages.reproducibility}</dt><dd className={technical} dir="ltr">{simulation.reproducibility_hash}</dd></div>
     </dl>
     <h4 className="font-medium">{messages.actionsTriggered}</h4>
-    {simulation.triggered_actions.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noActions}</p> : <ol className="space-y-2">{simulation.triggered_actions.map((action, index) => <li key={`${action.rule_version_id}-${action.evaluation_order}-${index}`} className="rounded-md border p-3 text-sm"><span className="font-medium">{localized(messages.actions, action.type, messages.unknown)}</span><bdi className={`mt-1 block ${technical}`}>{action.rule_version_id}</bdi></li>)}</ol>}
+    {simulation.triggered_actions.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noActions}</p> : <ol className="space-y-2">{simulation.triggered_actions.map((action, index) => <li key={`${action.rule_version_id}-${action.evaluation_order}-${index}`} className="rounded-md border p-3 text-sm"><span className="font-medium">{localized(messages.actions, action.type, messages.unknown)}</span><span className="mt-1 block text-xs text-muted-foreground">{locale === "ar" ? `الترتيب ${action.evaluation_order}` : `Ordre ${action.evaluation_order}`}</span><details className="mt-1"><summary className="cursor-pointer text-xs text-muted-foreground">{locale === "ar" ? "مرجع تقني" : "Référence technique"}</summary><bdi className={`mt-1 block ${technical}`}>{action.rule_version_id}</bdi></details></li>)}</ol>}
   </section>;
 }
 

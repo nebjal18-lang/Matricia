@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { ADMIN_SPACE_IDS } from "./admin-nav";
 import {
   buildDemoSpaceRows,
+  canApplyAdminDemo,
   demoActorUsers,
   demoClientCases,
   demoComplianceCases,
@@ -10,6 +11,19 @@ import {
 } from "./demo-overlay";
 
 describe("données démo admin Figma", () => {
+  afterEach(() => {
+    delete process.env.MATRICIA_DEMO_ACCESS_ENABLED;
+    delete process.env.APP_ENV;
+  });
+
+  it("active le peuplement UI seulement hors production avec le flag démo", () => {
+    process.env.APP_ENV = "development";
+    process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
+    expect(canApplyAdminDemo()).toBe(true);
+    process.env.APP_ENV = "production";
+    expect(canApplyAdminDemo()).toBe(false);
+  });
+
   it("remplit les organisations et les tables de parcours sans exemple illustratif", () => {
     const orgs = demoSupervisionOrganizations;
     expect(orgs.map((row) => row.display_name)).toEqual([

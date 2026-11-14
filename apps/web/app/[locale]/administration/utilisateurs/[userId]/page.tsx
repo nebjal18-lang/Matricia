@@ -26,7 +26,7 @@ export default async function AdminUserFichePage({
     if (result.reason === "NOT_FOUND") notFound();
     return <AdminActorLoadError locale={locale} userId={userId} reason={result.reason} space={space} />;
   }
-  if (result.rows.length === 0) notFound();
+  if (result.rows.length === 0) return <AdminActorLoadError locale={locale} userId={userId} reason="ORG_SCOPE_MISS" space={space} />;
   const a = actorCopy(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
   const name = result.rows[0]?.displayName ?? result.rows[0]?.email ?? a.userFiche;

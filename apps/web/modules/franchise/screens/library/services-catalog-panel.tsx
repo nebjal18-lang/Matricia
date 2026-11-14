@@ -122,10 +122,10 @@ export function ServicesCatalogPanel({
         </div>
         {rows.length === 0 ? <p>{c.emptyServices}</p> : (
           <div className="client-table-wrap client-compare" role="region" aria-label={c.filterServices} tabIndex={0}>
+            <p className="client-access-note">{locale === "ar" ? "التحديد الجماعي غير متاح؛ افتحوا كل خدمة عبر الرابط." : "La sélection groupée n’est pas disponible ; ouvrez chaque service via le lien."}</p>
             <table className="client-space-table">
                 <thead>
                   <tr>
-                    <th><span className="sr-only">{c.rowActions}</span></th>
                     <th>{c.serviceKind}</th>
                   <th>{c.category}</th>
                   <th>{c.subcategory}</th>
@@ -140,7 +140,6 @@ export function ServicesCatalogPanel({
                 <tbody>
                   {paged.map((item) => (
                     <tr key={item.id} data-selected={selectedId === item.id ? "true" : undefined}>
-                      <td><input type="checkbox" aria-label={item.title} /></td>
                       <td><Link href={item.href}><strong>{item.title}</strong></Link><div><KindChip kind={item.kind} locale={locale} /></div></td>
                     <td>{item.category ?? "—"}</td>
                     <td>{item.subcategory ?? "—"}</td>

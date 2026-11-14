@@ -210,7 +210,9 @@ async function main() {
         for (const kind of ["LEGAL", "FISCAL", "INSURANCE"]) {
           const family = id(`${org}:doc:${kind}`);
           const version = id(`${org}:doc:${kind}:v1`);
+          const scanResult = id(`${org}:doc:${kind}:scan-result`);
           const path = `demo/${org}/${kind}/qualification-evidence.pdf`;
+          const contentHash = digest(`${version}:file`);
           await tx`insert into public.provider_document_families(id,provider_organization_id,document_kind,code,created_by)
             values(${family}::uuid,${org}::uuid,${kind},${`DEMO_${kind}`},${actor}::uuid)
             on conflict(provider_organization_id,code) do nothing`;
@@ -220,9 +222,24 @@ async function main() {
           await tx`insert into public.provider_document_upload_reservations(id,provider_organization_id,actor_user_id,storage_object_path,declared_mime_type,declared_size_bytes,expires_at)
             values(${id(`${version}:reservation`)}::uuid,${org}::uuid,${actor}::uuid,${path},'application/pdf',128,clock_timestamp()+interval '30 minutes')
             on conflict(storage_object_path) do nothing`;
-          await tx`insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,issued_on,expires_on,storage_object_path,content_hash,metadata,change_reason,submitted_by,reviewed_by,reviewed_at)
-            values(${version}::uuid,${family}::uuid,${org}::uuid,1,'VERIFIED',current_date-30,current_date+365,${path},${digest(`${version}:file`)},${tx.json({ declared_mime_type: "application/pdf", declared_size_bytes: 128 })},'Justificatif de démonstration',${actor}::uuid,${adminUser}::uuid,clock_timestamp())
+          await tx`insert into public.provider_document_versions(id,family_id,provider_organization_id,version_number,status,issued_on,expires_on,storage_object_path,content_hash,metadata,change_reason,submitted_by)
+            values(${version}::uuid,${family}::uuid,${org}::uuid,1,'SUBMITTED',current_date-30,current_date+365,${path},${contentHash},${tx.json({ declared_mime_type: "application/pdf", declared_size_bytes: 128 })},'Justificatif de démonstration',${actor}::uuid)
             on conflict(id) do nothing`;
+          await tx`insert into public.provider_document_scan_jobs(document_version_id,provider_organization_id,storage_object_path,declared_sha256,declared_mime_type)
+            values(${version}::uuid,${org}::uuid,${path},${contentHash},'application/pdf')
+            on conflict(storage_object_path) do nothing`;
+          const jobs = await tx`select id from public.provider_document_scan_jobs where storage_object_path=${path} and provider_organization_id=${org}::uuid limit 1`;
+          if (jobs.length) {
+            await tx`insert into private.provider_document_scan_results(id,upload_id,sequence,result,engine_code,engine_version,computed_sha256,correlation_id)
+              values(${scanResult}::uuid,${jobs[0].id}::uuid,1,'CLEAN','DEMO_SCANNER','1.0',${contentHash},${id(`${scanResult}:correlation`)}::uuid)
+              on conflict do nothing`;
+            await tx`update public.provider_document_scan_jobs
+              set scan_status='CLEAN', scanned_at=clock_timestamp(), current_scan_result_id=${scanResult}::uuid
+              where id=${jobs[0].id}::uuid and scan_status='PENDING'`;
+          }
+          await tx`update public.provider_document_versions
+            set status='VERIFIED', reviewed_by=${adminUser}::uuid, reviewed_at=clock_timestamp()
+            where id=${version}::uuid and status='SUBMITTED'`;
         }
       }
       await tx`insert into public.service_request_versions(id,request_id,client_organization_id,library_id,version_number,description,urgency,currency_code,required_quote_data,required_fields_complete,catalog_snapshot_hash,questionnaire_snapshot_hash,change_reason,content_hash,created_by)

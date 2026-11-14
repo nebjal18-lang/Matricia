@@ -32,7 +32,7 @@ export async function loadProviderBilling(requestedOrganizationId?: string, requ
   let membershipQuery = client.from("organization_memberships")
     .select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)")
     .eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null)
-    .in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_ACCOUNTING"]);
+    .in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_ACCOUNTING", "PROVIDER_MANAGER"]);
   if(requestedOrganizationId&&id.safeParse(requestedOrganizationId).success)membershipQuery=membershipQuery.eq("organization_id",requestedOrganizationId);
   const membershipResult=await membershipQuery.limit(100);
   if (membershipResult.error) return { status: "error", reason: "QUERY_FAILED" };

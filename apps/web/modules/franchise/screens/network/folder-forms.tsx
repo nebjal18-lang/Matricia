@@ -8,6 +8,8 @@ import { ACTIVITY_TYPES, nextPipelineStage, PIPELINE_STAGES, type PipelineStage 
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { franchiseStageLabel } from "@/modules/franchise/data/spaces/labels";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { advanceFranchiseFolderPipeline, recordFranchiseFolderActivity, linkFranchiseProviderOrganization, type FranchiseInviteState } from "./actions";
 import { canMutateFranchiseFolder } from "./folder-guards";
 
@@ -35,6 +37,10 @@ const reasonOptions = {
     { value: "PROSPECT_AGREEMENT", label: "موافقة العميل المحتمل" },
   ],
 } as const;
+
+function reasonCodeLabel(code: string, locale: Locale) {
+  return reasonOptions[locale].find((option) => option.value === code)?.label ?? workflowStatusLabel(code, locale);
+}
 
 function Feedback({ state, locale, success }: { state: FranchiseInviteState; locale: Locale; success: string }) {
   const c = franchiseCopy(locale);
@@ -160,12 +166,7 @@ export function FranchiseFolderTimeline({
   events?: Array<{ id: string; from: string | null; to: string; reasonCode: string; occurredAt: string; evidence: string[] }>;
 }) {
   const c = franchiseCopy(locale);
-  const stamp = (value: string) => {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return value;
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())} ${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())} UTC`;
-  };
+  const stamp = (value: string) => formatDateTimeCasablanca(value, locale);
   return (
     <>
       {events?.length ? (
@@ -175,7 +176,7 @@ export function FranchiseFolderTimeline({
               <span className="franchise-dot" data-tone="violet" />
               <span>
                 <strong>{franchiseStageLabel(event.from ?? "SENT", locale)} → {franchiseStageLabel(event.to, locale)}</strong>
-                <small>{event.reasonCode} · {stamp(event.occurredAt)}</small>
+                <small>{reasonCodeLabel(event.reasonCode, locale)} · <time dateTime={event.occurredAt}>{stamp(event.occurredAt)}</time></small>
               </span>
             </li>
           ))}
@@ -188,7 +189,7 @@ export function FranchiseFolderTimeline({
               <span>
                 <strong>{activityLabels[locale][activity.type as keyof typeof activityLabels.fr] ?? activity.type}</strong>
                 <small>{activity.summary}</small>
-                <small>{stamp(activity.occurredAt)}</small>
+                <small><time dateTime={activity.occurredAt}>{stamp(activity.occurredAt)}</time></small>
                 {activity.evidence.length ? <small>{activity.evidence.join(" · ")}</small> : null}
               </span>
             </li>

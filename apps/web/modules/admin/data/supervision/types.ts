@@ -61,6 +61,10 @@ export const supervisionSchema = z.object({
     rating: z.string(),
     overall_score: z.union([z.number(), z.string()]),
     completed_at: z.string().nullable(),
+    questionnaire_version_id: uuid.nullable().optional(),
+    questionnaire_version: z.union([z.number(), z.string()]).nullable().optional(),
+    questionnaire_title_fr: z.string().nullable().optional(),
+    questionnaire_title_ar: z.string().nullable().optional(),
   })),
   work_enrichment: z.record(z.string(), z.object({
     organization_name: z.string().nullable(),

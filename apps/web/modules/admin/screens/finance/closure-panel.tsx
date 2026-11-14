@@ -7,6 +7,8 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import type { AdminClosureDashboard } from "@/modules/admin/data/closure/model";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
+import { presentDateOnly } from "@/modules/admin/data/spaces/present-space-row";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { issueStatementAction } from "./commerce-actions";
 import type { CommerceMessages } from "./commerce-messages";
@@ -29,7 +31,7 @@ export function ClosurePanel({ locale, dashboard, m, keyValue }: { locale: Local
         ))} />
         <Block title={m.statements} empty={m.empty} items={dashboard.statements.map((item) => (
           <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
-            <div className="flex justify-between gap-2"><h3 className="font-semibold">{item.statement_number}</h3><Badge>{item.invoiced ? m.invoiced : "ISSUED"}</Badge></div>
+            <div className="flex justify-between gap-2"><h3 className="font-semibold">{item.statement_number}</h3><Badge>{item.invoiced ? m.invoiced : localizeStatus("ISSUED", locale)}</Badge></div>
             <p>{item.organization_name}</p>
             <p dir="ltr">{formatMinor(item.total_minor, item.currency, locale)}</p>
           </article>
@@ -42,7 +44,7 @@ export function ClosurePanel({ locale, dashboard, m, keyValue }: { locale: Local
             </div>
             <p>{item.organization_name}</p>
             <p>{m.outstanding}: <span dir="ltr">{formatMinor(item.outstanding_minor, item.currency, locale)}</span></p>
-            <time dateTime={item.due_on}>{item.due_on}</time>
+            <time dateTime={item.due_on}>{presentDateOnly(item.due_on, locale)}</time>
             {item.blocks_new_opportunities ? <p className="mt-2 text-muted-foreground">{m.overdueHint}</p> : null}
           </article>
         ))} />
@@ -66,7 +68,7 @@ export function ClosurePanel({ locale, dashboard, m, keyValue }: { locale: Local
           <label className="grid gap-1 text-sm">{m.periodStart}<Input name="periodStart" type="date" required className="min-h-11" /></label>
           <label className="grid gap-1 text-sm">{m.periodEnd}<Input name="periodEnd" type="date" required className="min-h-11" /></label>
           <Button type="submit" disabled={pending} className="min-h-11 md:col-span-2">{pending ? m.processing : m.save}</Button>
-          {state.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {state.outcome}</p> : null}
+          {state.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {localizeStatus(state.outcome, locale)}</p> : null}
           {state.status === "error" ? <p role="alert" className="text-sm text-destructive md:col-span-2">{m.errors[state.reason]}</p> : null}
         </form>
       ) : null}

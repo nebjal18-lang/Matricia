@@ -12,6 +12,7 @@ import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { isAdminSpaceId, isReservedView, type AdminSpaceId } from "@/modules/admin/data/spaces/admin-nav";
 import { spaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
 import { findSpaceRow, loadAdminSpaceSnapshot } from "@/modules/admin/data/spaces/space-data";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { AdminAppShell, AdminCrumb } from "@/modules/admin/ui/admin-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { specialBoardCopy } from "@/modules/admin/data/spaces/special-copy";
@@ -38,6 +39,7 @@ export async function renderAdminSpacePage({
   organizationId,
   q,
   vue,
+  fixtures,
 }: {
   locale: string;
   space: string;
@@ -46,13 +48,16 @@ export async function renderAdminSpacePage({
   organizationId?: string;
   q?: string;
   vue?: string;
+  fixtures?: string;
 }) {
   if (!isLocale(localeParam) || !isAdminSpaceId(spaceParam)) notFound();
   const locale = localeParam;
+  const includeFixtures = fixtures === "1" || fixtures === "true";
   const returnParams = new URLSearchParams();
   if (organizationId) returnParams.set("organizationId", organizationId);
   if (q) returnParams.set("q", q);
   if (vue) returnParams.set("vue", vue);
+  if (includeFixtures) returnParams.set("fixtures", "1");
   const returnPath = `/${locale}/administration/${spaceParam}${itemId ? `/${encodeURIComponent(itemId)}` : ""}${action ? `/${encodeURIComponent(action)}` : ""}${returnParams.size ? `?${returnParams.toString()}` : ""}`;
   const space: AdminSpaceId = spaceParam === "territoires" && itemId === "validations" ? "gouvernance" : spaceParam;
   if (space === "gouvernance" && spaceParam === "territoires") {
@@ -66,7 +71,7 @@ export async function renderAdminSpacePage({
   if (admin.status === "unauthenticated") redirect(connexionHref(locale, { next: returnPath }));
   const snapshot = await loadAdminSpaceSnapshot(locale, space, admin.selectedQuery);
   const spec = spaceSpec(space);
-  const uiParams=new URLSearchParams(admin.selectedQuery);if(q)uiParams.set("q",q);if(vue)uiParams.set("vue",vue);const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
+  const uiParams=new URLSearchParams(admin.selectedQuery);if(q)uiParams.set("q",q);if(vue)uiParams.set("vue",vue);if(includeFixtures)uiParams.set("fixtures","1");const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
   const alternate = locale === "ar" ? "fr" : "ar";
   const failureReason = snapshot.reason;
   const currentHref = `/${locale}/administration/${space}${itemId ? `/${itemId}` : ""}${action ? `/${action}` : ""}${uiQuery}`;
@@ -86,8 +91,8 @@ export async function renderAdminSpacePage({
     ? (locale === "ar" ? "الفاعلون" : "Acteurs")
     : (locale === "ar" ? "المسار المهني" : "Parcours métier");
   const groupHref = spec.nav === "actors"
-    ? `/${locale}/administration/entreprises${admin.selectedQuery}`
-    : `/${locale}/administration/diagnostics${admin.selectedQuery}`;
+    ? `/${locale}/administration/acteurs${admin.selectedQuery}`
+    : `/${locale}/administration/parcours${admin.selectedQuery}`;
 
   const crumbItems: Array<{ href?: string; label: string }> = [
     { href: groupHref, label: groupLabel },
@@ -113,7 +118,7 @@ export async function renderAdminSpacePage({
     body = null;
   } else if (view === "queue") {
     body = (
-      <SpaceQueueBoard locale={locale} query={uiQuery} space={space} rows={snapshot.rows} treat={snapshot.treat} search={q} vue={vue}>
+      <SpaceQueueBoard locale={locale} query={uiQuery} space={space} rows={snapshot.rows} treat={snapshot.treat} search={q} vue={vue} includeFixtures={includeFixtures}>
         {space === "providers" && snapshot.providers ? (
           <details className="client-ops">
             <summary>{getAdminProviderMessages(locale).title}</summary>
@@ -183,7 +188,7 @@ export async function renderAdminSpacePage({
                 : spec.title(locale)
       }
       lead={special?.lead ?? spec.lead(locale)}
-      kicker={row ? row.status : undefined}
+      kicker={row ? localizeStatus(row.status, locale) : undefined}
       actions={snapshot.reason && snapshot.reason !== "OK" ? undefined : specialKind ? <SpecialBoardActions locale={locale} kind={specialKind} /> : <SpaceHeaderActions locale={locale} query={uiQuery} spec={spec} />}
     >
       {failureReason && failureReason !== "OK" ? (

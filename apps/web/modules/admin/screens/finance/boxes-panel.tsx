@@ -7,6 +7,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import type { AdminBoxesDashboard } from "@/modules/admin/data/boxes/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import {
@@ -28,9 +29,9 @@ const types = ["PLATFORM_FEATURE", "SERVICE_UNIT", "CREDIT_SERVICE", "PRIORITY",
 const modes = ["AUTOMATED_PLATFORM", "MATRICIA_INTERNAL", "DIRECT_PROVIDER", "SUBCONTRACTOR_POOL", "VOLUME_POOL", "RFQ"];
 const boxTypes = ["FIXED", "SEMI_CUSTOM", "CUSTOM", "ENTERPRISE", "MULTI_USER", "MULTI_LIBRARY"];
 
-function Feedback({ state, m }: { state: CommerceActionState; m: CommerceMessages }) {
+function Feedback({ state, m, locale }: { state: CommerceActionState; m: CommerceMessages; locale: Locale }) {
   if (state.status === "idle") return null;
-  if (state.status === "success") return <p role="status" className="text-sm text-primary">{m.success} {state.outcome}</p>;
+  if (state.status === "success") return <p role="status" className="text-sm text-primary">{m.success} {localizeStatus(state.outcome, locale)}</p>;
   return <p role="alert" className="text-sm text-destructive">{m.errors[state.reason]}</p>;
 }
 
@@ -76,12 +77,12 @@ export function BoxesPanel({
           <article key={item.id} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap justify-between gap-2">
               <h3 className="font-semibold">{name(item.name_fr, item.name_ar)}</h3>
-              <Badge variant={item.needs_approval ? "destructive" : "outline"}>{item.status} · v{item.version}</Badge>
+              <Badge variant={item.needs_approval ? "destructive" : "outline"}>{localizeStatus(item.status, locale)} · v{item.version}</Badge>
             </div>
-            <p className="mt-2 text-sm" dir="ltr">{item.code} · {item.box_type} · {item.credit_budget} cr</p>
+            <p className="mt-2 text-sm"><span dir="ltr">{item.code}</span> · {localizeStatus(item.box_type, locale)} · <span dir="ltr">{item.credit_budget} cr</span></p>
             <p className="mt-1 text-sm" dir="ltr">{formatMinor(item.cost_low_minor, item.currency, locale)} / {formatMinor(item.cost_expected_minor, item.currency, locale)} / {formatMinor(item.cost_full_minor, item.currency, locale)}</p>
             {item.needs_approval ? <p className="mt-2 text-sm text-destructive">{m.needsApproval}</p> : null}
-            <ul className="mt-2 text-sm text-muted-foreground">{item.slots.map((slot) => <li key={slot.id}>{slot.slot_code} · {slot.slot_kind} · {slot.minimum_selections}–{slot.maximum_selections}</li>)}</ul>
+            <ul className="mt-2 text-sm text-muted-foreground">{item.slots.map((slot) => <li key={slot.id}><span dir="ltr">{slot.slot_code}</span> · {localizeStatus(slot.slot_kind, locale)} · {slot.minimum_selections}–{slot.maximum_selections}</li>)}</ul>
           </article>
         ))}
       </DataList>
@@ -92,9 +93,9 @@ export function BoxesPanel({
           <article key={item.id} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap justify-between gap-2">
               <h3 className="font-semibold">{name(item.name_fr, item.name_ar)}</h3>
-              <Badge>{item.status} · v{item.version}</Badge>
+              <Badge>{localizeStatus(item.status, locale)} · v{item.version}</Badge>
             </div>
-            <p className="mt-2 text-sm" dir="ltr">{item.code} · {item.benefit_type} · {item.credit_cost} cr · {formatMinor(item.internal_cost_minor, item.currency, locale)}</p>
+            <p className="mt-2 text-sm"><span dir="ltr">{item.code}</span> · {localizeStatus(item.benefit_type, locale)} · <span dir="ltr">{item.credit_cost} cr · {formatMinor(item.internal_cost_minor, item.currency, locale)}</span></p>
           </article>
         ))}
       </DataList>
@@ -113,7 +114,7 @@ export function BoxesPanel({
       <DataList title={m.lots} empty={m.empty}>
         {dashboard.lots.map((item) => (
           <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
-            <p>{item.source_type} · {item.quantity}</p>
+            <p>{localizeStatus(item.source_type, locale)} · <span dir="ltr">{item.quantity}</span></p>
             <time dateTime={item.expires_at}>{formatDateTimeCasablanca(item.expires_at, locale)}</time>
           </article>
         ))}
@@ -122,18 +123,18 @@ export function BoxesPanel({
       <DataList title={m.redemptions} empty={m.empty}>
         {dashboard.redemptions.map((item) => (
           <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
-            <p>{item.status} · {item.reserved_credits} cr</p>
+            <p>{localizeStatus(item.status, locale)} · {item.reserved_credits} cr</p>
           </article>
         ))}
       </DataList>
 
-      {dashboard.capabilities.can_write ? <><ManualCreditGrantPanel locale={locale} wallets={dashboard.wallets}/><SubscriptionGrantPanel locale={locale} organizations={[...new Map(dashboard.wallets.map(w=>[w.organization_id,{id:w.organization_id,name:w.organization_name}])).values()]}/></> : null}
+      {canWrite ? <><ManualCreditGrantPanel locale={locale} wallets={dashboard.wallets.filter((wallet) => wallet.organization_id === auditOrganizationId)}/><SubscriptionGrantPanel locale={locale} organizations={[...new Map(dashboard.wallets.filter((wallet) => wallet.organization_id === auditOrganizationId).map(w=>[w.organization_id,{id:w.organization_id,name:w.organization_name}])).values()]}/></> : null}
       {canWrite ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <CommandForm title={m.createBenefit} action={createBenefitAction} extra={{effectiveFrom:dashboard.generated_at}} keyValue={keys.benefit} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
             <Field label={m.code}><Input name="code" required className={control} dir="ltr" pattern="[A-Z][A-Z0-9_]{2,79}" /></Field>
-            <Select name="benefitType" label={m.type} values={types} />
-            <Select name="fulfillmentMode" label={m.fulfillment} values={modes} />
+            <Select name="benefitType" label={m.type} values={types} locale={locale} />
+            <Select name="fulfillmentMode" label={m.fulfillment} values={modes} locale={locale} />
             <Field label={m.nameFr}><Input name="nameFr" required minLength={2} className={control} /></Field>
             <Field label={m.nameAr}><Input name="nameAr" required minLength={2} className={control} /></Field>
             <Field label={m.descriptionFr}><Input name="descriptionFr" required minLength={3} className={control} /></Field>
@@ -151,7 +152,7 @@ export function BoxesPanel({
 
           <CommandForm title={m.createBox} action={createBoxAction} extra={{effectiveFrom:dashboard.generated_at}} keyValue={keys.box} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
             <Field label={m.code}><Input name="code" required className={control} dir="ltr" pattern="[A-Z][A-Z0-9_]{2,79}" /></Field>
-            <Select name="boxType" label={m.boxType} values={boxTypes} />
+            <Select name="boxType" label={m.boxType} values={boxTypes} locale={locale} />
             <Field label={m.nameFr}><Input name="nameFr" required minLength={2} className={control} /></Field>
             <Field label={m.nameAr}><Input name="nameAr" required minLength={2} className={control} /></Field>
             <Field label={m.budget}><Input name="creditBudget" required inputMode="numeric" pattern="[0-9]+" className={control} dir="ltr" defaultValue="0" /></Field>
@@ -161,7 +162,7 @@ export function BoxesPanel({
             <Field label={m.costFull}><Input name="costFullMinor" required inputMode="numeric" pattern="[0-9]+" className={control} dir="ltr" defaultValue="0" /></Field>
             <Field label={m.currency}><Input name="currency" required defaultValue="MAD" maxLength={3} className={control} dir="ltr" /></Field>
             <Field label={m.slotCode}><Input name="slotCode" className={control} dir="ltr" pattern="[A-Z][A-Z0-9_]{1,39}" /></Field>
-            <Select name="slotKind" label={m.slotKind} values={["MANDATORY", "OPTIONAL"]} />
+            <Select name="slotKind" label={m.slotKind} values={["MANDATORY", "OPTIONAL"]} locale={locale} />
             <Field label={m.slotMin}><Input name="slotMin" className={control} dir="ltr" defaultValue="0" /></Field>
             <Field label={m.slotMax}><Input name="slotMax" className={control} dir="ltr" defaultValue="1" /></Field>
             <fieldset className="grid gap-2 text-sm">
@@ -187,7 +188,7 @@ export function BoxesPanel({
           </CommandForm>
 
           <CommandForm title={m.ensureWallet} action={ensureWalletAction} keyValue={keys.wallet} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} extra={{ organizationId: auditOrganizationId! }}>
-            <p className="text-sm text-muted-foreground">{m.organization}: <span dir="ltr">{auditOrganizationId}</span></p>
+            <p className="text-sm text-muted-foreground">{m.organization}: {locale==="ar"?"المؤسسة المحددة في شريط السياق":"Organisation sélectionnée dans la barre de contexte"}</p>
           </CommandForm>
 
 
@@ -211,11 +212,11 @@ function DataList({ title, empty, children, id }: { title: string; empty: string
   );
 }
 
-function Select({ name, label, values, labels }: { name: string; label: string; values: string[]; labels?: string[] }) {
+function Select({ name, label, values, labels, locale }: { name: string; label: string; values: string[]; labels?: string[]; locale?: Locale }) {
   return (
     <Field label={label}>
       <select name={name} required className={control}>
-        {values.map((value, index) => <option key={value} value={value}>{labels?.[index] ?? value}</option>)}
+        {values.map((value, index) => <option key={value} value={value}>{labels?.[index] ?? (locale ? localizeStatus(value, locale) : value)}</option>)}
       </select>
     </Field>
   );
@@ -245,7 +246,7 @@ function CommandForm({
         {extra ? Object.entries(extra).map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />) : null}
         {children}
         <Button type="submit" disabled={pending || disabled} className="min-h-11">{pending ? m.processing : m.save}</Button>
-        <Feedback state={state} m={m} />
+        <Feedback state={state} m={m} locale={locale} />
       </form>
     </article>
   );

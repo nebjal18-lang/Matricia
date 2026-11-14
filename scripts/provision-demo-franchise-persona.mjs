@@ -127,9 +127,17 @@ async function main() {
       await tx`insert into public.franchises(id,library_id,operator_organization_id,franchise_type,operator_code,territory_code,status,created_by)
         values(${franchise}::uuid,${library.id}::uuid,${operatorOrg}::uuid,'STANDARD','FRANCHISEE','SOUSS','ACTIVE',${user.id}::uuid)
         on conflict(id) do update set status='ACTIVE',library_id=excluded.library_id,operator_organization_id=excluded.operator_organization_id`;
-      await tx`insert into public.organization_member_roles(membership_id,role_code,franchise_id,granted_by,revoked_at)
-        values(${membership}::uuid,'FRANCHISE_OWNER',${franchise}::uuid,${user.id}::uuid,null)
-        on conflict(membership_id,role_code) do update set franchise_id=excluded.franchise_id,granted_by=excluded.granted_by,revoked_at=null`;
+      await tx`insert into public.organization_member_roles(membership_id,role_code,franchise_id,library_id,granted_by,revoked_at)
+        values(${membership}::uuid,'FRANCHISE_OWNER',${franchise}::uuid,${library.id}::uuid,${user.id}::uuid,null)
+        on conflict(membership_id,role_code) do update set franchise_id=excluded.franchise_id,library_id=excluded.library_id,granted_by=excluded.granted_by,revoked_at=null`;
+      // Catalogue ACL required by has_library_permission / franchise_catalog_workspace_v1.
+      // Without franchise_catalog_acl_grants_v1 rows, source_allows stays open for this manual grant.
+      await tx`insert into public.catalog_library_mandates(id,library_id,organization_id,status,valid_from,policy_version,created_by)
+        select ${id(`${projectRef}:demo:franchise:catalog-mandate`)}::uuid,${library.id}::uuid,${operatorOrg}::uuid,'ACTIVE',${new Date(now - 30 * dayMs).toISOString()},1,${user.id}::uuid
+        where not exists (
+          select 1 from public.catalog_library_mandates
+          where library_id=${library.id}::uuid and organization_id=${operatorOrg}::uuid and status='ACTIVE'
+        )`;
       await tx`insert into public.franchise_territory_versions(id,franchise_id,version,territory_code,name_fr,name_ar,scope_snapshot,effective_from,content_hash,created_by)
         values(${territory}::uuid,${franchise}::uuid,1,'SOUSS','Souss-Massa (démo)','سوس ماسة (تجريبي)',${tx.json({ regions: ["Souss-Massa"], origin: "demo" })},${new Date(now - 30 * dayMs).toISOString()},${digest(`${franchise}:territory:v1`)},${user.id}::uuid)
         on conflict(id) do nothing`;

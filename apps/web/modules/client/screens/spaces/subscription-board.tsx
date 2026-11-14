@@ -96,7 +96,9 @@ export function SubscriptionBoard({
           </header>
           <p>{c.creditExplain}</p>
           <p><strong dir="ltr">{credits.balance} {credits.unitCode}</strong></p>
-          {credits.operations.length === 0 ? null : (
+          {credits.operations.length === 0 ? (
+            <p role="status">{locale === "ar" ? "لا عمليات رصيد ظاهرة بعد." : "Aucune opération de crédits visible pour le moment."}</p>
+          ) : (
             <ul className="client-feed">
               {credits.operations.slice(0, 4).map((item) => (
                 <li key={item.id}><Link href={item.href}><span>{item.title}</span><em dir="ltr">{item.quantity}</em></Link></li>

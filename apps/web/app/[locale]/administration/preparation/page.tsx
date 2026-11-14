@@ -20,19 +20,19 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
   const fr = locale === "fr";
   const selfPath = `/${locale}/administration/preparation`;
   if (access.status === "error" && access.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: selfPath }));
-  if (access.status === "error" || !hasPlatformRole(access.roles, PLATFORM_ADMIN_ROLES)) {
-    return <main dir={locale === "ar" ? "rtl" : "ltr"} className="mx-auto max-w-3xl p-6"><WorkspaceFailure locale={locale} reason={access.status === "error" ? access.reason : "FORBIDDEN"} returnPath={selfPath} /></main>;
-  }
   const shell = {
     locale,
     selectedQuery: "",
     selectedOrganizationId: null,
-    userEmail: access.email,
+    userEmail: access.status === "success" ? access.email : null,
     active: "settings" as const,
     alternateHref: `/${fr ? "ar" : "fr"}/administration/preparation`,
     title: fr ? "Préparation de la livraison" : "إعداد التسليم",
     lead: fr ? "Saisissez ici les éléments qui manquent encore. Chaque enregistrement reste un brouillon : rien n’est publié." : "أدخلوا هنا العناصر التي لا تزال ناقصة. كل حفظ يبقى مسودة: لا يُنشر شيء.",
   };
+  if (access.status === "error" || !hasPlatformRole(access.roles, PLATFORM_ADMIN_ROLES)) {
+    return <AdminAppShell {...shell}><WorkspaceFailure locale={locale} reason={access.status === "error" ? access.reason : "FORBIDDEN"} returnPath={selfPath} /></AdminAppShell>;
+  }
   if (!access.requirementSatisfied) return <AdminAppShell {...shell}><WorkspaceFailure locale={locale} reason="MFA_REQUIRED" returnPath={selfPath} /></AdminAppShell>;
   const loaded = await loadDeliveryPreparationWorkspace(access.client, query);
   const servicePage = loaded.status === "success" ? loaded.workspace.servicePage : loaded.servicePage;
@@ -59,7 +59,7 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
         </nav>
         {!workspace ? <WorkspaceFailure locale={locale} reason={loadFailure} returnPath={selfPath} /> : (
           <>
-            {workspace.unavailableSections.length ? <p role="alert" className="mt-4 text-sm">{fr ? `Certaines sections sont temporairement indisponibles : ${workspace.unavailableSections.join(", ")}.` : `بعض الأقسام غير متاحة مؤقتاً: ${workspace.unavailableSections.join(", ")}.`}</p> : null}
+            {workspace.unavailableSections.length ? <p role="alert" className="mt-4 text-sm">{fr ? `Certaines sections sont temporairement indisponibles : ${workspace.unavailableSections.map((section) => ({ CATALOG_SERVICE_AR: "Noms arabes des services", CATALOG_CATEGORY_AR: "Noms arabes des catégories", LEGAL: "Identité légale", BOX: "Formules Box", INTEGRATION: "Intégrations", RELEASE: "Décisions de livraison" } as Record<string, string>)[section] ?? section).join(", ")}.` : `بعض الأقسام غير متاحة مؤقتاً: ${workspace.unavailableSections.map((section) => ({ CATALOG_SERVICE_AR: "الأسماء العربية للخدمات", CATALOG_CATEGORY_AR: "الأسماء العربية للفئات", LEGAL: "الهوية القانونية", BOX: "صيغ الصناديق", INTEGRATION: "التكاملات", RELEASE: "قرارات التسليم" } as Record<string, string>)[section] ?? section).join("، ")}.`}</p> : null}
             <p className="mt-4 text-sm">{fr ? `Services encore en français dans le champ arabe : ${workspace.overview.services_pending}. Brouillons de services : ${workspace.overview.services_drafted}. Catégories encore copiées : ${workspace.overview.categories_pending}. Brouillons de catégories : ${workspace.overview.categories_drafted}. Identité : ${workspace.overview.legal_drafted}/${workspace.overview.legal_total}. Formules : ${workspace.overview.box_drafted}. Intégrations décrites : ${workspace.overview.integrations_drafted}/${workspace.overview.integrations_total}, secrets enregistrés : ${workspace.overview.integrations_secret}. Décisions : ${workspace.overview.release_drafted}/${workspace.overview.release_total}.` : `خدمات ما زال حقلها العربي فرنساً: ${workspace.overview.services_pending}. مسودات الخدمات: ${workspace.overview.services_drafted}. فئات ما زالت منسوخة: ${workspace.overview.categories_pending}. مسودات الفئات: ${workspace.overview.categories_drafted}. الهوية: ${workspace.overview.legal_drafted}/${workspace.overview.legal_total}. الصيغ: ${workspace.overview.box_drafted}. تكاملات موصوفة: ${workspace.overview.integrations_drafted}/${workspace.overview.integrations_total}، أسرار محفوظة: ${workspace.overview.integrations_secret}. قرارات: ${workspace.overview.release_drafted}/${workspace.overview.release_total}.`}</p>
             <section id="catalogue" className="mt-8 grid gap-4">
               <h2>{fr ? "Noms arabes du catalogue" : "الأسماء العربية للدليل"}</h2>

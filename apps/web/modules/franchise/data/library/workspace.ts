@@ -181,7 +181,16 @@ async function selectFranchiseMandate(input: { locale: "fr" | "ar"; organization
   const candidates = allowed.filter((item)=>availableMandates.some(option=>option.id===item.id)).filter((item)=>(!input.organizationId||item.operator_organization_id===input.organizationId)&&(!input.franchiseId||item.id===input.franchiseId)&&(!input.libraryId||item.library_id===input.libraryId));
   if (candidates.length > 1 && !input.franchiseId) return { status: "error", reason: "MANDATE_REQUIRED", availableMandates: availableMandates.filter(option=>candidates.some(item=>item.id===option.id)) };
   const selected = candidates[0];
-  if (!selected) return { status: "error" as const, reason: input.organizationId || input.franchiseId || input.libraryId ? "FORBIDDEN" as const : "NO_MANDATE" as const };
+  if (!selected) {
+    // Explicit franchise/library that is not in the actor's allowed set is a true deny.
+    if (input.franchiseId || input.libraryId) return { status: "error" as const, reason: "FORBIDDEN" as const };
+    // Org present in the URL but not among authorized franchise operators is a deny.
+    if (input.organizationId && !allowed.some((item) => item.operator_organization_id === input.organizationId)) {
+      return { status: "error" as const, reason: "FORBIDDEN" as const };
+    }
+    // Authorized org without a usable library mandate → candidature / activation path.
+    return { status: "error" as const, reason: "NO_MANDATE" as const };
+  }
   const choice = choices.data.items.find((item) => item.id === selected.id);
   if (!choice) return { status: "error" as const, reason: "INVALID_RESPONSE" as const };
   return { status: "success" as const, client, selected, availableMandates, allowed, choice };

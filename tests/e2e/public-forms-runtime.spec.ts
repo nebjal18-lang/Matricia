@@ -22,7 +22,7 @@ const copy = {
     contactCategory: "Objet de la demande",
     contactEmail: "Adresse de réponse",
     contactMessage: "Votre message",
-    contactSubmit: "Enregistrer ma demande",
+    contactSubmit: "Envoyer la demande",
   },
   ar: {
     homeDiagnostic: "حللوا شركتي",
@@ -45,7 +45,7 @@ const copy = {
     contactCategory: "موضوع الطلب",
     contactEmail: "بريد الرد",
     contactMessage: "رسالتكم",
-    contactSubmit: "تسجيل طلبي",
+    contactSubmit: "إرسال الطلب",
   },
 } as const;
 

@@ -7,7 +7,6 @@ import {
   BookOpen,
   Check,
   ChevronRight,
-  CircleDot,
   Download,
   Eye,
   FileText,
@@ -37,9 +36,12 @@ import {
   orgTypeOptionLabel,
   type AdminDirectoryGroup,
 } from "@/modules/admin/data/spaces/directory";
+import type { HubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
 import { organizationJourney, type AdminOrgRow, type AdminTreatItem } from "@/modules/admin/data/spaces/view-model";
 import type { AdminOrganizationFiche } from "@/modules/admin/data/supervision/types";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { DirectoryLink } from "./directory-link";
+import { HubKpiStrip } from "./hub-charts";
 
 function Cta({ href, children }: { href: string; children: ReactNode }) {
   return <Link href={href} className="client-ghost-link">{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>;
@@ -65,13 +67,7 @@ function DirectoryCard({ group }: { group: AdminDirectoryGroup }) {
       <ul>
         {group.links.map((link) => (
           <li key={`${group.id}-${link.label}`}>
-            <Link href={link.href}>
-              <span className="admin-dir-link-label">
-                <CircleDot className="size-3.5 admin-dir-link-glyph" aria-hidden />
-                {link.label}
-              </span>
-              <ChevronRight className="size-4 rtl:rotate-180" aria-hidden />
-            </Link>
+            <DirectoryLink href={link.href} label={link.label} summary={link.summary} />
           </li>
         ))}
       </ul>
@@ -79,24 +75,30 @@ function DirectoryCard({ group }: { group: AdminDirectoryGroup }) {
   );
 }
 
-export function AdminDirectoryBoard({ locale, query }: { locale: Locale; query: string }) {
+function HubToolbar({
+  locale,
+  query,
+  showOrgActions = false,
+}: {
+  locale: Locale;
+  query: string;
+  showOrgActions?: boolean;
+}) {
   const c = adminCopy(locale);
-  const groups = adminDirectoryGroups(locale, query);
-  const actions = [
-    { href: `/${locale}/administration/entreprises/nouvelle${query}`, label: c.create, tone: "violet" as const, icon: Plus },
-    { href: `/${locale}/administration/entreprises${query}`, label: c.edit, tone: "peach" as const, icon: Pencil },
-    { href: `/${locale}/administration/operations${query}#archives`, label: c.archiveRestore, tone: "mint" as const, icon: Archive },
-    { href: `/${locale}/administration/entreprises/export${query}`, label: c.export, tone: "sky" as const, icon: Download },
-  ];
-  const sensitive = [c.s1, c.s2, c.s3, c.s4, c.s5];
+  const items = showOrgActions
+    ? [
+        { href: `/${locale}/administration/entreprises/nouvelle${query}`, label: c.create, tone: "violet" as const, icon: Plus },
+        { href: `/${locale}/administration/entreprises${query}`, label: c.edit, tone: "peach" as const, icon: Pencil },
+        { href: `/${locale}/administration/operations${query}#archives`, label: c.archiveRestore, tone: "mint" as const, icon: Archive },
+        { href: `/${locale}/administration/entreprises/export${query}`, label: c.export, tone: "sky" as const, icon: Download },
+      ]
+    : [];
   return (
-    <main className="client-page admin-home-page">
-      <h2 className="admin-home-title">{c.homeTitle}</h2>
-      <section className="admin-home-toolbar">
+    <section className="admin-home-toolbar">
+      {items.length ? (
         <div className="admin-dir-actions">
-          {actions.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
-            const className = "admin-dir-action";
             const content = (
               <>
                 <Icon className="size-4" aria-hidden />
@@ -105,19 +107,40 @@ export function AdminDirectoryBoard({ locale, query }: { locale: Locale; query: 
               </>
             );
             return item.href.includes("/export")
-              ? <a key={item.label} href={item.href} className={className} data-tone={item.tone}>{content}</a>
-              : <Link key={item.label} href={item.href} className={className} data-tone={item.tone}>{content}</Link>;
+              ? <a key={item.label} href={item.href} className="admin-dir-action" data-tone={item.tone}>{content}</a>
+              : <Link key={item.label} href={item.href} className="admin-dir-action" data-tone={item.tone}>{content}</Link>;
           })}
         </div>
-        <article className="admin-sensitive">
-          <h3><Shield className="size-4" aria-hidden /> {c.sensitive}</h3>
-          <ul>
-            {sensitive.map((item) => (
-              <li key={item}><Check className="size-3.5 admin-sensitive-check" aria-hidden />{item}</li>
-            ))}
-          </ul>
-        </article>
-      </section>
+      ) : null}
+      <article className="admin-sensitive">
+        <h3><Shield className="size-4" aria-hidden /> {c.sensitive}</h3>
+        <ul>
+          {[c.s1, c.s2, c.s3, c.s4, c.s5].map((item) => (
+            <li key={item}><Check className="size-3.5 admin-sensitive-check" aria-hidden />{item}</li>
+          ))}
+        </ul>
+      </article>
+    </section>
+  );
+}
+
+function HubVisualBlock({ locale, metrics }: { locale: Locale; metrics?: HubMetrics }) {
+  if (!metrics?.kpis.length) return null;
+  return (
+    <div className="admin-hub-visual">
+      <HubKpiStrip kpis={metrics.kpis} label={locale === "ar" ? "مؤشرات" : "Indicateurs"} />
+    </div>
+  );
+}
+
+export function AdminDirectoryBoard({ locale, query, metrics }: { locale: Locale; query: string; metrics?: HubMetrics }) {
+  const c = adminCopy(locale);
+  const groups = adminDirectoryGroups(locale, query);
+  return (
+    <main className="client-page admin-home-page">
+      <h2 className="admin-home-title">{c.homeTitle}</h2>
+      <HubToolbar locale={locale} query={query} showOrgActions />
+      <HubVisualBlock locale={locale} metrics={metrics} />
       <section className="admin-dir-grid" aria-label={c.homeTitle}>
         {groups.map((group) => <DirectoryCard key={group.id} group={group} />)}
       </section>
@@ -130,26 +153,25 @@ export function AdminHubBoard({
   locale,
   query,
   groupId,
+  metrics,
+  title,
 }: {
   locale: Locale;
   query: string;
   groupId: AdminDirectoryGroup["id"];
+  metrics?: HubMetrics;
+  title?: string;
 }) {
   const c = adminCopy(locale);
   const group = adminDirectoryGroup(locale, query, groupId);
   if (!group) return null;
   return (
-    <main className="client-page">
-      <section className="admin-hub-layout">
+    <main className="client-page admin-home-page" data-hub={groupId}>
+      <h2 className="admin-home-title">{title ?? group.title}</h2>
+      <HubToolbar locale={locale} query={query} showOrgActions={groupId === "actors"} />
+      <HubVisualBlock locale={locale} metrics={metrics} />
+      <section className="admin-dir-grid" aria-label={title ?? group.title} data-count="1">
         <DirectoryCard group={group} />
-        <article className="admin-sensitive">
-          <h3><Shield className="size-4" aria-hidden /> {c.sensitive}</h3>
-          <ul>
-            {[c.s1, c.s2, c.s3, c.s4, c.s5].map((item) => (
-              <li key={item}><Check className="size-3.5 admin-sensitive-check" aria-hidden />{item}</li>
-            ))}
-          </ul>
-        </article>
       </section>
       <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>
     </main>
@@ -170,7 +192,7 @@ export function AdminHubStrip({
   return (
     <nav className="admin-hub-strip" aria-label={group.title} data-tone={group.tone}>
       {group.links.map((link) => (
-        <Link key={link.href} href={link.href}>{link.label}</Link>
+        <Link key={link.href} href={link.href} title={link.summary}>{link.label}</Link>
       ))}
     </nav>
   );
@@ -202,7 +224,7 @@ export function OrganizationsBoard({
   const types = [...new Set(directory.flatMap((row) => orgTypeFilterCodes(row.typeCodes ?? [])))].sort();
   const statuses = [...new Set(directory.map((row) => row.statusCode ?? row.status).filter(Boolean))].sort();
   const compliances = [...new Set(directory.map((row) => row.complianceCode ?? row.compliance).filter(Boolean))].sort();
-  const plans = [...new Set(directory.map((row) => row.planCode ?? row.plan).filter(Boolean))].sort();
+  const plans = [...new Set(directory.map((row) => row.planCode).filter((code): code is string => Boolean(code)))].sort();
   const filtered = filterAdminOrgRows(directory, filters ?? {}, search, archives);
   const orgParams = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
   const organizationId = orgParams.get("organizationId");
@@ -257,12 +279,12 @@ export function OrganizationsBoard({
               <label>{c.plan}
                 <select name="plan" defaultValue={filters?.plan ?? "all"}>
                   <option value="all">{c.all}</option>
-                  {plans.map((plan) => <option key={plan} value={plan}>{plan === "UNKNOWN" ? c.unknownPlan : plan}</option>)}
+                  {plans.map((plan) => <option key={plan} value={plan}>{plan}</option>)}
                 </select>
               </label>
             </div>
             <div className="admin-filters-tools">
-              <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={archives} />{c.includeArchived}</label>
+              <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={Boolean(archives)} />{c.includeArchived}</label>
               <Link href={`/${locale}/administration/operations${organizationId ? `?organizationId=${organizationId}` : ""}#archives`} className="client-ghost-link">{c.seeArchives}</Link>
               <label className="client-top-search admin-filter-search">
                 <Search className="size-4" aria-hidden />
@@ -325,8 +347,8 @@ export function OrganizationsBoard({
                       <td><span className="client-status-chip" data-tone="violet">{row.plan}</span></td>
                       <td>{row.lastAction}</td>
                       <td>
-                        <details className="admin-row-menu">
-                          <summary aria-label={c.actions}><MoreHorizontal className="size-4" /></summary>
+                        <details className="admin-row-menu" suppressHydrationWarning>
+                          <summary aria-label={c.actions} suppressHydrationWarning><MoreHorizontal className="size-4" aria-hidden /></summary>
                           <div>
                             <Link href={`/${locale}/administration/entreprises/${row.id}${query}`}><Eye className="size-3.5" aria-hidden />{c.consult}</Link>
                             <Link href={`/${locale}/administration/entreprises/${row.id}/modifier${query}`}><Pencil className="size-3.5" aria-hidden />{c.edit}</Link>
@@ -360,7 +382,7 @@ export function OrganizationsBoard({
           <h2>{c.toTreat}</h2>
           <p>{c.toTreatLead}</p>
           <ul className="client-feed">
-            {treat.length === 0 ? <li><span>{c.emptyOrgsLead}</span></li> : treat.map((item) => (
+            {treat.length === 0 ? <li><span>{c.emptyTreatLead}</span></li> : treat.map((item) => (
               <li key={item.id}>
                 <span className="client-feed-icon" data-tone={item.tone}><FileText className="size-4" aria-hidden /></span>
                 <span><strong>{item.title}</strong><small>{item.detail}</small></span>
@@ -461,7 +483,7 @@ export function OrganizationFicheBoard({
         <article className="client-card" id="boxes">
           <header className="client-priority-head"><h2>{c.boxes}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{locale === "ar" ? "حالات الاشتراكات" : "États des abonnements"}</strong><small>{[...new Set(fiche.subscriptions.map(item => item.status))].join(", ") || "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "حالات الاشتراكات" : "États des abonnements"}</strong><small>{[...new Set(fiche.subscriptions.map((item) => localizeStatus(item.status, locale)))].join(", ") || "—"}</small></span></li>
             <li><span><strong>{c.boxesActive}</strong><small>{unknown}</small></span></li>
             <li><span><strong>{c.credits}</strong><small>{unknown}</small></span></li>
             <li><span><strong>{locale === "ar" ? "نهايات فترات الاشتراك" : "Fins de période des abonnements"}</strong><small dir="ltr">{fiche.subscriptions.map(item => item.current_period_end).filter(Boolean).join(", ") || "—"}</small></span></li>

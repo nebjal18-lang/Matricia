@@ -16,6 +16,7 @@ import {
   progressBarPercent,
   type Portfolio,
 } from "@/modules/client/data/portfolio/model";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import {
   createCostCenter,
   createProject,
@@ -157,7 +158,7 @@ function OrganizationPortfolio({ locale, data, m, keys, organizationId }: Props 
           <div key={contract.id} className="client-portfolio-item">
             <div className="client-portfolio-item-head">
               <strong>{m.contract} v{contract.version}</strong>
-              <Badge variant="outline">{contract.status}</Badge>
+              <Badge variant="outline">{workflowStatusLabel(contract.status, locale)}</Badge>
             </div>
             <p>{m.version} {contract.version} · {contract.projectId ? projectCode(contract.projectId) : m.unlinked}</p>
           </div>
@@ -365,7 +366,7 @@ function ContractForm({ locale, projects, contracts, m, keyValue }: { locale: "f
         <form action={action} className="grid gap-3">
           <Hidden locale={locale} keyValue={keyValue} />
           <Select name="projectId" label={m.project}>{projects.map((item) => <option key={item.id} value={item.id}>{item.code} · {nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
-          <Select name="contractId" label={m.contract}>{contracts.map((item) => <option key={item.id} value={item.id}>{m.contract} v{item.version} · {item.status}</option>)}</Select>
+          <Select name="contractId" label={m.contract}>{contracts.map((item) => <option key={item.id} value={item.id}>{m.contract} v{item.version} · {workflowStatusLabel(item.status, locale)}</option>)}</Select>
           <Button disabled={pending || projects.length === 0 || contracts.length === 0}>{m.link}</Button>
           <Feedback state={state} m={m} />
         </form>
@@ -432,12 +433,13 @@ function AllocationForm({ locale, orgId, projects, tasks, contracts, targets, ta
           <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
           <Select name="allocationType" label={m.allocationType}><option value="COMMITMENT">{locale === "ar" ? "التزام" : "Engagement"}</option><option value="ACTUAL">{locale === "ar" ? "نفقة فعلية" : "Dépense réalisée"}</option><option value="RELEASE">{locale === "ar" ? "تحرير الالتزام" : "Libération d’engagement"}</option></Select>
           {targetsStatus === "unavailable" ? <p role="alert">{locale === "ar" ? "تعذر تحميل الملفات المتاحة للتخصيص. أعيدوا تحميل الصفحة." : "Les dossiers disponibles pour l’allocation n’ont pas pu être chargés. Rechargez la page."}</p> : null}
+          {targetsStatus === "success" && targets.length === 0 && projects.length === 0 && tasks.length === 0 && contracts.length === 0 ? <p role="status">{locale === "ar" ? "لا ملفات مرتبطة متاحة للتخصيص بعد." : "Aucun dossier lié disponible pour l’allocation pour le moment."}</p> : null}
           {targetsTruncated ? <p role="status">{locale === "ar" ? "تظهر الملفات الأولى أدناه. استخدموا البحث للوصول إلى الملفات الأخرى." : "Les premiers dossiers sont proposés ci-dessous. Utilisez la recherche pour accéder aux autres dossiers."}</p> : null}
           {invoiceError ? <p role="alert">{invoiceError === "FORBIDDEN" ? (locale === "ar" ? "لا تتيح صلاحياتكم اختيار الفواتير في هذا السياق." : "Vos habilitations ne permettent pas de sélectionner des factures dans ce contexte.") : (locale === "ar" ? "اختيار الفواتير غير متاح مؤقتاً. تبقى الملفات الأخرى متاحة؛ أعيدوا التحميل للمحاولة مجدداً." : "La sélection des factures est momentanément indisponible. Les autres dossiers restent utilisables ; rechargez pour réessayer.")}</p> : null}
           <AllocationTargetSearch organizationId={orgId} locale={locale} initial={targets} label={m.referenceType}>
             <optgroup label={m.projects}>{projects.map(item => <option key={item.id} value={`PROJECT:${item.id}`}>{item.code} · {nameOf(locale, item.nameFr, item.nameAr)}</option>)}</optgroup>
             <optgroup label={m.tasks}>{tasks.map(item => <option key={item.id} value={`PROJECT_TASK:${item.id}`}>{item.key} · {nameOf(locale, item.titleFr, item.titleAr)}</option>)}</optgroup>
-            <optgroup label={m.contracts}>{contracts.map(item => <option key={item.id} value={`CONTRACT:${item.id}`}>{m.contracts} · v{item.version} · {item.status}</option>)}</optgroup>
+            <optgroup label={m.contracts}>{contracts.map(item => <option key={item.id} value={`CONTRACT:${item.id}`}>{m.contracts} · v{item.version} · {workflowStatusLabel(item.status, locale)}</option>)}</optgroup>
           </AllocationTargetSearch>
           <Field label={m.amount}><Input name="amount" inputMode="decimal" dir="ltr" required /></Field>
           <Field label={m.evidence}><Input name="evidenceFile" type="file" accept="application/pdf,image/png,image/jpeg" required /></Field>

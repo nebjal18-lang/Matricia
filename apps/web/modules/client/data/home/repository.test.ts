@@ -46,6 +46,21 @@ describe("organization-scoped home snapshot", () => {
     });
   });
 
+  it("falls back to exhaustive tenant queries when the RPC denies the role gate", async () => {
+    mocked.rpc.mockResolvedValue({ status: "error", reason: "FORBIDDEN" });
+    mocked.list.mockResolvedValue({
+      status: "success",
+      value: {
+        requests: [{ id: "own", organizationId: "selected-org", status: "DRAFT", description: "Own request", createdAt: input.now, quoteCount: 0, rfqId: null }],
+      },
+    });
+    expect(await loadClientHomeSnapshot(input)).toMatchObject({
+      status: "success",
+      counts: { openRequests: 1 },
+      featuredProject: { requestId: "own" },
+    });
+  });
+
   it("falls back to exhaustive tenant queries when the RPC is missing", async () => {
     mocked.list.mockResolvedValue({
       status: "success",

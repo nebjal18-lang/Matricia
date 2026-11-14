@@ -1,3 +1,4 @@
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import {randomUUID} from "node:crypto";
 import Link from "next/link";
 import {notFound,redirect} from "next/navigation";
@@ -10,7 +11,7 @@ import {BenefitRefundCard} from "@/modules/client/screens/benefit-refunds/panel"
 export default async function BenefitRefunds({params,searchParams}:{params:Promise<{locale:string}>;searchParams:Promise<{page?:string;organizationId?:string}>}){
  const{locale}=await params,q=await searchParams;if(!isLocale(locale))notFound();
  const parsed=z.object({page:z.coerce.number().int().min(1).max(100000).default(1),organizationId:z.string().uuid().optional()}).safeParse(q);if(!parsed.success)notFound();
- const space=await resolveClientSpace({locale,organizationId:parsed.data.organizationId});if(space.status==="unauthenticated")redirect(`/${locale}/connexion`);
+ const space=await resolveClientSpace({locale,organizationId:parsed.data.organizationId});if(space.status==="unauthenticated")redirect(connexionHref(locale,{next:`/${locale}/client/avantages/remboursements`}));
  const org=space.selectedOrganizationId,ar=locale==="ar",result=org?await loadBenefitRefunds(org,parsed.data.page):null;
  const href=(page:number)=>`/${locale}/client/avantages/remboursements?organizationId=${org}&page=${page}`;
  return <ClientAppShell locale={locale}selectedQuery={space.selectedQuery}selectedOrganizationId={org}userEmail={space.userEmail}organizationName={space.organizationName} organizations={space.organizations}active="credits"title={ar?"استرجاع أرصدة المزايا":"Retours de crédits des avantages"}lead={ar?"أرسل سبب الطلب وتابع المراجعة المالية المستقلة.":"Déposez un motif et suivez la revue Finance indépendante."}kicker="Matricia"><main className="client-page grid gap-4">

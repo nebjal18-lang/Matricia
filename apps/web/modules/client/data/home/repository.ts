@@ -73,9 +73,8 @@ export async function loadClientHomeSnapshot(input: {
   if (rpc.status === "error" && rpc.reason === "UNAUTHENTICATED") {
     return { status: "error", reason: "UNAUTHENTICATED", counts: emptyUnavailableCounts(), insights: emptyInsights };
   }
-  if (rpc.status === "error" && rpc.reason === "FORBIDDEN") {
-    return { status: "error", reason: "FORBIDDEN", counts: emptyUnavailableCounts(), insights: emptyInsights };
-  }
+  // FORBIDDEN on the aggregate RPC must not short-circuit the dashboard: fall back to
+  // exhaustive tenant readers so members with a subset of client roles still see their data.
   if (rpc.status === "success") {
     const actionPending = input.actionItems.filter((item) => item.requiresHumanReview || item.kind === "APPROVAL").length;
     const actionUpcoming = input.actionItems.filter((item) => item.dueAt && Date.parse(item.dueAt) >= Date.parse(input.now) && Date.parse(item.dueAt) <= Date.parse(input.now) + 7 * 86_400_000).length;

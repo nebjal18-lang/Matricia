@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   if (r.status === "error" && r.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/incitations` }));
   const m = messages[locale];
   return (
-    <AdminModulePage locale={locale} active="finance" path="incitations" title={m.title} lead={m.description}>
+    <AdminModulePage locale={locale} active="parcours" parcoursCurrent="reputation" path="incitations" title={m.title} lead={m.description}>
       <Alert><AlertDescription>{m.security}</AlertDescription></Alert>
       {r.status === "error" ? (
         <p role="alert" className="text-destructive">{r.reason === "MFA_REQUIRED" ? mfaRequiredMessage(locale) : m.loadError}</p>

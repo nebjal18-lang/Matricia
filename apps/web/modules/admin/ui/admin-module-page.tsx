@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { sensitivePageContext } from "./sensitive-page-context";
 import type { AdminDirectoryGroup } from "@/modules/admin/data/spaces/directory";
-import { AdminHubStrip } from "@/modules/admin/screens/spaces/boards";
+import { buildHubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
+import { loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
+import { AdminHubBoard } from "@/modules/admin/screens/spaces/boards";
 import { type AdminNavKey } from "@/modules/admin/ui/admin-app-shell";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
@@ -41,8 +43,23 @@ export async function AdminModulePage({
     parcoursCurrent,
   });
   if (context.status === "blocked") return context.view;
+  const supervision = hubGroup ? await loadAdminSupervisionDashboard(80) : null;
+  const metrics = hubGroup && supervision?.status === "success"
+    ? buildHubMetrics(hubGroup, supervision.value, locale)
+    : hubGroup
+      ? buildHubMetrics(hubGroup, null, locale)
+      : undefined;
+  const query = querySuffix ? `?${querySuffix}` : "";
   return context.wrap(<>
-    {hubGroup ? <div className="client-page admin-hub-wrap"><AdminHubStrip locale={locale} query="" groupId={hubGroup} /></div> : null}
+    {hubGroup ? (
+      <AdminHubBoard
+        locale={locale}
+        query={query}
+        groupId={hubGroup}
+        metrics={metrics}
+        title={title}
+      />
+    ) : null}
     {children}
   </>);
 }

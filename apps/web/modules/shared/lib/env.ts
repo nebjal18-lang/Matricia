@@ -36,7 +36,13 @@ export function getPaymentRuntimeConfig(environment: Record<string, string | und
   const allowedProviders = parseEnumSet(environment.PAYMENT_PROVIDER_ALLOWLIST, ["DEMO", "CMI", "PAYPAL"] as const);
   const liveEnabled = environment.PAYMENT_LIVE_ENABLED === "true";
   if (provider === "DEMO") {
-    if (environment.NODE_ENV === "production" || environment.APP_ENV?.trim().toLowerCase() === "production") throw new Error("PAYMENT_DEMO_FORBIDDEN");
+    if (
+      environment.NODE_ENV === "production"
+      || environment.APP_ENV?.trim().toLowerCase() === "production"
+      || environment.VERCEL_ENV === "production"
+    ) {
+      throw new Error("PAYMENT_DEMO_FORBIDDEN");
+    }
     return { provider, allowedProviders, liveEnabled, demoWebhookSecret: environment.PAYMENT_WEBHOOK_SECRET_DEMO };
   }
   if (provider === "CMI") {

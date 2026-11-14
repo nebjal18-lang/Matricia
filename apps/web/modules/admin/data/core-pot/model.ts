@@ -1,7 +1,18 @@
 import { z } from "zod";
 
 const uuid = z.string().uuid();
-const ledgerId = z.string().regex(/^\d+$/u);
+/** Decimal string for PostgreSQL bigint — never coerce via Number (precision loss). */
+const ledgerId = z
+  .string()
+  .regex(/^\d+$/u)
+  .refine((value) => {
+    try {
+      const id = BigInt(value);
+      return id >= 0n && id <= 9223372036854775807n;
+    } catch {
+      return false;
+    }
+  }, "LEDGER_ID_OUT_OF_RANGE");
 const reason = z.string().trim().min(3).max(1000);
 const idempotencyKey = z.string().trim().min(8).max(200);
 

@@ -332,21 +332,35 @@ export function buildFranchiseSpaceBoard(input: {
       title: "displayName" in item
         ? personDisplayLabel({ displayName: item.displayName }, locale)
         : "",
-      due: (dueAt ?? "").slice(0, 10) || "—",
+      due: dueAt ?? "",
       action: c.contact,
       tone,
       href,
     };
   });
+  const presentApprovalType = (code: string) => {
+    const known: Record<string, [string, string]> = {
+      MANDATE_CHANGE: ["Changement de mandat", "تغيير التفويض"],
+      TERRITORY_CHANGE: ["Changement de territoire", "تغيير الإقليم"],
+      FINANCE_RELEASE: ["Libération financière", "تحرير مالي"],
+      PROVIDER_EXCEPTION: ["Exception prestataire", "استثناء مقدم خدمة"],
+      DOCUMENT_EXCEPTION: ["Exception documentaire", "استثناء وثائقي"],
+      QUALITY_OVERRIDE: ["Dérogation qualité", "تجاوز جودة"],
+      BOOK_BINDING: ["Rattachement du livre", "ربط الدفتر"],
+    };
+    const hit = known[code];
+    if (hit) return locale === "ar" ? hit[1] : hit[0];
+    return code.replaceAll("_", " ").toLowerCase().replace(/^\w/u, (char) => char.toUpperCase());
+  };
   const decisions = approvals.map((item) => ({
     id: item.id,
-    title: item.requestType,
+    title: presentApprovalType(item.requestType),
     type: item.status,
     status: item.decision?.decision ?? item.status,
   }));
   const govHistory = approvals.filter((item) => item.decidedAt).map((item) => ({
     id: item.id,
-    title: item.requestType,
+    title: presentApprovalType(item.requestType),
     actor: item.decision?.decision ?? item.status,
   }));
   const governanceBinding=input.governance&&"bookBindingReviewRequired"in input.governance?input.governance.bookBindingReviewRequired:null;

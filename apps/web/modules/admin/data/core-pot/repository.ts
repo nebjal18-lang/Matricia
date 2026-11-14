@@ -26,8 +26,9 @@ export async function ingestAdminPlatformCorePotSource(input: unknown): Promise<
   const response = await access.client.rpc("ingest_platform_core_pot_sources_v1", {
     p_book_id: value.bookId,
     p_financial_journal_id: value.financialJournalId,
-    p_credit_revenue_ledger_id: value.creditRevenueLedgerId ? Number(value.creditRevenueLedgerId) : null,
-    p_franchise_entry_fee_ledger_id: value.franchiseEntryFeeLedgerId ? Number(value.franchiseEntryFeeLedgerId) : null,
+    // Keep exact decimal strings — Number() would round bigint > MAX_SAFE_INTEGER.
+    p_credit_revenue_ledger_id: value.creditRevenueLedgerId ?? null,
+    p_franchise_entry_fee_ledger_id: value.franchiseEntryFeeLedgerId ?? null,
     p_reason: value.reason,
     p_idempotency_key: value.idempotencyKey,
     p_correlation_id: value.correlationId,

@@ -10,12 +10,13 @@ import {
   reviewFranchiseApplication,
   type FranchiseApplicationReviewState,
 } from "./actions";
+import { isFranchiseApplicationOpen } from "./model";
 
 const idle: FranchiseApplicationReviewState = { status: "idle" };
 const control = "mt-1 min-h-11 w-full rounded-md border border-[var(--ad-border,var(--mat-border))] bg-background px-3";
 
 export type FranchiseApplicationReviewCopy = {
-  reason: string; company: string; documents: string; close: string; link: string; organization: string; noOrganization: string;
+  reason: string; reasonHint: string; company: string; documents: string; close: string; link: string; organization: string; noOrganization: string;
   bind: string; franchise: string; pending: string; denied: string; conflict: string; unavailable: string; saved: string; mfa: string;
   mailed: string; notMailed: string; propose: string; proposeTitle: string; itRule: string; entryFee: string; entryFeeMode: string;
   entryFeeTerm: string; mandateTerm: string; conditions: string; modes: Record<"UPFRONT" | "INSTALLMENT" | "REVENUE_WITHHOLDING", string>;
@@ -138,16 +139,22 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
   const [review, reviewAction, reviewPending] = useActionState(reviewFranchiseApplication, idle);
   const [link, linkAction, linkPending] = useActionState(linkFranchiseApplicationOrganization, idle);
   const [bind, bindAction, bindPending] = useActionState(bindFranchiseApplicationMandate, idle);
-  const open = ["REGISTERED", "COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(application.status);
+  const open = isFranchiseApplicationOpen(application.status);
+  const needsOrganization = !application.organizationId && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(application.status);
+  const canPropose = application.status === "DOCUMENT_REVIEW" && Boolean(application.organizationId) && !application.franchiseId;
+  const canApprove = application.status === "CONTRACT_PENDING";
+  const canResend = application.invitationPending && ["CONTRACT_PENDING", "LIBRARY_ASSIGNED"].includes(application.status);
+  if (!open && !needsOrganization && !canPropose && !canApprove && !canResend) return null;
   const prefix = `review-${application.id}`;
   return (
-    <div className="admin-franchise-review">
+    <div className="admin-franchise-review" data-status={application.status}>
       {open ? (
         <form action={reviewAction} className="admin-franchise-review__primary">
           <Hidden locale={locale} application={application} />
           <label htmlFor={`${prefix}-reason`} className="text-sm font-medium">{copy.reason}</label>
+          <p className="admin-franchise-review__hint">{copy.reasonHint}</p>
           <div className="admin-franchise-review__row">
-            <input id={`${prefix}-reason`} name="reason" required minLength={3} maxLength={1000} className={control} placeholder={copy.reason} />
+            <input id={`${prefix}-reason`} name="reason" required minLength={3} maxLength={1000} className={control} placeholder={copy.reasonHint} />
             <div className="admin-franchise-review__actions">
               {application.status === "REGISTERED" ? <button name="toStatus" value="COMPANY_REVIEW" disabled={reviewPending} className="client-cta">{reviewPending ? copy.pending : copy.company}</button> : null}
               {application.status === "COMPANY_REVIEW" ? <button name="toStatus" value="DOCUMENT_REVIEW" disabled={reviewPending} className="client-cta">{copy.documents}</button> : null}
@@ -157,7 +164,7 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
           <Notice state={review} copy={copy} />
         </form>
       ) : null}
-      {!application.organizationId && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(application.status) ? (
+      {needsOrganization ? (
         application.organizations.length ? (
           <details className="admin-franchise-action">
             <summary>{copy.link}</summary>
@@ -173,9 +180,9 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
               <Notice state={link} copy={copy} />
             </form>
           </details>
-        ) : <p className="text-sm text-muted-foreground">{copy.noOrganization}</p>
+        ) : <p className="admin-franchise-review__hint" role="status">{copy.noOrganization}</p>
       ) : null}
-      {application.status === "DOCUMENT_REVIEW" && application.organizationId && !application.franchiseId ? (
+      {canPropose ? (
         <>
           <ProposeMandate locale={locale} application={application} copy={copy} idempotencyKey={keys.propose} />
           {application.franchises.length ? (
@@ -196,8 +203,8 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
           ) : null}
         </>
       ) : null}
-      {application.status === "CONTRACT_PENDING" ? <ApproveMandate locale={locale} application={application} copy={copy} idempotencyKey={keys.approve} /> : null}
-      {application.invitationPending && ["CONTRACT_PENDING", "LIBRARY_ASSIGNED"].includes(application.status) ? <ResendCode locale={locale} application={application} copy={copy} idempotencyKey={keys.resend} /> : null}
+      {canApprove ? <ApproveMandate locale={locale} application={application} copy={copy} idempotencyKey={keys.approve} /> : null}
+      {canResend ? <ResendCode locale={locale} application={application} copy={copy} idempotencyKey={keys.resend} /> : null}
     </div>
   );
 }

@@ -283,7 +283,7 @@ describe("alignement maquettes constructeurs et espaces (06–20)", () => {
     expect(resolveFranchiseNestedView(["bibliotheque", "categories"])?.kind).toBe("library");
     expect(resolveFranchiseNestedView(["demandes", "d1000000-0000-4000-8000-000000000001", "matching"])?.tool).toBe("matching");
     expect(resolveFranchiseNestedView(["notifications"])?.view).toBe("notifications");
-    expect(FRANCHISE_NESTED_NAV_PATHS).toHaveLength(48);
+    expect(FRANCHISE_NESTED_NAV_PATHS).toHaveLength(59);
     expect(resolveFranchiseNestedView(["clients", "inviter"])?.view).toBe("inviter");
     expect(resolveFranchiseNestedView(["demandes", "devis"])?.view).toBe("devis");
     expect(resolveFranchiseNestedView(["qualite", "anomalies"])?.view).toBe("anomalies");

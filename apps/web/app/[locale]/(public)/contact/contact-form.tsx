@@ -37,7 +37,6 @@ const copy = {
     plan: "Offre concernée",
     help: "N’ajoutez aucune pièce ni donnée sensible ici. Pour une mission ou une facture, utilisez votre espace sécurisé.",
     send: "Envoyer la demande",
-    sendLegacy: "Enregistrer ma demande",
     pending: "Envoi en cours…",
     success: "Demande enregistrée. Référence",
     delivery: "Transmission au service d’envoi effectuée lorsque le canal est configuré ; cette confirmation porte d’abord sur l’enregistrement.",
@@ -78,7 +77,6 @@ const copy = {
     plan: "العرض المعني",
     help: "لا تضيفوا وثائق أو بيانات حساسة هنا. لمهمة أو فاتورة استخدموا مساحتكم الآمنة.",
     send: "إرسال الطلب",
-    sendLegacy: "تسجيل طلبي",
     pending: "جارٍ الإرسال…",
     success: "تم تسجيل الطلب. المرجع",
     delivery: "يتم الإرسال إلى خدمة الإشعار عند تهيئة القناة؛ يخص هذا التأكيد التسجيل أولاً.",
@@ -204,7 +202,7 @@ export function ContactForm({
               <span>{messages.consent} *</span>
             </label>
           </div>
-          <button type="submit" disabled={pending} className="journey-primary mt-6" aria-label={messages.sendLegacy}>
+          <button type="submit" disabled={pending} className="journey-primary mt-6">
             <Send size={16} aria-hidden="true" />
             {pending ? messages.pending : messages.send}
           </button>

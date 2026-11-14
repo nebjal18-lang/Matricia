@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import type { CreateEnvelopeInput, ProviderEnvelope, SignatureDocumentInput, SignatureEvidence, SignatureLevel, SignatureProvider, SignatureSignerInput, VerifiedSignatureEvent } from "./provider.js";
+import type { CreateEnvelopeInput, ProviderEnvelope, SignatureDocumentInput, SignatureEvidence, SignatureLevel, SignatureProvider, SignatureSignerInput, VerifiedSignatureEvent } from "./provider";
 
 const BASE_URLS = { sandbox: "https://api-sandbox.yousign.app/v3", live: "https://api.yousign.app/v3" } as const;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;

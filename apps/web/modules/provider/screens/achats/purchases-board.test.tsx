@@ -29,5 +29,6 @@ describe("provider purchases board", () => {
     );
     expect(html).toContain("BOX-GOLD");
     expect(html).toContain("/client/achats-groupes");
+    expect(html).toContain("workspace=client");
   });
 });

@@ -63,6 +63,7 @@ describe("admin actor boards", () => {
     expect(html).toContain("/fr/administration/clients/" + orgId);
     expect(html).toContain("/fr/administration/conformite-clients/" + caseId);
     expect(html).toContain("/fr/administration/entreprises/" + orgId + "/modifier");
+    expect(html).not.toContain("admin-chart-grid");
     expect(html).not.toMatch(/exemple illustratif/i);
   });
 
@@ -111,5 +112,51 @@ describe("admin actor boards", () => {
     expect(tabs).toContain("#securite-compte");
     expect(tabs).not.toContain("/fr/invitations");
     expect(html).not.toMatch(/Identité\s*:/);
+  });
+
+  it("requires an explicit organization before suspend/revoke on multi-membership accounts", () => {
+    const userId = "55555555-5555-4555-8555-555555555555";
+    const orgB = "22222222-2222-4222-8222-222222222222";
+    const row = (organizationId: string, organizationName: string, membershipId: string) => ({
+      userId,
+      membershipId,
+      organizationId,
+      organizationName,
+      roles: ["CLIENT_OWNER"],
+      status: "ACTIVE",
+      updatedAt: null,
+      displayName: "Sara Kadiri",
+      email: "sara@matricia.test",
+      givenName: "Sara",
+      familyName: "Kadiri",
+      platformRoles: [],
+      libraryScopes: [],
+      franchiseScopes: [],
+      accountStatus: "ACTIVE",
+      mfaStatus: "DISABLED" as const,
+      sessionCount: 0,
+    });
+    const withoutOrg = renderToStaticMarkup(
+      <UserFicheBoard
+        locale="fr"
+        query=""
+        userId={userId}
+        fiche={null}
+        rows={[row(orgId, "Org A", "66666666-6666-4666-8666-666666666661"), row(orgB, "Org B", "66666666-6666-4666-8666-666666666662")]}
+      />,
+    );
+    expect(withoutOrg).toContain("Choisissez une organisation avant de suspendre");
+    expect(withoutOrg).not.toContain("Suspendre le compte");
+    const withOrg = renderToStaticMarkup(
+      <UserFicheBoard
+        locale="fr"
+        query={`?organizationId=${orgB}`}
+        userId={userId}
+        fiche={null}
+        rows={[row(orgId, "Org A", "66666666-6666-4666-8666-666666666661"), row(orgB, "Org B", "66666666-6666-4666-8666-666666666662")]}
+      />,
+    );
+    expect(withOrg).toContain("Suspendre le compte");
+    expect(withOrg).toContain(`value="${orgB}"`);
   });
 });

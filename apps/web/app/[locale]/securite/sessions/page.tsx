@@ -45,6 +45,7 @@ export default async function SessionsPage({ params, searchParams }: { params: P
   const messages = getDictionary(locale).sessions;
   const c = spaceCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
+  const adminWorkspace = query.workspace === "administration";
 
   return (
     <ConnectedAppShell
@@ -61,12 +62,21 @@ export default async function SessionsPage({ params, searchParams }: { params: P
       franchiseActive="governance"
     >
       <main className="client-page">
+        {adminWorkspace ? (
+          <nav className="client-tabs" aria-label={locale === "ar" ? "أمن الإدارة" : "Sécurité administration"}>
+            <Link href={`/${locale}/administration/configuration${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{locale === "ar" ? "الإعداد" : "Configuration"}</Link>
+            <Link href={`/${locale}/administration/anti-abus${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{locale === "ar" ? "مكافحة الإساءة" : "Anti-abus"}</Link>
+            <a href="#sessions" aria-current="page">{c.sessions}</a>
+            <Link href={`/${locale}/administration/operations${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{locale === "ar" ? "العمليات" : "Opérations"}</Link>
+          </nav>
+        ) : (
         <nav className="client-tabs" aria-label={c.orgTitle}>
           <Link href={`/${locale}/organisation${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{c.orgTitle}</Link>
           <Link href={`/${locale}/securite/compte${suffix}`}>{c.security}</Link>
           <a href="#sessions" aria-current="page">{c.sessions}</a>
           <Link href={`/${locale}/organisation/roles${query.organizationId ? `?organizationId=${query.organizationId}` : ""}`}>{c.people}</Link>
         </nav>
+        )}
         <p>
           <Link href={translateLocalPath(selfPath, locale, alternate)} hrefLang={alternate} className="client-text-link">{messages.language}</Link>
         </p>

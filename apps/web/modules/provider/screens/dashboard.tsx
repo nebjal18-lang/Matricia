@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import type { DashboardActionSummary } from "@/modules/shared/lib/action-center/dashboard-summary";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -43,7 +42,6 @@ export function ProviderDashboardHome({
       title={c.homeTitle}
       lead={c.homeLead}
       kicker={organizationName ?? c.kicker}
-      actions={<Link href={`/${locale}/sous-traitant/qualification${selectedQuery}`} className="client-cta">{c.completeProfile}</Link>}
     >
       <ProviderHomeBoard
         locale={locale}

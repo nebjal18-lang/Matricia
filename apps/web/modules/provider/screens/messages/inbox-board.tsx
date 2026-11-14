@@ -6,6 +6,7 @@ import { OpenThreadForm, SendMessageForm } from "@/app/[locale]/messagerie/messa
 import { getMessagingMessages } from "@/app/[locale]/messagerie/messages";
 import { getNotificationMessages } from "@/app/[locale]/notifications/messages";
 import type { InboxThread, ThreadConversation, ThreadOption } from "@/modules/shared/lib/internal-messaging/model";
+import { queryWithWorkspace } from "@/modules/shared/lib/auth/workspace-navigation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 function date(value: string, locale: Locale) {
@@ -63,6 +64,7 @@ export function ProviderInboxBoard({
   const openOptions = filteredOptions.map(item => ({...item,label:item.context === "CONTRACT" ? (locale === "ar" ? "ملف عقد" : "Dossier contractuel") : (locale === "ar" ? "استشارة" : "Consultation")}));
   const empty = locale === "ar" ? "لا توجد محادثة مرتبطة باستشارة." : "Aucune conversation liée à une consultation.";
   const tr = (fr: string, ar: string) => locale === "ar" ? ar : fr;
+  const notificationsQuery = queryWithWorkspace(query, "provider");
   const base = `/${locale}/sous-traitant/messages`;
   const pageHref = (next:number) => {const params=new URLSearchParams(query);params.set("page",String(next));return `${base}?${params}`;};
   const historyHref = (cursor?:MessageCursor) => {const params=new URLSearchParams(query);params.delete("before");params.delete("beforeId");if(cursor){params.set("before",cursor.createdAt);params.set("beforeId",cursor.id);}return `${base}/${conversation!.thread.id}${params.size?`?${params}`:""}`;};
@@ -156,7 +158,7 @@ export function ProviderInboxBoard({
         <article className="client-card" id="notifications">
           <header className="client-priority-head">
             <h2>{n.center}</h2>
-            <Link href={`/${locale}/notifications${query}`} className="client-text-link">{n.preferences}</Link>
+            <Link href={`/${locale}/notifications${notificationsQuery}`} className="client-text-link">{n.preferences}</Link>
           </header>
           {notificationsUnavailable ? <p role="alert">{tr("Notifications indisponibles. Ouvrez le centre de notifications pour réessayer.", "الإشعارات غير متاحة. افتح مركز الإشعارات للمحاولة مجددا.")}</p> : notifications.length === 0 ? <p role="status">{n.empty}</p> : (
             <ul className="client-feed">
@@ -166,7 +168,7 @@ export function ProviderInboxBoard({
                     <strong>{item.subject}</strong>
                     <small>{date(item.createdAt, locale)}{item.unread ? ` · ${n.unread}` : ""}</small>
                   </span>
-                  <Link href={item.href ?? `/${locale}/notifications${query}`} className="client-text-link">{n.open}</Link>
+                  <Link href={item.href ?? `/${locale}/notifications${notificationsQuery}`} className="client-text-link">{n.open}</Link>
                 </li>
               ))}
             </ul>

@@ -6,6 +6,7 @@ import { canApplyClientSpaceDemo, demoClientSpaces } from "@/modules/client/data
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import type { ContractMissionDashboard } from "@/modules/shared/lib/contracts-missions/model";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 function Cta({ href, children }: { href: string; children: ReactNode }) {
@@ -52,7 +53,7 @@ export function FollowBoard({
   const demo = demoClientSpaces(locale, query);
   const preferDemo = !mission && canApplyClientSpaceDemo();
   const folders = mission
-    ? [{ id: mission.id, title: organizationName ?? c.misTitle, status: mission.status, tone: "mint" as const, href: `/${locale}/client/missions/${mission.id}/jalons${query}` }]
+    ? [{ id: mission.id, title: organizationName ?? c.misTitle, status: workflowStatusLabel(mission.status, locale), tone: "mint" as const, href: `/${locale}/client/missions/${mission.id}/jalons${query}` }]
     : preferDemo
       ? demo.requests.slice(0, 4).map((row) => ({ id: row.id, title: row.title, status: row.status, tone: row.tone, href: row.href }))
       : [];

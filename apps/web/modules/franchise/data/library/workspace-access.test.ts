@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadFranchiseLibraryWorkspace } from "./workspace";
 
-const mocks = vi.hoisted(() => ({ franchises: [] as unknown[], memberships: [] as unknown[], error: null as unknown, authError: null as {name?:string;status?:number}|null, authUser: {id:"11111111-1111-4111-8111-111111111111"} as {id:string}|null, from: vi.fn(), rpc: vi.fn() }));
-function choiceData(){return{complete:true,items:(mocks.franchises as Array<{id:string;operator_organization_id:string;library_id:string}>).map((f,index)=>({id:f.id,organization_id:f.operator_organization_id,library_id:f.library_id,territory_code:index===0?"TEST_NORD":"TEST_SUD",territory_fr:index===0?"Territoire Nord":"Territoire Sud",territory_ar:index===0?"النطاق الشمالي":"النطاق الجنوبي",library_code:"TEST_LIBRARY",library_fr:"Bibliothèque TEST",library_ar:"مكتبة اختبار",roles:[{code:"FRANCHISE_MANAGER",label_fr:"Responsable franchisé",label_ar:"مسؤول الامتياز"}]}))};}
+const mocks = vi.hoisted(() => ({ franchises: [] as unknown[], memberships: [] as unknown[], error: null as unknown, authError: null as {name?:string;status?:number}|null, authUser: {id:"11111111-1111-4111-8111-111111111111"} as {id:string}|null, from: vi.fn(), rpc: vi.fn(), emptyChoices: false }));
+function choiceData(){return{complete:true,items:mocks.emptyChoices?[]:(mocks.franchises as Array<{id:string;operator_organization_id:string;library_id:string}>).map((f,index)=>({id:f.id,organization_id:f.operator_organization_id,library_id:f.library_id,territory_code:index===0?"TEST_NORD":"TEST_SUD",territory_fr:index===0?"Territoire Nord":"Territoire Sud",territory_ar:index===0?"النطاق الشمالي":"النطاق الجنوبي",library_code:"TEST_LIBRARY",library_fr:"Bibliothèque TEST",library_ar:"مكتبة اختبار",roles:[{code:"FRANCHISE_MANAGER",label_fr:"Responsable franchisé",label_ar:"مسؤول الامتياز"}]}))};}
 const userId = "11111111-1111-4111-8111-111111111111";
 const organizationId = "22222222-2222-4222-8222-222222222222";
 const franchiseId = "33333333-3333-4333-8333-333333333333";
@@ -19,7 +19,7 @@ vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient
 }) }));
 vi.mock("./demo-overlay", () => ({ overlayFranchiseLibraryDemo: vi.fn((workspace) => workspace) }));
 
-beforeEach(() => { mocks.franchises = []; mocks.memberships = []; mocks.error = null; mocks.rpc.mockReset(); mocks.from.mockClear(); mocks.authError=null; mocks.authUser={id:userId}; });
+beforeEach(() => { mocks.franchises = []; mocks.memberships = []; mocks.error = null; mocks.rpc.mockReset(); mocks.from.mockClear(); mocks.authError=null; mocks.authUser={id:userId}; mocks.emptyChoices=false; });
 for (const locale of ["fr", "ar"] as const) describe(`Franchise workspace access ${locale}`, () => {
   it.each([null,{id:userId}])("keeps an Auth outage technical even with cached user %j", async user => {
     mocks.authError={name:"AuthRetryableFetchError",status:503}; mocks.authUser=user;
@@ -33,6 +33,13 @@ for (const locale of ["fr", "ar"] as const) describe(`Franchise workspace access
   });
   it("reports the absence of an active visible mandate without querying a fabricated franchise", async () => {
     expect(await loadFranchiseLibraryWorkspace({ locale })).toEqual({ status: "error", reason: "NO_MANDATE" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it("keeps an authorized organization without usable mandate choices as NO_MANDATE", async () => {
+    mocks.franchises = [{ id: franchiseId, library_id: libraryId, operator_organization_id: organizationId, franchise_type: "STANDARD", operator_code: "FRANCHISEE", status: "ACTIVE" }];
+    mocks.memberships = [{ organization_id: organizationId, organization_member_roles: [{ role_code: "FRANCHISE_OWNER", franchise_id: franchiseId, revoked_at: null }] }];
+    mocks.emptyChoices = true;
+    expect(await loadFranchiseLibraryWorkspace({ locale, organizationId })).toEqual({ status: "error", reason: "NO_MANDATE" });
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
   it("keeps a failed membership/mandate read distinct from absence", async () => {
