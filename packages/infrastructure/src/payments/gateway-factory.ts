@@ -32,7 +32,13 @@ export function createPaymentGateway(config: PaymentRuntimeConfig) {
   const production = appEnvironment === "production" || (!appEnvironment && process.env.NODE_ENV === "production");
   switch (config.provider) {
     case "DEMO":
-      if (process.env.NODE_ENV === "production" || process.env.APP_ENV?.trim().toLowerCase() === "production") throw new PaymentGatewayError("CONFIGURATION_INVALID");
+      if (
+        process.env.NODE_ENV === "production"
+        || process.env.APP_ENV?.trim().toLowerCase() === "production"
+        || process.env.VERCEL_ENV === "production"
+      ) {
+        throw new PaymentGatewayError("CONFIGURATION_INVALID");
+      }
       return new DemoPaymentGateway(config.demoWebhookSecret);
     case "CMI": {
       if (!config.cmi || (production && (config.cmi.environment !== "live" || !config.liveEnabled)) || (config.cmi.environment === "live" && !config.liveEnabled)) {

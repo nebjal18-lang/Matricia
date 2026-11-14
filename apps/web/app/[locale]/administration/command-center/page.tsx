@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { loadAdminCommandCenter } from "@/modules/admin/data/command-center/repository";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
+import { buildHubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
 import { loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import { CommandCenterPanel } from "@/modules/admin/screens/command-center/command-center-panel";
 import { getCommandCenterMessages } from "@/modules/admin/screens/command-center/messages";
@@ -36,6 +37,7 @@ export default async function AdminCommandCenterPage({
   const alternate = locale === "fr" ? "ar" : "fr";
   const keyCount = result.status === "success" ? result.dashboard.workItems.length * 2 + result.dashboard.actions.length + 1 : 1;
   const enrichment = supervision.status === "success" ? supervision.value.work_enrichment : {};
+  const metrics = buildHubMetrics("home", supervision.status === "success" ? supervision.value : null, locale);
 
   return (
     <AdminAppShell
@@ -50,7 +52,8 @@ export default async function AdminCommandCenterPage({
       kicker={c.kicker}
     >
       {query.q?.trim() ? <AdminSearchResults locale={locale} query={query.q.trim()} organizationQuery={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} /> : null}
-      <section className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 p-5" aria-labelledby="initial-configuration-title">
+      <AdminDirectoryBoard locale={locale} query={space.selectedQuery} metrics={metrics} />
+      <section className="mb-6 mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 p-5" aria-labelledby="initial-configuration-title">
         <div><h2 id="initial-configuration-title" className="text-lg font-semibold">{locale === "ar" ? "إعداد منصتكم" : "Configurer votre plateforme"}</h2><p className="mt-1 text-sm text-muted-foreground">{locale === "ar" ? "بيانات المؤسسة والاتصالات ومراحل الإعداد قبل بدء التشغيل." : "Retrouvez les informations de votre entreprise, les connexions et les étapes avant mise en service."}</p></div>
         <Link href={`/${locale}/administration/configuration`} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground">{locale === "ar" ? "فتح الإعداد" : "Ouvrir la configuration"}</Link>
       </section>
@@ -72,7 +75,6 @@ export default async function AdminCommandCenterPage({
           />
         )}
       </div>
-      <AdminDirectoryBoard locale={locale} query={space.selectedQuery} />
     </AdminAppShell>
   );
 }

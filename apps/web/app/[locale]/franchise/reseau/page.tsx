@@ -1,7 +1,7 @@
 import { FranchiseNetworkPage } from "@/modules/franchise/screens/spaces/network-page";
 
-export default function FranchiseReseauPage(
+export default async function FranchiseReseauPage(
   props: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?: string; q?: string; page?: string; service?: string; status?: string; capacity?: string; zone?: string; docs?: string }> },
 ) {
-  return <FranchiseNetworkPage basePath="reseau" {...props} />;
+  return FranchiseNetworkPage({ basePath: "reseau", ...props });
 }

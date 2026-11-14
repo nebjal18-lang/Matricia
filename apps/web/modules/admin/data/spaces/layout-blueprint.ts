@@ -1,10 +1,14 @@
 import type { AdminSpaceId } from "./admin-nav";
 import { spaceSpec, type SpaceTone } from "./screen-catalog";
 import type { SpaceRow } from "./space-data";
+import { localizeStatus } from "./view-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 function t(locale: Locale, fr: string, ar: string) {
   return locale === "ar" ? ar : fr;
+}
+function statusOf(value: string | undefined, locale: Locale) {
+  return localizeStatus(value ?? "", locale) || "—";
 }
 
 export type ListFamily = "actor-pipeline" | "parcours-cycle" | "plain";
@@ -35,7 +39,7 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
   const tones: SpaceTone[] = ["violet", "sky", "mint", "peach", "violet", "sky", "mint", "peach"];
   if (space === "providers") {
     return [
-      card(t(locale, "État du dossier", "حالة الملف"), row.cells[2] ?? row.status, t(locale, "Informations clés du prestataire.", "المعلومات الأساسية لمقدم الخدمة."), "mint"),
+      card(t(locale, "État du dossier", "حالة الملف"), statusOf(row.cells[2] ?? row.status, locale), t(locale, "Informations clés du prestataire.", "المعلومات الأساسية لمقدم الخدمة."), "mint"),
       card(t(locale, "Activité", "النشاط"), row.cells[1] ?? "—", t(locale, "Prestataire opérationnel sur la plateforme.", "مقدم خدمة عامل على المنصة."), "sky"),
       card(t(locale, "Qualification", "التأهيل"), row.cells[2] ?? "—", t(locale, "La qualification atteste d’une évaluation humaine.", "التأهيل يشهد تقييماً بشرياً."), "violet"),
       card(t(locale, "Capacité & disponibilité", "القدرة والتوفر"), row.cells[3] ?? "—", t(locale, "Capacité à répondre aux sollicitations.", "القدرة على الاستجابة للطلبات."), "mint"),
@@ -44,11 +48,11 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
   }
   if (space === "diagnostics") {
     return [
-      card(t(locale, "Contexte entreprise", "سياق المؤسسة"), row.cells[0] ?? row.title, columns[1] ? `${columns[1]} · ${row.cells[1] ?? "—"}` : row.status, "sky"),
+      card(t(locale, "Contexte entreprise", "سياق المؤسسة"), row.cells[0] ?? row.title, columns[1] ? `${columns[1]} · ${row.cells[1] ?? "—"}` : statusOf(row.status, locale), "sky"),
       card(t(locale, "Questionnaire et version", "الاستبيان والنسخة"), row.cells[2] ?? "—", t(locale, "Version du questionnaire utilisée.", "نسخة الاستبيان المستخدمة."), "violet"),
       card(t(locale, "Progression", "التقدم"), row.cells[3] ?? "—", t(locale, "Avancement de la collecte.", "تقدم الجمع."), "mint"),
       card(t(locale, "Priorités identifiées", "الأولويات المحددة"), row.cells[4] ?? "—", t(locale, "Priorités détectées par le moteur.", "أولويات اكتشفها المحرك."), "peach"),
-      card(t(locale, "Validation humaine", "المصادقة البشرية"), row.status, t(locale, "Aucune décision contractuelle automatique.", "لا قرار تعاقدي تلقائي."), "violet"),
+      card(t(locale, "Validation humaine", "المصادقة البشرية"), statusOf(row.status, locale), t(locale, "Aucune décision contractuelle automatique.", "لا قرار تعاقدي تلقائي."), "violet"),
     ];
   }
   if (space === "demandes") {
@@ -57,7 +61,7 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
       card(t(locale, "Objet de la demande", "موضوع الطلب"), row.cells[2] ?? "—", t(locale, "Description cadrée du besoin.", "وصف مؤطر للحاجة."), "mint"),
       card(t(locale, "Domaine / service", "المجال / الخدمة"), row.cells[3] ?? "—", t(locale, "Classification catalogue.", "تصنيف الدليل."), "sky"),
       card(t(locale, "Complétude", "الاكتمال"), row.cells[5] ?? "—", t(locale, "Points manquants à compléter.", "نقاط ناقصة للاستكمال."), "peach"),
-      card(t(locale, "Consultation et offres", "الاستشارة والعروض"), `${row.cells[6] ?? "—"} · ${row.cells[7] ?? "—"}`, row.status, "violet"),
+      card(t(locale, "Consultation et offres", "الاستشارة والعروض"), `${row.cells[6] ?? "—"} · ${row.cells[7] ?? "—"}`, statusOf(row.status, locale), "violet"),
     ];
   }
   if (space === "matching") {
@@ -66,7 +70,7 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
       card(t(locale, "Prestataires éligibles", "المؤهلون"), row.cells[2] ?? "—", t(locale, "Filtrage par qualification et capacité.", "تصفية حسب التأهيل والقدرة."), "mint"),
       card(t(locale, "Exclusions", "الاستبعادات"), row.cells[3] ?? "—", t(locale, "Conflits et règles d’exclusion.", "تعارضات وقواعد الاستبعاد."), "peach"),
       card(t(locale, "Revue humaine", "مراجعة بشرية"), row.cells[4] ?? "—", t(locale, "Validation avant invitation.", "مصادقة قبل الدعوة."), "sky"),
-      card(t(locale, "Consultation", "الاستشارة"), row.cells[6] ?? row.status, t(locale, "Suivi des réponses.", "متابعة الردود."), "violet"),
+      card(t(locale, "Consultation", "الاستشارة"), statusOf(row.cells[6] ?? row.status, locale), t(locale, "Suivi des réponses.", "متابعة الردود."), "violet"),
     ];
   }
   if (space === "litiges") {
@@ -75,7 +79,7 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
       card(t(locale, "Motif", "السبب"), row.cells[3] ?? "—", t(locale, "Réclamation ouverte.", "شكوى مفتوحة."), "peach"),
       card(t(locale, "Preuves", "الأدلة"), row.cells[4] ?? "—", t(locale, "Pièces du contradictoire.", "وثائق الحضوري."), "sky"),
       card(t(locale, "Médiation", "الوساطة"), row.cells[6] ?? "—", t(locale, "Tentative d’accord.", "محاولة اتفاق."), "mint"),
-      card(t(locale, "Décision", "القرار"), row.cells[7] ?? row.status, t(locale, "Arbitrage et réaffectation contrôlée.", "تحكيم وإعادة تعيين مراقبة."), "violet"),
+      card(t(locale, "Décision", "القرار"), statusOf(row.cells[7] ?? row.status, locale), t(locale, "Arbitrage et réaffectation contrôlée.", "تحكيم وإعادة تعيين مراقبة."), "violet"),
     ];
   }
   return columns.slice(0, 5).map((label, index) => (
@@ -100,7 +104,7 @@ export function spaceSectionCards(locale: Locale, space: AdminSpaceId, row: Spac
       { title: t(locale, "Documents", "الوثائق"), tone: "violet", items: [{ label: t(locale, "Coffre", "الخزينة"), value: row.cells[4] ?? "—" }] },
       { title: t(locale, "Services proposés", "الخدمات المقترحة"), tone: "mint", items: [{ label: t(locale, "Déclaration", "التصريح"), value: row.cells[1] ?? "—" }] },
       { title: t(locale, "Missions", "المهام"), tone: "sky", items: [{ label: t(locale, "Activité", "النشاط"), value: row.cells[5] ?? "—" }] },
-      { title: t(locale, "Facturation", "الفوترة"), tone: "peach", items: [{ label: t(locale, "État", "الحالة"), value: row.status }] },
+      { title: t(locale, "Facturation", "الفوترة"), tone: "peach", items: [{ label: t(locale, "État", "الحالة"), value: statusOf(row.status, locale) }] },
       { title: t(locale, "Réputation", "السمعة"), tone: "violet", items: [{ label: t(locale, "Suivi", "المتابعة"), value: row.extras?.partner ?? "—" }] },
       { title: t(locale, "Audit", "التدقيق"), tone: "mint", items: [{ label: t(locale, "Traçabilité", "التتبع"), value: row.extras?.rowVersion ?? "—" }] },
     ];
@@ -109,7 +113,7 @@ export function spaceSectionCards(locale: Locale, space: AdminSpaceId, row: Spac
   return spec.tabs(locale).slice(1, 5).map((tab) => ({
     title: tab,
     tone: "sky" as const,
-    items: [{ label: tab, value: row.status }],
+    items: [{ label: tab, value: statusOf(row.status, locale) }],
   }));
 }
 

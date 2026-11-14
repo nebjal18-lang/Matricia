@@ -1,5 +1,6 @@
 import {SourceDocumentLinks}from"./source-document-links";
 import { serializedDateLabel } from "./serialized-date";
+import { shortReference } from "@/modules/shared/lib/format/display";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { formatExactMoney, type ContractMissionDashboard, type ContractSignature, type MissionContractSnapshot } from "@/modules/shared/lib/contracts-missions/model";
 import type { MissionMessages } from "./messages";
@@ -61,13 +62,37 @@ export function MissionContractSnapshotView({ snapshot, missionId, locale, messa
 }
 
 function SnapshotDatum({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return <div className="min-w-0"><dt className="text-muted-foreground">{label}</dt><dd className={`mt-1 break-all ${mono ? "font-mono text-xs" : "font-medium"}`} dir={mono ? "ltr" : "auto"}>{value}</dd></div>;
+  const display = mono ? shortReference(value, 10) : value;
+  return <div className="min-w-0"><dt className="text-muted-foreground">{label}</dt><dd className={`mt-1 break-all ${mono ? "font-mono text-xs" : "font-medium"}`} dir={mono ? "ltr" : "auto"} title={mono ? value : undefined}>{display}</dd></div>;
 }
 
 function ItemList({ title, items, empty }: { title: string; items: Contract["items"]; empty: string }) {
   return <section className="mt-4"><h5 className="font-medium">{title}</h5>{items.length ? <ol className="mt-2 space-y-2">{items.map((item) => <li key={item.id} className="rounded-lg border bg-background p-3"><span className="font-mono text-xs text-muted-foreground" dir="ltr">{item.key}</span><p className="mt-1" dir="auto">{item.label}</p></li>)}</ol> : <p className="mt-2 text-sm text-muted-foreground">{empty}</p>}</section>;
 }
 
+function signatureRoleLabel(role: string, locale: Locale): string {
+  const known: Record<string, [string, string]> = {
+    CLIENT: ["Client", "العميل"],
+    PROVIDER: ["Prestataire", "مقدم الخدمة"],
+    FRANCHISE: ["Franchisé", "صاحب الامتياز"],
+    PLATFORM: ["Plateforme", "المنصة"],
+  };
+  const hit = known[role];
+  if (hit) return locale === "ar" ? hit[1] : hit[0];
+  return role.replaceAll("_", " ");
+}
+
+function signatureMethodLabel(method: string, locale: Locale): string {
+  const known: Record<string, [string, string]> = {
+    EXPLICIT_CONFIRMATION: ["Confirmation explicite", "تأكيد صريح"],
+    QUALIFIED_SIGNATURE: ["Signature qualifiée", "توقيع مؤهل"],
+    ADVANCED_SIGNATURE: ["Signature avancée", "توقيع متقدم"],
+  };
+  const hit = known[method];
+  if (hit) return locale === "ar" ? hit[1] : hit[0];
+  return method.replaceAll("_", " ");
+}
+
 function SignatureList({ signatures, locale, messages }: { signatures: ContractSignature[]; locale: Locale; messages: MissionMessages }) {
-  return <section className="mt-4"><h5 className="font-medium">{messages.recordedSignatures} ({signatures.length}/2)</h5>{signatures.length ? <ol className="mt-2 space-y-2">{signatures.map((signature) => <li key={signature.id} className="rounded-lg border bg-background p-3 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{signature.signerRole}</strong><time dateTime={signature.signedAt}>{serializedDateLabel(signature.signedAt,signature.signedAtLabel,locale)}</time></div><p className="mt-2 break-all font-mono text-xs" dir="ltr">{messages.signerOrganization}: {signature.organizationId}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.signatureMethod}: {signature.method}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.evidenceHash}: {signature.evidenceHash}</p></li>)}</ol> : <p className="mt-2 text-sm text-muted-foreground">{messages.noSignature}</p>}</section>;
+  return <section className="mt-4"><h5 className="font-medium">{messages.recordedSignatures} ({signatures.length}/2)</h5>{signatures.length ? <ol className="mt-2 space-y-2">{signatures.map((signature) => <li key={signature.id} className="rounded-lg border bg-background p-3 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{signatureRoleLabel(signature.signerRole, locale)}</strong><time dateTime={signature.signedAt}>{serializedDateLabel(signature.signedAt,signature.signedAtLabel,locale)}</time></div><p className="mt-2 text-sm">{messages.signatureMethod}: {signatureMethodLabel(signature.method, locale)}</p><details className="mt-2"><summary className="min-h-11 cursor-pointer text-sm text-muted-foreground">{locale === "ar" ? "المراجع التقنية" : "Références techniques"}</summary><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.signerOrganization}: {shortReference(signature.organizationId)}</p><p className="mt-1 break-all font-mono text-xs" dir="ltr">{messages.evidenceHash}: {shortReference(signature.evidenceHash, 12)}</p></details></li>)}</ol> : <p className="mt-2 text-sm text-muted-foreground">{messages.noSignature}</p>}</section>;
 }

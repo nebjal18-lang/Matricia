@@ -10,6 +10,7 @@ import { Textarea } from "@/modules/shared/ui/textarea";
 import type { CommandIdentity } from "@/modules/shared/lib/questionnaire-sessions/contracts";
 import { parseQuestionValidation, type DocumentOption, type Question, type QuestionnaireDashboard, type SessionDetail } from "@/modules/shared/lib/questionnaire-sessions/model";
 import { saveQuestionnaireAnswerAction, startQuestionnaireAction, submitQuestionnaireAction, type QuestionnaireActionState } from "./actions";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import { failureMessage, type QuestionnaireMessages } from "./messages";
 import { StructuredQuestionControl } from "./structured-controls";
 
@@ -19,11 +20,8 @@ type QuestionnaireRuntime={basePath:string;canEdit:boolean;actions:{start:typeof
 const QuestionnaireRuntimeContext=createContext<QuestionnaireRuntime>({basePath:"",canEdit:true,actions:{start:startQuestionnaireAction,save:saveQuestionnaireAnswerAction,submit:submitQuestionnaireAction}});
 type Props = {runtime?:Partial<QuestionnaireRuntime>; locale: "fr" | "ar"; dashboard: QuestionnaireDashboard; messages: QuestionnaireMessages; identities: { start: CommandIdentity; submit: CommandIdentity; answers: Record<string, CommandIdentity> }; sites?: SiteOption[] };
 const localized = (locale: "fr" | "ar", fr: string, ar: string) => locale === "ar" ? ar : fr;
-function displayDate(value: string, _locale: "fr" | "ar") {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+function displayDate(value: string, locale: "fr" | "ar") {
+  return formatDateTimeCasablanca(value, locale);
 }
 
 function IdentityFields({ locale, identity }: { locale: "fr" | "ar"; identity: CommandIdentity }) { return <><input type="hidden" name="locale" value={locale} /><input type="hidden" name="idempotencyKey" value={identity.idempotencyKey} /><input type="hidden" name="correlationId" value={identity.correlationId} /></>; }

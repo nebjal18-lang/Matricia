@@ -1,6 +1,8 @@
 import type { ProviderMissionDashboard } from "@/modules/provider/data/missions/model";
 import type { ProviderQuoteDashboard, ProviderQuoteInvitation } from "@/modules/provider/data/quotes/model";
 import { quoteStatusLabel } from "@/modules/provider/screens/devis/status-labels";
+import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export type ProviderListRow = {
@@ -38,7 +40,7 @@ export function consultationRowsFromInvitations(
     return {
       id: item.id,
       title: item.description,
-      scope: item.regionCode,
+      scope: moroccoRegionLabel(item.regionCode, locale),
       deadline: formatDeadline(item.deadline, locale),
       status: quoteStatusLabel(item.status, locale),
       action: ar ? "فتح الملف" : "Ouvrir le dossier",
@@ -73,7 +75,7 @@ export function quoteRowsFromInvitations(
     return [{
       id: item.quote.id,
       title: item.description,
-      scope: item.regionCode,
+      scope: moroccoRegionLabel(item.regionCode, locale),
       status: quoteStatusLabel(status, locale),
       next,
       action,
@@ -95,8 +97,8 @@ export function missionRowsFromDashboard(
     return {
       id: mission.id,
       title,
-      scope: mission.status,
-      status: mission.status,
+      scope: workflowStatusLabel(mission.status, locale),
+      status: workflowStatusLabel(mission.status, locale),
       next: open?.title ?? (ar ? "متابعة" : "Suivre"),
       action: ar ? "فتح" : "Ouvrir",
       tone: mission.status === "COMPLETED" ? "mint" : open ? "violet" : "sky",

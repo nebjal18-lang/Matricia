@@ -14,16 +14,21 @@ export function AdminActorLoadError({ locale, userId, roles = false, reason, spa
   space: ActorSpace;
 }) {
   const forbidden = reason === "FORBIDDEN";
+  const orgMiss = reason === "ORG_SCOPE_MISS";
   const title = locale === "ar"
-    ? forbidden ? "الوصول غير مسموح" : "تعذر تحميل الحساب"
-    : forbidden ? "Accès non autorisé" : "Compte indisponible";
+    ? forbidden ? "الوصول غير مسموح" : orgMiss ? "المؤسسة غير مرتبطة بهذا الحساب" : "تعذر تحميل الحساب"
+    : forbidden ? "Accès non autorisé" : orgMiss ? "Organisation hors périmètre" : "Compte indisponible";
   const message = locale === "ar"
     ? forbidden
       ? "صلاحياتك لا تسمح بعرض هذا الحساب أو تعديل أدواره."
-      : "تعذر تحميل بيانات الحساب. أعد المحاولة قبل أي تعديل."
+      : orgMiss
+        ? "هذا الحساب موجود لكنّه ليس عضواً في المؤسسة المختارة. أزيلوا عامل التصفية أو اختاروا عضوية صحيحة."
+        : "تعذر تحميل بيانات الحساب. أعد المحاولة قبل أي تعديل."
     : forbidden
       ? "Vos habilitations ne permettent pas de consulter ce compte ou de modifier ses rôles."
-      : "Les données du compte n’ont pas pu être chargées. Réessayez avant toute modification.";
+      : orgMiss
+        ? "Ce compte existe, mais il n’est pas membre de l’organisation sélectionnée. Retirez le filtre ou choisissez une adhésion valide."
+        : "Les données du compte n’ont pas pu être chargées. Réessayez avant toute modification.";
   const path = `/administration/utilisateurs/${userId}${roles ? "/roles" : ""}${space.selectedQuery}`;
   const alternate = locale === "ar" ? "fr" : "ar";
 

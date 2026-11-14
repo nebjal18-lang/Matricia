@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 import { notFound, unstable_rethrow } from "next/navigation";
 import { ConfigurationPanel } from "@/modules/admin/screens/configuration/panel";
 import { configurationCopy } from "@/modules/admin/screens/configuration/copy";
+import { buildHubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
+import { adminCopy } from "@/modules/admin/data/spaces/copy";
+import { loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
+import { AdminHubBoard } from "@/modules/admin/screens/spaces/boards";
 import { sensitivePageContext } from "@/modules/admin/ui/sensitive-page-context";
 import { loadConfigurationDashboard } from "@/modules/shared/lib/platform-configuration/repository";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
@@ -11,8 +15,12 @@ export const dynamic = "force-dynamic";
 export default async function ConfigurationPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const c = configurationCopy(locale), context = await sensitivePageContext({ locale, path: "configuration", active: "settings", title: c.title, lead: c.lead, roles: ["SUPER_ADMIN", "MATRICIA_ADMIN"], mainLandmark: true });
+  const c = configurationCopy(locale);
+  const space = adminCopy(locale);
+  const context = await sensitivePageContext({ locale, path: "configuration", active: "settings", title: c.title, lead: c.lead, roles: ["SUPER_ADMIN", "MATRICIA_ADMIN"], mainLandmark: true });
   if (context.status === "blocked") return context.view;
+  const supervision = await loadAdminSupervisionDashboard(80);
+  const metrics = buildHubMetrics("ops", supervision.status === "success" ? supervision.value : null, locale);
   let data: Awaited<ReturnType<typeof loadConfigurationDashboard>> | undefined;
   let failure: WorkspaceFailureReason = "QUERY_FAILED";
   try { data = await loadConfigurationDashboard(); }
@@ -21,11 +29,19 @@ export default async function ConfigurationPage({ params }: { params: Promise<{ 
     const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
     failure = /AAL2|MFA/u.test(code) ? "MFA_REQUIRED" : /FORBIDDEN|DENIED/u.test(code) ? "FORBIDDEN" : /CONFIGURATION|ENCRYPTION|MIGRATION/u.test(code) ? "CONFIGURATION" : "QUERY_FAILED";
   }
-  if (!data) return context.wrap(<WorkspaceFailure locale={locale} reason={failure} returnPath={context.selfPath}/>);
+  if (!data) {
+    return context.wrap(<>
+      <AdminHubBoard locale={locale} query="" groupId="ops" metrics={metrics} title={space.ops} />
+      <WorkspaceFailure locale={locale} reason={failure} returnPath={context.selfPath}/>
+    </>);
+  }
   const keys: Record<string, string> = {};
   for (const section of data.sections) {
     keys[`save:${section.section}`] = randomUUID();
     for (const revision of section.revisions) keys[`revision:${revision.id}`] = randomUUID();
   }
-  return context.wrap(<ConfigurationPanel locale={locale} data={data} keys={keys} observedAt={new Date().toISOString()}/>);
+  return context.wrap(<>
+    <AdminHubBoard locale={locale} query="" groupId="ops" metrics={metrics} title={space.ops} />
+    <ConfigurationPanel locale={locale} data={data} keys={keys} observedAt={new Date().toISOString()}/>
+  </>);
 }

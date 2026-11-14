@@ -4,7 +4,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: getPublicSiteUrl(),
-  title: { default: "Matricia", template: "%s | Matricia" },
+  // Default only — locale layout owns the "%s | Matricia" template.
+  title: "Matricia",
   description: "Plateforme numérique Matricia pour les services professionnels au Maroc.",
   applicationName: "Matricia",
   robots: { index: false, follow: false, noarchive: true },

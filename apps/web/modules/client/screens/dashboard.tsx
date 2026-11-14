@@ -183,7 +183,7 @@ export function ClientDashboardHome({
         </Link>
         <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active="home" />
         <figure className="client-side-art">
-          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>
@@ -229,7 +229,7 @@ export function ClientDashboardHome({
 
         <header className="client-mast client-home-mast">
           <div>
-            <h1>{c.helloBonjour}, {helloName}.</h1>
+            <h1>{helloName ? `${c.helloBonjour}, ${helloName}.` : `${c.helloBonjour}.`}</h1>
             <p>{c.helloLead}</p>
           </div>
           <div className="client-home-mast-actions">

@@ -1,3 +1,4 @@
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import {randomUUID}from'node:crypto';
 import Link from'next/link';
 import{notFound,redirect}from'next/navigation';
@@ -14,7 +15,7 @@ import{WorkspaceFailure}from'@/modules/shared/ui/workspace-failure';
 import'@/modules/client/screens/diagnostics/diagnostic-connected.css';
 export default async function SolutionsPage({params,searchParams}:{params:Promise<{locale:string}>;searchParams:Promise<{organizationId?:string;anomalyId?:string;q?:string;level?:string;saved?:string;page?:string}>}){
  const[{locale},query]=await Promise.all([params,searchParams]);if(!isLocale(locale))notFound();const fr=locale==='fr';
- const space=await resolveClientSpace({locale,organizationId:query.organizationId});if(space.status==='unauthenticated')redirect(`/${locale}/connexion`);
+ const space=await resolveClientSpace({locale,organizationId:query.organizationId});if(space.status==='unauthenticated')redirect(connexionHref(locale,{next:`/${locale}/client/diagnostics/solutions`}));
  const page=Math.min(100000,Math.max(1,Number.parseInt(query.page??'1',10)||1));
  const result=await(await createServerSolutionInsightsRepository(space.selectedOrganizationId,{query:query.q,level:query.level,saved:query.saved==='true',anomalyId:query.anomalyId,page})).list();const m=messages(locale);
  const client=await getSupabaseServerClient();const setIds=result.status==='success'?result.value.sets.map(set=>set.id):[];const bookmarks=setIds.length?await client.from('client_solution_bookmarks').select('solution_set_id').in('solution_set_id',setIds):{data:[],error:null};const saved=new Set((bookmarks.data??[]).map(r=>r.solution_set_id));

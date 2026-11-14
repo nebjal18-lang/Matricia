@@ -39,7 +39,7 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
     title: (l) => t(l, "Prestataires", "مقدمو الخدمات"),
     lead: (l) => t(l, "Gérez les profils professionnels, leur activité et les dossiers associés.", "أدِر الملفات المهنية ونشاطها والملفات المرتبطة."),
     search: (l) => t(l, "Rechercher un prestataire, un service, un document…", "ابحث عن مقدم خدمة أو خدمة أو وثيقة…"),
-    columns: (l) => t(l, "Prestataire,Services déclarés,Qualification,Capacité,Documents,Missions,Action", "مقدم الخدمة,الخدمات,التأهيل,القدرة,الوثائق,المهام,إجراء").split(","),
+    columns: (l) => t(l, "Prestataire,Services déclarés,Qualification,Capacité documents,Documents,Contrat partenaire,Action", "مقدم الخدمة,الخدمات,التأهيل,قدرة الوثائق,الوثائق,عقد الشريك,إجراء").split(","),
     pills: () => [],
     filters: (l) => t(l, "Qualification,Activité,Disponibilité,Documents,État", "التأهيل,النشاط,التوفر,الوثائق,الحالة").split(","),
     pipeline: (l) => [
@@ -83,9 +83,9 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
   capacite: {
     id: "capacite", nav: "actors", current: "capacity", source: "capacity", resourceType: "PROVIDER_DOCUMENT",
     title: (l) => t(l, "Capacité & documents prestataires", "قدرة ووثائق مقدمي الخدمات"),
-    lead: (l) => t(l, "Consultez et gérez la capacité d’intervention de vos prestataires, selon les règles applicables.", "راجع وقدرة التدخل لمقدمي الخدمات وفق القواعد المعمول بها."),
+    lead: (l) => t(l, "Consultez et gérez la capacité d’intervention de vos prestataires, selon les règles applicables.", "راجعوا وقدّروا قدرة التدخل لمقدمي الخدمات وفق القواعد المعمول بها."),
     search: (l) => t(l, "Rechercher un prestataire, un service…", "ابحث عن مقدم خدمة أو خدمة…"),
-    columns: (l) => t(l, "Prestataire,Service (hiérarchie),Statut capacité,Zones d’intervention,Délai d’intervention,Documents requis,État d’expiration,Actions", "مقدم الخدمة,الخدمة,حالة القدرة,مناطق التدخل,مهلة التدخل,الوثائق المطلوبة,انتهاء الصلاحية,إجراءات").split(","),
+    columns: (l) => t(l, "Prestataire,Code document,Statut,Type,Version,Document,Expiration,Actions", "مقدم الخدمة,رمز الوثيقة,الحالة,النوع,النسخة,الوثيقة,انتهاء الصلاحية,إجراءات").split(","),
     pills: () => [],
     filters: (l) => t(l, "Service,Qualification,Statut des documents,Disponibilité", "الخدمة,التأهيل,حالة الوثائق,التوفر").split(","),
     pipeline: () => [],
@@ -163,9 +163,9 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
   diagnostics: {
     id: "diagnostics", nav: "parcours", current: "diagnostics", source: "diagnostics", resourceType: "DIAGNOSTIC",
     title: (l) => t(l, "Diagnostics", "التشخيصات"),
-    lead: (l) => t(l, "Suivez et pilotez l’ensemble des diagnostics réalisés sur la plateforme.", "تابع وقد التشخيصات المنجزة على المنصة."),
+    lead: (l) => t(l, "Pilotez les diagnostics opérationnels : scores, priorités et dossiers à reprendre — sans bruit des fixtures de test.", "قودوا التشخيصات التشغيلية: الدرجات والأولويات والملفات لإعادة المعالجة، دون ضجيج اختبارات المختبر."),
     search: (l) => t(l, "Rechercher un diagnostic…", "ابحث عن تشخيص…"),
-    columns: (l) => t(l, "Organisation,Diagnostic,Version du questionnaire,Progression,Priorités détectées,Dernière activité,État,Actions", "المؤسسة,التشخيص,نسخة الاستبيان,التقدم,الأولويات,آخر نشاط,الحالة,إجراءات").split(","),
+    columns: (l) => t(l, "Organisation,Diagnostic,Version du questionnaire,Score,Priorités détectées,Dernière activité,État,Actions", "المؤسسة,التشخيص,نسخة الاستبيان,النتيجة,الأولويات,آخر نشاط,الحالة,إجراءات").split(","),
     pills: (l) => t(l, "Brouillons,En cours,Terminés,À revoir,Archivés", "مسودات,جارٍ,منتهية,للمراجعة,مؤرشفة").split(","),
     filters: (l) => t(l, "Statut,Type,Organisation,Priorité,Période", "الحالة,النوع,المؤسسة,الأولوية,الفترة").split(","),
     pipeline: (l) => [
@@ -186,9 +186,9 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
   demandes: {
     id: "demandes", nav: "parcours", current: "demandes", source: "requests", resourceType: "REQUEST",
     title: (l) => t(l, "Besoins & demandes", "الحاجات والطلبات"),
-    lead: (l) => t(l, "Créez, suivez et pilotez l’ensemble des demandes, de l’expression du besoin jusqu’à l’attribution.", "أنشئ وتابع وقد الطلبات من التعبير عن الحاجة حتى الإسناد."),
+    lead: (l) => t(l, "Créez, suivez et pilotez l’ensemble des demandes, de l’expression du besoin jusqu’à l’attribution.", "أنشئوا وتابعوا وقودوا الطلبات من التعبير عن الحاجة حتى الإسناد."),
     search: (l) => t(l, "Rechercher une demande, un besoin…", "ابحث عن طلب أو حاجة…"),
-    columns: (l) => t(l, "Demande,Organisation,Besoin,Domaine / service,Source,Complétude,Consultation,Offres,État,Actions", "الطلب,المؤسسة,الحاجة,المجال,المصدر,الاكتمال,الاستشارة,العروض,الحالة,إجراءات").split(","),
+    columns: (l) => t(l, "Organisation,Besoin,Domaine / service,Source,Complétude,Consultation,Offres,État", "المؤسسة,الحاجة,المجال,المصدر,الاكتمال,الاستشارة,العروض,الحالة").split(","),
     pills: (l) => t(l, "Tous,Brouillons,À compléter,Prêts,En consultation,Offres reçues,Attribués,Clos,Archivés", "الكل,مسودات,للاستكمال,جاهزة,قيد الاستشارة,عروض واردة,مسندة,مغلقة,مؤرشفة").split(","),
     filters: (l) => t(l, "Organisation,Statut,Domaine,Priorité,Source,Période", "المؤسسة,الحالة,المجال,الأولوية,المصدر,الفترة").split(","),
     pipeline: (l) => [
@@ -211,9 +211,9 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
   matching: {
     id: "matching", nav: "parcours", current: "matching", source: "requests", resourceType: "MATCHING",
     title: (l) => t(l, "Matching & consultations", "المطابقة والاستشارات"),
-    lead: (l) => t(l, "Identifiez les meilleurs prestataires, pilotez vos consultations et suivez les réponses, en toute transparence.", "حدد أفضل مقدمي الخدمات وقد الاستشارات وتابع الردود بشفافية."),
+    lead: (l) => t(l, "Identifiez les meilleurs prestataires, pilotez vos consultations et suivez les réponses, en toute transparence.", "حدّدوا أفضل مقدمي الخدمات وقودوا الاستشارات وتابعوا الردود بشفافية."),
     search: (l) => t(l, "Rechercher une consultation…", "ابحث عن استشارة…"),
-    columns: (l) => t(l, "Demande,Service,Prestataires éligibles,Exclus,Revue humaine,Consultation,Réponses,État,Actions", "الطلب,الخدمة,المؤهلون,المستبعدون,المراجعة البشرية,الاستشارة,الردود,الحالة,إجراءات").split(","),
+    columns: (l) => t(l, "Organisation,Service,Passages matching,Consultations RFQ,Revue,Consultations,Devis,État,Actions", "المؤسسة,الخدمة,مرور المطابقة,استشارات RFQ,المراجعة,الاستشارات,العروض,الحالة,إجراءات").split(","),
     pills: (l) => t(l, "À matcher,À revoir,Prêts à consulter,Envoyés,Réponses en cours,Expirés,Clos", "للمطابقة,للمراجعة,جاهز للاستشارة,مرسلة,ردود جارية,منتهية,مغلقة").split(","),
     filters: (l) => t(l, "Organisation,Domaine / service,Statut qualification,Zone,Capacité,Conflit d’intérêts,Période", "المؤسسة,المجال,حالة التأهيل,المنطقة,القدرة,تعارض المصالح,الفترة").split(","),
     pipeline: (l) => [
@@ -252,7 +252,7 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
     title: (l) => t(l, "Contrats & signatures", "العقود والتوقيعات"),
     lead: (l) => t(l, "Gérez le cycle de vie des contrats, de la préparation à l’activation et au lancement des missions.", "أدِر دورة حياة العقود من التحضير إلى التفعيل وانطلاق المهام."),
     search: (l) => t(l, "Rechercher un contrat…", "ابحث عن عقد…"),
-    columns: (l) => t(l, "Contrat,Demande,Client,Prestataire,Version,Signataires,Signature,Activation,État,Actions", "العقد,الطلب,العميل,مقدم الخدمة,النسخة,الموقعون,التوقيع,التفعيل,الحالة,إجراءات").split(","),
+    columns: (l) => t(l, "Contrat,Mission,Client,Prestataire,Version,Signataires,Signature,Activation,État,Actions", "العقد,المهمة,العميل,مقدم الخدمة,النسخة,الموقعون,التوقيع,التفعيل,الحالة,إجراءات").split(","),
     pills: (l) => t(l, "À préparer,En revue,À signer,Signature en cours,Signés,À activer,Actifs,Suspendus,Clos,Archivés", "للتحضير,قيد المراجعة,للتوقيع,توقيع جارٍ,موقعة,للتفعيل,نشطة,موقوفة,مغلقة,مؤرشفة").split(","),
     filters: (l) => t(l, "Organisation cliente,Prestataire,Mission,Statut,Version,Signature,Période", "مؤسسة العميل,مقدم الخدمة,المهمة,الحالة,النسخة,التوقيع,الفترة").split(","),
     pipeline: (l) => [
@@ -297,7 +297,7 @@ const specs: Record<AdminSpaceId, SpaceSpec> = {
   missions: {
     id: "missions", nav: "parcours", current: "missions", source: "missions", resourceType: "MISSION",
     title: (l) => t(l, "Missions", "المهام"),
-    lead: (l) => t(l, "Suivez et pilotez l’exécution des missions de la plateforme, de l’activation du contrat à la clôture.", "تابع وقد تنفيذ مهام المنصة من تفعيل العقد حتى الإغلاق."),
+    lead: (l) => t(l, "Suivez et pilotez l’exécution des missions de la plateforme, de l’activation du contrat à la clôture.", "تابعوا وقودوا تنفيذ مهام المنصة من تفعيل العقد حتى الإغلاق."),
     search: (l) => t(l, "Rechercher une mission…", "ابحث عن مهمة…"),
     columns: (l) => t(l, "Mission,Contrat,Client,Prestataire,Progression,Prochain jalon,Livrables,Risques,État,Actions", "المهمة,العقد,العميل,مقدم الخدمة,التقدم,المعلم التالي,التسليمات,المخاطر,الحالة,إجراءات").split(","),
     pills: (l) => t(l, "À démarrer,Actives,En attente,Bloquées,À clôturer,Clôturées,Suspendues,Archivées", "للانطلاق,نشطة,معلقة,محظورة,للإغلاق,مغلقة,موقوفة,مؤرشفة").split(","),

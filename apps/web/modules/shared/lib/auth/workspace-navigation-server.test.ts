@@ -45,4 +45,8 @@ describe("server verified workspace choices", () => {
     mocks.user.mockResolvedValue({ data: { user: null }, error: null });
     expect(await readWorkspaceNavigation("fr")).toEqual({ status: "error", reason: "UNAUTHENTICATED" });
   });
+  it("treats Auth 403 as forbidden rather than a missing session", async () => {
+    mocks.user.mockResolvedValue({ data: { user: null }, error: { status: 403, name: "AuthApiError" } });
+    expect(await readWorkspaceNavigation("fr")).toEqual({ status: "error", reason: "FORBIDDEN" });
+  });
 });

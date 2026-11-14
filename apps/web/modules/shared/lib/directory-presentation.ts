@@ -71,6 +71,7 @@ export function organizationDisplayLabel(name: string | null | undefined, locale
   const cleaned = name
     .replace(UUID_RE, " ")
     .replace(/\be2e\b/giu, " ")
+    .replace(/\b(SUPERSEDED|COMPLETED|ARCHIVED|ACTIVE|DRAFT|PENDING|IN_PROGRESS|IN_REVIEW|RETIRED|TERMINATED)\b/giu, " ")
     .replace(/\s+/gu, " ")
     .trim();
   return cleaned.length >= 2 ? cleaned : (locale === "ar" ? "بدون مؤسسة" : "Sans organisation");

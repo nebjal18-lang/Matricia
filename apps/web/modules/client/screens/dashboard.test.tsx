@@ -105,7 +105,7 @@ describe("ClientDashboardHome", () => {
     expect(html).toContain("Messages non lus");
     expect(html).toContain("L’avancement de vos projets");
     expect(html).toContain("client-home-spark");
-    expect(html).toContain("Bilan &amp; besoins");
+    expect(html).toContain("Bilans");
     expect(html).toContain("Récompenses");
     expect(html).not.toMatch(/exemple illustratif/i);
     expect(html).toContain("/fr/client/diagnostics");

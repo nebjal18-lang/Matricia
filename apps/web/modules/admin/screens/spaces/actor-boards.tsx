@@ -311,12 +311,19 @@ export function UserFicheBoard({
   const libraryScopes = [...new Set(memberships.flatMap((row) => row.libraryScopes ?? []))];
   const franchiseScopes = [...new Set(memberships.flatMap((row) => row.franchiseScopes ?? []))];
   const title = accountLabel(locale, primary);
-  const mfaRequired = orgRoles.some((role) => role.startsWith("FRANCHISE_")) || platformRoles.length > 0;
+  const mfaRequired = orgRoles.some((role) => /^(FRANCHISE_|CLIENT_OWNER|CLIENT_ADMIN|PROVIDER_OWNER|PROVIDER_MANAGER)/u.test(role))
+    || platformRoles.length > 0;
   const mfaLabel = primary?.mfaStatus === "ENABLED"
     ? a.mfaOn
     : primary?.mfaStatus === "DISABLED"
       ? (mfaRequired ? a.mfaRequiredOff : a.mfaOff)
       : a.notShown;
+  const requestedOrgId = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query).get("organizationId");
+  const actionOrganizationId = requestedOrgId && memberships.some((row) => row.organizationId === requestedOrgId)
+    ? requestedOrgId
+    : memberships.length === 1
+      ? memberships[0]?.organizationId ?? null
+      : null;
   const base = `/${locale}/administration/utilisateurs/${userId}`;
   return (
     <main className="client-page">
@@ -425,8 +432,25 @@ export function UserFicheBoard({
             <h2>{c.actions}</h2>
             <div className="admin-empty-actions">
               <Link href={`${base}/roles${query}`} className="admin-primary-cta">{a.editRoles}</Link>
-              {(primary?.organizationId ?? memberships[0]?.organizationId) ? <ActorIntentForm locale={locale} organizationId={(primary?.organizationId ?? memberships[0]?.organizationId)!} resourceId={userId} resourceType="SESSION" intent="RESTRICT_ENTITY" reason="Révocation de sessions demandée depuis la fiche utilisateur." label={a.revokeSession} tone="danger" /> : null}
-              {(primary?.organizationId ?? memberships[0]?.organizationId) ? <ActorIntentForm locale={locale} organizationId={(primary?.organizationId ?? memberships[0]?.organizationId)!} resourceId={userId} resourceType="MEMBERSHIP" intent="SUSPEND_ENTITY" reason="Suspension d’accès demandée depuis la fiche utilisateur." label={a.suspendAccount} tone="danger" /> : null}
+              {actionOrganizationId ? (
+                <>
+                  <ActorIntentForm locale={locale} organizationId={actionOrganizationId} resourceId={userId} resourceType="SESSION" intent="RESTRICT_ENTITY" reason="Révocation de sessions demandée depuis la fiche utilisateur." label={a.revokeSession} tone="danger" />
+                  <ActorIntentForm locale={locale} organizationId={actionOrganizationId} resourceId={userId} resourceType="MEMBERSHIP" intent="SUSPEND_ENTITY" reason="Suspension d’accès demandée depuis la fiche utilisateur." label={a.suspendAccount} tone="danger" />
+                </>
+              ) : memberships.length > 1 ? (
+                <p className="admin-note">{locale === "ar" ? "اختر مؤسسة قبل تعليق العضوية أو إلغاء الجلسات." : "Choisissez une organisation avant de suspendre une adhésion ou de révoquer les sessions."}</p>
+              ) : null}
+              {memberships.length > 1 ? (
+                <ul className="admin-org-action-list">
+                  {memberships.map((row) => (
+                    <li key={`action-org-${row.membershipId}`}>
+                      <Cta href={`${base}${organizationQuery(query, row.organizationId)}#securite-compte`}>
+                        {actorOrganizationLabel(row.organizationName, locale)}
+                      </Cta>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
           </article>
           <article className="client-card">
@@ -470,6 +494,11 @@ export function ClientsBoard({
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
+  const complianceMessages = getComplianceMessages(locale);
+  const complianceLabel = (status: string | undefined) => {
+    if (!status || status === "NONE") return locale === "ar" ? "غير متحقق" : "Non vérifié";
+    return complianceMessages.statuses[status as keyof typeof complianceMessages.statuses] ?? status;
+  };
   const showFixtures = includeFixtures || Boolean(search?.trim());
   const directory = showFixtures ? organizations : organizations.filter((org) => !isAdminOrgDirectoryFixture(org.display_name, org.legal_name));
   const hiddenFixtures = organizations.length - directory.length;
@@ -484,16 +513,16 @@ export function ClientsBoard({
     return !search || `${org.display_name} ${org.legal_name}`.toLowerCase().includes(search.toLowerCase());
   });
   const actionItems = [
-    ...cases.filter((item) => item.status !== "VERIFIED" && !isAdminOrgDirectoryFixture(item.organizationName)).slice(0, 2).map((item) => ({ id: item.id, title: actorOrganizationLabel(item.organizationName, locale), detail: item.status, href: `/${locale}/administration/conformite-clients${query}`, tone: "peach" as const })),
+    ...cases.filter((item) => item.status !== "VERIFIED" && !isAdminOrgDirectoryFixture(item.organizationName)).slice(0, 2).map((item) => ({ id: item.id, title: actorOrganizationLabel(item.organizationName, locale), detail: complianceLabel(item.status), href: `/${locale}/administration/conformite-clients${query}`, tone: "peach" as const })),
     ...directory.filter((org) => org.open_disputes > 0 || org.open_requests > 0).slice(0, 3).map((org) => ({ id: org.id, title: actorOrganizationLabel(org.display_name, locale), detail: org.open_disputes > 0 ? c.lastDispute : c.lastOpenRequest, href: `/${locale}/administration/clients/${org.id}${query}`, tone: "sky" as const })),
   ];
   const journey = [
-    { label: locale === "ar" ? "التسجيل" : "Inscription", detail: a.done, tone: "violet" },
-    { label: c.orgStep, detail: c.orgTitle, tone: "violet" },
-    { label: c.compliance, detail: a.inReview, tone: "mint" },
-    { label: a.diagnostic, detail: a.ongoing, tone: "peach" },
-    { label: c.requests, detail: a.ongoing, tone: "violet" },
-    { label: c.missions, detail: a.ongoing, tone: "violet" },
+    { label: locale === "ar" ? "التسجيل" : "Inscription", detail: locale === "ar" ? "إنشاء الحساب" : "Création du compte", tone: "violet" },
+    { label: c.orgStep, detail: locale === "ar" ? "هوية المؤسسة" : "Identité organisation", tone: "violet" },
+    { label: c.compliance, detail: locale === "ar" ? "التحقق من الوثائق" : "Vérification documentaire", tone: "mint" },
+    { label: a.diagnostic, detail: locale === "ar" ? "تقييم الصحة" : "Évaluation de santé", tone: "peach" },
+    { label: c.requests, detail: locale === "ar" ? "احتياجات الخدمة" : "Besoins de service", tone: "violet" },
+    { label: c.missions, detail: locale === "ar" ? "التنفيذ والمتابعة" : "Exécution et suivi", tone: "violet" },
   ];
   return (
     <main className="client-page">
@@ -508,7 +537,7 @@ export function ClientsBoard({
             <label>{c.compliance}
               <select name="compliance" defaultValue={filters?.compliance ?? "all"}>
                 <option value="all">{c.all}</option>
-                {complianceStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                {complianceStatuses.map((status) => <option key={status} value={status}>{complianceLabel(status)}</option>)}
               </select>
             </label>
             <label>{c.state}
@@ -544,7 +573,7 @@ export function ClientsBoard({
                     <th>{c.compliance}</th>
                     <th>{a.diagnostic}</th>
                     <th>{c.requests}</th>
-                    <th>{c.plan}</th>
+                    <th>{c.lastDispute}</th>
                     <th>{c.state}</th>
                     <th>{c.actions}</th>
                   </tr>
@@ -568,10 +597,10 @@ export function ClientsBoard({
                           </span>
                         </td>
                         <td><span className="client-status-chip" data-tone={compliance ? "mint" : "sky"}>{compliance ? (compliance.status === "VERIFIED" ? a.done : a.inReview) : a.notStarted}</span></td>
-                        <td><span className="client-status-chip" data-tone={compliance && compliance.status !== "VERIFIED" ? "peach" : "mint"}>{compliance?.status === "VERIFIED" ? c.complianceOk : compliance?.status === "UNDER_REVIEW" || compliance?.status === "QUESTION_REQUIRED" ? c.complianceReview : compliance?.status ?? (locale === "ar" ? "غير متحقق" : "Non vérifié")}</span></td>
+                        <td><span className="client-status-chip" data-tone={compliance && compliance.status !== "VERIFIED" ? "peach" : "mint"}>{compliance?.status === "VERIFIED" ? c.complianceOk : compliance?.status === "UNDER_REVIEW" || compliance?.status === "QUESTION_REQUIRED" ? c.complianceReview : complianceLabel(compliance?.status)}</span></td>
                         <td><span className="client-status-chip" data-tone={diagnostic ? "mint" : "sky"}>{diagnostic?.status ? localizeStatus(diagnostic.status, locale) : a.notStarted}</span></td>
                         <td>{org.open_requests}</td>
-                        <td><span className="client-status-chip" data-tone="violet">{c.unknownPlan}</span></td>
+                        <td>{org.open_disputes}</td>
                         <td><span className="client-status-chip" data-tone={statusTone(org.status)}>{localizeStatus(org.status, locale)}</span></td>
                         <td>
                           <details className="admin-row-menu">
@@ -641,6 +670,7 @@ export function ClientFicheBoard({
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
+  const complianceMessages = getComplianceMessages(locale);
   const org = fiche.organization;
   const base = `/${locale}/administration/clients/${org.id}`;
   const compliance = org.client_compliance_snapshot;
@@ -679,8 +709,8 @@ export function ClientFicheBoard({
         <article className="client-card">
           <header><h2>{c.compliance}</h2></header>
           <dl className="admin-dl">
-            <div><dt>{c.state}</dt><dd>{org.status}</dd></div>
-            <div><dt>KYC</dt><dd>{compliance?.status ?? "—"}</dd></div>
+            <div><dt>{c.state}</dt><dd>{localizeStatus(org.status, locale)}</dd></div>
+            <div><dt>KYC</dt><dd>{compliance?.status ? (complianceMessages.statuses[compliance.status as keyof typeof complianceMessages.statuses] ?? compliance.status) : "—"}</dd></div>
             <div><dt>{c.documents}</dt><dd>{compliance?.document_count ?? "—"}</dd></div>
           </dl>
           <Cta href={`/${locale}/administration/conformite-clients${query}`}>{a.seeCompliance}</Cta>
@@ -703,7 +733,7 @@ export function ClientFicheBoard({
         <article className="client-card" id="documents">
           <header><h2>{c.documents}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{c.state}</strong><small>{org.status}</small></span></li>
+            <li><span><strong>{c.state}</strong><small>{localizeStatus(org.status, locale)}</small></span></li>
           </ul>
           <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}` : `/${locale}/administration/conformite-clients${query}`}>{a.manageDocs}</Cta>
         </article>
@@ -718,7 +748,7 @@ export function ClientFicheBoard({
         <article className="client-card">
           <header><h2>{c.boxes}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{c.plan}</strong><small>{fiche.subscriptions[0]?.status ?? "—"}</small></span></li>
+            <li><span><strong>{c.plan}</strong><small>{fiche.subscriptions[0]?.status ? localizeStatus(fiche.subscriptions[0].status, locale) : "—"}</small></span></li>
             <li><span><strong>{c.nextBill}</strong><small>{fiche.subscriptions[0]?.current_period_end ?? "—"}</small></span></li>
           </ul>
           <Cta href={`/${locale}/administration/finance${query}`}>{a.managePlan}</Cta>

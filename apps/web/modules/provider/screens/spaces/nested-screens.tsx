@@ -42,6 +42,7 @@ import {
   QuoteRevisionWorkbench,
 } from "@/modules/provider/screens/spaces/workbenches";
 import { ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
 import { getAccountSecurity } from "@/app/[locale]/securite/compte/actions";
 import { listMySessions } from "@/app/[locale]/securite/sessions/actions";
@@ -52,11 +53,21 @@ const recordId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0
 
 type Search = Promise<{ organizationId?: string; rfq?: string; q?: string; vue?: string; invitationId?: string; page?: string; before?: string; beforeId?: string }>;
 
+function providerLoginNext(locale: string, organizationId?: string) {
+  return organizationId
+    ? `/${locale}/sous-traitant?organizationId=${encodeURIComponent(organizationId)}`
+    : `/${locale}/sous-traitant`;
+}
+
 async function spaceOrRedirect(locale: string, organizationId?: string) {
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId });
-  if (space.status === "unauthenticated") redirect(`/${locale}/connexion`);
+  if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: providerLoginNext(locale, organizationId) }));
   return space;
+}
+
+function redirectIfUnauth(locale: string, reason: string | undefined, organizationId?: string) {
+  if (reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: providerLoginNext(locale, organizationId) }));
 }
 
 function providerFailureState(reason: string): ProviderContextState {
@@ -110,7 +121,7 @@ export async function ProviderConsultationDetailPage({
   const w = workbenchCopy(locale as Locale);
   let result = await loadProviderQuotes(space.selectedOrganizationId ?? undefined,{invitationId:consultationId});
   if(result.status==="success"&&result.dashboard.invitations.length===0)result=await loadProviderQuotes(space.selectedOrganizationId??undefined,{rfqId:consultationId});
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
+  redirectIfUnauth(locale, result.status === "error" ? result.reason : undefined, query.organizationId);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="consult" reason={result.reason} />;
   const found = result.status === "success" ? findInvitation(result.dashboard, consultationId) : null;
   if(found&&found.id!==consultationId)redirect(`/${locale}/sous-traitant/consultations/${found.id}${space.selectedQuery}`);
@@ -172,7 +183,7 @@ export async function ProviderQuoteWorkbenchPage({
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
   const result = quoteId === "nouveau" ? await loadProviderQuotes(space.selectedOrganizationId ?? undefined,{invitationId:query.invitationId}) : await loadQuoteEntry(space.selectedOrganizationId ?? undefined,quoteId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
+  redirectIfUnauth(locale, result.status === "error" ? result.reason : undefined, query.organizationId);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="quotes" reason={result.reason} />;
   const invitation = result.status === "success" ? findInvitation(result.dashboard, quoteId === "nouveau" ? query.invitationId ?? "" : quoteId) : null;
   if ((quoteId !== "nouveau" || query.invitationId) && !invitation) {
@@ -204,7 +215,7 @@ export async function ProviderQuoteWorkbenchPage({
   const history=revisions?.map(item=>({...item,snapshot:revisionSnapshots[item.id]}))??null;
   const Workbench = mode === "revise" ? QuoteRevisionWorkbench : QuoteMultilineWorkbench;
   return (
-    <ProviderAppShell locale={locale as Locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
+    <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
       <Workbench history={history} locale={locale as Locale} query={space.selectedQuery} quoteId={quoteId} invitation={invitation} quotePanel={panel} prefill={invitation ? prefills[invitation.id] : undefined} />
     </ProviderAppShell>
   );
@@ -223,7 +234,7 @@ export async function ProviderQuotePreviewPage({
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
   const result = await loadQuoteEntry(space.selectedOrganizationId ?? undefined,quoteId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
+  redirectIfUnauth(locale, result.status === "error" ? result.reason : undefined, query.organizationId);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="quotes" reason={result.reason} />;
   const invitation = result.status === "success" ? findInvitation(result.dashboard, quoteId) : null;
   if (!invitation) {
@@ -269,7 +280,7 @@ export async function ProviderMissionDeliveryPage({
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
   const result = await loadProviderMissions(locale as Locale, space.selectedOrganizationId ?? query.organizationId, missionId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
+  redirectIfUnauth(locale, result.status === "error" ? result.reason : undefined, query.organizationId);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="missions" reason={result.reason} />;
   const mission = result.status === "success" ? result.dashboard.missions.find((item) => item.id === missionId) ?? null : null;
   if (!mission) {
@@ -306,7 +317,7 @@ export async function ProviderInvoiceSettlementPage({
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
   const result = await loadProviderBilling(space.selectedOrganizationId ?? undefined, invoiceId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(`/${locale}/connexion`);
+  redirectIfUnauth(locale, result.status === "error" ? result.reason : undefined, query.organizationId);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="billing" reason={result.reason} />;
   const invoice = result.status === "success" ? result.dashboard.invoices.find((item) => item.id === invoiceId || item.number === invoiceId) ?? null : null;
   if (!invoice) {
@@ -362,7 +373,7 @@ export async function ProviderMessagesPage({
     loadNotificationCenter(locale as Locale, space.selectedOrganizationId ?? undefined),
   ]);
   const { inbox, options, history } = loaded;
-  if ([inbox, options, history].some(result => result?.status === "error" && result.reason === "UNAUTHENTICATED")) redirect(`/${locale}/connexion`);
+  redirectIfUnauth(locale, [inbox, options, history].some(result => result?.status === "error" && result.reason === "UNAUTHENTICATED") ? "UNAUTHENTICATED" : undefined, query.organizationId);
   const threads = inbox.status === "success" ? inbox.value.inbox : [];
   const matched = query.rfq && recordId.test(query.rfq) ? threads.find((thread) => thread.object_id === query.rfq) : undefined;
   const retained = new URLSearchParams({ ...(space.selectedOrganizationId ? {organizationId:space.selectedOrganizationId} : {}), ...(search ? {q:search} : {}), ...(page > 1 ? {page:String(page)} : {}) });

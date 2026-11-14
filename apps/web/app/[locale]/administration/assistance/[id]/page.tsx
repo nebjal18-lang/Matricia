@@ -1,3 +1,4 @@
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
@@ -8,7 +9,7 @@ import { AssistanceReply } from "@/modules/admin/screens/assistance/reply";
 export const dynamic="force-dynamic";
 export default async function AssistancePage({params}:{params:Promise<{locale:string;id:string}>}){
  const{locale,id}=await params;if(!isLocale(locale)||!z.string().uuid().safeParse(id).success)notFound();
- const c=await getSupabaseServerClient();const{data:auth}=await c.auth.getUser();if(!auth.user)redirect(`/${locale}/connexion`);
+ const c=await getSupabaseServerClient();const{data:auth}=await c.auth.getUser();if(!auth.user)redirect(connexionHref(locale,{next:`/${locale}/administration/assistance`}));
  const [request,messages]=await Promise.all([c.from("client_assistance_requests").select("id,subject,body,status,document_ids,consented_at").eq("id",id).maybeSingle(),c.from("client_assistance_messages").select("id,body,created_at").eq("request_id",id).order("created_at")]);
  const parsed=z.object({id:z.string().uuid(),subject:z.string(),body:z.string(),status:z.string(),document_ids:z.array(z.string().uuid()),consented_at:z.string().nullable()}).safeParse(request.data);
  const feed=z.array(z.object({id:z.string().uuid(),body:z.string(),created_at:z.string()})).safeParse(messages.data);

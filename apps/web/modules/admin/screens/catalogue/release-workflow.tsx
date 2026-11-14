@@ -23,7 +23,7 @@ function ActionStatus({ state, messages, id }: { state: BuilderActionState; mess
     return (
       <div id={id} role="status" aria-live="polite" className="min-h-6 space-y-1 text-sm text-primary">
         <p>{message}</p>
-        {state.releaseStatus ? <p>{messages.resultStatus}: {messages.releaseStatuses[state.releaseStatus]} (<bdi dir="ltr">{state.releaseStatus}</bdi>)</p> : null}
+        {state.releaseStatus ? <p>{messages.resultStatus}: {messages.releaseStatuses[state.releaseStatus]}</p> : null}
       </div>
     );
   }

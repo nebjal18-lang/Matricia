@@ -52,12 +52,31 @@ describe("ingestAdminPlatformCorePotSource", () => {
     expect(mocks.rpc).toHaveBeenCalledWith("ingest_platform_core_pot_sources_v1", {
       p_book_id: bookId,
       p_financial_journal_id: journalId,
-      p_credit_revenue_ledger_id: 9001,
+      p_credit_revenue_ledger_id: "9001",
       p_franchise_entry_fee_ledger_id: null,
       p_reason: "Acquisition Core validée",
       p_idempotency_key: "INGEST-CORE-9001",
       p_correlation_id: correlationId,
     });
+  });
+
+  it("preserves exact bigint ledger ids beyond Number.MAX_SAFE_INTEGER", async () => {
+    const largeId = "9007199254740993";
+    await ingestAdminPlatformCorePotSource({
+      bookId,
+      financialJournalId: journalId,
+      creditRevenueLedgerId: largeId,
+      reason: "Acquisition Core validée",
+      idempotencyKey: "INGEST-CORE-LARGE",
+      correlationId,
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "ingest_platform_core_pot_sources_v1",
+      expect.objectContaining({ p_credit_revenue_ledger_id: largeId }),
+    );
+    // Guard: Number() would round this value — the RPC must receive the original string.
+    expect(Number(largeId)).toBe(9007199254740992);
+    expect(String(Number(largeId))).not.toBe(largeId);
   });
 
   it("requires exactly one source identifier", async () => {

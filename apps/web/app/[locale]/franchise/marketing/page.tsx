@@ -32,7 +32,9 @@ export default async function FranchiseMarketingPage({ params, searchParams }: {
     if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: space.currentPath }));
     if (result.status === "error") {
       body = result.reason === "NO_ORGANIZATION"
-        ? <FranchiseAccessState locale={locale} reason={space.organizations.length > 1 ? "ORGANIZATION_REQUIRED" : "NO_MANDATE"} returnPath={returnPath} />
+        ? space.organizations.length > 1
+          ? <FranchiseAccessState locale={locale} reason="ORGANIZATION_REQUIRED" returnPath={returnPath} />
+          : <WorkspaceFailure locale={locale} reason="NO_ORGANIZATION" returnPath={returnPath} supportReference="FRANCHISE_MARKETING" />
         : <WorkspaceFailure locale={locale} reason={result.reason} returnPath={returnPath} supportReference="FRANCHISE_MARKETING" />;
     } else {
       const brandDefaults = space.selectedOrganizationId

@@ -15,9 +15,39 @@ import type { ProviderReputationDashboard } from "@/modules/provider/data/reputa
 import { getEligibilityReason, getProviderStatusLabel } from "@/modules/provider/screens/qualification/messages";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
 import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+
+const providerServiceDomainCodes: Record<string, readonly [string, string]> = {
+  IT: ["Informatique", "معلوميات"],
+  COM: ["Communication", "تواصل"],
+  ACC: ["Comptabilité", "محاسبة"],
+  LEGAL: ["Juridique", "قانوني"],
+  HR: ["Ressources humaines", "موارد بشرية"],
+  INS: ["Assurance", "تأمين"],
+  LOG: ["Logistique", "لوجستيك"],
+  BTP: ["BTP", "بناء"],
+  QHSE: ["Qualité / HSE", "جودة"],
+  SALES: ["Commercial", "تجاري"],
+};
+
+function providerServiceDomainLabel(domain: string, locale: Locale): string {
+  const mapped = providerServiceDomainCodes[domain];
+  if (mapped) return locale === "ar" ? mapped[1] : mapped[0];
+  return domain;
+}
+
+function formatBillingDate(value: string | null | undefined, locale: Locale): string {
+  if (!value) return "—";
+  const ms = Date.parse(value);
+  if (!Number.isFinite(ms)) return value;
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
+    dateStyle: "medium",
+    timeZone: "Africa/Casablanca",
+  }).format(new Date(ms));
+}
 
 function capacityStatusLabel(status: string, locale: Locale, fallback: string) {
   if(status==="UNAVAILABLE")return locale==="ar"?"حالة التوافر غير متاحة":"Disponibilité indisponible";
@@ -230,7 +260,10 @@ export function ProviderHomeBoard({
           {journey.map((step, index) => (
             <li key={step.id} data-state={step.state}>
               <span><JourneyGlyph index={index} /></span>
-              <small>{step.title}<em>{step.detail}</em></small>
+              <span>
+                <strong>{step.title}</strong>
+                <small>{step.detail}</small>
+              </span>
             </li>
           ))}
         </ol>
@@ -324,7 +357,7 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
     ? documents.filter((item) => item.status === "VERIFIED").map((item) => item.code)
     : demo.verified;
   const history = live
-    ? documents.map((item) => ({ id: item.id, title: item.code, detail: `${item.kind} · ${item.status}` }))
+    ? documents.map((item) => ({ id: item.id, title: item.code, detail: `${getProviderStatusLabel(locale, item.kind)} · ${getProviderStatusLabel(locale, item.status)}` }))
     : demo.history;
   return (
     <main className="client-page provider-qualify">
@@ -480,7 +513,7 @@ export function ServicesBoard({ locale, query, services, domain,regions,interven
           <nav className="client-tabs" aria-label={c.declared}>
             <TabLink href={`/${locale}/sous-traitant/services${providerSearchQuery(query, { domain: undefined })}`} current={!domain}>{c.all}</TabLink>
             {(live ? groups : demo.services).map((group) => (
-              <TabLink key={group.id} href={`/${locale}/sous-traitant/services${providerSearchQuery(query, { domain: group.domain })}`} current={domain === group.domain}>{group.domain}</TabLink>
+              <TabLink key={group.id} href={`/${locale}/sous-traitant/services${providerSearchQuery(query, { domain: group.domain })}`} current={domain === group.domain}>{providerServiceDomainLabel(group.domain, locale)}</TabLink>
             ))}
           </nav>
           {live && visibleGroups.length === 0 ? (
@@ -512,7 +545,7 @@ export function ServicesBoard({ locale, query, services, domain,regions,interven
             {live
               ? visibleGroups.map((group) => (
                   <li key={group.id} className="provider-service-group">
-                    <span><strong>{group.domain}</strong></span>
+                    <span><strong>{providerServiceDomainLabel(group.domain, locale)}</strong></span>
                     <ul>
                       {group.items.map((item) => (
                         <li key={item.id}>
@@ -525,7 +558,7 @@ export function ServicesBoard({ locale, query, services, domain,regions,interven
                 ))
               : demo.services.map((group) => (
                   <li key={group.id} className="provider-service-group">
-                    <span><strong>{group.domain}</strong></span>
+                    <span><strong>{providerServiceDomainLabel(group.domain, locale)}</strong></span>
                     <ul>
                       {group.items.map((item) => (
                         <li key={item.id}>
@@ -926,7 +959,7 @@ export function BillingBoard({ locale, query, dashboard }: { locale: Locale; que
           <table className="client-space-table">
             <thead><tr><th>{c.document}</th><th>{c.linkedMission}</th><th>{c.status}</th><th>{c.nextAction}</th><th>{c.action}</th></tr></thead>
             <tbody>
-              {(live && dashboard ? dashboard.invoices.map((row) => ({ id: row.id, title: row.number, mission: row.dueOn, tone: "sky" as const, status: row.paymentStatus.replaceAll("_", " "), next: row.outstandingMinor === "0" ? "—" : row.dueOn, action: c.seeDetail })) : demo.invoices).map((row) => (
+              {(live && dashboard ? dashboard.invoices.map((row) => ({ id: row.id, title: row.number, mission: formatBillingDate(row.dueOn, locale), tone: "sky" as const, status: workflowStatusLabel(row.paymentStatus, locale), next: row.outstandingMinor === "0" ? "—" : formatBillingDate(row.dueOn, locale), action: c.seeDetail })) : demo.invoices).map((row) => (
                 <tr key={row.id}>
                   <td>{row.title}</td>
                   <td>{row.mission}</td>
@@ -957,7 +990,7 @@ export function BillingBoard({ locale, query, dashboard }: { locale: Locale; que
         <table className="client-space-table">
           <thead><tr><th>{c.document}</th><th>{c.linkedMission}</th><th>{c.recStatus}</th><th>{c.payStatus}</th><th>{c.nextAction}</th></tr></thead>
           <tbody>
-            {(live && dashboard ? dashboard.payments.map((row) => ({ id: row.id, title: row.reference, mission: row.paidOn, rec: formatMinor(row.allocatedMinor, row.currency, locale), pay: formatMinor(row.unallocatedMinor, row.currency, locale), next: row.paidOn })) : demo.reconcil).map((row) => (
+            {(live && dashboard ? dashboard.payments.map((row) => ({ id: row.id, title: row.reference, mission: formatBillingDate(row.paidOn, locale), rec: formatMinor(row.allocatedMinor, row.currency, locale), pay: formatMinor(row.unallocatedMinor, row.currency, locale), next: formatBillingDate(row.paidOn, locale) })) : demo.reconcil).map((row) => (
               <tr key={row.id}>
                 <td>{row.title}</td>
                 <td>{row.mission}</td>

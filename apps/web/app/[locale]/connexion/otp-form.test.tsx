@@ -4,12 +4,15 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/modules/shared/lib/i18n/dictionaries", async () => await import("@/modules/shared/lib/i18n/dictionaries"));
-vi.mock("@/modules/shared/lib/auth/otp", () => ({ normalizeEmail: (value: string) => value.trim().toLowerCase(), normalizeOtp: (value: string) => value }));
-vi.mock("@/modules/shared/lib/supabase/client", () => ({ getSupabaseBrowserClient: () => ({ auth: { verifyOtp: vi.fn(), signInWithPassword: vi.fn() } }) }));
+vi.mock("@/modules/shared/lib/auth/otp", () => ({
+  normalizeEmail: (value: string) => value.trim().toLowerCase(),
+  normalizeOtp: (value: string) => value,
+  applyOtpDigits: (current: string, index: number, raw: string) => `${current.slice(0, index)}${raw}${current.slice(index + 1)}`,
+}));
 vi.mock("@/modules/shared/ui/button", () => ({ Button: ({ children, variant, ...props }: ComponentPropsWithoutRef<"button"> & { variant?: string }) => <button data-variant={variant} {...props}>{children}</button> }));
 vi.mock("@/modules/shared/ui/input", () => ({ Input: (props: ComponentPropsWithoutRef<"input">) => <input {...props} /> }));
 vi.mock("@/modules/shared/ui/label", () => ({ Label: ({ children, ...props }: ComponentPropsWithoutRef<"label">) => <label {...props}>{children}</label> }));
-vi.mock("./actions", () => ({ requestOtp: vi.fn() }));
+vi.mock("./actions", () => ({ requestOtp: vi.fn(), completeEmailLogin: vi.fn(), completePasswordLogin: vi.fn() }));
 
 import { OtpForm } from "./otp-form";
 

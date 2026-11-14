@@ -30,6 +30,7 @@ export default async function AdminUserRolesPage({
     if (result.reason === "NOT_FOUND") notFound();
     return <AdminActorLoadError locale={locale} userId={userId} roles reason={result.reason} space={space} />;
   }
+  if (result.rows.length === 0) return <AdminActorLoadError locale={locale} userId={userId} roles reason="ORG_SCOPE_MISS" space={space} />;
   if (query.organizationId === undefined) {
     const organizations = new Map<string, string>();
     for (const membership of result.rows) {

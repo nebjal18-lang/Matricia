@@ -29,6 +29,12 @@ for(const locale of ["fr","ar"] as const)describe(`session verification proxy ${
   const response=await refreshSupabaseSession(new NextRequest(`https://matricia.example${path}`));
   expect(response.status).toBe(307);const target=new URL(response.headers.get("location")!);expect(target.pathname).toBe(`/${locale}/connexion`);expect(target.searchParams.get("next")).toBe(path);
  });
+ it("protects signatures routes with the same session refresh",async()=>{
+  const path=`/${locale}/signatures/preparation`;
+  const response=await refreshSupabaseSession(new NextRequest(`https://matricia.example${path}`));
+  expect(response.status).toBe(307);
+  expect(new URL(response.headers.get("location")!).searchParams.get("next")).toBe(path);
+ });
  it("does not treat a cached user as authenticated after a known invalid-session response",async()=>{
   mocks.getUser.mockResolvedValue({data:{user:{id:org}},error:{status:401}});
   const response=await refreshSupabaseSession(new NextRequest(`https://matricia.example/${locale}/franchise/services`));

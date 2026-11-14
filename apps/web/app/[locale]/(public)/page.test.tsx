@@ -22,7 +22,7 @@ describe("PublicHomePage", () => {
     expect(html).toContain('href="/fr/besoin"');
     expect(html).toContain("Un cycle complet");
     expect(html).not.toContain("/home-v2/hero-plate.png");
-    expect(html).toContain("Votre situation");
+    expect(html).toContain("Des priorités claires");
     expect(html).toContain("/home-v2/hero-collaboration.png");
     expect(html).not.toContain("200 services");
     expect((html.match(/<section/g) ?? []).length).toBeGreaterThanOrEqual(5);

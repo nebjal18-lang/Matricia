@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
-import { translateLocalPath, withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
+import { queryWithWorkspace, translateLocalPath, withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Bell, Search, Sprout } from "lucide-react";
 import { Suspense, type ReactNode } from "react";
 import { ProviderLanguageLinks } from "./provider-language-links";
@@ -67,6 +67,7 @@ export function ProviderAppShell({
   const nav = buildProviderNav(locale, selectedQuery);
   const alternate = locale === "fr" ? "ar" : "fr";
   const route = routeByActive[active];
+  const notificationsQuery = queryWithWorkspace(selectedQuery, "provider");
   const currentPath = safeReturnPath(languagePath, locale);
   const providerHomeHref = withDashboardWorkspaceHint(`/${locale}/tableau-de-bord${selectedQuery}`, locale, "provider");
   const homeHref = withDashboardWorkspaceHint(currentPath ?? `/${locale}/${route}${selectedQuery}`, locale, "provider");
@@ -99,7 +100,7 @@ export function ProviderAppShell({
           })}
         </nav>
         <figure className="client-side-art">
-          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>
@@ -122,7 +123,7 @@ export function ProviderAppShell({
             <label className="sr-only" htmlFor="provider-shell-search">{c.searchConsult}</label>
             <input id="provider-shell-search" name="q" placeholder={c.searchGlobal} />
           </form>
-          <Link href={`/${locale}/notifications${selectedQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
+          <Link href={`/${locale}/notifications${notificationsQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
             <Bell className="size-4" />
           </Link>
           <Suspense fallback={<nav className="client-lang-switch" aria-label={locale === "ar" ? "اللغة" : "Langue"}><Link href={homeHref} aria-current="page">{locale.toUpperCase()}</Link><Link href={altHref}>{alternate.toUpperCase()}</Link></nav>}>

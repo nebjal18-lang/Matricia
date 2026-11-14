@@ -20,8 +20,11 @@ export function humanizeTechnicalCode(code: string, locale: Locale): string {
     .trim();
   if (!cleaned) return "—";
   const loc = locale === "ar" ? "ar" : "fr-FR";
-  return cleaned
+  const parts = cleaned
     .split(" ")
+    .filter((part) => !/^[0-9a-f]{8,}$/iu.test(part));
+  if (!parts.length) return locale === "ar" ? "إقليم تجريبي" : "Territoire de test";
+  return parts
     .map((part) => part.charAt(0).toLocaleUpperCase(loc) + part.slice(1).toLocaleLowerCase(loc))
     .join(" ");
 }

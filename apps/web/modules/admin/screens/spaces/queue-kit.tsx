@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { loadDisputeDecisionContext } from "@/modules/shared/lib/dispute-economics/server";
 import{AdminDecisionHistory}from"@/modules/admin/screens/history/panel";
+import { adminFixturesHiddenLabel } from "@/modules/admin/data/spaces/actor-presentation";
 import { adminPillCode, filterAdminRows } from "@/modules/admin/data/spaces/filters";
 import Link from "next/link";
 import{AdminConversationMessages}from"@/modules/admin/screens/conversations/messages";
@@ -22,6 +23,7 @@ import {
 } from "@/modules/admin/data/spaces/layout-blueprint";
 import { spaceHref, spaceSpec, statusTone, type SpaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
 import type { SpaceRow } from "@/modules/admin/data/spaces/space-data";
+import { columnLooksLikeStatus as statusColumnLooksLikeStatus } from "@/modules/admin/data/spaces/queue-status-column";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { PipelineGlyph } from "./pipeline-step";
 import {
@@ -45,6 +47,22 @@ function Cta({ href, children, tone = "ghost", download = false }: { href: strin
   return <Link href={href} className={className} data-tone={tone === "white" ? "white" : undefined}>{children}</Link>;
 }
 
+function columnLooksLikeProgress(column: string): boolean {
+  const normalized = column.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
+  return /(progress|progression|score|resultat|نتيجة|تقدم)/u.test(normalized);
+}
+
+function QueueProgress({ label, percent }: { label: string; percent: number }) {
+  return (
+    <div className="admin-queue-progress" title={label}>
+      <div className="admin-queue-progress__track" aria-hidden>
+        <span style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
+      </div>
+      <span>{label}</span>
+    </div>
+  );
+}
+
 export function SpaceQueueBoard({
   locale,
   query,
@@ -53,6 +71,7 @@ export function SpaceQueueBoard({
   treat,
   search,
   vue,
+  includeFixtures = false,
   children,
 }: {
   locale: Locale;
@@ -62,6 +81,7 @@ export function SpaceQueueBoard({
   treat: SpaceRow[];
   search?: string;
   vue?: string;
+  includeFixtures?: boolean;
   children?: ReactNode;
 }) {
   const spec = spaceSpec(space);
@@ -69,34 +89,63 @@ export function SpaceQueueBoard({
   const pills = spec.pills(locale);
   const pipeline = spec.pipeline(locale);
   const columns = dataColumns(spec.columns(locale));
-  const orgId = query.includes("organizationId=") ? new URLSearchParams(query.replace("?", "")).get("organizationId") : null;
-  const statuses = [...new Set(rows.map((row) => row.status).filter(Boolean))];
-  const visibleRows = filterAdminRows(rows, space, vue, search);
-  const visibleTreat=filterAdminRows(treat,space,vue,search);
+  const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+  const orgId = params.get("organizationId");
+  const operationalRows = includeFixtures ? rows : rows.filter((row) => !row.fixture);
+  const hiddenFixtures = rows.length - operationalRows.length;
+  const statuses = [...new Set(operationalRows.map((row) => row.status).filter(Boolean))];
+  const filteredRows = filterAdminRows(operationalRows, space, vue, search);
+  const pageSize = space === "demandes" ? 25 : filteredRows.length;
+  const visibleRows = filteredRows.slice(0, pageSize);
+  const truncated = filteredRows.length > visibleRows.length;
+  const visibleTreat = filterAdminRows(
+    (includeFixtures ? treat : treat.filter((row) => !row.fixture)),
+    space,
+    vue,
+    search,
+  );
+  const fixturesHref = (() => {
+    const next = new URLSearchParams(params);
+    next.set("fixtures", "1");
+    if (search) next.set("q", search);
+    if (vue) next.set("vue", vue);
+    const qs = next.toString();
+    return `/${locale}/administration/${space}${qs ? `?${qs}` : ""}`;
+  })();
+  const resetHref = (() => {
+    const next = new URLSearchParams();
+    if (orgId) next.set("organizationId", orgId);
+    if (includeFixtures) next.set("fixtures", "1");
+    const qs = next.toString();
+    return `/${locale}/administration/${space}${qs ? `?${qs}` : ""}`;
+  })();
   const pillHref = (_pill: string, index: number) => {
     if(space==="messagerie"&&index===6)return spaceHref(locale,space,query,"preferences");
-    const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+    const next = new URLSearchParams(params);
     void _pill;
     const code = adminPillCode(space, index);
-    if (!code) params.delete("vue");
-    else params.set("vue", code);
-    if(search)params.set("q",search);
-    const qs = params.toString();
+    if (!code) next.delete("vue");
+    else next.set("vue", code);
+    if(search)next.set("q",search);
+    if (includeFixtures) next.set("fixtures", "1");
+    else next.delete("fixtures");
+    const qs = next.toString();
     return `/${locale}/administration/${space}${qs ? `?${qs}` : ""}`;
   };
   return (
-    <main className="client-page" data-admin-layout="queue" data-admin-space={space} data-admin-family={family.list}>
+    <main className="client-page admin-space-queue" data-admin-layout="queue" data-admin-space={space} data-admin-family={family.list}>
       <section className="admin-two">
-        <article className="client-card">
+        <article className="client-card admin-queue-panel">
           {pills.length ? (
-            <nav className="admin-pills" aria-label={spec.title(locale)}>
+            <nav className="admin-pills admin-queue-pills" aria-label={spec.title(locale)}>
               {pills.map((pill, index) => (
                 <Link key={pill} href={pillHref(pill, index)} aria-current={(!adminPillCode(space, index) && !vue) || vue === adminPillCode(space, index) ? "page" : undefined}>{pill}</Link>
               ))}
             </nav>
           ) : null}
-          <form key={`queue:${space}:${vue ?? ""}:${search ?? ""}:${orgId ?? ""}`} className="admin-filters" method="get" action={`/${locale}/administration/${space}`}>
+          <form key={`queue:${space}:${vue ?? ""}:${search ?? ""}:${orgId ?? ""}:${includeFixtures ? "fx" : "op"}`} className="admin-filters" method="get" action={`/${locale}/administration/${space}`}>
             {orgId ? <input type="hidden" name="organizationId" value={orgId} /> : null}
+            {includeFixtures ? <input type="hidden" name="fixtures" value="1" /> : null}
             {statuses.length > 0 ? (
               <label>{t(locale, "Statut", "الحالة")}
                 <select name="vue" defaultValue={vue ?? ""}>
@@ -111,12 +160,20 @@ export function SpaceQueueBoard({
               <input name="q" defaultValue={search} placeholder={spec.search(locale)} aria-label={spec.search(locale)} />
             </label>
             <button type="submit" className="admin-soft-cta">{t(locale, "Filtrer", "تصفية")}</button>
-            <Link href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
+            <Link href={resetHref} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
           </form>
-          <p role="status">{visibleRows.length} {t(locale,"résultats filtrés","نتائج مصفاة")}</p>
+          {hiddenFixtures > 0 && !includeFixtures ? (
+            <p role="status" className="client-access-note">
+              {adminFixturesHiddenLabel(hiddenFixtures, locale)}{" "}
+              <Link className="client-text-link" href={fixturesHref}>
+                {t(locale, "Afficher les fixtures", "إظهارها")}
+              </Link>
+            </p>
+          ) : null}
+          <p role="status">{truncated ? `${visibleRows.length} / ${filteredRows.length}` : visibleRows.length} {t(locale,"résultats filtrés","نتائج مصفاة")}{truncated ? ` · ${t(locale, "affiche les 25 premiers — affinez les filtres pour réduire la liste", "يعرض أول 25 — ضيّقوا عوامل التصفية لتقليص القائمة")}` : ""}</p>
           {visibleRows.length === 0 ? null : (
             <div className="client-table-wrap">
-              <table className="client-space-table">
+              <table className="client-space-table admin-queue-table">
                 <thead>
                   <tr>
                     {columns.map((column) => <th key={column}>{column}</th>)}
@@ -132,6 +189,11 @@ export function SpaceQueueBoard({
                             <Link href={row.href}><strong>{row.title}</strong></Link>
                           ) : columnLooksLikeStatus(column) ? (
                             <span className="client-status-chip" data-tone={statusTone(row.cells[index] ?? row.status)}>{localizeStatus(row.cells[index] ?? row.status, locale)}</span>
+                          ) : columnLooksLikeProgress(column) ? (
+                            <QueueProgress
+                              label={row.cells[index] ?? "—"}
+                              percent={Number.parseFloat(row.extras?.scorePercent ?? row.extras?.progressPercent ?? "0") || 0}
+                            />
                           ) : (row.cells[index] ?? "—")}
                         </td>
                       ))}
@@ -147,8 +209,9 @@ export function SpaceQueueBoard({
           {visibleRows.length === 0 ? (
             <div className="admin-empty-card">
               <h3>{spec.empty(locale)}</h3>
+              <p>{spec.lead(locale)}</p>
               <div className="admin-empty-actions">
-                <Link href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
+                <Link href={resetHref} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
                 {spec.createLabel ? <Cta href={spaceHref(locale, space, query, spec.createView)} tone="primary">{spec.createLabel(locale)}</Cta> : null}
               </div>
             </div>
@@ -174,7 +237,7 @@ export function SpaceQueueBoard({
                 ))}
               </ul>
             )}
-            <Cta href={`/${locale}/administration/${space}${orgId ? `?organizationId=${orgId}` : ""}`}>{t(locale, "Voir tout", "عرض الكل")}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Cta>
+            <Cta href={resetHref}>{t(locale, "Voir tout", "عرض الكل")}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Cta>
           </article>
           {family.list === "parcours-cycle" && pipeline.length ? (
             <article className="client-card">
@@ -214,20 +277,25 @@ export function SpaceQueueBoard({
 }
 
 function columnLooksLikeStatus(column: string) {
-  return /état|statut|state|حالة|status|qualification|conformité|risque|validation/i.test(column);
+  return statusColumnLooksLikeStatus(column);
 }
 
 function RowMenu({ locale, query, space, row, resourceType }: { locale: Locale; query: string; space: AdminSpaceId; row: SpaceRow; resourceType: string }) {
   const examineHref = decisionHref(locale, space, query, row);
+  const sensitive = space !== "demandes" && space !== "matching" && space !== "devis";
   return (
-    <details className="admin-row-menu">
-      <summary aria-label={t(locale, "Actions", "إجراءات")}><MoreHorizontal className="size-4" /></summary>
+    <details className="admin-row-menu" suppressHydrationWarning>
+      <summary aria-label={t(locale, "Actions", "إجراءات")} suppressHydrationWarning><MoreHorizontal className="size-4" aria-hidden /></summary>
       <div>
         <Link href={row.href}><Eye className="size-3.5" aria-hidden />{t(locale, "Consulter", "عرض")}</Link>
         <Link href={spaceHref(locale, space, query, row.id, "modifier")}><Pencil className="size-3.5" aria-hidden />{t(locale, "Modifier", "تعديل")}</Link>
         <Link href={examineHref}><Search className="size-3.5" aria-hidden />{t(locale, "Examiner", "معاينة")}</Link>
-        <ActorIntentForm locale={locale} organizationId={row.organizationId} resourceId={row.id} resourceType={resourceType} intent="SUSPEND_ENTITY" reason="Suspension demandée depuis la liste d’administration." label={t(locale, "Suspendre", "تعليق")} />
-        <ActorIntentForm locale={locale} organizationId={row.organizationId} resourceId={row.id} resourceType={resourceType} intent="RESTRICT_ENTITY" reason="Restriction / archivage demandé depuis la liste d’administration. Aucune suppression définitive." label={t(locale, "Archiver", "أرشفة")} tone="danger" />
+        {sensitive ? (
+          <>
+            <ActorIntentForm locale={locale} organizationId={row.organizationId} resourceId={row.id} resourceType={resourceType} intent="SUSPEND_ENTITY" reason="Suspension demandée depuis la liste d’administration." label={t(locale, "Suspendre", "تعليق")} />
+            <ActorIntentForm locale={locale} organizationId={row.organizationId} resourceId={row.id} resourceType={resourceType} intent="RESTRICT_ENTITY" reason="Restriction / archivage demandé depuis la liste d’administration. Aucune suppression définitive." label={t(locale, "Archiver", "أرشفة")} tone="danger" />
+          </>
+        ) : null}
       </div>
     </details>
   );
@@ -341,7 +409,7 @@ export function SpaceDetailBoard({
 }
 
 function ConversationLayout({ locale, query, space, row }: { locale: Locale; query: string; space: AdminSpaceId; row: SpaceRow }) {
-  if(row.extras?.kind==="NOTIFICATION")return <article className="client-card"><h2>{row.title}</h2><p>{row.status}</p><p>{t(locale,"Tentatives","المحاولات")} : {row.extras.attemptCount}</p>{row.extras.errorCode?<p>{t(locale,"Erreur de livraison","خطأ التسليم")} : {row.extras.errorCode}</p>:null}<p>{row.cells[3]} · {row.cells[4]}</p></article>;
+  if(row.extras?.kind==="NOTIFICATION")return <article className="client-card"><h2>{row.title}</h2><p>{localizeStatus(row.status,locale)}</p><p>{t(locale,"Tentatives","المحاولات")} : {row.extras.attemptCount}</p>{row.extras.errorCode?<p>{t(locale,"Erreur de livraison","خطأ التسليم")} : {localizeStatus(row.extras.errorCode,locale)}</p>:null}<p>{row.cells[3]} · {row.cells[4]}</p></article>;
   return (
     <section className="admin-two">
       <article className="client-card">
@@ -384,8 +452,8 @@ function DocumentLayout({ locale, query, space, row }: { locale: Locale; query: 
             <tbody>
               <tr>
                 <td>{row.extras?.version ?? "1"}</td>
-                <td>{row.extras?.kind ?? columns[2] ?? "—"}</td>
-                <td><span className="client-status-chip" data-tone={row.tone}>{row.status}</span></td>
+                <td>{row.extras?.kind ? localizeStatus(String(row.extras.kind), locale) : (columns[2] ?? "—")}</td>
+                <td><span className="client-status-chip" data-tone={row.tone}>{localizeStatus(row.status, locale)}</span></td>
                 <td>{row.cells[8] ?? row.cells[6] ?? row.cells[4] ?? "—"}</td>
               </tr>
             </tbody>
@@ -664,16 +732,18 @@ export function SpaceCompareBoard({
       <div className="client-offer-actions">
         {offers[0] ? <Cta href={offers[0].href}>{t(locale, "Voir le détail", "عرض التفاصيل")}</Cta> : null}
         <Cta href={spaceHref(locale, space, query)}>{t(locale, "Retour à la liste", "العودة إلى القائمة")}</Cta>
-        <SpaceMutationForm
-          locale={locale}
-          query={query}
-          space={space}
-          itemId={offers[0]?.id ?? crypto.randomUUID()}
-          organizationId={offers[0]?.organizationId}
-          resourceType={spec.resourceType}
-          title={t(locale, "Confirmer le choix", "تأكيد الاختيار")}
-          submitLabel={t(locale, "Confirmer le choix avec récapitulatif", "تأكيد الاختيار مع الملخص")}
-        />
+        {offers[0] ? (
+          <SpaceMutationForm
+            locale={locale}
+            query={query}
+            space={space}
+            itemId={offers[0].id}
+            organizationId={offers[0].organizationId}
+            resourceType={spec.resourceType}
+            title={t(locale, "Confirmer le choix", "تأكيد الاختيار")}
+            submitLabel={t(locale, "Confirmer le choix avec récapitulatif", "تأكيد الاختيار مع الملخص")}
+          />
+        ) : null}
       </div>
     </main>
   );

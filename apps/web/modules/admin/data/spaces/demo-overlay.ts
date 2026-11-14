@@ -12,8 +12,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { mapAdminOrgRows, type AdminOrgRow } from "./view-model";
 
 export function canApplyAdminDemo() {
-  void isDemoClientHomeEnabled;
-  return false;
+  return isDemoClientHomeEnabled();
 }
 
 export const demoSupervisionOrganizations: AdminSupervisionDashboard["organizations"] = [
@@ -36,7 +35,7 @@ function cellFor(column: string, org: AdminSupervisionDashboard["organizations"]
   if (/organisation|مؤسسة|prestataire|مقدم|client|عميل|franchis|امتياز/i.test(column)) return org.display_name;
   if (/état|statut|حالة|status/i.test(column)) return status;
   if (/type|نوع/i.test(column)) return inferOrgType(org.display_name, locale, org.role_codes);
-  if (/progression|تقدم/i.test(column)) return ["80 %", "45 %", "100 %", "30 %"][index] ?? "60 %";
+  if (/progression|score|resultat|نتيجة|تقدم/i.test(column)) return ["80 %", "45 %", "100 %", "30 %"][index] ?? "60 %";
   if (/priorit|أولوي/i.test(column)) return fr ? ["Élevée", "Moyenne", "Faible", "Élevée"][index] ?? "Moyenne" : ["مرتفعة", "متوسطة", "منخفضة", "مرتفعة"][index] ?? "متوسطة";
   if (/version|نسخة/i.test(column)) return `v${index + 1}`;
   if (/document|وثيق/i.test(column)) return String(2 + index);
@@ -159,8 +158,12 @@ export function demoDiagnostics(): AdminSupervisionDashboard["diagnostics"] {
     organization_id: org.id,
     organization_name: org.display_name,
     status: index === 0 ? "IN_PROGRESS" : "COMPLETED",
-    rating: index === 0 ? "B" : "A",
-    overall_score: index === 0 ? 72 : 91,
+    rating: index === 0 ? "ATTENTION" : "IMPORTANT",
+    overall_score: index === 0 ? 72 : 55,
     completed_at: index === 0 ? null : "2026-09-16T10:00:00.000Z",
+    questionnaire_version_id: `d0000000-0000-4000-8000-${String(900 + index + 1).padStart(12, "0")}`,
+    questionnaire_version: index === 0 ? 1 : 2,
+    questionnaire_title_fr: "Diagnostic entreprise",
+    questionnaire_title_ar: "تشخيص مؤسسي",
   }));
 }

@@ -36,7 +36,7 @@ describe("franchise editorial commands keep incidents distinct from authorizatio
     mocks.load.mockResolvedValue({status:"error",reason:"UNAUTHENTICATED"});
     expect(await saveFranchiseCompositionAction({status:"idle"},composition())).toEqual({status:"error",reason:"UNAUTHENTICATED"});
     mocks.load.mockResolvedValue({status:"error",reason:"NO_MANDATE"});
-    expect(await saveFranchiseRuleAction({status:"idle"},rule())).toEqual({status:"error",reason:"FORBIDDEN"});
+    expect(await saveFranchiseRuleAction({status:"idle"},rule())).toEqual({status:"error",reason:"NO_MANDATE"});
   });
   it.each([["08006","UNAVAILABLE"],["42501","FORBIDDEN"]])("question scope %s is %s without a write", async (code,reason) => {
     mocks.rpc.mockResolvedValueOnce({data:null,error:{code}});
@@ -94,7 +94,7 @@ describe("franchise editorial commands keep incidents distinct from authorizatio
     expect(mocks.rpc).toHaveBeenCalledTimes(1);
   });
   it.each(["fr","ar"] as const)("provides distinct localized recovery messages in %s",locale=>{
-    const messages=["UNAUTHENTICATED","FORBIDDEN","UNAVAILABLE","CONFLICT","LOCKED","VALIDATION"].map(reason=>editorialFailureMessage(reason as Parameters<typeof editorialFailureMessage>[0],locale));
-    expect(new Set(messages).size).toBe(6);expect(messages.every(message=>message.length>20)).toBe(true);
+    const messages=["UNAUTHENTICATED","FORBIDDEN","NO_MANDATE","UNAVAILABLE","CONFLICT","LOCKED","VALIDATION"].map(reason=>editorialFailureMessage(reason as Parameters<typeof editorialFailureMessage>[0],locale));
+    expect(new Set(messages).size).toBe(7);expect(messages.every(message=>message.length>20)).toBe(true);
   });
 });

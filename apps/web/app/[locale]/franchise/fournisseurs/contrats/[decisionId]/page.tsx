@@ -4,11 +4,44 @@ import {notFound}from "next/navigation";
 import {z}from "zod";
 import {isLocale}from "@/modules/shared/lib/i18n/locale";
 import {getSupabaseServerClient}from "@/modules/shared/lib/supabase/server";
+import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { MissingFranchiseReferenceContext } from "@/modules/franchise/screens/missing-reference-context";
+import { requireFranchiseMandate } from "@/modules/franchise/screens/library/page-helper";
+import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
+
 const history=z.object({organizationId:z.string().uuid(),name:z.string(),selectedId:z.string().uuid(),history:z.array(z.object({id:z.string().uuid(),version:z.number().int().positive(),companyStatus:z.string(),status:z.string(),expiresAt:z.string().nullable(),decidedAt:z.string(),ruleVersion:z.string(),reason:z.string()}))});
+
 export default async function PartnerContractPage({params,searchParams}:{params:Promise<{locale:string;decisionId:string}>;searchParams:Promise<{franchiseId?:string;organizationId?:string}>}){
- const[{locale,decisionId},query]=await Promise.all([params,searchParams]);if(!isLocale(locale)||!z.string().uuid().safeParse(decisionId).success)notFound();
- if(!z.string().uuid().safeParse(query.franchiseId).success)return <MissingFranchiseReferenceContext locale={locale} organizationId={query.organizationId}/>;
- const client=await getSupabaseServerClient();const response=await client.rpc("franchise_partner_contract_history",{p_franchise_id:query.franchiseId,p_decision_id:decisionId});const parsed=history.safeParse(response.data);const ar=locale==="ar";const suffix=new URLSearchParams({franchiseId:query.franchiseId!,...(query.organizationId?{organizationId:query.organizationId}:{})});
- return <main className="client-page" dir={ar?"rtl":"ltr"}><h1>{ar?"قرارات عقد الشراكة":"Décisions du contrat partenaire"}</h1>{response.error||!parsed.success?<p role="alert">{ar?"العقد غير متاح أو انتهت صلاحية الوصول.":"Le contrat est indisponible ou votre autorisation a expiré."}</p>:<><p>{parsed.data.name}</p><p>{ar?"تاريخ قرارات غير قابلة للتعديل. أي ملف تعاقدي مرتبط يخضع للتحقق والوصول الخاص من صفحة الوثائق.":"Historique des décisions immuables. Les fichiers contractuels associés sont accessibles depuis les documents, après contrôle de leur sécurité."}</p><ol className="space-y-4">{parsed.data.history.map((entry,index)=><li key={entry.id} className="client-card space-y-2" aria-current={entry.id===decisionId?"true":undefined}><h2>{ar?"نسخة":"Version"} {entry.version}{index===0?ar?" · آخر قرار":" · dernière décision":""}</h2><p>{entry.status} · {entry.companyStatus}</p><dl><dt>{ar?"اتخذ في":"Décidé le"}</dt><dd><time dateTime={entry.decidedAt}>{entry.decidedAt}</time></dd><dt>{ar?"ينتهي في":"Échéance"}</dt><dd>{entry.expiresAt??(ar?"بدون تاريخ انتهاء محدد":"Sans échéance définie")}</dd><dt>{ar?"نسخة القاعدة":"Version de règle"}</dt><dd>{entry.ruleVersion}</dd><dt>{ar?"التعليل":"Motif"}</dt><dd>{entry.reason}</dd></dl></li>)}</ol></>}<SignaturePreparationLink locale={locale}/><Link className="franchise-tool" href={`/${locale}/franchise/documents?${suffix}`}>{ar?"الوثائق والمواعيد":"Documents et échéances"}</Link></main>;
+  const[{locale,decisionId},query]=await Promise.all([params,searchParams]);
+  if(!isLocale(locale)||!z.string().uuid().safeParse(decisionId).success)notFound();
+  if(!z.string().uuid().safeParse(query.franchiseId).success)return <MissingFranchiseReferenceContext locale={locale} organizationId={query.organizationId}/>;
+  const { space } = await requireFranchiseMandate({
+    locale,
+    organizationId: query.organizationId,
+    franchiseId: query.franchiseId,
+    returnPath: `/${locale}/franchise/fournisseurs/contrats/${decisionId}`,
+    returnQuery: query,
+  });
+  const client=await getSupabaseServerClient();
+  const response=await client.rpc("franchise_partner_contract_history",{p_franchise_id:query.franchiseId,p_decision_id:decisionId});
+  const parsed=history.safeParse(response.data);
+  const ar=locale==="ar";
+  const c=franchiseCopy(locale);
+  const suffix=new URLSearchParams({franchiseId:query.franchiseId!,...(query.organizationId?{organizationId:query.organizationId}:{})});
+  return (
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="network" title={ar?"قرارات عقد الشراكة":"Décisions du contrat partenaire"} lead={c.kicker}>
+      <main className="client-page" dir={ar?"rtl":"ltr"}>
+        <h1>{ar?"قرارات عقد الشراكة":"Décisions du contrat partenaire"}</h1>
+        {response.error||!parsed.success
+          ? <p role="alert">{ar?"العقد غير متاح أو انتهت صلاحية الوصول.":"Le contrat est indisponible ou votre autorisation a expiré."}</p>
+          : <>
+              <p>{parsed.data.name}</p>
+              <p>{ar?"تاريخ قرارات غير قابلة للتعديل. أي ملف تعاقدي مرتبط يخضع للتحقق والوصول الخاص من صفحة الوثائق.":"Historique des décisions immuables. Les fichiers contractuels associés sont accessibles depuis les documents, après contrôle de leur sécurité."}</p>
+              <ol className="space-y-4">{parsed.data.history.map((entry,index)=><li key={entry.id} className="client-card space-y-2" aria-current={entry.id===decisionId?"true":undefined}><h2>{ar?"نسخة":"Version"} {entry.version}{index===0?ar?" · آخر قرار":" · dernière décision":""}</h2><p>{entry.status} · {entry.companyStatus}</p><dl><dt>{ar?"اتخذ في":"Décidé le"}</dt><dd><time dateTime={entry.decidedAt}>{entry.decidedAt}</time></dd><dt>{ar?"ينتهي في":"Échéance"}</dt><dd>{entry.expiresAt??(ar?"بدون تاريخ انتهاء محدد":"Sans échéance définie")}</dd><dt>{ar?"نسخة القاعدة":"Version de règle"}</dt><dd>{entry.ruleVersion}</dd><dt>{ar?"التعليل":"Motif"}</dt><dd>{entry.reason}</dd></dl></li>)}</ol>
+            </>}
+        <SignaturePreparationLink locale={locale}/>
+        <Link className="franchise-tool" href={`/${locale}/franchise/documents?${suffix}`}>{ar?"الوثائق والمواعيد":"Documents et échéances"}</Link>
+      </main>
+    </FranchiseAppShell>
+  );
 }

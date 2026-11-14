@@ -165,7 +165,8 @@
   padding: 0;
 }
 
-.client-side-art img {
+.client-side-art img,
+.client-side-art-image {
   width: 100%;
   height: auto;
   max-height: 7.5rem;
@@ -520,7 +521,13 @@
   display: none;
 }
 
+/* Explicit display must not override UA hiding of closed <details> content —
+   otherwise « Se déconnecter » stays clickable over the org selector and drops the session. */
 .client-account > div {
+  display: none;
+}
+
+.client-account[open] > div {
   position: absolute;
   inset-inline-end: 0;
   z-index: 4;
@@ -573,8 +580,14 @@
   display: none;
 }
 
+/* Explicit display must not override UA hiding of closed <details> content. */
 .client-org-switch ul,
 .client-org-switch p[role] {
+  display: none;
+}
+
+.client-org-switch[open] ul,
+.client-org-switch[open] p[role] {
   position: absolute;
   inset-inline-start: 0;
   z-index: 5;

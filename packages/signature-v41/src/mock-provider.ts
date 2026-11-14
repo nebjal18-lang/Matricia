@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { CreateEnvelopeInput, ProviderEnvelope, SignatureEvidence, SignatureLevel, SignatureProvider, VerifiedSignatureEvent } from "./provider.js";
+import type { CreateEnvelopeInput, ProviderEnvelope, SignatureEvidence, SignatureLevel, SignatureProvider, VerifiedSignatureEvent } from "./provider";
 
 interface MockState {
   envelope: ProviderEnvelope;

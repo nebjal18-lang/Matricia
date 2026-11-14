@@ -5,6 +5,7 @@ import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import type { RewardsDashboard } from "@/modules/shared/lib/rewards-referrals-roi/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { conversionStageLabel } from "@/modules/client/screens/recompenses/value-display-labels";
 
 function formatBps(value: string) {
   const amount = BigInt(value);
@@ -30,8 +31,20 @@ export function RewardsBoard({
   const conversions = dashboard.conversions;
   const link = dashboard.links.find((item) => item.status === "ACTIVE" && item.audience_type === "CLIENT");
   const snapshot = dashboard.roiSnapshots[0];
-  const stageLabels = locale === "ar" ? {REGISTERED:"مسجّل",PROFILE_STARTED:"الملف قيد الإعداد",VERIFIED:"تم التحقق",ACTIVE:"مفعّل",REJECTED:"مرفوض",CANCELLED:"ملغى"} : {REGISTERED:"Inscrit",PROFILE_STARTED:"Dossier en préparation",VERIFIED:"Vérifié",ACTIVE:"Activé",REJECTED:"Refusé",CANCELLED:"Annulé"};
-  const stageLabel = (value:string) => stageLabels[value as keyof typeof stageLabels] ?? (locale === "ar" ? "حالة غير معروفة" : "État non reconnu");
+  const stageLabel = (value: string) => conversionStageLabel(locale, value);
+  const referralRewardStateLabel = (state: NonNullable<RewardsDashboard["referralRewardStatuses"]>[number]["state"]) => {
+    if (state === "GRANTED") return locale === "ar" ? "تم إصدار الرصيد" : "Crédits émis";
+    if (state === "APPROVED_PENDING_EXECUTION") return locale === "ar" ? "موافقة بانتظار الإصدار" : "Approuvée, émission en attente";
+    return locale === "ar" ? "مكافأة مرفوضة" : "Récompense refusée";
+  };
+  const conversionRewardStatus = (stage: RewardsDashboard["conversions"][number]["conversion_stage"]) => {
+    if (stage !== "ACTIVE") return locale === "ar" ? "مكافأة غير متاحة بعد" : "Récompense pas encore disponible";
+    const rows = dashboard.referralRewardStatuses ?? [];
+    if (rows.some((item) => item.state === "GRANTED")) return referralRewardStateLabel("GRANTED");
+    if (rows.some((item) => item.state === "APPROVED_PENDING_EXECUTION")) return referralRewardStateLabel("APPROVED_PENDING_EXECUTION");
+    if (rows.some((item) => item.state === "REJECTED")) return referralRewardStateLabel("REJECTED");
+    return locale === "ar" ? "بانتظار قرار المكافأة" : "En attente de décision";
+  };
   const inviteHref = `/${locale}/client/recompenses${query}#regles`;
   const ambassador = conversions.some((item) => item.conversion_stage === "ACTIVE");
   const engaged = dashboard.grants.length > 0;
@@ -90,7 +103,7 @@ export function RewardsBoard({
                   {conversions.slice(0, 6).map((item) => (
                     <tr key={item.id}>
                       <td>{stageLabel(item.conversion_stage)}</td>
-                      <td><span className="client-status-chip" data-tone="mint">{stageLabel(item.conversion_stage)}</span></td>
+                      <td><span className="client-status-chip" data-tone="mint">{conversionRewardStatus(item.conversion_stage)}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -103,8 +116,8 @@ export function RewardsBoard({
           {snapshot ? (
             <dl className="client-fact-grid">
               <div><small>{c.savingsRoi}</small><span dir="ltr">{formatMinor(snapshot.net_value_minor, snapshot.currency, locale)}</span></div>
-              <div><small>ROI</small><span dir="ltr">{formatBps(snapshot.roi_basis_points)} %</span></div>
-              <div><small>{c.calcMethod}</small><span dir="ltr">{snapshot.formula_version}</span></div>
+              <div><small>{locale === "ar" ? "العائد" : "Rendement"}</small><span dir="ltr">{formatBps(snapshot.roi_basis_points)} %</span></div>
+              <div><small>{c.calcMethod}</small><span>{locale === "ar" ? `منهج ${snapshot.formula_version}` : `Méthode ${snapshot.formula_version}`}</span></div>
             </dl>
           ) : <p>{locale === "ar" ? "يُحتسب العائد بعد اعتماد قاعدة قياس." : "Le ROI s’affiche après validation d’une base de mesure."}</p>}
           <p className="client-access-note">{c.dataSources}</p>

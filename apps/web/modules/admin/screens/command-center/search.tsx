@@ -14,7 +14,7 @@ export function searchAdminLoadedContent(locale: Locale, query: string, organiza
   const pages = adminDirectoryGroups(locale, organizationQuery).flatMap(group => group.links);
   const seen = new Set<string>();
   const links = pages.flatMap((page, index) => {
-    if (seen.has(page.href) || !matches(`${page.label} ${alternate[index]?.label ?? ""} ${page.href.split("?")[0]}`)) return [];
+    if (seen.has(page.href) || !matches(`${page.label} ${page.summary} ${alternate[index]?.label ?? ""} ${alternate[index]?.summary ?? ""} ${page.href.split("?")[0]}`)) return [];
     seen.add(page.href);
     return [{ ...page, kind: "page" as const }];
   });

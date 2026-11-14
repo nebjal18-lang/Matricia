@@ -1,10 +1,21 @@
+import { timingSafeEqual } from "node:crypto";
 import { randomUUID } from "node:crypto";
 import { buildReadinessReport, type DependencyReadiness } from "@matricia/observability";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+function authorizedInternal(request: Request): boolean {
+  const expected = (process.env.CRON_SECRET ?? process.env.INTERNAL_WEBHOOK_SECRET ?? "").trim();
+  const supplied = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1] ?? "";
+  const expectedBytes = Buffer.from(expected);
+  const suppliedBytes = Buffer.from(supplied);
+  return expectedBytes.length >= 32
+    && expectedBytes.length === suppliedBytes.length
+    && timingSafeEqual(expectedBytes, suppliedBytes);
+}
+
+export async function GET(request: Request) {
   const startedAt = performance.now();
   const environment = process.env.APP_ENV?.trim().toLowerCase() || (process.env.NODE_ENV === "production" ? undefined : "development");
   let database: DependencyReadiness;
@@ -42,8 +53,13 @@ export async function GET() {
     } catch { privacy = { status: "down", latencyMs: performance.now() - privacyStarted, code: "PLATFORM_PRIVACY_NOT_READY" }; }
   }
   const report = buildReadinessReport("matricia-web", { database, outbox, ...(privacy ? { privacy } : {}) });
-  return Response.json(report, {
-    status: report.status === "ready" ? 200 : 503,
-    headers: { "x-correlation-id": randomUUID(), "cache-control": "no-store" },
-  });
+  const status = report.status === "ready" ? 200 : 503;
+  const headers = { "x-correlation-id": randomUUID(), "cache-control": "no-store" };
+
+  // Public probes (LB): status code only — no dependency codes / latencies.
+  if (!authorizedInternal(request)) {
+    return Response.json({ status: report.status, service: report.service }, { status, headers });
+  }
+
+  return Response.json(report, { status, headers });
 }

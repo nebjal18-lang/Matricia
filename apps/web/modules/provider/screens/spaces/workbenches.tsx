@@ -41,6 +41,8 @@ import type { ProviderQuoteMessages } from "@/modules/provider/screens/devis/mes
 import { getProviderQuoteMessages } from "@/modules/provider/screens/devis/messages";
 import { MissionsPanel } from "@/modules/provider/screens/missions/missions-panel";
 import type { ProviderMissionMessages } from "@/modules/provider/screens/missions/messages";
+import { queryWithWorkspace } from "@/modules/shared/lib/auth/workspace-navigation";
+import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 function Crumb({ href, children }: { href: string; children: ReactNode }) {
@@ -113,12 +115,12 @@ export function ConsultationDetailWorkbench({
   const scopeItems = pack?.scope.length
     ? pack.scope
     : invitation?.regionCode && invitation.regionCode !== "—"
-      ? [invitation.regionCode]
+      ? [moroccoRegionLabel(invitation.regionCode, locale)]
       : [];
   const deliverables = pack?.deliverables ?? [];
   const constraints = pack?.constraints ?? [];
   const documents: ConsultationPackDocument[] = pack?.documents ?? [];
-  const region = invitation?.regionCode && invitation.regionCode !== "—" ? invitation.regionCode : w.consultLocationFallback;
+  const region = invitation?.regionCode && invitation.regionCode !== "—" ? moroccoRegionLabel(invitation.regionCode, locale) : w.consultLocationFallback;
   const quoteStatus = invitation?.quote?.status;
   const quoteDecided = quoteStatus === "SELECTED" || quoteStatus === "REJECTED";
   const quoteSent = quoteDecided || quoteStatus === "SUBMITTED" || quoteStatus === "CLARIFICATION_REQUESTED";
@@ -215,7 +217,7 @@ export function ConsultationDetailWorkbench({
               </p>
               <ul className="client-feed">
                 {invitation?.regionCode && invitation.regionCode !== "—" ? (
-                  <li><span><strong>{w.consultFitZone}</strong><small>{invitation.regionCode}</small></span></li>
+                  <li><span><strong>{w.consultFitZone}</strong><small>{moroccoRegionLabel(invitation.regionCode, locale)}</small></span></li>
                 ) : null}
                 {documents.length > 0 ? (
                   <li><span><strong>{w.consultFitDocs}</strong><small dir="ltr">{documents.length}</small></span></li>
@@ -629,6 +631,7 @@ export function MessagesNotificationsWorkbench({
   threadId?: string;
 }) {
   const w = workbenchCopy(locale);
+  const notificationsQuery = queryWithWorkspace(query, "provider");
   return (
     <main className="client-page provider-workbench provider-messages">
       <header className="provider-workbench-hero">
@@ -639,7 +642,7 @@ export function MessagesNotificationsWorkbench({
       </header>
       <nav className="client-tabs" aria-label={w.messagesTitle}>
         <Link href={`/${locale}/sous-traitant/messages${query}`} aria-current="page">{w.messagesTab}</Link>
-        <Link href={`/${locale}/notifications${query}`}>{w.notifTab}</Link>
+        <Link href={`/${locale}/notifications${notificationsQuery}`}>{w.notifTab}</Link>
       </nav>
       <section className="provider-messages-grid" id="messages">
         <article className="client-card">
@@ -650,7 +653,7 @@ export function MessagesNotificationsWorkbench({
           <article className="client-card">
             <header><h3>{w.notifTab}</h3></header>
             <p role="status">{w.notifEmpty}</p>
-            <Link href={`/${locale}/notifications${query}`} className="client-text-link">{w.managePrefs}</Link>
+            <Link href={`/${locale}/notifications${notificationsQuery}`} className="client-text-link">{w.managePrefs}</Link>
           </article>
         </aside>
       </section>
@@ -682,6 +685,7 @@ export function CompanySecurityWorkbench({
   securityUnavailable?: boolean;
 }) {
   const w = workbenchCopy(locale);
+  const notificationsQuery = queryWithWorkspace(query, "provider");
   const name = organizationName
     ? organizationDisplayLabel(organizationName, locale)
     : (locale === "ar" ? "مؤسستكم" : "Votre entreprise");
@@ -706,7 +710,7 @@ export function CompanySecurityWorkbench({
         <Link href={`/${locale}/organisation/roles${query}#invitations`}>{w.tabInvites}</Link>
         <Link href={`/${locale}/securite/compte${query}`} aria-current="page">{w.tabSecurity}</Link>
         <Link href={`/${locale}/securite/sessions${query}`}>{w.tabSessions}</Link>
-        <Link href={`/${locale}/notifications${query}`}>{w.tabPrefs}</Link>
+        <Link href={`/${locale}/notifications${notificationsQuery}`}>{w.tabPrefs}</Link>
       </nav>
       <section className="provider-company-layout">
         <div className="client-stack">

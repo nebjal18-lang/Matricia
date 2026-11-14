@@ -134,6 +134,23 @@ export async function createYousignRuntime() {
   return createSignatureWorkflow({ provider, repository, env });
 }
 
+const NON_RETRYABLE_SIGNATURE_CODES = [
+  "YOUSIGN_CONFIGURATION_REQUIRED",
+  "YOUSIGN_DEPLOYMENT_ENVIRONMENT_MISMATCH",
+  "SIGNATURE_PROVIDER_NOT_CONFIGURED",
+  "SIGNATURE_PROVIDER_CODE_MISMATCH",
+  "SIGNATURE_DEVELOPMENT_PROVIDER_FORBIDDEN",
+  "SIGNATURE_PROVIDER_MODE_INVALID",
+  "SIGNATURE_SANDBOX_PROVIDER_FORBIDDEN",
+  "YOUSIGN_EXPLICIT_SIGNER_CONFIGURATION_REQUIRED",
+] as const;
+
+function signatureFailureCode(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return NON_RETRYABLE_SIGNATURE_CODES.find((code) => message.includes(code))
+    ?? "SIGNATURE_PROVIDER_DISPATCH_UNAVAILABLE";
+}
+
 export async function consumeGovernedSignatureEnvelope(envelopeId: string): Promise<{ ok: boolean; code: string; developmentMock: boolean }> {
   if (!uuid.safeParse(envelopeId).success) return { ok: false, code: "SIGNATURE_ENVELOPE_PAYLOAD_INVALID", developmentMock: false };
   try {
@@ -146,8 +163,10 @@ export async function consumeGovernedSignatureEnvelope(envelopeId: string): Prom
     // The existing SQL mock retains its own trusted-environment/governance gate.
     if (code !== "MATRICIA_DEV_MOCK") return { ok: false, code: "SIGNATURE_PROVIDER_NOT_REGISTERED", developmentMock: false };
     const result = z.object({ outcome: z.string() }).passthrough().parse(await rpc(admin, "dispatch_governed_signature_envelope_v1", { p_envelope_id: envelopeId }));
+    // CANCELLED is a terminal governed outcome: acknowledge so the outbox does not retry forever.
     return { ok: ["SIGNATURE_ENVELOPE_SENT", "SIGNATURE_DISPATCH_CANCELLED"].includes(result.outcome), code: result.outcome, developmentMock: true };
-  } catch {
-    return { ok: false, code: "SIGNATURE_PROVIDER_DISPATCH_UNAVAILABLE", developmentMock: false };
+  } catch (error) {
+    // Surface the exact configuration/policy code; outbox still returns 503 until ops remediates.
+    return { ok: false, code: signatureFailureCode(error), developmentMock: false };
   }
 }

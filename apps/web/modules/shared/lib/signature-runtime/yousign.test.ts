@@ -34,7 +34,7 @@ describe("governed signature runtime selection", () => {
   });
   it("does not fall back to the mock when YouSign configuration is incomplete", async () => {
     mock.rpc.mockResolvedValue({ data: "YOUSIGN", error: null }); vi.stubEnv("APP_ENV", "production");
-    expect(await consumeGovernedSignatureEnvelope(id)).toEqual({ ok: false, code: "SIGNATURE_PROVIDER_DISPATCH_UNAVAILABLE", developmentMock: false });
+    expect(await consumeGovernedSignatureEnvelope(id)).toEqual({ ok: false, code: "YOUSIGN_CONFIGURATION_REQUIRED", developmentMock: false });
     expect(mock.rpc).toHaveBeenCalledOnce();
   });
   it("does not acknowledge a missing SQL provider receipt", async () => {

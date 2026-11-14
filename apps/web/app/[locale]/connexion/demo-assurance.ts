@@ -26,13 +26,16 @@ type DemoAdminClient = {
   };
 };
 
-/** Enrolls a fresh authenticator and verifies it in the same request, so the demo session is really AAL2. */
+/** Elevate a demo session to AAL2. Skip destructive re-enrollment when already verified. */
 export async function elevateDemoSession(input: {
   email: string;
   userId: string;
   supabase: DemoSessionClient;
   admin: DemoAdminClient;
 }): Promise<boolean> {
+  const current = await input.supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (!current.error && current.data?.currentLevel === "aal2") return true;
+
   const listed = await input.supabase.auth.mfa.listFactors();
   if (listed.error) return false;
   const factors = listed.data?.totp ?? [];

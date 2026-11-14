@@ -8,6 +8,7 @@ import {
   UserRound,
   Wrench,
 } from "lucide-react";
+import { queryWithWorkspace } from "@/modules/shared/lib/auth/workspace-navigation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export type ProviderProfileRailKey =
@@ -52,13 +53,14 @@ export function ProviderProfileRail({
   active: ProviderProfileRailKey;
 }) {
   const c = copy[locale];
+  const notificationsQuery = queryWithWorkspace(query, "provider");
   const items = [
     { key: "profile" as const, href: `/${locale}/sous-traitant/identite${query}`, label: c.profile, icon: UserRound },
     { key: "services" as const, href: `/${locale}/sous-traitant/services${query}`, label: c.services, icon: Wrench },
     { key: "certs" as const, href: `/${locale}/sous-traitant/qualification/certifications${query}`, label: c.certs, icon: Award },
     { key: "capacity" as const, href: `/${locale}/sous-traitant/qualification${query}#capacite`, label: c.capacity, icon: ShieldCheck },
     { key: "settings" as const, href: `/${locale}/sous-traitant/parametres${query}`, label: c.settings, icon: Settings2 },
-    { key: "notifications" as const, href: `/${locale}/notifications${query}#notification-preferences`, label: c.notifications, icon: Bell },
+    { key: "notifications" as const, href: `/${locale}/notifications${notificationsQuery}#notification-preferences`, label: c.notifications, icon: Bell },
     { key: "company" as const, href: `/${locale}/sous-traitant/entreprise${query}`, label: c.company, icon: Building2 },
   ];
 

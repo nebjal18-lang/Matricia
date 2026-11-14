@@ -1,0 +1,42 @@
+/* Locale 404 only — keep out of (public)/experience.css so admin routes never preload it. */
+.public-root.not-found-root{
+  --jp-navy:var(--mat-navy);
+  --jp-ink:var(--mat-navy);
+  --jp-muted:var(--mat-slate);
+  --jp-blue:var(--mat-violet);
+  --jp-blue-hover:var(--mat-violet-strong);
+  --jp-border:var(--mat-border);
+  --jp-cream:var(--mat-canvas);
+  --jp-card:var(--mat-canvas);
+  min-height:100dvh;
+  background:var(--jp-cream);
+  color:var(--jp-ink);
+}
+.not-found-root .public-page{box-sizing:border-box}
+.not-found-root .public-wrap{width:min(100% - 48px,1180px);margin-inline:auto}
+.not-found-root .journey-eyebrow{margin:0;color:var(--jp-blue);font-size:.78rem;font-weight:750;letter-spacing:.14em;line-height:1.5;text-transform:uppercase}
+[dir=rtl].not-found-root .journey-eyebrow{letter-spacing:0;text-transform:none}
+.not-found-root .public-lead{max-width:620px;margin:0;color:var(--jp-muted);font-size:clamp(1.02rem,1.35vw,1.14rem);line-height:1.7}
+.not-found-root .journey-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:28px}
+.not-found-root .journey-primary,.not-found-root .journey-secondary{
+  display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:10px;
+  border:1px solid transparent;border-radius:999px;padding:12px 20px;font-size:.9rem;font-weight:700;line-height:1.25;text-decoration:none;
+}
+.not-found-root .journey-primary{background:var(--jp-blue);color:#fff;box-shadow:0 10px 22px rgb(109 60 199 / .18)}
+.not-found-root .journey-primary:hover{background:var(--jp-blue-hover)}
+.not-found-root .journey-primary.is-coral{background:var(--mat-coral-ink);box-shadow:0 10px 22px rgb(224 122 95 / .22)}
+.not-found-root .journey-primary.is-coral:hover{background:var(--mat-color-danger)}
+.not-found-root .journey-secondary{border-color:var(--mat-rose);background:#fff;color:var(--jp-ink)}
+.not-found-root .journey-known{display:inline-flex;min-height:44px;align-items:center;gap:8px;color:var(--jp-blue);font-size:.9rem;font-weight:650;text-underline-offset:5px}
+.not-found-root .public-muted{margin:0;color:var(--jp-muted);font-size:.82rem;line-height:1.5}
+.not-found-root .public-h2{max-width:640px;margin:14px 0 0;font-size:clamp(1.7rem,3vw,2.35rem);letter-spacing:-.03em;line-height:1.12;color:var(--jp-navy)}
+.not-found-root .public-card{padding:22px;border:1px solid var(--jp-border);border-radius:22px;background:var(--jp-card);box-shadow:0 10px 24px rgb(26 39 68 / .04)}
+.not-found-root .public-card h2{margin:12px 0 8px;font-size:1.05rem;color:var(--jp-navy)}
+.not-found-root .public-error-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:28px;align-items:center;padding-block:clamp(36px,6vw,64px)}
+.not-found-root .public-error-cases{display:grid;grid-template-columns:minmax(180px,.8fr) repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.not-found-root .public-error-help{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-top:40px;padding:22px 24px;border:1px solid var(--jp-border);border-radius:22px;background:var(--jp-card)}
+.not-found-root .public-error-help h2{margin:0 0 6px;font-size:1.1rem}
+@media (max-width:960px){
+  .not-found-root .public-error-hero,.not-found-root .public-error-cases{grid-template-columns:1fr}
+  .not-found-root .public-wrap{width:min(100% - 28px,1180px)}
+}

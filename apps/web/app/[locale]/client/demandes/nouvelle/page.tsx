@@ -6,6 +6,7 @@ import { createServerClientRfqRepository } from "@/modules/client/data/rfq/serve
 import { loadClientPortfolio } from "@/modules/client/data/portfolio/server-repository";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getClientRfqMessages } from "@/modules/client/screens/demandes/messages";
 import { loadNeedRequestContext } from "@/modules/client/screens/demandes/need-context";
@@ -40,11 +41,11 @@ export default async function NewRequestPage({
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   const nextPath = `/${locale}/client/demandes/nouvelle${nouvelleQuery(query)}`;
   if (space.status === "unauthenticated") {
-    redirect(`/${locale}/connexion?next=${encodeURIComponent(nextPath)}`);
+    redirect(connexionHref(locale, { next: nextPath }));
   }
   const result = await (await createServerClientRfqRepository()).list();
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") {
-    redirect(`/${locale}/connexion?next=${encodeURIComponent(nextPath)}`);
+    redirect(connexionHref(locale, { next: nextPath }));
   }
   const messages = getClientRfqMessages(locale);
   const c = spaceCopy(locale);

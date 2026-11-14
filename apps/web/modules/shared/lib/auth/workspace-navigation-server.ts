@@ -15,7 +15,7 @@ export async function readWorkspaceNavigation(locale: Locale, organizationId?: s
   try {
     const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
     const { data: auth, error: authError } = authResult;
-    if (authError) return { status: "error", reason: authError.status === 401 || authError.status === 403 || authError.name === "AuthSessionMissingError" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
+    if (authError) return { status: "error", reason: authError.status === 401 || authError.name === "AuthSessionMissingError" ? "UNAUTHENTICATED" : authError.status === 403 ? "FORBIDDEN" : "QUERY_FAILED" };
     if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
     const [security, memberships] = await Promise.all([
       client.rpc("get_my_account_security_requirement"),

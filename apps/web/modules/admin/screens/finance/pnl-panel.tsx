@@ -7,6 +7,8 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import type { AdminPnlDashboard } from "@/modules/admin/data/pnl/model";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
+import { presentDateOnly, presentOrgName } from "@/modules/admin/data/spaces/present-space-row";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { closePnlAction } from "./commerce-actions";
 import type { CommerceMessages } from "./commerce-messages";
@@ -25,8 +27,8 @@ export function PnlPanel({ locale, dashboard, m, keyValue }: { locale: Locale; d
           {dashboard.books.map((book) => (
             <article key={book.id} className="rounded-xl border bg-card p-4">
               <div className="flex flex-wrap justify-between gap-2">
-                <h3 className="font-semibold">{book.library_code} · {book.organization_name}</h3>
-                <Badge>{book.franchise_type} · {book.status}</Badge>
+                <h3 className="font-semibold">{book.library_code} · {presentOrgName(book.organization_name, locale)}</h3>
+                <Badge>{localizeStatus(book.franchise_type, locale)} · {localizeStatus(book.status, locale)}</Badge>
               </div>
               <p className="mt-2 text-sm">{book.operator_code} · {book.currency}</p>
               {book.latest_closure ? (
@@ -34,7 +36,7 @@ export function PnlPanel({ locale, dashboard, m, keyValue }: { locale: Locale; d
                   <div>{m.revenueLabel}: <span dir="ltr">{formatMinor(book.latest_closure.gross_revenue_ex_tax_minor, book.currency, locale)}</span></div>
                   <div>{m.costs}: <span dir="ltr">{formatMinor(book.latest_closure.costs_and_refunds_minor, book.currency, locale)}</span></div>
                   <div>{m.profit}: <strong dir="ltr">{formatMinor(book.latest_closure.distributable_profit_minor, book.currency, locale)}</strong></div>
-                  <div>{book.latest_closure.period_start} — {book.latest_closure.period_end}</div>
+                  <div>{presentDateOnly(book.latest_closure.period_start, locale)} — {presentDateOnly(book.latest_closure.period_end, locale)}</div>
                 </dl>
               ) : <p className="mt-2 text-sm text-muted-foreground">{m.empty}</p>}
               <ul className="mt-2 text-sm">{book.allocations.map((item) => <li key={item.beneficiary_code}>{item.beneficiary_code}: <span dir="ltr">{formatMinor(item.amount_minor, book.currency, locale)}</span></li>)}</ul>
@@ -51,14 +53,14 @@ export function PnlPanel({ locale, dashboard, m, keyValue }: { locale: Locale; d
             <select name="bookId" required className={control}>{openBooks.map((book) => <option key={book.id} value={book.id}>{book.library_code} · {book.organization_name}</option>)}</select>
           </label>
           <label className="grid gap-1 text-sm">{m.plan}
-            <select name="ruleVersionId" required className={control}>{dashboard.rules.map((rule) => <option key={rule.id} value={rule.id}>{rule.franchise_type} v{rule.version}</option>)}</select>
+            <select name="ruleVersionId" required className={control}>{dashboard.rules.map((rule) => <option key={rule.id} value={rule.id}>{localizeStatus(rule.franchise_type, locale)} v{rule.version}</option>)}</select>
           </label>
           <label className="grid gap-1 text-sm">{m.periodStart}<Input name="periodStart" type="date" required className="min-h-11" /></label>
           <label className="grid gap-1 text-sm">{m.periodEnd}<Input name="periodEnd" type="date" required className="min-h-11" /></label>
           <label className="grid gap-1 text-sm">{m.cutoff}<Input name="entryCutoffAt" type="datetime-local" className="min-h-11" /></label>
           <label className="grid gap-1 text-sm md:col-span-2">{m.reason}<Input name="reason" required minLength={10} className="min-h-11" /></label>
           <Button type="submit" disabled={pending} className="min-h-11 md:col-span-2">{pending ? m.processing : m.save}</Button>
-          {state.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {state.outcome}</p> : null}
+          {state.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {localizeStatus(state.outcome, locale)}</p> : null}
           {state.status === "error" ? <p role="alert" className="text-sm text-destructive md:col-span-2">{m.errors[state.reason]}</p> : null}
         </form>
       ) : null}

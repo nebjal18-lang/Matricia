@@ -31,4 +31,20 @@ describe("client analysis form", () => {
     expect(html).toContain("Entreprise A");
     expect(html).toContain("Entreprise B");
   });
+
+  it("wires an analysis disclosure that can open from a closed summary", () => {
+    const html = renderToStaticMarkup(
+      <CompleteForm
+        disclosure={{ summary: "Calculer la santé globale", initialOpen: false }}
+        locale="fr"
+        organizations={[{ id: "11111111-1111-4111-8111-111111111111", name: "Entreprise A", latestAt: "2026-09-15T12:00:00Z" }]}
+        questionnaireHref="/fr/client/questionnaires"
+        m={messages("fr")}
+        keyValue="44444444-4444-4444-8444-444444444444"
+      />,
+    );
+    expect(html).toContain('id="analyse"');
+    expect(html).toContain("Calculer la santé globale");
+    expect(html).not.toMatch(/<details[^>]*\sopen(=|\s|>)/);
+  });
 });

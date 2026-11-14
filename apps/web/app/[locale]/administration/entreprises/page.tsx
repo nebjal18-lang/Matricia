@@ -9,7 +9,8 @@ import { OrganizationsBoard } from "@/modules/admin/screens/spaces/boards";
 import { AdminAppShell, AdminCrumb } from "@/modules/admin/ui/admin-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
-import { mapAdminOrgRows, mapAdminTreatQueue } from "@/modules/admin/data/spaces/view-model";
+import { loadOrganizationPlanCodes } from "@/modules/admin/data/spaces/organization-plans";
+import { applyOrganizationPlanCodes, mapAdminOrgRows, mapAdminTreatQueue } from "@/modules/admin/data/spaces/view-model";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 
 export default async function AdminEntreprisesPage({
@@ -40,7 +41,11 @@ export default async function AdminEntreprisesPage({
   const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
-  const rows = result.status === "success" ? mapAdminOrgRows(result.value.organizations, locale) : [];
+  const baseRows = result.status === "success" ? mapAdminOrgRows(result.value.organizations, locale) : [];
+  const planCodes = result.status === "success"
+    ? await loadOrganizationPlanCodes(result.value.organizations.map((org) => org.id))
+    : new Map<string, string>();
+  const rows = applyOrganizationPlanCodes(baseRows, planCodes, locale);
   const treat = result.status === "success"
     ? mapAdminTreatQueue({
         locale,

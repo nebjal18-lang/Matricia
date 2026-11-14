@@ -14,6 +14,7 @@ import { FranchiseScopeInfo } from "./library-chrome";
 import { FranchiseServiceDraftForm, FranchiseServiceCommandForms } from "./service-builder";
 import { FranchiseQuestionnaireSandbox } from "./sandbox-form";
 import { FranchiseArchiveServiceForm, FranchiseCatalogSubmitForm, FranchiseCloneQuestionnaireForm, FranchiseDuplicateServiceForm, FranchisePublishReleaseForm } from "./catalog-commands";
+import { Suspense } from "react";
 import { ServicesCatalogPanel } from "./services-catalog-panel";
 
 function Toolbar({ children }: { children: ReactNode }) {
@@ -62,7 +63,9 @@ export function FranchiseServicesWorkbench({
         <ToolLink href={selected ? `/${locale}/franchise/services/${selected.id}/validation${query}` : `/${locale}/franchise/validations${query}`} label={c.submitValidation} />
       </Toolbar>
       <section className="franchise-workbench franchise-workbench-services">
-        <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
+        <Suspense fallback={<p role="status">{locale === "ar" ? "جارٍ تحميل الكتالوج…" : "Chargement du catalogue…"}</p>}>
+          <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
+        </Suspense>
         <aside className="client-card franchise-service-drawer">
           {createMode || !selected ? (
             <>

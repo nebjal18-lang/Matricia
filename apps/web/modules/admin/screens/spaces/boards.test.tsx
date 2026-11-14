@@ -42,6 +42,8 @@ describe("admin space boards", () => {
       renderToStaticMarkup(<OrganizationFicheBoard locale="fr" query="" fiche={fiche} />),
     ].join("\n");
     expect(html).toContain("Acteurs &amp; accès");
+    expect(html).toContain("Organisations");
+    expect(html).not.toContain("admin-dir-tip");
     expect(html).toContain("Actions sensibles");
     expect(html).toContain("Toutes les pages d’administration");
     expect(html).toContain("Créer");
@@ -52,6 +54,7 @@ describe("admin space boards", () => {
     expect(html).toContain("À traiter");
     expect(html).toContain("1 résultat");
     expect(html).toContain('data-layout="orgs"');
+    expect(html).not.toContain("admin-chart-grid");
     expect(html).toContain('data-tone="amber"');
     expect(html).toContain('data-tone="plum"');
     expect(html).not.toMatch(/exemple illustratif/i);

@@ -5,7 +5,7 @@ import type {
   SignatureLevel,
   SignatureProvider,
   VerifiedSignatureEvent,
-} from "./provider.js";
+} from "./provider";
 
 export type YousignSandboxConfig = Readonly<{
   apiKey: string;
@@ -14,11 +14,11 @@ export type YousignSandboxConfig = Readonly<{
 }>;
 
 /**
- * YouSign sandbox adapter scaffold.
- * Refuses to operate without real sandbox credentials — never invents a signed envelope.
- * Wire via SIGNATURE_PROVIDER_MODE=EXTERNAL + SIGNATURE_PROVIDER_CODE=YOUSIGN once keys exist in secrets.
+ * YouSign sandbox adapter scaffold (credentials gate only).
+ * Canonical runtime sandbox is `YousignSandboxSignatureProvider` in `./yousign-provider`.
+ * Kept for unit coverage of the scaffold refusals — not re-exported from the package index.
  */
-export class YousignSandboxSignatureProvider implements SignatureProvider {
+export class YousignSandboxScaffoldProvider implements SignatureProvider {
   readonly code = "YOUSIGN";
   readonly developmentOnly = false;
   readonly sandboxOnly = true;

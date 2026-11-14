@@ -1,3 +1,4 @@
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import{randomUUID}from"node:crypto";
 import Link from"next/link";
 import{notFound,redirect}from"next/navigation";
@@ -10,7 +11,7 @@ import{BenefitFulfillmentCard}from"@/modules/shared/lib/benefit-fulfillment/pane
 export default async function BenefitOperations({params,searchParams}:{params:Promise<{locale:string}>;searchParams:Promise<{page?:string;organizationId?:string}>}){
  const{locale}=await params,q=await searchParams;if(!isLocale(locale))notFound();
  const parsed=z.object({page:z.coerce.number().int().min(1).max(100000).default(1),organizationId:z.string().uuid().optional()}).safeParse(q);if(!parsed.success)notFound();
- const client=await getSupabaseServerClient();const{data:auth}=await client.auth.getUser();if(!auth.user)redirect(`/${locale}/connexion`);
+ const client=await getSupabaseServerClient();const{data:auth}=await client.auth.getUser();if(!auth.user)redirect(connexionHref(locale,{next:`/${locale}/administration/avantages/livraisons`}));
  const result=await loadBenefitFulfillment(locale,parsed.data.organizationId??null,parsed.data.page),ar=locale==="ar";
  const href=(page:number)=>`/${locale}/administration/avantages/livraisons?page=${page}${parsed.data.organizationId?`&organizationId=${parsed.data.organizationId}`:""}`;
  return <AdminModulePage locale={locale}active="finance"path="avantages/livraisons"title={ar?"تنفيذ المزايا واستلامها":"Exécution et réception des avantages"}lead={ar?"تنفيذ موثق، واستلام مستقل من العميل، ثم احتساب الرصيد المقبول.":"Exécution tracée, réception indépendante du client, puis consommation des crédits acceptés."}>

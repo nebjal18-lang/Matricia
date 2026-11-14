@@ -85,7 +85,7 @@ export function ClientAppShell({
         </Link>
         <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
         <figure className="client-side-art">
-          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>

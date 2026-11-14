@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Info, LifeBuoy, MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
+import { presentObligation } from "@/modules/admin/data/spaces/present-space-row";
 import { canApplyClientSpaceDemo, demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import type { DisputeDetail, DisputeSummary } from "@/modules/shared/lib/disputes/model";
 import type { DisputeMessages } from "@/modules/client/screens/litiges/messages";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 
 function formatDate(value: string | null, locale: Locale) {
   return value ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(value)) : "—";
@@ -43,9 +45,11 @@ export function DisputesBoard({
   const base = hrefPrefix ?? `/${locale}/client/litiges`;
   const preferDemo = !hrefPrefix && canApplyClientSpaceDemo() && cases.length === 0;
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
+  const providerSpace = base.includes("/sous-traitant/");
   const listHref = `${base}${query}`;
   const helpHref = `/${locale}/contact${query}`;
-  const messagesHref = `/${locale}/messagerie${query}`;
+  const messagesHref = providerSpace ? `/${locale}/sous-traitant/messages${query}` : `/${locale}/messagerie${query}`;
+  const docsBase = providerSpace ? `/${locale}/sous-traitant/documents` : `/${locale}/client/documents`;
   const newHref = `${base}/nouveau${query}`;
 
   if (!preferDemo && cases.length === 0) {
@@ -62,7 +66,7 @@ export function DisputesBoard({
       <section className="client-dispute-layout">
         <article className="client-card">
           <header className="client-priority-head">
-            <h2>{c.myDisputes}</h2>
+            <h2>{providerSpace ? (locale === "ar" ? "نزاعات المهام" : "Litiges de mission") : c.myDisputes}</h2>
             <span className="client-status-chip" data-tone="sky">{c.allStatuses}</span>
           </header>
           <ul className="client-dispute-list">
@@ -85,7 +89,7 @@ export function DisputesBoard({
                   <li key={item.id}>
                     <Link href={`${base}/${item.id}${query}`} aria-current={selected?.id === item.id ? "true" : undefined}>
                       <span>
-                        <strong>{item.obligationKey}</strong>
+                        <strong>{presentObligation(item.obligationKey, locale)}</strong>
                         <small>{messages.mission} · {formatDate(item.responseDueAt, locale)}</small>
                       </span>
                       <em>
@@ -101,7 +105,7 @@ export function DisputesBoard({
           {preferDemo ? (
             <DemoDisputeDetail locale={locale} query={query} />
           ) : selected ? (
-            <LiveDisputeDetail locale={locale} query={query} selected={selected} messages={messages} actions={children} />
+            <LiveDisputeDetail locale={locale} query={query} selected={selected} messages={messages} actions={children} docsHref={`${docsBase}${query}`} messagesHref={messagesHref} evidenceApiBase={providerSpace ? "/api/provider/disputes/evidence" : "/api/client/disputes/evidence"} />
           ) : (
             <article className="client-card">
               <p>{cases.length > 0 ? messages.selectCase : messages.empty}</p>
@@ -207,36 +211,55 @@ function DemoDisputeDetail({ locale, query }: { locale: Locale; query: string })
   );
 }
 
+function evidenceTypeLabel(type: string, locale: Locale): string {
+  const known: Record<string, [string, string]> = {
+    DOCUMENT: ["Document", "وثيقة"],
+    DELIVERY_PROOF: ["Preuve de livraison", "إثبات التسليم"],
+    STATEMENT: ["Déclaration", "تصريح"],
+    MESSAGE: ["Message", "رسالة"],
+    SCREENSHOT: ["Capture d’écran", "لقطة شاشة"],
+  };
+  const hit = known[type];
+  if (hit) return locale === "ar" ? hit[1] : hit[0];
+  return localizeStatus(type, locale);
+}
+
 function LiveDisputeDetail({
   locale,
   query,
   selected,
   messages,
   actions,
+  docsHref,
+  messagesHref,
+  evidenceApiBase,
 }: {
   locale: Locale;
   query: string;
   selected: DisputeDetail;
   messages: DisputeMessages;
   actions?: ReactNode;
+  docsHref: string;
+  messagesHref: string;
+  evidenceApiBase: string;
 }) {
   const c = spaceCopy(locale);
-  const docsHref = `/${locale}/client/documents${query}`;
   const visible = selected.evidence.filter((item) => item.visibility !== "MEDIATOR_ONLY");
   const confidential = selected.evidence.filter((item) => item.visibility === "MEDIATOR_ONLY");
+  const title = presentObligation(selected.obligationKey, locale);
   return (
     <>
       <article className="client-card">
         <header className="client-priority-head">
           <div>
-            <h2>{selected.obligationKey}</h2>
+            <h2>{title}</h2>
             <p>{messages.mission} · {formatDate(selected.responseDueAt, locale)}</p>
           </div>
           <span className="client-status-chip" data-tone={statusTone(selected.status)}>{messages.statuses[selected.status]}</span>
         </header>
         <nav className="client-tabs" aria-label={c.myDisputes}>
           <a href="#details" aria-current="page">{c.tabDetails}</a>
-          <Link href={`/${locale}/messagerie${query}`}>{c.tabExchanges}</Link>
+          <Link href={messagesHref}>{c.tabExchanges}</Link>
           <Link href={docsHref}>{c.tabDocs}</Link>
           <a href="#mediation">{c.tabMediation}</a>
           <a href="#history">{c.tabHistory}</a>
@@ -248,7 +271,7 @@ function LiveDisputeDetail({
         <section className="client-dispute-split">
           <article>
             <h3>{c.clientPosition}</h3>
-            <p>{selected.description}</p>
+            <p>{locale === "ar" ? "الطلب المسجل أعلاه يمثل موقف العميل." : "La réclamation ci-dessus constitue la position du client."}</p>
           </article>
           <article>
             <h3>{c.providerReply}</h3>
@@ -263,7 +286,13 @@ function LiveDisputeDetail({
           {visible.length === 0 ? <p>{messages.none}</p> : (
             <ul className="client-feed">
               {visible.map((item) => (
-                <li key={item.id}><span>{item.type}</span><small dir="auto">{item.statement ?? item.url}</small>{(item.type==="DOCUMENT"||(item.type==="DELIVERY_PROOF"&&!item.url))?<a href={`/api/client/disputes/evidence/${item.id}`} className="client-text-link">{locale==="ar"?"تنزيل الدليل":"Télécharger la pièce"}</a>:null}</li>
+                <li key={item.id}>
+                  <span>{evidenceTypeLabel(item.type, locale)}</span>
+                  <small dir="auto">{item.statement ?? item.url}</small>
+                  {(item.type === "DOCUMENT" || (item.type === "DELIVERY_PROOF" && !item.url)) ? (
+                    <a href={`${evidenceApiBase}/${item.id}`} className="client-text-link">{locale === "ar" ? "تنزيل الدليل" : "Télécharger la pièce"}</a>
+                  ) : null}
+                </li>
               ))}
             </ul>
           )}
@@ -282,7 +311,7 @@ function LiveDisputeDetail({
         <ol className="client-mediation">
           {selected.events.map((event) => (
             <li key={event.id} data-state="done">
-              <strong>{event.type}</strong>
+              <strong>{localizeStatus(event.type, locale)}</strong>
               <small>{formatDate(event.createdAt, locale)}</small>
             </li>
           ))}

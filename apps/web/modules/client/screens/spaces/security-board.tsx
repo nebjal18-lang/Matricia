@@ -19,6 +19,7 @@ export type SecurityMemberRow = {
   id: string;
   name: string;
   role: string;
+  access: string;
   status: string;
   lastSeen?: string;
 };
@@ -151,7 +152,7 @@ export function SecurityBoard({
                     <tr key={member.id}>
                       <td>{member.name}</td>
                       <td>{member.role}</td>
-                      <td>{member.role}</td>
+                      <td>{member.access}</td>
                       <td>{member.lastSeen ?? "—"}</td>
                       <td><span className="client-status-chip" data-tone="mint">{member.status}</span></td>
                     </tr>

@@ -76,6 +76,7 @@ export function DiagnosticsBoard({
   locale,
   questionnaireHref,
   evolutionHref,
+  analyseHref,
   score,
   ratingLabel,
   libraryScores,
@@ -89,6 +90,8 @@ export function DiagnosticsBoard({
   locale: Locale;
   questionnaireHref: string;
   evolutionHref: string;
+  /** Target for « Calculer la santé globale » — CompleteForm #analyse, not evolution. */
+  analyseHref?: string;
   score: string | null;
   ratingLabel: string | null;
   libraryScores: Array<{ key: string; score: string }>;
@@ -101,7 +104,7 @@ export function DiagnosticsBoard({
 }) {
   const c = spaceCopy(locale);
   const demo = demoClientSpaces(locale, "");
-  const analyseHref = evolutionHref;
+  const computeHref = analyseHref ?? `${questionnaireHref.replace(/\/questionnaires(?=\?|$)/, "/diagnostics").split("#")[0]}#analyse`;
   const preferDemo = canApplyClientSpaceDemo() && findings.length === 0;
   const priorities = preferDemo
     ? demo.priorities.map((row) => ({
@@ -165,7 +168,7 @@ export function DiagnosticsBoard({
               <Cta href={questionnaireHref} soft>
                 {c.startQuestionnaire}
               </Cta>
-              {hasSubmittedAssessment ? <Cta href={analyseHref}>{c.computeAnalysis}</Cta> : null}
+              {hasSubmittedAssessment ? <Cta href={computeHref}>{c.computeAnalysis}</Cta> : null}
             </div>
           ) : (
             priorities.map((row, index) => {
@@ -243,7 +246,7 @@ export function DiagnosticsBoard({
             </ul>
             <div className="client-offer-actions">
               <Cta href={questionnaireHref}>{c.modify}</Cta>
-              <Cta href={analyseHref} soft>
+              <Cta href={computeHref} soft>
                 {c.validate}
               </Cta>
             </div>
