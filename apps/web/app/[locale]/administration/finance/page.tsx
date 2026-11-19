@@ -1,26 +1,22 @@
-import { financeCostProofCopy } from "@/modules/admin/screens/pnl/finance-cost-proof-copy";
 import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { loadMyPlatformAccess, mfaRequiredMessage } from "@/modules/shared/lib/account-security/platform-access";
-import { loadAdminBoxesDashboard } from "@/modules/admin/data/boxes/repository";
-import { loadAdminCommerceCatalog } from "@/modules/admin/data/catalog/repository";
 import { loadAdminClosureDashboard } from "@/modules/admin/data/closure/repository";
 import { loadAdminFinanceDashboard } from "@/modules/admin/data/finance/repository";
 import { loadAdminPnlDashboard } from "@/modules/admin/data/pnl/repository";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
-import { BoxesPanel } from "@/modules/admin/screens/finance/boxes-panel";
-import { CommerceCatalogPanel } from "@/modules/admin/screens/finance/commerce-catalog-panel";
 import { ClosurePanel } from "@/modules/admin/screens/finance/closure-panel";
 import { getCommerceMessages } from "@/modules/admin/screens/finance/commerce-messages";
 import { FinancePanel } from "@/modules/admin/screens/finance/finance-panel";
 import { FinanceSorties } from "@/modules/admin/screens/finance/finance-sorties";
+import { FinanceWorkshops } from "@/modules/admin/screens/finance/finance-workshops";
 import { getAdminFinanceMessages } from "@/modules/admin/screens/finance/messages";
 import { PnlPanel } from "@/modules/admin/screens/finance/pnl-panel";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
-import { adminCopy } from "@/modules/admin/data/spaces/copy";
+import { AdminStep11Gate } from "@/modules/admin/ui/admin-step11-gate";
 import { loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import { financeAuditOrganizationContext } from "@/modules/admin/screens/finance/audit-organization-context";
 import { FinanceAuditOrganizationSelector } from "@/modules/admin/screens/finance/audit-organization-selector";
@@ -36,107 +32,163 @@ export default async function AdminFinancePage({
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const [result, boxes, pnl, closure, catalog, access, supervision] = await Promise.all([
+  const [result, pnl, closure, , supervision] = await Promise.all([
     loadAdminFinanceDashboard(),
-    loadAdminBoxesDashboard(),
     loadAdminPnlDashboard(),
     loadAdminClosureDashboard(),
-    loadAdminCommerceCatalog(),
     loadMyPlatformAccess(),
     loadAdminSupervisionDashboard(100),
   ]);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/finance` }));
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") {
+    redirect(connexionHref(locale, { next: `/${locale}/administration/finance` }));
+  }
   const m = getAdminFinanceMessages(locale);
   const commerce = getCommerceMessages(locale);
-  const c = adminCopy(locale);
   const ar = locale === "ar";
-  const mfaBlocked = access.status === "ok" && !access.requirementSatisfied;
-  const blockedCopy = (reason: string) => reason === "MFA_REQUIRED" || (mfaBlocked && reason === "FORBIDDEN") ? mfaRequiredMessage(locale) : reason === "FORBIDDEN" ? m.forbidden : m.unavailable;
-  const organizationContext = financeAuditOrganizationContext(query.organizationId, supervision.status === "success"
-    ? { status: "success", organizations: supervision.value.organizations }
-    : { status: "error" });
+  const organizationContext = financeAuditOrganizationContext(
+    query.organizationId,
+    supervision.status === "success"
+      ? { status: "success", organizations: supervision.value.organizations }
+      : { status: "error" },
+  );
   const auditOrganizationId = organizationContext.organizationId;
+  const orgQuery = auditOrganizationId ? `?organizationId=${encodeURIComponent(auditOrganizationId)}` : "";
 
   return (
-    <AdminModulePage locale={locale} active="finance" path="finance" title={m.title} lead={c.hubFinanceLead} hubGroup="finance">
-      <Link className="admin-btn-outline inline-flex min-h-11 items-center" href={`/${locale}/administration/finance/recompenses`}>{ar?"مراجعة مكافآت إحالة العملاء":"Examiner les récompenses du parrainage Client"}</Link>
-      <Link className="admin-btn-outline inline-flex min-h-11 items-center" href={`/${locale}/administration/finance/rapprochements-couts`}>{financeCostProofCopy[locale].openReconciliation}</Link>
-      <FinanceAuditOrganizationSelector locale={locale} context={organizationContext}/>
-      {result.status === "error" ? (
-        <Alert variant="destructive">
-          <AlertTitle>{result.reason === "MFA_REQUIRED" ? mfaRequiredMessage(locale) : result.reason === "FORBIDDEN" ? m.forbidden : m.unavailable}</AlertTitle>
-          <AlertDescription>
-            <Link href={`/${locale}/administration/finance`} className="admin-btn-outline mt-3 inline-flex">{m.retry}</Link>
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <div className="space-y-6">
-          <FinanceSorties locale={locale} dashboard={result.value} m={m} />
-          <div className="admin-panel">
-            <FinancePanel locale={locale} dashboard={result.value} m={m} identity={{ idempotencyKey: randomUUID(), correlationId: randomUUID() }} />
+    <AdminModulePage
+      locale={locale}
+      active="finance"
+      path="finance"
+      querySuffix={auditOrganizationId ? `organizationId=${auditOrganizationId}` : undefined}
+      title={m.title}
+      lead={m.intro}
+      hubGroup="finance"
+      hubMode="strip"
+    >
+      <div className="admin-finance-workspace space-y-6">
+        <nav className="admin-finance-tabs" aria-label={m.nav}>
+          <Link href={`/${locale}/administration/parcours${orgQuery}`} className="client-ghost-link">{m.tabMilestones}</Link>
+          <a href="#finance-aujourdhui" className="admin-soft-cta" aria-current="page">{m.tabMoney}</a>
+          <a href="#cloture" className="client-ghost-link">{m.tabClosure}</a>
+        </nav>
+
+        {result.status === "error" ? (
+          <Alert variant="destructive">
+            <AlertTitle>
+              {result.reason === "MFA_REQUIRED" ? mfaRequiredMessage(locale) : result.reason === "FORBIDDEN" ? m.forbidden : m.unavailable}
+            </AlertTitle>
+            <AlertDescription>
+              <Link href={`/${locale}/administration/finance`} className="admin-soft-cta mt-3 inline-flex min-h-11 items-center">
+                {m.retry}
+              </Link>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <FinancePanel
+            locale={locale}
+            dashboard={result.value}
+            m={m}
+            organizationQuery={orgQuery}
+            identity={{ idempotencyKey: randomUUID(), correlationId: randomUUID() }}
+          />
+        )}
+
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{ar ? "الخطوة 11 والمؤسسة المرجعية" : "Étape 11 et entreprise de référence"}</summary>
+          <div className="mt-4 space-y-4">
+            <AdminStep11Gate locale={locale} query={orgQuery} current="finance" />
+            <FinanceAuditOrganizationSelector locale={locale} context={organizationContext} />
           </div>
-          <section id="plans" className="scroll-mt-24 rounded-xl border bg-card p-5">
-            <h2 className="text-xl font-semibold">{ar ? "الخطط والاشتراكات" : "Plans et abonnements"}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{ar ? "إدارة الخطط والصناديق وحزم الأرصدة من الأقسام التالية." : "Pilotez les plans, boxes et packs de crédits dans les sections suivantes."}</p>
-          </section>
-          <section id="boxes" className="scroll-mt-24 rounded-xl border bg-card p-5">
-            <h2 className="text-xl font-semibold">{commerce.boxes}</h2>
-            {boxes.status === "error" ? (
-              <p className="mt-2 text-sm text-muted-foreground">{blockedCopy(boxes.reason)}{mfaBlocked && boxes.reason === "FORBIDDEN" ? <> <Link href={`/${locale}/securite/compte`}>{ar ? "فتح أمان الحساب" : "Ouvrir la sécurité du compte"}</Link></> : null}</p>
-            ) : (
-              <BoxesPanel
-                locale={locale}
-                dashboard={boxes.value}
-                m={commerce}
-                auditOrganizationId={auditOrganizationId}
-                keys={{
-                  benefit: randomUUID(),
-                  activateBenefit: randomUUID(),
-                  box: randomUUID(),
-                  activateBox: randomUUID(),
-                  link: randomUUID(),
-                  wallet: randomUUID(),
-                  credits: randomUUID(),
-                }}
-              />
-            )}
-          </section>
-          <section id="credits" className="scroll-mt-24 rounded-xl border bg-card p-5">
-            <h2 className="text-xl font-semibold">{commerce.packs}</h2>
-            {catalog.status === "error" ? (
-              <p className="mt-2 text-sm text-muted-foreground">{blockedCopy(catalog.reason)}{mfaBlocked && catalog.reason === "FORBIDDEN" ? <> <Link href={`/${locale}/securite/compte`}>{ar ? "فتح أمان الحساب" : "Ouvrir la sécurité du compte"}</Link></> : null}</p>
-            ) : (
-              <CommerceCatalogPanel
-                locale={locale}
-                catalog={catalog.value}
-                wallets={boxes.status === "success" ? boxes.value.wallets : []}
-                m={commerce}
-                auditOrganizationId={auditOrganizationId}
-                keys={{
-                  pack: randomUUID(),
-                  activatePack: randomUUID(),
-                  grantPack: randomUUID(),
-                  promotion: randomUUID(),
-                  activatePromotion: randomUUID(),
-                  grantPromotion: randomUUID(),
-                  parameter: randomUUID(),
-                  activateParameter: randomUUID(),
-                }}
-              />
-            )}
-          </section>
-          {pnl.status === "success" ? <PnlPanel locale={locale} dashboard={pnl.value} m={commerce} keyValue={randomUUID()} /> : <section id="pnl" className="scroll-mt-24 rounded-xl border bg-card p-5"><h2 className="text-xl font-semibold">{commerce.pnl}</h2><p className="mt-2 text-sm text-muted-foreground">{m.unavailable}</p></section>}
-          {closure.status === "success" ? <ClosurePanel locale={locale} dashboard={closure.value} m={commerce} keyValue={randomUUID()} /> : <section id="cloture" className="scroll-mt-24 rounded-xl border bg-card p-5"><h2 className="text-xl font-semibold">{commerce.closure}</h2><p className="mt-2 text-sm text-muted-foreground">{m.unavailable}</p></section>}
-          <section id="centres-couts" className="scroll-mt-24 rounded-xl border bg-card p-5">
-            <h2 className="text-xl font-semibold">{ar ? "مراكز التكلفة" : "Centres de coûts"}</h2>
-            <p className="mt-2 leading-7 text-muted-foreground">
+        </details>
+
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{m.booksTitle}</summary>
+          <div className="mt-4 space-y-6">
+        <section id="cloture" className="admin-section-head scroll-mt-24 space-y-4" aria-labelledby="finance-books-title">
+          <div>
+            <h2 id="finance-books-title">{m.booksTitle}</h2>
+            <p>{m.booksLead}</p>
+          </div>
+          <div className="client-table-wrap" tabIndex={0} role="region" aria-label={m.booksTitle}>
+            <table className="client-space-table admin-org-table">
+              <thead>
+                <tr>
+                  <th>{m.operation}</th>
+                  <th>{m.status}</th>
+                  <th>{m.action}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{m.journalIn}</td>
+                  <td><span className="client-status-chip" data-tone="peach">{m.closurePending}</span></td>
+                  <td><a href="#pnl" className="client-text-link">{m.viewEntries}</a></td>
+                </tr>
+                <tr>
+                  <td>{m.journalOut}</td>
+                  <td><span className="client-status-chip" data-tone="peach">{m.closurePending}</span></td>
+                  <td><a href="#sorties" className="client-text-link">{m.viewEntries}</a></td>
+                </tr>
+                <tr>
+                  <td>{m.journalReconcile}</td>
+                  <td><span className="client-status-chip" data-tone="peach">{m.closurePending}</span></td>
+                  <td><a href="#rapprochements" className="client-text-link">{m.viewEntries}</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {pnl.status === "success" ? (
+            <div id="pnl">
+              <PnlPanel locale={locale} dashboard={pnl.value} m={commerce} keyValue={randomUUID()} />
+            </div>
+          ) : (
+            <section id="pnl" className="admin-finance-stage space-y-2" aria-labelledby="finance-pnl-title">
+              <h3 id="finance-pnl-title" className="admin-finance-subhead">{commerce.pnl}</h3>
+              <p className="admin-finance-empty" role="status">{m.unavailable}</p>
+            </section>
+          )}
+          {closure.status === "success" ? (
+            <ClosurePanel locale={locale} dashboard={closure.value} m={commerce} keyValue={randomUUID()} />
+          ) : (
+            <section className="admin-finance-stage space-y-2" aria-labelledby="finance-closure-title">
+              <h3 id="finance-closure-title" className="admin-finance-subhead">{commerce.closure}</h3>
+              <p className="admin-finance-empty" role="status">{m.unavailable}</p>
+            </section>
+          )}
+          <section id="centres-couts" className="admin-finance-stage scroll-mt-24 space-y-2" aria-labelledby="finance-cost-centers-title">
+            <h3 id="finance-cost-centers-title" className="admin-finance-subhead">{ar ? "مراكز التكلفة" : "Centres de coûts"}</h3>
+            <p className="admin-finance-lead">
               {ar
-                ? "لا محرك مراكز تكلفة منفصل هنا. التوزيع يظهر عبر المطابقة والفواتير المفتوحة وكتب الأرباح والخسائر أعلاه."
-                : "Aucun moteur de centres de coûts distinct ici. L’affectation se lit via le rapprochement, les factures ouvertes et les livres P&L ci-dessus."}
+                ? "لا شاشة منفصلة: تُقرأ التخصيصات عبر المطابقة والفواتير المفتوحة ودفتر الأرباح والخسائر."
+                : "Pas d’écran séparé : les affectations se lisent via le rapprochement, les factures ouvertes et le P&L."}
             </p>
           </section>
-        </div>
-      )}
+        </section>
+
+        {result.status === "success" ? (
+          <details className="client-card p-4">
+            <summary className="min-h-11 cursor-pointer font-semibold">{m.recordedPayments}</summary>
+            <div className="mt-4">
+              <FinanceSorties locale={locale} dashboard={result.value} m={m} />
+            </div>
+          </details>
+        ) : null}
+
+        <FinanceWorkshops locale={locale} m={m} organizationQuery={orgQuery} />
+          </div>
+        </details>
+
+        {/* Ancres legacy hub → ateliers */}
+        <section id="boxes" className="sr-only" aria-hidden>
+          <Link href={`/${locale}/administration/finance/offres${orgQuery}`}>boxes</Link>
+        </section>
+        <section id="plans" className="sr-only" aria-hidden>
+          <Link href={`/${locale}/administration/finance/offres${orgQuery}`}>plans</Link>
+        </section>
+        <section id="credits" className="sr-only" aria-hidden>
+          <Link href={`/${locale}/administration/finance/credits${orgQuery}`}>credits</Link>
+        </section>
+      </div>
     </AdminModulePage>
   );
 }

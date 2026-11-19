@@ -1,9 +1,15 @@
 import{beforeEach,describe,expect,it,vi}from"vitest";
-const mock=vi.hoisted(()=>({user:vi.fn(),rpc:vi.fn(),from:vi.fn(),revalidate:vi.fn()}));
-vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mock.user},rpc:mock.rpc,from:mock.from})}));vi.mock("next/cache",()=>({revalidatePath:mock.revalidate}));
+const mock=vi.hoisted(()=>({user:vi.fn(),rpc:vi.fn(),from:vi.fn(),revalidate:vi.fn(),client:{rpc:vi.fn(),from:vi.fn()}}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mock.user},rpc:mock.rpc,from:mock.from})}));
+vi.mock("next/cache",()=>({revalidatePath:mock.revalidate}));
+const id="11111111-1111-4111-8111-111111111111";
+vi.mock("@/modules/shared/lib/account-security/platform-access",()=>({
+  hasPlatformRole:()=>true,
+  loadMyPlatformAccess:async()=>({status:"ok",roles:["MATRICIA_ADMIN"],requirementSatisfied:true,client:mock.client,email:"admin@example.invalid",userId:"11111111-1111-4111-8111-111111111111"}),
+}));
 import{loadQualificationQuestionnaireReview}from"./qualification-questionnaire-review-actions";import{decideQualification,type AdminProviderActionState}from"./actions";
-const id="11111111-1111-4111-8111-111111111111",session="22222222-2222-4222-8222-222222222222",idle:AdminProviderActionState={status:"idle"};
-beforeEach(()=>{vi.clearAllMocks();mock.user.mockResolvedValue({data:{user:{id}},error:null});mock.rpc.mockResolvedValue({data:{outcome:"PROVIDER_QUALIFICATION_DECIDED"},error:null})});
+const session="22222222-2222-4222-8222-222222222222",idle:AdminProviderActionState={status:"idle"};
+beforeEach(()=>{vi.clearAllMocks();mock.user.mockResolvedValue({data:{user:{id}},error:null});mock.rpc.mockResolvedValue({data:{outcome:"PROVIDER_QUALIFICATION_DECIDED"},error:null});mock.client.rpc.mockImplementation((...args:unknown[])=>mock.rpc(...args));mock.client.from.mockImplementation((...args:unknown[])=>mock.from(...args));});
 const form=()=>{const f=new FormData();Object.entries({qualificationId:id,status:"APPROVED",questionnaireSessionId:session,reviewedManifestHash:"c".repeat(64),evidenceConfirmed:"yes",scorePercent:"80,81",rationale:"Revue réelle des réponses déposées.",expectedRowVersion:"2",idempotencyKey:id}).forEach(([k,v])=>f.set(k,v));return f};
 describe("Reviewer-only questionnaire actions",()=>{
  it("does not read the Provider's actor-private session table",async()=>{expect(await decideQualification(idle,form())).toEqual({status:"success",outcome:"PROVIDER_QUALIFICATION_DECIDED"});expect(mock.from).not.toHaveBeenCalled();expect(mock.rpc).toHaveBeenCalledWith("decide_provider_qualification",expect.objectContaining({p_questionnaire_session_id:session,p_score_basis_points:8081,p_expected_row_version:2,p_mandatory_checks:expect.arrayContaining([expect.objectContaining({check:"HUMAN_EVIDENCE_REVIEW",review_context_hash:"c".repeat(64)})])}));expect(mock.revalidate).toHaveBeenCalledWith("/[locale]/administration/providers","page")});

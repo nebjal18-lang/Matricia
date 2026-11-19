@@ -12,6 +12,7 @@ import { getAdminV41Messages } from "@/modules/admin/screens/v4-1/module/message
 import { AdminV41OverviewPanel } from "@/modules/admin/screens/v4-1/module/overview-panel";
 import { ExternalValidationPanel } from "@/modules/admin/screens/v4-1/module/validation-panel";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminOffFilmGate } from "@/modules/admin/ui/admin-off-film-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,10 @@ export default async function AdminV41Page({ params }: { params: Promise<{ local
   const m = getAdminV41Messages(locale);
   return (
     <AdminModulePage locale={locale} active="settings" path={`v4-1/${selected}`} title={m.title} lead={m.intro}>
+      <AdminOffFilmGate
+        locale={locale}
+        role={locale === "ar" ? "وحدات V4.1 الخارجية والمراجعات" : "Modules V4.1 et validations externes"}
+      />
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "FORBIDDEN" ? m.forbidden : m.unavailable}</AlertTitle>

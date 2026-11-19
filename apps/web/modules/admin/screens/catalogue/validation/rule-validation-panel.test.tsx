@@ -7,7 +7,9 @@ vi.mock("@/modules/shared/ui/badge", () => ({ Badge: ({ children }: { children: 
 vi.mock("@/modules/shared/ui/button", () => ({ Button: ({ children, variant, ...props }: ComponentPropsWithoutRef<"button"> & { variant?: string }) => <button data-variant={variant} {...props}>{children}</button> }));
 vi.mock("@/modules/shared/ui/card", () => ({ Card: ({ children }: { children: ReactNode }) => <article>{children}</article>, CardContent: ({ children }: { children: ReactNode }) => <div>{children}</div>, CardDescription: ({ children }: { children: ReactNode }) => <p>{children}</p>, CardHeader: ({ children }: { children: ReactNode }) => <header>{children}</header>, CardTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2> }));
 vi.mock("@/modules/shared/ui/label", () => ({ Label: ({ children, ...props }: ComponentPropsWithoutRef<"label">) => <label {...props}>{children}</label> }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }), usePathname: () => "/fr/administration/catalogue/validation" }));
 vi.mock("./actions", () => ({ validateRules: async () => ({ status: "idle" }), simulateRules: async () => ({ status: "idle" }) }));
+
 
 import { RuleValidationPanel } from "./rule-validation-panel";
 import { getRuleValidationMessages } from "./messages";

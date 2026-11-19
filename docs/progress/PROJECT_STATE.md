@@ -1,3 +1,247 @@
+## 2026-11-18 — Admin Parcours hubs P0→P3 (colonnes, Ariadne, film)
+
+- P0 : colonnes métier réelles (demandes titre/domaine/complétude, matching score/exclusion, avenants objet+delta) via `parcours-space-rows` + schéma supervision enrichi ; fil d’Ariane cliquable demande→matching→devis→contrat→mission sur chaque ligne (`parcours-ariadne` + colonne Parcours).
+- P1 : leads/CTAs « Superviser / Examiner / Ouvrir le parcours acteur » ; « Traiter » réservé litiges (+ revue documents) ; `parcoursDossierChain` sur hub Parcours ; film démo hétérogène (≥1 devis SELECTED, ≥1 contrat ACTIVE sans mission).
+- P2 : onglets Messagerie / Notifications ; pipelines devis/docs remplis ; badge « Film démo » ; copy diagnostics alignée mode démo.
+- P3 : KPIs par hub (`buildSpaceHubMetrics`) sur les files Parcours.
+- Vitest : `parcours-ariadne`, `demo-hubs`, `hub-metrics`, `space-journey`, `render-admin-space`, `diagnostics-queue` verts.
+- Prochaine étape : smoke navigateur FR/AR 360 sur files Parcours si demandé.
+
+## 2026-11-18 — Démo overlays Client / ST / Franchise réactivés
+
+- Gates `canApplyClientSpaceDemo` / `canApplyProviderSpaceDemo` / `canApplyFranchiseSpaceDemo` / `canApplyDemoOffer` → `isDemoClientHomeEnabled()` (APP_ENV allowlist + `MATRICIA_DEMO_ACCESS_ENABLED`, jamais prod).
+- Builders déjà non vides côté Client/ST ; Franchise : devis/missions/users/volume/qualité/correctifs remplis (plus de tableaux `[]` sur ces boards).
+- Home client (`applyDemoClientHome`) et bibliothèque franchise (`overlayFranchiseLibraryDemo`) restent no-op volontaire (pas de catalogue inventé).
+- Vitest : `client|provider|franchise/data/spaces/demo.test.ts` + ajustements boards/comparison/quote-detail.
+- Hors périmètre : invitations-réseau / territoires / anti-abus / catalogue (agent sibling).
+
+## 2026-11-18 — Démo overlay admin gaps #2–5
+
+- Invitations réseau : `demo-network-invitations.ts` + loader (24 = 12×CLIENT+PROVIDER, `@matricia.test`).
+- Territoires / gouvernance / litiges : `demo-special-spaces.ts` branché sur `specialSnapshotSpaces` (12 / 8 / 6).
+- Anti-abus : `demo-anti-abuse.ts` (4 règles + 5 cas OPEN) sur `/administration/anti-abus`.
+- Catalogue questions : thin path `catalogue/validation` via `demo-catalog-questions.ts` (1 version + 5 questions, fill-when-empty).
+- Vitest : overlays + smokes page/loader. Éditeur catalogue create-form reste DB-only (pas de liste thin).
+
+## 2026-11-18 — Démo overlay candidatures franchise
+
+- `/administration/candidatures-franchise` : flag démo ON → file d’instruction overlay (`buildDemoFranchiseApplications`, 6 dossiers ouverts REGISTERED→CONTRACT_PENDING, e-mails `@matricia.test`, orgs régionales liées).
+- Cause : seeds créent des franchises déjà ACTIVE → file DB vide pour l’instruction.
+- Vitest : `demo-franchise-applications.test.ts` + page overlay.
+- Prochaine étape : gaps admin #2–5 (invitations, territoires/gouvernance, anti-abus, catalogue questions) livrés.
+
+## 2026-11-18 — Alignement shells Version A (scene hero + page-standard)
+
+- `SpaceSceneHero` + `.mat-scene-hero` partagés ; `OrganizationFicheHero` rebranché (photo `arch-city` + motifs admin).
+- Enveloppes `*-page-standard` cascaded sous Admin / Client / Provider / Franchise.
+- Hubs identité : scene mast sur Client (home, organisation, dossiers), Provider (identité, missions, devis), Franchise (accueil, territoire, finance) + revues identité admin.
+- Vitest ciblé : boards admin 4/4, client boards 12/12, cockpit 6/6, space-scene-hubs 3/3 (**25/25**).
+- Spot-check navigateur : `/fr/tableau-de-bord` → redirection connexion (session absente) ; preuves structure via tests source + boards HTML `mat-scene-hero`.
+- Prochaine étape : photo hero seulement sur fiches détaillées restantes si demandé ; pas sur listes génériques.
+
+## 2026-11-18 — Fiche organisation `#membres` enrichie
+
+- Panel Membres plein : KPIs, liste (nom/email/statut/rôles), CTA Inviter / Gérer / ouvrir profil.
+- Contrat `memberships` + démo (représentant + invite) ; migration `20261118180000_admin_fiche_membership_identity_v1` (RPC fiche).
+- Onglet `#membres` : `FicheTabNav` + `aria-current` via hash / `matricia:hashchange`.
+- Tests : `boards.test.tsx`, `demo-supervision.test.ts` verts.
+- Prochaine étape : aligner Finance sur ce pattern carte si demandé.
+
+## 2026-11-18 — Démo hubs admin : film métier + finance/pilotage
+
+- Film supervision : 12 régions × demande → matching → devis → contrat → avenant → mission → 2 jalons + diagnostics/docs/messages/exceptions.
+- Hubs branchés (flag ON = replace) : command-center, finance dashboard, crédits/catalogue commerce + vault + volume, opérations.
+- Parcours spaces (devis, etc.) : lignes métier du film (plus d’écrasement générique).
+- Reste hors seed : éditeur catalogue questions/questionnaires (DB bibliothèque) et écrans paramètres purs (forms).
+
+## 2026-11-18 — Démo complète : replace + reset propre + flag
+
+- UI admin (Entreprises, acteurs, spaces, conformité) : **remplace** l’ancien volume quand `MATRICIA_DEMO_ACCESS_ENABLED=true` (+ `APP_ENV` non prod) ; **rien** de démo si flag `false`.
+- Catalogue : 12 régions × (1 franchisé + 3 ST + 6 clients).
+- SQL `20261118170000_reset_demo_workspace_v1` : `reset_demo_workspace_v1` archive orgs démo (`@matricia.test` / `matricia_demo`) + purge `DEMO_*` ; registre `private.demo_workspace_organizations_v1` ; `ensure_demo_regional_actor_v1` enregistre les orgs. Jamais en PRODUCTION.
+- Test SQL `0405` + vitest `demo-supervision.test.ts`.
+
+## 2026-11-18 — Film finance : MATRICIA_ADMIN + AAL2 (plus de dead-ends)
+
+- Migration `20261118220000_admin_matricia_finance_film_gates_v1` : `morocco_tax_admin`, `service_tax_mapping_reviewer_v1`, `provider_finance_reviewer_v1`, `client_billing_admin`, `benefit_admission_staff_v1`, `manual_credit_finance_v1`, crédits abonnement (read/write helpers) incluent **MATRICIA_ADMIN** + AAL2 ; four-eyes (auteur ≠ réviseur) inchangé.
+- UI alignée : fiscalité, classification fiscale, prestataires, avantages/règles, hub-copy, actions finance, crédits abonnement ; facturation-clients distingue MFA vs refus rôle.
+- SQL `0414` **8/8 PASS** local ; Vitest morocco-tax **7/7 PASS**.
+- Hors élargissement volontaire : écritures remboursements / cost-proof / pot Core restent SUPER_ADMIN|FINANCE_MANAGER (lecture ops déjà ouverte à MATRICIA_ADMIN).
+- Appliquée local via psql Docker ; `db push` distant seulement sur OK explicite.
+
+## 2026-11-18 — Audit gates admin UI↔SQL (demo MATRICIA_ADMIN) — corrigé ensuite
+
+- Dead-ends nav signalés (fiscalité, classification, facturation, avantages/règles) → corrigés par entrée « Film finance : MATRICIA_ADMIN + AAL2 » ci-dessus.
+- Prestataires : message rôle distinct de MFA (plus de faux « MFA requise »).
+
+## 2026-11-18 — `next build` vert + film E2E AAL2 (20/20)
+
+- `npx next build` PASS (TypeScript + 352 pages) avec `NEXT_PUBLIC_APP_URL=https://…` (http local rejeté en NODE_ENV=production).
+- Fixes TS : demo `PromiseLike` RPC, CRM franchise erase profondeur PostgREST, loading admin sans double `<main>`.
+- Harness film S1–S6 : **20/20** FR/AR 360 AAL2.
+- **Reste** : nests hors smoke ; wholesale **linked** sans OK explicite ; upgrade Next sécurité proposé à part.
+
+## 2026-11-18 — Admin film E2E AAL2 FR/AR 360 PASS (20/20)
+
+- Harness `tests/e2e/helpers/admin-film-s1-s6-run.mjs` : fixture GoTrue + TOTP AAL2, `next dev` local, page fraîche par route.
+- Résultat : **PASSED** — 9 routes × FR/AR = 20 checks, `mains=1`, 0 crash (`work/admin-film-s1-s6/<runId>/summary.json`).
+- Fix loading admin : plus de `<main>` imbriqué sous `AdminAppShell`.
+- Checklist S1–S6 + scoreboard C12 film smoke mis à jour (~97 % cœur).
+
+## 2026-11-18 — Admin parcours quasi-fermé (~93 %)
+
+- V4 orphelins : OffFilmGate / Step gates sur ops, privacy, marketing, anti-abus, avantages, assistance, support, v4-1, incitations, achats-groupes, clonage, livres, identité, wholesale offres.
+- Wholesale Box : migration `18150000` + test `0413` PASS ; demo reset `18160000` poussé local.
+- `db push --local` débloqué (fix defaults `ingest_platform_core_pot_sources_v1`).
+- SQL admin `0402`/`0403`/`0412`/`0413` PASS local.
+- Bug log cœur VERIFIED ; E2E S1–S6 STRUCT_PASS (navigateur auth traité dans l’entrée du jour).
+
+## 2026-11-18 — V4 amorcée + film hub 3/4 séparés
+
+- `filmHubChain` : étapes 3 (`invitations-reseau`) et 4 (`entreprises`) distinctes.
+- `AdminOffFilmGate` branché : operations, confidentialité, marketing, anti-abus, avantages/règles.
+
+## 2026-11-18 — BUG-011 a11y + bug log cœur VERIFIED
+
+- Shell admin : `mainLandmark` défaut **true** ; contenus `client-page` passés en `<div>` (plus de main imbriqués).
+- Une recette d’en-tête : mast shell **ou** hub board (plus les deux) ; `finance/prestataires` branché sur `AdminModulePage`.
+- Jargon restant nettoyé (ops AR, matching colonnes, Event Outbox blueprint, payloads).
+- Bug log admin parcours : **BUG-001→012 tous VERIFIED**.
+- E2E S1–S6 : `STRUCT_PASS` structure ; navigateur auth toujours bloqué sans fixtures.
+
+## 2026-11-18 — Admin parcours : batterie de tests lancée
+
+- Vitest admin (journey + franchise + alignment) : **36/36 PASS**.
+- SQL local (migrations 140000/141000 appliquées à la main sur Docker local) : `0402` 9/9, `0403` 3/3, `0412` 4/4 **PASS**.
+- Harness pgTAP : `search_path=public,extensions` + `grant usage` sur `0402`/`0403`/`0412` (sinon `throws_ok` invisible sous `authenticated`).
+- `db push --local` bloqué plus tôt sur `20261113100000_platform_core_pot_ingest_sources_v1` (paramètres sans défaut après défaut) — hors périmètre ; contournement psql ciblé OK.
+- Playwright admin authentifié : **bloqué** (fixtures `E2E_P06_*` absentes). Checklist S1–S6 reste à jouer navigateur.
+- Bug log : BUG-002/003/004/007/012 → **VERIFIED** ; BUG-011 encore OPEN.
+
+## 2026-11-18 — Mode démo Box : réseau propre franchisé/ST/services
+
+- Nettoyage : défauts slots COMPTABLE/MARKETING retirés ; catalogue démo **remplace** le volume DB résiduel quand `MATRICIA_DEMO_ACCESS_ENABLED=true` (+ `APP_ENV` non prod).
+- Réseau déterministe : **12 régions Maroc** × 10 secteurs × 1 franchisé × 3 ST × 3 services (1080 offres).
+- **Dossiers franchisé/ST** (ICE/IF/RC/CIN/RIB/contrats…) dans les espaces admin Franchisés / Prestataires / Capacité — **pas** sur la page Offres.
+- RPC reset scoped `reset_demo_box_network_v1` (préfixe `DEMO_` uniquement, AAL2). Tests `demo-network.test.ts` + `demo-box-actors.test.ts`.
+
+## 2026-11-18 — Box Builder : catalogue gros territorial + combo
+
+- `/finance/offres` : catalogue de **toutes** les offres de gros ST par `Region_territoire`, toutes catégories, détail prix ; sélection manuelle ou assistée par sujet ; composition Box + marge `BOX_PLATFORM_MARGIN_BPS` (défaut 1500).
+- RPC `list_admin_wholesale_offers_by_territory_v1` ; action `createBoxFromWholesaleAction` (snapshot sources + calcul serveur exact).
+- Outils techniques BoxesPanel conservés en `<details>`. Migration `20261118150000_…`. Tests margin + workshop + SQL 0403.
+
+## 2026-11-18 — Finance : contenu remis sur la bonne page
+
+- Attributions manuelles + journal crédits sortis de `/finance/offres` → `/finance/credits` (`CreditAttributionsPanel`).
+- Hub `/finance` : ancres legacy `#boxes` / `#plans` / `#credits` = renvois uniquement ; guide ops corrigé ; plus de numéros 3./4. fantômes.
+- Annuaire : liens `#plans` / `#credits` morts remplacés par `/finance/offres` et `/finance/credits`.
+- Sélecteur org : hub reste sur Finance du jour ; offres/crédits ouvrent leur atelier.
+
+## 2026-11-18 — Admin parcours 100 % (exécution démarrée)
+
+- Artefacts : `docs/parcours/ADMIN_PARCOURS_SCOREBOARD.md`, `ADMIN_BUG_LOG.md`.
+- Film 1→11 : `admin-film.ts` + `AdminFilmStrip` branché sur tous les spaces admin ; hub `parcours` étendu.
+- `spaceNextStep` couvre aussi acteurs (providers→qualification→…).
+- Purge jargon : finance, directory, matching, fixtures, operations (messages).
+- V0 amorcé : command-center + preparation (why/next gate).
+- V1b : page `/administration/invitations-reseau` + RPC `get_admin_network_invitations_supervision_v1` + test `0412`.
+- V0 : `AdminStep1Gate` sur préparation/config/catalogue(+sous-pages)/fiscalité ; hub acteurs ordonné.
+- V1 : migration `20261118141000` audit+outbox sur invite franchise.
+- Appliquer : voir `docs/parcours/APPLY_MIGRATION_INVITATIONS_RESEAU.md` (ne pas `db push` aveugle : 25 migrations en retard sur linked).
+- V1/V2 gates : `AdminStep2Gate`, `AdminStep5Gate`, `AdminCommerceGate` ; franchises filtre ACTIVE par défaut.
+- Tests : `0402` étendu, `0403` audit/outbox presence.
+- Migrations 140000/141000 signalées appliquées par l’opérateur.
+- V3 étape 11 : `AdminStep11Gate` (facturation, finance, prestataires, approbations, litiges).
+- Tests SQL `0408` (compliance entitlement) + `0409` (qualification company gate).
+- Checklist E2E : `docs/parcours/ADMIN_E2E_S1_S6_CHECKLIST.md` (à jouer FR/AR 360).
+- Suite : passer S1–S6 + bug log VERIFIED + V4 orphelins.
+
+## 2026-11-14 — Atelier Offres Box séparé de Finance du jour
+
+- Problème : `#boxes` mélangeait création d’offre + paiements + P&L → illisible.
+- Nouveau : `/administration/finance/offres` = atelier seul (services → Box multi-catégories → plan → wallet).
+- `/finance/credits` = packs ; hub `/finance` = ops du jour + liens clairs.
+- Nav Finance + fiches org pointent vers `/finance/offres`. Tests hub/boards PASS.
+
+## 2026-11-14 — Box = offre unique multi-services
+
+- Intention métier : une Box regroupe plusieurs services/catégories (ex. créer une entreprise = comptable + marketing + …), souvent via sous-traitants.
+- UI `#boxes` : parcours Services → Offre Box → Plan → Wallet ; éditeur multi-emplacements (`OfferSlotsEditor` + `slotsJson`).
+- Action `create_box_version` accepte plusieurs slots (compat legacy 1 slot conservée).
+- Tests boxes + commerce-exact PASS.
+
+## 2026-11-14 — Finance page : corrections complètes #boxes/#credits/ops
+
+- `#boxes` : pipeline Avantage → Box → lien plan → wallet ; grants après catalogue ; empty compact ; activité ledger en details.
+- `#credits` : rôle packs/promotions distinct + notice « Achats de packs vérifiés ».
+- Sections 3–5 : empty sans cartes lourdes (finance-panel, sorties, P&L/clôture indisponibles).
+- Tests finance 103 PASS.
+
+## 2026-11-14 — Finance #boxes : logique métier (pas du polish)
+
+- Rôle clarifié (Gold Master §12.3–12.7 / ADM-031) : `#boxes` = ce que le client obtient via son plan.
+- Parcours imposé dans l’UI : **Avantage → Box → lien plan↔Box → wallet/attributions** ; étape courante affichée ; grants après le catalogue.
+- `#credits` séparé : packs/promotions/paramètres (hors Box Builder).
+- Plus de murs « Aucun élément » en cartes : empty compact + activité ledger en `<details>`.
+- Tests BoxesPanel + finance page PASS.
+
+## 2026-11-14 — Standard pages Administration (toutes pages)
+
+- Fondation : `admin-page-standard.css` + enveloppe `admin-page-standard` + `WorkspaceHashScroll` dans `AdminAppShell` (toutes pages AdminAppShell / AdminModulePage).
+- Primitives : `AdminSectionHead` / `AdminNotice` ; sections `admin-panel` + `data-tone` (violet/mint/coral/sky/peach) ; notices ; tabs `client-tabs`.
+- Hubs alignés : finance (boxes/credits/P&L), catalogue, parcours, opérations, anti-abus, configuration, command-center (via shell).
+- Panels génériques `bg-card` → `admin-panel` (finance, achats groupés, clients, providers, ops, marketing, etc.).
+- Fiches acteurs : tons Version A + champs manquants « — à compléter » (plus de faux « Non disponible »).
+- Tests ciblés boards + cockpit. **RELEASE_GATE** inchangé.
+
+## 2026-11-14 — Candidatures franchise : clarté + invitation admin
+
+- CTA **Ouvrir / inviter un dossier** sur `/administration/candidatures-franchise` (plus de faux « Ajouter un franchisé »).
+- RPC `open_franchise_application_invite_v1` (`20261114210000_…`) : dossier `REGISTERED` + event `ADMIN_INVITE`, AAL2, e-mail candidat ; jamais ACTIVE en un clic.
+- Revue : motif explicite, bandeau org non liée, bloc lien ouvert.
+- Annuaire Franchisés : lead « pas de création libre » ; CTA → file candidatures.
+- Doc : `docs/parcours/ORDONNANCEMENT_TACHES_MOTS_SIMPLES.md` étape 2.
+- Tests Vitest franchise-applications PASS (25). SQL `0402_…` prêt ; **migration à appliquer** (Docker local indispo cette session). **RELEASE_GATE** inchangé.
+
+## 2026-11-14 — Ordonnancement des tâches (mots simples)
+
+- Document métier pédagogique : `docs/parcours/ORDONNANCEMENT_TACHES_MOTS_SIMPLES.md` (valider les gens → commerce).
+- Lien depuis `docs/audit-20261113/K-CARTOGRAPHIE.md`.
+- Ordre : plateforme → franchise → invitations → inscription → confirmation admin → besoin → matching → devis → contrat → mission → facturation.
+
+## 2026-11-14 — Alignement UI global Version A (toutes interfaces)
+
+- Fondation partagée : `apps/web/modules/shared/ui/design-system/matricia-ds.css` (heroes/cartes/chips colorés) importée via `client-experience.css` et `(public)/experience.css`.
+- Bloc identité Gold Master réutilisable : `OrganizationIdentityBlock` (FR/AR) — raison sociale, forme juridique, ICE/IF/RC, adresse, représentant.
+- Admin : panels client/provider identité refondus ; fiches acteurs/org enrichies ; migration display `20261114194500_admin_fiche_legal_profile_gold_master_v1.sql` (+ `profile_display` identité client déjà en place).
+- Client onboarding : passeport via `OrganizationIdentityBlock` quand profil présent.
+- Prestataire `/sous-traitant/identite` : hero mint + bloc identité + cartes tonées.
+- Franchise treat tiles + sections publiques : accents violet/mint/coral/navy.
+- Tests ciblés PASS (identity block + client-identity + boards). SQL fiche à appliquer sur la base cible. **RELEASE_GATE** inchangé (REFUSÉ).
+
+## 2026-11-14 — Vague 3 MED (lang/dir, HashAware, privacy messages)
+
+- Bootstrap `lang`/`dir` avant paint (`DOCUMENT_LOCALE_BOOTSTRAP`) + DocumentLocaleSync inchangé.
+- HashAwareLink sur onglets/ancres client (organisation, abonnement, récompenses, litiges, jalons, boards).
+- Privacy inventory : erreurs et outcomes humanisés (`readableError`, labels sources).
+- Inventaire : `docs/audit-20261114-12cats/FINDINGS.md` — plus de MED code listés ; **RELEASE_GATE** toujours REFUSÉ.
+
+## 2026-11-14 — Vague 2 HIGH (MFA, membership, N+1, labels)
+
+- MFA + rôles plateforme sur `admin/screens/providers/actions.ts` (review vs finance) ; `p_correlation_id` sur mutations.
+- Membership avant crédits `ensure`/`reserve`, bookmark diagnostics, franchise bank-search.
+- N+1 candidatures-franchise + mission prep : lots parallèles de 8.
+- E2E MAT-FUNC-024/028 : fixture vide → fail (plus de soft-skip data).
+- Labels humains DSR erasure + allocations PnL / bénéficiaires franchise.
+- Inventaire mis à jour : `docs/audit-20261114-12cats/FINDINGS.md`. **RELEASE_GATE** toujours REFUSÉ.
+
+## 2026-11-14 — Audit large 12 familles + corrections HIGH
+
+- Inventaire : `docs/audit-20261114-12cats/FINDINGS.md` (cats 1–12, ~75 findings agents).
+- Corrections livrées : clés d’idempotence stables (`StableIdempotencyField`) sur favoris / invites / jalons / anti-abus / approbations-finance / space-forms ; gate démo alignée (APP_ENV allowlist + blocage production) ; query `organizationId` préservée sur liens sessions sécurité ; ancre `#plans` unique abonnement ; cibles tactiles admin ≥44px.
+- Tests ciblés PASS (61). **Ne remplace pas** `RELEASE_GATE` (visas / YouSign / paiements / E2E C1–C8 toujours REFUSÉ).
+
 ## 2026-11-12 — Pot Core + droits d’entrée (50/50 Jalil–Asmaa)
 
 - Autorité : `docs/finance/REGLE_ECONOMIQUE_PARTENARIAT_CORE_ENTREE_V1.md` + Gold Master décision prioritaire §5.

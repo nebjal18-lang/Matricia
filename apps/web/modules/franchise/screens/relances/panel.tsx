@@ -86,7 +86,7 @@ export function FollowupPanel({
         <div className="mt-4 space-y-2">
           {d.jobs.map((j) => (
             <div key={j.id} className="grid gap-2 rounded-xl border bg-card p-3 text-sm sm:grid-cols-3">
-              <span>{m.status}: {m.jobStatusLabels[j.status] ?? workflowStatusLabel(j.status, locale)} · #{j.reminderOrdinal}</span>
+              <span>{m.status}: {m.jobStatusLabels[j.status as keyof typeof m.jobStatusLabels] ?? workflowStatusLabel(j.status, locale)} · #{j.reminderOrdinal}</span>
               <span>{j.attemptCount} {locale === "ar" ? "محاولات" : "tentatives"}</span>
               <time dateTime={j.nextAttemptAt}>{m.next}: {stableStamp(j.nextAttemptAt, locale)}</time>
             </div>

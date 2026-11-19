@@ -3,7 +3,7 @@ import { listInvitations, type InvitationOrganization, type SafeInvitation } fro
 import { loadAdminClients } from "@/modules/admin/data/clients/repository";
 import { loadAdminOrganizationFiche, loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
-import { canApplyAdminDemo, demoActorUsers as overlayActorUsers, demoClientCases, demoClientOrganizations, demoDiagnostics, demoSupervisionOrganizations } from "./demo-overlay";
+import { canApplyAdminDemo, demoActorUsers as overlayActorUsers, demoClientCases, demoClientOrganizations, demoDiagnostics, listDemoSupervisionOrganizations } from "./demo-overlay";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
@@ -37,8 +37,9 @@ export async function loadAdminActorDirectory(consistent = false): Promise<Actor
   const users = actorResult.users;
   let forbidden = supervision.status === "error" && supervision.reason === "FORBIDDEN";
   if (canApplyAdminDemo()) {
-    if (organizations.length === 0) organizations = demoSupervisionOrganizations;
-    if (users.length === 0) users.push(...overlayActorUsers());
+    organizations = listDemoSupervisionOrganizations();
+    users.length = 0;
+    users.push(...overlayActorUsers());
     forbidden = false;
   }
   return {
@@ -98,9 +99,9 @@ export async function loadAdminClientDirectory(locale: Locale) {
     let diagnostics = supervision.status === "success" ? supervision.value.diagnostics : [];
     const reason = clients.status === "error" ? clients.reason : supervision.status === "error" ? supervision.reason : null;
     if (!reason && canApplyAdminDemo()) {
-      if (organizations.length === 0) organizations = demoClientOrganizations(locale);
-      if (cases.length === 0) cases = demoClientCases();
-      if (diagnostics.length === 0) diagnostics = demoDiagnostics();
+      organizations = demoClientOrganizations(locale);
+      cases = demoClientCases();
+      diagnostics = demoDiagnostics();
     }
     return {
       organizations,

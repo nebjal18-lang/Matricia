@@ -17,6 +17,7 @@ import { ClientQuestionResponseForm } from "@/modules/client/screens/onboarding/
 import { onboardingProgressIndex } from "@/modules/client/screens/onboarding/progress";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
+import { OrganizationIdentityBlock } from "@/modules/shared/ui/organization-identity";
 
 const editableStatuses = new Set<ComplianceStatus>([
   "PROFILE_IN_PROGRESS", "DOCUMENTS_REQUIRED", "QUESTION_REQUIRED", "REJECTED",
@@ -74,13 +75,47 @@ function OrganizationOnboarding({ organization, locale, messages }: {
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <section aria-labelledby={`passport-${organization.id}`} className="space-y-3">
-            <h2 id={`passport-${organization.id}`} className="text-lg font-semibold">{messages.passportTitle}</h2>
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div><dt className="text-muted-foreground">{messages.legalName}</dt><dd className="mt-1 break-words font-medium">{organization.legalName}</dd></div>
-              <div><dt className="text-muted-foreground">{messages.tradeName}</dt><dd className="mt-1 break-words font-medium">{organization.displayName}</dd></div>
-              <div><dt className="text-muted-foreground">{messages.organizationStatus}</dt><dd className="mt-1 font-medium">{messages.organizationStatuses[organization.organizationStatus]}</dd></div>
-              <div><dt className="text-muted-foreground">{messages.ice}</dt><dd className="mt-1 flex flex-wrap items-center gap-2 font-medium" dir="ltr"><span className="break-all">{organization.ice ?? messages.iceUnknown}</span>{organization.iceVerificationStatus ? <Badge variant="secondary">{messages.identifierStatuses[organization.iceVerificationStatus]}</Badge> : null}</dd></div>
-            </dl>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 id={`passport-${organization.id}`} className="text-lg font-semibold">{messages.passportTitle}</h2>
+              <div className="mat-status-row">
+                <span className="admin-status" data-tone="violet">{messages.organizationStatuses[organization.organizationStatus]}</span>
+                {organization.iceVerificationStatus ? (
+                  <span className="admin-status" data-tone={organization.iceVerificationStatus === "VERIFIED" ? "ok" : "warn"}>
+                    {messages.identifierStatuses[organization.iceVerificationStatus]}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            {organization.latestProfile?.data ? (
+              <OrganizationIdentityBlock
+                locale={locale}
+                idPrefix={`client-onboarding-${organization.id}`}
+                identity={{
+                  legalName: organization.legalName,
+                  displayName: organization.displayName,
+                  countryCode: organization.latestProfile.data.registered_address?.country_code ?? "MA",
+                  legalForm: organization.latestProfile.data.legal_form,
+                  incorporationDate: organization.latestProfile.data.incorporation_date,
+                  activity: organization.latestProfile.data.activity,
+                  sector: organization.latestProfile.data.sector,
+                  registeredCity: organization.latestProfile.data.registered_city,
+                  registeredAddress: organization.latestProfile.data.registered_address,
+                  identifiers: {
+                    ICE: organization.ice,
+                    IF: organization.latestProfile.data.if_number,
+                    RC: organization.latestProfile.data.rc_number,
+                  },
+                  representative: organization.latestProfile.data.representative,
+                }}
+              />
+            ) : (
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div><dt className="text-muted-foreground">{messages.legalName}</dt><dd className="mt-1 break-words font-medium">{organization.legalName}</dd></div>
+                <div><dt className="text-muted-foreground">{messages.tradeName}</dt><dd className="mt-1 break-words font-medium">{organization.displayName}</dd></div>
+                <div><dt className="text-muted-foreground">{messages.organizationStatus}</dt><dd className="mt-1 font-medium">{messages.organizationStatuses[organization.organizationStatus]}</dd></div>
+                <div><dt className="text-muted-foreground">{messages.ice}</dt><dd className="mt-1 flex flex-wrap items-center gap-2 font-medium" dir="ltr"><span className="break-all">{organization.ice ?? messages.iceUnknown}</span></dd></div>
+              </dl>
+            )}
           </section>
 
           <section aria-labelledby={`questions-${organization.id}`} className="space-y-4">

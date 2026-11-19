@@ -30,7 +30,7 @@ export default async function AdminEntreprisesPage({
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: returnHref }));
   const [result, command] = await Promise.all([
-    loadAdminSupervisionDashboard(100),
+    loadAdminSupervisionDashboard(500),
     loadAdminCommandCenter().catch(error => { unstable_rethrow(error); return { status: "error", reason: "QUERY_FAILED" } as const; }),
   ]);
   const readError = result.status === "error" ? result.reason : null;
@@ -84,9 +84,9 @@ export default async function AdminEntreprisesPage({
       }
     >
       {readError ? (
-        <main className="client-page">
+        <div className="client-page">
           <AdminReadError locale={locale} reason={readError} retryHref={`/${locale}/administration/entreprises${uiQuery}`} />
-        </main>
+        </div>
       ) : (
         <>
         {command.status === "error" ? <AdminReadError locale={locale}

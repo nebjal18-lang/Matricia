@@ -7,6 +7,12 @@ import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { adminFixturesHiddenLabel } from "@/modules/admin/data/spaces/actor-presentation";
 import {
+  buildDemoFranchiseApplicationOrganizationNames,
+  buildDemoFranchiseApplications,
+  canApplyAdminDemoFranchiseApplications,
+} from "@/modules/admin/data/spaces/demo-franchise-applications";
+import { FranchiseApplicationInviteForm } from "@/modules/admin/screens/franchise-applications/invite-form";
+import {
   FranchiseApplicationReview,
   type FranchiseApplicationReviewCopy,
   type FranchiseApplicationReviewModel,
@@ -18,6 +24,7 @@ import {
   organizationDisplayName,
 } from "@/modules/admin/screens/franchise-applications/model";
 import { AdminAppShell, AdminCrumb } from "@/modules/admin/ui/admin-app-shell";
+import { AdminStep2Gate } from "@/modules/admin/ui/admin-step2-gate";
 import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
@@ -101,7 +108,7 @@ export default async function FranchiseApplicationsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; vue?: string; fixtures?: string }>;
+  searchParams: Promise<{ organizationId?: string; vue?: string; fixtures?: string; ouvrir?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -111,28 +118,44 @@ export default async function FranchiseApplicationsPage({
   const alternate = locale === "fr" ? "ar" : "fr";
   const fr = locale === "fr";
   const includeFixtures = query.fixtures === "1";
+  const inviteOpen = query.ouvrir === "1";
   const vue = query.vue?.trim() || "all";
+  const inviteKey = randomUUID();
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
+  const demoOn = canApplyAdminDemoFranchiseApplications();
   const loaded = await client.from("franchise_applications").select("id,applicant_name,reply_email,territory_code,domain_label,status,organization_id,franchise_id,row_version,created_at").order("created_at", { ascending: false }).order("id").limit(50);
   const rows = z.array(rowSchema).safeParse(loaded.data);
-  const list = rows.success ? rows.data : [];
+  const list = demoOn ? buildDemoFranchiseApplications() : (rows.success ? rows.data : []);
+  const listReady = demoOn || (!loaded.error && rows.success);
   const { visible, hiddenFixtures, treatCount } = filterFranchiseApplications(list, { vue, includeFixtures });
-  const candidateRows = visible.filter((row) => !row.organization_id && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(row.status));
-  const candidates = new Map(await Promise.all(candidateRows.map(async (row) => {
-    const result = await client.rpc("franchise_application_organization_candidates", { p_application_id: row.id });
-    const parsed = candidateSchema.safeParse(result.data);
-    return [row.id, result.error || !parsed.success ? [] : parsed.data.map((item) => ({ id: item.organization_id, name: item.display_name }))] as const;
-  })));
+  const candidateRows = demoOn
+    ? []
+    : visible.filter((row) => !row.organization_id && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(row.status));
+  const candidatePairs: Array<readonly [string, Array<{ id: string; name: string }>]> = [];
+  for (let offset = 0; offset < candidateRows.length; offset += 8) {
+    const chunk = candidateRows.slice(offset, offset + 8);
+    candidatePairs.push(...await Promise.all(chunk.map(async (row) => {
+      const result = await client.rpc("franchise_application_organization_candidates", { p_application_id: row.id });
+      const parsed = candidateSchema.safeParse(result.data);
+      return [row.id, result.error || !parsed.success ? [] : parsed.data.map((item) => ({ id: item.organization_id, name: item.display_name }))] as const;
+    })));
+  }
+  const candidates = new Map(candidatePairs);
   const organizationIds = [...new Set(visible.flatMap((row) => row.organization_id ? [row.organization_id] : []))];
   const franchiseIds = visible.flatMap((row) => row.franchise_id ? [row.franchise_id] : []);
   const [organizationsResult, franchisesResult, approvalsResult, invitationsResult] = await Promise.all([
-    organizationIds.length ? client.from("organizations").select("id,display_name").in("id", organizationIds) : Promise.resolve({ data: [], error: null }),
-    organizationIds.length ? client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", organizationIds).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]) : Promise.resolve({ data: [], error: null }),
-    franchiseIds.length ? client.from("franchise_approval_requests").select("id,franchise_id,row_version,requested_by").in("franchise_id", franchiseIds).eq("status", "PENDING") : Promise.resolve({ data: [], error: null }),
-    loadInvitations(client, franchiseIds),
+    !demoOn && organizationIds.length ? client.from("organizations").select("id,display_name").in("id", organizationIds) : Promise.resolve({ data: [], error: null }),
+    !demoOn && organizationIds.length ? client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", organizationIds).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]) : Promise.resolve({ data: [], error: null }),
+    !demoOn && franchiseIds.length ? client.from("franchise_approval_requests").select("id,franchise_id,row_version,requested_by").in("franchise_id", franchiseIds).eq("status", "PENDING") : Promise.resolve({ data: [], error: null }),
+    demoOn ? Promise.resolve({ data: [], error: null, observedAt: Date.now() }) : loadInvitations(client, franchiseIds),
   ]);
   const organizations = new Map((organizationSchema.safeParse(organizationsResult.data).data ?? []).map((item) => [item.id, item.display_name]));
+  if (demoOn) {
+    for (const [id, name] of buildDemoFranchiseApplicationOrganizationNames()) {
+      organizations.set(id, name);
+    }
+  }
   const franchises = franchiseSchema.safeParse(franchisesResult.data).data ?? [];
   const approvals = approvalSchema.safeParse(approvalsResult.data).data ?? [];
   const invitations = invitationSchema.safeParse(invitationsResult.data).data ?? [];
@@ -160,14 +183,16 @@ export default async function FranchiseApplicationsPage({
     };
   });
   const copy: FranchiseApplicationReviewCopy = {
-    reason: fr ? "Motif" : "السبب",
-    reasonHint: fr ? "Motif de la décision (obligatoire, 3 caractères min.)" : "سبب القرار (إلزامي، 3 أحرف على الأقل)",
+    reason: fr ? "Motif de la décision" : "سبب القرار",
+    reasonHint: fr ? "Obligatoire pour tracer la décision (audit, 3 caractères min.)." : "إلزامي لتوثيق القرار (تدقيق، 3 أحرف على الأقل).",
     company: fr ? "Passer en revue société" : "الانتقال إلى مراجعة الشركة",
     documents: fr ? "Demander les pièces" : "طلب الوثائق",
     close: fr ? "Clore" : "إغلاق",
     link: fr ? "Lier l’organisation" : "ربط المؤسسة",
     organization: fr ? "Organisation du candidat" : "مؤسسة المترشح",
     noOrganization: fr ? "Organisation non liée : le candidat doit créer puis rattacher sa société franchisée depuis son dossier." : "مؤسسة غير مرتبطة: يجب أن ينشئ المترشح شركة الامتياز ويربطها من ملفه.",
+    nextStepLinkOrg: fr ? "Prochaine étape : lier une organisation avant de poursuivre le mandat." : "الخطوة التالية: ربط مؤسسة قبل متابعة التفويض.",
+    documentsBlocked: fr ? "Liez une organisation avant de proposer le mandat." : "اربطوا مؤسسة قبل اقتراح التفويض.",
     bind: fr ? "Rattacher ce mandat existant" : "ربط هذا التفويض الموجود",
     franchise: fr ? "Mandat déjà proposé pour cette organisation" : "تفويض مقترح سابقاً لهذه المؤسسة",
     pending: fr ? "Enregistrement…" : "جارٍ التسجيل…",
@@ -210,19 +235,32 @@ export default async function FranchiseApplicationsPage({
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
-      active="parcours"
-      parcoursCurrent="franchise-applications"
+      active="actors"
+      actorCurrent="franchise-applications"
       alternateHref={`/${alternate}/administration/candidatures-franchise${space.selectedQuery}`}
-      crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/command-center${space.selectedQuery}`, label: c.crumbAdmin }, { href: `/${locale}/administration/parcours${space.selectedQuery}`, label: c.navParcours }, { label: fr ? "Candidatures franchise" : "ترشيحات الامتياز" }]} />}
+      crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/command-center${space.selectedQuery}`, label: c.crumbAdmin }, { href: `/${locale}/administration/acteurs${space.selectedQuery}`, label: c.navActors }, { label: fr ? "Candidatures franchise" : "ترشيحات الامتياز" }]} />}
     >
-      <main className="client-page admin-franchise-applications">
+      <div className="client-page admin-franchise-applications">
+        <AdminStep2Gate locale={locale} query={space.selectedQuery} current="candidatures" />
         <header className="admin-section-head admin-franchise-applications__head">
           <div>
-            <p className="admin-franchise-applications__kicker">{fr ? "Parcours métier" : "المسارات المهنية"}</p>
+            <p className="admin-franchise-applications__kicker">{fr ? "Acteurs" : "الفاعلون"}</p>
             <h1>{fr ? "Candidatures franchise" : "ترشيحات الامتياز"}</h1>
-            <p>{fr ? "Chaque dépôt ouvre un dossier inscrit. Après la revue société et les pièces, le mandat est proposé, approuvé à quatre yeux, puis activé par le candidat." : "كل إيداع يفتح ملفاً مسجّلاً. بعد مراجعة الشركة والوثائق يُقترح التفويض، ويُعتمد بأربعة أعين، ثم يفعّله المترشح."}</p>
+            <p>
+              {fr
+                ? "Ici on crée et instruit les dossiers. L’annuaire Franchisés liste seulement les actifs. Après revue société et pièces : mandat, quatre yeux, puis activation par le candidat."
+                : "هنا تُنشأ الملفات وتُدرس. دليل أصحاب الامتياز يعرض النشطين فقط. بعد مراجعة الشركة والوثائق: التفويض، أربعة أعين، ثم التفعيل من المترشح."}
+            </p>
+            <div className="admin-franchise-applications__toolbar">
+              <FranchiseApplicationInviteForm locale={locale} query={space.selectedQuery} idempotencyKey={inviteKey} open={inviteOpen} />
+              <p className="client-actions">
+                <Link href={`/${locale}/franchise/candidature`}>{fr ? "Formulaire public candidat" : "استمارة المترشح العامة"}</Link>
+                {" · "}
+                <Link href={`/${locale}/administration/franchises${space.selectedQuery}`}>{fr ? "Annuaire franchisés (actifs)" : "دليل أصحاب الامتياز (نشطون)"}</Link>
+              </p>
+            </div>
           </div>
-          {!loaded.error && rows.success ? (
+          {listReady ? (
             <div className="admin-franchise-applications__stats" aria-label={fr ? "Synthèse file" : "ملخص الطابور"}>
               <div>
                 <span>{fr ? "Visibles" : "الظاهرة"}</span>
@@ -235,7 +273,7 @@ export default async function FranchiseApplicationsPage({
             </div>
           ) : null}
         </header>
-        {!loaded.error && rows.success ? (
+        {listReady ? (
           <nav className="admin-pills admin-franchise-applications__pills" aria-label={fr ? "Filtres candidatures" : "مرشحات الترشيحات"}>
             {pills.map((pill) => (
               <Link key={pill.id} href={queueHref(locale, space.selectedQuery, { vue: pill.id, fixtures: includeFixtures })} aria-current={vue === pill.id ? "page" : undefined}>
@@ -248,11 +286,11 @@ export default async function FranchiseApplicationsPage({
           <p role="status" className="client-access-note">
             {adminFixturesHiddenLabel(hiddenFixtures, locale)}{" "}
             <Link className="client-text-link" href={queueHref(locale, space.selectedQuery, { vue, fixtures: true })}>
-              {fr ? "Afficher les fixtures" : "إظهارها"}
+              {fr ? "Afficher les données de démo" : "إظهار بيانات العرض"}
             </Link>
           </p>
         ) : null}
-        {loaded.error || !rows.success ? <p role="alert" className="admin-panel">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : visible.length === 0 ? (
+        {!listReady ? <p role="alert" className="admin-panel">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : visible.length === 0 ? (
           <p className="admin-panel">
             {list.length === 0
               ? (fr ? "Aucune candidature enregistrée." : "لا يوجد ترشيح مسجّل.")
@@ -352,7 +390,7 @@ export default async function FranchiseApplicationsPage({
             })}
           </ul>
         )}
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

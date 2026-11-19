@@ -1,11 +1,150 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-const fr = { eyebrow: "Administration", title: "Fiscalité Maroc", subtitle: "Règles fiscales datées, validées et simulées en unités exactes. Les configurations de démonstration ne constituent jamais une vérité fiscale de production.", simulation: "Simuler un calcul", proposal: "Proposer une règle", decisions: "Valider ou retirer une règle", categories: "Catégories fiscales", rules: "Historique des règles", category: "Catégorie", date: "Date d’effet", netMinor: "Montant net en unités mineures", sourceRule: "Règle source pour un avoir", simulate: "Simuler", type: "Type", rate: "Taux en points de base", priority: "Priorité", legal: "Référence légale ou professionnelle", from: "Début", to: "Fin facultative", reason: "Motif documenté", propose: "Créer le brouillon", decision: "Décision", validation: "Niveau de validation", validationReference: "Référence de validation", approve: "Approuver", reject: "Rejeter", retire: "Retirer", demo: "Démonstration", validated: "Validée par un professionnel", execute: "Exécuter", status: "Statut", version: "Version", period: "Période", pending: "Traitement…", success: "Opération enregistrée, auditée et publiée dans l’Outbox.", invalid: "Vérifiez les champs et les formats.", forbidden: "Vous n’avez pas l’autorisation requise.", aal2: "Une authentification renforcée AAL2 est obligatoire.", conflict: "Conflit de version ou de période : actualisez les données.", failed: "L’opération n’a pas abouti.", unavailable: "Le module fiscal n’est pas accessible dans votre périmètre.", exact: "Aucun calcul flottant : montants en unités mineures et taux en points de base.", noRules: "Aucune règle visible." };
-const ar: typeof fr = { eyebrow: "الإدارة", title: "الضرائب بالمغرب", subtitle: "قواعد ضريبية مؤرخة ومتحقق منها ومحاكاة بوحدات دقيقة. إعدادات العرض ليست حقيقة ضريبية للإنتاج.", simulation: "محاكاة الحساب", proposal: "اقتراح قاعدة", decisions: "اعتماد القاعدة أو سحبها", categories: "الفئات الضريبية", rules: "سجل القواعد", category: "الفئة", date: "تاريخ السريان", netMinor: "المبلغ الصافي بالوحدات الصغرى", sourceRule: "القاعدة المصدر للإشعار الدائن", simulate: "محاكاة", type: "النوع", rate: "المعدل بنقاط الأساس", priority: "الأولوية", legal: "المرجع القانوني أو المهني", from: "البداية", to: "النهاية الاختيارية", reason: "سبب موثق", propose: "إنشاء المسودة", decision: "القرار", validation: "مستوى التحقق", validationReference: "مرجع التحقق", approve: "موافقة", reject: "رفض", retire: "سحب", demo: "عرض", validated: "مصدقة مهنيا", execute: "تنفيذ", status: "الحالة", version: "الإصدار", period: "الفترة", pending: "جارٍ التنفيذ…", success: "تم تسجيل العملية وتدقيقها وإرسالها إلى صندوق الأحداث.", invalid: "تحقق من الحقول والصيغ.", forbidden: "ليست لديك الصلاحية المطلوبة.", aal2: "يلزم تحقق قوي من المستوى AAL2.", conflict: "تعارض في الإصدار أو الفترة: حدّث البيانات.", failed: "تعذر إتمام العملية.", unavailable: "الوحدة الضريبية غير متاحة ضمن نطاقك.", exact: "لا حساب عائم: المبالغ بوحدات صغرى والمعدلات بنقاط الأساس.", noRules: "لا توجد قواعد مرئية." };
-type TaxCodes = { types: Record<"VAT" | "EXEMPT" | "OUT_OF_SCOPE" | "WITHHOLDING", string>; statuses: Record<"DRAFT" | "ACTIVE" | "RETIRED", string>; validations: Record<"PENDING" | "DEMO" | "VALIDATED", string>; minorUnit: string; basisPointsUnit: string; taxAmount: string; grossAmount: string; unknown: string };
-const codes: Record<Locale, TaxCodes> = {
-  fr: { types: { VAT: "Taxe sur la valeur ajoutée", EXEMPT: "Exonération", OUT_OF_SCOPE: "Hors champ", WITHHOLDING: "Retenue à la source" }, statuses: { DRAFT: "Brouillon", ACTIVE: "Active", RETIRED: "Retirée" }, validations: { PENDING: "Validation en attente", DEMO: "Démonstration non-production", VALIDATED: "Validée par un professionnel" }, minorUnit: "unités mineures", basisPointsUnit: "points de base", taxAmount: "Montant de la taxe", grossAmount: "Montant total", unknown: "Valeur inconnue" },
-  ar: { types: { VAT: "الضريبة على القيمة المضافة", EXEMPT: "إعفاء ضريبي", OUT_OF_SCOPE: "خارج النطاق الضريبي", WITHHOLDING: "اقتطاع من المنبع" }, statuses: { DRAFT: "مسودة", ACTIVE: "نشطة", RETIRED: "مسحوبة" }, validations: { PENDING: "في انتظار التحقق", DEMO: "عرض خارج الإنتاج", VALIDATED: "مصدقة مهنياً" }, minorUnit: "وحدة صغرى", basisPointsUnit: "نقطة أساس", taxAmount: "مبلغ الضريبة", grossAmount: "المبلغ الإجمالي", unknown: "قيمة غير معروفة" },
+const fr = {
+  eyebrow: "Administration",
+  title: "Fiscalité Maroc",
+  subtitle: "Quand la fiscalité change, mettez à jour le taux ici. Les anciennes factures gardent l’ancien taux.",
+  rules: "Taux en vigueur",
+  drafts: "À valider",
+  retired: "Anciennes règles",
+  change: "Changer le taux",
+  cancelChange: "Annuler",
+  newRate: "Nouveau taux (%)",
+  from: "Date d’effet",
+  reason: "Motif",
+  legal: "Référence (loi ou avis)",
+  proposeChange: "Enregistrer comme brouillon",
+  approve: "Approuver",
+  reject: "Rejeter",
+  retire: "Retirer",
+  execute: "Confirmer",
+  decision: "Décision",
+  validation: "Niveau",
+  validationReference: "Réf. de revue",
+  newRule: "Ajouter une règle",
+  newRuleHint: "Cas rare : nouvelle catégorie ou nouveau type. Sinon utilisez « Changer le taux ».",
+  category: "Catégorie",
+  type: "Type",
+  proposal: "Nouvelle règle",
+  propose: "Créer le brouillon",
+  to: "Fin (facultatif)",
+  priority: "Priorité technique",
+  simulation: "Vérifier un calcul",
+  simulationHint: "Contrôle rapide avant activation. Montants en dirhams.",
+  date: "Date du calcul",
+  netMad: "Montant HT (MAD)",
+  sourceRule: "Règle source (avoir, facultatif)",
+  simulate: "Calculer",
+  status: "Statut",
+  version: "v",
+  period: "Depuis",
+  pending: "Traitement…",
+  success: "Enregistré.",
+  invalid: "Vérifiez les champs.",
+  forbidden: "Accès refusé.",
+  aal2: "Authentification renforcée requise.",
+  conflict: "Conflit de version : rechargez la page.",
+  failed: "Échec.",
+  unavailable: "Module fiscal inaccessible.",
+  noRules: "Aucun taux actif.",
+  noDrafts: "Aucun brouillon à valider.",
+  rate: "Taux",
+  currentRate: "Taux actuel",
+  taxAmount: "Taxe",
+  grossAmount: "TTC",
+  demoNote: "Les règles marquées démo ne sont pas une vérité fiscale de production.",
 };
+
+const ar: typeof fr = {
+  eyebrow: "الإدارة",
+  title: "الضرائب بالمغرب",
+  subtitle: "عند تغيّر الضريبة، حدّث النسبة هنا. الفواتير القديمة تحتفظ بالنسبة القديمة.",
+  rules: "النسب السارية",
+  drafts: "بانتظار الاعتماد",
+  retired: "القواعد السابقة",
+  change: "تغيير النسبة",
+  cancelChange: "إلغاء",
+  newRate: "النسبة الجديدة (%)",
+  from: "تاريخ السريان",
+  reason: "السبب",
+  legal: "المرجع (قانون أو رأي)",
+  proposeChange: "حفظ كمسودة",
+  approve: "موافقة",
+  reject: "رفض",
+  retire: "سحب",
+  execute: "تأكيد",
+  decision: "القرار",
+  validation: "المستوى",
+  validationReference: "مرجع المراجعة",
+  newRule: "إضافة قاعدة",
+  newRuleHint: "حالة نادرة: فئة أو نوع جديد. وإلا استخدم «تغيير النسبة».",
+  category: "الفئة",
+  type: "النوع",
+  proposal: "قاعدة جديدة",
+  propose: "إنشاء المسودة",
+  to: "النهاية (اختياري)",
+  priority: "الأولوية التقنية",
+  simulation: "التحقق من حساب",
+  simulationHint: "فحص سريع قبل التفعيل. المبالغ بالدرهم.",
+  date: "تاريخ الحساب",
+  netMad: "المبلغ دون ضريبة (درهم)",
+  sourceRule: "القاعدة المصدر (إشعار دائن، اختياري)",
+  simulate: "احسب",
+  status: "الحالة",
+  version: "ن",
+  period: "منذ",
+  pending: "جارٍ…",
+  success: "تم التسجيل.",
+  invalid: "تحقق من الحقول.",
+  forbidden: "الوصول مرفوض.",
+  aal2: "يلزم تحقق أقوى.",
+  conflict: "تعارض إصدار: أعد تحميل الصفحة.",
+  failed: "فشل.",
+  unavailable: "الوحدة الضريبية غير متاحة.",
+  noRules: "لا توجد نسبة سارية.",
+  noDrafts: "لا مسودات للاعتماد.",
+  rate: "النسبة",
+  currentRate: "النسبة الحالية",
+  taxAmount: "الضريبة",
+  grossAmount: "شامل الضريبة",
+  demoNote: "القواعد المعروضة للتجربة ليست حقيقة ضريبية للإنتاج.",
+};
+
+type TaxCodes = {
+  types: Record<"VAT" | "EXEMPT" | "OUT_OF_SCOPE" | "WITHHOLDING", string>;
+  statuses: Record<"DRAFT" | "ACTIVE" | "RETIRED", string>;
+  validations: Record<"PENDING" | "DEMO" | "VALIDATED", string>;
+  minorUnit: string;
+  basisPointsUnit: string;
+  taxAmount: string;
+  grossAmount: string;
+  unknown: string;
+};
+
+const codes: Record<Locale, TaxCodes> = {
+  fr: {
+    types: { VAT: "TVA", EXEMPT: "Exonération", OUT_OF_SCOPE: "Hors champ", WITHHOLDING: "Retenue à la source" },
+    statuses: { DRAFT: "Brouillon", ACTIVE: "Active", RETIRED: "Retirée" },
+    validations: { PENDING: "En attente", DEMO: "Démo", VALIDATED: "Validée pro" },
+    minorUnit: "centimes",
+    basisPointsUnit: "%",
+    taxAmount: "Taxe",
+    grossAmount: "TTC",
+    unknown: "—",
+  },
+  ar: {
+    types: { VAT: "ض.ق.م", EXEMPT: "إعفاء", OUT_OF_SCOPE: "خارج النطاق", WITHHOLDING: "اقتطاع" },
+    statuses: { DRAFT: "مسودة", ACTIVE: "نشطة", RETIRED: "مسحوبة" },
+    validations: { PENDING: "قيد الانتظار", DEMO: "تجريبي", VALIDATED: "مصدّقة مهنياً" },
+    minorUnit: "سنتيم",
+    basisPointsUnit: "%",
+    taxAmount: "الضريبة",
+    grossAmount: "شامل",
+    unknown: "—",
+  },
+};
+
 export type MoroccoTaxMessages = typeof fr & { codes: TaxCodes };
-export function getMoroccoTaxMessages(locale: Locale): MoroccoTaxMessages { return { ...(locale === "ar" ? ar : fr), codes: codes[locale] }; }
+export function getMoroccoTaxMessages(locale: Locale): MoroccoTaxMessages {
+  return { ...(locale === "ar" ? ar : fr), codes: codes[locale] };
+}

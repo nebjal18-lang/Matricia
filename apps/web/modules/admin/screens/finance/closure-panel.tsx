@@ -23,21 +23,21 @@ export function ClosurePanel({ locale, dashboard, m, keyValue }: { locale: Local
       <p className="text-sm leading-6 text-muted-foreground">{m.closureHint}</p>
       <div className="grid gap-3 lg:grid-cols-3">
         <Block title={m.unstatemented} empty={m.empty} items={dashboard.unstatemented.map((item) => (
-          <article key={`${item.provider_organization_id}-${item.currency}`} className="rounded-xl border bg-card p-4 text-sm">
+          <article key={`${item.provider_organization_id}-${item.currency}`} className="admin-panel p-4 text-sm">
             <h3 className="font-semibold">{item.organization_name}</h3>
             <p>{m.events}: {item.event_count}</p>
             <p dir="ltr">{formatMinor(item.total_minor, item.currency, locale)}</p>
           </article>
         ))} />
         <Block title={m.statements} empty={m.empty} items={dashboard.statements.map((item) => (
-          <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
+          <article key={item.id} className="admin-panel p-4 text-sm">
             <div className="flex justify-between gap-2"><h3 className="font-semibold">{item.statement_number}</h3><Badge>{item.invoiced ? m.invoiced : localizeStatus("ISSUED", locale)}</Badge></div>
             <p>{item.organization_name}</p>
             <p dir="ltr">{formatMinor(item.total_minor, item.currency, locale)}</p>
           </article>
         ))} />
         <Block title={m.overdue} empty={m.empty} items={dashboard.overdue_invoices.map((item) => (
-          <article key={item.id} className="rounded-xl border bg-card p-4 text-sm">
+          <article key={item.id} className="admin-panel p-4 text-sm">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <h3 className="font-semibold">{item.invoice_number}</h3>
               {item.blocks_new_opportunities ? <Badge>{m.overdueBlocksNew}</Badge> : null}
@@ -50,7 +50,7 @@ export function ClosurePanel({ locale, dashboard, m, keyValue }: { locale: Local
         ))} />
       </div>
       {dashboard.capabilities.can_issue_statement && dashboard.unstatemented.length > 0 ? (
-        <form action={action} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+        <form action={action} className="grid gap-3 admin-panel p-4 md:grid-cols-2">
           <h3 className="font-semibold md:col-span-2">{m.issueStatement}</h3>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="idempotencyKey" value={keyValue} />
@@ -77,5 +77,5 @@ export function ClosurePanel({ locale, dashboard, m, keyValue }: { locale: Local
 }
 
 function Block({ title, empty, items }: { title: string; empty: string; items: React.ReactNode[] }) {
-  return <div className="space-y-3"><h3 className="font-semibold">{title}</h3>{items.length ? items : <p className="rounded-xl border bg-card p-4">{empty}</p>}</div>;
+  return <div className="space-y-3"><h3 className="font-semibold">{title}</h3>{items.length ? items : <p className="admin-panel p-4">{empty}</p>}</div>;
 }

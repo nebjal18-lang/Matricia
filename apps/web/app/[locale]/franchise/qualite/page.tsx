@@ -6,7 +6,7 @@ import { franchiseCommandScope, franchiseMandateName, loadFranchiseSpaceFromLibr
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
-export default async function FranchiseQualityPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string; q?: string; page?: string }> }) {
+export default async function FranchiseQualityPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; franchiseId?:string; q?: string; page?: string; itemId?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const { space, result } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/qualite`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
@@ -17,7 +17,7 @@ export default async function FranchiseQualityPage({ params, searchParams }: { p
   const scope = franchiseCommandScope(result, space.selectedOrganizationId);
   return (
     <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quality" title={c.qualTitleRich} lead={c.qualLeadRich} kicker={c.kicker} mandateName={mandateName}>
-      <QualityBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={board} search={query.q} page={query.page} libraryId={scope.libraryId} organizationId={scope.organizationId} services={scope.services} />
+      <QualityBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={board} search={query.q} page={query.page} itemId={query.itemId} libraryId={scope.libraryId} organizationId={scope.organizationId} services={scope.services} />
     </FranchiseAppShell>
   );
 }

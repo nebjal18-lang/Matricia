@@ -35,6 +35,7 @@ import {
   type ClientPrioritySituation,
 } from "@/modules/client/data/home/view-model";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 
 type FeaturedSteps = NonNullable<Extract<ClientHomeSnapshot, { status: "success" }>["featuredProject"]>["steps"];
 
@@ -227,20 +228,26 @@ export function ClientDashboardHome({
           </div>
         </div>
 
-        <header className="client-mast client-home-mast">
-          <div>
-            <h1>{helloName ? `${c.helloBonjour}, ${helloName}.` : `${c.helloBonjour}.`}</h1>
-            <p>{c.helloLead}</p>
-          </div>
-          <div className="client-home-mast-actions">
-            <Link href={`/${locale}/besoin${selectedQuery}`} className="client-need-cta">
-              {c.primaryNeed}
-              <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
-            </Link>
-            <p className="client-ambition-script">{c.ambitionScript}</p>
-          </div>
-        </header>
+        <div className="client-scene-mast">
+          <SpaceSceneHero
+            className="client-home-scene-hero"
+            sceneSrc="/scenes/arch-city.png"
+            title={helloName ? `${c.helloBonjour}, ${helloName}.` : `${c.helloBonjour}.`}
+            meta={c.helloLead}
+            actions={
+              <div className="client-home-mast-actions">
+                <Link href={`/${locale}/besoin${selectedQuery}`} className="client-need-cta">
+                  {c.primaryNeed}
+                  <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
+                </Link>
+                <p className="client-ambition-script">{c.ambitionScript}</p>
+              </div>
+            }
+            priority
+          />
+        </div>
 
+        <div className="client-page-standard">
         <main className="client-page">
           {showSignoutError ? <Alert variant="destructive"><AlertDescription>{m.signOutError}</AlertDescription></Alert> : null}
           {contextRejected ? <Alert variant="destructive"><AlertDescription>{m.contextRejected}</AlertDescription></Alert> : null}
@@ -472,6 +479,7 @@ export function ClientDashboardHome({
 
           {snapshot.status === "error" ? <p role="alert" className="admin-notice">{snapshot.reason === "FORBIDDEN" ? c.snapshotForbidden : c.snapshotError}</p> : snapshot.partialSources?.length ? <div role="status" className="admin-notice">{snapshot.partialSources.map((item) => <p key={item.source}>{item.source === "missions" ? c.kpiMissions : c.kpiRequests} : {item.reason === "FORBIDDEN" ? c.snapshotForbidden : c.snapshotError}</p>)}</div> : null}
         </main>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import {beforeEach,describe,expect,it,vi} from "vitest";
 const {rpc,getUser}=vi.hoisted(()=>({rpc:vi.fn(),getUser:vi.fn()}));
+vi.mock("next/cache",()=>({revalidatePath:vi.fn()}));
 vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser},rpc})}));
 import {decideTaxRule,proposeTaxRule} from "./actions";
 const id="11111111-1111-4111-8111-111111111111";

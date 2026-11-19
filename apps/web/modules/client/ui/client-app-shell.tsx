@@ -11,8 +11,11 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ClientNavKey } from "@/modules/client/ui/client-nav";
 import { buildClientNav } from "@/modules/client/ui/client-nav";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
+import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import "./client-experience.css";
+import "./client-page-standard.css";
 
 export type { ClientNavKey };
 
@@ -40,6 +43,7 @@ export function ClientAppShell({
   actions,
   messagesUnread,
   theme = "default",
+  sceneHero = false,
   children,
 }: {
   locale: Locale;
@@ -58,6 +62,8 @@ export function ClientAppShell({
   kicker?: string;
   actions?: ReactNode;
   theme?: "default" | "follow";
+  /** Photo hero mast — identity hubs only (home / org / dossiers). */
+  sceneHero?: boolean;
   children: ReactNode;
 }): ReactNode {
   const c = clientDashboardCopy[locale];
@@ -73,6 +79,7 @@ export function ClientAppShell({
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace" data-theme={theme}>
+      <WorkspaceHashScroll />
       <aside className="client-side" aria-label={c.navHome}>
         <Link href={`/${locale}/tableau-de-bord${selectedQuery}`} className="client-brand">
           <span className="client-brand-mark" aria-hidden>
@@ -113,7 +120,11 @@ export function ClientAppShell({
                     const current = organization.id === selectedOrganizationId;
                     const params = new URLSearchParams((currentPath ?? "").includes("?") ? (currentPath!.split("?")[1] ?? "") : "");
                     params.set("organizationId", organization.id);
-                    const href = `${switchBase}?${params.toString()}`;
+                    const landHash =
+                      switchBase.includes("/organisation") || switchBase.includes("/securite")
+                        ? "#invitation"
+                        : "";
+                    const href = `${switchBase}?${params.toString()}${landHash}`;
                     return (
                       <li key={organization.id}>
                         {current ? <span data-selected="true">{organization.name}</span> : <Link href={href}>{organization.name}</Link>}
@@ -142,7 +153,18 @@ export function ClientAppShell({
             />
           </div>
         </div>
-        {title ? (
+        {title && sceneHero ? (
+          <div className="client-scene-mast">
+            <SpaceSceneHero
+              sceneSrc="/scenes/arch-city.png"
+              title={title}
+              meta={lead}
+              badge={kicker ? <span className="mat-status" data-tone="sky">{kicker}</span> : undefined}
+              actions={actions}
+              priority
+            />
+          </div>
+        ) : title ? (
           <header className="client-mast">
             <div>
               <p className="client-space-label">{space.space}</p>
@@ -155,7 +177,7 @@ export function ClientAppShell({
             </div>
           </header>
         ) : null}
-        {children}
+        <div className="client-page-standard">{children}</div>
       </div>
     </div>
   );

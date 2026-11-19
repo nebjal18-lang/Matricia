@@ -1,7 +1,12 @@
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import type { AdminWorkItem } from "./model";
 
 export type AdminWorkSummary = {
   ordered: AdminWorkItem[];
+  /** Overdue or CRITICAL/HIGH — treat first. */
+  priorityNow: AdminWorkItem[];
+  /** Remaining ordered items after priorityNow. */
+  remaining: AdminWorkItem[];
   critical: number;
   overdue: number;
   dueToday: number;
@@ -25,6 +30,11 @@ export function workItemDueTone(dueAt: string, currentTime: string, priority: Ad
   return "default";
 }
 
+function isPriorityNow(item: AdminWorkItem, now: number) {
+  const overdue = new Date(item.dueAt).getTime() < now;
+  return overdue || item.priority === "CRITICAL" || item.priority === "HIGH";
+}
+
 export function summarizeAdminWork(items: AdminWorkItem[], currentTime: string): AdminWorkSummary {
   const now = new Date(currentTime).getTime();
   const today = dayInMorocco(currentTime);
@@ -37,8 +47,12 @@ export function summarizeAdminWork(items: AdminWorkItem[], currentTime: string):
       new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime()
     );
   });
+  const priorityNow = ordered.filter((item) => isPriorityNow(item, now));
+  const remaining = ordered.filter((item) => !isPriorityNow(item, now));
   return {
     ordered,
+    priorityNow,
+    remaining,
     critical: items.filter((item) => item.priority === "CRITICAL").length,
     overdue: items.filter((item) => new Date(item.dueAt).getTime() < now).length,
     dueToday: items.filter((item) => dayInMorocco(item.dueAt) === today).length,
@@ -87,6 +101,32 @@ export function workItemMotif(item: AdminWorkItem, locale: "fr" | "ar") {
 export function workItemNextAction(item: AdminWorkItem, locale: "fr" | "ar") {
   const map = locale === "ar" ? nextAr : nextFr;
   return map[item.status] ?? (locale === "ar" ? "مراجعة الملف" : "Examiner le dossier");
+}
+
+/** Prefer enrichment, then a title segment after · / —, never a vague “Plateforme”. */
+export function workItemOrganizationLabel(
+  item: AdminWorkItem,
+  locale: "fr" | "ar",
+  enrichmentName?: string | null,
+) {
+  const named = enrichmentName?.trim();
+  if (named) return named;
+  const title = (locale === "ar" ? item.titleAr : item.titleFr).trim();
+  const parts = title.split(/\s*[·|—–-]\s*/u).map((part) => part.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const tail = parts[parts.length - 1]!;
+    if (tail.length > 2) return tail;
+  }
+  return locale === "ar" ? "منظمة غير مبيّنة" : "Organisation à préciser";
+}
+
+/** Soften seed/demo reasons into an actionable ops label. */
+export function humanizeActionReason(reason: string, locale: "fr" | "ar") {
+  const text = reason.trim();
+  if (/d[eé]mo|parcours admin|اختبار|تجريب/iu.test(text)) {
+    return locale === "ar" ? "طلب إسناد للتحقق" : "Demande d’attribution à valider";
+  }
+  return text;
 }
 
 export const RESOLUTION_CODES = [
@@ -170,13 +210,7 @@ export function compactDateTime(value: string) {
 }
 
 export function formatAdminDateTime(value: string, locale: "fr" | "ar") {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Africa/Casablanca",
-  }).format(date);
+  return formatDateTimeCasablanca(value, locale);
 }
 
 export function actionStatusTone(status: string): "critical" | "high" | "ok" | "default" {

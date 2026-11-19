@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { demoRegionalSummary } from "@/app/[locale]/connexion/demo-regional-directory";
 import { ADMIN_SPACE_IDS } from "./admin-nav";
 import {
   buildDemoSpaceRows,
@@ -7,7 +8,7 @@ import {
   demoClientCases,
   demoComplianceCases,
   demoOrganizationFiche,
-  demoSupervisionOrganizations,
+  listDemoSupervisionOrganizations,
 } from "./demo-overlay";
 
 describe("données démo admin Figma", () => {
@@ -24,21 +25,18 @@ describe("données démo admin Figma", () => {
     expect(canApplyAdminDemo()).toBe(false);
   });
 
-  it("remplit les organisations et les tables de parcours sans exemple illustratif", () => {
-    const orgs = demoSupervisionOrganizations;
-    expect(orgs.map((row) => row.display_name)).toEqual([
-      "Studio Atlas",
-      "Client · Communication",
-      "Franchisé · Casablanca-Settat",
-      "Conseil Anfa",
-    ]);
-    expect(demoActorUsers()).toHaveLength(4);
-    expect(demoClientCases()[0]?.organizationName).toBe("Studio Atlas");
-    expect(demoComplianceCases()[0]?.organizationName).toBe("Studio Atlas");
-    expect(demoOrganizationFiche(demoSupervisionOrganizations[0]!.id)?.organization.display_name).toBe("Studio Atlas");
+  it("remplit les organisations régionales et les tables de parcours", () => {
+    const summary = demoRegionalSummary();
+    const orgs = listDemoSupervisionOrganizations();
+    expect(orgs).toHaveLength(summary.franchises + summary.providers + summary.clients);
+    expect(orgs.some((row) => row.display_name === "Anfa Business Franchise")).toBe(true);
+    expect(demoActorUsers()).toHaveLength(orgs.length);
+    expect(demoClientCases().length).toBe(summary.clients);
+    expect(demoComplianceCases().length).toBe(summary.clients);
+    expect(demoOrganizationFiche(orgs[0]!.id)?.organization.display_name).toBe(orgs[0]!.display_name);
     for (const space of ADMIN_SPACE_IDS) {
       const rows = buildDemoSpaceRows("fr", space, "");
-      expect(rows.length).toBe(4);
+      expect(rows.length).toBeGreaterThan(0);
       expect(rows[0]?.cells.length).toBeGreaterThan(2);
       expect(JSON.stringify(rows).toLowerCase()).not.toContain("exemple illustratif");
     }

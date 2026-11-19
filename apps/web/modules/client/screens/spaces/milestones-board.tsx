@@ -9,6 +9,7 @@ import type { MissionMessages } from "@/modules/client/screens/missions/messages
 import type { ContractMissionDashboard } from "@/modules/shared/lib/contracts-missions/model";
 import { AssistanceCue } from "@/modules/client/screens/diagnostics/assistance-cue";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function toneFor(state: "done" | "current" | "todo") {
   if (state === "done") return "mint" as const;
@@ -136,11 +137,11 @@ export function JalonsBoard({
       </article>
       {assistanceHref ? <AssistanceCue locale={locale} href={assistanceHref} context="milestone" /> : null}
       <nav className="client-tabs" aria-label={c.jalonsTitle}>
-        <a href="#jalons" aria-current="page">{c.tabJalons}</a>
+        <HashAwareLink href="#jalons" aria-current="page">{c.tabJalons}</HashAwareLink>
         <Link href={mission ? `/${locale}/client/missions/${mission.id}${query}` : `/${locale}/client/missions${query}`}>{c.tabMission}</Link>
         <Link href={`/${locale}/client/documents${query}`}>{c.docsTab}</Link>
         <Link href={`/${locale}/messagerie${query}`}>{c.messagesTab}</Link>
-        <a href="#jalon-history">{c.tabHistory}</a>
+        <HashAwareLink href="#jalon-history">{c.tabHistory}</HashAwareLink>
       </nav>
       <section className="client-dispute-layout" id="jalons">
         <article className="client-card">
@@ -150,9 +151,10 @@ export function JalonsBoard({
                 ? `/${locale}/client/missions/${mission.id}/jalons${withJalonQuery(query, item.id)}`
                 : `#jalon-${item.id}`;
               const isSelected = selected?.id === item.id;
+              const RailLink = href.startsWith("#") ? HashAwareLink : Link;
               return (
                 <li key={item.id} data-state={item.state} data-selected={isSelected ? "true" : undefined}>
-                  <Link href={href} aria-current={isSelected ? "true" : undefined} className="client-jalon-rail-link">
+                  <RailLink href={href} aria-current={isSelected ? "true" : undefined} className="client-jalon-rail-link">
                     <span className="client-jalon-marker" aria-hidden>
                       {item.state === "done" ? <CheckCircle2 className="size-4" /> : <span>{index + 1}</span>}
                     </span>
@@ -161,7 +163,7 @@ export function JalonsBoard({
                       <small>{c.dueOn} : {item.due}</small>
                     </span>
                     <span className="client-status-chip" data-tone={toneFor(item.state)}>{statusLabel(item.state, item.status, locale, c)}</span>
-                  </Link>
+                  </RailLink>
                 </li>
               );
             })}

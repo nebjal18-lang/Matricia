@@ -24,6 +24,7 @@ const copy = {
     providerAccount: "Compte Sous-traitant",
     demoUnavailable: "La connexion de démonstration n’est pas disponible pour ce profil. Vérifiez le provisionnement local.",
     demoDisabled: "L’accès de démonstration est désactivé dans cet environnement.",
+    demoRoleMissing: "Le compte Admin démo n’a pas le rôle plateforme. Réessayez : le rôle vient d’être rétabli, ou lancez le provisionnement local.",
   },
   ar: {
     brand: "ماتريسيا",
@@ -48,8 +49,9 @@ const copy = {
     providerAccount: "حساب مقدم خدمات",
     demoUnavailable: "تسجيل الدخول التجريبي غير متاح لهذا الملف. تحقق من التجهيز المحلي.",
     demoDisabled: "تم تعطيل الوصول التجريبي في هذه البيئة.",
+    demoRoleMissing: "حساب الإدارة التجريبي بلا دور منصة. أعيدوا المحاولة بعد إعادة الدور، أو شغّلوا التجهيز المحلي.",
   },
-} satisfies Record<Locale, { brand: string; back: string; panelEyebrow: string; panelTitle: string; panelBody: string; trust: readonly string[]; continuity: string; planIntent: string; planNote: string; security: string; resend: string; resent: string; loginTitle: string; loginAction: string; signupTitle: string; signupAction: string; signupPageTitle: string; signupPageDescription: string; clientAccount: string; providerAccount: string; demoUnavailable: string; demoDisabled: string }>;
+} satisfies Record<Locale, { brand: string; back: string; panelEyebrow: string; panelTitle: string; panelBody: string; trust: readonly string[]; continuity: string; planIntent: string; planNote: string; security: string; resend: string; resent: string; loginTitle: string; loginAction: string; signupTitle: string; signupAction: string; signupPageTitle: string; signupPageDescription: string; clientAccount: string; providerAccount: string; demoUnavailable: string; demoDisabled: string; demoRoleMissing: string }>;
 
 export function getLoginMessages(locale: Locale) {
   return copy[locale];

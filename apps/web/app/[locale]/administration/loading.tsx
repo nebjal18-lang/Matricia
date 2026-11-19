@@ -12,7 +12,7 @@ export default function AdministrationLoading() {
       title="Administration"
       lead=""
     >
-      <main className="min-h-[50vh] px-4 py-6 sm:px-6" aria-busy="true" aria-live="polite">
+      <div className="min-h-[50vh] px-4 py-6 sm:px-6" aria-busy="true" aria-live="polite">
         <span className="sr-only">Chargement administration / جاري تحميل الإدارة</span>
         <div className="mx-auto max-w-6xl space-y-4">
           <div className="h-16 animate-pulse rounded-2xl bg-muted" />
@@ -21,7 +21,7 @@ export default function AdministrationLoading() {
           </div>
           <div className="h-72 animate-pulse rounded-2xl bg-muted" />
         </div>
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

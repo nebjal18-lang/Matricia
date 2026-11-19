@@ -17,7 +17,7 @@ export async function DocumentVaultPanel({ locale }: { locale: Locale }) {
       {result.value.documents.length === 0 ? <p>{m.empty}</p> : (
         <div className="grid gap-3 md:grid-cols-2">
           {result.value.documents.map((item) => (
-            <article key={`${item.source}-${item.id}`} className="rounded-xl border bg-card p-4 text-sm">
+            <article key={`${item.source}-${item.id}`} className="admin-panel p-4 text-sm">
               <div className="flex flex-wrap justify-between gap-2">
                 <strong>{item.organization_name}</strong>
                 <Badge variant={item.expiring ? "destructive" : "outline"}>{item.expiring ? m.expiring : item.status}</Badge>

@@ -50,7 +50,7 @@ export const MODULE_ROUTE_REGISTRY = [
   { id: "admin-providers", path: "administration/providers", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "FINANCE_MANAGER", "READ_ONLY_AUDITOR"] },
   { id: "admin-finance", path: "administration/finance", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER", "READ_ONLY_AUDITOR"] },
   { id: "admin-finance-approvals", path: "administration/approbations-finance", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER", "READ_ONLY_AUDITOR"] },
-  { id: "admin-tax", path: "administration/fiscalite-maroc", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER", "READ_ONLY_AUDITOR"] },
+  { id: "admin-tax", path: "administration/fiscalite-maroc", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER"] },
   { id: "admin-volume", path: "administration/achats-groupes", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER"] },
   { id: "admin-franchise", path: "administration/gouvernance-franchise", space: "admin", platformRoles: ADMIN_ALL },
   { id: "admin-incentives", path: "administration/incitations", space: "admin", platformRoles: ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER", "COMPLIANCE_MANAGER"] },

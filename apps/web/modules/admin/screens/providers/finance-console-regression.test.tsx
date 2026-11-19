@@ -3,6 +3,17 @@ import{renderToStaticMarkup}from"react-dom/server";
 import{ProvidersPanel}from"./providers-panel";
 import{getAdminProviderMessages}from"./messages";
 import type{AdminProviderDashboard}from"@/modules/admin/data/providers/model";
-vi.mock("next/navigation",()=>({useRouter:()=>({refresh:vi.fn()})}));
+vi.mock("next/navigation",()=>({useRouter:()=>({refresh:vi.fn(),replace:vi.fn(),push:vi.fn()})}));
 const dashboard:AdminProviderDashboard={capabilities:{qualificationDecision:false,financeAction:true,readOnly:false},providers:[],services:[],documents:[],statements:[],invoices:[],payments:[],accounts:[],creditNotes:[],paymentPlans:[],collectionCases:[],totalsByCurrency:[],limitsReached:[]};
-describe("Provider Admin governed finance handoff",()=>{for(const locale of["fr","ar"]as const)it(`routes ${locale} periodic issuance and independent reviews through the actual console`,()=>{const html=renderToStaticMarkup(<ProvidersPanel dashboard={dashboard} locale={locale} messages={getAdminProviderMessages(locale)} keys={{}}/>);expect(html).toContain(`/${locale}/administration/finance/prestataires`);expect(html).not.toContain('name="statementNumber"');expect(html).not.toContain('name="invoiceNumber"');expect(html).toContain('name="invoiceId"');});});
+describe("Provider Admin governed finance handoff",()=>{
+  for(const locale of["fr","ar"]as const)it(`routes ${locale} periodic issuance and independent reviews through the actual console`,()=>{
+    const html=renderToStaticMarkup(<ProvidersPanel dashboard={dashboard} locale={locale} messages={getAdminProviderMessages(locale)} keys={{}}/>);
+    expect(html).toContain(`/${locale}/administration/finance/prestataires#allocation`);
+    expect(html).toContain('id="finance-actions"');
+    expect(html).toContain("#finance-actions");
+    expect(html.indexOf('id="finance-actions"')).toBeLessThan(html.indexOf(getAdminProviderMessages(locale).noFinancialTotals));
+    expect(html).not.toContain('name="statementNumber"');
+    expect(html).not.toContain('name="invoiceNumber"');
+    expect(html).toContain('name="invoiceId"');
+  });
+});

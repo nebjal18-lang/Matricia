@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
@@ -30,7 +29,6 @@ export default async function AdminEnterpriseFichePage({
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
   const name = fiche?.organization.display_name ?? c.orgTitle;
-  const status = fiche?.organization.status ?? "";
 
   return (
     <AdminAppShell
@@ -44,25 +42,14 @@ export default async function AdminEnterpriseFichePage({
       searchPlaceholder={c.searchList}
       alternateHref={`/${alternate}/administration/entreprises/${organizationId}${space.selectedQuery}`}
       crumb={<AdminCrumb locale={locale} query={space.selectedQuery} organizationName={name} />}
-      title={`${c.orgTitle} — ${name}`}
-      lead={c.orgLead}
-      actions={
-        fiche ? (
-          <>
-            <span className="admin-status">{status}</span>
-            <Link href={`/${locale}/administration/entreprises/${organizationId}/modifier${space.selectedQuery}`} className="admin-primary-cta">{c.edit}</Link>
-            <Link href={`/${locale}/administration/entreprises/${organizationId}/archiver${space.selectedQuery ? `${space.selectedQuery}&mode=disable` : "?mode=disable"}`} className="admin-danger-cta">{c.disable}</Link>
-          </>
-        ) : null
-      }
     >
       {!fiche ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert variant="destructive">
             <AlertTitle>{result.status === "error" && result.reason === "FORBIDDEN" ? (locale === "ar" ? "رفض الوصول" : "Accès refusé") : (locale === "ar" ? "تعذر التحميل" : "Chargement indisponible")}</AlertTitle>
             <AlertDescription>{result.status === "error" ? result.reason : ""}</AlertDescription>
           </Alert>
-        </main>
+        </div>
       ) : (
         <OrganizationFicheBoard locale={locale} query={space.selectedQuery} fiche={fiche} />
       )}

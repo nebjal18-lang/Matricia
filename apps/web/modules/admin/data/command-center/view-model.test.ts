@@ -6,10 +6,12 @@ import {
   actionStatusTone,
   dossierHref,
   formatAdminDateTime,
+  humanizeActionReason,
   isWorkOverdue,
   shortReference,
   summarizeAdminWork,
   workItemDueTone,
+  workItemOrganizationLabel,
 } from "./view-model";
 const base: AdminWorkItem = { id: "1", queueKey: "OPS", queueLabelFr: "Ops", queueLabelAr: "عمليات", organizationId: null, sourceKind: "EXCEPTION", resourceType: "case", resourceId: "1", titleFr: "Cas", titleAr: "حالة", priority: "LOW", status: "OPEN", dueAt: "2026-09-13T12:00:00Z", assignedTo: null, rowVersion: 1 };
 describe("action presentation helpers", () => {
@@ -35,7 +37,36 @@ describe("overdue-first ordering", () => {
       "2026-11-13T12:00:00Z",
     );
     expect(summary.ordered.map((item) => item.id)).toEqual(["overdue-medium", "future-critical"]);
+    expect(summary.priorityNow.map((item) => item.id)).toEqual(["overdue-medium", "future-critical"]);
+    expect(summary.remaining).toEqual([]);
     expect(summary.overdue).toBe(1);
+  });
+
+  it("keeps future medium work out of priorityNow", () => {
+    const summary = summarizeAdminWork(
+      [
+        { ...base, id: "later", priority: "MEDIUM", dueAt: "2026-11-20T12:00:00Z" },
+        { ...base, id: "high-today", priority: "HIGH", dueAt: "2026-11-13T18:00:00Z" },
+      ],
+      "2026-11-13T12:00:00Z",
+    );
+    expect(summary.priorityNow.map((item) => item.id)).toEqual(["high-today"]);
+    expect(summary.remaining.map((item) => item.id)).toEqual(["later"]);
+  });
+});
+
+describe("work presentation helpers", () => {
+  it("extracts organization from title and softens demo reasons", () => {
+    expect(
+      workItemOrganizationLabel(
+        { ...base, titleFr: "Conformité · Hôtel Bayt Al Bahar", titleAr: "امتثال · فندق" },
+        "fr",
+        null,
+      ),
+    ).toBe("Hôtel Bayt Al Bahar");
+    expect(workItemOrganizationLabel(base, "fr", "  Coop Tadla  ")).toBe("Coop Tadla");
+    expect(humanizeActionReason("Attribution démo pour parcours admin.", "fr")).toBe("Demande d’attribution à valider");
+    expect(humanizeActionReason("Restriction après revue conformité", "fr")).toBe("Restriction après revue conformité");
   });
 });
 

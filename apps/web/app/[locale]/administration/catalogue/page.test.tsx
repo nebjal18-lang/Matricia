@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const m=vi.hoisted(()=>({load:vi.fn()}));
-vi.mock("next/navigation",()=>({notFound:()=>{throw Error("NOT_FOUND");},redirect:(url:string)=>{throw Error(`REDIRECT:${url}`);}}));
+vi.mock("next/navigation",()=>({notFound:()=>{throw Error("NOT_FOUND");},redirect:(url:string)=>{throw Error(`REDIRECT:${url}`);},useRouter:()=>({replace:vi.fn(),push:vi.fn()}),usePathname:()=>"/fr/administration/catalogue"}));
 vi.mock("@/modules/shared/lib/catalogue-builder/server-repository",()=>({createServerCatalogBuilderRepository:async()=>({loadWorkspace:m.load})}));
 vi.mock("@/modules/admin/ui/admin-module-page",()=>({AdminModulePage:({children,querySuffix}:{children:ReactNode;querySuffix?:string})=><section data-query={querySuffix}>{children}</section>}));
 vi.mock("@/modules/shared/catalogue-builders/question-builder",()=>({QuestionBuilder:()=> <p>REAL_QUESTION_FORM_SCOPE</p>}));

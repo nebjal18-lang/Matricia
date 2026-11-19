@@ -17,9 +17,12 @@ describe("shared directory presentation", () => {
       displayName: "Prestataire Démo Matricia",
     })).toBe(true);
     expect(isDirectoryOrgFixture(`P05 E2E A ${id}`)).toBe(true);
+    expect(isDirectoryOrgFixture("P05 A")).toBe(true);
+    expect(isDirectoryOrgFixture("Client test A")).toBe(true);
     expect(isDirectoryOrgFixture("Atlas Franchise Conseil")).toBe(false);
-    expect(organizationDisplayLabel(`P05 E2E A ${id}`, "fr")).toBe("P05 A");
-    expect(organizationDisplayLabel(`P05 E2E A ${id} SUPERSEDED`, "fr")).toBe("P05 A");
+    expect(organizationDisplayLabel(`P05 E2E A ${id}`, "fr")).toBe("Client test A");
+    expect(organizationDisplayLabel(`P05 E2E A ${id} SUPERSEDED`, "fr")).toBe("Client test A");
+    expect(organizationDisplayLabel("P05 A", "fr")).toBe("Client test A");
     expect(personDisplayLabel({ givenName: "Karim", familyName: "Benjelloun" }, "fr")).toBe("Karim Benjelloun");
     expect(personAvatarInitial({ givenName: "Hatim", familyName: "Ahmitech", displayName: "Franchise Parcours IT" }, "fr")).toBe("H");
     expect(scopeLabelsLine(["IT", "IT:HATIM_AHMITECH · MA"], "Non défini")).toBe("IT · IT:HATIM_AHMITECH · MA");

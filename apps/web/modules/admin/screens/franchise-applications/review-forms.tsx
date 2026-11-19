@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useId, useState } from "react";
 import {
   bindFranchiseApplicationMandate,
   decideFranchiseApplicationMandate,
@@ -17,6 +17,7 @@ const control = "mt-1 min-h-11 w-full rounded-md border border-[var(--ad-border,
 
 export type FranchiseApplicationReviewCopy = {
   reason: string; reasonHint: string; company: string; documents: string; close: string; link: string; organization: string; noOrganization: string;
+  nextStepLinkOrg: string; documentsBlocked: string;
   bind: string; franchise: string; pending: string; denied: string; conflict: string; unavailable: string; saved: string; mfa: string;
   mailed: string; notMailed: string; propose: string; proposeTitle: string; itRule: string; entryFee: string; entryFeeMode: string;
   entryFeeTerm: string; mandateTerm: string; conditions: string; modes: Record<"UPFRONT" | "INSTALLMENT" | "REVENUE_WITHHOLDING", string>;
@@ -139,34 +140,63 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
   const [review, reviewAction, reviewPending] = useActionState(reviewFranchiseApplication, idle);
   const [link, linkAction, linkPending] = useActionState(linkFranchiseApplicationOrganization, idle);
   const [bind, bindAction, bindPending] = useActionState(bindFranchiseApplicationMandate, idle);
+  const [reasonValue, setReasonValue] = useState("");
+  const [reasonTouched, setReasonTouched] = useState(false);
+  const reasonInvalid = reasonTouched && reasonValue.trim().length < 3;
   const open = isFranchiseApplicationOpen(application.status);
   const needsOrganization = !application.organizationId && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(application.status);
   const canPropose = application.status === "DOCUMENT_REVIEW" && Boolean(application.organizationId) && !application.franchiseId;
   const canApprove = application.status === "CONTRACT_PENDING";
   const canResend = application.invitationPending && ["CONTRACT_PENDING", "LIBRARY_ASSIGNED"].includes(application.status);
+  const reasonFieldId = useId();
   if (!open && !needsOrganization && !canPropose && !canApprove && !canResend) return null;
   const prefix = `review-${application.id}`;
   return (
     <div className="admin-franchise-review" data-status={application.status}>
+      {needsOrganization ? (
+        <p className="admin-franchise-review__next" role="status" data-tone="high">{copy.nextStepLinkOrg}</p>
+      ) : null}
       {open ? (
-        <form action={reviewAction} className="admin-franchise-review__primary">
+        <form
+          action={reviewAction}
+          className="admin-franchise-review__primary"
+          onSubmit={(event) => {
+            setReasonTouched(true);
+            if (reasonValue.trim().length < 3) event.preventDefault();
+          }}
+        >
           <Hidden locale={locale} application={application} />
           <label htmlFor={`${prefix}-reason`} className="text-sm font-medium">{copy.reason}</label>
-          <p className="admin-franchise-review__hint">{copy.reasonHint}</p>
+          <p id={`${reasonFieldId}-hint`} className="admin-franchise-review__hint">{copy.reasonHint}</p>
           <div className="admin-franchise-review__row">
-            <input id={`${prefix}-reason`} name="reason" required minLength={3} maxLength={1000} className={control} placeholder={copy.reasonHint} />
+            <input
+              id={`${prefix}-reason`}
+              name="reason"
+              required
+              minLength={3}
+              maxLength={1000}
+              className={control}
+              placeholder={copy.reasonHint}
+              aria-describedby={`${reasonFieldId}-hint${reasonInvalid ? ` ${reasonFieldId}-error` : ""}`}
+              aria-invalid={reasonInvalid ? true : undefined}
+              value={reasonValue}
+              onChange={(event) => setReasonValue(event.target.value)}
+              onBlur={() => setReasonTouched(true)}
+            />
             <div className="admin-franchise-review__actions">
               {application.status === "REGISTERED" ? <button name="toStatus" value="COMPANY_REVIEW" disabled={reviewPending} className="client-cta">{reviewPending ? copy.pending : copy.company}</button> : null}
               {application.status === "COMPANY_REVIEW" ? <button name="toStatus" value="DOCUMENT_REVIEW" disabled={reviewPending} className="client-cta">{copy.documents}</button> : null}
               <button name="toStatus" value="CLOSED" disabled={reviewPending} className="admin-btn-outline">{copy.close}</button>
             </div>
           </div>
+          {reasonInvalid ? <p id={`${reasonFieldId}-error`} role="alert" className="text-sm text-destructive">{copy.reasonHint}</p> : null}
+          {application.status === "DOCUMENT_REVIEW" && needsOrganization ? <p className="admin-franchise-review__hint" role="status">{copy.documentsBlocked}</p> : null}
           <Notice state={review} copy={copy} />
         </form>
       ) : null}
       {needsOrganization ? (
         application.organizations.length ? (
-          <details className="admin-franchise-action">
+          <details className="admin-franchise-action" open>
             <summary>{copy.link}</summary>
             <form action={linkAction} className="admin-franchise-action__body">
               <Hidden locale={locale} application={application} />
@@ -175,12 +205,18 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
                 {application.organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
               </select>
               <label htmlFor={`${prefix}-link-reason`} className="text-sm font-medium">{copy.reason}</label>
+              <p className="admin-franchise-review__hint">{copy.reasonHint}</p>
               <input id={`${prefix}-link-reason`} name="reason" required minLength={3} maxLength={1000} className={control} />
               <button disabled={linkPending} className="client-cta w-fit">{linkPending ? copy.pending : copy.link}</button>
               <Notice state={link} copy={copy} />
             </form>
           </details>
-        ) : <p className="admin-franchise-review__hint" role="status">{copy.noOrganization}</p>
+        ) : (
+          <p className="admin-franchise-review__hint" role="status">
+            {copy.noOrganization}{" "}
+            <a className="client-text-link" href={`/${locale}/franchise/candidature`}>{locale === "ar" ? "فتح مسار المترشح" : "Ouvrir le parcours candidat"}</a>
+          </p>
+        )
       ) : null}
       {canPropose ? (
         <>

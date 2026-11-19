@@ -18,7 +18,7 @@ export default async function ContractPoliciesPage({params, searchParams}: {para
   const data = contractPolicyConsoleSchema.safeParse(result.data);
   const keys: Record<string, string> = {create: randomUUID()};
   if (data.success) for (const policy of data.data.policies) keys[policy.id] = randomUUID();
-  return context.wrap(<main className="client-page">
+  return context.wrap(<div className="client-page">
     {result.error || !data.success ? <WorkspaceFailure locale={locale} reason={adminReadFailure(result.error)} returnPath={context.selfPath} /> : <ContractPolicyPanel locale={locale} data={data.data} actorId={context.access.userId} keys={keys}/>}
-  </main>);
+  </div>);
 }

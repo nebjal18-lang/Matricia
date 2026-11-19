@@ -1,0 +1,58 @@
+import { afterEach, describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import {
+  applyDemoCatalogQuestionsWorkspace,
+  buildDemoCatalogQuestionWorkspace,
+  canApplyAdminDemoCatalogQuestions,
+  demoCatalogQuestionCounts,
+} from "./demo-catalog-questions";
+
+describe("demo catalogue questions (validation thin path)", () => {
+  afterEach(() => {
+    delete process.env.MATRICIA_DEMO_ACCESS_ENABLED;
+    delete process.env.APP_ENV;
+  });
+
+  it("reste masqué hors flag", () => {
+    process.env.APP_ENV = "development";
+    expect(canApplyAdminDemoCatalogQuestions()).toBe(false);
+    const empty = { versions: [], selectedVersionId: null, questions: [] };
+    expect(applyDemoCatalogQuestionsWorkspace(empty, null)).toEqual(empty);
+  });
+
+  it("remplit versions + questions quand le workspace est vide", () => {
+    process.env.APP_ENV = "development";
+    process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
+    const counts = demoCatalogQuestionCounts();
+    const built = buildDemoCatalogQuestionWorkspace(null);
+    expect(built.versions).toHaveLength(counts.versions);
+    expect(built.questions).toHaveLength(counts.questions);
+    expect(built.questions.every((row) => row.dataKey.startsWith("it."))).toBe(true);
+
+    const filled = applyDemoCatalogQuestionsWorkspace(
+      { versions: [], selectedVersionId: null, questions: [] },
+      null,
+    );
+    expect(filled.versions.length).toBe(1);
+    expect(filled.questions.length).toBe(5);
+
+    const thinQuestions = applyDemoCatalogQuestionsWorkspace(
+      {
+        versions: built.versions,
+        selectedVersionId: built.selectedVersionId,
+        questions: [],
+      },
+      built.selectedVersionId,
+    );
+    expect(thinQuestions.questions).toHaveLength(5);
+  });
+
+  it("branche la page catalogue/validation sur l’overlay", () => {
+    const page = readFileSync(
+      fileURLToPath(new URL("../../../../app/[locale]/administration/catalogue/validation/page.tsx", import.meta.url)),
+      "utf8",
+    );
+    expect(page).toContain("applyDemoCatalogQuestionsWorkspace");
+  });
+});

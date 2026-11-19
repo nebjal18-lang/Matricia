@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getPublicSiteUrl } from "@/modules/shared/lib/seo/metadata";
+import { DOCUMENT_LOCALE_BOOTSTRAP } from "@/modules/shared/ui/document-locale-bootstrap";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,10 +23,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Locale attributes are synchronized by DocumentLocaleSync; avoid headers() here so
-  // public routes are not forced fully dynamic at the root boundary.
+  // Default FR attributes stay static (no headers()/cookies()). A blocking bootstrap
+  // aligns lang/dir to /ar|/fr before paint; DocumentLocaleSync covers client navigations.
   return (
     <html lang="fr" dir="ltr" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: DOCUMENT_LOCALE_BOOTSTRAP }} />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   );

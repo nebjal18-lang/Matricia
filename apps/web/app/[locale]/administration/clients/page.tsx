@@ -57,7 +57,7 @@ export default async function AdminClientsPage({
       }
     >
       {directory.reason === "MFA_REQUIRED" ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert>
             <AlertTitle>{m.mfaTitle}</AlertTitle>
             <AlertDescription>
@@ -65,15 +65,15 @@ export default async function AdminClientsPage({
               <Link href={`/${locale}/securite/compte`} className="admin-soft-cta">{m.configureMfa}</Link>
             </AlertDescription>
           </Alert>
-        </main>
+        </div>
       ) : directory.reason === "FORBIDDEN" ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert variant="destructive">
             <AlertTitle>{a.forbiddenSection}</AlertTitle>
             <AlertDescription>{a.forbiddenSectionLead}</AlertDescription>
           </Alert>
-        </main>
-      ) : directory.reason ? <main className="client-page"><AdminReadError locale={locale} reason={directory.reason === "QUERY_FAILED" ? "UNAVAILABLE" : directory.reason} retryHref={`/${locale}/administration/clients${uiQuery}`} /></main> : (
+        </div>
+      ) : directory.reason ? <div className="client-page"><AdminReadError locale={locale} reason={directory.reason === "QUERY_FAILED" ? "UNAVAILABLE" : directory.reason} retryHref={`/${locale}/administration/clients${uiQuery}`} /></div> : (
         <>
           <ClientsBoard locale={locale} query={uiQuery} organizations={directory.organizations} cases={directory.cases} diagnostics={directory.diagnostics} search={query.q} filters={boardFilters} includeFixtures={includeFixtures} />
           {directory.dashboard ? (

@@ -3,11 +3,13 @@ import Link from "next/link";
 import { ArrowRight, Briefcase, Cloud, FileText, Filter, Folder, Goal, MessageSquare, Plus, Scale, Search, Target } from "lucide-react";
 import type { ReactNode } from "react";
 import { canApplyClientSpaceDemo } from "@/modules/client/data/spaces/demo";
+import { HashAwareCta, HashAwareFilterLink } from "@/modules/shared/ui/hash-aware-actions";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { OrganizationTabs } from "./organization-tabs";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function Cta({
   href,
@@ -22,10 +24,10 @@ function Cta({
 }) {
   const className = tone && !soft ? "client-kpi-cta" : soft ? "client-soft-link" : "client-ghost-link";
   return (
-    <Link href={href} className={className} data-tone={tone}>
+    <HashAwareLink href={href} className={className} data-tone={tone}>
       {children}
       <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
-    </Link>
+    </HashAwareLink>
   );
 }
 
@@ -515,7 +517,7 @@ export function MissionsBoard({ locale, query, view }: { locale: Locale; query: 
               <h2>{c.docsExchanges}</h2>
             </header>
             <nav className="client-tabs" aria-label={c.docsExchanges}>
-              <a href="#dossier-docs" aria-current="page">{c.all}</a>
+              <HashAwareLink href="#dossier-docs" aria-current="page">{c.all}</HashAwareLink>
               <Link href={`/${locale}/client/documents${query}`}>{c.docsTab}</Link>
               <Link href={`/${locale}/messagerie${query}`}>{c.messagesTab}</Link>
             </nav>
@@ -611,7 +613,7 @@ export function DocumentsBoard({ locale, query, children, documents, toHandle, r
           <Link href={`/${locale}/client/documents${query}`} className="client-text-link">{c.seeAllToHandle}</Link>
         </header>
         <nav className="client-tabs" aria-label={c.recent}>
-          <a href="#documents-recents" aria-current="page">{c.all}</a>
+          <HashAwareLink href="#documents-recents" aria-current="page">{c.all}</HashAwareLink>
           <Link href={`/${locale}/client/demandes${query}`}>{c.requestsTab}</Link>
           <Link href={`/${locale}/client/missions${query}`}>{c.missionsTab}</Link>
           <Link href={`/${locale}/client/contrats${query}`}>{c.contractsTab}</Link>
@@ -737,7 +739,7 @@ export function CompanyBoard({ locale, query, organizationName, people }: { loca
           <ul className="client-feed">
             <li><Link href={`/${locale}/confidentialite/demandes`}><span>{locale==="fr"?"Mes demandes de données":"طلباتي المتعلقة بالبيانات"}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/securite/compte${query}`}><span>{c.accountSec}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
-            <li><Link href={`/${locale}/securite/sessions`}><span>{c.sessions}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
+            <li><Link href={`/${locale}/securite/sessions${query}`}><span>{c.sessions}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/notifications${query}`}><span>{c.notif}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
           </ul>
         </article>
@@ -871,9 +873,9 @@ export function MessagesBoard({ locale, query, search, children, threads,serverF
 
 export function SpaceActions({ href, label, variant = "primary" }: { href: string; label: string; variant?: "primary" | "soft" | "ghost" }) {
   const className = variant === "ghost" ? "client-ghost-link" : variant === "soft" ? "client-soft-link" : "client-cta";
-  return <Link href={href} className={className}><Plus className="size-4" aria-hidden />{label}</Link>;
+  return <HashAwareCta href={href} label={label} className={className} withPlus />;
 }
 
 export function SpaceFilters({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="client-ghost-link"><Filter className="size-4" aria-hidden />{label}</Link>;
+  return <HashAwareFilterLink href={href} label={label} className="client-ghost-link" />;
 }

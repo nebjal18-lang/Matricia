@@ -24,6 +24,11 @@ describe("central fiscal dashboard", () => {
     expect(await loadMoroccoTaxDashboard()).toEqual({ status: "error", reason: "FORBIDDEN" });
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
+  it("lets MATRICIA_ADMIN open the dated tax engine like the SQL gate", async () => {
+    mocks.access.mockResolvedValue({ status: "ok", roles: new Set(["MATRICIA_ADMIN"]), requirementSatisfied: true, client: { rpc: mocks.rpc } });
+    mocks.rpc.mockImplementation(async (name: string) => name === "get_morocco_tax_context_v1" ? { data: { kind: "PLATFORM" }, error: null } : { data: { categories: [], rules: [] }, error: null });
+    expect(await loadMoroccoTaxDashboard()).toMatchObject({ status: "success" });
+  });
   it("keeps an authentication outage technical instead of asking for another login", async () => {
     mocks.access.mockResolvedValue({ status: "error", reason: "QUERY_FAILED" });
     expect(await loadMoroccoTaxDashboard()).toEqual({ status: "error", reason: "QUERY_FAILED" });
