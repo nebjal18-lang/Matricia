@@ -65,16 +65,12 @@ export default async function AdminFinancePage({
       hubGroup="finance"
       hubMode="strip"
     >
-      <AdminStep11Gate locale={locale} query={orgQuery} current="finance" />
-
       <div className="admin-finance-workspace space-y-6">
         <nav className="admin-finance-tabs" aria-label={m.nav}>
           <Link href={`/${locale}/administration/parcours${orgQuery}`} className="client-ghost-link">{m.tabMilestones}</Link>
           <a href="#finance-aujourdhui" className="admin-soft-cta" aria-current="page">{m.tabMoney}</a>
           <a href="#cloture" className="client-ghost-link">{m.tabClosure}</a>
         </nav>
-
-        <FinanceAuditOrganizationSelector locale={locale} context={organizationContext} />
 
         {result.status === "error" ? (
           <Alert variant="destructive">
@@ -96,6 +92,14 @@ export default async function AdminFinancePage({
             identity={{ idempotencyKey: randomUUID(), correlationId: randomUUID() }}
           />
         )}
+
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{ar ? "الخطوة 11 والمؤسسة المرجعية" : "Étape 11 et entreprise de référence"}</summary>
+          <div className="mt-4 space-y-4">
+            <AdminStep11Gate locale={locale} query={orgQuery} current="finance" />
+            <FinanceAuditOrganizationSelector locale={locale} context={organizationContext} />
+          </div>
+        </details>
 
         <details className="client-card p-4">
           <summary className="min-h-11 cursor-pointer font-semibold">{m.booksTitle}</summary>

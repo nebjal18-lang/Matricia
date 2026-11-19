@@ -64,7 +64,12 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
       hubGroup="catalog"
       hubMode="strip"
     >
-      <AdminStep1Gate locale={locale} query={contextQuery} current="catalogue" />
+      <details className="client-card mb-4 p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{locale === "ar" ? "الخطوة 1 — تجهيز المنصة" : "Étape 1 — préparer la plateforme"}</summary>
+        <div className="mt-4">
+          <AdminStep1Gate locale={locale} query={contextQuery} current="catalogue" />
+        </div>
+      </details>
       <nav className="client-tabs mb-2" aria-label={locale === "ar" ? "خطوات الدليل" : "Étapes catalogue"}>
         <a href={`${catalogueHref}#domaines`}>{locale === "ar" ? "1. السياق" : "1. Contexte"}</a>
         <a href={`${catalogueHref}#questions`}>{locale === "ar" ? "2. التركيب" : "2. Composer"}</a>
@@ -88,6 +93,37 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
         </Alert>
       ) : (
         <>
+          {ready && selectedLibrary && selectedService ? (
+            <details id="domaines" className="client-card scroll-mt-24 p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">
+                {presentCatalogEntityLabel(locale, selectedLibrary)} · {presentCatalogEntityLabel(locale, selectedService)}
+              </summary>
+              <div className="mt-4">
+                <CatalogueContextForm
+                  locale={locale}
+                  organizationId={queryValue(query.organizationId)}
+                  libraryId={selectedLibrary.id}
+                  serviceId={selectedService.id}
+                  libraries={result.value.libraries.map((library) => ({
+                    id: library.id,
+                    label: presentCatalogEntityLabel(locale, library),
+                  }))}
+                  services={result.value.services.map((service) => ({
+                    id: service.id,
+                    label: presentCatalogEntityLabel(locale, service),
+                  }))}
+                  labels={{
+                    library: messages.library,
+                    service: messages.service,
+                    chooseLibrary: messages.chooseLibrary,
+                    chooseService: messages.chooseService,
+                    chooseServiceFirst: messages.chooseServiceFirst,
+                    open: messages.open,
+                  }}
+                />
+              </div>
+            </details>
+          ) : (
           <Card id="domaines" className="scroll-mt-24 data-[catalog-focus=true]:ring-2 data-[catalog-focus=true]:ring-ring">
             <CardHeader>
               <CardTitle><h2>{messages.selection}</h2></CardTitle>
@@ -121,7 +157,7 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
               {selectedLibrary && result.value.services.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">{messages.noServices}</p> : null}
             </CardContent>
           </Card>
-
+          )}
           {ready && selectedLibrary && selectedService ? (
             <>
               <details id="questionnaires" className="client-card scroll-mt-24 space-y-4 p-4">

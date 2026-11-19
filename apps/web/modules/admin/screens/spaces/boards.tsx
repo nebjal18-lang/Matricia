@@ -485,8 +485,8 @@ export function OrganizationFicheBoard({
         overview={(
           <>
       <section className="admin-fiche-grid">
-        <article className="client-card" data-tone="violet">
-          <header><h2>{c.info}</h2></header>
+        <details className="client-card p-4" data-tone="violet">
+          <summary className="min-h-11 cursor-pointer font-semibold">{c.info}</summary>
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
             <div><dt>{locale === "ar" ? "الاسم التجاري" : "Nom commercial"}</dt><dd>{org.display_name || unknown}</dd></div>
@@ -501,7 +501,7 @@ export function OrganizationFicheBoard({
             <div><dt>{locale === "ar" ? "السجل التجاري (RC)" : "Registre de commerce (RC)"}</dt><dd dir="ltr">{org.client_legal_profile?.rc_number ?? unknown}</dd></div>
             <div><dt>{locale === "ar" ? "الممثل" : "Représentant"}</dt><dd>{org.client_legal_profile?.representative_name ?? unknown}</dd></div>
           </dl>
-        </article>
+        </details>
         <details className="client-card p-4" data-tone="sky">
           <summary className="min-h-11 cursor-pointer font-semibold">{c.journey}</summary>
           <ol className="admin-journey">

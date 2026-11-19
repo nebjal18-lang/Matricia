@@ -751,15 +751,15 @@ export function ClientFicheBoard({
           </dl>
           <Cta href={`/${locale}/administration/entreprises/${org.id}/modifier${query}`}>{a.seeProfile}</Cta>
         </article>
-        <article className="client-card">
-          <header><h2>{c.compliance}</h2></header>
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{c.compliance}</summary>
           <dl className="admin-dl">
             <div><dt>{c.state}</dt><dd>{localizeStatus(org.status, locale)}</dd></div>
             <div><dt>KYC</dt><dd>{compliance?.status ? (complianceMessages.statuses[compliance.status as keyof typeof complianceMessages.statuses] ?? compliance.status) : "—"}</dd></div>
             <div><dt>{c.documents}</dt><dd>{compliance?.document_count ?? "—"}</dd></div>
           </dl>
           <Cta href={complianceHref}>{a.seeCompliance}</Cta>
-        </article>
+        </details>
         <article className="client-card">
           <header><h2>{locale === "ar" ? "إجراءات الامتثال المطلوبة" : "Actions de conformité requises"}</h2></header>
           {compliance ? compliance.required_actions.length ? <ul className="client-feed">{compliance.required_actions.map((action)=><li key={action.id}><span>{locale === "ar" ? action.label_ar : action.label_fr}</span></li>)}</ul> : <p>{locale === "ar" ? "لا توجد عوائق أو أسئلة امتثال مفتوحة في هذا الملف." : "Aucune anomalie bloquante ni question de conformité ouverte dans ce dossier."}</p> : <p>{locale === "ar" ? "ملف الامتثال غير متاح." : "Dossier de conformité non disponible."}</p>}

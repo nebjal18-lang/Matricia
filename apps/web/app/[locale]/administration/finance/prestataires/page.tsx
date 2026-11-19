@@ -95,47 +95,37 @@ export default async function ProviderFinanceAdminPage({
       hubGroup="finance"
       hubMode="strip"
     >
-      <AdminStep11Gate locale={locale} query={org ? `?organizationId=${org}` : ""} current="prestataires" />
       <div className="client-page space-y-6">
-      <section className="admin-panel space-y-3" aria-labelledby="provider-finance-context">
-        <h2 id="provider-finance-context" className="text-xl font-semibold">
-          {tr("1. Choisir le prestataire", "1. اختيار مقدّم الخدمة")}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {tr(
-            "Confirmez le prestataire pour ouvrir les formulaires d’allocation et de configuration juste en dessous.",
-            "أكّدوا مقدّم الخدمة لفتح نماذج التخصيص والإعداد مباشرة أسفل الصفحة.",
-          )}
-        </p>
-        <ContextUnlockForm
-          locale={locale}
-          selectedId={org}
-          options={c.organizations.map((row) => ({ id: row.id, label: row.name }))}
-          landHash="#allocation"
-          labels={{
-            field: tr("Prestataire", "مقدم الخدمة"),
-            choose: tr("Choisir un prestataire", "اختيار مقدّم خدمة"),
-            submit: tr("Ouvrir le dossier", "فتح الملف"),
-            pending: tr("Ouverture…", "جارٍ الفتح…"),
-            ready: tr(
-              "Dossier prêt. Les actions d’allocation et de configuration sont ouvertes ci-dessous.",
-              "الملف جاهز. إجراءات التخصيص والإعداد مفتوحة أسفل الصفحة.",
-            ),
-            go: tr("Aller aux formulaires", "الانتقال إلى النماذج"),
-          }}
-        />
-      </section>
-
       {org ? (
         <>
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{tr("Changer de prestataire", "تغيير مقدّم الخدمة")}</summary>
+          <div className="mt-4 space-y-4">
+            <AdminStep11Gate locale={locale} query={`?organizationId=${org}`} current="prestataires" />
+            <ContextUnlockForm
+              locale={locale}
+              selectedId={org}
+              options={c.organizations.map((row) => ({ id: row.id, label: row.name }))}
+              landHash="#allocation"
+              labels={{
+                field: tr("Prestataire", "مقدم الخدمة"),
+                choose: tr("Choisir un prestataire", "اختيار مقدّم خدمة"),
+                submit: tr("Ouvrir le dossier", "فتح الملف"),
+                pending: tr("Ouverture…", "جارٍ الفتح…"),
+                ready: tr("Prestataire confirmé.", "تم تأكيد مقدّم الخدمة."),
+                go: tr("Aller à l’allocation", "الانتقال إلى التخصيص"),
+              }}
+            />
+          </div>
+        </details>
           <section id="allocation" className="scroll-mt-24 space-y-4">
             <div className="admin-section-head">
               <div>
-                <h2>{tr("2. Actions disponibles", "2. الإجراءات المتاحة")}</h2>
+                <h2>{tr("Allouer les paiements aux factures", "تخصيص المدفوعات للفواتير")}</h2>
                 <p>
                   {tr(
-                    "Allouez les paiements aux factures, puis configurez la clôture. Le détail du dossier suit ensuite.",
-                    "خصّصوا المدفوعات للفواتير ثم أعدّوا الإغلاق. تفاصيل الملف تأتي بعد ذلك.",
+                    "Affectez un paiement reçu à une facture ouverte.",
+                    "اربطوا دفعة مستلمة بفاتورة مفتوحة.",
                   )}
                 </p>
               </div>
@@ -198,7 +188,29 @@ export default async function ProviderFinanceAdminPage({
             </div>
           </details>
         </>
-      ) : null}
+      ) : (
+        <>
+          <AdminStep11Gate locale={locale} current="prestataires" />
+          <section className="admin-panel space-y-3" aria-labelledby="provider-finance-context">
+            <h2 id="provider-finance-context">{tr("1. Choisir le prestataire", "1. اختيار مقدّم الخدمة")}</h2>
+            <p className="text-sm text-muted-foreground">{tr("Confirmez le prestataire pour ouvrir l’allocation.", "أكّدوا مقدّم الخدمة لفتح التخصيص.")}</p>
+            <ContextUnlockForm
+              locale={locale}
+              selectedId={org}
+              options={c.organizations.map((row) => ({ id: row.id, label: row.name }))}
+              landHash="#allocation"
+              labels={{
+                field: tr("Prestataire", "مقدم الخدمة"),
+                choose: tr("Choisir un prestataire", "اختيار مقدّم خدمة"),
+                submit: tr("Ouvrir le dossier", "فتح الملف"),
+                pending: tr("Ouverture…", "جارٍ الفتح…"),
+                ready: tr("Prestataire confirmé.", "تم تأكيد مقدّم الخدمة."),
+                go: tr("Aller à l’allocation", "الانتقال إلى التخصيص"),
+              }}
+            />
+          </section>
+        </>
+      )}
       </div>
     </AdminModulePage>
   );

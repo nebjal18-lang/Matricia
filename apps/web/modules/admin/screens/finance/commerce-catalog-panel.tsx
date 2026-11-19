@@ -98,9 +98,8 @@ export function CommerceCatalogPanel({
 
       {canWrite ? (
         <div className="admin-finance-actions space-y-4">
-          <h4 className="admin-finance-actions-title">{locale === "ar" ? "إنشاء ونشر" : "Créer et publier"}</h4>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Form title={m.createPack} action={createCreditPackAction} keyValue={keys.pack} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
+          <h4 className="admin-finance-actions-title">{m.createPack}</h4>
+          <Form title={m.createPack} action={createCreditPackAction} keyValue={keys.pack} locale={locale} auditOrganizationId={auditOrganizationId!} m={m}>
               <Field label={m.packCode}><Input name="code" required className={control} dir="ltr" pattern="[A-Za-z][A-Za-z0-9_]{2,63}" /></Field>
               <Field label={m.nameFr}><Input name="nameFr" required minLength={2} className={control} /></Field>
               <Field label={m.nameAr}><Input name="nameAr" required minLength={2} className={control} /></Field>
@@ -109,10 +108,18 @@ export function CommerceCatalogPanel({
               <Field label={m.currency}><Input name="currency" required defaultValue="MAD" maxLength={3} className={control} dir="ltr" /></Field>
               <Field label={m.validityDays}><Input name="validityDays" required inputMode="numeric" pattern="[1-9][0-9]*" className={control} dir="ltr" defaultValue="365" /></Field>
             </Form>
+            <details className="client-card p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{m.activatePack}</summary>
+              <div className="mt-4">
             <Form title={m.activatePack} action={activateCreditPackAction} keyValue={keys.activatePack} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={draftPacks.length === 0}>
               <Select name="packVersionId" label={m.packs} values={draftPacks.map((item) => item.id)} labels={draftPacks.map((item) => `${item.code} v${item.version}`)} />
             </Form>
-            <aside className="admin-notice lg:col-span-2 space-y-1" data-tone="sky" role="note">
+              </div>
+            </details>
+            <details className="client-card p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{m.promotions}</summary>
+              <div className="mt-4 grid gap-4">
+            <aside className="admin-notice space-y-1" data-tone="sky" role="note">
               <strong>{name("Achats de packs vérifiés", "مشتريات حزم متحققة")}</strong>
               <p>
                 {name(
@@ -145,7 +152,8 @@ export function CommerceCatalogPanel({
             <Form title={m.activateParameter} action={activatePlatformParameterAction} keyValue={keys.activateParameter} locale={locale} auditOrganizationId={auditOrganizationId!} m={m} disabled={draftParameters.length === 0}>
               <Select name="parameterVersionId" label={m.parameters} values={draftParameters.map((item) => item.id)} labels={draftParameters.map((item) => `${item.parameter_key} v${item.version}`)} />
             </Form>
-          </div>
+              </div>
+            </details>
         </div>
       ) : null}
 
@@ -173,6 +181,9 @@ export function CommerceCatalogPanel({
               ))}
             </CatalogBlock>
           ) : null}
+          <details className="client-card p-4">
+            <summary className="min-h-11 cursor-pointer font-semibold">{m.promotions} · {m.parameters}</summary>
+            <div className="mt-4 space-y-4">
           {catalog.promotions.length ? (
             <CatalogBlock title={m.promotions}>
               {catalog.promotions.map((item) => (
@@ -199,6 +210,8 @@ export function CommerceCatalogPanel({
               ))}
             </CatalogBlock>
           ) : null}
+            </div>
+          </details>
         </div>
       )}
     </div>
