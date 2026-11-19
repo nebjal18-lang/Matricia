@@ -40,10 +40,19 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
   if (space === "providers") {
     return [
       card(t(locale, "État du dossier", "حالة الملف"), statusOf(row.cells[2] ?? row.status, locale), t(locale, "Informations clés du prestataire.", "المعلومات الأساسية لمقدم الخدمة."), "mint"),
-      card(t(locale, "Activité", "النشاط"), row.cells[1] ?? "—", t(locale, "Prestataire opérationnel sur la plateforme.", "مقدم خدمة عامل على المنصة."), "sky"),
-      card(t(locale, "Qualification", "التأهيل"), row.cells[2] ?? "—", t(locale, "La qualification atteste d’une évaluation humaine.", "التأهيل يشهد تقييماً بشرياً."), "violet"),
-      card(t(locale, "Capacité & disponibilité", "القدرة والتوفر"), row.cells[3] ?? "—", t(locale, "Capacité à répondre aux sollicitations.", "القدرة على الاستجابة للطلبات."), "mint"),
+      card(t(locale, "Activité", "النشاط"), row.cells[1] ?? row.extras?.sector ?? "—", t(locale, "Prestataire opérationnel sur la plateforme.", "مقدم خدمة عامل على المنصة."), "sky"),
+      card(t(locale, "Identité légale", "الهوية القانونية"), row.extras?.ice ? `ICE ${row.extras.ice}` : (row.cells[2] ?? "—"), row.extras?.legalName ?? t(locale, "La qualification atteste d’une évaluation humaine.", "التأهيل يشهد تقييماً بشرياً."), "violet"),
+      card(t(locale, "Capacité & documents", "القدرة والوثائق"), row.extras?.documentCount ?? row.cells[3] ?? "—", t(locale, "Pièces de validation du sous-traitant.", "وثائق تحقق المقاول."), "mint"),
       card(t(locale, "Actions requises", "إجراءات مطلوبة"), row.treat ? t(locale, "À traiter", "للمعالجة") : t(locale, "Aucune en attente", "لا شيء معلّق"), t(locale, "File d’action du dossier.", "طابور إجراء الملف."), "peach"),
+    ];
+  }
+  if (space === "franchises") {
+    return [
+      card(t(locale, "Franchisé", "صاحب الامتياز"), row.title, row.extras?.legalName ?? "—", "mint"),
+      card(t(locale, "Territoire", "الإقليم"), row.extras?.territory ?? row.cells[2] ?? "—", row.extras?.city ?? "—", "sky"),
+      card(t(locale, "Secteur", "القطاع"), row.extras?.sector ?? row.cells[1] ?? "—", row.extras?.manager ?? "—", "violet"),
+      card(t(locale, "Identifiants", "المعرّفات"), row.extras?.ice ? `ICE ${row.extras.ice}` : "—", row.extras?.tradeRegister ? `RC ${row.extras.tradeRegister}` : "—", "mint"),
+      card(t(locale, "Documents", "الوثائق"), row.extras?.documentCount ?? "—", t(locale, "Dossier de validation franchise.", "ملف تحقق الامتياز."), "peach"),
     ];
   }
   if (space === "diagnostics") {
@@ -57,20 +66,29 @@ export function spaceDetailCards(locale: Locale, space: AdminSpaceId, row: Space
   }
   if (space === "demandes") {
     return [
-      card(t(locale, "Organisation et demandeur", "المؤسسة ومقدم الطلب"), row.cells[1] ?? row.title, `${columns[0] ?? ""} · ${row.cells[0] ?? "—"}`, "violet"),
-      card(t(locale, "Objet de la demande", "موضوع الطلب"), row.cells[2] ?? "—", t(locale, "Description cadrée du besoin.", "وصف مؤطر للحاجة."), "mint"),
-      card(t(locale, "Domaine / service", "المجال / الخدمة"), row.cells[3] ?? "—", t(locale, "Classification catalogue.", "تصنيف الدليل."), "sky"),
-      card(t(locale, "Complétude", "الاكتمال"), row.cells[5] ?? "—", t(locale, "Points manquants à compléter.", "نقاط ناقصة للاستكمال."), "peach"),
-      card(t(locale, "Consultation et offres", "الاستشارة والعروض"), `${row.cells[6] ?? "—"} · ${row.cells[7] ?? "—"}`, statusOf(row.status, locale), "violet"),
+      card(t(locale, "Organisation et demandeur", "المؤسسة ومقدم الطلب"), row.cells[0] ?? row.title, statusOf(row.status, locale), "violet"),
+      card(t(locale, "Besoin", "الحاجة"), row.cells[1] ?? "—", t(locale, "Titre métier de la demande.", "العنوان المهني للطلب."), "mint"),
+      card(t(locale, "Domaine / service", "المجال / الخدمة"), row.cells[2] ?? "—", t(locale, "Classification catalogue.", "تصنيف الدليل."), "sky"),
+      card(t(locale, "Complétude", "الاكتمال"), row.cells[4] ?? "—", t(locale, "Points manquants à compléter.", "نقاط ناقصة للاستكمال."), "peach"),
+      card(t(locale, "Consultation et offres", "الاستشارة والعروض"), `${row.cells[5] ?? "—"} · ${row.cells[6] ?? "—"}`, row.cells[3] ?? "—", "violet"),
     ];
   }
   if (space === "matching") {
     return [
-      card(t(locale, "Demande", "الطلب"), row.cells[0] ?? row.title, t(locale, "Critères de matching explicables.", "معايير مطابقة قابلة للتفسير."), "violet"),
+      card(t(locale, "Organisation", "المؤسسة"), row.cells[0] ?? row.title, row.cells[1] ?? "—", "violet"),
       card(t(locale, "Prestataires éligibles", "المؤهلون"), row.cells[2] ?? "—", t(locale, "Filtrage par qualification et capacité.", "تصفية حسب التأهيل والقدرة."), "mint"),
-      card(t(locale, "Exclusions", "الاستبعادات"), row.cells[3] ?? "—", t(locale, "Conflits et règles d’exclusion.", "تعارضات وقواعد الاستبعاد."), "peach"),
-      card(t(locale, "Revue humaine", "مراجعة بشرية"), row.cells[4] ?? "—", t(locale, "Validation avant invitation.", "مصادقة قبل الدعوة."), "sky"),
-      card(t(locale, "Consultation", "الاستشارة"), statusOf(row.cells[6] ?? row.status, locale), t(locale, "Suivi des réponses.", "متابعة الردود."), "violet"),
+      card(t(locale, "Score", "الدرجة"), row.cells[4] ?? "—", t(locale, "Meilleur score candidat (basis points).", "أفضل درجة مرشح."), "sky"),
+      card(t(locale, "Exclusions", "الاستبعادات"), row.cells[5] ?? row.cells[3] ?? "—", t(locale, "Conflits et règles d’exclusion.", "تعارضات وقواعد الاستبعاد."), "peach"),
+      card(t(locale, "Consultation", "الاستشارة"), statusOf(row.cells[8] ?? row.status, locale), `${row.cells[6] ?? "—"} · ${row.cells[7] ?? "—"}`, "violet"),
+    ];
+  }
+  if (space === "avenants") {
+    return [
+      card(t(locale, "Avenant", "الملحق"), row.cells[0] ?? row.title, row.cells[1] ?? "—", "violet"),
+      card(t(locale, "Objet", "الموضوع"), row.cells[2] ?? "—", t(locale, "Motif de modification du périmètre.", "سبب تعديل النطاق."), "mint"),
+      card(t(locale, "Delta prix", "فرق السعر"), row.cells[3] ?? "—", t(locale, "Variation en unités mineures exactes.", "التغير بوحدات صغرى دقيقة."), "peach"),
+      card(t(locale, "Signature", "التوقيع"), row.cells[6] ?? "—", row.cells[5] ?? "—", "sky"),
+      card(t(locale, "Activation", "التفعيل"), statusOf(row.status, locale), row.cells[7] ?? "—", "violet"),
     ];
   }
   if (space === "litiges") {
@@ -99,14 +117,37 @@ export function spaceSectionCards(locale: Locale, space: AdminSpaceId, row: Spac
     tone: "sky" as const,
     items: [{ label, value: row.cells[index + 5] ?? "—" }],
   }));
-  if (space === "providers") {
+  if (space === "providers" || space === "franchises") {
     return [
-      { title: t(locale, "Documents", "الوثائق"), tone: "violet", items: [{ label: t(locale, "Coffre", "الخزينة"), value: row.cells[4] ?? "—" }] },
-      { title: t(locale, "Services proposés", "الخدمات المقترحة"), tone: "mint", items: [{ label: t(locale, "Déclaration", "التصريح"), value: row.cells[1] ?? "—" }] },
-      { title: t(locale, "Missions", "المهام"), tone: "sky", items: [{ label: t(locale, "Activité", "النشاط"), value: row.cells[5] ?? "—" }] },
-      { title: t(locale, "Facturation", "الفوترة"), tone: "peach", items: [{ label: t(locale, "État", "الحالة"), value: statusOf(row.status, locale) }] },
-      { title: t(locale, "Réputation", "السمعة"), tone: "violet", items: [{ label: t(locale, "Suivi", "المتابعة"), value: row.extras?.partner ?? "—" }] },
-      { title: t(locale, "Audit", "التدقيق"), tone: "mint", items: [{ label: t(locale, "Traçabilité", "التتبع"), value: row.extras?.rowVersion ?? "—" }] },
+      {
+        title: t(locale, "Coordonnées", "بيانات الاتصال"),
+        tone: "sky",
+        items: [
+          { label: t(locale, "Adresse", "العنوان"), value: row.extras?.address ?? "—" },
+          { label: "Email", value: row.extras?.email ?? "—" },
+          { label: t(locale, "Téléphone", "الهاتف"), value: row.extras?.phone ?? "—" },
+          { label: t(locale, "Gérant", "المسير"), value: row.extras?.manager ?? "—" },
+        ],
+      },
+      {
+        title: t(locale, "Identifiants légaux", "المعرّفات القانونية"),
+        tone: "mint",
+        items: [
+          { label: "ICE", value: row.extras?.ice ?? "—" },
+          { label: "IF", value: row.extras?.taxId ?? "—" },
+          { label: "RC", value: row.extras?.tradeRegister ?? "—" },
+          { label: "RIB", value: row.extras?.rib ?? "—" },
+          { label: "CNSS", value: row.extras?.cnss ?? "—" },
+        ],
+      },
+      {
+        title: t(locale, "Documents de validation", "وثائق التحقق"),
+        tone: "violet",
+        items: [{ label: t(locale, "Pièces", "الوثائق"), value: row.extras?.documents ?? row.cells[4] ?? "—" }],
+      },
+      { title: t(locale, "Services / secteur", "الخدمات / القطاع"), tone: "peach", items: [{ label: t(locale, "Secteur", "القطاع"), value: row.extras?.sector ?? row.cells[1] ?? "—" }] },
+      { title: t(locale, "État", "الحالة"), tone: "sky", items: [{ label: t(locale, "Validation", "التحقق"), value: statusOf(row.status, locale) }] },
+      { title: t(locale, "Audit", "التدقيق"), tone: "mint", items: [{ label: t(locale, "Traçabilité", "التتبع"), value: row.extras?.rowVersion ?? row.extras?.documentCount ?? "—" }] },
     ];
   }
   if (rest.length > 0) return rest;
@@ -157,7 +198,7 @@ export function decisionGuards(locale: Locale, space: AdminSpaceId): Array<{ tit
   };
   const audit = {
     title: t(locale, "Journal d’audit", "سجل التدقيق"),
-    body: t(locale, "Le journal d’audit et l’Event Outbox enregistrent l’action.", "يسجَّل الإجراء في سجل التدقيق وصندوق الأحداث."),
+    body: t(locale, "Le journal d’audit et la file d’événements enregistrent l’action.", "يسجَّل الإجراء في سجل التدقيق وفي طابور الأحداث."),
     tone: "ok" as const,
   };
   if (space === "qualification" || space === "gouvernance" || space === "litiges") {

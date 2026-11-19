@@ -77,7 +77,7 @@ export default async function SubscriptionPage({ params, searchParams }: { param
           })),
         }}
       >
-        <details className="client-ops" id="plans" open>
+        <details className="client-ops" open>
           <summary>{messages.plans}</summary>
           <SubscriptionPanel dateLabels={subscriptionDateLabels(result.dashboard,locale)} dashboard={result.dashboard} locale={locale} messages={messages} keys={keys} />
         </details>

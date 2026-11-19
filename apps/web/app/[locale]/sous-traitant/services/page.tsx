@@ -30,7 +30,7 @@ export default async function ProviderServicesPage({ params, searchParams }: { p
       {result.status === "success" ? (
         <ServicesBoard regions={result.dashboard.regionCodes} interventionModes={result.dashboard.interventionModes} locale={locale} query={boardQuery} services={services} domain={domain || undefined} />
       ) : (
-        <ProviderReadState locale={locale} state={contextState ?? (result.reason === "FORBIDDEN" ? "forbidden" : result.reason === "NO_ORGANIZATION" || result.reason === "NO_PROVIDER_ORGANIZATION" ? "no-organization" : "unavailable")} retryHref={`/${locale}/sous-traitant/services${space.selectedQuery}`} reason={space.readError ?? result.reason} />
+        <ProviderReadState locale={locale} state={contextState ?? (result.reason === "NO_ORGANIZATION" || result.reason === "NO_PROVIDER_ORGANIZATION" ? "no-organization" : "unavailable")} retryHref={`/${locale}/sous-traitant/services${space.selectedQuery}`} reason={space.readError ?? result.reason} />
       )}
     </ProviderAppShell>
   );

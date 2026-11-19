@@ -286,6 +286,17 @@ export function PerimeterBoard({ locale, query, mandateName, view, board, organi
           </nav>
           {view === "utilisateurs" ? (
             <>
+              <div id="invite" className="scroll-mt-24 space-y-3">
+                {demo.canWrite && (organizationId || organizationIdFromQuery(query)) ? (
+                  <FranchiseMandateInviteForm locale={locale} organizationId={organizationId || organizationIdFromQuery(query)} />
+                ) : (
+                  <p role="status" className="client-access-note">
+                    {locale === "ar"
+                      ? "اختاروا مؤسسة في أعلى الصفحة لفتح نموذج الدعوة."
+                      : "Choisissez une organisation en haut de page pour ouvrir le formulaire d’invitation."}
+                  </p>
+                )}
+              </div>
               {demo.users.length === 0 ? <p>{c.emptyUsers}</p> : (
                 <ul className="client-feed">
                   {demo.users.map((row) => (
@@ -293,9 +304,6 @@ export function PerimeterBoard({ locale, query, mandateName, view, board, organi
                   ))}
                 </ul>
               )}
-              {demo.canWrite && (organizationId || organizationIdFromQuery(query)) ? (
-                <FranchiseMandateInviteForm locale={locale} organizationId={organizationId || organizationIdFromQuery(query)} />
-              ) : null}
             </>
           ) : (
             <ul className="client-feed">
@@ -393,8 +401,21 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
         </nav>
         <section className="franchise-dossier-grid">
           <article className="client-card">
-            {!selected.linkedOrganizationId?<p role="status">{locale==="ar"?"هذا عميل محتمل غير مرتبط بعد بمنظمة مقدم خدمة. لا تُنسب إليه أي وثيقة أو قدرة.":"Ce prospect n’est pas encore relié à une organisation prestataire. Aucune qualification, pièce ou disponibilité ne lui est attribuée."}</p>:null}
-            {demo.canWrite&&selected.rowVersion?<FranchiseProviderLinkForm locale={locale} prospectId={selected.id} rowVersion={selected.rowVersion} organizationId={organizationId||organizationIdFromQuery(query)||null} options={demo.providerDossiers}/>:null}
+            <div id="dossier-actions" className="scroll-mt-24 mb-4 space-y-3 rounded-xl border p-4">
+              <h2 className="text-lg font-semibold">{locale === "ar" ? "إجراءات الملف" : "Actions du dossier"}</h2>
+              {!selected.linkedOrganizationId?<p role="status">{locale==="ar"?"هذا عميل محتمل غير مرتبط بعد بمنظمة مقدم خدمة. لا تُنسب إليه أي وثيقة أو قدرة.":"Ce prospect n’est pas encore relié à une organisation prestataire. Aucune qualification, pièce ou disponibilité ne lui est attribuée."}</p>:null}
+              {demo.canWrite&&selected.rowVersion?<FranchiseProviderLinkForm locale={locale} prospectId={selected.id} rowVersion={selected.rowVersion} organizationId={organizationId||organizationIdFromQuery(query)||null} options={demo.providerDossiers}/>:null}
+              {(view === "qualification" || !view) && canMutateFranchiseFolder(selected.id, demo.canWrite&&Boolean(selected.rowVersion)) && selected.rowVersion ? (
+                <FranchiseFolderAdvanceForm locale={locale} organizationId={organizationIdFromQuery(query) || null} prospectId={selected.id} stage={selected.stage ?? "SENT"} rowVersion={selected.rowVersion} />
+              ) : null}
+              {(view === "qualification" || !view) && demo.permissions.canDecideQualifications && canMutateFranchiseFolder(selected.id, demo.canWrite && Boolean(selected.rowVersion)) ? (
+                <FranchiseQualificationDecisionForm
+                  locale={locale}
+                  organizationId={organizationId || organizationIdFromQuery(query) || null}
+                  qualifications={qualifications.filter((row) => row.rowVersion)}
+                />
+              ) : null}
+            </div>
             {view === "services" || view === "qualification" || !view ? (
               <header><h2>{view === "services" ? c.servicesTab : c.stepQual}</h2></header>
             ) : view === "historique" ? (
@@ -457,21 +478,9 @@ export function NetworkBoard({ locale, query, mandateName, view, itemId, search,
               </>
             ) : null}
             {view === "qualification" || !view ? (
-              <>
-                {canMutateFranchiseFolder(selected.id, demo.canWrite&&Boolean(selected.rowVersion)) && selected.rowVersion ? (
-                  <FranchiseFolderAdvanceForm locale={locale} organizationId={organizationIdFromQuery(query) || null} prospectId={selected.id} stage={selected.stage ?? "SENT"} rowVersion={selected.rowVersion} />
-                ) : null}
-                {canMutateFranchiseFolder(selected.id, demo.canWrite&&Boolean(selected.rowVersion)) ? (
-                  <FranchiseFolderActivityForm locale={locale} organizationId={organizationIdFromQuery(query) || null} prospectId={selected.id} defaultType="NOTE" />
-                ) : null}
-                {demo.permissions.canDecideQualifications && canMutateFranchiseFolder(selected.id, demo.canWrite && Boolean(selected.rowVersion)) ? (
-                  <FranchiseQualificationDecisionForm
-                    locale={locale}
-                    organizationId={organizationId || organizationIdFromQuery(query) || null}
-                    qualifications={qualifications.filter((row) => row.rowVersion)}
-                  />
-                ) : null}
-              </>
+              canMutateFranchiseFolder(selected.id, demo.canWrite&&Boolean(selected.rowVersion)) ? (
+                <FranchiseFolderActivityForm locale={locale} organizationId={organizationIdFromQuery(query) || null} prospectId={selected.id} defaultType="NOTE" />
+              ) : null
             ) : null}
             {view === "capacite" && canMutateFranchiseFolder(selected.id, demo.canWrite&&Boolean(selected.rowVersion)) ? (
               <FranchiseFolderActivityForm locale={locale} organizationId={organizationIdFromQuery(query) || null} prospectId={selected.id} defaultType="FOLLOW_UP" />
@@ -732,13 +741,18 @@ export function FranchiseRequestsBoard({ locale, query, mandateName, view, itemI
   );
 }
 
-export function QualityBoard({ locale, query, mandateName, view, search, page, board, libraryId, organizationId, services }: SpaceBoardProps) {
+export function QualityBoard({ locale, query, mandateName, view, itemId, search, page, board, libraryId, organizationId, services }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
   if(sourceUnavailable(demo,['QUALITY','CRM','OPERATIONS']))return <UnavailableSection locale={locale} query={query}/>;
   const needle = (search ?? "").trim().toLocaleLowerCase();
   const matches = (value: string) => !needle || value.toLocaleLowerCase().includes(needle);
   const qualityPath = view ? `/${locale}/franchise/qualite/${view}` : `/${locale}/franchise/qualite`;
+  const withItem = (path: string, id: string) => {
+    const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+    params.set("itemId", id);
+    return `${path}?${params.toString()}`;
+  };
   const supervision = view === "anomalies" ? demo.anomalies
     : view === "recommandations" ? demo.recommendations
       : view === "opportunites" ? demo.opportunities
@@ -765,7 +779,9 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
   const nonConfCount = demo.quality.filter((row) => row.tone === "peach").length;
   const correctiveCount = demo.corrective.filter(row=>!["COMPLETED","CANCELLED"].includes(row.status)).length;
   const lateCount = demo.corrective.filter(row=>!["COMPLETED","CANCELLED"].includes(row.status)&&row.due<(renewalCivilDate(new Date().toISOString())??"")).length;
-  const selectedReview = pagedQuality.rows[0] ?? demo.quality[0] ?? null;
+  const selectedReview = (itemId
+    ? pagedQuality.rows.find((row) => row.id === itemId) ?? demo.quality.find((row) => row.id === itemId) ?? null
+    : null) ?? pagedQuality.rows[0] ?? demo.quality[0] ?? null;
   return (
     <main className="client-page franchise-quality-page">
       <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
@@ -799,6 +815,29 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
           {view === "definitions" || view === "risques" || view === "recommandations" || view === "incidents" ? (
             <p className="client-access-note">{c.ruleModelsLead}</p>
           ) : null}
+          {(view === "definitions" || view === "risques" || view === "recommandations" || view === "incidents") ? (
+            <div id="definition-form" className="scroll-mt-24 mb-4 space-y-3 rounded-xl border border-[var(--ad-border)] bg-[var(--mat-canvas)] p-4">
+              <h3 className="font-semibold">{locale === "ar" ? "إجراءات متاحة الآن" : "Actions disponibles maintenant"}</h3>
+              {view === "definitions" && libraryId && demo.permissions.canMaintainDefinitions ? (
+                <FranchiseAnomalyDefinitionForm locale={locale} libraryId={libraryId} organizationId={organizationId || organizationIdFromQuery(query) || null} />
+              ) : view === "risques" && libraryId && demo.permissions.canMaintainDefinitions ? (
+                <FranchiseRiskDefinitionForm locale={locale} libraryId={libraryId} organizationId={organizationId || organizationIdFromQuery(query) || null} />
+              ) : view === "recommandations" && libraryId && demo.permissions.canMaintainDefinitions ? (
+                <FranchiseRecommendationDefinitionForm locale={locale} libraryId={libraryId} organizationId={organizationId || organizationIdFromQuery(query) || null} services={services ?? []} anomalies={demo.definitions} />
+              ) : view === "incidents" && demo.permissions.canInstructDisputes ? (
+                <>
+                  <p>{c.openingClientOnly}</p>
+                  <FranchiseIncidentInstructForm locale={locale} organizationId={organizationId || organizationIdFromQuery(query) || null} incidents={demo.incidents} />
+                </>
+              ) : (
+                <p role="status" className="client-access-note">
+                  {locale === "ar"
+                    ? "يلزم تفويض مكتبة نشط وصلاحية مناسبة لفتح النماذج."
+                    : "Un mandat bibliothèque actif et la permission adaptée sont requis pour ouvrir les formulaires."}
+                </p>
+              )}
+            </div>
+          ) : null}
           <div tabIndex={0} className="client-table-wrap">
             <table className="client-space-table franchise-dense-table">
               <thead><tr><th>{c.folder}</th><th>{c.type}</th><th>{c.severity}</th><th>{c.proofs}</th><th>{c.state}</th><th>{c.nextActionCol}</th><th>{c.action}</th></tr></thead>
@@ -813,7 +852,7 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
                       <td colSpan={2}><span className="client-access-note">{locale === "ar" ? "المالك والتواريخ غير متاحين هنا." : "Propriétaire et dates non disponibles ici."}</span></td>
                       <td><span className="client-status-chip" data-tone="peach">{networkStateLabel(row.status,locale)}</span></td>
                       <td>{row.due}</td>
-                      <td><Cta href={`/${locale}/franchise/qualite/actions${query}`} soft>{c.open}</Cta></td>
+                      <td><Cta href={withItem(`/${locale}/franchise/qualite/actions`, row.id)} soft>{c.open}</Cta></td>
                     </tr>
                   ))
                 ) : view === "anomalies" || view === "recommandations" || view === "opportunites" || view === "definitions" || view === "risques" || view === "incidents" ? (
@@ -832,15 +871,15 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
                   ))
                 ) : pagedQuality.rows.length === 0 ? (
                   <tr><td colSpan={7}>{c.emptyQuality}</td></tr>
-                ) : pagedQuality.rows.map((row, index) => (
-                  <tr key={row.id} data-selected={index === 0 ? "true" : undefined}>
+                ) : pagedQuality.rows.map((row) => (
+                  <tr key={row.id} data-selected={(itemId != null ? itemId === row.id : selectedReview?.id === row.id) ? "true" : undefined}>
                     <td>{row.title}</td>
                     <td>{row.type}</td>
                     <td><span className="franchise-dot" data-tone={row.tone} /> {row.tone === "peach" ? (locale === "ar" ? "حرجة" : "Critique") : (locale === "ar" ? "مرتفعة" : "Élevée")}</td>
                     <td dir="ltr">—</td>
                     <td><span className="client-status-chip" data-tone={row.tone}>{networkStateLabel(row.status,locale)}</span></td>
                     <td>{row.next}</td>
-                    <td><Cta href={row.href ?? `/${locale}/franchise/qualite${query}`} soft>{c.open}</Cta></td>
+                    <td><Cta href={row.href ?? withItem(qualityPath, row.id)} soft>{c.open}</Cta></td>
                   </tr>
                 ))}
               </tbody>
@@ -850,17 +889,10 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
         </article>
         <article className="client-card">
           <header><h2>{selectedReview ? selectedReview.title : c.reviewDetail}</h2></header>
-          {view === "definitions" && libraryId && demo.permissions.canMaintainDefinitions ? (
-            <FranchiseAnomalyDefinitionForm locale={locale} libraryId={libraryId} organizationId={organizationId || organizationIdFromQuery(query) || null} />
-          ) : view === "risques" && libraryId && demo.permissions.canMaintainDefinitions ? (
-            <FranchiseRiskDefinitionForm locale={locale} libraryId={libraryId} organizationId={organizationId || organizationIdFromQuery(query) || null} />
-          ) : view === "recommandations" && libraryId && demo.permissions.canMaintainDefinitions ? (
-            <FranchiseRecommendationDefinitionForm locale={locale} libraryId={libraryId} organizationId={organizationId || organizationIdFromQuery(query) || null} services={services ?? []} anomalies={demo.definitions} />
-          ) : view === "incidents" && demo.permissions.canInstructDisputes ? (
-            <>
-              <p>{c.openingClientOnly}</p>
-              <FranchiseIncidentInstructForm locale={locale} organizationId={organizationId || organizationIdFromQuery(query) || null} incidents={demo.incidents} />
-            </>
+          {view === "definitions" || view === "risques" || view === "recommandations" || view === "incidents" ? (
+            <p className="client-access-note">
+              {locale === "ar" ? "نماذج الإنشاء مفتوحة في العمود الأيسر أعلى القائمة." : "Les formulaires de création sont ouverts dans la colonne de gauche, au-dessus de la liste."}
+            </p>
           ) : (
             <>
               {selectedReview ? (
@@ -895,6 +927,11 @@ export function QualityBoard({ locale, query, mandateName, view, search, page, b
 }
 
 export function PerformanceBoard({ locale, query, mandateName, view, board }: SpaceBoardProps) {
+  const withItem = (path: string, id: string) => {
+    const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+    params.set("itemId", id);
+    return `${path}?${params.toString()}`;
+  };
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
   if(sourceUnavailable(board,['OPERATIONS']))return <UnavailableSection locale={locale} query={query}/>;
@@ -975,7 +1012,7 @@ export function PerformanceBoard({ locale, query, mandateName, view, board }: Sp
               <tbody>
                 {view === "tendances" ? (
                   demo.quality.length === 0 ? <tr><td colSpan={5}>{c.emptyQuality}</td></tr> : demo.quality.map((row) => (
-                    <tr key={row.id}><td>{row.title}</td><td dir="ltr">—</td><td><span className="client-status-chip" data-tone={row.tone}>{networkStateLabel(row.status,locale)}</span></td><td>{row.next}</td><td><Cta href={`/${locale}/franchise/qualite${query}`} soft>{c.perfSeeDetail}</Cta></td></tr>
+                    <tr key={row.id}><td>{row.title}</td><td dir="ltr">—</td><td><span className="client-status-chip" data-tone={row.tone}>{networkStateLabel(row.status,locale)}</span></td><td>{row.next}</td><td><Cta href={row.href ?? withItem(`/${locale}/franchise/qualite`, row.id)} soft>{c.perfSeeDetail}</Cta></td></tr>
                   ))
                 ) : view === "reseau" ? (
                   demo.people.length === 0 ? <tr><td colSpan={5}>{c.emptyPeople}</td></tr> : demo.people.map((row) => (
@@ -985,7 +1022,7 @@ export function PerformanceBoard({ locale, query, mandateName, view, board }: Sp
                   demo.corrective.length === 0 ? (
                     <tr><td colSpan={5}>{c.emptyCorrective}</td></tr>
                   ) : demo.corrective.map((row) => (
-                    <tr key={row.id}><td>{row.title}</td><td dir="ltr">—</td><td><span className="client-status-chip" data-tone="peach">{networkStateLabel(row.status,locale)}</span></td><td>{formatBoardDate(row.due,locale)}</td><td><Cta href={`/${locale}/franchise/qualite/actions${query}`} soft>{c.open}</Cta></td></tr>
+                    <tr key={row.id}><td>{row.title}</td><td dir="ltr">—</td><td><span className="client-status-chip" data-tone="peach">{networkStateLabel(row.status,locale)}</span></td><td>{formatBoardDate(row.due,locale)}</td><td><Cta href={withItem(`/${locale}/franchise/qualite/actions`, row.id)} soft>{c.open}</Cta></td></tr>
                   ))
                 ) : serviceRows.length === 0 ? (
                   <tr><td colSpan={5}>{c.emptyPerformance}</td></tr>
@@ -1361,6 +1398,25 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
           </nav>
           {view === "volume" ? (
             <>
+              <div id="volume-propose" className="scroll-mt-24 space-y-3">
+                <p className="client-access-note">{c.proposeVolume}</p>
+                {(() => {
+                  const franchiseId = new URLSearchParams(query.replace(/^\?/, "")).get("franchiseId") ?? demo.franchiseId ?? "";
+                  if (!franchiseId) {
+                    return <p role="status">{locale === "ar" ? "حدّدوا تفويض امتياز نشطاً قبل اقتراح شراء مجمّع." : "Sélectionnez un mandat de franchise actif avant de proposer un achat groupé."}</p>;
+                  }
+                  if (!demo.permissions.canProposeVolume || !libraryId) return null;
+                  return (
+                    <FranchiseVolumeProposeForm
+                      locale={locale}
+                      libraryId={libraryId}
+                      franchiseId={franchiseId}
+                      organizationId={organizationId || organizationIdFromQuery(query) || null}
+                      skus={demo.volume.filter((row) => row.status === "ACTIVE").map((row) => ({ id: row.id, title: row.title }))}
+                    />
+                  );
+                })()}
+              </div>
               {rows.length === 0 ? <p>{empty}</p> : (
                 <ul className="client-feed">
                   {rows.map((row) => (
@@ -1368,23 +1424,6 @@ export function FranchiseFinanceBoard({ locale, query, mandateName, view, board,
                   ))}
                 </ul>
               )}
-              <p className="client-access-note">{c.proposeVolume}</p>
-              {(() => {
-                const franchiseId = new URLSearchParams(query.replace(/^\?/, "")).get("franchiseId") ?? demo.franchiseId ?? "";
-                if (!franchiseId) {
-                  return <p role="status">{locale === "ar" ? "حدّدوا تفويض امتياز نشطاً قبل اقتراح شراء مجمّع." : "Sélectionnez un mandat de franchise actif avant de proposer un achat groupé."}</p>;
-                }
-                if (!demo.permissions.canProposeVolume || !libraryId) return null;
-                return (
-                  <FranchiseVolumeProposeForm
-                    locale={locale}
-                    libraryId={libraryId}
-                    franchiseId={franchiseId}
-                    organizationId={organizationId || organizationIdFromQuery(query) || null}
-                    skus={demo.volume.filter((row) => row.status === "ACTIVE").map((row) => ({ id: row.id, title: row.title }))}
-                  />
-                );
-              })()}
             </>
           ) : (
             <div tabIndex={0} className="client-table-wrap">

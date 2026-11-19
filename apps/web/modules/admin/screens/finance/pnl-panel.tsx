@@ -10,6 +10,7 @@ import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import { presentDateOnly, presentOrgName } from "@/modules/admin/data/spaces/present-space-row";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { beneficiaryCodeLabel } from "@/modules/franchise/screens/gouvernance/governance-labels";
 import { closePnlAction } from "./commerce-actions";
 import type { CommerceMessages } from "./commerce-messages";
 
@@ -25,7 +26,7 @@ export function PnlPanel({ locale, dashboard, m, keyValue }: { locale: Locale; d
       {dashboard.books.length === 0 ? <p>{m.empty}</p> : (
         <div className="grid gap-3 lg:grid-cols-2">
           {dashboard.books.map((book) => (
-            <article key={book.id} className="rounded-xl border bg-card p-4">
+            <article key={book.id} className="admin-panel p-4">
               <div className="flex flex-wrap justify-between gap-2">
                 <h3 className="font-semibold">{book.library_code} · {presentOrgName(book.organization_name, locale)}</h3>
                 <Badge>{localizeStatus(book.franchise_type, locale)} · {localizeStatus(book.status, locale)}</Badge>
@@ -39,13 +40,13 @@ export function PnlPanel({ locale, dashboard, m, keyValue }: { locale: Locale; d
                   <div>{presentDateOnly(book.latest_closure.period_start, locale)} — {presentDateOnly(book.latest_closure.period_end, locale)}</div>
                 </dl>
               ) : <p className="mt-2 text-sm text-muted-foreground">{m.empty}</p>}
-              <ul className="mt-2 text-sm">{book.allocations.map((item) => <li key={item.beneficiary_code}>{item.beneficiary_code}: <span dir="ltr">{formatMinor(item.amount_minor, book.currency, locale)}</span></li>)}</ul>
+              <ul className="mt-2 text-sm">{book.allocations.map((item) => <li key={item.beneficiary_code}>{beneficiaryCodeLabel(item.beneficiary_code, locale)}: <span dir="ltr">{formatMinor(item.amount_minor, book.currency, locale)}</span></li>)}</ul>
             </article>
           ))}
         </div>
       )}
       {dashboard.capabilities.can_close && openBooks.length > 0 ? (
-        <form action={action} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+        <form action={action} className="grid gap-3 admin-panel p-4 md:grid-cols-2">
           <h3 className="font-semibold md:col-span-2">{m.closePeriod}</h3>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="idempotencyKey" value={keyValue} />

@@ -41,8 +41,7 @@ test("FR provider mission exposes frozen checklist template version and hash", a
     }
     const checklistHeading = provider.page.getByRole("heading", { name: "Checklist contractuelle" }).first();
     await expect(checklistHeading).toBeVisible();
-    const empty = provider.page.getByText("Aucune obligation de checklist.");
-    test.skip(await empty.isVisible(), "provider missions need seeded checklist snapshot items (extend P25 fixture)");
+    await expect(provider.page.getByText("Aucune obligation de checklist.")).toHaveCount(0);
     const frozenLine = provider.page.getByText(/Modèle publié\s+\d+\s+·\s+[a-f0-9]{12}/i).first();
     await expect(frozenLine).toBeVisible();
     const text = await frozenLine.innerText();
@@ -63,7 +62,7 @@ test("AR provider checklist snapshot line is visible at 360 px", async ({ browse
     if ((await operations.count()) && !(await operations.evaluate((node) => (node as HTMLDetailsElement).open))) {
       await operations.locator("summary").click();
     }
-    test.skip(await provider.page.getByText("لا توجد التزامات في قائمة التحقق.").isVisible(), "provider missions need seeded checklist snapshot items (extend P25 fixture)");
+    await expect(provider.page.getByText("لا توجد التزامات في قائمة التحقق.")).toHaveCount(0);
     await expect(provider.page.getByText(/النموذج المنشور\s+\d+\s+·\s+[a-f0-9]{12}/i).first()).toBeVisible();
   } finally {
     await provider.context.close();

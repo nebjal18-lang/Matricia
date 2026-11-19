@@ -9,13 +9,27 @@ export async function createServerCatalogBuilderRepository() {
       return !error && Boolean(data.user);
     },
     async libraries() {
-      return client.from("catalog_libraries").select("id,code,status,row_version,current_release_id").order("code").limit(10);
+      return client
+        .from("catalog_libraries")
+        .select("id,code,status,row_version,current_release_id,published:catalog_library_versions!catalog_libraries_published_fk(name_fr,name_ar),draft:catalog_library_versions!catalog_libraries_draft_fk(name_fr,name_ar)")
+        .in("status", ["PUBLISHED", "APPROVED"])
+        .order("code")
+        .limit(80);
     },
     async library(libraryId) {
-      return client.from("catalog_libraries").select("id,code,status,row_version,current_release_id").eq("id", libraryId).limit(1);
+      return client
+        .from("catalog_libraries")
+        .select("id,code,status,row_version,current_release_id,published:catalog_library_versions!catalog_libraries_published_fk(name_fr,name_ar),draft:catalog_library_versions!catalog_libraries_draft_fk(name_fr,name_ar)")
+        .eq("id", libraryId)
+        .limit(1);
     },
     async services(libraryId) {
-      return client.from("catalog_services").select("id,library_id,code,slug,status").eq("library_id", libraryId).order("code").limit(201);
+      return client
+        .from("catalog_services")
+        .select("id,library_id,code,slug,status,published:catalog_service_versions!catalog_services_published_fk(name_fr,name_ar),draft:catalog_service_versions!catalog_services_draft_fk(name_fr,name_ar)")
+        .eq("library_id", libraryId)
+        .order("code")
+        .limit(201);
     },
     async draftReleases(libraryId) {
       return client.from("catalog_releases").select("id,library_id,release_key,row_version,status").eq("library_id", libraryId).eq("status", "DRAFT").order("created_at", { ascending: false }).limit(100);

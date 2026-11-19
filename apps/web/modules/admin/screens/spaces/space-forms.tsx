@@ -19,6 +19,7 @@ import {
 } from "./space-actions";
 import { decideAdminDispute, type DomainActionState } from "./domain-actions";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { StableIdempotencyField } from "@/modules/shared/ui/stable-idempotency-field";
 
 const idle: AdminActionState = { status: "idle" };
 const idleProvider: AdminProviderActionState = { status: "idle" };
@@ -114,7 +115,7 @@ export function QualificationDecisionForm({
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="qualificationId" value={qualificationId} />
       <input type="hidden" name="expectedRowVersion" value={expectedRowVersion} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <article className="client-card">
         <header><h2>{ar ? "قرار التأهيل" : "Décision de qualification"}</h2></header>
         <div className="admin-radio-row" data-cards="true">
@@ -184,7 +185,7 @@ export function CompanyDecisionForm({
     <form action={action} className="client-stack"><a href={`/${locale}/administration/providers/${organizationId}/identite`}>{ar?"مراجعة الهوية الحالية ووثائقها":"Revoir l’identité courante et ses pièces"}</a>
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="expectedRowVersion" value={rowVersion} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <input type="hidden" name="locale" value={locale} />
       <div className="admin-form-grid">
         <Field id="company-status" label={ar ? "قرار الشركة" : "Décision société"} required>
@@ -291,7 +292,7 @@ export function DocumentDecisionForm({ locale, documentVersionId }: { locale: Lo
   return (
     <form action={action} className="client-stack">
       <input type="hidden" name="documentVersionId" value={documentVersionId} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <input type="hidden" name="locale" value={locale} />
       <div className="admin-form-grid">
         <Field id="doc-status" label={ar ? "القرار" : "Décision"} required>
@@ -331,7 +332,7 @@ export function GovernanceDecisionForm({
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="approvalRequestId" value={approvalRequestId} />
       <input type="hidden" name="rowVersion" value={rowVersion} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <article className="client-card">
         <header><h2>{ar ? "منطقة القرار" : "Zone de décision"}</h2></header>
         <div className="admin-radio-row">

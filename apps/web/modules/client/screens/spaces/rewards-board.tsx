@@ -6,6 +6,7 @@ import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import type { RewardsDashboard } from "@/modules/shared/lib/rewards-referrals-roi/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { conversionStageLabel } from "@/modules/client/screens/recompenses/value-display-labels";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function formatBps(value: string) {
   const amount = BigInt(value);
@@ -56,7 +57,7 @@ export function RewardsBoard({
         <article className="client-card" id="badges">
           <header className="client-priority-head">
             <h2>{c.badgesTitle}</h2>
-            <a href="#badges" className="client-text-link" aria-current="page">{c.seeBadges}</a>
+            <HashAwareLink href="#badges" className="client-text-link" aria-current="page">{c.seeBadges}</HashAwareLink>
           </header>
           <ul className="client-brief-kpis">
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="mint"><Award className="size-4" aria-hidden /></span><strong>{c.ambassador}</strong><small>{ambassador ? c.obtained : c.inProgressBadge}</small></li>
@@ -68,7 +69,7 @@ export function RewardsBoard({
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.inviteNetwork}</h2>
-            <a href="#regles" className="client-text-link">{c.howItWorks}</a>
+            <HashAwareLink href="#regles" className="client-text-link">{c.howItWorks}</HashAwareLink>
           </header>
           <p>{c.inviteNetworkLead}</p>
           <ol className="client-journey">
@@ -85,7 +86,7 @@ export function RewardsBoard({
               {locale === "ar" ? "شاركوا رابط الدعوة أعلاه مع جهة الاتصال." : "Partagez le lien d’invitation ci-dessus avec votre contact."}
             </p>
           ) : (
-            <Link href={inviteHref} className="client-cta"><Share2 className="size-4" aria-hidden />{c.inviteContact}</Link>
+            <HashAwareLink href={inviteHref} className="client-cta"><Share2 className="size-4" aria-hidden />{c.inviteContact}</HashAwareLink>
           )}
         </article>
       </section>
@@ -93,7 +94,7 @@ export function RewardsBoard({
         <article className="client-card" id="parrainages">
           <header className="client-priority-head">
             <h2>{c.referralStatus}</h2>
-            <a href="#parrainages" className="client-text-link">{c.seeHistory}</a>
+            <HashAwareLink href="#parrainages" className="client-text-link">{c.seeHistory}</HashAwareLink>
           </header>
           {conversions.length === 0 ? <p>{locale === "ar" ? "لا إحالات ظاهرة بعد." : "Aucun parrainage visible pour le moment."}</p> : (
             <div className="client-table-wrap">
@@ -121,7 +122,7 @@ export function RewardsBoard({
             </dl>
           ) : <p>{locale === "ar" ? "يُحتسب العائد بعد اعتماد قاعدة قياس." : "Le ROI s’affiche après validation d’une base de mesure."}</p>}
           <p className="client-access-note">{c.dataSources}</p>
-          <a href="#roi" className="client-ghost-link">{c.calcMethod}</a>
+          <HashAwareLink href="#roi" className="client-ghost-link">{c.calcMethod}</HashAwareLink>
         </article>
       </section>
       <article className="client-quote-banner">

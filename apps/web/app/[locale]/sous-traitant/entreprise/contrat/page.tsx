@@ -37,7 +37,7 @@ export default async function ProviderPartnerContractPage({
   if (result.status === "error") {
     return (
       <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="company" title={copy.title} lead={copy.lead} kicker={copy.error}>
-        <ProviderReadState locale={locale} state={result.reason === "FORBIDDEN" ? "forbidden" : result.reason === "NO_PROVIDER_ORGANIZATION" ? "no-organization" : "unavailable"} retryHref={`/${locale}/sous-traitant/entreprise/contrat${space.selectedQuery}`} reason={result.reason} />
+        <ProviderReadState locale={locale} state={result.reason === "NO_PROVIDER_ORGANIZATION" ? "no-organization" : "unavailable"} retryHref={`/${locale}/sous-traitant/entreprise/contrat${space.selectedQuery}`} reason={result.reason} />
       </ProviderAppShell>
     );
   }

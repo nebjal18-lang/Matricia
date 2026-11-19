@@ -6,8 +6,8 @@ import { SpaceQueueBoard } from "./queue-kit";
 const fixtureRow: SpaceRow = {
   id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   href: "/fr/administration/diagnostics/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-  title: "P05 A",
-  cells: ["P05 A", "Diagnostic entreprise", "v2", "55 %", "Priorité Importante", "21 sept. 2025, 21:03", "COMPLETED"],
+  title: "Client test A",
+  cells: ["Client test A", "Diagnostic entreprise", "v2", "55 %", "Priorité Importante", "21 sept. 2025, 21:03", "COMPLETED"],
   status: "COMPLETED",
   tone: "mint",
   fixture: true,
@@ -38,12 +38,13 @@ describe("diagnostics SpaceQueueBoard", () => {
     expect(hidden).not.toContain(">Progression<");
     expect(hidden).toContain("Terminé");
     expect(hidden).toContain("v1");
+    expect(hidden).not.toContain(">Client test A<");
     expect(hidden).not.toContain(">P05 A<");
 
     const shown = renderToStaticMarkup(
       <SpaceQueueBoard locale="fr" query="?fixtures=1" space="diagnostics" rows={[fixtureRow, operationalRow]} treat={[operationalRow]} includeFixtures />,
     );
-    expect(shown).toContain("P05 A");
+    expect(shown).toContain("Client test A");
     expect(shown).toContain("Atlas Conseil");
     expect(shown).toContain("v2");
   });

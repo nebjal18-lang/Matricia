@@ -44,14 +44,14 @@ export default async function AdminEnterpriseArchivePage({
       lead={mode === "disable" ? c.disableLead : c.archiveLead}
     >
       {result.status === "error" || !org ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert variant="destructive">
             <AlertTitle>{result.status === "error" && result.reason === "FORBIDDEN" ? (locale === "ar" ? "رفض الوصول" : "Accès refusé") : (locale === "ar" ? "تعذر التحميل" : "Chargement indisponible")}</AlertTitle>
             <AlertDescription>{result.status === "error" ? result.reason : "UNAVAILABLE"}</AlertDescription>
           </Alert>
-        </main>
+        </div>
       ) : (
-        <main className="client-page">
+        <div className="client-page">
           <ArchiveOrganizationForm idempotencyKey={randomUUID()}
             locale={locale}
             query={space.selectedQuery}
@@ -60,7 +60,7 @@ export default async function AdminEnterpriseArchivePage({
             status={org.status}
             mode={mode}
           />
-        </main>
+        </div>
       )}
     </AdminAppShell>
   );

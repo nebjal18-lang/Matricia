@@ -66,9 +66,19 @@ export async function loadContractMissions(locale: "fr" | "ar", requestedOrganiz
   // A signature subsystem outage does not erase the healthy contractual history.
   for(let offset=0;offset<contractIds.length;offset+=100){try{const ids=contractIds.slice(offset,offset+100),result=await client.rpc("list_contract_signature_readiness_v1",{p_contract_ids:ids}),parsed=z.array(signatureReadinessSchema.extend({contract_id:id})).max(100).safeParse(result.data);if(!result.error&&parsed.success&&parsed.data.every(row=>ids.includes(row.contract_id)))for(const row of parsed.data)readinessById.set(row.contract_id,row);}catch{ /* Explicitly unavailable on the corresponding contract. */ }}
   const preparationById=new Map<string,MissionPreparation>();
-  for(const contract of contracts.data.filter(row=>["ACTIVE","AMENDED"].includes(row.status)&&!missions.data.some(mission=>mission.contract_id===row.id))){
+  const prepTargets=contracts.data.filter(row=>["ACTIVE","AMENDED"].includes(row.status)&&!missions.data.some(mission=>mission.contract_id===row.id)).map(contract=>{
     const current=versions.data.find(version=>version.contract_id===contract.id&&version.version===contract.current_version);
-    if(current){try{const result=await client.rpc("get_client_mission_preparation_v1",{p_contract_id:contract.id,p_contract_version_id:current.id});const parsed=missionPreparationSchema.safeParse(result.data);if(!result.error&&parsed.success&&parsed.data.contract_id===contract.id&&parsed.data.contract_version_id===current.id)preparationById.set(contract.id,parsed.data);}catch{ /* The preparation state is explicitly unavailable; contractual history remains readable. */ }}
+    return current?{contract,current}:null;
+  }).filter((row):row is{contract:(typeof contracts.data)[number];current:(typeof versions.data)[number]}=>row!==null);
+  for(let offset=0;offset<prepTargets.length;offset+=8){
+    const chunk=prepTargets.slice(offset,offset+8);
+    await Promise.all(chunk.map(async({contract,current})=>{
+      try{
+        const result=await client.rpc("get_client_mission_preparation_v1",{p_contract_id:contract.id,p_contract_version_id:current.id});
+        const parsed=missionPreparationSchema.safeParse(result.data);
+        if(!result.error&&parsed.success&&parsed.data.contract_id===contract.id&&parsed.data.contract_version_id===current.id)preparationById.set(contract.id,parsed.data);
+      }catch{ /* The preparation state is explicitly unavailable; contractual history remains readable. */ }
+    }));
   }
   const versionIds = versions.data.map((version) => version.id);
   const missionIds = missions.data.map((mission) => mission.id);

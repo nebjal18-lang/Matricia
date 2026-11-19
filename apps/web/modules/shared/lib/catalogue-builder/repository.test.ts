@@ -1,14 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
 import { createCatalogBuilderRepository, type BuilderRepositoryDependencies } from "./repository";
 
-const library = { id: "11111111-1111-4111-8111-111111111111", code: "IT", status: "PUBLISHED", row_version: 4, current_release_id: null };
+const library = {
+  id: "11111111-1111-4111-8111-111111111111",
+  code: "IT",
+  status: "PUBLISHED",
+  row_version: 4,
+  current_release_id: null,
+  published: { name_fr: "Informatique", name_ar: "المعلوميات" },
+  draft: null,
+};
 const commandIdentity = { idempotencyKey: "33333333-3333-4333-8333-333333333333", correlationId: "44444444-4444-4444-8444-444444444444" };
 function dependencies(overrides: Partial<BuilderRepositoryDependencies> = {}): BuilderRepositoryDependencies {
   return {
     authenticated: async () => true,
     libraries: async () => ({ data: [library], error: null }),
     library: async (libraryId) => ({ data: libraryId === library.id ? [library] : [], error: null }),
-    services: async () => ({ data: [{ id: "22222222-2222-4222-8222-222222222222", library_id: library.id, code: "IT_AUDIT", slug: "it-audit", status: "PUBLISHED" }], error: null }),
+    services: async () => ({ data: [{ id: "22222222-2222-4222-8222-222222222222", library_id: library.id, code: "IT_AUDIT", slug: "it-audit", status: "PUBLISHED", published: { name_fr: "Audit SI", name_ar: "تدقيق نظم المعلومات" }, draft: null }], error: null }),
     draftReleases: async () => ({ data: [], error: null }),
     approvedServiceVersions: async () => ({ data: [], error: null }),
     release: async () => ({ data: [], error: null }),
@@ -25,12 +33,53 @@ describe("catalogue builder repository", () => {
     expect(result.status).toBe("success");
     if (result.status === "success") expect(result.value.services).toHaveLength(1);
   });
+  it("hides scratch and fixture libraries from the operator picker", async () => {
+    const scratch = {
+      id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      code: "TMP_SAVE",
+      status: "DRAFT",
+      row_version: 1,
+      current_release_id: null,
+      published: null,
+      draft: { name_fr: "Bibliothèque sauvée", name_ar: "مكتبة محفوظة" },
+    };
+    const shortJunk = {
+      id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      code: "CC",
+      status: "DRAFT",
+      row_version: 1,
+      current_release_id: null,
+      published: null,
+      draft: { name_fr: "Cc", name_ar: "Cc" },
+    };
+    const fixture = {
+      id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      code: "A_P08_10B6E982",
+      status: "PUBLISHED",
+      row_version: 1,
+      current_release_id: null,
+      published: { name_fr: "Fixture IT", name_ar: "اختبار" },
+      draft: null,
+    };
+    const domain = {
+      ...library,
+      published: { name_fr: "Informatique, cybersécurité et data", name_ar: "المعلوميات والأمن السيبراني" },
+    };
+    const result = await createCatalogBuilderRepository(dependencies({
+      libraries: async () => ({ data: [scratch, shortJunk, fixture, domain], error: null }),
+    })).loadWorkspace(null);
+    expect(result.status).toBe("success");
+    if (result.status === "success") {
+      expect(result.value.libraries.map((item) => item.id)).toEqual([domain.id]);
+      expect(result.value.libraries[0]?.nameFr).toBe("Informatique, cybersécurité et data");
+    }
+  });
   it("fails closed on malformed status and excess library/service cardinality", async () => {
     const malformed = await createCatalogBuilderRepository(dependencies({ libraries: async () => ({ data: [{ ...library, status: "UNKNOWN" }], error: null }) })).loadWorkspace(null);
     expect(malformed).toEqual({ status: "error", reason: "INVALID_RESPONSE" });
-    const tooManyLibraries = await createCatalogBuilderRepository(dependencies({ libraries: async () => ({ data: Array.from({ length: 11 }, () => library), error: null }) })).loadWorkspace(null);
+    const tooManyLibraries = await createCatalogBuilderRepository(dependencies({ libraries: async () => ({ data: Array.from({ length: 81 }, () => library), error: null }) })).loadWorkspace(null);
     expect(tooManyLibraries).toEqual({ status: "error", reason: "INVALID_RESPONSE" });
-    const service = { id: "22222222-2222-4222-8222-222222222222", library_id: library.id, code: "IT_AUDIT", slug: "it-audit", status: "PUBLISHED" };
+    const service = { id: "22222222-2222-4222-8222-222222222222", library_id: library.id, code: "IT_AUDIT", slug: "it-audit", status: "PUBLISHED", published: { name_fr: "Audit SI", name_ar: "تدقيق نظم المعلومات" }, draft: null };
     const tooManyServices = await createCatalogBuilderRepository(dependencies({ services: async () => ({ data: Array.from({ length: 201 }, () => service), error: null }) })).loadWorkspace(library.id);
     expect(tooManyServices).toEqual({ status: "error", reason: "INVALID_RESPONSE" });
   });

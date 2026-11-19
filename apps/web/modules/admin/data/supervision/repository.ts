@@ -2,6 +2,12 @@ import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure"
 import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import {
+  buildDemoOrganizationFiche,
+  canApplyAdminDemoSupervision,
+  isDemoRegionalOrganizationId,
+  replaceWithDemoSupervisionDashboard,
+} from "@/modules/admin/data/spaces/demo-supervision";
 import { ficheSchema, supervisionSchema, type AdminOrganizationFiche, type AdminSupervisionDashboard, type AdminSupervisionResult } from "./types";
 import { supervisionChartSeries } from "./series";
 
@@ -15,6 +21,12 @@ function rpcFailure(code?: string): "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILAB
   return code === "42501" ? "FORBIDDEN" : "UNAVAILABLE";
 }
 
+/** Démo ON : remplace entièrement le snapshot supervision (propre, organisée). Démo OFF : DB seule. */
+function withDemoSupervision(value: AdminSupervisionDashboard): AdminSupervisionDashboard {
+  if (!canApplyAdminDemoSupervision()) return value;
+  return replaceWithDemoSupervisionDashboard(value);
+}
+
 export async function loadAdminSupervisionDashboard(limit = 50, consistent = false): Promise<AdminSupervisionResult<AdminSupervisionDashboard>> {
   try {
     const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
@@ -25,7 +37,9 @@ export async function loadAdminSupervisionDashboard(limit = 50, consistent = fal
       const response = await client.rpc("get_admin_supervision_snapshot_v1");
       if (response.error) return { status: "error", reason: rpcFailure(response.error.code) };
       const parsed = supervisionSchema.safeParse(response.data);
-      return parsed.success ? { status: "success", value: parsed.data } : { status: "error", reason: "INVALID_RESPONSE" };
+      return parsed.success
+        ? { status: "success", value: withDemoSupervision(parsed.data) }
+        : { status: "error", reason: "INVALID_RESPONSE" };
     }
     // Read each projection in bounded server pages; never compute totals from a
     // silently truncated 100-row snapshot. Detail readers remain separate.
@@ -48,7 +62,7 @@ export async function loadAdminSupervisionDashboard(limit = 50, consistent = fal
       if (!Object.values(page).some((value) => Array.isArray(value) && value.length >= pageSize)) break;
       offset += pageSize;
     }
-    return { status: "success", value: result };
+    return { status: "success", value: withDemoSupervision(result) };
   } catch (error) {
     unstable_rethrow(error);
     return { status: "error", reason: "UNAVAILABLE" };
@@ -63,13 +77,23 @@ export async function loadAdminOrganizationFiche(organizationId: string): Promis
     const { data: auth, error: authError } = authResult;
     if (authError) return { status: "error", reason: classifyAuthReadFailure(authError) ?? "UNAVAILABLE" };
     if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
+    // Démo ON + org régionale : fiche identité complète (pas de « à compléter »).
+    if (canApplyAdminDemoSupervision() && isDemoRegionalOrganizationId(id.data)) {
+      const demo = buildDemoOrganizationFiche(id.data);
+      if (demo) return { status: "success", value: demo };
+    }
     const response = await client.rpc("get_admin_organization_fiche", { p_organization_id: id.data });
     if (response.error) {
-      if (response.error.code === "P0002") return { status: "error", reason: "NOT_FOUND" };
+      if (response.error.code === "P0002") {
+        const demo = canApplyAdminDemoSupervision() ? buildDemoOrganizationFiche(id.data) : null;
+        return demo ? { status: "success", value: demo } : { status: "error", reason: "NOT_FOUND" };
+      }
       return { status: "error", reason: rpcFailure(response.error.code) };
     }
     const parsed = ficheSchema.safeParse(response.data);
-    return parsed.success ? { status: "success", value: parsed.data } : { status: "error", reason: "INVALID_RESPONSE" };
+    if (parsed.success) return { status: "success", value: parsed.data };
+    const demo = canApplyAdminDemoSupervision() ? buildDemoOrganizationFiche(id.data) : null;
+    return demo ? { status: "success", value: demo } : { status: "error", reason: "INVALID_RESPONSE" };
   } catch (error) {
     unstable_rethrow(error);
     return { status: "error", reason: "UNAVAILABLE" };

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
+import { StableIdempotencyField } from "@/modules/shared/ui/stable-idempotency-field";
 import { formatMinorAmount, shortReference } from "@/modules/shared/lib/format/display";
 import { decideApproval, reconcileForecast, recordForecast, requestApproval, type State } from "./actions";
 
@@ -40,7 +41,7 @@ function Feed({ s, locale }: { s: State; locale: "fr" | "ar" }) {
 }
 
 function K() {
-  return <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />;
+  return <StableIdempotencyField />;
 }
 
 function resourceLabel(locale: "fr" | "ar", resourceType: string, resourceId: string) {
@@ -81,9 +82,34 @@ export function FinanceApprovalPanel({
 
   return (
     <div className="space-y-6" dir={ar ? "rtl" : "ltr"}>
-      <section id="rapprochements" className="grid scroll-mt-24 gap-4 xl:grid-cols-2">
-        <form action={ra} className="grid gap-3 rounded-2xl border p-4">
-          <h2 className="text-xl font-semibold">{ar ? "طلب موافقة حملة" : "Demander l’approbation d’une campagne"}</h2>
+      <form action={da} className="grid gap-3 rounded-2xl border p-4">
+        <h2 className="text-xl font-semibold">{ar ? "قرار مستقل" : "Décision indépendante"}</h2>
+        <K />
+        {!pending.length ? <p className="text-sm text-muted-foreground">{ar ? "لا طلبات معلقة." : "Aucune demande en attente."}</p> : null}
+        <label>
+          {ar ? "الطلب" : "Demande"}
+          <select name="requestSelection" required className="min-h-11 w-full rounded-md border" disabled={!pending.length}>
+            {pending.map((q) => (
+              <option key={q.id} value={`${q.id}|${q.row_version}`} title={`${q.resource_type}/${q.resource_id}`}>
+                {resourceLabel(locale, q.resource_type, q.resource_id)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          {ar ? "القرار" : "Décision"}
+          <select name="decision" className="min-h-11 w-full rounded-md border" disabled={!pending.length}>
+            <option value="APPROVE">{ar ? "موافقة" : "Approuver"}</option>
+            <option value="REJECT">{ar ? "رفض" : "Rejeter"}</option>
+          </select>
+        </label>
+        <F name="reason" label={ar ? "السبب" : "Motif"} />
+        <Button disabled={dp || !pending.length}>{ar ? "تقرير" : "Décider"}</Button>
+        <Feed s={d} locale={locale} />
+      </form>
+      <details id="rapprochements" className="client-card scroll-mt-24 p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{ar ? "طلب موافقة حملة" : "Demander l’approbation d’une campagne"}</summary>
+        <form action={ra} className="mt-4 grid gap-3">
           <K />
           {!campaigns.length ? <p className="text-sm text-muted-foreground">{ar ? "لا حملة متاحة." : "Aucune campagne disponible."}</p> : null}
           <label>
@@ -99,81 +125,59 @@ export function FinanceApprovalPanel({
           <Button disabled={rp || !campaigns.length}>{ar ? "إرسال" : "Soumettre"}</Button>
           <Feed s={r} locale={locale} />
         </form>
-        <form action={da} className="grid gap-3 rounded-2xl border p-4">
-          <h2 className="text-xl font-semibold">{ar ? "قرار مستقل" : "Décision indépendante"}</h2>
-          <K />
-          {!pending.length ? <p className="text-sm text-muted-foreground">{ar ? "لا طلبات معلقة." : "Aucune demande en attente."}</p> : null}
-          <label>
-            {ar ? "الطلب" : "Demande"}
-            <select name="requestSelection" required className="min-h-11 w-full rounded-md border" disabled={!pending.length}>
-              {pending.map((q) => (
-                <option key={q.id} value={`${q.id}|${q.row_version}`} title={`${q.resource_type}/${q.resource_id}`}>
-                  {resourceLabel(locale, q.resource_type, q.resource_id)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {ar ? "القرار" : "Décision"}
-            <select name="decision" className="min-h-11 w-full rounded-md border" disabled={!pending.length}>
-              <option value="APPROVE">{ar ? "موافقة" : "Approuver"}</option>
-              <option value="REJECT">{ar ? "رفض" : "Rejeter"}</option>
-            </select>
-          </label>
-          <F name="reason" label={ar ? "السبب" : "Motif"} />
-          <Button disabled={dp || !pending.length}>{ar ? "تقرير" : "Décider"}</Button>
-          <Feed s={d} locale={locale} />
-        </form>
-      </section>
-      <section id="commissions" className="grid scroll-mt-24 gap-4 xl:grid-cols-2">
-        <form action={fa} className="grid gap-3 rounded-2xl border p-4">
-          <h2 className="text-xl font-semibold">{ar ? "توقع العمولة" : "Prévision de commission"}</h2>
-          <p>{ar ? "تُقرأ القاعدة من نسخة العقد؛ لا يمكن تعديلها هنا." : "La règle est lue depuis la version du contrat et n’est pas modifiable ici."}</p>
-          <K />
-          <label>
-            {ar ? "المهمة" : "Mission"}
-            <select name="missionId" required className="min-h-11 w-full rounded-md border">
-              {missions.map((m) => (
-                <option key={m.id} value={m.id} title={m.id}>
-                  {missionLabel(locale, m.id)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <F name="start" label={ar ? "من" : "Du"} type="date" />
-          <F name="end" label={ar ? "إلى" : "Au"} type="date" />
-          <F name="grossAmount" label={ar ? "الإجمالي التقديري بالدرهم" : "Brut estimé (MAD)"} />
-          <Button disabled={fp || !missions.length}>{ar ? "تسجيل" : "Enregistrer"}</Button>
-          <Feed s={f} locale={locale} />
-        </form>
-        <form action={xa} className="grid gap-3 rounded-2xl border p-4">
-          <h2 className="text-xl font-semibold">{ar ? "مطابقة حدث الدفع" : "Réconcilier au payable réel"}</h2>
-          <K />
-          <label>
-            {ar ? "التوقع" : "Prévision"}
-            <select name="forecastId" className="min-h-11 w-full rounded-md border">
-              {forecasts.map((q) => (
-                <option key={q.id} value={q.id} title={q.mission_id}>
-                  {missionLabel(locale, q.mission_id)} · {formatMinorAmount(q.estimated_commission_minor, q.currency, locale)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {ar ? "حدث الدفع الرسمي" : "Payable officiel"}
-            <select name="payableEventId" className="min-h-11 w-full rounded-md border">
-              {payables.map((p) => (
-                <option key={p.id} value={p.id} title={p.mission_id}>
-                  {missionLabel(locale, p.mission_id)} · {formatMinorAmount(p.commission_amount_minor, p.currency, locale)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <F name="reason" label={ar ? "السبب" : "Motif"} />
-          <Button disabled={xp || !forecasts.length || !payables.length}>{ar ? "مطابقة" : "Réconcilier"}</Button>
-          <Feed s={x} locale={locale} />
-        </form>
-      </section>
+      </details>
+      <details id="commissions" className="client-card scroll-mt-24 p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{ar ? "العمولات" : "Commissions"}</summary>
+        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <form action={fa} className="grid gap-3 rounded-2xl border p-4">
+            <h2 className="text-xl font-semibold">{ar ? "توقع العمولة" : "Prévision de commission"}</h2>
+            <p>{ar ? "تُقرأ القاعدة من نسخة العقد؛ لا يمكن تعديلها هنا." : "La règle est lue depuis la version du contrat et n’est pas modifiable ici."}</p>
+            <K />
+            <label>
+              {ar ? "المهمة" : "Mission"}
+              <select name="missionId" required className="min-h-11 w-full rounded-md border">
+                {missions.map((m) => (
+                  <option key={m.id} value={m.id} title={m.id}>
+                    {missionLabel(locale, m.id)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <F name="start" label={ar ? "من" : "Du"} type="date" />
+            <F name="end" label={ar ? "إلى" : "Au"} type="date" />
+            <F name="grossAmount" label={ar ? "الإجمالي التقديري بالدرهم" : "Brut estimé (MAD)"} />
+            <Button disabled={fp || !missions.length}>{ar ? "تسجيل" : "Enregistrer"}</Button>
+            <Feed s={f} locale={locale} />
+          </form>
+          <form action={xa} className="grid gap-3 rounded-2xl border p-4">
+            <h2 className="text-xl font-semibold">{ar ? "مطابقة حدث الدفع" : "Réconcilier au payable réel"}</h2>
+            <K />
+            <label>
+              {ar ? "التوقع" : "Prévision"}
+              <select name="forecastId" className="min-h-11 w-full rounded-md border">
+                {forecasts.map((q) => (
+                  <option key={q.id} value={q.id} title={q.mission_id}>
+                    {missionLabel(locale, q.mission_id)} · {formatMinorAmount(q.estimated_commission_minor, q.currency, locale)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {ar ? "حدث الدفع الرسمي" : "Payable officiel"}
+              <select name="payableEventId" className="min-h-11 w-full rounded-md border">
+                {payables.map((p) => (
+                  <option key={p.id} value={p.id} title={p.mission_id}>
+                    {missionLabel(locale, p.mission_id)} · {formatMinorAmount(p.commission_amount_minor, p.currency, locale)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <F name="reason" label={ar ? "السبب" : "Motif"} />
+            <Button disabled={xp || !forecasts.length || !payables.length}>{ar ? "مطابقة" : "Réconcilier"}</Button>
+            <Feed s={x} locale={locale} />
+          </form>
+        </div>
+      </details>
     </div>
   );
 }

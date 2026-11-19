@@ -1,7 +1,18 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./org-actions",()=>({requestOrganizationMutation:async()=>({status:"idle"})}));
 import { CreateOrganizationForm } from "./org-forms";
 describe("Organization ICE input",()=>{
  it.each(["fr","ar"] as const)("explains the exact server-aligned fifteen digits in %s",locale=>{const html=renderToStaticMarkup(<CreateOrganizationForm locale={locale} query=""/>);expect(html).toContain("ICE");expect(html).toContain('aria-describedby="create-ice-help"');expect(html).toContain('pattern="[0-9]{15}"');expect(html).toContain('inputMode="numeric"');expect(html).toContain(locale==="ar"?"15 رقماً بالضبط":"exactement 15 chiffres");expect(html).toContain("RC");expect(html).toContain("IF");});
+ it("keeps the create form main stack before the side panel and pins layout columns in CSS",()=>{
+  const html=renderToStaticMarkup(<CreateOrganizationForm locale="fr" query=""/>);
+  expect(html.indexOf('class="client-stack"')).toBeLessThan(html.indexOf("<aside"));
+  expect(html.indexOf("admin-note")).toBeLessThan(html.indexOf('class="client-stack"'));
+  const css=readFileSync(new URL("../../ui/admin-experience.css",import.meta.url),"utf8");
+  expect(css).toContain(".admin-form-layout > .admin-note");
+  expect(css).toContain("grid-column: 1 / -1");
+  expect(css).toContain(".admin-form-layout > :is(div, section, form).client-stack");
+  expect(css).toContain(".admin-form-layout > aside");
+ });
 });

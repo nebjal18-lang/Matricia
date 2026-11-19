@@ -1,9 +1,102 @@
 import { z } from "zod";
 import type { BuilderResult, CatalogBuilderRepository, ReleaseDraft, ReleaseItemInput } from "./contracts";
-import { builderDraftSchema, catalogEntityStatusSchema, questionnaireDraftInputSchema, questionDraftInputSchema, ruleDraftInputSchema, type BuilderDraft, type BuilderWorkspace, uuidSchema } from "./model";
+import {
+  builderDraftSchema,
+  catalogEntityStatusSchema,
+  isCatalogFixtureCode,
+  isCatalogOperatorLibrary,
+  isCatalogScratchLabel,
+  questionnaireDraftInputSchema,
+  questionDraftInputSchema,
+  ruleDraftInputSchema,
+  type BuilderDraft,
+  type BuilderLibrary,
+  type BuilderService,
+  type BuilderWorkspace,
+  uuidSchema,
+} from "./model";
 
-const libraryRow = z.object({ id: uuidSchema, code: z.string().min(2).max(80), status: catalogEntityStatusSchema, row_version: z.number().int().positive(), current_release_id: uuidSchema.nullable() }).strict();
-const serviceRow = z.object({ id: uuidSchema, library_id: uuidSchema, code: z.string().min(2).max(80), slug: z.string().min(1).max(80), status: catalogEntityStatusSchema }).strict();
+const versionNameRow = z.object({ name_fr: z.string().min(2).max(240), name_ar: z.string().min(2).max(240) }).strict();
+const embeddedName = z.preprocess((value) => {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+}, versionNameRow.nullable());
+const libraryRow = z.object({
+  id: uuidSchema,
+  code: z.string().min(2).max(80),
+  status: catalogEntityStatusSchema,
+  row_version: z.number().int().positive(),
+  current_release_id: uuidSchema.nullable(),
+  published: embeddedName.optional(),
+  draft: embeddedName.optional(),
+}).strict();
+const serviceRow = z.object({
+  id: uuidSchema,
+  library_id: uuidSchema,
+  code: z.string().min(2).max(80),
+  slug: z.string().min(1).max(80),
+  status: catalogEntityStatusSchema,
+  published: embeddedName.optional(),
+  draft: embeddedName.optional(),
+}).strict();
+
+function mapLibrary(library: z.infer<typeof libraryRow>): BuilderLibrary {
+  const named = library.published ?? library.draft ?? null;
+  return {
+    id: library.id,
+    code: library.code,
+    status: library.status,
+    rowVersion: library.row_version,
+    currentReleaseId: library.current_release_id,
+    nameFr: named?.name_fr ?? null,
+    nameAr: named?.name_ar ?? null,
+    fixture: isCatalogFixtureCode(library.code),
+  };
+}
+
+function mapService(service: z.infer<typeof serviceRow>): BuilderService {
+  const named = service.published ?? service.draft ?? null;
+  return {
+    id: service.id,
+    libraryId: service.library_id,
+    code: service.code,
+    slug: service.slug,
+    status: service.status,
+    nameFr: named?.name_fr ?? null,
+    nameAr: named?.name_ar ?? null,
+    fixture: isCatalogFixtureCode(service.code),
+  };
+}
+
+function libraryDisplayKey(library: BuilderLibrary): string {
+  return (library.nameFr ?? library.nameAr ?? library.code).normalize("NFD").replace(/\p{M}/gu, "").trim().toLowerCase();
+}
+
+function preferOperationalLibraries(libraries: BuilderLibrary[], selectedId: string | null): BuilderLibrary[] {
+  const selected = selectedId ? libraries.find((item) => item.id === selectedId) : undefined;
+  const operational = libraries.filter((item) => isCatalogOperatorLibrary(item));
+  const published = operational.filter((item) => item.status === "PUBLISHED" || item.status === "APPROVED");
+  const pool = published.length ? published : operational;
+  const ranked = [...pool].sort((left, right) => {
+    const rank = (item: BuilderLibrary) => (item.status === "PUBLISHED" ? 0 : item.status === "APPROVED" ? 1 : 2);
+    const byStatus = rank(left) - rank(right);
+    if (byStatus !== 0) return byStatus;
+    return (left.nameFr ?? left.code).localeCompare(right.nameFr ?? right.code, "fr");
+  });
+  const unique: BuilderLibrary[] = [];
+  const seen = new Set<string>();
+  for (const item of ranked) {
+    const key = libraryDisplayKey(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(item);
+  }
+  const limited = unique.slice(0, 20);
+  if (selected && !limited.some((item) => item.id === selected.id)) {
+    if (isCatalogOperatorLibrary(selected) || selectedId) return [selected, ...limited.slice(0, 19)];
+  }
+  return limited;
+}
 const draftReleaseRow = z.object({ id: uuidSchema, library_id: uuidSchema, release_key: z.string().min(3), row_version: z.number().int().positive(), status: z.literal("DRAFT") }).strict();
 const approvedServiceVersionRow = z.object({ id: uuidSchema, service_id: uuidSchema, library_id: uuidSchema, version: z.number().int().positive(), status: z.literal("APPROVED"), name_fr: z.string().min(2), name_ar: z.string().min(2) }).strict();
 const releaseContextRow = z.object({ id: uuidSchema, library_id: uuidSchema, row_version: z.number().int().positive(), status: z.literal("DRAFT") }).strict();
@@ -52,9 +145,9 @@ export function createCatalogBuilderRepository(dependencies: BuilderRepositoryDe
       if (!await dependencies.authenticated()) return { status: "error", reason: "UNAUTHENTICATED" };
       const librariesResponse = await dependencies.libraries();
       if (librariesResponse.error) return failure(librariesResponse.error);
-      const parsedLibraries = z.array(libraryRow).max(10).safeParse(librariesResponse.data);
+      const parsedLibraries = z.array(libraryRow).max(80).safeParse(librariesResponse.data);
       if (!parsedLibraries.success) return { status: "error", reason: "INVALID_RESPONSE" };
-      let libraries = parsedLibraries.data;
+      let libraries = preferOperationalLibraries(parsedLibraries.data.map(mapLibrary), libraryId);
       let services: BuilderWorkspace["services"] = [], draftReleases: BuilderWorkspace["draftReleases"] = [], approvedServiceVersions: BuilderWorkspace["approvedServiceVersions"] = [];
       if (libraryId) {
         if (!uuidSchema.safeParse(libraryId).success) return { status: "error", reason: "INVALID_INPUT" };
@@ -64,13 +157,28 @@ export function createCatalogBuilderRepository(dependencies: BuilderRepositoryDe
           const selected = z.array(libraryRow).max(1).safeParse(selectedResponse.data);
           if (!selected.success) return { status: "error", reason: "INVALID_RESPONSE" };
           if (selected.data.length !== 1 || selected.data[0].id !== libraryId) return { status: "error", reason: "INVALID_INPUT" };
-          libraries = [selected.data[0], ...libraries.slice(0, 9)];
+          libraries = preferOperationalLibraries([mapLibrary(selected.data[0]), ...libraries], libraryId);
         }
         const servicesResponse = await dependencies.services(libraryId);
         if (servicesResponse.error) return failure(servicesResponse.error);
         const parsed = z.array(serviceRow).max(200).safeParse(servicesResponse.data);
         if (!parsed.success || parsed.data.some((service) => service.library_id !== libraryId)) return { status: "error", reason: "INVALID_RESPONSE" };
-        services = parsed.data.map((service) => ({ id: service.id, libraryId: service.library_id, code: service.code, slug: service.slug, status: service.status }));
+        const mappedServices = parsed.data.map(mapService);
+        const operationalServices = mappedServices.filter((service) => (
+          !service.fixture
+          && !isCatalogScratchLabel(service.nameFr)
+          && !isCatalogScratchLabel(service.nameAr)
+          && Boolean(service.nameFr?.trim() || service.nameAr?.trim())
+        ));
+        const publishedServices = operationalServices.filter(
+          (service) => service.status === "PUBLISHED" || service.status === "APPROVED",
+        );
+        const servicePool = publishedServices.length
+          ? publishedServices
+          : (operationalServices.length ? operationalServices : mappedServices.filter((service) => !service.fixture));
+        services = servicePool
+          .slice()
+          .sort((left, right) => (left.nameFr ?? left.code).localeCompare(right.nameFr ?? right.code, "fr"));
         const [releaseResponse, versionResponse] = await Promise.all([dependencies.draftReleases(libraryId), dependencies.approvedServiceVersions(libraryId)]);
         if (releaseResponse.error || versionResponse.error) return failure(releaseResponse.error ?? versionResponse.error);
         const releases = z.array(draftReleaseRow).max(100).safeParse(releaseResponse.data), versions = z.array(approvedServiceVersionRow).max(500).safeParse(versionResponse.data);
@@ -79,7 +187,7 @@ export function createCatalogBuilderRepository(dependencies: BuilderRepositoryDe
         approvedServiceVersions = versions.data.map(item => ({ id: item.id, serviceId: item.service_id, libraryId: item.library_id, version: item.version, nameFr: item.name_fr, nameAr: item.name_ar }));
       }
       return { status: "success", value: {
-        libraries: libraries.map((library) => ({ id: library.id, code: library.code, status: library.status, rowVersion: library.row_version, currentReleaseId: library.current_release_id })),
+        libraries,
         services, draftReleases, approvedServiceVersions,
         questionnairePersistenceAvailable: false,
       } };

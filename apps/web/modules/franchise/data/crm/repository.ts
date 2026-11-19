@@ -46,16 +46,25 @@ async function readFranchiseCrm(franchiseId?: string):Promise<FranchiseCrmLoadRe
   return{status:"success",dashboard:{currentUserId:access.userId,canWrite:false,canRecordPerformance:platformRoles.has("SUPER_ADMIN")||platformRoles.has("MATRICIA_ADMIN"),franchises:[],prospects:[],metrics:[],snapshots:[],alerts:[],objectives:[]}};
  }
 
+ type PageResult={error:unknown;data:unknown};
+ // Erase PostgREST builder depth before collectOperationPages (TS2589).
+ const page=(run:(from:number,to:number)=>unknown)=>
+  collectOperationPages(async(from,to)=>{
+   const result=await (run(from,to) as PromiseLike<{data:unknown;error:unknown}>);
+   return{data:Array.isArray(result.data)?(result.data as unknown[]):null,error:result.error};
+  }) as Promise<PageResult>;
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any -- boundary erase for supabase builder depth
+ const q=(value:unknown)=>value as any;
  const [territories,prospects,activities,pipelineEvents,metrics,snapshots,alerts,invitations,objectives]=await Promise.all([
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_territory_versions").select("id,franchise_id,version,territory_code,name_fr,name_ar"),franchiseId,scopeIds).order("version",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_crm_prospects").select("id,linked_organization_id,created_at,franchise_id,territory_version_id,prospect_type,display_name,contact_email,organization_name,source_code,pipeline_stage,next_followup_at,row_version"),franchiseId,scopeIds).order("updated_at",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_crm_activities").select("id::text,prospect_id,activity_type,occurred_at,summary,evidence_refs"),franchiseId,scopeIds).order("occurred_at",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_pipeline_events").select("id::text,prospect_id,from_stage,to_stage,reason_code,occurred_at,evidence_refs"),franchiseId,scopeIds).order("occurred_at",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>c.from("franchise_performance_metric_versions").select("id,metric_code,version,axis_code,label_fr,label_ar,weight_basis_points,warning_below_basis_points").eq("status","ACTIVE").order("metric_code").order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_performance_score_snapshots").select("id,franchise_id,period_start,period_end,model_version,global_score_basis_points,library_quality_score_basis_points,axis_scores,health_suggestion"),franchiseId,scopeIds).order("period_end",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_performance_alerts").select("id,franchise_id,snapshot_id,alert_type,severity,status,metric_code,explanation_fr,explanation_ar,evidence_refs,rule_version"),franchiseId,scopeIds).order("created_at",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_network_invitations").select("id,prospect_id,status,delivery_mode,expires_at,sent_at"),franchiseId,scopeIds).order("created_at",{ascending:false}).order("id").range(from,to)),
-  collectOperationPages((from,to)=>scopedFranchiseQuery(c.from("franchise_performance_objective_versions").select("id,franchise_id,objective_code,version,title_fr,title_ar,target_value::text,current_value::text,unit_code,status,starts_on,due_on,rule_version"),franchiseId,scopeIds).order("due_on").order("id").range(from,to))
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_territory_versions").select("id,franchise_id,version,territory_code,name_fr,name_ar")),franchiseId,scopeIds)).order("version",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_crm_prospects").select("id,linked_organization_id,created_at,franchise_id,territory_version_id,prospect_type,display_name,contact_email,organization_name,source_code,pipeline_stage,next_followup_at,row_version")),franchiseId,scopeIds)).order("updated_at",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_crm_activities").select("id::text,prospect_id,activity_type,occurred_at,summary,evidence_refs")),franchiseId,scopeIds)).order("occurred_at",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_pipeline_events").select("id::text,prospect_id,from_stage,to_stage,reason_code,occurred_at,evidence_refs")),franchiseId,scopeIds)).order("occurred_at",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(c.from("franchise_performance_metric_versions").select("id,metric_code,version,axis_code,label_fr,label_ar,weight_basis_points,warning_below_basis_points")).eq("status","ACTIVE").order("metric_code").order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_performance_score_snapshots").select("id,franchise_id,period_start,period_end,model_version,global_score_basis_points,library_quality_score_basis_points,axis_scores,health_suggestion")),franchiseId,scopeIds)).order("period_end",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_performance_alerts").select("id,franchise_id,snapshot_id,alert_type,severity,status,metric_code,explanation_fr,explanation_ar,evidence_refs,rule_version")),franchiseId,scopeIds)).order("created_at",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_network_invitations").select("id,prospect_id,status,delivery_mode,expires_at,sent_at")),franchiseId,scopeIds)).order("created_at",{ascending:false}).order("id").range(from,to)),
+  page((from,to)=>q(scopedFranchiseQuery(q(c.from("franchise_performance_objective_versions").select("id,franchise_id,objective_code,version,title_fr,title_ar,target_value::text,current_value::text,unit_code,status,starts_on,due_on,rule_version")),franchiseId,scopeIds)).order("due_on").order("id").range(from,to)),
  ]);
  if([territories,prospects,activities,pipelineEvents,metrics,snapshots,alerts,objectives,invitations].some(x=>x.error))return{status:"error",reason:"QUERY_FAILED"};
  const tp=z.array(territory).safeParse(territories.data),pp=z.array(prospect).safeParse(prospects.data),ap=z.array(activity).safeParse(activities.data),pep=z.array(pipelineEvent).safeParse(pipelineEvents.data),mp=z.array(metric).safeParse(metrics.data),sp=z.array(snapshot).safeParse(snapshots.data),alp=z.array(alert).safeParse(alerts.data),op=z.array(objective).safeParse(objectives.data),ip=z.array(nativeInvitation).safeParse(invitations.data);

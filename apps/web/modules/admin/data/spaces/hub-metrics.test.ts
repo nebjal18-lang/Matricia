@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
-import { buildHubMetrics } from "./hub-metrics";
+import { buildHubMetrics, buildSpaceHubMetrics } from "./hub-metrics";
 
 const dash = {
   as_of: "2026-11-13T00:00:00.000Z",
@@ -30,5 +30,13 @@ describe("buildHubMetrics", () => {
       expect("charts" in metrics).toBe(false);
     }
     expect(buildHubMetrics("actors", dash, "fr").kpis.map((item) => item.value)).toEqual([1, 1, 0, 1]);
+  });
+
+  it("builds per-hub parcours KPIs", () => {
+    const devis = buildSpaceHubMetrics("devis", dash, "fr");
+    expect(devis.kpis).toHaveLength(4);
+    expect(devis.kpis.some((item) => item.id === "review")).toBe(true);
+    const demandes = buildSpaceHubMetrics("demandes", dash, "ar");
+    expect(demandes.kpis[0]?.value).toBe(1);
   });
 });

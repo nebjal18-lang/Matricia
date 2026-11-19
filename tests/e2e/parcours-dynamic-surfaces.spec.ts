@@ -141,7 +141,7 @@ async function scanRoute(page: Page, actor: string, locale: "fr" | "ar", route: 
     page.off("pageerror", onPageError);
   }
   const routePath=route.split("?")[0];
-  const expectedGate=actor==="admin-demo"&&["administration/classification-fiscale","administration/fiscalite-maroc"].includes(routePath??"");
+  const expectedGate=false;
   const expectedUrl=new URL(`/${locale}/${route}`,process.env.E2E_BASE_URL??"http://localhost:5173");
   const destinationMatches=surfaceDestinationMatches(page.url(),expectedUrl);
   const outcome=surfaceOutcome({status,heading,workspaceFailure,accessGate,bodyFailure,consoleErrors,pageErrors,expectedGate,destinationMatches});

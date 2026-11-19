@@ -1,3 +1,4 @@
+import { isDemoClientHomeEnabled } from "@/modules/client/data/home/demo-scenario";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ClientOfferDetail } from "./quote-detail-model";
 
@@ -7,7 +8,7 @@ export function isDemoOfferId(quoteId: string) {
 
 export function canApplyDemoOffer(organizationName: string | null) {
   void organizationName;
-  return false;
+  return isDemoClientHomeEnabled();
 }
 
 export function demoClientOfferDetail(input: {

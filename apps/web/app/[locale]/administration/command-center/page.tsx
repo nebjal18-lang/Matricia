@@ -1,5 +1,4 @@
 import { AdminSearchResults } from "@/modules/admin/screens/command-center/search";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
@@ -19,7 +18,7 @@ export default async function AdminCommandCenterPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; q?: string; actionPage?:string;actionStatus?:string }>;
+  searchParams: Promise<{ organizationId?: string; q?: string; actionPage?: string; actionStatus?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
@@ -27,8 +26,14 @@ export default async function AdminCommandCenterPage({
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/administration/command-center` }));
   const m = getCommandCenterMessages(locale);
   const c = adminCopy(locale);
-  const [result, supervision] = await Promise.all([loadAdminCommandCenter(Number(query.actionPage??"1"),query.actionStatus), loadAdminSupervisionDashboard(50)]);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/command-center` }));
+  const fr = locale === "fr";
+  const [result, supervision] = await Promise.all([
+    loadAdminCommandCenter(Number(query.actionPage ?? "1"), query.actionStatus),
+    loadAdminSupervisionDashboard(50),
+  ]);
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") {
+    redirect(connexionHref(locale, { next: `/${locale}/administration/command-center` }));
+  }
   const currentParams = new URLSearchParams(space.selectedQuery);
   if (query.q?.trim()) currentParams.set("q", query.q.trim());
   if (query.actionPage) currentParams.set("actionPage", query.actionPage);
@@ -47,22 +52,33 @@ export default async function AdminCommandCenterPage({
       userEmail={space.userEmail}
       active="home"
       alternateHref={`/${alternate}/administration/command-center${currentQuery}`}
-      title={c.space}
-      lead={c.homeLead}
+      title={fr ? "Centre de pilotage" : "مركز القيادة"}
+      lead={fr ? "Une file unifiée. Sélectionnez une ligne : l’action s’ouvre à droite." : "طابور موحّد. اختاروا سطراً: يُفتح الإجراء على اليمين."}
       kicker={c.kicker}
     >
-      {query.q?.trim() ? <AdminSearchResults locale={locale} query={query.q.trim()} organizationQuery={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} /> : null}
-      <AdminDirectoryBoard locale={locale} query={space.selectedQuery} metrics={metrics} />
-      <section className="mb-6 mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 p-5" aria-labelledby="initial-configuration-title">
-        <div><h2 id="initial-configuration-title" className="text-lg font-semibold">{locale === "ar" ? "إعداد منصتكم" : "Configurer votre plateforme"}</h2><p className="mt-1 text-sm text-muted-foreground">{locale === "ar" ? "بيانات المؤسسة والاتصالات ومراحل الإعداد قبل بدء التشغيل." : "Retrouvez les informations de votre entreprise, les connexions et les étapes avant mise en service."}</p></div>
-        <Link href={`/${locale}/administration/configuration`} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground">{locale === "ar" ? "فتح الإعداد" : "Ouvrir la configuration"}</Link>
-      </section>
-      <div id="command-today" className="admin-command-surface">
+      {query.q?.trim() ? (
+        <AdminSearchResults
+          locale={locale}
+          query={query.q.trim()}
+          organizationQuery={space.selectedQuery}
+          dashboard={result.status === "success" ? result.dashboard : null}
+        />
+      ) : null}
+
+      <div className="client-page admin-command-home">
         {result.status === "error" ? (
-          <Alert variant="destructive">
-            <AlertTitle>{result.reason === "FORBIDDEN" ? m.forbiddenPage : result.reason === "MFA_REQUIRED" ? m.mfaRequired : m.loadError}</AlertTitle>
-            <AlertDescription>{locale === "ar" ? "تعذر تحميل قائمة المعالجة. لا يمكن اعتبارها فارغة." : "La file n’a pas pu être chargée ; elle ne peut pas être considérée comme vide."}</AlertDescription>
-          </Alert>
+          <section id="command-today" aria-label={fr ? "File du jour" : "طابور اليوم"}>
+            <Alert variant="destructive">
+              <AlertTitle>
+                {result.reason === "FORBIDDEN" ? m.forbiddenPage : result.reason === "MFA_REQUIRED" ? m.mfaRequired : m.loadError}
+              </AlertTitle>
+              <AlertDescription>
+                {fr
+                  ? "La file n’a pas pu être chargée ; elle ne peut pas être considérée comme vide."
+                  : "تعذر تحميل قائمة المعالجة. لا يمكن اعتبارها فارغة."}
+              </AlertDescription>
+            </Alert>
+          </section>
         ) : (
           <CommandCenterPanel
             dashboard={result.dashboard}
@@ -74,6 +90,13 @@ export default async function AdminCommandCenterPage({
             keys={Array.from({ length: keyCount }, () => crypto.randomUUID())}
           />
         )}
+
+        <details id="admin-directory" className="client-card admin-command-directory p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{fr ? "Répertoire plateforme" : "دليل المنصة"}</summary>
+          <div className="mt-4">
+            <AdminDirectoryBoard locale={locale} query={space.selectedQuery} metrics={metrics} embedded compact />
+          </div>
+        </details>
       </div>
     </AdminAppShell>
   );

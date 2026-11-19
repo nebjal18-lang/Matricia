@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { hasPlatformRole, loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
+import { buildDemoFinanceDashboard, canApplyAdminDemoHubs } from "@/modules/admin/data/spaces/demo-hubs";
 import { adminFinanceDashboardSchema, adminFinanceUuid, exactMinor, reconciliationSchema, type AdminFinanceDashboard, type AdminFinanceResult } from "./model";
 
 const paymentRow = z.object({ id: adminFinanceUuid, provider_organization_id: adminFinanceUuid, currency: z.string().regex(/^[A-Z]{3}$/u), amount_minor: exactMinor }).strict();
@@ -21,6 +22,11 @@ async function authorizedClient() {
 export async function loadAdminFinanceDashboard(): Promise<AdminFinanceResult<AdminFinanceDashboard>> {
   const access = await authorizedClient();
   if (access.status === "error") return access;
+  if (canApplyAdminDemoHubs()) {
+    const demo = buildDemoFinanceDashboard();
+    const parsed = adminFinanceDashboardSchema.safeParse(demo);
+    return parsed.success ? { status: "success", value: parsed.data } : { status: "error", reason: "INVALID_RESPONSE" };
+  }
   const response = await access.client.rpc("list_admin_finance_dashboard", { p_limit: 100 });
   if (response.error) return { status: "error", reason: response.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
   const parsed = adminFinanceDashboardSchema.safeParse(response.data);

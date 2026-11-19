@@ -1,3 +1,5 @@
+@import "../../../modules/shared/ui/design-system/matricia-ds.css";
+
 .journey-home,.journey-shell,.public-root,.public-page{
   --jp-navy:var(--mat-navy);--jp-ink:var(--mat-navy);--jp-muted:var(--mat-slate);--jp-blue:var(--mat-violet);--jp-blue-hover:var(--mat-violet-strong);--jp-pale:var(--mat-violet-soft);--jp-border:var(--mat-border);--jp-bronze:var(--mat-rose);--jp-cream:var(--mat-canvas);--jp-coral:var(--mat-coral);--jp-card:var(--mat-canvas);
   background:var(--jp-cream);color:var(--jp-ink)
@@ -19,6 +21,10 @@
 .journey-eyebrow.is-coral{color:var(--mat-coral-ink)}
 [dir=rtl] .journey-eyebrow{letter-spacing:0;text-transform:none}
 .journey-home-hero,.journey-home-section,.journey-home-provider,.public-wrap{width:min(100% - 48px,1180px);margin-inline:auto}
+.journey-home-section:nth-of-type(3n+1){background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--mat-violet-soft) 35%,transparent));border-radius:28px;padding-block:clamp(1.2rem,3vw,2rem)}
+.journey-home-section:nth-of-type(3n+2){background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--mat-mint-soft) 40%,transparent));border-radius:28px;padding-block:clamp(1.2rem,3vw,2rem)}
+.journey-home-section:nth-of-type(3n+3){background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--mat-coral-soft) 35%,transparent));border-radius:28px;padding-block:clamp(1.2rem,3vw,2rem)}
+.public-page .client-card,.journey-card{background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--mat-navy-tint) 45%,white))}
 .journey-home-hero{display:grid;width:100%;max-width:none;margin:0;grid-template-columns:minmax(280px,34vw) minmax(0,1fr);gap:12px;align-items:center;padding-block:clamp(28px,5vw,56px);padding-inline-start:max(24px,calc((100% - 1180px) / 2));padding-inline-end:0;position:relative;overflow:visible}
 .journey-hero-copy{position:relative}
 .journey-hero-copy h1,.public-hero h1{max-width:740px;margin:18px 0 20px;font-size:clamp(2.4rem,4.6vw,3.55rem);font-weight:720;letter-spacing:-.04em;line-height:1.08;text-wrap:balance;color:var(--jp-navy)}

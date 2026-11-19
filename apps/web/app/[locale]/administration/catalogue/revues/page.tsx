@@ -5,6 +5,7 @@ import {z} from "zod";
 import {isLocale} from "@/modules/shared/lib/i18n/locale";
 import {getSupabaseServerClient} from "@/modules/shared/lib/supabase/server";
 import {AdminModulePage} from "@/modules/admin/ui/admin-module-page";
+import {AdminStep1Gate} from "@/modules/admin/ui/admin-step1-gate";
 import {editorialDetailSchema, editorialKinds, editorialQueueSchema} from "@/modules/admin/screens/catalogue-reviews/model";
 import {EditorialReviewDetail} from "@/modules/admin/screens/catalogue-reviews/detail";
 export default async function EditorialReviewsPage({params, searchParams}: {params: Promise<{locale: string}>; searchParams: Promise<{page?: string; kind?: string; reviewId?: string}>}) {
@@ -30,6 +31,7 @@ export default async function EditorialReviewsPage({params, searchParams}: {para
     return hit ? (ar ? hit[1] : hit[0]) : value;
   };
   return <AdminModulePage locale={locale} active="catalog" path="catalogue/revues" querySuffix={`kind=${kind}&page=${page}${selected.success ? `&reviewId=${selected.data}` : ""}`} title={t("Revue éditoriale centrale du catalogue", "المراجعة التحريرية المركزية للفهرس")} lead={t("Examiner le contenu et les dépendances, approuver ou refuser, puis programmer séparément une publication approuvée.", "مراجعة المحتوى والاعتماديات والاعتماد أو الرفض ثم برمجة نشر النسخة المعتمدة بشكل منفصل.")}>
+    <AdminStep1Gate locale={locale} current="revues" />
     <div className="client-stack"><Link href={`/${locale}/administration/catalogue/questionnaires/revues`}>{t("Revue des questionnaires et de leurs questions", "مراجعة الاستبيانات وأسئلتها")}</Link><form method="get"><label>{t("Nature de contenu", "نوع المحتوى")}<select name="kind" defaultValue={kind}>{["ALL", ...editorialKinds].map((value) => <option key={value} value={value}>{kindLabel(value)}</option>)}</select></label><button>{t("Filtrer", "تصفية")}</button></form>
     {queueResult.error || !queue.success ? <p role="alert">{t("File indisponible ou accès refusé. Vérifiez la MFA et les droits de revue.", "قائمة المراجعة غير متاحة أو الوصول مرفوض. تحققوا من المصادقة والصلاحيات.")}</p> : <><p>{queue.data.total} {t("demandes en revue", "طلبات قيد المراجعة")}</p><ul>{queue.data.items.map((item) => <li key={item.id}><Link href={href(page, item.id)}>{kindLabel(item.targetType)} · {ar ? item.titleAr : item.titleFr} · {item.code}</Link></li>)}</ul><nav className="flex gap-4">{page > 1 ? <Link href={href(page - 1)}>{t("Précédent", "السابق")}</Link> : null}<span>{page}</span>{page * 25 < queue.data.total ? <Link href={href(page + 1)}>{t("Suivant", "التالي")}</Link> : null}</nav></>}
     {selected.success ? detailResult?.error || !detail.success ? <p role="alert">{t("Détail indisponible ou hors périmètre.", "التفاصيل غير متاحة أو خارج النطاق.")}</p> : <EditorialReviewDetail key={detail.data.request.id} locale={locale} detail={detail.data} idempotencyKey={randomUUID()} scheduleKey={randomUUID()}/> : null}</div>

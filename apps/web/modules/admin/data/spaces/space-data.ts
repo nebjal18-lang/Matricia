@@ -9,24 +9,34 @@ import type { AdminGovernanceDashboard } from "@/modules/admin/data/governance-d
 import { loadAdminSupervisionDashboard, type AdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import type { AdminSpaceId } from "./admin-nav";
 import { canApplyAdminDemo, buildDemoSpaceRows } from "./demo-overlay";
+import { buildDemoBoxActorSpaceRows } from "./demo-box-actors";
+import { buildDemoSpecialSpaceRows } from "./demo-special-spaces";
 import { franchiseListTitle, franchiseTerritoryLabel } from "./franchise-presentation";
 import { buildFranchisesRowsFromGovernance, presentAuthorizedFranchisesRows } from "./franchises-presentation";
-import { actorOrganizationLabel, isAdminOrgDirectoryFixture } from "./actor-presentation";
-import { formatAdminDateTime } from "@/modules/admin/data/command-center/view-model";
 import {
   isOperationalFixtureName,
-  presentChannel,
   presentDateOnly,
-  presentDateTime,
-  presentMinor,
-  presentObligation,
   presentOrgName,
-  presentPersonPair,
 } from "./present-space-row";
+import type { ParcoursChainLink } from "./parcours-ariadne";
+import {
+  mapAvenantsRows,
+  mapContratsRows,
+  mapDemandesRows,
+  mapDevisRows,
+  mapDiagnosticsRows,
+  mapDocumentsRows,
+  mapJalonsRows,
+  mapLitigesExceptionRows,
+  mapLitigesGovernanceRows,
+  mapMatchingRows,
+  mapMessagerieRows,
+  mapMissionsRows,
+} from "./parcours-space-rows";
 import { spaceHref, statusTone, type SpaceTone } from "./screen-catalog";
 import { normalizeSpecialQueueRow } from "./special-queue-normalize";
 import { buildTerritoiresRowsFromGovernance, presentAuthorizedTerritoiresRows } from "./territoires-presentation";
-import { formatDiagnosticProgress, localizeDiagnosticRating, localizeStatus } from "./view-model";
+import { localizeStatus } from "./view-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export type SpaceRow = {
@@ -39,6 +49,8 @@ export type SpaceRow = {
   organizationId?: string;
   treat?: boolean;
   fixture?: boolean;
+  demoFilm?: boolean;
+  chain?: ParcoursChainLink[];
   extras?: Record<string, string>;
   history?: Array<{ id: string; action: string; occurredAt: string; actorType: string; actorLabel?:string|null;reason?:string }>;
   conversation?:ConversationPage|null;
@@ -103,6 +115,19 @@ export async function loadAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId
     } else if (space === "capacite" || space === "providers" || space === "qualification" || space === "gouvernance" || space === "litiges") {
       snapshot.rows = snapshot.rows.map((row) => normalizeSpecialQueueRow(locale, space, query, row));
       snapshot.treat = snapshot.rows.filter((row) => row.treat ?? /PENDING|SUBMITTED|UNDER_REVIEW|IN_REVIEW|EXPIRED|REJECTED|SUSPENDED/.test(row.status));
+    }
+    const demoActorRows = buildDemoBoxActorSpaceRows(locale, space, query);
+    if (demoActorRows) {
+      snapshot.rows = demoActorRows;
+      snapshot.treat = snapshot.rows.filter((row) => row.treat);
+      snapshot.reason = null;
+    } else {
+      const demoSpecialRows = buildDemoSpecialSpaceRows(locale, space, query);
+      if (demoSpecialRows) {
+        snapshot.rows = demoSpecialRows;
+        snapshot.treat = snapshot.rows.filter((row) => row.treat);
+        snapshot.reason = null;
+      }
     }
     return finalizeOperationalRows(locale, snapshot);
   } catch { return unavailableSnapshot("UNAVAILABLE"); }
@@ -183,349 +208,62 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
+  const demoFilm = Boolean(dash?.read_only);
   if (space === "matching" && dash) {
-    snapshot.rows = (dash.matching ?? []).map((item) => {
-      const orgName = presentOrgName(item.organization_name, locale);
-      const fixture = isOperationalFixtureName(item.organization_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "matching", query, item.id),
-        title: orgName,
-        cells: [
-          orgName,
-          sliceId(item.request_id),
-          String(item.eligible_count),
-          String(item.excluded_count),
-          item.eligible_count > 0 ? (locale === "ar" ? "مراجعة" : "Revue") : (locale === "ar" ? "بانتظار" : "En attente"),
-          String(item.rfq_count),
-          String(item.candidates.length || item.rfq_count),
-          item.status,
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.organization_id,
-        fixture,
-        treat: !fixture && (item.rfq_count === 0 || item.eligible_count === 0),
-        extras: {
-          requestId: item.request_id,
-          policy: item.policy_version,
-          candidates: JSON.stringify(item.candidates),
-          organizationName: orgName,
-        },
-      };
-    });
+    snapshot.rows = mapMatchingRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "contrats" && dash) {
-    snapshot.rows = dash.contracts.map((item) => {
-      const title = presentPersonPair(item.client_name, item.provider_name, locale);
-      const fixture = isOperationalFixtureName(item.client_name, item.provider_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "contrats", query, item.id),
-        title,
-        cells: [
-          sliceId(item.id),
-          item.mission_id ? sliceId(item.mission_id) : "—",
-          presentOrgName(item.client_name, locale),
-          presentOrgName(item.provider_name, locale),
-          String(item.current_version),
-          String(item.signature_count),
-          item.signature_count > 0 ? (locale === "ar" ? "موقّع جزئياً/كلياً" : "Signatures en cours") : (locale === "ar" ? "بانتظار التوقيع" : "En attente de signature"),
-          item.status === "ACTIVE" ? (locale === "ar" ? "مفعّل" : "Activé") : "—",
-          item.status,
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.client_organization_id,
-        fixture,
-        extras: { missionId: item.mission_id ?? "", signatures: String(item.signature_count) },
-        treat: !fixture && /PENDING|DRAFT|SIGNATURE/i.test(item.status),
-      };
-    });
+    snapshot.rows = mapContratsRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "avenants" && dash) {
-    snapshot.rows = dash.amendments.map((item) => {
-      const title = presentPersonPair(item.client_name, item.provider_name, locale);
-      const fixture = isOperationalFixtureName(item.client_name, item.provider_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "avenants", query, item.id),
-        title,
-        cells: [
-          sliceId(item.id),
-          sliceId(item.contract_id),
-          locale === "ar" ? "تعديل تعاقدي" : "Modification contractuelle",
-          String(item.amendment_number),
-          "—",
-          "—",
-          /ACTIVE|ACTIV/i.test(item.status) ? (locale === "ar" ? "مفعّل" : "Activé") : (locale === "ar" ? "بانتظار التفعيل" : "En attente d’activation"),
-          item.status,
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.client_organization_id,
-        fixture,
-        extras: { contractId: item.contract_id, amendment: String(item.amendment_number) },
-        treat: !fixture && /DRAFT|PENDING/i.test(item.status),
-      };
-    });
+    snapshot.rows = mapAvenantsRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if (space === "documents" && dash) {
-    snapshot.rows = dash.documents.map((item) => {
-      const orgName = presentOrgName(item.organization_name, locale);
-      const fixture = isOperationalFixtureName(item.organization_name);
-      const kind = localizeTechnicalCode(item.kind, locale);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "documents", query, item.id),
-        title: `${kind} · ${item.code}`,
-        cells: [item.code, orgName, kind, "—", "—", `v${item.version}`, "—", "—", presentDateOnly(item.expires_on, locale), item.status],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.organization_id,
-        fixture,
-        extras: {
-          kind: item.kind,
-          version: String(item.version),
-          statusCodes: item.expires_on && item.expires_on < new Date().toISOString().slice(0, 10) ? "EXPIRED" : item.expires_on && item.expires_on <= new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10) ? "EXPIRING" : "",
-        },
-        treat: !fixture && /PENDING|SUBMITTED|UNDER_REVIEW|EXPIRED|REJECTED|QUARANTINED/i.test(item.status),
-      };
-    });
+  if (space === "documents" && dash?.documents?.length) {
+    snapshot.rows = mapDocumentsRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if (space === "messagerie" && dash?.messages) {
-    snapshot.rows = dash.messages.map((item) => {
-      const fixture = isOperationalFixtureName(item.client_name, item.provider_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "messagerie", query, item.id),
-        title: item.subject,
-        cells: [
-          `${presentOrgName(item.client_name, locale)} · ${presentOrgName(item.provider_name, locale)}`,
-          `${presentOrgName(item.client_name, locale)} / ${presentOrgName(item.provider_name, locale)}`,
-          sliceId(item.service_request_id),
-          presentChannel("in-app", locale),
-          presentDateTime(item.created_at, locale),
-          "—",
-          item.status,
-          "—",
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.client_organization_id,
-        fixture,
-        treat: !fixture && item.status === "OPEN",
-        extras: { rfqId: item.object_id, requestId: item.service_request_id, providerId: item.provider_organization_id },
-      };
-    });
-    snapshot.rows.push(...(dash.notifications ?? []).map((item) => {
-      const orgName = presentOrgName(item.organization_name, locale);
-      const fixture = isOperationalFixtureName(item.organization_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "messagerie", query, item.id),
-        title: localizeTechnicalCode(item.event_type, locale),
-        cells: [
-          localizeTechnicalCode(item.event_type, locale),
-          orgName,
-          locale === "ar" ? "إشعار" : "Notification",
-          presentChannel(item.channel, locale),
-          presentDateTime(item.updated_at, locale),
-          item.read_at ? "0" : "1",
-          item.status,
-          localizeStatus(item.priority, locale),
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.organization_id,
-        fixture,
-        treat: !fixture && !item.read_at,
-        extras: { kind: "NOTIFICATION", statusCodes: item.read_at ? "" : "UNREAD", errorCode: item.error_code ?? "", attemptCount: String(item.attempt_count) },
-      };
-    }));
+  if (space === "messagerie" && dash) {
+    const vue = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query).get("vue") ?? "";
+    const resolvedMode = !vue
+      ? "all"
+      : /UNREAD|PENDING|QUEUED|SENT|DELIVERED|FAILED|DEAD|NOTIFICATION/i.test(vue)
+        ? "notifications"
+        : /OPEN|LOCKED|FLAGGED/i.test(vue)
+          ? "messages"
+          : "all";
+    snapshot.rows = mapMessagerieRows(locale, query, dash, demoFilm, resolvedMode);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "diagnostics" && dash) {
-    snapshot.rows = dash.diagnostics.map((item) => {
-      const orgName = actorOrganizationLabel(item.organization_name, locale);
-      const score = formatDiagnosticProgress(item.overall_score, locale);
-      const fixture = isAdminOrgDirectoryFixture(item.organization_name);
-      const activity = item.completed_at ? formatAdminDateTime(item.completed_at, locale) : (locale === "ar" ? "بدون نشاط مسجّل" : "Aucune activité enregistrée");
-      const diagnosticTitle = locale === "ar"
-        ? (item.questionnaire_title_ar?.trim() || item.questionnaire_title_fr?.trim() || "تشخيص مؤسسي")
-        : (item.questionnaire_title_fr?.trim() || item.questionnaire_title_ar?.trim() || "Diagnostic entreprise");
-      const versionValue = item.questionnaire_version == null || item.questionnaire_version === ""
-        ? null
-        : Number(item.questionnaire_version);
-      const versionLabel = versionValue != null && Number.isFinite(versionValue)
-        ? `v${versionValue}`
-        : (locale === "ar" ? "—" : "—");
-      return {
-        id: item.id,
-        href: spaceHref(locale, "diagnostics", query, item.id),
-        title: orgName,
-        cells: [
-          orgName,
-          diagnosticTitle,
-          versionLabel,
-          score.label,
-          localizeDiagnosticRating(item.rating, locale),
-          activity,
-          item.status,
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.organization_id,
-        fixture,
-        treat: !fixture && /DRAFT|IN_PROGRESS|STARTED|RUNNING|IN_REVIEW|STALE|SUBMITTED/i.test(item.status),
-        extras: { scorePercent: String(Math.round(score.percent)), progressPercent: String(Math.round(score.percent)) },
-      };
-    });
+    snapshot.rows = mapDiagnosticsRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
-  if ((space === "demandes" || space === "matching") && dash) {
-    snapshot.rows = dash.requests.map((item) => {
-      const orgName = presentOrgName(item.organization_name, locale);
-      const fixture = isOperationalFixtureName(item.organization_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, space, query, item.id),
-        title: orgName,
-        cells: space === "matching"
-          ? [
-              orgName,
-              sliceId(item.service_id),
-              String(item.matching_runs),
-              String(item.rfq_count),
-              item.matching_runs > 0 ? (locale === "ar" ? "مراجعة" : "Revue") : (locale === "ar" ? "بانتظار" : "En attente"),
-              String(item.rfq_count),
-              String(item.quote_count),
-              localizeStatus(item.status, locale),
-            ]
-          : [
-              orgName,
-              locale === "ar" ? "طلب خدمة" : "Demande de service",
-              "—",
-              locale === "ar" ? "طلب عروض" : "Consultation RFQ",
-              item.rfq_count > 0 ? `${item.rfq_count}` : "0",
-              String(item.matching_runs),
-              String(item.quote_count),
-              localizeStatus(item.status, locale),
-            ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.organization_id,
-        fixture,
-        treat: !fixture && (item.matching_runs === 0 || /DRAFT|BLOCKED/i.test(item.status)),
-        extras: { serviceId: item.service_id, libraryId: item.library_id },
-      };
-    });
+  if (space === "demandes" && dash) {
+    snapshot.rows = mapDemandesRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "devis" && dash) {
-    snapshot.rows = dash.quotes.map((item) => {
-      const provider = presentOrgName(item.provider_name, locale);
-      const client = presentOrgName(item.client_name, locale);
-      const fixture = isOperationalFixtureName(item.provider_name, item.client_name);
-      const currency = item.currency ?? "MAD";
-      return {
-        id: item.id,
-        href: spaceHref(locale, "devis", query, item.id),
-        title: `${client} · ${provider}`,
-        cells: [
-          sliceId(item.id),
-          sliceId(item.request_id),
-          provider,
-          item.version_number?.toString() ?? "—",
-          "—",
-          presentMinor(item.subtotal_minor, currency, locale),
-          presentMinor(item.tax_minor, currency, locale),
-          presentMinor(item.total_minor, currency, locale),
-          presentDateOnly(item.valid_until, locale),
-          "—",
-          item.status,
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.provider_organization_id,
-        fixture,
-        treat: !fixture && /REVIEW|PENDING|RECEIVED/i.test(item.status),
-      };
-    });
+    snapshot.rows = mapDevisRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "jalons" && dash) {
-    snapshot.rows = (dash.milestones ?? []).map((item) => {
-      const title = locale === "ar" ? item.title_ar : item.title_fr;
-      const fixture = isOperationalFixtureName(item.owner_name, title);
-      return {
-        id: item.id,
-        href: spaceHref(locale, space, query, item.id),
-        title,
-        cells: [
-          sliceId(item.mission_id),
-          title,
-          item.deliverable_count > 0 ? (locale === "ar" ? `${item.deliverable_count} تسليم` : `${item.deliverable_count} livrable(s)`) : "—",
-          presentOrgName(item.owner_name, locale),
-          presentDateTime(item.due_at, locale),
-          String(item.proof_count),
-          localizeStatus(item.status, locale),
-          "—",
-          localizeStatus(item.status, locale),
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.organization_id,
-        fixture,
-        extras: {
-          missionId: item.mission_id,
-          statusCodes: item.due_at && new Date(item.due_at) < new Date() && !["ACCEPTED", "REJECTED"].includes(item.status) ? "OVERDUE" : "",
-        },
-        treat: !fixture && (item.status === "SUBMITTED" || item.status === "REJECTED"),
-      };
-    });
+    snapshot.rows = mapJalonsRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
   if (space === "missions" && dash) {
-    snapshot.rows = dash.missions.map((item) => {
-      const title = presentPersonPair(item.client_name, item.provider_name, locale);
-      const fixture = isOperationalFixtureName(item.client_name, item.provider_name);
-      return {
-        id: item.id,
-        href: spaceHref(locale, space, query, item.id),
-        title,
-        cells: [
-          sliceId(item.id),
-          sliceId(item.contract_id),
-          presentOrgName(item.client_name, locale),
-          presentOrgName(item.provider_name, locale),
-          `${item.milestone_count}`,
-          item.milestone_count > 0 ? (locale === "ar" ? `التالي ضمن ${item.milestone_count}` : `Prochain parmi ${item.milestone_count}`) : "—",
-          String(item.deliverable_count),
-          "—",
-          item.status,
-        ],
-        status: item.status,
-        tone: statusTone(item.status),
-        organizationId: item.client_organization_id,
-        fixture,
-        extras: { contractId: item.contract_id, providerId: item.provider_organization_id },
-        treat: !fixture && /BLOCKED|PENDING|START|CLOSUR/.test(item.status),
-      };
-    });
+    snapshot.rows = mapMissionsRows(locale, query, dash, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
@@ -537,30 +275,13 @@ async function loadBaseAdminSpaceSnapshot(locale: Locale, space: AdminSpaceId, q
   if (space === "messagerie") {
     return overlayDemo(locale, space, query, snapshot);
   }
+  if (space === "litiges" && canApplyAdminDemo() && dash?.exceptions?.length) {
+    snapshot.rows = mapLitigesExceptionRows(locale, query, dash, true);
+    snapshot.treat = snapshot.rows.filter((row) => row.treat);
+    return overlayDemo(locale, space, query, snapshot);
+  }
   if (space === "litiges" && gov) {
-    snapshot.rows = gov.disputes.map((item) => {
-      const obligation = presentObligation(item.obligationKey, locale);
-      return {
-        id: item.id,
-        href: spaceHref(locale, "litiges", query, item.id),
-        title: obligation,
-        cells: [
-          sliceId(item.id),
-          sliceId(item.missionId),
-          "—",
-          obligation,
-          item.latestDecision ? String(item.latestDecision.evidenceCount) : "—",
-          "—",
-          item.reassignment?.status ? localizeStatus(item.reassignment.status, locale) : "—",
-          item.latestDecision?.outcome ? localizeTechnicalCode(item.latestDecision.outcome, locale) : "—",
-          item.status,
-        ],
-        status: item.status,
-        tone: item.urgency === "URGENT" ? "peach" : statusTone(item.status),
-        treat: item.urgency === "URGENT" || !item.latestDecision,
-        extras: { missionId: item.missionId, policy: item.policyVersion },
-      };
-    });
+    snapshot.rows = mapLitigesGovernanceRows(locale, query, gov.disputes, demoFilm);
     snapshot.treat = snapshot.rows.filter((row) => row.treat);
     return overlayDemo(locale, space, query, snapshot);
   }
@@ -594,9 +315,21 @@ function overlayDemo(locale: Locale, space: AdminSpaceId, query: string, snapsho
   if (snapshot.reason && snapshot.reason !== "OK") {
     return snapshot;
   }
-  if (snapshot.rows.length === 0 && canApplyAdminDemo()) {
-    snapshot.rows = buildDemoSpaceRows(locale, space, query);
+  if (!canApplyAdminDemo()) {
+    return finalizeOperationalRows(locale, snapshot);
   }
+  const demoActorRows = buildDemoBoxActorSpaceRows(locale, space, query);
+  if (demoActorRows) {
+    snapshot.rows = demoActorRows;
+    snapshot.treat = snapshot.rows.filter((row) => row.treat);
+    return finalizeOperationalRows(locale, snapshot);
+  }
+  // Parcours déjà peuplé par le film supervision : ne pas écraser avec des lignes génériques.
+  if (snapshot.rows.length > 0) {
+    return finalizeOperationalRows(locale, snapshot);
+  }
+  snapshot.rows = buildDemoSpaceRows(locale, space, query);
+  snapshot.treat = snapshot.rows.filter((row) => row.treat);
   return finalizeOperationalRows(locale, snapshot);
 }
 

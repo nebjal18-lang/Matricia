@@ -1,0 +1,537 @@
+/* Design Authority Version A — primitives partagées (tous espaces) */
+
+.mat-tone-chip,
+.admin-status,
+.mat-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.18rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.mat-tone-chip[data-tone="violet"],
+.admin-status[data-tone="violet"],
+.mat-status[data-tone="violet"] {
+  background: var(--mat-violet-soft);
+  color: var(--mat-violet-strong);
+}
+
+.mat-tone-chip[data-tone="mint"],
+.mat-tone-chip[data-tone="ok"],
+.admin-status[data-tone="ok"],
+.admin-status[data-tone="mint"],
+.mat-status[data-tone="ok"],
+.mat-status[data-tone="mint"] {
+  background: var(--mat-mint-soft);
+  color: var(--mat-mint-ink);
+}
+
+.mat-tone-chip[data-tone="coral"],
+.mat-tone-chip[data-tone="danger"],
+.admin-status[data-tone="danger"],
+.admin-status[data-tone="coral"],
+.mat-status[data-tone="danger"],
+.mat-status[data-tone="coral"] {
+  background: var(--mat-coral-soft);
+  color: var(--mat-coral-ink);
+}
+
+.mat-tone-chip[data-tone="peach"],
+.mat-tone-chip[data-tone="warn"],
+.admin-status[data-tone="warn"],
+.admin-status[data-tone="peach"],
+.mat-status[data-tone="warn"],
+.mat-status[data-tone="peach"] {
+  background: #fff1e0;
+  color: #9a530f;
+}
+
+.mat-tone-chip[data-tone="sky"],
+.admin-status[data-tone="sky"],
+.mat-status[data-tone="sky"] {
+  background: var(--mat-navy-tint);
+  color: var(--mat-navy-soft);
+}
+
+.mat-tone-chip[data-tone="rose"],
+.admin-status[data-tone="rose"],
+.mat-status[data-tone="rose"] {
+  background: var(--mat-rose-soft);
+  color: var(--mat-rose-ink);
+}
+
+.mat-tone-chip[data-tone="neutral"],
+.admin-status[data-tone="neutral"],
+.mat-status[data-tone="neutral"] {
+  background: var(--mat-color-surface-muted, #f1f3f8);
+  color: var(--mat-slate);
+}
+
+.mat-hero,
+.client-card.mat-hero,
+.admin-identity-review-hero.mat-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 72%) 0%, transparent 46%),
+    linear-gradient(160deg, var(--mat-navy-tint) 0%, #fff 55%, var(--mat-violet-soft) 100%);
+  box-shadow: 0 18px 44px rgb(18 29 88 / 10%);
+}
+
+.mat-hero[data-tone="violet"] {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 70%) 0%, transparent 48%),
+    linear-gradient(155deg, var(--mat-violet-soft) 0%, #fff 52%, var(--mat-navy-tint) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 70%, white);
+}
+
+.mat-hero[data-tone="mint"] {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 70%) 0%, transparent 48%),
+    linear-gradient(155deg, var(--mat-mint-soft) 0%, #fff 52%, var(--mat-navy-tint) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 28%, white);
+}
+
+.mat-hero[data-tone="coral"] {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 70%) 0%, transparent 48%),
+    linear-gradient(155deg, var(--mat-coral-soft) 0%, #fff 52%, var(--mat-rose-soft) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 28%, white);
+}
+
+.mat-hero[data-tone="sky"] {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 70%) 0%, transparent 48%),
+    linear-gradient(155deg, var(--mat-navy-tint) 0%, #fff 55%, var(--mat-mint-soft) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 22%, white);
+}
+
+.mat-hero[data-tone="peach"] {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 70%) 0%, transparent 48%),
+    linear-gradient(155deg, #fff1e0 0%, #fff 52%, var(--mat-coral-soft) 100%);
+  border-color: #f3d6b0;
+}
+
+.mat-hero[data-tone="rose"] {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 70%) 0%, transparent 48%),
+    linear-gradient(155deg, var(--mat-rose-soft) 0%, #fff 52%, var(--mat-violet-soft) 100%);
+  border-color: var(--mat-rose-tint);
+}
+
+.client-card[data-tone="violet"],
+.mat-card[data-tone="violet"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 65%, white);
+}
+
+.client-card[data-tone="mint"],
+.mat-card[data-tone="mint"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 60%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 25%, white);
+}
+
+.client-card[data-tone="coral"],
+.mat-card[data-tone="coral"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 60%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 25%, white);
+}
+
+.client-card[data-tone="sky"],
+.mat-card[data-tone="sky"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 65%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 18%, white);
+}
+
+.client-card[data-tone="peach"],
+.mat-card[data-tone="peach"] {
+  background: linear-gradient(180deg, #fff 0%, #fff6ea 100%);
+  border-color: #f0d7b5;
+}
+
+.client-card[data-tone="rose"],
+.mat-card[data-tone="rose"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-rose-soft) 60%, white) 100%);
+  border-color: var(--mat-rose-tint);
+}
+
+.client-card[data-tone] > header,
+.mat-card[data-tone] > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid rgb(18 29 88 / 6%);
+}
+
+.client-card[data-tone="violet"] > header,
+.mat-card[data-tone="violet"] > header {
+  background: color-mix(in srgb, var(--mat-violet-soft) 80%, white);
+  color: var(--mat-violet-strong);
+}
+
+.client-card[data-tone="mint"] > header,
+.mat-card[data-tone="mint"] > header {
+  background: color-mix(in srgb, var(--mat-mint-soft) 85%, white);
+  color: var(--mat-mint-ink);
+}
+
+.client-card[data-tone="coral"] > header,
+.mat-card[data-tone="coral"] > header {
+  background: color-mix(in srgb, var(--mat-coral-soft) 85%, white);
+  color: var(--mat-coral-ink);
+}
+
+.client-card[data-tone="sky"] > header,
+.mat-card[data-tone="sky"] > header {
+  background: color-mix(in srgb, var(--mat-navy-tint) 85%, white);
+  color: var(--mat-navy-soft);
+}
+
+.client-card[data-tone="peach"] > header,
+.mat-card[data-tone="peach"] > header {
+  background: #fff1e0;
+  color: #9a530f;
+}
+
+.client-card[data-tone="rose"] > header,
+.mat-card[data-tone="rose"] > header {
+  background: color-mix(in srgb, var(--mat-rose-soft) 85%, white);
+  color: var(--mat-rose-ink);
+}
+
+/* Auto-color section grids across spaces */
+.admin-fiche-grid > .client-card:nth-child(6n + 1),
+.client-board > .client-card:nth-child(6n + 1),
+.mat-identity-grid > .client-card:nth-child(6n + 1) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 2),
+.client-board > .client-card:nth-child(6n + 2),
+.mat-identity-grid > .client-card:nth-child(6n + 2) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 3),
+.client-board > .client-card:nth-child(6n + 3),
+.mat-identity-grid > .client-card:nth-child(6n + 3) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 4),
+.client-board > .client-card:nth-child(6n + 4),
+.mat-identity-grid > .client-card:nth-child(6n + 4) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 60%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, white);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 5),
+.client-board > .client-card:nth-child(6n + 5),
+.mat-identity-grid > .client-card:nth-child(6n + 5) {
+  background: linear-gradient(180deg, #fff 0%, #fff6ea 100%);
+  border-color: #f0d7b5;
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 6),
+.client-board > .client-card:nth-child(6n + 6),
+.mat-identity-grid > .client-card:nth-child(6n + 6) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-rose-soft) 55%, white) 100%);
+  border-color: var(--mat-rose-tint);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 1) > header,
+.client-board > .client-card:nth-child(6n + 1) > header,
+.mat-identity-grid > .client-card:nth-child(6n + 1) > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--mat-violet-soft) 78%, white);
+  color: var(--mat-violet-strong);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 2) > header,
+.client-board > .client-card:nth-child(6n + 2) > header,
+.mat-identity-grid > .client-card:nth-child(6n + 2) > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--mat-mint-soft) 82%, white);
+  color: var(--mat-mint-ink);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 3) > header,
+.client-board > .client-card:nth-child(6n + 3) > header,
+.mat-identity-grid > .client-card:nth-child(6n + 3) > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--mat-coral-soft) 82%, white);
+  color: var(--mat-coral-ink);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 4) > header,
+.client-board > .client-card:nth-child(6n + 4) > header,
+.mat-identity-grid > .client-card:nth-child(6n + 4) > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--mat-navy-tint) 82%, white);
+  color: var(--mat-navy-soft);
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 5) > header,
+.client-board > .client-card:nth-child(6n + 5) > header,
+.mat-identity-grid > .client-card:nth-child(6n + 5) > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: #fff1e0;
+  color: #9a530f;
+}
+
+.admin-fiche-grid > .client-card:nth-child(6n + 6) > header,
+.client-board > .client-card:nth-child(6n + 6) > header,
+.mat-identity-grid > .client-card:nth-child(6n + 6) > header {
+  margin: -0.75rem -0.9rem 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--mat-rose-soft) 82%, white);
+  color: var(--mat-rose-ink);
+}
+
+.mat-identity-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 860px) {
+  .mat-identity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .mat-identity-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mat-identity-block {
+  display: grid;
+  gap: 1rem;
+}
+
+.mat-identity-block .admin-dl,
+.mat-identity-block .mat-dl {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.mat-identity-block .admin-dl > div,
+.mat-identity-block .mat-dl > div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.mat-identity-block .admin-dl dt,
+.mat-identity-block .mat-dl dt {
+  color: var(--mat-slate);
+}
+
+.mat-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+/* Scene hero — photo full-bleed + motifs + scrim (fiches / hubs d’identité) */
+.mat-scene-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  min-height: 13.5rem;
+  margin: 0 0 1rem;
+  padding: 1.5rem 1.55rem 1.35rem;
+  border-radius: 1.25rem;
+  color: #fff;
+  background: transparent;
+  isolation: isolate;
+  box-shadow: 0 14px 32px rgb(18 28 48 / 14%);
+}
+
+.mat-scene-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.mat-scene-hero-photo {
+  object-fit: cover;
+  object-position: center 38%;
+}
+
+.mat-scene-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(8 16 36 / 8%) 0%, rgb(8 16 36 / 18%) 48%, rgb(8 16 36 / 58%) 100%),
+    linear-gradient(90deg, rgb(8 16 36 / 34%) 0%, rgb(8 16 36 / 10%) 42%, transparent 68%);
+}
+
+[dir="rtl"] .mat-scene-hero-scrim {
+  background:
+    linear-gradient(180deg, rgb(8 16 36 / 8%) 0%, rgb(8 16 36 / 18%) 48%, rgb(8 16 36 / 58%) 100%),
+    linear-gradient(270deg, rgb(8 16 36 / 34%) 0%, rgb(8 16 36 / 10%) 42%, transparent 68%);
+}
+
+.mat-scene-hero-motif {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.mat-scene-hero-motif-tl,
+.mat-scene-hero-motif-br {
+  position: absolute;
+  display: block;
+  opacity: 0.16;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.mat-scene-hero-motif-tl {
+  inset-inline-start: 0;
+  top: 0;
+  width: min(7rem, 24vw);
+  height: 5.5rem;
+  background-position: left top;
+  filter: brightness(1.8);
+}
+
+.mat-scene-hero-motif-br {
+  inset-inline-end: 0;
+  bottom: 0;
+  width: min(9.5rem, 30vw);
+  height: 6.5rem;
+  background-position: right bottom;
+  filter: brightness(1.7);
+}
+
+.mat-scene-hero-body {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  width: 100%;
+}
+
+.mat-scene-hero-copy {
+  min-width: 0;
+  max-width: min(34rem, 100%);
+}
+
+.mat-scene-hero-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.mat-scene-hero-title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 2.6vw, 2rem);
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 35%);
+}
+
+[dir="rtl"] .mat-scene-hero-title {
+  font-family: "Noto Sans Arabic", sans-serif;
+  letter-spacing: 0;
+}
+
+.mat-scene-hero-meta {
+  margin: 0.35rem 0 0;
+  color: rgb(255 255 255 / 90%);
+  font-size: 0.94rem;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 32%);
+}
+
+.mat-scene-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+@media (max-width: 860px) {
+  .mat-scene-hero {
+    min-height: 12rem;
+    padding: 1.2rem 1.15rem 1.15rem;
+  }
+
+  .mat-scene-hero-body {
+    align-items: flex-start;
+  }
+
+  .mat-scene-hero-scrim {
+    background:
+      linear-gradient(180deg, rgb(8 16 36 / 12%) 0%, rgb(8 16 36 / 28%) 45%, rgb(8 16 36 / 62%) 100%);
+  }
+}
+
+/* Shell mast wrapper — photo hero inset under topbar (identity hubs only) */
+.client-scene-mast,
+.admin-scene-mast {
+  position: relative;
+  z-index: 1;
+  padding: 0.55rem 1rem 0;
+}
+
+@media (min-width: 860px) {
+  .client-scene-mast,
+  .admin-scene-mast {
+    padding-inline: 1.6rem;
+  }
+}
+
+.mat-scene-hero .client-cta,
+.mat-scene-hero .client-soft-cta,
+.mat-scene-hero .client-need-cta {
+  box-shadow: 0 8px 20px rgb(0 0 0 / 18%);
+}
+
+.mat-scene-hero .client-ambition-script {
+  color: rgb(255 255 255 / 92%);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
+}
+
+.mat-scene-hero .client-ambition-script::after {
+  background: rgb(255 255 255 / 75%);
+}
+
+.mat-scene-hero .provider-mast-tip {
+  color: rgb(255 255 255 / 92%);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 30%);
+}
+
+.client-workspace,
+.admin-shell,
+.provider-shell,
+.franchise-shell,
+.public-root,
+.journey-home {
+  --mat-ds-ready: 1;
+}

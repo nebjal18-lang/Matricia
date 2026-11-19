@@ -1,0 +1,426 @@
+/* Standard pages Administration — Design Authority Version A */
+
+.admin-workspace .admin-page-standard {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.admin-workspace .admin-page-standard > .client-page,
+.admin-workspace .admin-page-standard > .admin-finance-workspace,
+.admin-workspace .admin-page-standard > .client-stack,
+.admin-workspace .admin-page-standard > .space-y-6,
+.admin-workspace .admin-page-standard > .space-y-8 {
+  display: grid;
+  gap: 1.15rem;
+}
+
+/* Generic shadcn cards → Version A surfaces */
+.admin-workspace .rounded-xl.border.bg-card,
+.admin-workspace .rounded-2xl.border.bg-card,
+.admin-workspace article.rounded-xl.border,
+.admin-workspace article.rounded-2xl.border,
+.admin-workspace form.rounded-xl.border.bg-card,
+.admin-workspace form.rounded-2xl.border.bg-card,
+.admin-workspace [data-slot="card"] {
+  border-color: var(--client-line, var(--ad-border));
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.admin-workspace .rounded-xl.border.bg-card:nth-child(6n + 1),
+.admin-workspace .rounded-2xl.border.bg-card:nth-child(6n + 1),
+.admin-workspace form.rounded-xl.border.bg-card:nth-child(6n + 1),
+.admin-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 1) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.admin-workspace .rounded-xl.border.bg-card:nth-child(6n + 2),
+.admin-workspace .rounded-2xl.border.bg-card:nth-child(6n + 2),
+.admin-workspace form.rounded-xl.border.bg-card:nth-child(6n + 2),
+.admin-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 2) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.admin-workspace .rounded-xl.border.bg-card:nth-child(6n + 3),
+.admin-workspace .rounded-2xl.border.bg-card:nth-child(6n + 3),
+.admin-workspace form.rounded-xl.border.bg-card:nth-child(6n + 3),
+.admin-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 3) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.admin-workspace .rounded-xl.border.bg-card:nth-child(6n + 4),
+.admin-workspace .rounded-2xl.border.bg-card:nth-child(6n + 4),
+.admin-workspace form.rounded-xl.border.bg-card:nth-child(6n + 4),
+.admin-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 4) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 60%, white) 100%);
+}
+
+.admin-workspace .rounded-xl.border.bg-card:nth-child(6n + 5),
+.admin-workspace .rounded-2xl.border.bg-card:nth-child(6n + 5),
+.admin-workspace form.rounded-xl.border.bg-card:nth-child(6n + 5),
+.admin-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 5) {
+  background: linear-gradient(180deg, #fff 0%, #fff6ea 100%);
+  border-color: #f0d7b5;
+}
+
+.admin-workspace .rounded-xl.border.bg-card:nth-child(6n + 6),
+.admin-workspace .rounded-2xl.border.bg-card:nth-child(6n + 6),
+.admin-workspace form.rounded-xl.border.bg-card:nth-child(6n + 6),
+.admin-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 6) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-rose-soft) 55%, white) 100%);
+  border-color: var(--mat-rose-tint);
+}
+
+.admin-workspace .admin-panel {
+  border: 1px solid var(--ad-border, var(--client-line));
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  padding: 1rem 1.1rem;
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.admin-workspace .admin-panel[data-tone="violet"],
+.admin-workspace section.admin-panel[data-tone="violet"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 48%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 55%, white);
+}
+
+.admin-workspace .admin-panel[data-tone="mint"],
+.admin-workspace section.admin-panel[data-tone="mint"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.admin-workspace .admin-panel[data-tone="coral"],
+.admin-workspace section.admin-panel[data-tone="coral"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.admin-workspace .admin-panel[data-tone="sky"],
+.admin-workspace section.admin-panel[data-tone="sky"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 58%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, white);
+}
+
+.admin-workspace .admin-panel[data-tone="peach"],
+.admin-workspace section.admin-panel[data-tone="peach"] {
+  background: linear-gradient(180deg, #fff 0%, #fff6ea 100%);
+  border-color: #f0d7b5;
+}
+
+.admin-workspace .admin-section-head h2,
+.admin-workspace .admin-section-head h3 {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  letter-spacing: -0.02em;
+}
+
+.admin-workspace .admin-section-head p {
+  margin: 0.35rem 0 0;
+  color: var(--client-muted, var(--ad-muted));
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-workspace .admin-notice {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--mat-mint) 22%, var(--ad-border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--mat-mint-soft) 70%, white);
+  color: var(--mat-mint-ink);
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-workspace .admin-notice[data-tone="warn"] {
+  border-color: #f0d7b5;
+  background: #fff6e5;
+  color: #8a5a10;
+}
+
+.admin-workspace .admin-notice[data-tone="danger"] {
+  border-color: color-mix(in srgb, var(--mat-coral) 28%, white);
+  background: var(--mat-coral-soft);
+  color: var(--mat-coral-ink);
+}
+
+.admin-workspace .admin-notice[data-tone="sky"] {
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 18%, white);
+  background: var(--mat-navy-tint);
+  color: var(--mat-navy-soft);
+}
+
+/* Tabs / secondary nav */
+.admin-workspace .client-tabs a {
+  min-height: 2.75rem;
+}
+
+.admin-workspace .client-tabs a[aria-current="page"] {
+  background: var(--mat-violet-soft);
+  color: var(--mat-violet-strong);
+}
+
+/* Related hub strip */
+.admin-workspace .admin-hub-related {
+  border-top: 1px solid var(--ad-border);
+  padding-top: 1.25rem;
+}
+
+.admin-workspace [id].scroll-mt-24 {
+  scroll-margin-top: 6rem;
+}
+
+/* client-card surfaces without explicit tone */
+.admin-workspace .client-card:not([data-tone]) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  border-color: var(--client-line, var(--ad-border));
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.admin-workspace .client-card[data-tone="violet"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.admin-workspace .client-card[data-tone="mint"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.admin-workspace .client-card[data-tone="coral"],
+.admin-workspace .client-card[data-tone="peach"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.admin-workspace .client-card[data-tone="sky"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 58%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, white);
+}
+
+.admin-workspace .admin-finance-zone {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0 0.25rem;
+}
+
+.admin-workspace .admin-finance-block {
+  border: 1px solid color-mix(in srgb, var(--mat-mint) 16%, var(--ad-border));
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 28%, white) 100%);
+  padding: 1.1rem 1.15rem;
+}
+
+.admin-workspace .admin-finance-block[data-tone="sky"] {
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, var(--ad-border));
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 45%, white) 100%);
+}
+
+.admin-workspace .admin-finance-lead {
+  margin: 0;
+  color: var(--client-muted, var(--ad-muted));
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.admin-workspace .admin-finance-pipeline {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 720px) {
+  .admin-workspace .admin-finance-pipeline {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.admin-workspace .admin-finance-pipeline li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  border: 1px solid var(--ad-border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0.7rem 0.8rem;
+}
+
+.admin-workspace .admin-finance-pipeline li[data-state="current"] {
+  border-color: color-mix(in srgb, var(--mat-mint) 35%, white);
+  background: color-mix(in srgb, var(--mat-mint-soft) 55%, white);
+}
+
+.admin-workspace .admin-finance-pipeline li[data-state="done"] {
+  border-color: color-mix(in srgb, var(--mat-violet-line) 45%, white);
+  background: color-mix(in srgb, var(--mat-violet-soft) 40%, white);
+}
+
+.admin-workspace .admin-finance-pipeline__index {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  border-radius: 999px;
+  background: var(--mat-navy-tint);
+  color: var(--mat-navy-soft);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.admin-workspace .admin-finance-pipeline__body {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--client-muted, var(--ad-muted));
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.admin-workspace .admin-finance-stage {
+  border-top: 1px solid var(--ad-border);
+  padding-top: 1rem;
+}
+
+.admin-workspace .admin-finance-stage[data-active="true"] {
+  border-top-color: color-mix(in srgb, var(--mat-mint) 40%, var(--ad-border));
+}
+
+.admin-workspace .admin-finance-form {
+  border: 1px solid var(--ad-border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0.95rem 1rem;
+}
+
+.admin-workspace .admin-finance-form h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-workspace .admin-finance-subhead {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.admin-workspace .admin-finance-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admin-workspace .admin-finance-row {
+  border: 1px solid color-mix(in srgb, var(--ad-border) 80%, white);
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.75rem 0.85rem;
+}
+
+.admin-workspace .admin-finance-row h4 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.admin-workspace .admin-finance-empty,
+.admin-workspace .admin-finance-empty-block {
+  margin: 0;
+  color: var(--client-muted, var(--ad-muted));
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-workspace .admin-finance-empty-block {
+  border-inline-start: 3px solid color-mix(in srgb, var(--mat-mint) 45%, white);
+  padding-inline-start: 0.85rem;
+}
+
+.admin-workspace .admin-finance-empty-block p + p {
+  margin-top: 0.35rem;
+}
+
+.admin-workspace .admin-finance-metrics-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.admin-workspace .admin-finance-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin: 0;
+}
+
+.admin-workspace .admin-finance-links a {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.admin-workspace .admin-finance-details {
+  border: 1px solid var(--ad-border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0.65rem 0.85rem;
+}
+
+.admin-workspace .admin-finance-details > summary {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  align-items: center;
+  font-weight: 650;
+}
+
+.admin-workspace .admin-finance-details-body {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ad-border);
+}
+
+.admin-workspace .admin-finance-zone--open {
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--mat-mint) 18%, var(--ad-border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mat-mint-soft) 35%, white) 0%, #fff 100%);
+  padding: 1.1rem;
+}
+
+.admin-workspace .admin-finance-zone .admin-panel {
+  box-shadow: 0 12px 28px rgb(18 29 88 / 6%);
+}
+
+.admin-workspace .admin-primary-cta,
+.admin-workspace .admin-soft-cta,
+.admin-workspace .admin-dir-action {
+  min-height: 2.75rem;
+}
+
+.admin-workspace main.client-page,
+.admin-workspace .client-page {
+  display: grid;
+  gap: 1.15rem;
+}
+
+@media (max-width: 720px) {
+  .admin-workspace .admin-page-standard {
+    gap: 0.95rem;
+  }
+
+  .admin-workspace .admin-finance-zone--open {
+    padding: 0.85rem;
+  }
+}

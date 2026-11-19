@@ -597,7 +597,7 @@ export function InvoiceSettlementWorkbench({
           <TriangleAlert className="size-4" aria-hidden />
           <p>{w.invoicePaymentNotProof}</p>
           <div className="provider-workbench-actions">
-            <Link href="#provider-payment-proof" className="client-cta">{w.invoiceAddProof}</Link>
+            <a href="#provider-payment-proof" className="client-cta">{w.invoiceAddProof}</a>
             <Link href={`/${locale}/sous-traitant/messages${query}`} className="client-ghost-link">{w.invoiceReportGap}</Link>
           </div>
         </article>

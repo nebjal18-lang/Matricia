@@ -98,7 +98,7 @@ export function ConsultationSendBoard({
     }))
     : [];
   return (
-    <main className="client-page" data-admin-layout="consultation" data-admin-space="matching">
+    <div className="client-page" data-admin-layout="consultation" data-admin-space="matching">
       <ol className="admin-pipeline" data-count="6">
         {steps.map((step, index) => (
           <li key={step.label} data-current={index === 0 ? "true" : undefined}>
@@ -114,7 +114,9 @@ export function ConsultationSendBoard({
           <article className="client-card">
             <header className="client-priority-head">
               <h2>{t(locale, "Destinataires sélectionnés", "المستلمون المختارون")}</h2>
-              <Link href={`/${locale}/administration/providers${query}`} className="admin-soft-cta"><Plus className="size-4" aria-hidden />{t(locale, "Ajouter des prestataires", "إضافة مقدمي خدمات")}</Link>
+              <Link href={`/${locale}/administration/qualification${query}`} className="admin-soft-cta">{t(locale, "Qualification prestataires", "تأهيل مقدمي الخدمات")}</Link>
+              <Link href={`/${locale}/administration/capacite${query}`} className="admin-soft-cta">{t(locale, "Capacité & documents", "القدرة والوثائق")}</Link>
+              <Link href={`/${locale}/administration/providers${query}`} className="admin-soft-cta"><Plus className="size-4" aria-hidden />{t(locale, "Annuaire prestataires", "دليل مقدمي الخدمات")}</Link>
             </header>
             <p>{t(locale, "Prestataires issus du matching explicable. L’envoi ouvre une demande à quatre yeux. Après approbation, seuls les destinataires approuvés et encore éligibles sont invités.", "مقدمو الخدمات من المطابقة القابلة للتفسير. الإرسال يطلب تحققاً بأربعة أعين. بعد الموافقة تتم دعوة الجهات المعتمدة والتي لا تزال مؤهلة فقط.")}</p>
             {recipients.length === 0 ? (
@@ -213,7 +215,7 @@ export function ConsultationSendBoard({
         </div>
         <Feedback state={state} locale={locale} />
       </form>
-    </main>
+    </div>
   );
 }
 
@@ -232,7 +234,7 @@ export function DocumentReuseBoard({
     { value: "MISSION", label: t(locale, "Mission", "مهمة"), hint: t(locale, "Lier à une mission en cours", "ربطه بمهمة جارية"), tone: "mint" as const },
   ];
   return (
-    <main className="client-page" data-admin-layout="document-reuse" data-admin-space="documents">
+    <div className="client-page" data-admin-layout="document-reuse" data-admin-space="documents">
       <ol className="admin-pipeline" data-count="5">
         {steps.map((step, index) => (
           <li key={step.label} data-current={index === 0 ? "true" : undefined}>
@@ -327,7 +329,7 @@ export function DocumentReuseBoard({
         </div>
         <Feedback state={state} locale={locale} />
       </form>
-    </main>
+    </div>
   );
 }
 
@@ -339,7 +341,7 @@ export function NotificationPreferencesBoard({
   const [state, action, pending] = useActionState(requestSpaceMutation, idle);
   const selected = templates[0];
   return (
-    <main className="client-page" data-admin-layout="notification-preferences" data-admin-space="messagerie">
+    <div className="client-page" data-admin-layout="notification-preferences" data-admin-space="messagerie">
       <form action={action} className="admin-form-layout">
         <HiddenIdentity locale={locale} space="messagerie" itemId="preferences" view="preferences" resourceType="NOTIFICATION_TEMPLATE" />
         <section className="client-stack" id="regles">
@@ -407,7 +409,7 @@ export function NotificationPreferencesBoard({
         </section>
         <Feedback state={state} locale={locale} />
       </form>
-    </main>
+    </div>
   );
 }
 

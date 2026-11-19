@@ -40,8 +40,13 @@ import type { HubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
 import { organizationJourney, type AdminOrgRow, type AdminTreatItem } from "@/modules/admin/data/spaces/view-model";
 import type { AdminOrganizationFiche } from "@/modules/admin/data/supervision/types";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 import { DirectoryLink } from "./directory-link";
+import { FicheMembresPanel } from "./fiche-membres-panel";
+import { FichePanels } from "./fiche-panels";
+import { FicheTabNav } from "./fiche-tab-nav";
 import { HubKpiStrip } from "./hub-charts";
+import { OrganizationFicheHero } from "./organization-fiche-hero";
 
 function Cta({ href, children }: { href: string; children: ReactNode }) {
   return <Link href={href} className="client-ghost-link">{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>;
@@ -133,19 +138,33 @@ function HubVisualBlock({ locale, metrics }: { locale: Locale; metrics?: HubMetr
   );
 }
 
-export function AdminDirectoryBoard({ locale, query, metrics }: { locale: Locale; query: string; metrics?: HubMetrics }) {
+export function AdminDirectoryBoard({
+  locale,
+  query,
+  metrics,
+  embedded = false,
+  compact = false,
+}: {
+  locale: Locale;
+  query: string;
+  metrics?: HubMetrics;
+  embedded?: boolean;
+  /** Hide org CRUD strip and duplicate KPI block (command-center home). */
+  compact?: boolean;
+}) {
   const c = adminCopy(locale);
   const groups = adminDirectoryGroups(locale, query);
+  const Frame = embedded ? "div" : "main";
   return (
-    <main className="client-page admin-home-page">
+    <Frame className={embedded ? "admin-home-page admin-home-page--embedded" : "client-page admin-home-page"}>
       <h2 className="admin-home-title">{c.homeTitle}</h2>
-      <HubToolbar locale={locale} query={query} showOrgActions />
-      <HubVisualBlock locale={locale} metrics={metrics} />
+      {compact ? null : <HubToolbar locale={locale} query={query} showOrgActions />}
+      {compact ? null : <HubVisualBlock locale={locale} metrics={metrics} />}
       <section className="admin-dir-grid" aria-label={c.homeTitle}>
         {groups.map((group) => <DirectoryCard key={group.id} group={group} />)}
       </section>
-      <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>
-    </main>
+      {compact ? null : <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>}
+    </Frame>
   );
 }
 
@@ -166,15 +185,15 @@ export function AdminHubBoard({
   const group = adminDirectoryGroup(locale, query, groupId);
   if (!group) return null;
   return (
-    <main className="client-page admin-home-page" data-hub={groupId}>
-      <h2 className="admin-home-title">{title ?? group.title}</h2>
+    <div className="client-page admin-home-page" data-hub={groupId}>
+      <h1 className="admin-home-title">{title ?? group.title}</h1>
       <HubToolbar locale={locale} query={query} showOrgActions={groupId === "actors"} />
       <HubVisualBlock locale={locale} metrics={metrics} />
       <section className="admin-dir-grid" aria-label={title ?? group.title} data-count="1">
         <DirectoryCard group={group} />
       </section>
       <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>
-    </main>
+    </div>
   );
 }
 
@@ -192,7 +211,7 @@ export function AdminHubStrip({
   return (
     <nav className="admin-hub-strip" aria-label={group.title} data-tone={group.tone}>
       {group.links.map((link) => (
-        <Link key={link.href} href={link.href} title={link.summary}>{link.label}</Link>
+        <HashAwareLink key={link.href} href={link.href} title={link.summary}>{link.label}</HashAwareLink>
       ))}
     </nav>
   );
@@ -244,7 +263,7 @@ export function OrganizationsBoard({
     return `/${locale}/administration/entreprises?${params.toString()}`;
   })();
   return (
-    <main className="client-page">
+    <div className="client-page">
       <section className="admin-org-layout">
         <article className="client-card">
           <form
@@ -299,7 +318,7 @@ export function OrganizationsBoard({
               {adminFixturesHiddenLabel(hiddenFixtures, locale)}
               {" "}
               <Link className="client-text-link" href={fixturesHref}>
-                {locale === "ar" ? "إظهارها" : "Afficher les fixtures"}
+                {locale === "ar" ? "إظهار بيانات العرض" : "Afficher les données de démo"}
               </Link>
             </p>
           ) : null}
@@ -394,7 +413,7 @@ export function OrganizationsBoard({
           <p className="client-access-note">{c.controlNote}</p>
         </aside>
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -413,40 +432,78 @@ export function OrganizationFicheBoard({
   const journey = organizationJourney(fiche, locale);
   const memberQuery = new URLSearchParams({ organizationId: org.id, org: org.id });
   const membersHref = `/${locale}/administration/utilisateurs?${memberQuery}`;
+  const complianceCaseId = org.client_compliance_snapshot?.case_id;
+  const complianceHref = complianceCaseId
+    ? `/${locale}/administration/conformite-clients/${complianceCaseId}${query}`
+    : `/${locale}/administration/conformite-clients${query}`;
+  const profileComplete = Boolean(
+    org.client_legal_profile?.legal_form
+    && org.client_legal_profile?.if_number
+    && org.client_legal_profile?.rc_number
+    && org.client_legal_profile?.registered_city
+    && org.client_legal_profile?.representative_name,
+  );
+  const complianceDone = journey.find((step) => step.id === "compliance")?.state === "done";
+  const rolesAssigned = fiche.memberships.some((item) => item.roles.length > 0);
+  const folderStarted = fiche.requests.length + fiche.missions.length + fiche.diagnostics.length > 0;
   const required = [
-    { href: `${base}/modifier${query}`, title: c.completeInfo, detail: c.completeInfoLead, tone: "peach" as const },
-    { href: `/${locale}/administration/conformite-clients${query}`, title: c.finishCompliance, detail: c.finishComplianceLead, tone: "peach" as const },
-    { href: `/${locale}/administration/parcours${query}`, title: c.completeFolder, detail: c.completeFolderLead, tone: "sky" as const },
-    { href: membersHref, title: c.assignRoles, detail: c.assignRolesLead, tone: "peach" as const },
+    ...(!profileComplete
+      ? [{ href: `${base}/modifier${query}`, title: c.completeInfo, detail: c.completeInfoLead, tone: "peach" as const }]
+      : []),
+    ...(!complianceDone
+      ? [{ href: complianceHref, title: c.finishCompliance, detail: c.finishComplianceLead, tone: "peach" as const }]
+      : []),
+    ...(!folderStarted
+      ? [{ href: `/${locale}/administration/parcours${query}`, title: c.completeFolder, detail: c.completeFolderLead, tone: "sky" as const }]
+      : []),
+    ...(!rolesAssigned
+      ? [{ href: membersHref, title: c.assignRoles, detail: c.assignRolesLead, tone: "peach" as const }]
+      : []),
   ];
   const history = fiche.timeline.slice(0, 4);
-  const unknown = locale === "ar" ? "غير متاح" : "Non disponible";
-  const roles = [...new Set(fiche.memberships.flatMap((item) => item.roles))];
+  const unknown = locale === "ar" ? "— للتعبئة" : "— à compléter";
+  const activeMembers = fiche.memberships.filter((item) => item.status === "ACTIVE").length;
+  const invitedMembers = fiche.memberships.filter((item) => item.status === "INVITED").length;
+  const withoutRole = fiche.memberships.filter((item) => item.roles.length === 0).length;
+  const inviteHref = `/${locale}/administration/utilisateurs/inviter?organizationId=${encodeURIComponent(org.id)}`;
   return (
-    <main className="client-page">
-      <nav className="client-tabs" aria-label={c.overview}>
-        <a href={`${base}${query}`} aria-current="page">{c.overview}</a>
-        <a href={`${base}${query}#membres`}>{c.members}</a>
-        <a href={`/${locale}/administration/conformite-clients${query}`}>{c.compliance}</a>
-        <a href={`/${locale}/administration/parcours${query}`}>{c.dossiers}</a>
-        <a href={`${base}${query}#boxes`}>{c.boxes}</a>
-        <a href={`/${locale}/administration/finance${query}`}>{c.navFinance}</a>
-        <a href={`/${locale}/administration/operations${query}`}>{c.audit}</a>
-      </nav>
+    <div className="client-page">
+      <OrganizationFicheHero locale={locale} query={query} fiche={fiche} />
+      <FicheTabNav
+        label={c.overview}
+        tabs={[
+          { id: "overview", href: `${base}${query}`, label: c.overview, currentWhen: "overview" },
+          { id: "membres", href: `${base}${query}#membres`, label: c.members, currentWhen: "hash" },
+          { id: "compliance", href: complianceHref, label: c.compliance },
+          { id: "dossiers", href: `/${locale}/administration/parcours${query}`, label: c.dossiers },
+          { id: "boxes", href: `/${locale}/administration/finance/offres?organizationId=${encodeURIComponent(org.id)}`, label: c.boxes },
+          { id: "finance", href: `/${locale}/administration/finance${query}`, label: c.navFinance },
+          { id: "audit", href: `/${locale}/administration/operations${query}`, label: c.audit },
+        ]}
+      />
+      <FichePanels
+        overview={(
+          <>
       <section className="admin-fiche-grid">
-        <article className="client-card">
-          <header><h2>{c.info}</h2></header>
+        <details className="client-card p-4" data-tone="violet">
+          <summary className="min-h-11 cursor-pointer font-semibold">{c.info}</summary>
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
+            <div><dt>{locale === "ar" ? "الاسم التجاري" : "Nom commercial"}</dt><dd>{org.display_name || unknown}</dd></div>
             <div><dt>{c.type}</dt><dd>{inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes)}</dd></div>
+            <div><dt>{locale === "ar" ? "الشكل القانوني" : "Forme juridique"}</dt><dd>{org.client_legal_profile?.legal_form ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "تاريخ التأسيس" : "Date de création"}</dt><dd>{org.client_legal_profile?.incorporation_date ?? unknown}</dd></div>
             <div><dt>{c.activity}</dt><dd>{org.client_legal_profile?.activity ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "القطاع" : "Secteur"}</dt><dd>{org.client_legal_profile?.sector ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "مدينة السجل" : "Ville du RC"}</dt><dd>{org.client_legal_profile?.registered_city ?? unknown}</dd></div>
             <div><dt>{locale === "ar" ? "البلد" : "Pays"}</dt><dd dir="ltr">{org.country_code}</dd></div>
             <div><dt>{locale === "ar" ? "المعرّف الضريبي (IF)" : "Identifiant fiscal (IF)"}</dt><dd dir="ltr">{org.client_legal_profile?.if_number ?? unknown}</dd></div>
             <div><dt>{locale === "ar" ? "السجل التجاري (RC)" : "Registre de commerce (RC)"}</dt><dd dir="ltr">{org.client_legal_profile?.rc_number ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "الممثل" : "Représentant"}</dt><dd>{org.client_legal_profile?.representative_name ?? unknown}</dd></div>
           </dl>
-        </article>
-        <article className="client-card">
-          <header><h2>{c.journey}</h2></header>
+        </details>
+        <details className="client-card p-4" data-tone="sky">
+          <summary className="min-h-11 cursor-pointer font-semibold">{c.journey}</summary>
           <ol className="admin-journey">
             {journey.map((step) => (
               <li key={step.id} data-state={step.state}>
@@ -455,42 +512,53 @@ export function OrganizationFicheBoard({
               </li>
             ))}
           </ol>
-        </article>
-        <article className="client-card">
+        </details>
+        <article className="client-card" data-tone="peach">
           <header className="client-priority-head"><h2>{locale === "ar" ? "إجراءات الملف" : "Actions sur le dossier"}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
-          <ul className="admin-req-list">
-            {required.map((item) => (
-              <li key={item.title}>
-                <span><strong>{item.title}</strong><small>{item.detail}</small></span>
-                <Link href={item.href} className="admin-soft-cta">{c.open}</Link>
-              </li>
-            ))}
-          </ul>
+          {required.length === 0 ? (
+            <p className="client-access-note">{locale === "ar" ? "لا توجد إجراءات عاجلة: الملف متسق مع حالة المسار." : "Aucune action urgente : le dossier est aligné avec l’état du parcours."}</p>
+          ) : (
+            <ul className="admin-req-list">
+              {required.map((item) => (
+                <li key={item.title}>
+                  <span><strong>{item.title}</strong><small>{item.detail}</small></span>
+                  <Link href={item.href} className="admin-soft-cta">{c.open}</Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </article>
       </section>
-      <section className="admin-fiche-lower">
-        <article className="client-card" id="membres">
-          <header className="client-priority-head"><h2>{c.members}</h2></header>
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{locale === "ar" ? "أعضاء وصناديق وملفات" : "Membres, boxes et dossiers"}</summary>
+      <section className="admin-fiche-lower mt-4">
+        <article className="client-card" data-tone="sky">
+          <header className="client-priority-head"><h2>{c.members}</h2><Cta href={`${base}${query}#membres`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
             <li><Users className="size-4" aria-hidden /><span><strong>{c.membersCount}</strong><small dir="ltr">{fiche.memberships.length}</small></span></li>
-            <li><span><strong>{c.roles}</strong><small>{roles.join(", ") || "—"}</small></span></li>
-            <li><span><strong>{c.access}</strong><small>{fiche.memberships.filter((item) => item.status === "ACTIVE").length}</small></span></li>
-            <li><span><strong>{c.invites}</strong><small>{fiche.memberships.filter((item) => item.status === "INVITED").length}</small></span></li>
+            <li><span><strong>{c.access}</strong><small dir="ltr">{activeMembers}</small></span></li>
+            <li><span><strong>{c.invites}</strong><small dir="ltr">{invitedMembers}</small></span></li>
+            <li><span><strong>{c.membersWithoutRole}</strong><small dir="ltr">{withoutRole}</small></span></li>
           </ul>
-          <p className="client-access-note">{locale === "ar" ? "إدارة الأدوار تتم من دليل المستخدمين." : "La gestion des rôles se fait depuis l’annuaire des utilisateurs."}</p>
-          <Link href={membersHref} className="admin-soft-cta">{c.manageMembers}</Link>
+          <HashAwareLink href={`${base}${query}#membres`} className="admin-soft-cta">{c.members}</HashAwareLink>
         </article>
-        <article className="client-card" id="boxes">
+        <article className="client-card" id="boxes" data-tone="mint">
           <header className="client-priority-head"><h2>{c.boxes}</h2></header>
           <ul className="client-feed">
             <li><span><strong>{locale === "ar" ? "حالات الاشتراكات" : "États des abonnements"}</strong><small>{[...new Set(fiche.subscriptions.map((item) => localizeStatus(item.status, locale)))].join(", ") || "—"}</small></span></li>
-            <li><span><strong>{c.boxesActive}</strong><small>{unknown}</small></span></li>
-            <li><span><strong>{c.credits}</strong><small>{unknown}</small></span></li>
-            <li><span><strong>{locale === "ar" ? "نهايات فترات الاشتراك" : "Fins de période des abonnements"}</strong><small dir="ltr">{fiche.subscriptions.map(item => item.current_period_end).filter(Boolean).join(", ") || "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "اشتراكات مرئية" : "Abonnements visibles"}</strong><small dir="ltr">{fiche.subscriptions.length}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "نهايات فترات الاشتراك" : "Fins de période des abonnements"}</strong><small dir="ltr">{fiche.subscriptions.map((item) => item.current_period_end).filter(Boolean).join(", ") || "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "إعداد العرض" : "Configuration de l’offre"}</strong><small>{locale === "ar" ? "الصناديق والمزايا في المالية" : "Boxes et avantages dans Finance"}</small></span></li>
           </ul>
-          <Link href={`/${locale}/administration/finance${query}`} className="admin-dir-action" data-tone="mint">{c.seeFinance}</Link>
+          <Link
+            href={`/${locale}/administration/finance/offres?organizationId=${encodeURIComponent(org.id)}`}
+            className="admin-dir-action"
+            data-tone="mint"
+          >
+            {c.seeFinance}
+          </Link>
         </article>
-        <article className="client-card">
+        <article className="client-card" data-tone="coral">
           <header className="client-priority-head"><h2>{c.dossiers}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
             <li><span><strong>{c.requests}</strong><small>{fiche.requests.length}</small></span></li>
@@ -498,9 +566,9 @@ export function OrganizationFicheBoard({
             <li><span><strong>{c.diag}</strong><small>{fiche.diagnostics.length}</small></span></li>
             <li><span><strong>{c.missions}</strong><small>{fiche.missions.length}</small></span></li>
           </ul>
-          <Link href={`/${locale}/administration/conformite-clients${query}`} className="admin-dir-action" data-tone="peach">{c.openCompliance}</Link>
+          <Link href={complianceHref} className="admin-dir-action" data-tone="peach">{c.openCompliance}</Link>
         </article>
-        <article className="client-card">
+        <article className="client-card" data-tone="violet">
           <header className="client-priority-head"><h2>{c.lastChange}</h2><Cta href={`/${locale}/administration/operations${query}`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
             {history.length === 0 ? (
@@ -512,6 +580,20 @@ export function OrganizationFicheBoard({
           <Link href={`/${locale}/administration/operations${query}`} className="admin-dir-action" data-tone="violet">{c.seeAudit}</Link>
         </article>
       </section>
-    </main>
+      </details>
+          </>
+        )}
+        membres={(
+          <FicheMembresPanel
+            locale={locale}
+            query={query}
+            fiche={fiche}
+            base={base}
+            membersHref={membersHref}
+            inviteHref={inviteHref}
+          />
+        )}
+      />
+    </div>
   );
 }

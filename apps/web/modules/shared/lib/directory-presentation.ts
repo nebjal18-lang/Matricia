@@ -11,6 +11,18 @@ export type DirectoryPersonInput = {
   familyName?: string | null;
 };
 
+/** Short phase-lab labels after UUID/E2E cleanup: P05, P05 A, Client test A, … */
+const PHASE_LAB_NAME_RE = /^(?:p\d{2}(?:\s+[\p{L}\p{N}]+)?|client\s+test(?:\s+[\p{L}\p{N}]+)?|عميل\s+اختبار(?:\s+[\p{L}\p{N}]+)?)$/iu;
+
+function isPhaseLabOrganizationName(value: string): boolean {
+  return PHASE_LAB_NAME_RE.test(value.trim());
+}
+
+function phaseLabDisplayLabel(slot: string | undefined, locale: Locale): string {
+  if (locale === "ar") return slot ? `عميل اختبار ${slot}` : "عميل اختبار";
+  return slot ? `Client test ${slot}` : "Client test";
+}
+
 /** E2E / lab / Démo identities that must not flood operational directories by default. */
 export function isDirectoryFixture(row: DirectoryPersonInput): boolean {
   const email = (row.email ?? "").toLowerCase();
@@ -20,6 +32,7 @@ export function isDirectoryFixture(row: DirectoryPersonInput): boolean {
   if (email.endsWith("@example.invalid") || email.endsWith("@example.com") || email.includes(".invalid")) return true;
   if (/\be2e\b/u.test(email) || /\be2e\b/u.test(name) || /\be2e\b/u.test(org)) return true;
   if (/p0\d[\s_-]?e2e/iu.test(name) || /p0\d[\s_-]?e2e/iu.test(org)) return true;
+  if (isPhaseLabOrganizationName(row.displayName ?? "") || isPhaseLabOrganizationName(row.organizationName ?? "")) return true;
   if (local.startsWith("demo.") || local.startsWith("demo_") || local.includes(".demo.")) return true;
   if (DEMO_NAME_RE.test(name) || DEMO_NAME_RE.test(org)) return true;
   return false;
@@ -34,6 +47,7 @@ export function isDirectoryOrgFixture(name: string, legalName = ""): boolean {
     UUID_RE.lastIndex = 0;
     return true;
   }
+  if (isPhaseLabOrganizationName(name) || isPhaseLabOrganizationName(legalName)) return true;
   if (/^p\d{2}\b/iu.test(name.trim()) && /provider\s+cible|cible\s+provider|fixture|seed/iu.test(blob)) return true;
   if (/^prestataire\s*[-–]\s*biblioth/iu.test(name.trim())) return true;
   if (/\bbiblioth[eè]que concurrence\b/iu.test(blob)) return true;
@@ -64,16 +78,22 @@ function titleCaseWords(value: string): string {
     .join(" ");
 }
 
-/** Human organization label (never a raw UUID / E2E blob). */
+/** Human organization label (never a raw UUID / E2E blob / bare P05 code). */
 export function organizationDisplayLabel(name: string | null | undefined, locale: Locale): string {
   if (!name?.trim()) return locale === "ar" ? "بدون مؤسسة" : "Sans organisation";
-  if (!looksLikeTechnicalIdentity(name) && !/\be2e\b/iu.test(name)) return name.trim();
+  const trimmed = name.trim();
+  const directPhase = trimmed.match(/^P(\d{2})(?:\s+([\p{L}\p{N}]+))?$/u);
+  if (directPhase) return phaseLabDisplayLabel(directPhase[2], locale);
+  if (/^(?:client\s+test|عميل\s+اختبار)(?:\s+[\p{L}\p{N}]+)?$/iu.test(trimmed)) return trimmed;
+  if (!looksLikeTechnicalIdentity(name) && !/\be2e\b/iu.test(name) && !/^p\d{2}\b/iu.test(trimmed)) return trimmed;
   const cleaned = name
     .replace(UUID_RE, " ")
     .replace(/\be2e\b/giu, " ")
     .replace(/\b(SUPERSEDED|COMPLETED|ARCHIVED|ACTIVE|DRAFT|PENDING|IN_PROGRESS|IN_REVIEW|RETIRED|TERMINATED)\b/giu, " ")
     .replace(/\s+/gu, " ")
     .trim();
+  const cleanedPhase = cleaned.match(/^P(\d{2})(?:\s+([\p{L}\p{N}]+))?$/u);
+  if (cleanedPhase) return phaseLabDisplayLabel(cleanedPhase[2], locale);
   return cleaned.length >= 2 ? cleaned : (locale === "ar" ? "بدون مؤسسة" : "Sans organisation");
 }
 

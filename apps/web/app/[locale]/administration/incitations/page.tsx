@@ -8,6 +8,7 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { IncentivesPanel } from "@/modules/admin/screens/incitations/incentives-panel";
 import { messages } from "@/modules/admin/screens/incitations/messages";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminOffFilmGate } from "@/modules/admin/ui/admin-off-film-gate";
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -16,7 +17,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   if (r.status === "error" && r.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/incitations` }));
   const m = messages[locale];
   return (
-    <AdminModulePage locale={locale} active="parcours" parcoursCurrent="reputation" path="incitations" title={m.title} lead={m.description}>
+    <AdminModulePage locale={locale} active="finance" path="incitations" title={m.title} lead={m.description} hubGroup="finance" hubMode="strip">
+      <AdminOffFilmGate locale={locale} role={locale === "ar" ? "حوافز وإشارات الأداء" : "Incitations et signaux de performance"} />
       <Alert><AlertDescription>{m.security}</AlertDescription></Alert>
       {r.status === "error" ? (
         <p role="alert" className="text-destructive">{r.reason === "MFA_REQUIRED" ? mfaRequiredMessage(locale) : m.loadError}</p>

@@ -23,6 +23,26 @@
   text-decoration: none;
 }
 
+.franchise-treat > .franchise-treat-tile:nth-child(4n + 1) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.franchise-treat > .franchise-treat-tile:nth-child(4n + 2) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 60%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.franchise-treat > .franchise-treat-tile:nth-child(4n + 3) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 60%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.franchise-treat > .franchise-treat-tile:nth-child(4n + 4) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 65%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, white);
+}
+
 .franchise-treat-tile > div {
   flex: 1 1 auto;
   min-width: 0;

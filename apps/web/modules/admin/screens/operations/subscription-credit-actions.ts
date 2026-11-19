@@ -4,7 +4,7 @@ import {z} from "zod";
 import {loadMyPlatformAccess,hasPlatformRole} from "@/modules/shared/lib/account-security/platform-access";
 export type SubscriptionCreditRetryState={status:"idle"|"success"|"error"};
 export async function submitSubscriptionCreditRetry(_previous:SubscriptionCreditRetryState,form:FormData):Promise<SubscriptionCreditRetryState>{
- const access=await loadMyPlatformAccess();if(access.status!=="ok"||!access.requirementSatisfied||!hasPlatformRole(access.roles,["SUPER_ADMIN","FINANCE_MANAGER"]))return{status:"error"};
+ const access=await loadMyPlatformAccess();if(access.status!=="ok"||!access.requirementSatisfied||!hasPlatformRole(access.roles,["SUPER_ADMIN","MATRICIA_ADMIN","FINANCE_MANAGER"]))return{status:"error"};
  const input=z.object({locale:z.enum(["fr","ar"]),action:z.enum(["request","approve","reject"]),id:z.string().uuid(),sourceHash:z.string().regex(/^[a-f0-9]{64}$/u)}).safeParse(Object.fromEntries(form));if(!input.success)return{status:"error"};
  const value=input.data;let result;
  if(value.action==="request"){

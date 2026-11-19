@@ -19,7 +19,9 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/modules/admin/data/spaces/context", () => ({ resolveAdminSpace: mocks.resolveAdminSpace }));
 vi.mock("@/modules/admin/ui/admin-app-shell", () => ({
-  AdminAppShell: ({ children, parcoursCurrent }: { children: ReactNode; parcoursCurrent?: string }) => <div data-parcours={parcoursCurrent}>{children}</div>,
+  AdminAppShell: ({ children, parcoursCurrent, actorCurrent }: { children: ReactNode; parcoursCurrent?: string; actorCurrent?: string }) => (
+    <div data-parcours={parcoursCurrent ?? actorCurrent}>{children}</div>
+  ),
   AdminCrumb: () => <nav>crumb</nav>,
 }));
 vi.mock("@/modules/admin/screens/franchise-applications/review-forms", () => ({
@@ -105,6 +107,26 @@ describe("FranchiseApplicationsPage", () => {
     expect(html).not.toContain("Organisation rattachée");
     expect(html).not.toContain("BBBBBBBB");
     expect(html).not.toMatch(/ACTIVE\s*·\s*[0-9A-F]{8}/i);
+  });
+
+  it("overlays demo instruction dossiers when demo flag is on and DB queue is empty", async () => {
+    process.env.APP_ENV = "development";
+    process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
+    mocks.from.mockImplementation(() => query({ data: [], error: null }));
+    const html = renderToStaticMarkup(await FranchiseApplicationsPage({
+      params: Promise.resolve({ locale: "fr" }),
+      searchParams: Promise.resolve({}),
+    }));
+    expect(html).toContain("admin-franchise-card");
+    expect(html).toContain("@matricia.test");
+    expect(html).toContain("Inscrit");
+    expect(html).toContain("Revue de la société");
+    expect(html).toContain("Pièces demandées");
+    expect(html).toContain("Mandat proposé");
+    expect(html).toContain("À traiter");
+    expect(html).not.toContain("Aucune candidature enregistrée");
+    delete process.env.MATRICIA_DEMO_ACCESS_ENABLED;
+    delete process.env.APP_ENV;
   });
 
   it("hides fixture applications by default and exposes a treat filter", async () => {

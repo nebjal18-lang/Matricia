@@ -31,3 +31,17 @@ export function franchiseBookTypeLabel(type: string, locale: Locale) {
   if (type === "STANDARD") return locale === "ar" ? "امتياز عام" : "Franchise standard";
   return workflowStatusLabel(type, locale);
 }
+
+export function beneficiaryCodeLabel(code: string, locale: Locale) {
+  const known: Record<string, [string, string]> = {
+    FRANCHISEE: ["Franchisé", "صاحب الامتياز"],
+    HATIM_AHMITECH: ["Hatim Ahmitech", "حاتم أهميتيك"],
+    NEOXA_JALIL: ["Jalil — NEOXA", "جليل — نِيوكسا"],
+    ASMA_MATRICIA: ["Mme Asma — Matricia", "السيدة أسماء — ماتريسيا"],
+    CORE: ["Pot Core plateforme", "وعاء المنصة الأساسي"],
+    POOL: ["Pool de bénéfices", "مجمع المنافع"],
+  };
+  const hit = known[code];
+  if (hit) return locale === "ar" ? hit[1] : hit[0];
+  return workflowStatusLabel(code, locale);
+}

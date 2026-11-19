@@ -136,23 +136,37 @@ export async function completePasswordLogin(
 }
 
 /** Resolve the next step from server-verified assurance and the role policy. */
-export async function postLoginDestination(localeInput: string, requestedNext?: string): Promise<string> {
+export async function postLoginDestination(
+  localeInput: string,
+  requestedNext?: string,
+  preferredWorkspace?: "client" | "provider" | "franchise" | "administration",
+): Promise<string> {
   const locale = isLocale(localeInput) ? localeInput : "fr";
   const requested = safeReturnPath(requestedNext, locale);
   let target = requested ?? `/${locale}/tableau-de-bord`;
   const client = await getSupabaseServerClient();
   if (!(await client.auth.getUser()).data.user) return `/${locale}/connexion?${new URLSearchParams({ next: target })}`;
-  const navigation = await readWorkspaceNavigation(locale);
+  const navigation = await readWorkspaceNavigation(locale, undefined, preferredWorkspace);
   if (navigation.status === "ok") {
     const allowed = navigation.navigation.options.map(option => option.kind);
     const authorized = authorizedReturnPath(requested, locale, allowed);
-    const fallback = navigation.navigation.options.find(option => option.kind === navigation.navigation.landing)?.href ?? `/${locale}/tableau-de-bord`;
+    const preferredHref = preferredWorkspace && allowed.includes(preferredWorkspace)
+      ? navigation.navigation.options.find((option) => option.kind === preferredWorkspace)?.href
+      : undefined;
+    // Jamais de fallback vers un autre espace quand un workspace explicite est demandé (ex. démo Admin).
+    if (preferredWorkspace && !preferredHref && !authorized) {
+      return `/${locale}/connexion?${new URLSearchParams({ demo: "role-missing", ...(requested ? { next: requested } : {}) })}`;
+    }
+    const fallback = preferredHref
+      ?? navigation.navigation.options.find(option => option.kind === navigation.navigation.landing)?.href
+      ?? `/${locale}/tableau-de-bord`;
     target = authorized ?? fallback;
     const targetUrl = new URL(target, "https://matricia.invalid");
-    const currentKind = navigation.navigation.options.find(option => option.kind === targetUrl.searchParams.get("workspace"))?.kind
+    const currentKind = (preferredWorkspace && allowed.includes(preferredWorkspace) ? preferredWorkspace : undefined)
+      ?? navigation.navigation.options.find(option => option.kind === targetUrl.searchParams.get("workspace"))?.kind
       ?? (targetUrl.pathname.startsWith(`/${locale}/administration/`) ? allowed.find(kind => kind === "administration") : targetUrl.pathname.startsWith(`/${locale}/franchise/`) ? allowed.find(kind => kind === "franchise") : targetUrl.pathname.startsWith(`/${locale}/sous-traitant/`) ? allowed.find(kind => kind === "provider") : navigation.navigation.landing);
     if (currentKind) (await cookies()).set("matricia.workspace", currentKind, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 30 });
-    if (requested && !authorized) {
+    if (requested && !authorized && !preferredWorkspace) {
       const url = new URL(target, "https://matricia.invalid");
       url.searchParams.set("navigation", "role-fallback");
       target = `${url.pathname}${url.search}`;
