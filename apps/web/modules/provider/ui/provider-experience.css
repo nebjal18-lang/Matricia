@@ -2,6 +2,33 @@
   --ad-radius: 14px;
 }
 
+.provider-workspace .client-page > .client-stack > .client-card:not([data-tone]):nth-child(6n + 1),
+.provider-workspace .client-stack > .client-card:not([data-tone]):nth-child(6n + 1) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.provider-workspace .client-page > .client-stack > .client-card:not([data-tone]):nth-child(6n + 2),
+.provider-workspace .client-stack > .client-card:not([data-tone]):nth-child(6n + 2) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.provider-workspace .client-page > .client-stack > .client-card:not([data-tone]):nth-child(6n + 3),
+.provider-workspace .client-stack > .client-card:not([data-tone]):nth-child(6n + 3) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.provider-workspace .client-page > .client-stack > .client-card:not([data-tone]):nth-child(6n + 4),
+.provider-workspace .client-stack > .client-card:not([data-tone]):nth-child(6n + 4) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 60%, white) 100%);
+}
+
+.provider-workspace .mat-hero[data-tone="mint"] {
+  border-color: color-mix(in srgb, var(--mat-mint) 28%, white);
+}
+
 .provider-workspace .client-space-table {
   min-width: max-content;
 }

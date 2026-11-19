@@ -57,7 +57,7 @@ describe("FinanceSorties", () => {
     const html = renderToStaticMarkup(
       createElement(FinanceSorties, { locale: "fr", dashboard, m: getAdminFinanceMessages("fr") }),
     );
-    expect(html).toContain("Sorties");
+    expect(html).toContain("Argent sortant");
     expect(html).toContain("INV-12");
     expect(html).toContain("PAY-88");
     expect(html).toContain("Prestataire Atlas");
@@ -70,8 +70,8 @@ describe("FinanceSorties", () => {
     const html = renderToStaticMarkup(
       createElement(FinanceSorties, { locale: "ar", dashboard: empty, m: getAdminFinanceMessages("ar") }),
     );
-    expect(html).toContain("المصروفات");
-    expect(html).toContain("لا يوجد عنصر.");
+    expect(html).toContain("الأموال الخارجة");
+    expect(html).toContain("لا يوجد شيء حالياً.");
     expect(html).toContain('role="status"');
   });
 });

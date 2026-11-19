@@ -387,7 +387,7 @@ function BudgetForm({ locale, orgId, projects, sites, data, m, keyValue }: { loc
           <Field label={m.currency}><Input name="currency" value="MAD" readOnly /></Field>
           <Select name="libraryId" label={m.library} required={false}><option value="">{m.none}</option>{data.libraries.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
           <Select name="siteId" label={m.site} required={false}><option value="">{m.none}</option>{sites.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
-          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
+          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
           <Field label={m.amount}><Input name="amount" inputMode="decimal" dir="ltr" required /></Field>
           <Field label={m.rationale}><Textarea name="rationale" required /></Field>
           <input type="hidden" name="approve" value="no" />
@@ -429,8 +429,8 @@ function AllocationForm({ locale, orgId, projects, tasks, contracts, targets, ta
         <form action={action} className="grid gap-3">
           <Hidden locale={locale} orgId={orgId} keyValue={keyValue} />
           <Select name="budgetId" label={m.budgets}>{budgets.map((item) => <option key={item.id} value={item.id}>{item.fiscalYear} · {exactMoney(item.amountMinor, item.currency)}</option>)}</Select>
-          <Select name="costCenterId" label={m.center}>{centers.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
-          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
+          <Select name="costCenterId" label={m.center}>{centers.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
+          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
           <Select name="allocationType" label={m.allocationType}><option value="COMMITMENT">{locale === "ar" ? "التزام" : "Engagement"}</option><option value="ACTUAL">{locale === "ar" ? "نفقة فعلية" : "Dépense réalisée"}</option><option value="RELEASE">{locale === "ar" ? "تحرير الالتزام" : "Libération d’engagement"}</option></Select>
           {targetsStatus === "unavailable" ? <p role="alert">{locale === "ar" ? "تعذر تحميل الملفات المتاحة للتخصيص. أعيدوا تحميل الصفحة." : "Les dossiers disponibles pour l’allocation n’ont pas pu être chargés. Rechargez la page."}</p> : null}
           {targetsStatus === "success" && targets.length === 0 && projects.length === 0 && tasks.length === 0 && contracts.length === 0 ? <p role="status">{locale === "ar" ? "لا ملفات مرتبطة متاحة للتخصيص بعد." : "Aucun dossier lié disponible pour l’allocation pour le moment."}</p> : null}
@@ -459,7 +459,7 @@ function EventForm({ locale, orgId, projects, m, keyValue }: { locale: "fr" | "a
       <CardContent>
         <form action={action} className="grid gap-3 md:grid-cols-2">
           <Hidden locale={locale} orgId={orgId} keyValue={keyValue} />
-          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
+          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
           <Select name="eventType" label={m.eventType}>{["CUSTOM", "PROJECT_DEADLINE", "APPROVAL", "DOCUMENT", "INVOICE", "MISSION", "RFQ"].map((item) => <option key={item} value={item}>{portfolioEventLabels[locale][item] ?? item}</option>)}</Select>
           <Field label={m.nameFr}><Input name="titleFr" required /></Field>
           <Field label={m.nameAr}><Input name="titleAr" dir="rtl" required /></Field>

@@ -10,6 +10,7 @@ import { cn } from "@/modules/shared/lib/utils";
 import { getPublicationMessages } from "@/modules/admin/screens/catalogue/publications/messages";
 import { PublicationPanel } from "@/modules/admin/screens/catalogue/publications/publication-panel";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminStep1Gate } from "@/modules/admin/ui/admin-step1-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ export default async function CataloguePublicationsPage({ params }: { params: Pr
     : {};
   return (
     <AdminModulePage locale={locale} active="catalog" path="catalogue/publications" title={messages.title} lead={messages.description}>
+      <AdminStep1Gate locale={locale} current="publications" />
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "FORBIDDEN" ? messages.forbidden : messages.unavailable}</AlertTitle>

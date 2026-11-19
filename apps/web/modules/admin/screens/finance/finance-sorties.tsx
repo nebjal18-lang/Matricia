@@ -10,6 +10,7 @@ function formatDate(value: string, _locale: Locale) {
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
 }
 
+/** Ledger lecture for open provider invoices + recorded payments (used by tests and secondary surfaces). */
 export function FinanceSorties({
   locale,
   dashboard,
@@ -23,93 +24,95 @@ export function FinanceSorties({
   const payments = dashboard.provider_payments;
 
   return (
-    <section id="sorties" className="space-y-5" aria-labelledby="finance-sorties-title">
-      <div className="admin-section-head">
+    <section id="sorties-ledger" className="admin-finance-zone scroll-mt-24 space-y-5" aria-labelledby="finance-sorties-title">
+      <div className="admin-table-tools">
         <div>
           <h2 id="finance-sorties-title">{m.sorties}</h2>
           <p>{m.sortiesHint}</p>
         </div>
       </div>
-      <div className="grid gap-4 xl:grid-cols-2">
-        <article className="admin-panel space-y-3">
-          <h3 className="text-base font-semibold">{m.openInvoices}</h3>
-          {openInvoices.length === 0 ? (
-            <p role="status" className="text-sm text-[var(--ad-muted)]">
-              {m.empty}
-            </p>
-          ) : (
-            <ul className="grid gap-3">
-              {openInvoices.map((invoice) => (
-                <li key={invoice.id} className="rounded-xl border border-[var(--ad-border)] bg-[var(--mat-canvas)] p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <p className="font-semibold">{invoice.organization_name}</p>
-                    <span className="admin-badge" data-tone={invoice.payment_status === "OVERDUE" ? "critical" : "warn"}>
-                      {m.states[invoice.payment_status]}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm" dir="ltr">
-                    {invoice.invoice_number}
-                  </p>
-                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                    <div>
-                      <dt className="text-[var(--ad-muted)]">{m.outstanding}</dt>
-                      <dd dir="ltr">{formatMinor(invoice.outstanding_minor, invoice.currency, locale)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[var(--ad-muted)]">{m.dueOn}</dt>
-                      <dd>
-                        <time dateTime={invoice.due_on}>{formatDate(invoice.due_on, locale)}</time>
-                      </dd>
-                    </div>
-                  </dl>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-        <article className="admin-panel space-y-3">
-          <h3 className="text-base font-semibold">{m.recordedPayments}</h3>
-          {payments.length === 0 ? (
-            <p role="status" className="text-sm text-[var(--ad-muted)]">
-              {m.empty}
-            </p>
-          ) : (
-            <ul className="grid gap-3">
-              {payments.map((payment) => (
-                <li key={payment.id} className="rounded-xl border border-[var(--ad-border)] bg-[var(--mat-canvas)] p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <p className="font-semibold">{payment.organization_name}</p>
-                    <span className="admin-badge">{m.states.PAID}</span>
-                  </div>
-                  <p className="mt-2 text-sm" dir="ltr">
-                    {m.reference} · {payment.payment_reference}
-                  </p>
-                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                    <div>
-                      <dt className="text-[var(--ad-muted)]">{m.amount}</dt>
-                      <dd dir="ltr">{formatMinor(payment.amount_minor, payment.currency, locale)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[var(--ad-muted)]">{m.allocated}</dt>
-                      <dd dir="ltr">{formatMinor(payment.allocated_minor, payment.currency, locale)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[var(--ad-muted)]">{m.unallocated}</dt>
-                      <dd dir="ltr">{formatMinor(payment.unallocated_minor, payment.currency, locale)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[var(--ad-muted)]">{m.paid}</dt>
-                      <dd>
-                        <time dateTime={payment.paid_on}>{formatDate(payment.paid_on, locale)}</time>
-                      </dd>
-                    </div>
-                  </dl>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-      </div>
+
+      <article className="client-card space-y-3 p-4">
+        <h3 className="text-base font-semibold">{m.openInvoices}</h3>
+        {openInvoices.length === 0 ? (
+          <p role="status" className="admin-finance-empty">{m.empty}</p>
+        ) : (
+          <div className="client-table-wrap" tabIndex={0} role="region" aria-label={m.openInvoices}>
+            <table className="client-space-table admin-org-table">
+              <thead>
+                <tr>
+                  <th>{m.organization}</th>
+                  <th>{m.status}</th>
+                  <th>{m.outstanding}</th>
+                  <th>{m.dueOn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {openInvoices.map((invoice) => (
+                  <tr key={invoice.id} data-overdue={invoice.payment_status === "OVERDUE" ? "true" : undefined}>
+                    <td>
+                      <span className="client-doc-cell">
+                        <span className="client-avatar" data-tone={invoice.payment_status === "OVERDUE" ? "coral" : "peach"}>
+                          {invoice.organization_name.slice(0, 1)}
+                        </span>
+                        <span>
+                          <strong>{invoice.organization_name}</strong>
+                          <small dir="ltr">{invoice.invoice_number}</small>
+                        </span>
+                      </span>
+                    </td>
+                    <td>
+                      <span className="client-status-chip" data-tone={invoice.payment_status === "OVERDUE" ? "coral" : "peach"}>
+                        {m.states[invoice.payment_status]}
+                      </span>
+                    </td>
+                    <td dir="ltr">{formatMinor(invoice.outstanding_minor, invoice.currency, locale)}</td>
+                    <td>
+                      <time dateTime={invoice.due_on}>{formatDate(invoice.due_on, locale)}</time>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </article>
+
+      <article className="client-card space-y-3 p-4">
+        <h3 className="text-base font-semibold">{m.recordedPayments}</h3>
+        {payments.length === 0 ? (
+          <p role="status" className="admin-finance-empty">{m.empty}</p>
+        ) : (
+          <div className="client-table-wrap" tabIndex={0} role="region" aria-label={m.recordedPayments}>
+            <table className="client-space-table admin-org-table">
+              <thead>
+                <tr>
+                  <th>{m.organization}</th>
+                  <th>{m.reference}</th>
+                  <th>{m.amount}</th>
+                  <th>{m.unallocated}</th>
+                  <th>{m.paid}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>
+                      <strong>{payment.organization_name}</strong>
+                    </td>
+                    <td dir="ltr">{payment.payment_reference}</td>
+                    <td dir="ltr">{formatMinor(payment.amount_minor, payment.currency, locale)}</td>
+                    <td dir="ltr">{formatMinor(payment.unallocated_minor, payment.currency, locale)}</td>
+                    <td>
+                      <time dateTime={payment.paid_on}>{formatDate(payment.paid_on, locale)}</time>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </article>
     </section>
   );
 }

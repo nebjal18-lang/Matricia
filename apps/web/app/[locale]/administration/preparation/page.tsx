@@ -5,6 +5,7 @@ import { BoxFormulaForm, PreparationField } from "@/modules/admin/screens/delive
 import { loadDeliveryPreparationWorkspace } from "@/modules/admin/screens/delivery-preparation/load";
 import { type PreparationItem, type PreparationSection } from "@/modules/admin/screens/delivery-preparation/model";
 import { AdminAppShell } from "@/modules/admin/ui/admin-app-shell";
+import { AdminStep1Gate } from "@/modules/admin/ui/admin-step1-gate";
 import { hasPlatformRole, loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { PLATFORM_ADMIN_ROLES } from "@/modules/shared/lib/connected-space/workspace-landing";
@@ -24,11 +25,11 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
     locale,
     selectedQuery: "",
     selectedOrganizationId: null,
-    userEmail: access.status === "success" ? access.email : null,
+    userEmail: access.status === "ok" ? access.email : null,
     active: "settings" as const,
     alternateHref: `/${fr ? "ar" : "fr"}/administration/preparation`,
-    title: fr ? "Préparation de la livraison" : "إعداد التسليم",
-    lead: fr ? "Saisissez ici les éléments qui manquent encore. Chaque enregistrement reste un brouillon : rien n’est publié." : "أدخلوا هنا العناصر التي لا تزال ناقصة. كل حفظ يبقى مسودة: لا يُنشر شيء.",
+    title: fr ? "Préparation de la plateforme" : "تجهيز المنصة",
+    lead: fr ? "Étape 1/11 — complétez les brouillons manquants avant d’ouvrir les candidatures franchise. Rien n’est publié ici." : "الخطوة 1/11 — أكملوا المسودات الناقصة قبل فتح ترشيحات الامتياز. لا يُنشر شيء هنا.",
   };
   if (access.status === "error" || !hasPlatformRole(access.roles, PLATFORM_ADMIN_ROLES)) {
     return <AdminAppShell {...shell}><WorkspaceFailure locale={locale} reason={access.status === "error" ? access.reason : "FORBIDDEN"} returnPath={selfPath} /></AdminAppShell>;
@@ -48,7 +49,8 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
   };
   return (
     <AdminAppShell {...shell}>
-      <main className="client-page">
+      <div className="client-page">
+        <AdminStep1Gate locale={locale} current="preparation" />
         <p className="text-sm text-muted-foreground">{fr ? "Les brouillons ne changent pas les pages légales, les noms publiés du catalogue, les prix, les quotas en vigueur, ni les prestataires réellement branchés." : "لا تغيّر المسودات الصفحات القانونية ولا أسماء الدليل المنشورة ولا الأسعار ولا الحصص السارية ولا المزوّدين المرتبطين فعلياً."}</p>
         <nav className="mt-4 flex flex-wrap gap-3 text-sm" aria-label={fr ? "Sections de préparation" : "أقسام الإعداد"}>
           <a href="#catalogue">{fr ? "Noms arabes" : "الأسماء العربية"}</a>
@@ -67,18 +69,30 @@ export default async function DeliveryPreparationPage({ params, searchParams }: 
               <CatalogueList locale={locale} title={fr ? "Services" : "الخدمات"} queryName="serviceQ" pageName="servicePage" queryValue={query.serviceQ ?? ""} page={servicePage} total={workspace.services.total} items={workspace.services.items} section="CATALOG_SERVICE_AR" href={href} preserve={{ categoryQ: query.categoryQ, categoryPage: String(categoryPage) }} />
               <CatalogueList locale={locale} title={fr ? "Catégories" : "الفئات"} queryName="categoryQ" pageName="categoryPage" queryValue={query.categoryQ ?? ""} page={categoryPage} total={workspace.categories.total} items={workspace.categories.items} section="CATALOG_CATEGORY_AR" href={href} preserve={{ serviceQ: query.serviceQ, servicePage: String(servicePage) }} />
             </section>
+            <details className="client-card mt-6 p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{fr ? "Identité légale" : "الهوية القانونية"}</summary>
             <DraftSection id="legal" locale={locale} title={fr ? "Identité légale" : "الهوية القانونية"} lead={fr ? "Ces onze champs alimenteront plus tard les pages légales. Les enregistrer ici ne les publie pas." : "ستغذّي هذه الحقول الأحد عشر الصفحات القانونية لاحقاً. حفظها هنا لا ينشرها."} section="LEGAL" items={workspace.legal.items} multilineKeys={["LEGAL_ENTITY_ADDRESS", "LEGAL_HOST_ADDRESS", "LEGAL_RETENTION_FR", "LEGAL_RETENTION_AR", "LEGAL_TERMS_APPROVAL_REFERENCE"]} />
-            <section id="box" className="mt-8 grid gap-4">
+            </details>
+            <details className="client-card mt-4 p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{fr ? "Formules Box" : "صيغ الصناديق"}</summary>
+            <section id="box" className="mt-4 grid gap-4">
               <h2>{fr ? "Formules Box" : "صيغ الصناديق"}</h2>
               <p className="text-sm text-muted-foreground">{fr ? "Décrivez les quotas, privilèges et conditions de chaque formule. Aucun montant n’est créé." : "صفوا حصص كل صيغة وامتيازاتها وشروطها. لا يُنشأ أي مبلغ."}</p>
               <BoxFormulaForm locale={locale} idempotencyKeys={{ quota: randomUUID(), privileges: randomUUID(), conditions: randomUUID() }} />
               {workspace.box.items.map((item) => <PreparationField key={item.key} locale={locale} section="BOX" item={item} idempotencyKey={randomUUID()} multiline />)}
             </section>
+            </details>
+            <details className="client-card mt-4 p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{fr ? "Intégrations réelles" : "التكاملات الفعلية"}</summary>
             <DraftSection id="integrations" locale={locale} title={fr ? "Intégrations réelles" : "التكاملات الفعلية"} lead={fr ? "Indiquez le prestataire et, quand vous l’avez, sa clé. La clé n’est jamais réaffichée et ne branche pas le prestataire." : "حدّدوا المزوّد ومفتاحه عندما يتوفر. لا يُعاد عرض المفتاح ولا يُربط المزوّد."} section="INTEGRATION" items={workspace.integrations.items} secret />
+            </details>
+            <details className="client-card mt-4 p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{fr ? "Décisions de livraison" : "قرارات التسليم"}</summary>
             <DraftSection id="release" locale={locale} title={fr ? "Décisions de livraison" : "قرارات التسليم"} lead={fr ? "Consignez la décision CNDP, la fiscalité validée, l’adresse de préproduction et la référence du procès-verbal. Un texte enregistré ne vaut pas la décision signée." : "سجّلوا قرار اللجنة الوطنية والضرائب المعتمدة وعنوان ما قبل الإنتاج ومرجع محضر الاستلام. النص المحفوظ لا يغني عن القرار الموقّع."} section="RELEASE" items={workspace.release.items} multiline />
+            </details>
           </>
         )}
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

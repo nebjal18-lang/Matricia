@@ -4,6 +4,7 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminOffFilmGate } from "@/modules/admin/ui/admin-off-film-gate";
 import { SupportRevokeForm } from "@/modules/admin/screens/support/revoke-form";
 
 export default async function SupportCasePage({ params }: { params: Promise<{ locale: string; id: string }> }) {
@@ -30,6 +31,10 @@ export default async function SupportCasePage({ params }: { params: Promise<{ lo
       title={ar ? "ملف الدعم المحدد" : "Dossier de support limité"}
       lead={ar ? "قراءة محددة بالترخيص المؤقت." : "Lecture limitée à l’autorisation temporaire."}
     >
+      <AdminOffFilmGate
+        locale={locale}
+        role={ar ? "دعم محدود بترخيص مؤقت" : "Support limité à une autorisation temporaire"}
+      />
       {r.error || !parsed.success ? (
         <p role="alert">{ar ? "الترخيص غير موجود أو منتهي أو ملغى." : "Autorisation absente, expirée ou révoquée."}</p>
       ) : (

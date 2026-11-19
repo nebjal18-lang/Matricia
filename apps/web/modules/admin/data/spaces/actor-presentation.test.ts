@@ -61,7 +61,7 @@ describe("admin actor presentation", () => {
   it("labels roles, cleans technical organization names and groups memberships per account", () => {
     expect(actorRolesLabel(["CLIENT_OWNER", "MATRICIA_ADMIN"], "fr")).toBe("Propriétaire client · Admin Matricia");
     expect(actorRolesLabel([], "fr")).toBe("—");
-    expect(actorOrganizationLabel(`P05 E2E A ${id}`, "fr")).toBe("P05 A");
+    expect(actorOrganizationLabel(`P05 E2E A ${id}`, "fr")).toBe("Client test A");
     expect(actorOrganizationLabel(null, "fr")).toBe("Sans organisation");
 
     const rows: ActorUserRow[] = [

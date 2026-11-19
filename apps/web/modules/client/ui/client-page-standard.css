@@ -1,0 +1,141 @@
+/* Standard pages Client — Design Authority Version A */
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page-standard {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page-standard > .client-page,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page-standard > .client-stack,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page-standard > .space-y-6,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page-standard > .space-y-8 {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) article.rounded-xl.border,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) article.rounded-2xl.border,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) [data-slot="card"] {
+  border-color: var(--client-line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card:nth-child(6n + 1),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card:nth-child(6n + 1),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card:nth-child(6n + 1),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card:nth-child(6n + 1) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card:nth-child(6n + 2),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card:nth-child(6n + 2),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card:nth-child(6n + 2),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card:nth-child(6n + 2) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card:nth-child(6n + 3),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card:nth-child(6n + 3),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card:nth-child(6n + 3),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card:nth-child(6n + 3) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card:nth-child(6n + 4),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card:nth-child(6n + 4),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card:nth-child(6n + 4),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card:nth-child(6n + 4) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 60%, white) 100%);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card:nth-child(6n + 5),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card:nth-child(6n + 5),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card:nth-child(6n + 5),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card:nth-child(6n + 5) {
+  background: linear-gradient(180deg, #fff 0%, #fff6ea 100%);
+  border-color: #f0d7b5;
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-xl.border.bg-card:nth-child(6n + 6),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .rounded-2xl.border.bg-card:nth-child(6n + 6),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-xl.border.bg-card:nth-child(6n + 6),
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) form.rounded-2xl.border.bg-card:nth-child(6n + 6) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-rose-soft) 55%, white) 100%);
+  border-color: var(--mat-rose-tint);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-card:not([data-tone]) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  border-color: var(--client-line);
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-card[data-tone="violet"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-card[data-tone="mint"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-card[data-tone="coral"],
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-card[data-tone="peach"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-card[data-tone="sky"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 58%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, white);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-tabs a {
+  min-height: 2.75rem;
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-tabs a[aria-current="page"] {
+  background: var(--mat-violet-soft);
+  color: var(--mat-violet-strong);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-mast {
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--mat-navy-tint) 38%, white) 0%, color-mix(in srgb, var(--client-cream) 94%, transparent) 100%);
+  border: 1px solid color-mix(in srgb, var(--client-line) 70%, white);
+  padding: 1rem 1.1rem 0.85rem;
+  box-shadow: 0 12px 28px rgb(18 29 88 / 5%);
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) main.client-page,
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.client-workspace:not(.provider-workspace):not(.franchise-workspace) [id].scroll-mt-24 {
+  scroll-margin-top: 6rem;
+}
+
+@media (min-width: 860px) {
+  .client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-mast {
+    padding: 1rem 1.35rem 0.95rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .client-workspace:not(.provider-workspace):not(.franchise-workspace) .client-page-standard {
+    gap: 0.95rem;
+  }
+}

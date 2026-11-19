@@ -6,6 +6,7 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { hasPlatformRole, loadMyPlatformAccess, mfaRequiredMessage } from "@/modules/shared/lib/account-security/platform-access";
 import { ClonePanel, type CloneChoices } from "@/modules/admin/screens/clonage/clone-panel";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminStep1Gate } from "@/modules/admin/ui/admin-step1-gate";
 
 const MUTATION_ROLES = new Set(["SUPER_ADMIN", "MATRICIA_ADMIN", "LIBRARY_MANAGER"]);
 
@@ -49,6 +50,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       title={ar ? "استنساخ المحتوى مع المصدر" : "Clonage de contenu avec provenance"}
       lead={ar ? "اختر محتوى موجوداً ووجهته. يتحقق الخادم من الصلاحيات والمصدر قبل إنشاء إصدار جديد." : "Choisissez un contenu existant et sa destination. Le serveur revalide les droits et la provenance avant de créer une nouvelle version."}
     >
+      <AdminStep1Gate locale={locale} current="clonage" />
       {needsMfa ? (
         <Alert variant="destructive">
           <AlertTitle>{mfaRequiredMessage(locale)}</AlertTitle>

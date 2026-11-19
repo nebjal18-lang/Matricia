@@ -86,7 +86,11 @@ export default async function LoginPage({ params, searchParams }: { params: Prom
           {!registration && nextPath ? <p className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6">{locale === "ar" ? "بعد الاتصال ستعودون إلى الصفحة المطلوبة إذا كانت صلاحياتكم تسمح بذلك. قد يلزم تحقق معزّز." : "Après connexion, vous retrouverez la page demandée si votre compte est habilité. Une vérification renforcée peut être nécessaire."}</p> : null}
           <div className="mt-8">{registration ? <InscriptionConsent otpLength={configuredEmailOtpLength()} locale={locale} nextPath={effectiveNextPath ?? defaultRegistrationPath}/> : <OtpForm otpLength={configuredEmailOtpLength()} locale={locale} nextPath={effectiveNextPath}/>}</div>
           {!registration && isPublicDemoAccessEnabled() ? <DemoAccess locale={locale} nextPath={effectiveNextPath} /> : null}
-          {!registration && (query.demo === "unavailable" || query.demo === "disabled") ? <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">{query.demo === "disabled" ? chrome.demoDisabled : chrome.demoUnavailable}</p> : null}
+          {!registration && (query.demo === "unavailable" || query.demo === "disabled" || query.demo === "role-missing") ? (
+            <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+              {query.demo === "disabled" ? chrome.demoDisabled : query.demo === "role-missing" ? chrome.demoRoleMissing : chrome.demoUnavailable}
+            </p>
+          ) : null}
           <ul className="mt-8 space-y-3 text-sm text-slate-600">
             {(locale === "fr"
               ? ["Vos données sont protégées", "Authentification par code à usage unique", "Aucune information sur l’existence d’un compte n’est affichée"]

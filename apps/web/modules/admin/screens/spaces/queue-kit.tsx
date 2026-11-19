@@ -21,10 +21,13 @@ import {
   spaceSectionCards,
   wizardFields,
 } from "@/modules/admin/data/spaces/layout-blueprint";
-import { spaceHref, spaceSpec, statusTone, type SpaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
+import type { HubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
+import { spaceCreateHref, spaceHref, spaceSpec, statusTone, type SpaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
+import { governedMutationSpaces, spaceNextStep } from "@/modules/admin/data/spaces/space-journey";
 import type { SpaceRow } from "@/modules/admin/data/spaces/space-data";
 import { columnLooksLikeStatus as statusColumnLooksLikeStatus } from "@/modules/admin/data/spaces/queue-status-column";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
+import { HubKpiStrip } from "./hub-charts";
 import { PipelineGlyph } from "./pipeline-step";
 import {
   CompanyDecisionForm,
@@ -72,6 +75,7 @@ export function SpaceQueueBoard({
   search,
   vue,
   includeFixtures = false,
+  metrics,
   children,
 }: {
   locale: Locale;
@@ -82,6 +86,7 @@ export function SpaceQueueBoard({
   search?: string;
   vue?: string;
   includeFixtures?: boolean;
+  metrics?: HubMetrics;
   children?: ReactNode;
 }) {
   const spec = spaceSpec(space);
@@ -94,14 +99,16 @@ export function SpaceQueueBoard({
   const operationalRows = includeFixtures ? rows : rows.filter((row) => !row.fixture);
   const hiddenFixtures = rows.length - operationalRows.length;
   const statuses = [...new Set(operationalRows.map((row) => row.status).filter(Boolean))];
-  const filteredRows = filterAdminRows(operationalRows, space, vue, search);
+  // Annuaire franchises = actifs par défaut ; vue=all pour tout voir
+  const effectiveVue = space === "franchises" && (vue === undefined || vue === "") ? "ACTIVE" : vue === "all" && space === "franchises" ? undefined : vue;
+  const filteredRows = filterAdminRows(operationalRows, space, effectiveVue, search);
   const pageSize = space === "demandes" ? 25 : filteredRows.length;
   const visibleRows = filteredRows.slice(0, pageSize);
   const truncated = filteredRows.length > visibleRows.length;
   const visibleTreat = filterAdminRows(
     (includeFixtures ? treat : treat.filter((row) => !row.fixture)),
     space,
-    vue,
+    effectiveVue,
     search,
   );
   const fixturesHref = (() => {
@@ -132,8 +139,17 @@ export function SpaceQueueBoard({
     const qs = next.toString();
     return `/${locale}/administration/${space}${qs ? `?${qs}` : ""}`;
   };
+  const createHref = spaceCreateHref(locale, spec, query);
   return (
-    <main className="client-page admin-space-queue" data-admin-layout="queue" data-admin-space={space} data-admin-family={family.list}>
+    <div className="client-page admin-space-queue" data-admin-layout="queue" data-admin-space={space} data-admin-family={family.list}>
+      {metrics?.kpis.length ? (
+        <details className="client-card mb-4 p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{t(locale, "Indicateurs du hub", "مؤشرات المحور")}</summary>
+          <div className="admin-hub-visual mt-3">
+            <HubKpiStrip kpis={metrics.kpis} label={t(locale, "Indicateurs du hub", "مؤشرات المحور")} />
+          </div>
+        </details>
+      ) : null}
       <section className="admin-two">
         <article className="client-card admin-queue-panel">
           {pills.length ? (
@@ -148,8 +164,8 @@ export function SpaceQueueBoard({
             {includeFixtures ? <input type="hidden" name="fixtures" value="1" /> : null}
             {statuses.length > 0 ? (
               <label>{t(locale, "Statut", "الحالة")}
-                <select name="vue" defaultValue={vue ?? ""}>
-                  <option value="">{t(locale, "Tous", "الكل")}</option>
+                <select name="vue" defaultValue={effectiveVue ?? (space === "franchises" ? "ACTIVE" : "")}>
+                  <option value={space === "franchises" ? "all" : ""}>{t(locale, "Tous", "الكل")}</option>
                   {vue&&!statuses.includes(vue)?<option value={vue}>{pills.find((_,index)=>adminPillCode(space,index)===vue)??vue}</option>:null}
                   {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status, locale)}</option>)}
                 </select>
@@ -166,9 +182,26 @@ export function SpaceQueueBoard({
             <p role="status" className="client-access-note">
               {adminFixturesHiddenLabel(hiddenFixtures, locale)}{" "}
               <Link className="client-text-link" href={fixturesHref}>
-                {t(locale, "Afficher les fixtures", "إظهارها")}
+                {t(locale, "Afficher les données de démo", "إظهار بيانات العرض")}
               </Link>
             </p>
+          ) : null}
+          {visibleRows.some((row) => row.demoFilm) ? (
+            <p role="status" className="client-access-note" data-demo-film="true">
+              <span className="client-status-chip" data-tone="sky">{t(locale, "Film démo", "فيلم العرض")}</span>
+              {" "}
+              {t(locale, "Cette file est alimentée par le scénario démo régional déterministe.", "هذه القائمة تُغذّى بالسيناريو الإقليمي المحدد للعرض.")}
+            </p>
+          ) : null}
+          {space === "messagerie" ? (
+            <nav className="client-tabs" aria-label={t(locale, "Messagerie ou notifications", "مراسلة أو إشعارات")}>
+              <Link href={pillHref("Conversations", 0)} aria-current={!vue || /OPEN|LOCKED/i.test(vue) ? "page" : undefined}>
+                {t(locale, "Messagerie", "المراسلة")}
+              </Link>
+              <Link href={pillHref("Notifications", 3)} aria-current={/UNREAD|PENDING|QUEUED|SENT|DELIVERED|FAILED|DEAD/i.test(vue ?? "") ? "page" : undefined}>
+                {t(locale, "Notifications", "الإشعارات")}
+              </Link>
+            </nav>
           ) : null}
           <p role="status">{truncated ? `${visibleRows.length} / ${filteredRows.length}` : visibleRows.length} {t(locale,"résultats filtrés","نتائج مصفاة")}{truncated ? ` · ${t(locale, "affiche les 25 premiers — affinez les filtres pour réduire la liste", "يعرض أول 25 — ضيّقوا عوامل التصفية لتقليص القائمة")}` : ""}</p>
           {visibleRows.length === 0 ? null : (
@@ -177,6 +210,7 @@ export function SpaceQueueBoard({
                 <thead>
                   <tr>
                     {columns.map((column) => <th key={column}>{column}</th>)}
+                    <th>{t(locale, "Parcours", "المسار")}</th>
                     <th>{t(locale, "Actions", "إجراءات")}</th>
                   </tr>
                 </thead>
@@ -186,7 +220,10 @@ export function SpaceQueueBoard({
                       {columns.map((column, index) => (
                         <td key={`${row.id}-${column}`}>
                           {index === 0 ? (
-                            <Link href={row.href}><strong>{row.title}</strong></Link>
+                            <div className="admin-queue-title-cell">
+                              <Link href={row.href}><strong>{row.title}</strong></Link>
+                              {row.demoFilm ? <span className="client-status-chip" data-tone="sky">{t(locale, "Film démo", "فيلم العرض")}</span> : null}
+                            </div>
                           ) : columnLooksLikeStatus(column) ? (
                             <span className="client-status-chip" data-tone={statusTone(row.cells[index] ?? row.status)}>{localizeStatus(row.cells[index] ?? row.status, locale)}</span>
                           ) : columnLooksLikeProgress(column) ? (
@@ -197,6 +234,18 @@ export function SpaceQueueBoard({
                           ) : (row.cells[index] ?? "—")}
                         </td>
                       ))}
+                      <td>
+                        {row.chain?.length ? (
+                          <nav className="admin-ariadne" aria-label={t(locale, "Fil d’Ariane du dossier", "خيط أريادن للملف")}>
+                            {row.chain.map((link, linkIndex) => (
+                              <span key={`${row.id}-${link.key}`}>
+                                {linkIndex > 0 ? <span aria-hidden> → </span> : null}
+                                <Link href={link.href}>{link.label}</Link>
+                              </span>
+                            ))}
+                          </nav>
+                        ) : "—"}
+                      </td>
                       <td>
                         <RowMenu locale={locale} query={query} space={space} row={row} resourceType={spec.resourceType} />
                       </td>
@@ -210,9 +259,14 @@ export function SpaceQueueBoard({
             <div className="admin-empty-card">
               <h3>{spec.empty(locale)}</h3>
               <p>{spec.lead(locale)}</p>
+              {space === "messagerie" ? (
+                <p className="client-access-note">
+                  {t(locale, "Basculez vers Messagerie ou Notifications, ou réinitialisez les filtres.", "انتقلوا إلى المراسلة أو الإشعارات، أو أعيدوا تعيين عوامل التصفية.")}
+                </p>
+              ) : null}
               <div className="admin-empty-actions">
                 <Link href={resetHref} className="client-ghost-link">{t(locale, "Réinitialiser les filtres", "إعادة تعيين عوامل التصفية")}</Link>
-                {spec.createLabel ? <Cta href={spaceHref(locale, space, query, spec.createView)} tone="primary">{spec.createLabel(locale)}</Cta> : null}
+                {createHref && spec.createLabel ? <Cta href={createHref} tone="primary">{spec.createLabel(locale)}</Cta> : null}
               </div>
             </div>
           ) : null}
@@ -232,7 +286,11 @@ export function SpaceQueueBoard({
                       <strong>{row.title}</strong>
                       <small>{localizeStatus(row.status, locale)}</small>
                     </span>
-                    <Link href={row.href}>{t(locale, "Ouvrir", "فتح")}</Link>
+                    <Link href={decisionHref(locale, space, query, row)}>
+                      {space === "litiges" || space === "documents"
+                        ? t(locale, "Traiter", "معالجة")
+                        : t(locale, "Examiner", "معاينة")}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -240,9 +298,9 @@ export function SpaceQueueBoard({
             <Cta href={resetHref}>{t(locale, "Voir tout", "عرض الكل")}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Cta>
           </article>
           {family.list === "parcours-cycle" && pipeline.length ? (
-            <article className="client-card">
-              <header><h2>{spec.cycleTitle(locale)}</h2></header>
-              <ol className="admin-cycle">
+            <details className="client-card p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{spec.cycleTitle(locale)}</summary>
+              <ol className="admin-cycle mt-3">
                 {pipeline.map((step, index) => (
                   <li key={step.label}>
                     <PipelineGlyph index={index} tone={step.tone} />
@@ -250,7 +308,7 @@ export function SpaceQueueBoard({
                   </li>
                 ))}
               </ol>
-            </article>
+            </details>
           ) : null}
           <article className="admin-note">
             <p>{detailNote(locale, space)}</p>
@@ -258,9 +316,9 @@ export function SpaceQueueBoard({
         </aside>
       </section>
       {family.list === "actor-pipeline" && pipeline.length ? (
-        <article className="client-card">
-          <h2>{spec.cycleTitle(locale)}</h2>
-          <ol className="admin-pipeline" data-count={String(pipeline.length)}>
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{spec.cycleTitle(locale)}</summary>
+          <ol className="admin-pipeline mt-3" data-count={String(pipeline.length)}>
             {pipeline.map((step, index) => (
               <li key={step.label}>
                 <PipelineGlyph index={index} tone={step.tone} />
@@ -269,10 +327,10 @@ export function SpaceQueueBoard({
               </li>
             ))}
           </ol>
-        </article>
+        </details>
       ) : null}
       {children}
-    </main>
+    </div>
   );
 }
 
@@ -280,16 +338,22 @@ function columnLooksLikeStatus(column: string) {
   return statusColumnLooksLikeStatus(column);
 }
 
+function rowActionLabel(locale: Locale, space: AdminSpaceId) {
+  if (space === "litiges" || space === "documents") return t(locale, "Traiter", "معالجة");
+  return t(locale, "Examiner", "معاينة");
+}
+
 function RowMenu({ locale, query, space, row, resourceType }: { locale: Locale; query: string; space: AdminSpaceId; row: SpaceRow; resourceType: string }) {
   const examineHref = decisionHref(locale, space, query, row);
   const sensitive = space !== "demandes" && space !== "matching" && space !== "devis";
+  const allowFreeEdit = !governedMutationSpaces.has(space);
   return (
     <details className="admin-row-menu" suppressHydrationWarning>
       <summary aria-label={t(locale, "Actions", "إجراءات")} suppressHydrationWarning><MoreHorizontal className="size-4" aria-hidden /></summary>
       <div>
         <Link href={row.href}><Eye className="size-3.5" aria-hidden />{t(locale, "Consulter", "عرض")}</Link>
-        <Link href={spaceHref(locale, space, query, row.id, "modifier")}><Pencil className="size-3.5" aria-hidden />{t(locale, "Modifier", "تعديل")}</Link>
-        <Link href={examineHref}><Search className="size-3.5" aria-hidden />{t(locale, "Examiner", "معاينة")}</Link>
+        {allowFreeEdit ? <Link href={spaceHref(locale, space, query, row.id, "modifier")}><Pencil className="size-3.5" aria-hidden />{t(locale, "Modifier", "تعديل")}</Link> : null}
+        <Link href={examineHref}><Search className="size-3.5" aria-hidden />{rowActionLabel(locale, space)}</Link>
         {sensitive ? (
           <>
             <ActorIntentForm locale={locale} organizationId={row.organizationId} resourceId={row.id} resourceType={resourceType} intent="SUSPEND_ENTITY" reason="Suspension demandée depuis la liste d’administration." label={t(locale, "Suspendre", "تعليق")} />
@@ -316,11 +380,20 @@ function decisionHref(locale: Locale, space: AdminSpaceId, query: string, row: S
 }
 
 export function SpaceHeaderActions({ locale, query, spec }: { locale: Locale; query: string; spec: SpaceSpec }) {
+  const createHref = spaceCreateHref(locale, spec, query);
   return (
     <>
       {spec.id === "territoires" ? <Cta href={spaceHref(locale, "gouvernance", query)} tone="soft">{t(locale, "Validations", "المصادقات")}</Cta> : null}
-      {spec.createLabel && spec.createView ? (
-        <Cta href={spaceHref(locale, spec.id, query, spec.createView)} tone="primary"><Plus className="size-4" aria-hidden />{spec.createLabel(locale)}</Cta>
+      {spec.id === "franchises" ? (
+        <>
+          <Cta href={`/${locale}/administration/candidatures-franchise${query}`} tone="soft">{t(locale, "Candidatures", "الترشيحات")}</Cta>
+          <Cta href={spaceHref(locale, "gouvernance", query)} tone="soft">{t(locale, "Gouvernance", "الحوكمة")}</Cta>
+        </>
+      ) : null}
+      {spec.id === "contrats" ? <Cta href={`/${locale}/administration/signatures${query}`} tone="soft">{t(locale, "Signatures", "التوقيعات")}</Cta> : null}
+      {spec.id === "messagerie" ? <Cta href={spaceHref(locale, "messagerie", query, "preferences")} tone="soft">{t(locale, "Préférences", "التفضيلات")}</Cta> : null}
+      {createHref && spec.createLabel ? (
+        <Cta href={createHref} tone="primary"><Plus className="size-4" aria-hidden />{spec.createLabel(locale)}</Cta>
       ) : null}
       {spec.exportable ? (
         <Cta href={`/${locale}/administration/export/${spec.id}${query}`} tone="white" download><Download className="size-4" aria-hidden />{t(locale, "Exporter les résultats filtrés", "تصدير النتائج المصفاة")}</Cta>
@@ -350,8 +423,26 @@ export function SpaceDetailBoard({
   const kpis = spaceDetailCards(locale, space, row);
   const sections = spaceSectionCards(locale, space, row);
   const tabTarget = (index: number) => `detail-onglet-${index + 1}`;
+  const providerOrgId = space === "providers" ? (row.organizationId ?? row.id) : null;
+  const next = spaceNextStep(locale, space, query);
+  const allowFreeEdit = !governedMutationSpaces.has(space);
   return (
-    <main className="client-page" data-admin-layout="detail" data-admin-space={space} data-admin-family={family.detail}>
+    <div className="client-page" data-admin-layout="detail" data-admin-space={space} data-admin-family={family.detail}>
+      {providerOrgId ? (
+        <section className="mb-4 rounded-xl border border-primary/20 bg-primary/5 p-4" aria-label={t(locale, "Prochaine étape prestataire", "الخطوة التالية لمقدم الخدمة")}>
+          <p className="text-sm text-muted-foreground">{t(locale, "Admin décide sur identité, qualification et capacité. Le prestataire dépose les preuves.", "تقرر الإدارة الهوية والتأهيل والقدرة. يودع مقدم الخدمة الأدلة.")}</p>
+          <p className="client-actions mt-2">
+            <Cta href={`/${locale}/administration/providers/${providerOrgId}/identite${query}`} tone="primary">{t(locale, "Revoir l’identité", "مراجعة الهوية")}</Cta>
+            <Cta href={`/${locale}/administration/qualification${query}`} tone="soft">{t(locale, "Qualification", "التأهيل")}</Cta>
+            <Cta href={`/${locale}/administration/capacite${query}`} tone="soft">{t(locale, "Capacité & documents", "القدرة والوثائق")}</Cta>
+          </p>
+        </section>
+      ) : null}
+      {next ? (
+        <p className="mb-4 client-actions">
+          <Cta href={next.href} tone="soft"><ArrowRight className="size-4" aria-hidden />{next.label}</Cta>
+        </p>
+      ) : null}
       <nav className="admin-pills" aria-label={spec.title(locale)}>
         {tabs.map((tab, index) => (
           <a key={`${tab}-${index}`} href={`#${tabTarget(index)}`} aria-current={index === 0 ? "page" : undefined}>{tab}</a>
@@ -363,7 +454,9 @@ export function SpaceDetailBoard({
         <DocumentLayout locale={locale} query={query} space={space} row={row} />
       ) : (
         <>
-          <section id={tabTarget(0)} className="admin-kpi-strip scroll-mt-24" data-count={String(kpis.length)}>
+          <details id={tabTarget(0)} className="client-card scroll-mt-24 p-4">
+            <summary className="min-h-11 cursor-pointer font-semibold">{t(locale, "Indicateurs du dossier", "مؤشرات الملف")}</summary>
+          <section className="admin-kpi-strip mt-4" data-count={String(kpis.length)}>
             {kpis.map((card) => (
               <article key={card.title} className="client-card" data-tone={card.tone}>
                 <header><h2>{card.title}</h2></header>
@@ -372,6 +465,7 @@ export function SpaceDetailBoard({
               </article>
             ))}
           </section>
+          </details>
           <section className="admin-fiche-lower">
             {sections.map((card, index) => (
               <article key={card.title} id={tabTarget(Math.min(index + 1, Math.max(tabs.length - 1, 1)))} className="client-card scroll-mt-24" data-tone={card.tone}>
@@ -383,12 +477,15 @@ export function SpaceDetailBoard({
                 </dl>
               </article>
             ))}
-            {tabs.slice(sections.length + 1).map((tab, index) => (
-              <article key={`extra-${tab}`} id={tabTarget(sections.length + 1 + index)} className="client-card scroll-mt-24">
-                <header className="client-priority-head"><h2>{tab}</h2></header>
+            {tabs.slice(sections.length + 1).length ? (
+              <article id={tabTarget(Math.min(sections.length + 1, Math.max(tabs.length - 1, 1)))} className="client-card scroll-mt-24">
+                <header className="client-priority-head"><h2>{t(locale, "Suite du dossier", "تتمة الملف")}</h2></header>
                 <p>{detailNote(locale, space)}</p>
+                <ul className="mt-2 list-disc ps-5 text-sm text-muted-foreground">
+                  {tabs.slice(sections.length + 1).map((tab) => <li key={tab}>{tab}</li>)}
+                </ul>
               </article>
-            ))}
+            ) : null}
           </section>
         </>
       )}
@@ -396,7 +493,7 @@ export function SpaceDetailBoard({
         <article className="client-card">
           <header><h2>{t(locale, "Actions", "إجراءات")}</h2></header>
           <div className="client-offer-actions">
-            <Cta href={spaceHref(locale, space, query, row.id, "modifier")} tone="soft"><Pencil className="size-4" aria-hidden />{t(locale, "Modifier", "تعديل")}</Cta>
+            {allowFreeEdit ? <Cta href={spaceHref(locale, space, query, row.id, "modifier")} tone="soft"><Pencil className="size-4" aria-hidden />{t(locale, "Modifier", "تعديل")}</Cta> : null}
             <Cta href={decisionHref(locale, space, query, row)} tone="primary"><Eye className="size-4" aria-hidden />{t(locale, "Examiner", "معاينة")}</Cta>
           </div>
         </article>
@@ -404,7 +501,7 @@ export function SpaceDetailBoard({
       </section>
       <p className="admin-note">{detailNote(locale, space)}</p>
       {children}
-    </main>
+    </div>
   );
 }
 
@@ -494,8 +591,10 @@ export async function SpaceDecisionBoard({
   const pipeline = spec.pipeline(locale);
   const decisionContext = family.decision === "dispute" ? await loadDisputeDecisionContext(row.id) : null;
   return (
-    <main className="client-page" data-admin-layout="decision" data-admin-space={space} data-admin-family={family.decision}>
-      <section className="admin-kpi-strip" data-count={String(kpis.length)}>
+    <div className="client-page" data-admin-layout="decision" data-admin-space={space} data-admin-family={family.decision}>
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{t(locale, "Indicateurs du dossier", "مؤشرات الملف")}</summary>
+      <section className="admin-kpi-strip mt-4" data-count={String(kpis.length)}>
         {kpis.map((card) => (
           <article key={card.title} className="client-card" data-tone={card.tone}>
             <header><h2>{card.title}</h2></header>
@@ -507,6 +606,7 @@ export async function SpaceDecisionBoard({
           </article>
         ))}
       </section>
+      </details>
       {family.decision === "dispute" ? (
         <section className="admin-two">
           <article className="client-card">
@@ -518,8 +618,8 @@ export async function SpaceDecisionBoard({
               <strong>{t(locale, "Décision irréversible", "قرار غير قابل للتراجع")}</strong>
               <p>{t(locale, "Une fois soumise et approuvée, la décision est immuable.", "بعد الإرسال والمصادقة يصبح القرار غير قابل للتعديل.")}</p>
             </article>
-            <article className="client-card">
-              <header><h2>{t(locale, "Plan de réaffectation contrôlée", "خطة إعادة التعيين المراقبة")}</h2></header>
+            <details className="client-card p-4">
+              <summary className="min-h-11 cursor-pointer font-semibold">{t(locale, "Plan de réaffectation contrôlée", "خطة إعادة التعيين المراقبة")}</summary>
               <ol className="admin-cycle">
                 {pipeline.map((step, index) => (
                   <li key={step.label}>
@@ -528,7 +628,7 @@ export async function SpaceDecisionBoard({
                   </li>
                 ))}
               </ol>
-            </article>
+            </details>
           </aside>
         </section>
       ) : (
@@ -561,7 +661,7 @@ export async function SpaceDecisionBoard({
           </aside>
         </section>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -625,17 +725,17 @@ export function SpaceWizardBoard({
   const targetId = itemId ?? row?.id;
   if (!targetId) {
     return (
-      <main className="client-page">
+      <div className="client-page">
         <article className="admin-empty-card">
           <h3>{t(locale, "Création non disponible ici", "الإنشاء غير متاح هنا")}</h3>
           <p>{t(locale, "Utilisez la préparation guidée ou ouvrez un dossier existant pour le modifier.", "استخدموا التحضير الموجّه أو افتحوا ملفاً موجوداً لتعديله.")}</p>
           <Cta href={spaceHref(locale, space, query)}>{t(locale, "Retour à la liste", "العودة إلى القائمة")}</Cta>
         </article>
-      </main>
+      </div>
     );
   }
   return (
-    <main className="client-page admin-form-layout" data-admin-layout="wizard" data-admin-space={space}>
+    <div className="client-page admin-form-layout" data-admin-layout="wizard" data-admin-space={space}>
       <section className="client-stack">
         {steps.length ? (
           <ol className="admin-pipeline" data-count={String(steps.length)}>
@@ -687,7 +787,7 @@ export function SpaceWizardBoard({
           <p>{detailNote(locale, space)}</p>
         </article>
       </aside>
-    </main>
+    </div>
   );
 }
 
@@ -706,7 +806,7 @@ export function SpaceCompareBoard({
   const offers = rows.slice(0, 3);
   const columns = dataColumns(spec.columns(locale)).slice(0, 8);
   return (
-    <main className="client-page" data-admin-layout="compare" data-admin-space={space}>
+    <div className="client-page" data-admin-layout="compare" data-admin-space={space}>
       <article className="admin-banner" data-tone="sky">
         <strong>{t(locale, "La décision appartient au client.", "القرار يعود للعميل.")}</strong>
         <p>{t(locale, "Cette comparaison est un support d’aide. Vérifiez l’équivalence des périmètres avant de conclure.", "هذه المقارنة أداة مساعدة. تحقق من تكافؤ النطاقات قبل الحسم.")}</p>
@@ -732,19 +832,9 @@ export function SpaceCompareBoard({
       <div className="client-offer-actions">
         {offers[0] ? <Cta href={offers[0].href}>{t(locale, "Voir le détail", "عرض التفاصيل")}</Cta> : null}
         <Cta href={spaceHref(locale, space, query)}>{t(locale, "Retour à la liste", "العودة إلى القائمة")}</Cta>
-        {offers[0] ? (
-          <SpaceMutationForm
-            locale={locale}
-            query={query}
-            space={space}
-            itemId={offers[0].id}
-            organizationId={offers[0].organizationId}
-            resourceType={spec.resourceType}
-            title={t(locale, "Confirmer le choix", "تأكيد الاختيار")}
-            submitLabel={t(locale, "Confirmer le choix avec récapitulatif", "تأكيد الاختيار مع الملخص")}
-          />
-        ) : null}
+        <Cta href={`/${locale}/client/demandes`} tone="soft">{t(locale, "Ouvrir la comparaison côté Client", "فتح المقارنة لدى العميل")}</Cta>
       </div>
-    </main>
+      <p className="admin-note" role="status">{t(locale, "L’administration compare en lecture seule. Le Client habilité confirme le devis retenu dans son parcours.", "الإدارة تقارن للقراءة فقط. يأكد العميل المخوّل العرض المختار في مساره.")}</p>
+    </div>
   );
 }

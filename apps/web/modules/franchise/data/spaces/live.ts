@@ -122,6 +122,11 @@ export function buildFranchiseSpaceBoard(input: {
   const c = franchiseCopy(input.locale);
   const q = input.query;
   const locale = input.locale;
+  const withItem = (path: string, id: string) => {
+    const params = new URLSearchParams(q.startsWith("?") ? q.slice(1) : q);
+    params.set("itemId", id);
+    return `${path}?${params.toString()}`;
+  };
   const franchise = input.crm?.franchises[0] ?? input.governance?.franchises[0] ?? null;
   const territory = input.crm?.franchises[0]?.territory
     ? (locale === "ar" ? input.crm.franchises[0].territory.nameAr : input.crm.franchises[0].territory.nameFr)
@@ -278,7 +283,7 @@ export function buildFranchiseSpaceBoard(input: {
       evidence:evidenceLabels(item.evidenceRefs),
       next: item.metricCode ?? item.status,
       tone: item.severity === "CRITICAL" ? "peach" as const : item.severity === "WARNING" ? "violet" as const : "sky" as const,
-      href: `/${locale}/franchise/qualite${q}`,
+      href: withItem(`/${locale}/franchise/qualite`, item.id),
     })),
     ...(input.operations?.anomalies ?? []).map((item) => ({
       id: item.id,
@@ -288,7 +293,7 @@ export function buildFranchiseSpaceBoard(input: {
       status: item.status,
       next: item.status,
       tone: item.severity === "CRITICAL" || item.severity === "HIGH" ? "peach" as const : "violet" as const,
-      href: `/${locale}/franchise/qualite/anomalies${q}`,
+      href: withItem(`/${locale}/franchise/qualite/anomalies`, item.id),
     })),
   ];
   const performance = objectives.map((item) => ({
@@ -601,8 +606,8 @@ export function buildFranchiseSpaceBoard(input: {
     treat,
     pipeline:empty.pipeline.map((step,index)=>{const metrics=input.operations?.metrics;const net=metrics?.network;const values=[net?.providers,metrics?.requestCount,metrics?.missionCount,metrics?.qualitySnapshot?`${metrics.qualitySnapshot.scoreBasisPoints/100}%`:null,metrics?.completedMissions];const labels=locale==="ar"?["مزودون مرتبطون بالخدمات","طلبات · كامل التاريخ","مهام · كامل التاريخ","آخر تقييم مؤرخ","مهام مكتملة"]:["Prestataires liés aux services","Demandes · historique complet","Missions · historique complet","Dernière évaluation datée","Missions terminées"];return{...step,title:labels[index]??step.title,detail:values[index]==null?"—":String(values[index]),status:metrics?new Date(metrics.asOf).toLocaleDateString(locale==="ar"?"ar-MA":"fr-MA"):"—"};}),
     attention: [
-      ...quality.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: `/${locale}/franchise/qualite${q}` })),
-      ...followups.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: `/${locale}/franchise/relances${q}` })),
+      ...quality.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: withItem(`/${locale}/franchise/qualite`, item.id) })),
+      ...followups.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: withItem(`/${locale}/franchise/relances`, item.id) })),
     ],
     perimeter: {
       territory,

@@ -48,14 +48,14 @@ export default async function AdminEnterpriseEditPage({
       lead={c.editLead}
     >
       {result.status === "error" || !org ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert variant="destructive">
             <AlertTitle>{result.status === "error" && result.reason === "FORBIDDEN" ? (locale === "ar" ? "رفض الوصول" : "Accès refusé") : (locale === "ar" ? "تعذر التحميل" : "Chargement indisponible")}</AlertTitle>
             <AlertDescription>{result.status === "error" ? result.reason : "UNAVAILABLE"}</AlertDescription>
           </Alert>
-        </main>
+        </div>
       ) : (
-        <main className="client-page">
+        <div className="client-page">
           {identityContext.success&&!identityResponse?.error?<CanonicalOrganizationIdentityPanel locale={locale}data={identityContext.data}requestKey={randomUUID()}/>:<p>{locale === "ar" ? "مراجعة الهوية القانونية غير متاحة بهذه الصلاحيات؛ يلزم مسؤول مركزي ومصادقة ثنائية." : "Révision juridique indisponible avec ces habilitations : un responsable central avec MFA est requis."}</p>}
           <EditOrganizationForm idempotencyKey={randomUUID()}
             locale={locale}
@@ -69,7 +69,7 @@ export default async function AdminEnterpriseEditPage({
             rowVersion={org.row_version}
             updatedAt={org.updated_at}
           />
-        </main>
+        </div>
       )}
     </AdminAppShell>
   );

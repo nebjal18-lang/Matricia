@@ -33,7 +33,7 @@ export default async function ProviderQuotesPage({ params, searchParams }: { par
     ? quoteRowsFromInvitations(result.dashboard.invitations, locale, space.selectedQuery)
     : [];
   return (
-    <ProviderAppShell languagePath={`/${locale}/sous-traitant/devis${boardQuery}`} locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={c.quotesTitle} lead={c.quotesLead} kicker={c.kicker} actions={<ProviderActions href={`/${locale}/sous-traitant/devis/nouveau${space.selectedQuery}`} label={c.createQuote} />}>
+    <ProviderAppShell languagePath={`/${locale}/sous-traitant/devis${boardQuery}`} locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={c.quotesTitle} lead={c.quotesLead} kicker={c.kicker} sceneHero actions={<ProviderActions href={`/${locale}/sous-traitant/devis/nouveau${space.selectedQuery}`} label={c.createQuote} />}>
       {result.status === "success" ? <QuotesBoard locale={locale} query={boardQuery} rows={rows} tab={query.tab} /> : <ProviderReadState locale={locale} state={contextState ?? (result.status === "error" && result.reason === "NO_ORGANIZATION" ? "forbidden" : "unavailable")} retryHref={`/${locale}/sous-traitant/devis${space.selectedQuery}`} unavailableMessage={m.loadError} reason={space.readError ?? (result.status === "error" ? result.reason : undefined)} />}
       {result.status === "success" ? <details id="devis-operation" className="client-ops">
         <summary>{c.opsQuotes}</summary>

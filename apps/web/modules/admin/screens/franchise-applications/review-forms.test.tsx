@@ -21,6 +21,8 @@ const copy: FranchiseApplicationReviewCopy = {
   link: "Lier l’organisation",
   organization: "Organisation du candidat",
   noOrganization: "Pas encore de société",
+  nextStepLinkOrg: "Prochaine étape : lier une organisation",
+  documentsBlocked: "Liez une organisation avant de proposer le mandat",
   bind: "Rattacher ce mandat existant",
   franchise: "Mandat déjà proposé",
   pending: "Enregistrement…",
@@ -128,6 +130,27 @@ describe("FranchiseApplicationReview", () => {
     );
     expect(html).toContain("Demander les pièces");
     expect(html).toContain("Pas encore de société");
+    expect(html).toContain("Prochaine étape : lier une organisation");
     expect(html).not.toContain("Organisation rattachée");
+  });
+
+  it("opens the organization link panel when candidates exist", () => {
+    const html = renderToStaticMarkup(
+      <FranchiseApplicationReview
+        locale="fr"
+        application={{
+          ...base,
+          status: "DOCUMENT_REVIEW",
+          organizationId: null,
+          organizations: [{ id: "22222222-2222-4222-8222-222222222222", name: "Org Démo" }],
+        }}
+        copy={copy}
+        keys={{ propose: "p", approve: "a", resend: "r" }}
+      />,
+    );
+    expect(html).toContain('open=""');
+    expect(html).toContain("Lier l’organisation");
+    expect(html).toContain("Org Démo");
+    expect(html).toContain("Liez une organisation avant de proposer le mandat");
   });
 });

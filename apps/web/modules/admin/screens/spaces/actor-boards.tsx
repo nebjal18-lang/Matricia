@@ -15,8 +15,8 @@ import { actorAccountSubtitle, actorAccountTitle, actorAvatarInitial, actorMembe
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
-import type { SafeComplianceCase } from "@/modules/admin/screens/conformite-clients/actions";
-import { getComplianceMessages } from "@/modules/admin/screens/conformite-clients/messages";
+import type { ComplianceEvidenceType, SafeComplianceCase } from "@/modules/admin/screens/conformite-clients/actions";
+import { getComplianceMessages, type ComplianceMessages } from "@/modules/admin/screens/conformite-clients/messages";
 import { ActorIntentForm } from "@/modules/admin/screens/spaces/actor-forms";
 import { PipelineGlyph } from "./pipeline-step";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -49,6 +49,32 @@ function statusTone(status: string): "mint" | "sky" | "peach" | "violet" {
   if (key === "PENDING" || key === "UNDER_REVIEW" || key === "IN_REVIEW") return "violet";
   if (key === "SUSPENDED" || key === "REJECTED" || key === "INACTIVE") return "peach";
   return "sky";
+}
+
+function isEvidenceType(value: string | null | undefined): value is ComplianceEvidenceType {
+  return value === "REGISTRATION_DOCUMENT" || value === "REPRESENTATIVE_AUTHORITY" || value === "TAX_DOCUMENT";
+}
+
+/** Column « Pièces attendues »: deposited types, else expected set — never a false “not visible” message. */
+function compliancePiecesSummary(item: SafeComplianceCase, messages: ComplianceMessages): string {
+  if (item.evidence.length > 0) {
+    return item.evidence.map((evidence) => messages.evidenceTypes[evidence.type]).join(" · ");
+  }
+  const fromQuestions = [...new Set(item.questions.map((question) => question.expectedDocumentType).filter(isEvidenceType))];
+  if (fromQuestions.length > 0) {
+    return fromQuestions.map((type) => messages.evidenceTypes[type]).join(" · ");
+  }
+  if (item.status === "PROFILE_IN_PROGRESS" || item.status === "DOCUMENTS_REQUIRED") {
+    return messages.piecesAwaitingDeposit;
+  }
+  return messages.noEvidence;
+}
+
+function complianceNextAction(item: SafeComplianceCase, a: ReturnType<typeof actorCopy>): string {
+  if (item.status === "QUESTION_REQUIRED") return a.askComplement;
+  if (item.status === "DOCUMENTS_REQUIRED" || item.status === "PROFILE_IN_PROGRESS") return a.manageDocs;
+  if (item.status === "VERIFIED" || item.status === "REJECTED") return a.done;
+  return a.decision;
 }
 
 export function UsersBoard({
@@ -93,7 +119,7 @@ export function UsersBoard({
     return `/${locale}/administration/utilisateurs?${params.toString()}`;
   };
   return (
-    <main className="client-page">
+    <div className="client-page">
       <section className="admin-two">
         <article className="client-card">
           <header className="client-priority-head">
@@ -140,7 +166,7 @@ export function UsersBoard({
               {adminFixturesHiddenLabel(hiddenFixtureAccounts, locale)}
               {" "}
               <Link className="client-text-link" href={`/${locale}/administration/utilisateurs?fixtures=1${search ? `&q=${encodeURIComponent(search)}` : ""}`}>
-                {locale === "ar" ? "إظهارها" : "Afficher les fixtures"}
+                {locale === "ar" ? "إظهار بيانات العرض" : "Afficher les données de démo"}
               </Link>
             </p>
           ) : null}
@@ -235,8 +261,9 @@ export function UsersBoard({
             </div>
           ) : null}
         </article>
-        <aside className="client-card">
-          <h2><Mail className="size-4" aria-hidden /> {a.pendingInvites}</h2>
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold"><Mail className="size-4" aria-hidden /> {a.pendingInvites}</summary>
+          <div className="mt-4">
           {invites.length === 0 ? (
             <p>{inviteMessages.managedEmpty}</p>
           ) : (
@@ -258,9 +285,12 @@ export function UsersBoard({
             </>
           )}
           <Link href={`/${locale}/invitations`}>{locale==="ar"?"عرض كل الدعوات":"Voir toutes les invitations"}</Link>
-        </aside>
+          </div>
+        </details>
       </section>
-      <section className="admin-three">
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{a.accessControls}</summary>
+      <section className="admin-three mt-4">
         <article className="client-card admin-span-2">
           <h2><Shield className="size-4" aria-hidden /> {a.accessControls}</h2>
           <p>{a.accessControlsLead}</p>
@@ -284,7 +314,8 @@ export function UsersBoard({
           </article>
         ) : null}
       </section>
-    </main>
+      </details>
+    </div>
   );
 }
 
@@ -326,7 +357,7 @@ export function UserFicheBoard({
       : null;
   const base = `/${locale}/administration/utilisateurs/${userId}`;
   return (
-    <main className="client-page">
+    <div className="client-page">
       <section className="admin-two">
         <div className="client-stack">
           <article className="client-card" id="vue">
@@ -383,8 +414,9 @@ export function UserFicheBoard({
               <small>{locale === "ar" ? "حالة الحساب" : "État du compte"} : {accountStatusLabel(primary?.accountStatus ?? primary?.status ?? "UNKNOWN", locale)}</small>
             </div>
           </article>
-          <article className="client-card" id="perimetres">
-            <header><h2>{a.explicitPerimeters}</h2><p>{a.noCrossLead}</p></header>
+          <details className="client-card p-4" id="perimetres">
+            <summary className="min-h-11 cursor-pointer font-semibold">{a.explicitPerimeters}</summary>
+            <p>{a.noCrossLead}</p>
             <div className="admin-perimeter-grid">
               <div>
                 <h3>{a.orgPerimeter}</h3>
@@ -412,7 +444,7 @@ export function UserFicheBoard({
                 ) : null}
               </div>
             </div>
-          </article>
+          </details>
         </div>
         <aside className="client-stack">
           <article className="client-card">
@@ -453,12 +485,12 @@ export function UserFicheBoard({
               ) : null}
             </div>
           </article>
-          <article className="client-card">
-            <h2>{a.relatedInvites}</h2>
+          <details className="client-card p-4">
+            <summary className="min-h-11 cursor-pointer font-semibold">{a.relatedInvites}</summary>
             <Cta href={`/${locale}/invitations${query}`}>{a.openInvites}</Cta>
-          </article>
-          <article className="client-card">
-            <h2>{a.auditHistory}</h2>
+          </details>
+          <details className="client-card p-4">
+            <summary className="min-h-11 cursor-pointer font-semibold">{a.auditHistory}</summary>
             <ul className="admin-history">
               {(fiche?.timeline ?? []).slice(0, 5).map((item) => (
                 <li key={item.ref}><span className="client-history-dot" data-tone="violet" /><span><strong>{item.label}</strong><small dir="ltr">{item.at ? formatDateTimeCasablanca(item.at, locale) : "—"}</small></span></li>
@@ -466,10 +498,10 @@ export function UserFicheBoard({
               {(fiche?.timeline.length ?? 0) === 0 ? <li><span>{c.lastChangeLead}</span></li> : null}
             </ul>
             <Cta href={`/${locale}/administration/operations${query}`}>{a.seeHistory}</Cta>
-          </article>
+          </details>
         </aside>
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -513,7 +545,7 @@ export function ClientsBoard({
     return !search || `${org.display_name} ${org.legal_name}`.toLowerCase().includes(search.toLowerCase());
   });
   const actionItems = [
-    ...cases.filter((item) => item.status !== "VERIFIED" && !isAdminOrgDirectoryFixture(item.organizationName)).slice(0, 2).map((item) => ({ id: item.id, title: actorOrganizationLabel(item.organizationName, locale), detail: complianceLabel(item.status), href: `/${locale}/administration/conformite-clients${query}`, tone: "peach" as const })),
+    ...cases.filter((item) => item.status !== "VERIFIED" && !isAdminOrgDirectoryFixture(item.organizationName)).slice(0, 2).map((item) => ({ id: item.id, title: actorOrganizationLabel(item.organizationName, locale), detail: complianceLabel(item.status), href: `/${locale}/administration/conformite-clients/${item.id}${query}`, tone: "peach" as const })),
     ...directory.filter((org) => org.open_disputes > 0 || org.open_requests > 0).slice(0, 3).map((org) => ({ id: org.id, title: actorOrganizationLabel(org.display_name, locale), detail: org.open_disputes > 0 ? c.lastDispute : c.lastOpenRequest, href: `/${locale}/administration/clients/${org.id}${query}`, tone: "sky" as const })),
   ];
   const journey = [
@@ -525,7 +557,7 @@ export function ClientsBoard({
     { label: c.missions, detail: locale === "ar" ? "التنفيذ والمتابعة" : "Exécution et suivi", tone: "violet" },
   ];
   return (
-    <main className="client-page">
+    <div className="client-page">
       <section className="admin-two">
         <article className="client-card">
           <form
@@ -559,7 +591,7 @@ export function ClientsBoard({
               {adminFixturesHiddenLabel(hiddenFixtures, locale)}
               {" "}
               <Link className="client-text-link" href={`/${locale}/administration/clients?fixtures=1${search ? `&q=${encodeURIComponent(search)}` : ""}`}>
-                {locale === "ar" ? "إظهارها" : "Afficher les fixtures"}
+                {locale === "ar" ? "إظهار بيانات العرض" : "Afficher les données de démo"}
               </Link>
             </p>
           ) : null}
@@ -643,6 +675,8 @@ export function ClientsBoard({
           <Cta href={`/${locale}/administration/clients${query}`}>{a.seeAllClients}</Cta>
         </aside>
       </section>
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{a.clientJourney}</summary>
       <article className="client-card">
         <h2>{a.clientJourney}</h2>
         <ol className="admin-pipeline">
@@ -655,7 +689,8 @@ export function ClientsBoard({
           ))}
         </ol>
       </article>
-    </main>
+      </details>
+    </div>
   );
 }
 
@@ -675,34 +710,44 @@ export function ClientFicheBoard({
   const base = `/${locale}/administration/clients/${org.id}`;
   const compliance = org.client_compliance_snapshot;
   const profile = org.client_legal_profile;
+  const complianceHref = compliance
+    ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}`
+    : `/${locale}/administration/conformite-clients${query}`;
   return (
-    <main className="client-page">
+    <div className="client-page">
       <nav className="client-tabs" aria-label={c.overview}>
         <a href={`${base}${query}`} aria-current="page">{c.overview}</a>
         <a href={`/${locale}/administration/entreprises/${org.id}/modifier${query}`}>{locale === "ar" ? "ملف المؤسسة" : "Profil entreprise"}</a>
-        <a href={`/${locale}/administration/conformite-clients${query}`}>{c.compliance}</a>
+        <a href={complianceHref}>{c.compliance}</a>
         <a href={`/${locale}/administration/parcours${query}`}>{locale === "ar" ? "المسارات" : "Parcours"}</a>
-        <a href={`/${locale}/administration/finance${query}`}>{c.boxes}</a>
+        <a href={`/${locale}/administration/finance/offres?organizationId=${encodeURIComponent(org.id)}`}>{c.boxes}</a>
         <a href={`/${locale}/administration/finance${query}`}>{c.navFinance}</a>
         <a href={`/${locale}/administration/operations${query}`}>{c.audit}</a>
       </nav>
       <section className="admin-fiche-grid">
-        <article className="client-card">
-          <header><h2>{a.onboardingState}</h2></header>
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{a.onboardingState}</summary>
           <ol className="admin-journey">
             {[{ label: locale === "ar" ? "التسجيل" : "Inscription", state: "done" }, { label: locale === "ar" ? "الملف" : "Profil", state: profile ? "done" : compliance ? "current" : "pending" }, { label: c.compliance, state: compliance?.currently_verified ? "done" : compliance ? "current" : "pending" }, { label: locale === "ar" ? "التفعيل" : "Activation", state: org.status === "ACTIVE" && compliance?.currently_verified ? "done" : "pending" }].map((step) => (
               <li key={step.label} data-state={step.state}><i aria-hidden /><span>{step.label}</span></li>
             ))}
           </ol>
           <Cta href={`/${locale}/administration/parcours${query}`}>{a.seeOnboarding}</Cta>
-        </article>
-        <article className="client-card">
+        </details>
+        <article className="client-card" data-tone="violet">
           <header><h2>{a.companyInfo}</h2></header>
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
+            <div><dt>{locale === "ar" ? "الاسم التجاري" : "Nom commercial"}</dt><dd>{org.display_name || "—"}</dd></div>
             <div><dt>{c.legalForm}</dt><dd>{profile?.legal_form ?? "—"}</dd></div>
+            <div><dt>{locale === "ar" ? "تاريخ التأسيس" : "Date de création"}</dt><dd>{profile?.incorporation_date ?? "—"}</dd></div>
             <div><dt>{c.activity}</dt><dd>{profile?.activity ?? "—"}</dd></div>
+            <div><dt>{locale === "ar" ? "القطاع" : "Secteur"}</dt><dd>{profile?.sector ?? "—"}</dd></div>
+            <div><dt>{locale === "ar" ? "مدينة السجل" : "Ville du RC"}</dt><dd>{profile?.registered_city ?? "—"}</dd></div>
             <div><dt>{locale === "ar" ? "البلد" : "Pays"}</dt><dd>{org.country_code}</dd></div>
+            <div><dt>IF</dt><dd dir="ltr">{profile?.if_number ?? "—"}</dd></div>
+            <div><dt>RC</dt><dd dir="ltr">{profile?.rc_number ?? "—"}</dd></div>
+            <div><dt>{locale === "ar" ? "الممثل" : "Représentant"}</dt><dd>{profile?.representative_name ?? "—"}</dd></div>
           </dl>
           <Cta href={`/${locale}/administration/entreprises/${org.id}/modifier${query}`}>{a.seeProfile}</Cta>
         </article>
@@ -713,29 +758,31 @@ export function ClientFicheBoard({
             <div><dt>KYC</dt><dd>{compliance?.status ? (complianceMessages.statuses[compliance.status as keyof typeof complianceMessages.statuses] ?? compliance.status) : "—"}</dd></div>
             <div><dt>{c.documents}</dt><dd>{compliance?.document_count ?? "—"}</dd></div>
           </dl>
-          <Cta href={`/${locale}/administration/conformite-clients${query}`}>{a.seeCompliance}</Cta>
+          <Cta href={complianceHref}>{a.seeCompliance}</Cta>
         </article>
         <article className="client-card">
           <header><h2>{locale === "ar" ? "إجراءات الامتثال المطلوبة" : "Actions de conformité requises"}</h2></header>
           {compliance ? compliance.required_actions.length ? <ul className="client-feed">{compliance.required_actions.map((action)=><li key={action.id}><span>{locale === "ar" ? action.label_ar : action.label_fr}</span></li>)}</ul> : <p>{locale === "ar" ? "لا توجد عوائق أو أسئلة امتثال مفتوحة في هذا الملف." : "Aucune anomalie bloquante ni question de conformité ouverte dans ce dossier."}</p> : <p>{locale === "ar" ? "ملف الامتثال غير متاح." : "Dossier de conformité non disponible."}</p>}
-          <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}` : `/${locale}/administration/conformite-clients${query}`}>{locale === "ar" ? "فتح ملف الامتثال" : "Ouvrir le dossier de conformité"}</Cta>
+          <Cta href={complianceHref}>{locale === "ar" ? "فتح ملف الامتثال" : "Ouvrir le dossier de conformité"}</Cta>
         </article>
-        <article className="client-card">
-          <header><h2>{a.dossierActivity}</h2></header>
+        <details className="client-card p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{a.dossierActivity}</summary>
           <ul className="client-feed">
             {fiche.timeline.slice(0, 4).map((item) => <li key={item.ref}><span><strong>{item.label}</strong><small dir="ltr">{item.at ? formatDateTimeCasablanca(item.at, locale) : "—"}</small></span></li>)}
             {fiche.timeline.length === 0 ? <li><span>{c.lastChangeLead}</span></li> : null}
           </ul>
           <Cta href={`/${locale}/administration/operations${query}`}>{a.seeActivity}</Cta>
-        </article>
+        </details>
       </section>
-      <section className="admin-fiche-lower">
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{locale === "ar" ? "مستندات وطلبات وصناديق" : "Documents, demandes et boxes"}</summary>
+      <section className="admin-fiche-lower mt-4">
         <article className="client-card" id="documents">
           <header><h2>{c.documents}</h2></header>
           <ul className="client-feed">
             <li><span><strong>{c.state}</strong><small>{localizeStatus(org.status, locale)}</small></span></li>
           </ul>
-          <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}${query}` : `/${locale}/administration/conformite-clients${query}`}>{a.manageDocs}</Cta>
+          <Cta href={compliance ? `/${locale}/administration/conformite-clients/${compliance.case_id}/identite${query}` : complianceHref}>{a.manageDocs}</Cta>
         </article>
         <article className="client-card">
           <header><h2>{c.requests}</h2></header>
@@ -745,13 +792,14 @@ export function ClientFicheBoard({
           </ul>
           <Cta href={`/${locale}/administration/parcours${query}`}>{a.seeRequests}</Cta>
         </article>
-        <article className="client-card">
+        <article className="client-card" data-tone="mint">
           <header><h2>{c.boxes}</h2></header>
           <ul className="client-feed">
             <li><span><strong>{c.plan}</strong><small>{fiche.subscriptions[0]?.status ? localizeStatus(fiche.subscriptions[0].status, locale) : "—"}</small></span></li>
             <li><span><strong>{c.nextBill}</strong><small>{fiche.subscriptions[0]?.current_period_end ?? "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "اشتراكات مرئية" : "Abonnements visibles"}</strong><small dir="ltr">{fiche.subscriptions.length}</small></span></li>
           </ul>
-          <Cta href={`/${locale}/administration/finance${query}`}>{a.managePlan}</Cta>
+          <Cta href={`/${locale}/administration/finance/offres?organizationId=${encodeURIComponent(org.id)}`}>{a.managePlan}</Cta>
         </article>
         <article className="client-card">
           <header><h2>{c.audit}</h2></header>
@@ -762,8 +810,9 @@ export function ClientFicheBoard({
           <Cta href={`/${locale}/administration/operations${query}`}>{c.seeAudit}</Cta>
         </article>
       </section>
+      </details>
       <p className="admin-note"><strong>{a.completeDossier}</strong> {a.completeDossierLead}</p>
-    </main>
+    </div>
   );
 }
 
@@ -773,24 +822,31 @@ export function ComplianceBoard({
   cases,
   filter,
   serverCounts,
+  fixtureCount = 0,
+  includeFixtures = false,
 }: {
   locale: Locale;
   query: string;
   cases: SafeComplianceCase[];
   filter?: string;
   serverCounts?: Record<"all"|"check"|"complement"|"review"|"decided", number>;
+  fixtureCount?: number;
+  includeFixtures?: boolean;
 }) {
   const a = actorCopy(locale);
   const c = adminCopy(locale);
   const messages = getComplianceMessages(locale);
+  const showFixtures = includeFixtures;
+  const operationalCases = showFixtures ? cases : cases.filter((item) => !isAdminOrgDirectoryFixture(item.organizationName ?? ""));
+  const hiddenFixtures = Math.max(fixtureCount, cases.length - operationalCases.length);
   const counts = serverCounts ?? {
-    all: cases.length,
-    check: cases.filter((item) => item.status === "DOCUMENTS_REQUIRED").length,
-    complement: cases.filter((item) => item.status === "QUESTION_REQUIRED").length,
-    review: cases.filter((item) => item.status === "UNDER_REVIEW" || item.status === "RESPONSE_RECEIVED").length,
-    decided: cases.filter((item) => item.status === "VERIFIED" || item.status === "REJECTED").length,
+    all: operationalCases.length,
+    check: operationalCases.filter((item) => item.status === "DOCUMENTS_REQUIRED").length,
+    complement: operationalCases.filter((item) => item.status === "QUESTION_REQUIRED").length,
+    review: operationalCases.filter((item) => item.status === "UNDER_REVIEW" || item.status === "RESPONSE_RECEIVED").length,
+    decided: operationalCases.filter((item) => item.status === "VERIFIED" || item.status === "REJECTED").length,
   };
-  const visible = cases.filter((item) => {
+  const visible = operationalCases.filter((item) => {
     if (!filter || filter === "all") return true;
     if (filter === "check") return item.status === "DOCUMENTS_REQUIRED";
     if (filter === "complement") return item.status === "QUESTION_REQUIRED";
@@ -798,6 +854,7 @@ export function ComplianceBoard({
     if (filter === "decided") return item.status === "VERIFIED" || item.status === "REJECTED";
     return true;
   });
+  const fixtureQuery = showFixtures ? "fixtures=1&" : "";
   const pills = [
     { id: "all", label: `${c.all} (${counts.all})` },
     { id: "check", label: `${a.toCheck} (${counts.check})` },
@@ -813,12 +870,21 @@ export function ComplianceBoard({
     { label: a.review, lead: a.reviewLead, tone: "violet" },
     { label: a.decision, lead: a.decisionLead, tone: "mint" },
   ];
-  const treat = cases.filter((item) => item.status !== "VERIFIED" && item.status !== "REJECTED").slice(0, 7);
-  const qs = query ? `${query}&filter=` : "?filter=";
+  const treat = operationalCases.filter((item) => item.status !== "VERIFIED" && item.status !== "REJECTED").slice(0, 7);
+  const qs = query ? `${query}&${fixtureQuery}filter=` : `?${fixtureQuery}filter=`;
+  const fixturesHref = `/${locale}/administration/conformite-clients${query ? `${query}&` : "?"}fixtures=1${filter && filter !== "all" ? `&filter=${filter}` : ""}`;
   return (
-    <main className="client-page">
+    <div className="client-page">
       <section className="admin-two">
         <article className="client-card">
+          {hiddenFixtures > 0 && !showFixtures ? (
+            <p role="status" className="client-access-note">
+              {adminFixturesHiddenLabel(hiddenFixtures, locale)}{" "}
+              <Link className="client-text-link" href={fixturesHref}>
+                {locale === "ar" ? "إظهار بيانات العرض" : "Afficher les données de démo"}
+              </Link>
+            </p>
+          ) : null}
           <nav className="admin-pills" aria-label={a.complianceTitle}>
             {pills.map((pill) => (
               <Link key={pill.id} href={`/${locale}/administration/conformite-clients${qs}${pill.id}`} aria-current={!filter && pill.id === "all" || filter === pill.id ? "page" : undefined}>{pill.label}</Link>
@@ -846,10 +912,10 @@ export function ComplianceBoard({
                           {actorOrganizationLabel(item.organizationName, locale)}
                         </span>
                       </td>
-                      <td>{item.evidence.length > 0 ? item.evidence.map((evidence) => messages.evidenceTypes[evidence.type]).join(" · ") : messages.noEvidence}</td>
+                      <td>{compliancePiecesSummary(item, messages)}</td>
                       <td><span className="client-status-chip" data-tone={statusTone(item.status)}>{messages.statuses[item.status]}</span></td>
                       <td><span className="client-status-chip" data-tone={risk(item) === a.high ? "peach" : risk(item) === a.medium ? "sky" : "mint"}>{risk(item)}</span></td>
-                      <td>{item.status === "QUESTION_REQUIRED" ? a.askComplement : a.decision}</td>
+                      <td>{complianceNextAction(item, a)}</td>
                       <td>
                         <Link href={`/${locale}/administration/conformite-clients/${item.id}${query}`} className="admin-soft-cta">{c.open}</Link>
                       </td>
@@ -866,14 +932,16 @@ export function ComplianceBoard({
             {treat.length === 0 ? <li><span>{messages.empty}</span></li> : treat.map((item) => (
               <li key={item.id}>
                 <span className="client-feed-icon" data-tone="peach"><FileText className="size-4" aria-hidden /></span>
-                <span><strong>{item.organizationName ?? messages.unknownOrganization}</strong><small>{messages.statuses[item.status]}</small></span>
+                <span><strong>{actorOrganizationLabel(item.organizationName, locale)}</strong><small>{messages.statuses[item.status]}</small></span>
                 <Cta href={`/${locale}/administration/conformite-clients/${item.id}${query}`}>{c.open}</Cta>
               </li>
             ))}
           </ul>
         </aside>
       </section>
-      <section className="admin-two">
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{a.complianceJourney}</summary>
+      <section className="admin-two mt-4">
         <article className="client-card">
           <h2>{a.complianceJourney}</h2>
           <ol className="admin-pipeline">
@@ -892,7 +960,8 @@ export function ComplianceBoard({
           <Cta href={`/${locale}/administration/operations${query}`}>{a.seeAudit}</Cta>
         </article>
       </section>
-    </main>
+      </details>
+    </div>
   );
 }
 
@@ -911,7 +980,7 @@ export function ComplianceDecisionBoard({
   const c = adminCopy(locale);
   const messages = getComplianceMessages(locale);
   return (
-    <main className="client-page">
+    <div className="client-page">
       <article className="client-card">
         <div className="admin-user-hero">
           <span className="client-avatar" data-tone="violet">{actorOrganizationLabel(item.organizationName, locale).slice(0, 1)}</span>
@@ -920,7 +989,7 @@ export function ComplianceDecisionBoard({
             <p>{c.kindClient} · {messages.profileVersion} {item.profileVersion ?? messages.noProfile}</p>
           </div>
           <span className="admin-status">{messages.statuses[item.status]}</span>
-          <Link href={`/${locale}/administration/conformite-clients${query}`} className="admin-soft-cta">{a.seeDossier}</Link>
+          <Link href={`/${locale}/administration/conformite-clients/${item.id}/identite${query}`} className="admin-soft-cta">{a.seeDossier}</Link>
         </div>
         <dl className="admin-hero-meta">
           <div><strong>{locale === "ar" ? "أُنشئ" : "Créé le"}</strong>{formatDateTimeCasablanca(item.createdAt, locale)}</div>
@@ -958,7 +1027,7 @@ export function ComplianceDecisionBoard({
                       <td>{evidence.type}</td>
                       <td>{item.updatedAt.slice(0, 10)}</td>
                       <td><span className="client-status-chip" data-tone={evidence.status === "VERIFIED" ? "mint" : "peach"}>{messages.evidenceStatuses[evidence.status]}</span></td>
-                      <td><Link href={`/${locale}/administration/conformite-clients/${item.id}${query}`}>{c.consult}</Link></td>
+                      <td><Link href={`/${locale}/administration/conformite-clients/${item.id}/identite${query}`}>{c.consult}</Link></td>
                     </tr>
                   ))}
                 </tbody>
@@ -996,6 +1065,6 @@ export function ComplianceDecisionBoard({
           </article>
         </aside>
       </section>
-    </main>
+    </div>
   );
 }

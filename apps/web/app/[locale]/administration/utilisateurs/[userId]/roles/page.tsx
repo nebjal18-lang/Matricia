@@ -69,7 +69,7 @@ export default async function AdminUserRolesPage({
       lead={a.editRolesLead}
       kicker={locale === "ar" ? "وصول مضبوط لنظام أكثر أماناً" : "Des accès maîtrisés pour un écosystème plus sûr"}
     >
-      <main className="client-page">
+      <div className="client-page">
         {row.organizationId&&row.organizationName&&row.membershipId?(!contextResult.error&&context.success?<EditUserRolesForm
           locale={locale}
           query={space.selectedQuery}
@@ -81,7 +81,7 @@ export default async function AdminUserRolesPage({
           franchises={!contextResult.error&&context.success?context.data.franchises:[]}
         />:<p role="alert">{locale==="ar"?"تعذر تحميل الأدوار الحالية. حدّث الملف قبل التغيير.":"Les rôles actuels sont indisponibles. Actualisez la fiche avant tout changement."}</p>):<section className="client-card"><h2>{locale==="ar"?"حساب بدون مؤسسة":"Compte sans organisation"}</h2><p>{locale==="ar"?"ليس لهذا الحساب أي عضوية. أدوار المنصة والجلسات مستقلة عن أدوار المؤسسات.":"Ce compte n’a aucune adhésion. Ses rôles plateforme et ses sessions sont gérés séparément."}</p></section>}
         {!accessResult.error&&access.success?<AccountAccessPanel context={access.data}locale={locale}requestKey={randomUUID()}/>:<p role="alert">{locale==="ar"?"تعذر تحميل مراجعة وصول الحساب. يلزم تفويض وتحقق متعدد العوامل.":"La revue des accès du compte est indisponible. Vérifiez vos habilitations et votre MFA."}</p>}
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

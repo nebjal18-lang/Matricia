@@ -40,41 +40,16 @@ export function VolumeNegotiatePanel({
   const canActivate = dashboard.capabilities.can_activate_pool !== false && activatable.length > 0;
 
   return (
-    <div className="mt-8 space-y-6">
-      <section aria-labelledby="volume-agreements">
-        <h2 id="volume-agreements" className="mb-3 text-xl font-semibold">{m.agreements}</h2>
-        {agreements.length === 0 ? <p>{m.empty}</p> : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {agreements.map((item) => (
-              <article key={item.id} className="rounded-xl border bg-card p-4">
-                <div className="flex flex-wrap justify-between gap-2">
-                  <h3 className="font-semibold">{item.agreement_code}</h3>
-                  <Badge>{localizeStatus(item.pool_status ?? item.status, locale)}</Badge>
-                </div>
-                <p className="mt-2 text-sm"><span dir="ltr">{item.sku_code}</span> · {item.payment_model ? paymentModelLabel(item.payment_model, locale) : "—"} · {item.currency ?? "—"}</p>
-                {item.forecast_units ? <p className="text-sm" dir="ltr">{formatExactUnits(item.forecast_units, locale)}</p> : null}
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-      <section aria-labelledby="volume-profit">
-        <h2 id="volume-profit" className="mb-3 text-xl font-semibold">{m.profitability}</h2>
-        {profitability.length === 0 ? <p>{m.empty}</p> : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {profitability.map((item) => (
-              <article key={`${item.agreement_code}-${item.sku_code}`} className="rounded-xl border bg-card p-4 text-sm">
-                <h3 className="font-semibold">{item.agreement_code} · {item.sku_code}</h3>
-                <p>{m.consumedCost}: <span dir="ltr">{formatMinorExact(item.consumed_cost_minor, item.currency, locale)}</span></p>
-                <p>{m.referenceCost}: <span dir="ltr">{formatMinorExact(item.reference_cost_minor, item.currency, locale)}</span></p>
-                <p dir="ltr">{formatExactUnits(item.consumed_units, locale)}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+    <div id="negotiate" className="mt-8 scroll-mt-24 space-y-6">
+      {!ownerOrganizationId ? (
+        <p role="status" className="admin-notice">
+          {locale === "ar"
+            ? "يلزم سياق مؤسسة (?organizationId=) لفتح نماذج التفاوض أدناه."
+            : "Un contexte entreprise (?organizationId=) est requis pour ouvrir les formulaires de négociation ci-dessous."}
+        </p>
+      ) : null}
       {canWrite ? (
-        <form action={draftAction} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+        <form action={draftAction} className="grid gap-3 admin-panel p-4 md:grid-cols-2">
           <h3 className="font-semibold md:col-span-2">{m.negotiate}</h3>
           <p className="text-sm text-muted-foreground md:col-span-2">{m.negotiateHint}</p>
           <input type="hidden" name="locale" value={locale} />
@@ -104,7 +79,7 @@ export function VolumeNegotiatePanel({
         </form>
       ) : null}
       {canActivate ? (
-        <form action={poolAction} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+        <form action={poolAction} className="grid gap-3 admin-panel p-4 md:grid-cols-2">
           <h3 className="font-semibold md:col-span-2">{m.activatePool}</h3>
           <p className="text-sm text-muted-foreground md:col-span-2">{m.activatePoolHint}</p>
           <input type="hidden" name="locale" value={locale} />
@@ -130,6 +105,38 @@ export function VolumeNegotiatePanel({
           {poolState.status === "error" ? <p role="alert" className="text-sm text-destructive md:col-span-2">{m.errors[poolState.reason]}</p> : null}
         </form>
       ) : null}
+      <section aria-labelledby="volume-agreements">
+        <h2 id="volume-agreements" className="mb-3 text-xl font-semibold">{m.agreements}</h2>
+        {agreements.length === 0 ? <p>{m.empty}</p> : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {agreements.map((item) => (
+              <article key={item.id} className="admin-panel p-4">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <h3 className="font-semibold">{item.agreement_code}</h3>
+                  <Badge>{localizeStatus(item.pool_status ?? item.status, locale)}</Badge>
+                </div>
+                <p className="mt-2 text-sm"><span dir="ltr">{item.sku_code}</span> · {item.payment_model ? paymentModelLabel(item.payment_model, locale) : "—"} · {item.currency ?? "—"}</p>
+                {item.forecast_units ? <p className="text-sm" dir="ltr">{formatExactUnits(item.forecast_units, locale)}</p> : null}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+      <section aria-labelledby="volume-profit">
+        <h2 id="volume-profit" className="mb-3 text-xl font-semibold">{m.profitability}</h2>
+        {profitability.length === 0 ? <p>{m.empty}</p> : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {profitability.map((item) => (
+              <article key={`${item.agreement_code}-${item.sku_code}`} className="admin-panel p-4 text-sm">
+                <h3 className="font-semibold">{item.agreement_code} · {item.sku_code}</h3>
+                <p>{m.consumedCost}: <span dir="ltr">{formatMinorExact(item.consumed_cost_minor, item.currency, locale)}</span></p>
+                <p>{m.referenceCost}: <span dir="ltr">{formatMinorExact(item.reference_cost_minor, item.currency, locale)}</span></p>
+                <p dir="ltr">{formatExactUnits(item.consumed_units, locale)}</p>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

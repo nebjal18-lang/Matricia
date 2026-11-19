@@ -90,6 +90,7 @@ export default async function OrganizationPage({ params, searchParams }: { param
       clientActive="company"
       providerActive="company"
       franchiseActive="governance"
+      sceneHero
       actions={<SpaceActions href="#modifier" label={c.editInfo} />}
     >
       <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/organisation/rattachements${space.selectedQuery}`}>{locale==="fr"?"Rejoindre une entreprise et traiter les demandes":"الانضمام إلى مؤسسة ومعالجة الطلبات"}</Link>

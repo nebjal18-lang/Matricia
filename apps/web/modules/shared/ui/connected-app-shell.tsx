@@ -28,6 +28,7 @@ export async function ConnectedAppShell({
   clientActive,
   providerActive,
   franchiseActive,
+  sceneHero = false,
   children,
 }: {
   locale: Locale;
@@ -43,6 +44,7 @@ export async function ConnectedAppShell({
   clientActive?: ClientNavKey;
   providerActive: ProviderNavKey;
   franchiseActive: FranchiseNavKey;
+  sceneHero?: boolean;
   children: ReactNode;
 }): Promise<ReactNode> {
   const returnPath = safeReturnPath(currentPath, locale) ?? `/${locale}/tableau-de-bord`;
@@ -76,6 +78,7 @@ export async function ConnectedAppShell({
     actions,
     alternateHref,
     languagePath: returnPath,
+    sceneHero,
     children: <>{space.directoryUnavailable ? <WorkspaceFailure locale={locale} reason="QUERY_FAILED" returnPath={returnPath} /> : null}{children}</>,
   };
   if (kind === "administration") return <AdminAppShell {...shared} active="home" />;

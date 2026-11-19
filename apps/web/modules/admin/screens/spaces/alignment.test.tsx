@@ -68,5 +68,16 @@ describe("alignement visuel de l’espace admin", () => {
     expect(css).toContain("/admin/scene/pattern-tl.png");
     expect(css).toContain("/admin/scene/pattern-br.png");
   });
+
+  it("le shell admin possède le landmark main unique et les boards n’ajoutent pas de main imbriqué", async () => {
+    const shell = await readFile(new URL("../../../../modules/admin/ui/admin-app-shell.tsx", import.meta.url), "utf8");
+    const boards = await readFile(new URL("../../../../modules/admin/screens/spaces/boards.tsx", import.meta.url), "utf8");
+    const kit = await readFile(new URL("../../../../modules/admin/screens/spaces/queue-kit.tsx", import.meta.url), "utf8");
+    const modulePage = await readFile(new URL("../../../../modules/admin/ui/admin-module-page.tsx", import.meta.url), "utf8");
+    expect(shell).toContain("mainLandmark = true");
+    expect(boards).not.toMatch(/<main\b/);
+    expect(kit).not.toMatch(/<main\b/);
+    expect(modulePage).toContain("useBoard ? undefined : title");
+  });
 });
 

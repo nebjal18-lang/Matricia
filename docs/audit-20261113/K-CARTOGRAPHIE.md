@@ -4,6 +4,8 @@ Sources : navs `*-nav.ts`, shells, App Router ; consolidé depuis [Cartographie 
 
 **Importance :** 4 = critique V1 · 3 = cœur métier · 2 = support · 1 = légal / mineur
 
+Ordonnancement métier en mots simples (invitation → confirmation admin → commerce) : [docs/parcours/ORDONNANCEMENT_TACHES_MOTS_SIMPLES.md](../parcours/ORDONNANCEMENT_TACHES_MOTS_SIMPLES.md).
+
 ## Parcours critique V1 (10 étapes)
 
 | # | Étape | Routes types | Rôles |

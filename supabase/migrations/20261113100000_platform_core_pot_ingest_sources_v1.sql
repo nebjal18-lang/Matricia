@@ -5,8 +5,8 @@ create function public.ingest_platform_core_pot_sources_v1(
  p_financial_journal_id uuid,
  p_credit_revenue_ledger_id bigint default null,
  p_franchise_entry_fee_ledger_id bigint default null,
- p_reason text,
- p_idempotency_key text,
+ p_reason text default '',
+ p_idempotency_key text default '',
  p_correlation_id uuid default extensions.gen_random_uuid()
 )returns jsonb language plpgsql security definer set search_path=pg_catalog,public,private,extensions as $$
 declare

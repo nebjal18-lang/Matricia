@@ -1,3 +1,5 @@
+@import "../../shared/ui/design-system/matricia-ds.css";
+
 .client-workspace {
   --ad-forest: var(--mat-navy);
   --ad-gold: var(--mat-rose-tint);

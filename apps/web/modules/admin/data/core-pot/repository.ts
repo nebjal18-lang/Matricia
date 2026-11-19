@@ -1,9 +1,14 @@
 import { hasPlatformRole, loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
-import { ingestPlatformCorePotSourceOutputSchema, ingestPlatformCorePotSourceSchema, type AdminCorePotResult } from "./model";
+import {
+  ingestPlatformCorePotSourceOutputSchema,
+  ingestPlatformCorePotSourceSchema,
+  type AdminCorePotErrorReason,
+  type AdminCorePotResult,
+} from "./model";
 
 const writeRoles = ["SUPER_ADMIN", "FINANCE_MANAGER"] as const;
 
-function mapError(code?: string): AdminCorePotResult<never>["reason"] {
+function mapError(code?: string): AdminCorePotErrorReason {
   if (code === "42501") return "FORBIDDEN";
   if (code === "22023") return "INVALID_INPUT";
   if (["22000", "23505", "23514", "40001", "55000"].includes(code ?? "")) return "CONFLICT";

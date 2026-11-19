@@ -30,7 +30,7 @@ export async function loadManualCreditConsoleAction(input:{page:number;status:st
   if(access.status==="error"){
     return{status:"error",reason:access.reason==="UNAUTHENTICATED"?"UNAUTHENTICATED":access.reason==="INVALID_RESPONSE"?"INVALID_RESPONSE":"UNAVAILABLE"};
   }
-  if(!hasPlatformRole(access.roles,["SUPER_ADMIN","FINANCE_MANAGER"]))return{status:"error",reason:"FORBIDDEN"};
+  if(!hasPlatformRole(access.roles,["SUPER_ADMIN","MATRICIA_ADMIN","FINANCE_MANAGER"]))return{status:"error",reason:"FORBIDDEN"};
   if(!access.requirementSatisfied)return{status:"error",reason:"MFA_REQUIRED"};
   const response=await access.client.rpc("get_manual_credit_grant_console_v1",{p_page:page,p_status:status});
   if(response.error)return{status:"error",reason:response.error.code==="42501"?"FORBIDDEN":"UNAVAILABLE"};

@@ -63,13 +63,13 @@ describe("admin actor user loading", () => {
 
   it("keeps a missing scoped membership empty and never loads another organization", async () => {
     mocks.rpc.mockResolvedValue({ data: { rows: [row(organizationB)], total: 1 }, error: null });
-    expect(await loadAdminActorUser(userId, organizationA)).toEqual({ status: "success", rows: [], fiche: null, organizations: [] });
+    expect(await loadAdminActorUser(userId, organizationA)).toEqual({ status: "error", reason: "ORG_SCOPE_MISS" });
     expect(mocks.fiche).not.toHaveBeenCalled();
   });
 
   it("distinguishes a genuinely absent user from a failed lookup", async () => {
     mocks.rpc.mockResolvedValue({ data: { rows: [], total: 0 }, error: null });
-    expect(await loadAdminActorUser(userId)).toEqual({ status: "success", rows: [], fiche: null, organizations: [] });
+    expect(await loadAdminActorUser(userId)).toEqual({ status: "error", reason: "NOT_FOUND" });
   });
 
   it.each(["FORBIDDEN", "UNAVAILABLE", "NOT_FOUND"])("preserves %s errors from the selected organization fiche", async (reason) => {

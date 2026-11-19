@@ -81,13 +81,46 @@ describe("BoxesPanel", () => {
     );
     expect(html).toContain("Box Gold");
     expect(html).toContain("Approbation requise avant publication");
-    expect(html).toContain("Créer une version d’avantage");
-    expect(html).toContain("Attributions de crédits sous double contrôle");
-    expect(html).toContain("Crédits du cycle d’abonnement payé");
+    expect(html).toContain("Ajouter un service (avantage)");
+    expect(html).toContain("offre unique");
+    expect(html).toContain("1. Services de l’offre");
+    expect(html).toContain("2. Offre Box multi-services");
+    expect(html).toContain("3. Lien plan ↔ Box");
+    expect(html).toContain("4. Ouvrir le compte crédits de l’entreprise");
+    expect(html).toContain("Composer l’offre : plusieurs services");
+    expect(html).toContain('name="slotsJson"');
+    expect(html).toContain("Service / catégorie");
+    expect(html).toContain("/fr/administration/finance/credits?organizationId=");
+    expect(html).toContain("Attributions de crédits et journal");
+    expect(html).not.toContain("Attributions de crédits sous double contrôle");
+    expect(html).not.toContain("Crédits du cycle d’abonnement payé");
     expect(html).toContain("/fr/administration/avantages/regles");
     expect(html).toContain("/fr/administration/avantages/livraisons");
+    expect(html).toContain('data-state="current"');
+    expect(html).not.toContain("v{item.version}");
     expect(html).not.toContain('value="SUBSCRIPTION_GRANT"');
     expect(html).not.toMatch(/\bTODO\b|\bFIXME\b/);
     expect(html).not.toMatch(/placeholder="/i);
+  });
+
+  it("place l’ouverture du compte crédits après le catalogue, sans attributions", () => {
+    const html = renderToStaticMarkup(
+      <BoxesPanel
+        locale="fr"
+        dashboard={dashboard}
+        m={getCommerceMessages("fr")}
+        auditOrganizationId="77777777-7777-4777-8777-777777777777"
+        keys={{ benefit: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", activateBenefit: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", box: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", activateBox: "dddddddd-dddd-4ddd-8ddd-dddddddddddd", link: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", wallet: "ffffffff-ffff-4fff-8fff-ffffffffffff", credits: "99999999-9999-4999-8999-999999999999" }}
+      />,
+    );
+    const services = html.indexOf("1. Services de l’offre");
+    const offer = html.indexOf("2. Offre Box multi-services");
+    const lien = html.indexOf("3. Lien plan");
+    const wallet = html.indexOf("4. Ouvrir le compte crédits");
+    expect(services).toBeGreaterThan(-1);
+    expect(offer).toBeGreaterThan(services);
+    expect(lien).toBeGreaterThan(offer);
+    expect(wallet).toBeGreaterThan(lien);
+    expect(html.indexOf("Ouvrir le compte crédits client")).toBeGreaterThan(lien);
   });
 });

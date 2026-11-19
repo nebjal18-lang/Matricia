@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isDirectoryOrgFixture } from "@/modules/shared/lib/directory-presentation";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
@@ -157,7 +158,7 @@ export type SafeComplianceCase = {
   questions: ComplianceQuestion[];
 };
 export type ComplianceReviewResult =
-  | { status: "success"; cases: SafeComplianceCase[]; page: number; hasNext: boolean; counts: Record<"all"|"check"|"complement"|"review"|"decided", number> }
+  | { status: "success"; cases: SafeComplianceCase[]; page: number; hasNext: boolean; counts: Record<"all"|"check"|"complement"|"review"|"decided", number>; fixtureCount: number }
   | { status: "error"; reason: "UNAUTHENTICATED" | "MFA_REQUIRED" | "FORBIDDEN" | "UNAVAILABLE" };
 export type ComplianceDecisionState =
   | { status: "idle" }
@@ -193,16 +194,51 @@ function safeOrganizationName(displayName: string | null, legalName: string | nu
   return value?.slice(0, 200) ?? null;
 }
 
-export async function listClientComplianceReviews(options: {page?: number; filter?: string; caseId?: string} = {}): Promise<ComplianceReviewResult> {
+export async function listClientComplianceReviews(options: {page?: number; filter?: string; caseId?: string; includeFixtures?: boolean} = {}): Promise<ComplianceReviewResult> {
   const context = await centralContext();
   if (context.status === "error") return context;
-  const input = z.object({page: z.number().int().min(1).max(100000), filter: z.enum(["all","check","complement","review","decided"]), caseId: z.string().uuid().optional()}).safeParse({page: options.page ?? 1, filter: options.filter ?? "all", caseId: options.caseId});
+  const input = z.object({
+    page: z.number().int().min(1).max(100000),
+    filter: z.enum(["all","check","complement","review","decided"]),
+    caseId: z.string().uuid().optional(),
+    includeFixtures: z.boolean(),
+  }).safeParse({
+    page: options.page ?? 1,
+    filter: options.filter ?? "all",
+    caseId: options.caseId,
+    includeFixtures: options.includeFixtures === true || Boolean(options.caseId),
+  });
   if (!input.success) return {status: "error", reason: "UNAVAILABLE"};
-  const result = await context.supabase.rpc("get_admin_client_compliance_page_v1", {p_page: input.data.page, p_filter: input.data.filter, p_case_id: input.data.caseId ?? null});
-  const page = z.object({cases: z.array(caseRowSchema), page: z.number().int(), has_next: z.boolean(), counts: z.object({all:z.number().int(),check:z.number().int(),complement:z.number().int(),review:z.number().int(),decided:z.number().int()})}).safeParse(result.data);
+  const rpcArgs = {
+    p_page: input.data.page,
+    p_filter: input.data.filter,
+    p_case_id: input.data.caseId ?? null,
+    p_include_fixtures: input.data.includeFixtures,
+  };
+  let result = await context.supabase.rpc("get_admin_client_compliance_page_v1", rpcArgs);
+  // Pre-migration overload (no fixtures flag) still serves pages; UI filters lab orgs defensively.
+  if (result.error) {
+    result = await context.supabase.rpc("get_admin_client_compliance_page_v1", {
+      p_page: rpcArgs.p_page,
+      p_filter: rpcArgs.p_filter,
+      p_case_id: rpcArgs.p_case_id,
+    });
+  }
+  const page = z.object({
+    cases: z.array(caseRowSchema),
+    page: z.number().int(),
+    has_next: z.boolean(),
+    counts: z.object({all:z.number().int(),check:z.number().int(),complement:z.number().int(),review:z.number().int(),decided:z.number().int()}),
+    fixture_count: z.number().int().nonnegative().optional(),
+  }).safeParse(result.data);
   if (result.error || !page.success) return {status: "error", reason: "UNAVAILABLE"};
   const cases = {data: page.data.cases};
-  const pagination = {page: page.data.page, hasNext: page.data.has_next, counts: page.data.counts};
+  const pagination = {
+    page: page.data.page,
+    hasNext: page.data.has_next,
+    counts: page.data.counts,
+    fixtureCount: page.data.fixture_count ?? 0,
+  };
   const caseIds = cases.data.map((item) => item.id);
   if (caseIds.length === 0) return { status: "success", cases: [], ...pagination };
 
@@ -245,10 +281,7 @@ export async function listClientComplianceReviews(options: {page?: number; filte
   const responses = z.array(responseRowSchema).safeParse(responsesResult.data);
   if (!responses.success) return { status: "error", reason: "UNAVAILABLE" };
 
-  return {
-    status: "success",
-    ...pagination,
-    cases: cases.data.map((item) => {
+  const mapped = cases.data.map((item) => {
       const currentProfile = profiles.data.find((profile) =>
         profile.compliance_case_id === item.id && profile.version === item.current_profile_version);
       return {
@@ -294,7 +327,16 @@ export async function listClientComplianceReviews(options: {page?: number; filte
             };
           }),
       };
-    }),
+    });
+  const operational = input.data.includeFixtures
+    ? mapped
+    : mapped.filter((item) => !isDirectoryOrgFixture(item.organizationName ?? ""));
+  const hiddenOnPage = mapped.length - operational.length;
+  return {
+    status: "success",
+    ...pagination,
+    fixtureCount: Math.max(pagination.fixtureCount, hiddenOnPage),
+    cases: operational,
   };
 }
 

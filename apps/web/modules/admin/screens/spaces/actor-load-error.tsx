@@ -35,7 +35,7 @@ export function AdminActorLoadError({ locale, userId, roles = false, reason, spa
   return (
     <AdminAppShell locale={locale} {...space} active="actors" actorCurrent="users"
       alternateHref={`/${alternate}${path}`} title={title}>
-      <main className="client-page">
+      <div className="client-page">
         <section className="client-card" role="alert">
           <h2>{title}</h2>
           <p>{message}</p>
@@ -46,7 +46,7 @@ export function AdminActorLoadError({ locale, userId, roles = false, reason, spa
             </Link>
           </div>
         </section>
-      </main>
+      </div>
     </AdminAppShell>
   );
 }
@@ -66,7 +66,7 @@ export function AdminActorOrganizationPicker({ locale, userId, organizations, sp
   return (
     <AdminAppShell locale={locale} {...space} active="actors" actorCurrent="users"
       alternateHref={`/${alternate}/administration/utilisateurs/${userId}/roles`} title={title}>
-      <main className="client-page">
+      <div className="client-page">
         <section className="client-card" aria-labelledby="actor-organization-choice">
           <h2 id="actor-organization-choice">{title}</h2>
           <p>{message}</p>
@@ -80,7 +80,7 @@ export function AdminActorOrganizationPicker({ locale, userId, organizations, sp
             ))}
           </ul>
         </section>
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

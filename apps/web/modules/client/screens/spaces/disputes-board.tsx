@@ -8,6 +8,7 @@ import type { DisputeDetail, DisputeSummary } from "@/modules/shared/lib/dispute
 import type { DisputeMessages } from "@/modules/client/screens/litiges/messages";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function formatDate(value: string | null, locale: Locale) {
   return value ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(value)) : "—";
@@ -73,7 +74,7 @@ export function DisputesBoard({
             {preferDemo
               ? demo.disputes.map((item, index) => (
                   <li key={item.id}>
-                    <a href="#litige-detail" aria-current={index === 0 ? "true" : undefined}>
+                    <HashAwareLink href="#litige-detail" aria-current={index === 0 ? "true" : undefined}>
                       <span>
                         <strong>{item.title}</strong>
                         <small>{item.project}</small>
@@ -82,7 +83,7 @@ export function DisputesBoard({
                         <span className="client-status-chip" data-tone={item.tone}>{item.status}</span>
                         <small>{item.due}</small>
                       </em>
-                    </a>
+                    </HashAwareLink>
                   </li>
                 ))
               : cases.map((item) => (
@@ -143,11 +144,11 @@ function DemoDisputeDetail({ locale, query }: { locale: Locale; query: string })
           <span className="client-status-chip" data-tone="violet">{demo.disputes[0]?.status ?? detail.stage}</span>
         </header>
         <nav className="client-tabs" aria-label={c.myDisputes}>
-          <a href="#details" aria-current="page">{c.tabDetails}</a>
+          <HashAwareLink href="#details" aria-current="page">{c.tabDetails}</HashAwareLink>
           <Link href={`/${locale}/messagerie${query}`}>{c.tabExchanges}</Link>
           <Link href={docsHref}>{c.tabDocs}</Link>
-          <a href="#mediation">{c.tabMediation}</a>
-          <a href="#history">{c.tabHistory}</a>
+          <HashAwareLink href="#mediation">{c.tabMediation}</HashAwareLink>
+          <HashAwareLink href="#history">{c.tabHistory}</HashAwareLink>
         </nav>
         <section id="details" className="client-dispute-split">
           <div>
@@ -258,11 +259,11 @@ function LiveDisputeDetail({
           <span className="client-status-chip" data-tone={statusTone(selected.status)}>{messages.statuses[selected.status]}</span>
         </header>
         <nav className="client-tabs" aria-label={c.myDisputes}>
-          <a href="#details" aria-current="page">{c.tabDetails}</a>
+          <HashAwareLink href="#details" aria-current="page">{c.tabDetails}</HashAwareLink>
           <Link href={messagesHref}>{c.tabExchanges}</Link>
           <Link href={docsHref}>{c.tabDocs}</Link>
-          <a href="#mediation">{c.tabMediation}</a>
-          <a href="#history">{c.tabHistory}</a>
+          <HashAwareLink href="#mediation">{c.tabMediation}</HashAwareLink>
+          <HashAwareLink href="#history">{c.tabHistory}</HashAwareLink>
         </nav>
         <section id="details">
           <h3>{c.contextReminder}</h3>

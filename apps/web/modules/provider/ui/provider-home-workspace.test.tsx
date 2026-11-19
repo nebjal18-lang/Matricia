@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks=vi.hoisted(()=>({path:"",query:"",space:vi.fn(),roles:vi.fn()}));
-vi.mock("next/navigation",()=>({usePathname:()=>mocks.path,useSearchParams:()=>new URLSearchParams(mocks.query),notFound:()=>{throw Error("NOT_FOUND")},redirect:(href:string)=>{throw Error(`REDIRECT:${href}`)}}));
+vi.mock("next/navigation",()=>({usePathname:()=>mocks.path,useSearchParams:()=>new URLSearchParams(mocks.query),useRouter:()=>({replace:vi.fn(),push:vi.fn(),refresh:vi.fn()}),notFound:()=>{throw Error("NOT_FOUND")},redirect:(href:string)=>{throw Error(`REDIRECT:${href}`)}}));
 vi.mock("@/modules/shared/ui/workspace-account-menu",()=>({WorkspaceAccountMenu:({returnTo}:{returnTo:string})=><div data-account-return={returnTo}/> }));
 vi.mock("@/modules/provider/data/spaces/context",()=>({resolveProviderSpace:mocks.space}));
 vi.mock("@/app/[locale]/organisation/roles/actions",()=>({listOrganizationRoles:mocks.roles}));

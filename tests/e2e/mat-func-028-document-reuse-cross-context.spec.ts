@@ -88,7 +88,8 @@ test("FR links a verified compliance document to another authorized context", as
       const targetSelect = form.locator("select").filter({ hasNot: documentSelect }).first();
       const documentOptions = await documentSelect.locator("option").count();
       const targetOptions = await targetSelect.locator("option").count();
-      test.skip(documentOptions < 2 || targetOptions < 2, "vault must contain a reusable VERIFIED document and at least one link target");
+      expect(documentOptions, "vault must contain a reusable VERIFIED document").toBeGreaterThanOrEqual(2);
+      expect(targetOptions, "vault must expose at least one link target").toBeGreaterThanOrEqual(2);
       await documentSelect.selectOption({ index: 1 });
       await targetSelect.selectOption({ index: 1 });
       await form.locator('[name="purpose"]').fill(copy.fr.purpose);

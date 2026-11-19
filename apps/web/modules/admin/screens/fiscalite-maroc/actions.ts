@@ -1,9 +1,14 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { taxDecisionSchema, taxProposalSchema, taxSimulationSchema, type TaxSimulation } from "@/modules/shared/lib/morocco-tax/model";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+
+function refreshTaxPages(locale: string) {
+  revalidatePath(`/${locale}/administration/fiscalite-maroc`);
+}
 
 export type TaxActionState = { status: "idle" } | { status: "success"; outcome: string; simulation?: TaxSimulation } | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "AAL2_REQUIRED" | "CONFLICT" | "FAILED" };
 const outcomeSchema = z.object({ outcome: z.string().min(3) }).passthrough();
@@ -17,7 +22,7 @@ function contextFromForm(form: FormData) {
 }
 
 
-async function rpc(name: string, args: Record<string, unknown>): Promise<TaxActionState> {
+async function rpc(name: string, args: Record<string, unknown>, locale: string): Promise<TaxActionState> {
   const client = await getSupabaseServerClient();
   const { data } = await client.auth.getUser();
   if (!data.user) return { status: "error", reason: "UNAUTHENTICATED" };
@@ -29,7 +34,9 @@ async function rpc(name: string, args: Record<string, unknown>): Promise<TaxActi
     return { status: "error", reason: "FAILED" };
   }
   const parsed = outcomeSchema.safeParse(result.data);
-  return parsed.success ? { status: "success", outcome: parsed.data.outcome } : { status: "error", reason: "FAILED" };
+  if (!parsed.success) return { status: "error", reason: "FAILED" };
+  refreshTaxPages(locale);
+  return { status: "success", outcome: parsed.data.outcome };
 }
 
 export async function simulateTax(_: TaxActionState, form: FormData): Promise<TaxActionState> {
@@ -48,11 +55,13 @@ export async function simulateTax(_: TaxActionState, form: FormData): Promise<Ta
 export async function proposeTaxRule(_: TaxActionState, form: FormData): Promise<TaxActionState> {
   if (!validLocale(form)) return { status: "error", reason: "VALIDATION" };
   const parsed = taxProposalSchema.safeParse({ context: contextFromForm(form), categoryCode: text(form, "categoryCode"), ruleType: text(form, "ruleType"), rateBasisPoints: text(form, "rateBasisPoints"), priority: text(form, "priority"), legalReference: text(form, "legalReference"), effectiveFrom: text(form, "effectiveFrom"), effectiveTo: text(form, "effectiveTo"), changeReason: text(form, "changeReason"), idempotencyKey: text(form, "idempotencyKey") });
-  return parsed.success ? rpc("propose_morocco_tax_rule", { p_audit_organization_id: parsed.data.context.kind === "ORGANIZATION" ? parsed.data.context.organizationId : null, p_category_code: parsed.data.categoryCode, p_rule_type: parsed.data.ruleType, p_rate_basis_points: parsed.data.rateBasisPoints, p_priority: parsed.data.priority, p_conditions: { source: "ADMIN_UI", requires_accountant_validation: true }, p_legal_reference: parsed.data.legalReference, p_effective_from: parsed.data.effectiveFrom, p_effective_to: parsed.data.effectiveTo || null, p_change_reason: parsed.data.changeReason, p_idempotency_key: parsed.data.idempotencyKey }) : { status: "error", reason: "VALIDATION" };
+  const locale = text(form, "locale");
+  return parsed.success ? rpc("propose_morocco_tax_rule", { p_audit_organization_id: parsed.data.context.kind === "ORGANIZATION" ? parsed.data.context.organizationId : null, p_category_code: parsed.data.categoryCode, p_rule_type: parsed.data.ruleType, p_rate_basis_points: parsed.data.rateBasisPoints, p_priority: parsed.data.priority, p_conditions: { source: "ADMIN_UI", requires_accountant_validation: true }, p_legal_reference: parsed.data.legalReference, p_effective_from: parsed.data.effectiveFrom, p_effective_to: parsed.data.effectiveTo || null, p_change_reason: parsed.data.changeReason, p_idempotency_key: parsed.data.idempotencyKey }, locale) : { status: "error", reason: "VALIDATION" };
 }
 
 export async function decideTaxRule(_: TaxActionState, form: FormData): Promise<TaxActionState> {
   if (!validLocale(form)) return { status: "error", reason: "VALIDATION" };
   const parsed = taxDecisionSchema.safeParse({ context: contextFromForm(form), taxRuleVersionId: text(form, "taxRuleVersionId"), decision: text(form, "decision"), professionalValidationStatus: text(form, "professionalValidationStatus"), validationReference: text(form, "validationReference"), reason: text(form, "reason"), rowVersion: text(form, "rowVersion"), idempotencyKey: text(form, "idempotencyKey") });
-  return parsed.success ? rpc("decide_morocco_tax_rule", { p_audit_organization_id: parsed.data.context.kind === "ORGANIZATION" ? parsed.data.context.organizationId : null, p_tax_rule_version_id: parsed.data.taxRuleVersionId, p_decision: parsed.data.decision, p_professional_validation_status: parsed.data.professionalValidationStatus, p_validation_reference: parsed.data.validationReference, p_reason: parsed.data.reason, p_expected_row_version: parsed.data.rowVersion, p_idempotency_key: parsed.data.idempotencyKey }) : { status: "error", reason: "VALIDATION" };
+  const locale = text(form, "locale");
+  return parsed.success ? rpc("decide_morocco_tax_rule", { p_audit_organization_id: parsed.data.context.kind === "ORGANIZATION" ? parsed.data.context.organizationId : null, p_tax_rule_version_id: parsed.data.taxRuleVersionId, p_decision: parsed.data.decision, p_professional_validation_status: parsed.data.professionalValidationStatus, p_validation_reference: parsed.data.validationReference, p_reason: parsed.data.reason, p_expected_row_version: parsed.data.rowVersion, p_idempotency_key: parsed.data.idempotencyKey }, locale) : { status: "error", reason: "VALIDATION" };
 }

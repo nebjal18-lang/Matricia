@@ -7,6 +7,7 @@ import { callBoxesCommand } from "@/modules/admin/data/boxes/repository";
 import { closeAdminProfitPeriod } from "@/modules/admin/data/pnl/repository";
 import { issueAdminProviderStatement, sweepAdminExceptions } from "@/modules/admin/data/closure/repository";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { applyMarginBps, sumWholesaleCosts } from "@/modules/admin/data/wholesale/margin";
 
 import {planBoxRuleFromChoice} from "./box-approval-model";
 import type {CommerceActionState}from"./commerce-state";
@@ -33,6 +34,8 @@ async function boxed(locale: string, name: string, args: Record<string, unknown>
   const result = await callBoxesCommand(name, args);
   if (result.status === "error") return fail(result.reason);
   revalidatePath(`/${locale}/administration/finance`);
+  revalidatePath(`/${locale}/administration/finance/offres`);
+  revalidatePath(`/${locale}/administration/finance/credits`);
   return { status: "success", outcome: result.value.outcome };
 }
 
@@ -86,19 +89,10 @@ export async function createBoxAction(_: CommerceActionState, form: FormData): P
   const effectiveFrom=preparedEffectiveFrom(form);
   if(!effectiveFrom)return {status:"error",reason:"VALIDATION"};
   const budget=exactMinor(text(form,"creditBudget")),low=exactMinor(text(form,"costLowMinor")),expected=exactMinor(text(form,"costExpectedMinor")),full=exactMinor(text(form,"costFullMinor"));
-  const rollover=boundedInteger(text(form,"rolloverMonths")||"0",0,2147483647),minimum=boundedInteger(text(form,"slotMin")||"0",0,2147483647),maximum=boundedInteger(text(form,"slotMax")||"1",0,2147483647);
-  if(budget===null||low===null||expected===null||full===null||rollover===null||minimum===null||maximum===null||maximum<minimum)return {status:"error",reason:"VALIDATION"};
-  const slotCode = text(form, "slotCode").toUpperCase();
-  const benefitIds = [...new Set(form.getAll("allowedBenefitVersionIds").flatMap((value) => String(value).split(/[\s,]+/u)).filter(Boolean))];
-  const slots = slotCode
-    ? [{
-        slot_code: slotCode,
-        slot_kind: text(form, "slotKind") || "MANDATORY",
-        minimum_selections: minimum,
-        maximum_selections: maximum,
-        allowed_benefit_version_ids: benefitIds,
-      }]
-    : [];
+  const rollover=boundedInteger(text(form,"rolloverMonths")||"0",0,2147483647);
+  if(budget===null||low===null||expected===null||full===null||rollover===null)return {status:"error",reason:"VALIDATION"};
+  const slots = parseBoxSlots(form);
+  if (slots === null) return { status: "error", reason: "VALIDATION" };
   return boxed(locale, "create_box_version", {
     p_audit_organization_id: text(form, "auditOrganizationId"),
     p_code: text(form, "code").toUpperCase(),
@@ -113,6 +107,116 @@ export async function createBoxAction(_: CommerceActionState, form: FormData): P
     p_cost_full_minor: full,
     p_currency: text(form, "currency").toUpperCase(),
     p_effective_from: effectiveFrom,
+    p_slots: slots,
+    p_idempotency_key: text(form, "idempotencyKey"),
+    p_correlation_id: randomUUID(),
+  });
+}
+
+/** Box combo depuis tarifs de gros territoriaux (coût + marge versionnée). */
+export async function createBoxFromWholesaleAction(_: CommerceActionState, form: FormData): Promise<CommerceActionState> {
+  const locale = localeOrFail(form);
+  if (!locale) return { status: "error", reason: "VALIDATION" };
+  const budget = exactMinor(text(form, "creditBudget") || "0");
+  const wholesaleDeclared = exactMinor(text(form, "wholesaleTotalMinor"));
+  const proposedDeclared = exactMinor(text(form, "proposedTotalMinor"));
+  const marginBps = boundedInteger(text(form, "marginBps") || "1500", 1, 10000);
+  const currency = text(form, "currency").toUpperCase();
+  const territory = text(form, "territoryCode").toUpperCase();
+  const code = text(form, "code").toUpperCase();
+  const nameFr = text(form, "nameFr");
+  const nameAr = text(form, "nameAr");
+  if (
+    budget === null
+    || wholesaleDeclared === null
+    || proposedDeclared === null
+    || marginBps === null
+    || !/^[A-Z]{3}$/u.test(currency)
+    || !/^[A-Z][A-Z0-9_-]{0,63}$/u.test(territory)
+    || !/^[A-Z][A-Z0-9_]{2,79}$/u.test(code)
+    || nameFr.length < 2
+    || nameAr.length < 2
+  ) {
+    return { status: "error", reason: "VALIDATION" };
+  }
+
+  let offers: Array<{
+    commitment_id: string;
+    category_code: string;
+    sku_code: string;
+    wholesale_unit_price_minor: string;
+    provider_organization_id: string;
+    service_name_fr: string;
+    service_name_ar: string;
+  }>;
+  try {
+    const parsed = JSON.parse(text(form, "offersJson")) as unknown;
+    if (!Array.isArray(parsed) || parsed.length === 0) return { status: "error", reason: "VALIDATION" };
+    offers = [];
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") return { status: "error", reason: "VALIDATION" };
+      const row = item as Record<string, unknown>;
+      const price = String(row.wholesale_unit_price_minor ?? "");
+      if (!/^\d+$/u.test(price)) return { status: "error", reason: "VALIDATION" };
+      const category = String(row.category_code ?? "").trim().toUpperCase().replace(/[^A-Z0-9_]/g, "_");
+      if (!/^[A-Z][A-Z0-9_]{1,39}$/u.test(category)) return { status: "error", reason: "VALIDATION" };
+      offers.push({
+        commitment_id: String(row.commitment_id ?? ""),
+        category_code: category,
+        sku_code: String(row.sku_code ?? ""),
+        wholesale_unit_price_minor: price,
+        provider_organization_id: String(row.provider_organization_id ?? ""),
+        service_name_fr: String(row.service_name_fr ?? ""),
+        service_name_ar: String(row.service_name_ar ?? ""),
+      });
+    }
+  } catch {
+    return { status: "error", reason: "VALIDATION" };
+  }
+
+  let wholesaleTotal: bigint;
+  let proposedTotal: bigint;
+  try {
+    wholesaleTotal = sumWholesaleCosts(offers.map((offer) => offer.wholesale_unit_price_minor));
+    proposedTotal = applyMarginBps(wholesaleTotal, marginBps);
+  } catch {
+    return { status: "error", reason: "VALIDATION" };
+  }
+  if (wholesaleTotal.toString() !== wholesaleDeclared || proposedTotal.toString() !== proposedDeclared) {
+    return { status: "error", reason: "VALIDATION" };
+  }
+
+  const categorySlots = [...new Set(offers.map((offer) => offer.category_code))];
+  const slots = categorySlots.map((slotCode) => ({
+    slot_code: slotCode,
+    slot_kind: "MANDATORY",
+    minimum_selections: 1,
+    maximum_selections: 1,
+    allowed_benefit_version_ids: [] as string[],
+  }));
+
+  return boxed(locale, "create_box_version", {
+    p_audit_organization_id: text(form, "auditOrganizationId"),
+    p_code: code,
+    p_box_type: "MULTI_LIBRARY",
+    p_name_fr: nameFr,
+    p_name_ar: nameAr,
+    p_credit_budget: budget,
+    p_rollover_months: 0,
+    p_rules_snapshot: {
+      source: "WHOLESALE_TERRITORY_V1",
+      territory_code: territory,
+      subject: emptyToNull(text(form, "subject")),
+      margin_bps: marginBps,
+      wholesale_total_minor: wholesaleTotal.toString(),
+      proposed_total_minor: proposedTotal.toString(),
+      lines: offers,
+    },
+    p_cost_low_minor: wholesaleTotal.toString(),
+    p_cost_expected_minor: proposedTotal.toString(),
+    p_cost_full_minor: proposedTotal.toString(),
+    p_currency: currency,
+    p_effective_from: new Date().toISOString(),
     p_slots: slots,
     p_idempotency_key: text(form, "idempotencyKey"),
     p_correlation_id: randomUUID(),
@@ -272,6 +376,59 @@ function boundedInteger(value:string,minimum:number,maximum:number):number|null{
   const exact=exactMinor(value);
   if(exact===null||BigInt(exact)<BigInt(minimum)||BigInt(exact)>BigInt(maximum))return null;
   return Number(exact);
+}
+
+/** Multi-services Box: slotsJson preferred; legacy single slotCode kept for tests/compat. */
+function parseBoxSlots(form: FormData): Array<{
+  slot_code: string;
+  slot_kind: string;
+  minimum_selections: number;
+  maximum_selections: number;
+  allowed_benefit_version_ids: string[];
+}> | null {
+  const raw = text(form, "slotsJson");
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed) || parsed.length === 0) return null;
+      const slots = [];
+      for (const item of parsed) {
+        if (!item || typeof item !== "object") return null;
+        const row = item as Record<string, unknown>;
+        const code = String(row.slot_code ?? "").trim().toUpperCase();
+        if (!/^[A-Z][A-Z0-9_]{1,39}$/u.test(code)) return null;
+        const minimum = boundedInteger(String(row.minimum_selections ?? "0"), 0, 2147483647);
+        const maximum = boundedInteger(String(row.maximum_selections ?? "1"), 0, 2147483647);
+        if (minimum === null || maximum === null || maximum < minimum) return null;
+        const ids = Array.isArray(row.allowed_benefit_version_ids)
+          ? [...new Set(row.allowed_benefit_version_ids.map((value) => String(value).trim()).filter(Boolean))]
+          : [];
+        slots.push({
+          slot_code: code,
+          slot_kind: String(row.slot_kind ?? "MANDATORY").trim() || "MANDATORY",
+          minimum_selections: minimum,
+          maximum_selections: maximum,
+          allowed_benefit_version_ids: ids,
+        });
+      }
+      return slots;
+    } catch {
+      return null;
+    }
+  }
+  const slotCode = text(form, "slotCode").toUpperCase();
+  if (!slotCode) return [];
+  const minimum = boundedInteger(text(form, "slotMin") || "0", 0, 2147483647);
+  const maximum = boundedInteger(text(form, "slotMax") || "1", 0, 2147483647);
+  if (minimum === null || maximum === null || maximum < minimum) return null;
+  const benefitIds = [...new Set(form.getAll("allowedBenefitVersionIds").flatMap((value) => String(value).split(/[\s,]+/u)).filter(Boolean))];
+  return [{
+    slot_code: slotCode,
+    slot_kind: text(form, "slotKind") || "MANDATORY",
+    minimum_selections: minimum,
+    maximum_selections: maximum,
+    allowed_benefit_version_ids: benefitIds,
+  }];
 }
 
 export async function activateFrameworkPoolAction(_: CommerceActionState, form: FormData): Promise<CommerceActionState> {

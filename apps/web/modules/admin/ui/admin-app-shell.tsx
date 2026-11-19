@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
-import { Bell, Building2, ChevronDown, CircleHelp, Route, Search, Users } from "lucide-react";
+import { Activity, Bell, Building2, Landmark, Route, Search, Settings, Shield, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { adminActorLinks, adminParcoursLinks } from "@/modules/admin/data/spaces/admin-nav";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
-import { buildAdminNav, type AdminNavKey } from "@/modules/admin/ui/admin-nav";
+import { buildAdminFinanceLinks, buildAdminNav, buildAdminPilotLinks, buildAdminSettingsLinks, type AdminNavKey } from "@/modules/admin/ui/admin-nav";
+import { AdminSideGroup } from "@/modules/admin/ui/admin-side-group";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import "@/modules/client/ui/client-experience.css";
 import "@/modules/admin/ui/admin-experience.css";
+import "@/modules/admin/ui/admin-page-standard.css";
 import "@/modules/shared/shell/admin-experience.css";
 
 export type { AdminNavKey };
@@ -29,8 +33,9 @@ export function AdminAppShell({
   actions,
   actorCurrent,
   parcoursCurrent,
+  sceneHero = false,
   children,
-  mainLandmark = false,
+  mainLandmark = true,
 }: {
   locale: Locale;
   selectedQuery: string;
@@ -47,7 +52,10 @@ export function AdminAppShell({
   actions?: ReactNode;
   actorCurrent?: string;
   parcoursCurrent?: string;
+  /** Photo hero mast — actor identity fiches only. */
+  sceneHero?: boolean;
   children: ReactNode;
+  /** Shell owns the single page `<main>` by default. Pass false only for rare embed cases. */
   mainLandmark?: boolean;
 }): ReactNode {
   const c = adminCopy(locale);
@@ -56,6 +64,9 @@ export function AdminAppShell({
   const p = `/${locale}`;
   const actors = adminActorLinks(locale, q);
   const parcours = adminParcoursLinks(locale, q);
+  const pilot = buildAdminPilotLinks(locale, q);
+  const settings = buildAdminSettingsLinks(locale, q);
+  const finance = buildAdminFinanceLinks(locale, q);
   const nav = buildAdminNav(locale, q);
   const Frame = mainLandmark ? "main" : "div";
 
@@ -79,34 +90,47 @@ export function AdminAppShell({
             const Icon = item.icon;
             if (item.key === "actors") {
               return (
-                <details key={item.key} className="admin-side-group" open={active === "actors"} suppressHydrationWarning>
-                  <summary data-active={active === "actors" ? "true" : undefined} suppressHydrationWarning>
-                    <Users aria-hidden className="size-4" />
-                    {item.label}
-                    <ChevronDown aria-hidden className="size-3.5 admin-side-chevron" />
-                  </summary>
-                  <div className="admin-side-sub">
-                    {actors.map((link) => (
-                      <Link key={link.id} href={link.href} data-current={actorCurrent === link.id ? "true" : undefined}>{link.label}</Link>
-                    ))}
-                  </div>
-                </details>
+                <AdminSideGroup key={item.key} label={item.label} active={active === "actors"} icon={<Users aria-hidden className="size-4" />}>
+                  {actors.map((link) => (
+                    <Link key={link.id} href={link.href} data-current={actorCurrent === link.id ? "true" : undefined}>{link.label}</Link>
+                  ))}
+                </AdminSideGroup>
               );
             }
             if (item.key === "parcours") {
               return (
-                <details key={item.key} className="admin-side-group" open={active === "parcours"} suppressHydrationWarning>
-                  <summary data-active={active === "parcours" ? "true" : undefined} suppressHydrationWarning>
-                    <Route aria-hidden className="size-4" />
-                    {item.label}
-                    <ChevronDown aria-hidden className="size-3.5 admin-side-chevron" />
-                  </summary>
-                  <div className="admin-side-sub">
-                    {parcours.map((link) => (
-                      <Link key={link.id} href={link.href} data-current={parcoursCurrent === link.id ? "true" : undefined}>{link.label}</Link>
-                    ))}
-                  </div>
-                </details>
+                <AdminSideGroup key={item.key} label={item.label} active={active === "parcours"} icon={<Route aria-hidden className="size-4" />}>
+                  {parcours.map((link) => (
+                    <Link key={link.id} href={link.href} data-current={parcoursCurrent === link.id ? "true" : undefined}>{link.label}</Link>
+                  ))}
+                </AdminSideGroup>
+              );
+            }
+            if (item.key === "finance") {
+              return (
+                <AdminSideGroup key={item.key} label={item.label} active={active === "finance"} icon={<Landmark aria-hidden className="size-4" />}>
+                  {finance.map((link) => (
+                    <Link key={link.id} href={link.href}>{link.label}</Link>
+                  ))}
+                </AdminSideGroup>
+              );
+            }
+            if (item.key === "pilot") {
+              return (
+                <AdminSideGroup key={item.key} label={item.label} active={active === "pilot"} icon={<Shield aria-hidden className="size-4" />}>
+                  {pilot.map((link) => (
+                    <Link key={link.id} href={link.href}>{link.label}</Link>
+                  ))}
+                </AdminSideGroup>
+              );
+            }
+            if (item.key === "settings") {
+              return (
+                <AdminSideGroup key={item.key} label={item.label} active={active === "settings"} icon={<Settings aria-hidden className="size-4" />}>
+                  {settings.map((link) => (
+                    <Link key={link.id} href={link.href}>{link.label}</Link>
+                  ))}
+                </AdminSideGroup>
               );
             }
             return (
@@ -138,7 +162,7 @@ export function AdminAppShell({
             <span data-active={locale === "ar" ? "true" : undefined}>{c.langAr}</span>
           </Link>
           <Link href={`${p}/notifications${q}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}><Bell className="size-4" /></Link>
-          <Link href={`${p}/administration/operations${q}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشراف على العمليات" : "Supervision des opérations"} title={locale === "ar" ? "الإشراف على العمليات" : "Supervision des opérations"}><CircleHelp className="size-4" /></Link>
+          <Link href={`${p}/administration/operations${q}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشراف على العمليات" : "Supervision des opérations"} title={locale === "ar" ? "الإشراف على العمليات" : "Supervision des opérations"}><Activity className="size-4" /></Link>
           <WorkspaceAccountMenu
             locale={locale}
             userEmail={userEmail}
@@ -150,7 +174,18 @@ export function AdminAppShell({
         </div>
         {new URL(alternateHref, "https://matricia.invalid").searchParams.get("navigation") === "role-fallback" ? <p role="status" className="m-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">{locale === "ar" ? "الصفحة المطلوبة غير متاحة بصلاحياتكم. تم فتح مساحتكم المسموح بها." : "La page demandée ne correspond pas à vos habilitations. Votre espace autorisé a été ouvert."}</p> : null}
         {crumb ? <div className="admin-crumb">{crumb}</div> : null}
-        {title ? (
+        {title && sceneHero ? (
+          <div className="admin-scene-mast">
+            <SpaceSceneHero
+              sceneSrc="/scenes/arch-city.png"
+              title={title}
+              meta={lead}
+              badge={kicker ? <span className="mat-status" data-tone="sky">{kicker}</span> : undefined}
+              actions={actions}
+              priority
+            />
+          </div>
+        ) : title ? (
           <header className="client-mast">
             <div>
             <h1>{title}</h1>
@@ -162,7 +197,8 @@ export function AdminAppShell({
             </div>
           </header>
         ) : null}
-        {children}
+        <WorkspaceHashScroll />
+        <div className="admin-page-standard">{children}</div>
       </Frame>
     </div>
   );
@@ -195,11 +231,11 @@ export function AdminCrumb({
     );
   }
   return (
-    <nav className="client-crumb" aria-label={c.crumbOrgs}>
+    <nav className="client-crumb" aria-label={c.navActors}>
       <Link href={`/${locale}/administration/command-center${query}`}>{c.crumbAdmin}</Link>
       <span aria-hidden>/</span>
-      <Link href={`/${locale}/administration/entreprises${query}`}>{c.crumbOrgs}</Link>
-      {organizationName ? <><span aria-hidden>/</span><span>{organizationName}</span></> : null}
+      <Link href={`/${locale}/administration/acteurs${query}`}>{c.navActors}</Link>
+      {organizationName ? <><span aria-hidden>/</span><Link href={`/${locale}/administration/entreprises${query}`}>{organizationName}</Link></> : <><span aria-hidden>/</span><Link href={`/${locale}/administration/entreprises${query}`}>{c.crumbOrgs}</Link></>}
       {current ? <><span aria-hidden>/</span><span>{current}</span></> : null}
     </nav>
   );

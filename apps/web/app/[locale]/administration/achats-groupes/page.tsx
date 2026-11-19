@@ -11,6 +11,7 @@ import { VolumeDemandPanel } from "@/modules/admin/screens/achats-groupes/volume
 import { VolumeNegotiatePanel } from "@/modules/admin/screens/achats-groupes/volume-negotiate-panel";
 import { getMessages } from "@/modules/admin/screens/achats-groupes/messages";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminOffFilmGate } from "@/modules/admin/ui/admin-off-film-gate";
 
 export default async function Page({
   params,
@@ -26,7 +27,8 @@ export default async function Page({
   const providerOptions = providers.status === "success" ? providers.dashboard.providers.map((item) => ({ id: item.organizationId, name: item.organizationName })) : [];
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/achats-groupes` }));
   return (
-    <AdminModulePage locale={locale} active="parcours" parcoursCurrent="recurring" path="achats-groupes" title={m.title} lead={m.description}>
+    <AdminModulePage locale={locale} active="finance" path="achats-groupes" title={m.title} lead={m.description} hubGroup="finance" hubMode="strip">
+      <AdminOffFilmGate locale={locale} role={locale === "ar" ? "مشتريات مجمّعة وقدرات الحجم" : "Achats groupés et capacités volume"} />
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "FORBIDDEN" ? m.forbidden : m.unavailable}</AlertTitle>
