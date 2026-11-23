@@ -21,6 +21,7 @@
     "test:e2e": "playwright test",
     "test:e2e:local-spaces": "node scripts/run-local-spaces-e2e.mjs",
     "test:application": "node scripts/run-application-validation.mjs",
+    "test:finance:browser": "node --test tests/remediation/finance-reconciliation-browser.test.mjs",
     "catalog:validate": "node --experimental-strip-types scripts/validate-catalog.ts",
     "spec:validate": "node --experimental-strip-types scripts/validate-spec.ts",
     "context:pack": "node --experimental-strip-types scripts/context-pack.ts",

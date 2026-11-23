@@ -96,8 +96,12 @@ function ReconcileForm({
 }) {
   const prefix = useId();
   const [state, action, pending] = useActionState(reconcilePaymentAction, idle);
-  const payment = payments.find((item) => item.id === selectedPaymentId) ?? payments[0];
-  const invoice = invoices.find((item) => item.id === selectedInvoiceId) ?? invoices[0];
+  const initialInvoice = invoices.find((item) => item.id === selectedInvoiceId);
+  const [paymentId, setPaymentId] = useState(selectedPaymentId ?? payments.find((item) => initialInvoice && item.organization_id === initialInvoice.organization_id && item.currency === initialInvoice.currency)?.id ?? payments[0]?.id);
+  const [invoiceId, setInvoiceId] = useState(selectedInvoiceId);
+  const payment = payments.find((item) => item.id === paymentId) ?? payments[0];
+  const compatibleInvoices = invoices.filter((item) => item.organization_id === payment?.organization_id && item.currency === payment.currency);
+  const invoice = compatibleInvoices.find((item) => item.id === invoiceId) ?? compatibleInvoices[0];
   const suggested =
     payment && invoice
       ? BigInt(payment.unallocated_minor) < BigInt(invoice.outstanding_minor)
@@ -121,8 +125,8 @@ function ReconcileForm({
           name="paymentId"
           required
           className={control}
-          defaultValue={selectedPaymentId ?? payment?.id}
-          key={`payment:${selectedPaymentId ?? payment?.id}`}
+          value={payment?.id ?? ""}
+          onChange={(event) => setPaymentId(event.target.value)}
         >
           {payments.map((item) => (
             <option key={item.id} value={item.id}>
@@ -143,10 +147,11 @@ function ReconcileForm({
           name="invoiceId"
           required
           className={control}
-          defaultValue={selectedInvoiceId ?? invoice?.id}
-          key={`invoice:${selectedInvoiceId ?? invoice?.id}`}
+          value={invoice?.id ?? ""}
+          onChange={(event) => setInvoiceId(event.target.value)}
         >
-          {invoices.map((item) => (
+          {!compatibleInvoices.length ? <option value="">{m.empty}</option> : null}
+          {compatibleInvoices.map((item) => (
             <option key={item.id} value={item.id}>
               {item.organization_name} · {item.invoice_number} · {formatMinor(item.outstanding_minor, item.currency, locale)}
             </option>
@@ -164,14 +169,14 @@ function ReconcileForm({
           className="min-h-11"
           dir="ltr"
           defaultValue={suggested ? String(suggested) : undefined}
-          key={`amount:${selectedPaymentId ?? ""}:${selectedInvoiceId ?? ""}:${suggested}`}
+          key={`amount:${payment?.id ?? ""}:${invoice?.id ?? ""}:${suggested}`}
         />
       </div>
       <label className="flex min-h-11 items-start gap-3 rounded-md border border-[var(--client-line)] p-3 text-sm">
-        <input type="checkbox" name="confirmed" value="yes" required className="mt-0.5 size-5 accent-primary" />
+        <input key={`confirm:${payment?.id}:${invoice?.id}`} type="checkbox" name="confirmed" value="yes" required className="mt-0.5 size-5 accent-primary" />
         <span>{m.confirm}</span>
       </label>
-      <button type="submit" disabled={pending} className="admin-primary-cta min-h-11 w-full">
+      <button type="submit" disabled={pending || !payment || !invoice} className="admin-primary-cta min-h-11 w-full">
         {pending ? m.reconciling : m.reconcile}
       </button>
       <ActionStatus state={state} m={m} />
@@ -380,6 +385,7 @@ export function FinancePanel({
               </div>
               {selected.kind === "payment" || selected.kind === "invoice" ? (
                 <ReconcileForm
+                  key={selected.key}
                   locale={locale}
                   m={m}
                   identity={identity}

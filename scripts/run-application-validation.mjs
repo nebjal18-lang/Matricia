@@ -50,7 +50,7 @@ await save();
 for (const [name, args] of [
   ['lint', ['lint']], ['typecheck', ['typecheck']],
   ['unit', ['-r', '--no-bail', 'test']], ['integration', ['test:integration']],
-  ['tooling', ['test:tooling']], ['phase00', ['verify:phase00']],
+  ['tooling', ['test:tooling']], ['financeComponentBrowser', ['test:finance:browser']], ['phase00', ['verify:phase00']],
   ['placeholders', ['no-placeholders']], ['releaseStructure', ['release:structure']],
 ]) await run(name, args);
 await run('publicE2E', ['exec', 'playwright', 'test',

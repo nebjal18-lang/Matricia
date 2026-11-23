@@ -353,7 +353,7 @@ select is((select count(*)from public.provider_invoices where provider_organizat
 -- Historical immutable period fixture models an elapsed window, with the exact
 -- native snapshots generated above. No clock or trigger is altered.
 insert into public.provider_billing_periods_v1(id,policy_id,provider_organization_id,currency,period_end,generated_at,dispute_until)select 'f347c000-0000-4000-8000-000000000001',(v#>>'{}')::uuid,'fd110000-0000-4000-8000-000000000002','MAD',(date_trunc('month',current_date)::date-interval'3 months')::date-1,clock_timestamp()-interval'10 days',clock_timestamp()-interval'7 days'from monthly347 where k='closing-policy';
-insert into public.provider_pre_statement_lines_v1(period_id,payable_event_id,source_snapshot)select 'f347c000-0000-4000-8000-000000000001',pl.payable_event_id,pl.source_snapshot from public.provider_pre_statement_lines_v1 pl join public.provider_billing_periods_v1 p on p.id=pl.period_id where p.provider_organization_id='fd110000-0000-4000-8000-000000000002'and p.id<>'f347c000-0000-4000-8000-000000000001';
+insert into public.provider_pre_statement_lines_v1(period_id,payable_event_id,source_snapshot)select 'f347c000-0000-4000-8000-000000000001',pl.payable_event_id,pl.source_snapshot from public.provider_pre_statement_lines_v1 pl join public.provider_billing_periods_v1 p on p.id=pl.period_id where p.provider_organization_id='fd110000-0000-4000-8000-000000000002'and p.id<>'f347c000-0000-4000-8000-000000000001' and pl.payable_event_id<>(select(v->>'payable_event_id')::uuid from monthly347 where k='payable-3');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
 select public.dispute_provider_billing_line_v1((select id from public.provider_billing_periods_v1 where provider_organization_id='fd110000-0000-4000-8000-000000000002'and id<>'f347c000-0000-4000-8000-000000000001'),(select(v->>'payable_event_id')::uuid from monthly347 where k='payable-2'),'TEST ONLY line-specific commission dispute');
 reset role;
@@ -367,16 +367,19 @@ select public.resolve_provider_billing_line_v1(id,false,'Same persisted resoluti
 select throws_ok($$select public.resolve_provider_billing_line_v1(id,true,'Contradictory immutable resolution')from public.provider_billing_line_disputes_v1 where payable_event_id=(select(v->>'payable_event_id')::uuid from monthly347 where k='payable-2')$$,'22000','DECISION_ALREADY_RECORDED','opposite line decision cannot report a false success');
 select is((select count(*)from public.audit_events where action='provider.billing.dispute.resolved'),1::bigint,'resolution replay and conflict create no false additional audit');
 reset role;
+-- Explicit second elapsed period; invoices are still emitted by native closing.
+insert into public.provider_billing_periods_v1(id,policy_id,provider_organization_id,currency,period_end,generated_at,dispute_until)select 'f347c000-0000-4000-8000-000000000002',(v#>>'{}')::uuid,'fd110000-0000-4000-8000-000000000002','MAD',(date_trunc('month',current_date)::date-interval'2 months')::date-1,clock_timestamp()-interval'10 days',clock_timestamp()-interval'7 days'from monthly347 where k='closing-policy';
+insert into public.provider_pre_statement_lines_v1(period_id,payable_event_id,source_snapshot)select 'f347c000-0000-4000-8000-000000000002',pl.payable_event_id,pl.source_snapshot from public.provider_pre_statement_lines_v1 pl join public.provider_billing_periods_v1 p on p.id=pl.period_id where p.provider_organization_id='fd110000-0000-4000-8000-000000000002'and p.id<>'f347c000-0000-4000-8000-000000000001' and p.id<>'f347c000-0000-4000-8000-000000000002' and pl.payable_event_id=(select(v->>'payable_event_id')::uuid from monthly347 where k='payable-3');
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
 select public.run_provider_billing_scheduler_v1(100);
 select public.run_provider_billing_scheduler_v1(100);
 reset role;
 
-select is((select count(*)from public.provider_invoices where provider_organization_id='fd110000-0000-4000-8000-000000000002'),1::bigint,'elapsed clean lines produce exactly one invoice on repeated scheduler calls');
+select is((select count(*)from public.provider_invoices where provider_organization_id='fd110000-0000-4000-8000-000000000002'),2::bigint,'elapsed clean lines produce exactly two invoices on repeated scheduler calls');
 select is((select count(*)from public.provider_statement_lines l join public.provider_statements s on s.id=l.statement_id where s.provider_organization_id='fd110000-0000-4000-8000-000000000002'),2::bigint,'contested line is carried while two clean lines close');
 select ok(not exists(select 1 from public.provider_statement_lines where payable_event_id=(select(v->>'payable_event_id')::uuid from monthly347 where k='payable-2')),'line-specific dispute never enters an issued statement');
 select ok((select bool_and(due_on=issued_on+7)from public.provider_invoices where provider_organization_id='fd110000-0000-4000-8000-000000000002'),'approved standard payment deadline is seven calendar days');
-select is((select count(*)from public.provider_billing_source_policy_bindings where provider_organization_id='fd110000-0000-4000-8000-000000000002'),2::bigint,'official statement and invoice each retain their frozen approved issuer binding');
+select is((select count(*)from public.provider_billing_source_policy_bindings where provider_organization_id='fd110000-0000-4000-8000-000000000002'),4::bigint,'both statements and invoices retain frozen approved issuer bindings');
 select ok((select sum(case direction when'DEBIT'then amount_minor else-amount_minor end)=0 from public.financial_entries where organization_id='fd110000-0000-4000-8000-000000000002'),'automated invoices remain exactly double-entry balanced');
 
 -- Continue from the invoice actually issued by the scheduler, not an invoice
@@ -384,7 +387,9 @@ select ok((select sum(case direction when'DEBIT'then amount_minor else-amount_mi
 create temporary table close360(k text primary key,v jsonb);
 grant select,insert on close360 to authenticated,service_role;
 insert into close360 values('business-day',to_jsonb(private.provider_finance_civil_date_v1(clock_timestamp())));
-insert into close360 select'invoice-before',to_jsonb(i)from public.provider_invoices i where i.provider_organization_id='fd110000-0000-4000-8000-000000000002';
+insert into close360 select'invoice-before',to_jsonb(i)from public.provider_invoices i where i.provider_organization_id='fd110000-0000-4000-8000-000000000002' order by i.id limit 1;
+insert into close360 select'invoice-second',to_jsonb(i)from public.provider_invoices i where i.provider_organization_id='fd110000-0000-4000-8000-000000000002'and i.id<>(select(v->>'id')::uuid from close360 where k='invoice-before');
+insert into close360 select'invoice-total',to_jsonb(sum((v->>'total_minor')::bigint))from close360 where k in('invoice-before','invoice-second');
 select ok((select (v->>'total_minor')::bigint>1 from close360 where k='invoice-before'),'native closing created a real divisible invoice');
 select ok(not has_function_privilege('authenticated','private.provider_finance_civil_date_v1(timestamptz)','EXECUTE'),'private calendar helper is not exposed to runtime');
 select ok(not has_function_privilege('authenticated','private.provider_invoice_overdue_minor_v1(uuid,date)','EXECUTE'),'private amount calculator remains private');
@@ -432,7 +437,7 @@ select set_config('request.jwt.claim.sub','',true);select set_config('request.jw
 select public.record_provider_payment_proof_scan_result((v->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('6',64),'TEST360-scan')from close360 where k='payment-upload';
 reset role;
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
-insert into close360 values('payment-declaration',public.record_provider_payment('fd110000-0000-4000-8000-000000000002','TEST360-PAYMENT',(select(v#>>'{}')::date from close360 where k='business-day'),'BANK_TRANSFER','MAD',(select(v->>'total_minor')::bigint from close360 where k='invoice-before'),repeat('6',64),'f360b000-0000-4000-8000-000000000001','f347b000-0000-4000-8000-000000000001','TEST360-payment'));
+insert into close360 values('payment-declaration',public.record_provider_payment('fd110000-0000-4000-8000-000000000002','TEST360-PAYMENT',(select(v#>>'{}')::date from close360 where k='business-day'),'BANK_TRANSFER','MAD',1,repeat('6',64),'f360b000-0000-4000-8000-000000000001','f347b000-0000-4000-8000-000000000001','TEST360-payment'));
 select is((select count(*)from public.provider_payments where provider_organization_id='fd110000-0000-4000-8000-000000000002'),0::bigint,'a scanned declaration is not yet a payment');
 select throws_ok($$select public.review_provider_financial_declaration_v1((v->>'declaration_id')::uuid,true,'TEST ONLY cannot approve the Provider own settlement')from close360 where k='payment-declaration'$$,'42501','INDEPENDENT_FINANCE_REVIEW_REQUIRED','Provider cannot approve its own settlement');
 reset role;
@@ -450,30 +455,54 @@ select throws_ok($$select public.reconcile_provider_payment((v->>'payment_id')::
 select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":null}',true);
 select throws_ok($$select public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor','1')),'TEST360-allocation-aal-null')from close360 where k='payment-approved'$$,'42501','INDEPENDENT_FINANCE_REVIEW_REQUIRED','known Finance with null aal cannot allocate the real confirmed payment');
 select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);
+-- A second independently reviewed payment completes the same native invoice.
+reset role;
+select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);
+select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
+set local role authenticated;
+insert into close360 values('payment-upload-2',public.begin_provider_payment_proof_upload('fd110000-0000-4000-8000-000000000002','TEST360-bank-proof-2.pdf','application/pdf',20,repeat('7',64),'TEST360-upload-2'));
+reset role;
+insert into storage.objects(bucket_id,name,metadata)select 'provider-qualification',v->>'storage_object_path','{"mimetype":"application/pdf","size":20}'from close360 where k='payment-upload-2';
+select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select public.record_provider_payment_proof_scan_result((v->>'upload_id')::uuid,'CLEAN','SQL_TEST_SCANNER','test-only',repeat('7',64),'TEST360-scan-2')from close360 where k='payment-upload-2';
+reset role;
+select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
+insert into close360 values('payment-declaration-2',public.record_provider_payment('fd110000-0000-4000-8000-000000000002','TEST360-PAYMENT-2',(select(v#>>'{}')::date from close360 where k='business-day'),'BANK_TRANSFER','MAD',(select(v#>>'{}')::bigint-1 from close360 where k='invoice-total'),repeat('7',64),'f360b000-0000-4000-8000-000000000001','f347b000-0000-4000-8000-000000000001','TEST360-payment-2'));
+select is((select count(*)from public.provider_payments where provider_organization_id='fd110000-0000-4000-8000-000000000002'),1::bigint,'second declaration does not create a payment before independent review');
+reset role;
+select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000004',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
+insert into close360 select'payment-approved-2',public.review_provider_financial_declaration_v1((v->>'declaration_id')::uuid,true,'TEST ONLY independent review of second bank payment')from close360 where k='payment-declaration-2';
+select isnt((select v->>'payment_id'from close360 where k='payment-approved-2'),(select v->>'payment_id'from close360 where k='payment-approved'),'two payment references produce distinct immutable payments');
 insert into close360 select'allocation-1',public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor','1')),'TEST360-allocation-1')from close360 where k='payment-approved';
 select is((select outstanding_minor from public.provider_invoice_balances where id=(select(v->>'id')::uuid from close360 where k='invoice-before')),(select(v->>'total_minor')::bigint-1 from close360 where k='invoice-before'),'first allocation reduces exactly one minor unit');
-insert into close360 select'allocation-2',public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor',(select((v->>'total_minor')::bigint-1)::text from close360 where k='invoice-before'))),'TEST360-allocation-2')from close360 where k='payment-approved';
-select is((select public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor',(select((v->>'total_minor')::bigint-1)::text from close360 where k='invoice-before'))),'TEST360-allocation-2')from close360 where k='payment-approved'),(select v from close360 where k='allocation-2'),'second partial allocation has an exact receipt replay');
-select throws_ok($$select public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor','1')),'TEST360-overallocate')from close360 where k='payment-approved'$$,'23514','PAYMENT_OVERALLOCATED','fully allocated confirmed payment cannot fund another minor unit');
+insert into close360 select'allocation-2',public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor',(select((v->>'total_minor')::bigint-1)::text from close360 where k='invoice-before')),jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-second'),'amount_minor',(select v->>'total_minor'from close360 where k='invoice-second'))),'TEST360-allocation-2')from close360 where k='payment-approved-2';
+select is((select public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor',(select((v->>'total_minor')::bigint-1)::text from close360 where k='invoice-before')),jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-second'),'amount_minor',(select v->>'total_minor'from close360 where k='invoice-second'))),'TEST360-allocation-2')from close360 where k='payment-approved-2'),(select v from close360 where k='allocation-2'),'second partial allocation has an exact receipt replay');
+select throws_ok($$select public.reconcile_provider_payment((v->>'payment_id')::uuid,jsonb_build_array(jsonb_build_object('invoice_id',(select v->>'id'from close360 where k='invoice-before'),'amount_minor','1')),'TEST360-overallocate')from close360 where k='payment-approved-2'$$,'23514','PAYMENT_OVERALLOCATED','fully allocated confirmed payment cannot fund another minor unit');
 select is((select payment_status from public.provider_invoice_balances where id=(select(v->>'id')::uuid from close360 where k='invoice-before')),'PAID','native closed invoice is settled through the actual financial commands');
 select is((select outstanding_minor from public.provider_invoice_balances where id=(select(v->>'id')::uuid from close360 where k='invoice-before')),0::bigint,'settlement leaves exactly zero outstanding');
 reset role;
-select is((select count(*)from public.provider_payments where provider_organization_id='fd110000-0000-4000-8000-000000000002'),1::bigint,'replays create exactly one confirmed payment');
+select is((select count(*)from public.provider_payments where provider_organization_id='fd110000-0000-4000-8000-000000000002'),2::bigint,'replays create exactly two independently confirmed payments');
 select is((select count(*)from public.provider_payment_allocations where invoice_id=(select(v->>'id')::uuid from close360 where k='invoice-before')),2::bigint,'two partial batches settle the same actual invoice without duplicate rows');
+select is((select sum(amount_minor)from public.provider_payments where provider_organization_id='fd110000-0000-4000-8000-000000000002'),(select(v#>>'{}')::numeric from close360 where k='invoice-total'),'two confirmed payments sum exactly to both invoices');
+select is((select count(distinct payment_id)from public.provider_payment_allocations where invoice_id=(select(v->>'id')::uuid from close360 where k='invoice-before')),2::bigint,'two distinct payments settle the same invoice');
 select is((select to_jsonb(i)from public.provider_invoices i where i.id=(select(v->>'id')::uuid from close360 where k='invoice-before')),(select v from close360 where k='invoice-before'),'payment, plans and allocation never rewrite any invoice field or original date');
 select ok(not exists(select 1 from public.financial_entries where organization_id='fd110000-0000-4000-8000-000000000002'group by journal_id having sum(case direction when'DEBIT'then amount_minor else-amount_minor end)<>0),'all native issue and settlement journals balance exactly');
-select is((select count(*)from public.financial_journals where organization_id='fd110000-0000-4000-8000-000000000002'),2::bigint,'only one issue journal and one independently reviewed cash journal exist');
+select is((select count(*)from public.financial_journals where organization_id='fd110000-0000-4000-8000-000000000002'),4::bigint,'two issue journals and two independently reviewed cash journals exist');
 select ok(exists(select 1 from public.event_outbox where organization_id='fd110000-0000-4000-8000-000000000002'and event_type='ProviderInvoiceIssuedV1')and exists(select 1 from public.event_outbox where organization_id='fd110000-0000-4000-8000-000000000002'and event_type='ProviderFinancialDeclarationReviewedV1'),'issuance and reviewed settlement retain durable events');
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
 select public.run_provider_billing_scheduler_v1(100);
 select public.run_provider_billing_reminders_v1(100);
 reset role;
-select is((select count(*)from public.provider_invoices where provider_organization_id='fd110000-0000-4000-8000-000000000002'),1::bigint,'scheduler retry after settlement does not emit a second invoice');
+select is((select count(*)from public.provider_invoices where provider_organization_id='fd110000-0000-4000-8000-000000000002'),2::bigint,'scheduler retry after settlement does not emit additional invoices');
 select is((select count(*)from public.notification_instances where organization_id='fd110000-0000-4000-8000-000000000002'and deduplication_key like'provider-invoice-reminder:%'),0::bigint,'a fully settled native invoice receives no collection reminder');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000003',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
 select is((select count(*)from public.provider_invoice_balances where id=(select(v->>'id')::uuid from close360 where k='invoice-before')),0::bigint,'foreign organization cannot read the paid invoice');
 select is((select count(*)from public.provider_payments where id=(select(v->>'payment_id')::uuid from close360 where k='payment-approved')),0::bigint,'foreign organization cannot read the settlement');
+select is((select count(*)from public.provider_invoice_balances where id=(select(v->>'id')::uuid from close360 where k='invoice-second')),0::bigint,'foreign organization cannot read the second invoice');
 reset role;
+select is((select outstanding_minor from public.provider_invoice_balances where id=(select(v->>'id')::uuid from close360 where k='invoice-second')),0::bigint,'second invoice is settled exactly by the multi-invoice batch');
+select is((select count(*)from public.provider_payment_allocations where payment_id=(select(v->>'payment_id')::uuid from close360 where k='payment-approved-2')),2::bigint,'one payment spans two invoices without duplicate allocations');
+select is((select to_jsonb(i)from public.provider_invoices i where i.id=(select(v->>'id')::uuid from close360 where k='invoice-second')),(select v from close360 where k='invoice-second'),'second invoice remains immutable after multi-invoice settlement');
 set constraints all immediate;
 select*from finish();
 rollback;

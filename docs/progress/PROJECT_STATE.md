@@ -1,5 +1,21 @@
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 
+### 2026-11-23 — Validation financière native ciblée
+
+Dernière extension : **82/82 assertions PASS** sur clone neuf (629 migrations, nettoyage PASS). Deux factures natives et deux paiements approuvés ; répartition d'un paiement entre les deux factures, soldes nuls, comptabilité équilibrée, immutabilité et rejeux vérifiés. Les chiffres 74/78 ci-dessous sont historiques, non cumulatifs. Prochaine preuve : continuité navigateur-vers-base ; aucun mouvement bancaire externe certifié.
+
+Extension exécutée : **78/78 assertions PASS**, 629 migrations, nettoyage confirmé. Deux paiements indépendamment approuvés règlent exactement une facture, avec journaux équilibrés et absence de doublons. Le cas multi-factures et la continuité navigateur native restent ouverts. Aucun test E2E ajouté au compteur par cette preuve SQL.
+
+629 migrations rejouées sur clone neuf ; 74/74 assertions du scénario clôture-facture-paiement-rapprochement passent, nettoyage confirmé. Écritures natives équilibrées, revue indépendante, rejouabilité et refus MFA/inter-organisations vérifiés. [Résultat et limites](../audits/E2E_COVERAGE_2026-11-22.md). Reste : continuité navigateur native et cas multi-factures/multi-paiements, sans confondre ces preuves avec un règlement bancaire externe.
+
+### 2026-11-23 — Continuité, dates et rapprochement financier
+
+Contrôle interactif du rapprochement ajouté : 4/4 tests Chromium FR/AR 360/1280 passent ; composant réel, données et action synthétiques explicitement déclarées. Couverture des changements de sélection, montants et confirmations. Exécution isolée en 7,1 secondes et intégration à la validation applicative. La recette financière native reste ouverte.
+
+Quatre corrections : conservation de l'organisation du besoin, report d'opportunité en heure Casablanca avec validation des dates, transport exact des montants des recommandations, sélection de factures compatible avec le paiement dans l'Admin. Validation ciblée : 62 tests PASS, TypeScript/lint sans erreur ; 10/10 E2E FR/AR desktop/360 du besoin passent avec nettoyage. [Détails et limites](../audits/E2E_COVERAGE_2026-11-22.md).
+
+Prochaine étape : recette navigateur native du rapprochement modifié, puis fermeture des lacunes des 11 exigences encore à examiner. La validation complète des 68 exigences, les intégrations externes et les audits indépendants restent ouverts. Aucun pourcentage de couverture complète revendiqué.
+
 ## 2026-11-23 - Historique des diagnostics
 
 10/10 E2E passent : comparaison de scores 50 vers 0, conservation des anciens instantanes, explications client et techniques, refus inter-organisations, rejeu et audit. FR/AR ordinateur et 360 px. Le debordement mobile qui rendait le lien historique inaccessible est corrige. [Preuve](../../artifacts/test-results/local-acceptance/history/diagnostic-history-bfe25e1e52ab7412949e5d63dcbd56956de4381eb793a319afb5bf6576790733.json).

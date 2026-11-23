@@ -1,5 +1,28 @@
 # Couverture E2E — contrôle du 22 novembre 2026
 
+## 2026-11-23 — Finance native : clôture vers règlement
+
+Extension multi-factures : **82/82 assertions PASS**, 629 migrations sur clone neuf, nettoyage PASS. [Dernier reçu](../../work/isolated-replay/f9823ef3-4974-4812-b37f-485872790b92/summary.json). Deux périodes historiques explicites produisent deux factures par le planificateur natif, sans insertion directe de facture ou d'écriture comptable. Deux paiements approuvés indépendamment règlent les deux factures ; le second paiement est réparti entre elles. Sommes exactes, soldes nuls, quatre journaux équilibrés, factures immuables, absence de doublon et lectures étrangères refusées. Le scénario remplace les versions 74/78 assertions ci-dessous : ne pas additionner leurs résultats. Reste à prouver la continuité navigateur-vers-base de ce parcours et le règlement bancaire externe.
+
+Extension multi-paiements : **78/78 assertions PASS** après les 629 migrations sur clone neuf, nettoyage PASS. [Reçu actualisé](../../work/isolated-replay/ef31dbbe-476f-4789-860c-b9e058a8578f/summary.json). Deux paiements distincts, chacun déclaré puis approuvé indépendamment, règlent la même facture. Leur somme correspond exactement au total facturé ; deux allocations, trois journaux équilibrés, aucun doublon au rejeu. Cette preuve remplace le précédent scénario à paiement unique ; elle ne prouve pas encore plusieurs factures ni leur parcours navigateur natif.
+
+Rejeu ciblé sur base locale neuve : **629 migrations, 1 fichier SQL, 74 assertions PASS, nettoyage PASS**. [Reçu](../../work/isolated-replay/e7c2391b-de1d-4e48-a7a3-c3f473e6a9bb/summary.json). Scénario : [0360_provider_finance_close_to_payment.test.sql](../../supabase/tests/0360_provider_finance_close_to_payment.test.sql).
+
+Les commandes natives émettent la facture, demandent et approuvent indépendamment un échéancier, déclarent puis approuvent indépendamment le paiement, et rapprochent deux allocations partielles jusqu'au solde nul. Rejeux sans doublon, surallocation refusée, facture inchangée, journaux exactement équilibrés, MFA obligatoire et lectures étrangères refusées. Les préconditions historiques et le scan documentaire sont synthétiques ; aucun mouvement bancaire ni antivirus externe n'est certifié.
+
+Cette exécution porte sur une facture et un paiement : le parcours navigateur natif multi-factures/multi-paiements reste à prouver. Les quatre tests de composant financier sont une preuve distincte. Aucune hausse artificielle du total E2E, aucun passage de MAT-FUNC-032 à une validation complète ; pas de nouvelle suite globale ou de concurrence exécutée.
+
+## 2026-11-23 — Corrections ciblées de continuité et de finance
+
+Complément navigateur du rapprochement : **4/4 tests Chromium PASS**, FR/AR à 360 et 1280 px, en 7,1 secondes. Le vrai composant React est monté avec données synthétiques et action serveur remplacée : filtrage organisation/devise, changement de facture, montant recalculé, confirmation réinitialisée, soumission empêchée sans facture compatible puis rétablie. Aucune erreur JavaScript. Commande : `corepack pnpm --use-node-version=22.23.5 test:finance:browser`, également incluse dans `test:application`. Cette preuve de composant ne certifie ni écritures comptables natives, ni MFA/RLS, ni accessibilité globale ; elle n'augmente pas le total E2E natif.
+
+- Besoin guidé : conserve l'organisation initiale pendant la restauration sans brouillon. La recette des ensembles vérifie maintenant aussi l'organisation persistée dans le navigateur : **10/10 E2E PASS**, FR/AR ordinateur/360 px, nettoyage confirmé. [Preuve](../../artifacts/test-results/local-acceptance/history/need-organization-solution-bundles-18b00f1c6697572943b367a57acffe0f78c6bc053133054d2f05fd127cf748e5.json).
+- Report d'opportunité : conversion IANA Casablanca de la fin de journée et rejet des dates civiles impossibles. Quatre nouvelles régressions échouaient avant correction.
+- Montants des recommandations : lecture PostgreSQL en texte pour conserver les unités mineures au-delà de la précision entière JavaScript. Nouvelle régression rouge puis verte avec 9007199254740993 unités mineures.
+- Rapprochement Admin : seules les factures de la même organisation et devise sont proposées ; changement de paiement pris en compte, suggestion recalculée, confirmation réinitialisée lorsque la paire change. Refus serveur conservés. Tests des frontières MFA, organisations, devises, solde, lecture incomplète et reçus invalides.
+
+Validation : **62 tests ciblés PASS** dans huit fichiers, TypeScript et lint ciblé sans erreur. Le parcours E2E ci-dessus précède les changements financiers ; aucune recette navigateur du rapprochement modifié n'est revendiquée. Aucun nouveau visa global ni promotion d'exigence : 57 exigences restent partiellement prouvées et 11 à examiner. Cette réexécution ne s'ajoute pas au total consolidé des 406 exécutions.
+
 ## 2026-11-23 - Historique des diagnostics
 
 Optimisation du lanceur : un serveur local possede par execution est reutilise entre les trois suites, puis arrete avant nettoyage. Verification ciblee : 10/10 passent, aucun echec ni skip, nettoyage confirme. Intervalle navigateur observe : 96 s avant, 84 s apres (environ 12 % de moins sur cette mesure ; pas un benchmark general). Les assertions et preconditions restent identiques. Les suites SQL/unitaires non touchees ne sont pas relancees.

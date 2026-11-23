@@ -1319,7 +1319,8 @@
         "tests/e2e/mat-func-032-atomic-smoke.spec.ts"
       ],
       "candidateDatabaseTests": [
-        "supabase/tests/0047_p10_provider_billing_reconciliation.test.sql"
+        "supabase/tests/0047_p10_provider_billing_reconciliation.test.sql",
+        "supabase/tests/0360_provider_finance_close_to_payment.test.sql"
       ],
       "currentAcceptance": "REVIEW_REQUIRED",
       "requiredEvidence": [
@@ -1337,6 +1338,13 @@
           "assertions": 33,
           "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
           "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0360_provider_finance_close_to_payment.test.sql",
+          "assertions": 82,
+          "evidence": "work/isolated-replay/f9823ef3-4974-4812-b37f-485872790b92/summary.json",
+          "semanticAcceptance": "PARTIAL_NATIVE_SQL",
+          "scope": "Two natively issued invoices and two independently approved payments; one payment allocated across both invoices. Exact totals and zero balances, immutable invoices, balanced journals, replay and foreign read denial verified. Browser-to-database continuity and external bank settlement remain unproved."
         }
       ]
     },

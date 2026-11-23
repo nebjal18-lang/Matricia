@@ -26,6 +26,10 @@ for(const locale of ['fr','ar'] as const)test(`MAT-FUNC-010 ${locale} opens a mu
   const target=new URL(href,page.url());expect(target.searchParams.get('organizationId')).toBe(item.organizationId);expect(target.searchParams.get('q')).toBe(`${item.code}\n${item.description}`);
   await link.click();await expect(page).toHaveURL(new RegExp(`/${locale}/besoin\\?`));
   await expect(page.locator('textarea[aria-labelledby="need-step-title"]')).toHaveValue(`${item.code}\n${item.description}`);
+  await expect.poll(()=>page.evaluate(()=>{
+   const stored=localStorage.getItem('matricia.public-need');
+   return stored?JSON.parse(stored).organizationId:null;
+  })).toBe(item.organizationId);
   await settleVisualState(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
   scan=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();if(scan.violations.length)throw new Error(`BUNDLE_NEED_ACCESSIBILITY_${scan.violations.map(v=>v.id).join('_')}`);
  }finally{await context.close();}
