@@ -1,5 +1,11 @@
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 
+## 2026-11-23 — Rapprochement : refus serveur et reprise navigateur
+
+Treize nouveaux tests de l'action serveur couvrent la confirmation obligatoire, les locales autorisées, la transmission exacte des montants et identifiants, les refus et l'absence de rafraîchissement après échec. Résultat ciblé avec le repository : **21/21 PASS**. Deux nouveaux tests de composant navigateur FR/AR vérifient le bouton désactivé pendant l'envoi, le conflit visible, la reprise avec la même identité de requête et le montant exact `9007199254740993`. Suite composant : **6/6 PASS** en 5,4 secondes, compilation et navigateur partagés. Sources : [action serveur](../../apps/web/modules/admin/screens/finance/actions.test.ts), [composant navigateur](../../tests/remediation/finance-reconciliation-browser.test.mjs).
+
+Les limites sont inchangées : action simulée dans le navigateur, repository simulé dans les tests d'action ; aucune nouvelle preuve E2E native ni hausse du total 406. Prochaine étape : continuité navigateur-vers-base du rapprochement.
+
 ### 2026-11-23 — Validation financière native ciblée
 
 Dernière extension : **82/82 assertions PASS** sur clone neuf (629 migrations, nettoyage PASS). Deux factures natives et deux paiements approuvés ; répartition d'un paiement entre les deux factures, soldes nuls, comptabilité équilibrée, immutabilité et rejeux vérifiés. Les chiffres 74/78 ci-dessous sont historiques, non cumulatifs. Prochaine preuve : continuité navigateur-vers-base ; aucun mouvement bancaire externe certifié.

@@ -1,5 +1,11 @@
 # Couverture E2E — contrôle du 22 novembre 2026
 
+## 2026-11-23 — Rapprochement : refus serveur et reprise navigateur
+
+Treize nouveaux tests de l'action serveur couvrent la confirmation obligatoire, les locales autorisées, la transmission exacte des montants et identifiants, les refus et l'absence de rafraîchissement après échec. Résultat ciblé avec le repository : **21/21 PASS**. Deux nouveaux tests de composant navigateur FR/AR vérifient le bouton désactivé pendant l'envoi, le conflit visible, la reprise avec la même identité de requête et le montant exact `9007199254740993`. Suite composant : **6/6 PASS** en 5,4 secondes, compilation et navigateur partagés. Sources : [action serveur](../../apps/web/modules/admin/screens/finance/actions.test.ts), [composant navigateur](../../tests/remediation/finance-reconciliation-browser.test.mjs).
+
+Les limites sont inchangées : action simulée dans le navigateur, repository simulé dans les tests d'action ; aucune nouvelle preuve E2E native ni hausse du total 406. Prochaine étape : continuité navigateur-vers-base du rapprochement.
+
 ## 2026-11-23 — Finance native : clôture vers règlement
 
 Extension multi-factures : **82/82 assertions PASS**, 629 migrations sur clone neuf, nettoyage PASS. [Dernier reçu](../../work/isolated-replay/f9823ef3-4974-4812-b37f-485872790b92/summary.json). Deux périodes historiques explicites produisent deux factures par le planificateur natif, sans insertion directe de facture ou d'écriture comptable. Deux paiements approuvés indépendamment règlent les deux factures ; le second paiement est réparti entre elles. Sommes exactes, soldes nuls, quatre journaux équilibrés, factures immuables, absence de doublon et lectures étrangères refusées. Le scénario remplace les versions 74/78 assertions ci-dessous : ne pas additionner leurs résultats. Reste à prouver la continuité navigateur-vers-base de ce parcours et le règlement bancaire externe.

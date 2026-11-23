@@ -22,10 +22,34 @@ before(async()=>{
  `},bundle:true,write:false,format:'iife',jsx:'automatic',define:{'process.env.NODE_ENV':'"test"'},alias:{'@':web},plugins:[{name:'test-boundaries',setup(b){
   b.onResolve({filter:/^next\/link$/},()=>({path:'link',namespace:'boundary'}));
   b.onResolve({filter:/^\.\/actions$/},args=>args.importer.endsWith('finance-panel.tsx')?{path:'actions',namespace:'boundary'}:undefined);
-  b.onLoad({filter:/.*/,namespace:'boundary'},args=>({resolveDir:web,loader:'jsx',contents:args.path==='link'?`import React from 'react';export default function Link(props){return <a {...props}/>}`:`export async function reconcilePaymentAction(_,form){window.submitted=Object.fromEntries(form.entries());return {status:'success',batchId:'fixture-batch'};}`}));
+  b.onLoad({filter:/.*/,namespace:'boundary'},args=>({resolveDir:web,loader:'jsx',contents:args.path==='link'?`import React from 'react';export default function Link(props){return <a {...props}/>}`:`export async function reconcilePaymentAction(_,form){window.submitted=Object.fromEntries(form.entries());window.attempts=(window.attempts??0)+1;if(window.deferAction)await new Promise(resolve=>{window.finishAction=resolve;});return window.actionResult??{status:'success',batchId:'fixture-batch'};}`}));
  }}]});script=output.outputFiles[0].text;browser=await chromium.launch({headless:true});
 });
 after(async()=>{await browser?.close();});
+
+for(const locale of ['fr','ar'])test(`finance pending, failure and exact retry ${locale}`,async()=>{
+ const page=await browser.newPage({viewport:{width:360,height:900}});
+ try{
+  await page.route('**/*',route=>route.abort());
+  await page.setContent(`<html lang="${locale}" dir="${locale==='ar'?'rtl':'ltr'}"><body><div id="root"></div></body></html>`);
+  await page.evaluate(f=>{window.fixture=f;window.deferAction=true;window.actionResult={status:'error',reason:'CONFLICT'};},{...fixture,provider_payments:[payment('PAY-LARGE','ORG-A','MAD','9007199254740993')],provider_invoices:[invoice('INV-LARGE','ORG-A','MAD','9007199254740993')]});
+  await page.addScriptTag({content:script});
+  const form=page.locator('#rapprochements'),submit=form.locator('[type="submit"]');
+  await expect(form.locator('[name="amountMinor"]')).toHaveValue('9007199254740993');
+  await form.locator('[name="confirmed"]').check();await submit.click();
+  await expect(submit).toBeDisabled();await expect.poll(()=>page.evaluate(()=>window.attempts)).toBe(1);
+  const first=await page.evaluate(()=>window.submitted);
+  assert.equal(first.amountMinor,'9007199254740993');
+  await page.evaluate(()=>window.finishAction());
+  await expect(form.getByRole('alert')).toBeVisible();await expect(submit).toBeEnabled();
+  await expect(form.getByRole('status')).toHaveCount(0);
+  await page.evaluate(()=>{window.deferAction=false;window.actionResult={status:'success',batchId:'retry-batch'};});
+  await form.locator('[name="confirmed"]').check();await submit.click();
+  await expect(form.getByRole('alert')).toHaveCount(0);await expect(form.getByRole('status')).not.toBeEmpty();
+  assert.equal(await page.evaluate(()=>window.attempts),2);
+  assert.deepEqual(await page.evaluate(()=>window.submitted),first);
+ }finally{await page.close();}
+});
 
 const payment=(id,organization_id,currency,unallocated_minor)=>({id,organization_id,organization_name:organization_id,payment_reference:id,currency,amount_minor:unallocated_minor,allocated_minor:'0',unallocated_minor,paid_on:'2026-11-01'});
 const invoice=(id,organization_id,currency,outstanding_minor)=>({id,organization_id,organization_name:organization_id,invoice_number:id,currency,total_minor:outstanding_minor,paid_minor:'0',outstanding_minor,payment_status:'ISSUED',due_on:'2026-12-01'});
