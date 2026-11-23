@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "suite": "p05-onboarding",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:33:08.787Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 28,
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:32:13.053Z",
+    "finishedAt": "2026-11-23T22:33:07.904Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realAuthenticationStorageAudit": true
+  }
+}

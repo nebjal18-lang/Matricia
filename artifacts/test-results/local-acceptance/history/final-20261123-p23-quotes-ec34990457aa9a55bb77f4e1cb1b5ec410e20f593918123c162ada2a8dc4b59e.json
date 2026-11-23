@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "suite": "p23-quotes",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:44:33.988Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:42:42.162Z",
+    "finishedAt": "2026-11-23T22:44:33.047Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "stage": "exact-money-audit-and-identity-anchors",
+    "quoteFinancialAndAuditVerified": true
+  }
+}

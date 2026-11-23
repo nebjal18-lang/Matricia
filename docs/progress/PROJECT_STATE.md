@@ -1,5 +1,26 @@
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 
+## 2026-11-23 — Vérification globale du candidat d5e3cf2c
+
+[Bilan consolidé](../../artifacts/test-results/final-verification-20261123/summary.json). Node 22.23.5, aucun changement applicatif pendant la recette.
+
+| Contrôle | Résultat exécuté |
+| --- | --- |
+| Lint, TypeScript, phase00, absence de placeholders, structure release | PASS |
+| Unitaires | 4 753 PASS + 1 test de stockage privé local exécuté séparément PASS ; ce dernier était ignoré par défaut |
+| Intégration / outillage | 3 / 123 PASS |
+| Composant financier navigateur | 6 PASS, action serveur simulée |
+| Recette E2E locale complète | 404/404 PASS, 32 séquences, zéro échec/ignoré, nettoyages validés |
+| Pages publiques | 58/58 PASS, zéro échec/ignoré/instable |
+| SQL complet | 629 migrations, 400 fichiers, 9 793 assertions PASS ; concurrence et nettoyage PASS |
+| Build | PASS après configuration locale de NEXT_PUBLIC_APP_URL=https://matricia.invalid |
+
+La première commande globale a échoué au build car l'URL HTTP locale ne satisfait pas la règle HTTPS de production. Seul le build a été relancé avec l'URL fictive ci-dessus ; aucun déploiement ni assouplissement de garde. Le test Storage séparé vérifie les vrais octets PDF FR/AR sur le Supabase local et supprime ses propres fichiers.
+
+Les **462 exécutions E2E réussies** comprennent des prérequis répétés : ce nombre ne mesure pas une couverture fonctionnelle de 100 %. La recette complète est désormais exécutée sur un même candidat, au lieu de seulement additionner les 406 exécutions historiques de segments distincts. [Manifeste archivé et reçus des 32 séquences](../../artifacts/test-results/local-acceptance/history/final-20261123-manifest-41811a7c6d99c5826c50b9643db2e91bb6f858f751560f13a9d3ec2ba833a093.json). [Preuve SQL](../../artifacts/test-results/final-verification-20261123/sql.json). [Preuve publique](../../artifacts/test-results/final-verification-20261123/public-browser.json).
+
+Les statuts contractuels restent **57 PARTIAL_EXECUTED / 11 REVIEW_REQUIRED**. Les parcours encore incomplets et les preuves externes (paiement bancaire/PSP, signature contractuelle, emails, antivirus, restauration hébergée, déploiement et audit indépendant) empêchent un visa global. Prochaine étape : combler ces preuves ; pas de nouvelle relance globale sans changement. Le push est bloqué par la reconnexion GitHub requise.
+
 ## 2026-11-23 — Expiration des certifications : preuve SQL native
 
 **15/15 assertions PASS**, 629 migrations sur clone isolé neuf, nettoyage PASS. Onze assertions comportementales ajoutées aux quatre contrôles statiques de [0370_provider_review_credential_reminders.test.sql](../../supabase/tests/0370_provider_review_credential_reminders.test.sql). Les commandes natives déposent et font vérifier les documents, puis le worker génère six rappels J-60/J-30/J-7 pour deux destinataires FR/AR. Pagination, refus utilisateur, absence de rappel hors échéance, rejeu sans doublon et lectures RLS par destinataire sont vérifiés. [Reçu final](../../work/isolated-replay/5b741104-8870-4228-ab2b-7397c4b5b638/summary.json).

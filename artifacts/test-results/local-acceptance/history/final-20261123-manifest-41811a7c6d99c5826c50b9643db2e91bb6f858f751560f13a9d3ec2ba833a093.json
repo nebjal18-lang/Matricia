@@ -1,0 +1,657 @@
+{
+  "schemaVersion": 1,
+  "environment": "development-local-docker",
+  "startedAt": "2026-11-23T21:35:44.000Z",
+  "completedAt": "2026-11-23T22:54:12.591Z",
+  "scope": "LOCAL_SEGMENTS",
+  "status": "LOCAL_SEGMENTS_PASSED",
+  "source": {
+    "gitHead": "d5e3cf2c1cf1f9267233b6f678b3dbf660e6b48a",
+    "applicationAndRecipeTreeSha256": "1a421712f43eb5ac1bbc39e1e919c10ddd5e59898d958ec9fbe6050ca27227a3",
+    "files": 3485
+  },
+  "phases": [
+    {
+      "id": "diagnostic-history",
+      "status": "PASSED",
+      "expectedTests": 10,
+      "browser": {
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:36:50.225Z",
+        "finishedAt": "2026-11-23T21:38:04.016Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-diagnostic-history-df5bfb76a897e0b99ba75a9801a2a607a5b90787d976bd44905ce32fe9f67cf6.json",
+        "sha256": "df5bfb76a897e0b99ba75a9801a2a607a5b90787d976bd44905ce32fe9f67cf6"
+      }
+    },
+    {
+      "id": "questionnaire-simulation",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:38:57.145Z",
+        "finishedAt": "2026-11-23T21:39:16.424Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-questionnaire-simulation-311cb3c63674dfb513bf066f53c26810a90ee2c3332dadc4fa80d2ac24a0cba2.json",
+        "sha256": "311cb3c63674dfb513bf066f53c26810a90ee2c3332dadc4fa80d2ac24a0cba2"
+      }
+    },
+    {
+      "id": "question-quality",
+      "status": "PASSED",
+      "expectedTests": 10,
+      "browser": {
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:40:07.773Z",
+        "finishedAt": "2026-11-23T21:41:26.096Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-question-quality-1ca64a6f3a7050ea73f9a871e2f42ab57219d9913ec81b2000a0742a13b2389b.json",
+        "sha256": "1ca64a6f3a7050ea73f9a871e2f42ab57219d9913ec81b2000a0742a13b2389b"
+      }
+    },
+    {
+      "id": "solution-bundles",
+      "status": "PASSED",
+      "expectedTests": 10,
+      "browser": {
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:42:18.382Z",
+        "finishedAt": "2026-11-23T21:43:18.390Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-solution-bundles-ab9ab380f73af053c9b1e68a31ad67f20bbf2c8f553fa0c0d6262fb265f1d56a.json",
+        "sha256": "ab9ab380f73af053c9b1e68a31ad67f20bbf2c8f553fa0c0d6262fb265f1d56a"
+      }
+    },
+    {
+      "id": "solution-decisions",
+      "status": "PASSED",
+      "expectedTests": 10,
+      "browser": {
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:44:10.990Z",
+        "finishedAt": "2026-11-23T21:45:15.046Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-solution-decisions-b0aceba8c75439a1afdbdad332586bfbec607b8ace88523772393084ca2fc043.json",
+        "sha256": "b0aceba8c75439a1afdbdad332586bfbec607b8ace88523772393084ca2fc043"
+      }
+    },
+    {
+      "id": "referral-rewards",
+      "status": "PASSED",
+      "expectedTests": 14,
+      "browser": {
+        "executed": 14,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:46:08.138Z",
+        "finishedAt": "2026-11-23T21:47:05.602Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-referral-rewards-fb580dba94b1a367eb09748882ea418b5c5d92ed6aa3ac3b67a608325399db62.json",
+        "sha256": "fb580dba94b1a367eb09748882ea418b5c5d92ed6aa3ac3b67a608325399db62"
+      }
+    },
+    {
+      "id": "admin-summary",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:47:58.677Z",
+        "finishedAt": "2026-11-23T21:48:09.457Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-admin-summary-eabc95a5b7d4624b20c01ca2dc28ee3d049538ce4d744749071c620145aeb718.json",
+        "sha256": "eabc95a5b7d4624b20c01ca2dc28ee3d049538ce4d744749071c620145aeb718"
+      }
+    },
+    {
+      "id": "universal-actions",
+      "status": "PASSED",
+      "expectedTests": 16,
+      "browser": {
+        "executed": 16,
+        "passed": 16,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:49:02.978Z",
+        "finishedAt": "2026-11-23T21:49:50.439Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-universal-actions-ce1b988efc5b56392e70f511675e84253d3675e2780a79c0d04bfede17483a3c.json",
+        "sha256": "ce1b988efc5b56392e70f511675e84253d3675e2780a79c0d04bfede17483a3c"
+      }
+    },
+    {
+      "id": "franchise-followups",
+      "status": "PASSED",
+      "expectedTests": 12,
+      "browser": {
+        "executed": 12,
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:50:46.919Z",
+        "finishedAt": "2026-11-23T21:51:59.696Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-franchise-followups-036d446d0fde04871ef217e2bdee412074cae7f3632069420825ebdb611158f3.json",
+        "sha256": "036d446d0fde04871ef217e2bdee412074cae7f3632069420825ebdb611158f3"
+      }
+    },
+    {
+      "id": "franchise-crm",
+      "status": "PASSED",
+      "expectedTests": 8,
+      "browser": {
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:52:53.008Z",
+        "finishedAt": "2026-11-23T21:54:43.691Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-franchise-crm-87175b34913dc10771ff9608301ff869d8e8d264396628ab0d89bc2148bce85a.json",
+        "sha256": "87175b34913dc10771ff9608301ff869d8e8d264396628ab0d89bc2148bce85a"
+      }
+    },
+    {
+      "id": "questionnaire-assistance",
+      "status": "PASSED",
+      "expectedTests": 14,
+      "browser": {
+        "executed": 14,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:55:38.155Z",
+        "finishedAt": "2026-11-23T21:58:18.945Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-questionnaire-assistance-1d9ecc55ef17d2162cc1e9f3f86c54990b4d559686381428551c8a7f05a2a8e6.json",
+        "sha256": "1d9ecc55ef17d2162cc1e9f3f86c54990b4d559686381428551c8a7f05a2a8e6"
+      }
+    },
+    {
+      "id": "questionnaire-revalidation",
+      "status": "PASSED",
+      "expectedTests": 10,
+      "browser": {
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T21:59:13.197Z",
+        "finishedAt": "2026-11-23T22:01:23.725Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-questionnaire-revalidation-89d18fe26ae9141fd48c7ae8951b17a2ef03020781a19679174e18d4c19f7bd1.json",
+        "sha256": "89d18fe26ae9141fd48c7ae8951b17a2ef03020781a19679174e18d4c19f7bd1"
+      }
+    },
+    {
+      "id": "client-referrals",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:02:17.825Z",
+        "finishedAt": "2026-11-23T22:02:39.058Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-client-referrals-3de838aefed017e1554ef23a32d70cb961a1bc6e30d96ff29b759dc51d7c3c4d.json",
+        "sha256": "3de838aefed017e1554ef23a32d70cb961a1bc6e30d96ff29b759dc51d7c3c4d"
+      }
+    },
+    {
+      "id": "reward-rules",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:03:33.633Z",
+        "finishedAt": "2026-11-23T22:04:01.049Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-reward-rules-3e7f1baed4d411f634b8857778cda15a53cd6ba32ab2997dd3fac18cfe65badc.json",
+        "sha256": "3e7f1baed4d411f634b8857778cda15a53cd6ba32ab2997dd3fac18cfe65badc"
+      }
+    },
+    {
+      "id": "amendment-activation",
+      "status": "PASSED",
+      "expectedTests": 20,
+      "browser": {
+        "executed": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:04:55.775Z",
+        "finishedAt": "2026-11-23T22:06:53.450Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-amendment-activation-8fa6d811c78736640b4de05f323c11f2c388c0da6aca2757059640a90eb16e0b.json",
+        "sha256": "8fa6d811c78736640b4de05f323c11f2c388c0da6aca2757059640a90eb16e0b"
+      }
+    },
+    {
+      "id": "contract-amendments",
+      "status": "PASSED",
+      "expectedTests": 16,
+      "browser": {
+        "executed": 16,
+        "passed": 16,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:07:49.817Z",
+        "finishedAt": "2026-11-23T22:09:20.274Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-contract-amendments-014311787e3ea86975033ca0c5fadf6376e1fb25f6615afdeb4fdc502ca8fcf8.json",
+        "sha256": "014311787e3ea86975033ca0c5fadf6376e1fb25f6615afdeb4fdc502ca8fcf8"
+      }
+    },
+    {
+      "id": "provider-reputation",
+      "status": "PASSED",
+      "expectedTests": 20,
+      "browser": {
+        "executed": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:10:16.656Z",
+        "finishedAt": "2026-11-23T22:12:19.676Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-provider-reputation-741985f59ac4c89779b252479608213ac99f49a3c4a05b5485abacb6ca4ab948.json",
+        "sha256": "741985f59ac4c89779b252479608213ac99f49a3c4a05b5485abacb6ca4ab948"
+      }
+    },
+    {
+      "id": "provider-favorites",
+      "status": "PASSED",
+      "expectedTests": 16,
+      "browser": {
+        "executed": 16,
+        "passed": 16,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:13:16.642Z",
+        "finishedAt": "2026-11-23T22:15:36.392Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-provider-favorites-5d6ae284a30b88bb4e2212d9f6e4f3c2e106a7204ddae91f887dc80a2bd5c1e6.json",
+        "sha256": "5d6ae284a30b88bb4e2212d9f6e4f3c2e106a7204ddae91f887dc80a2bd5c1e6"
+      }
+    },
+    {
+      "id": "notification-templates",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:16:33.494Z",
+        "finishedAt": "2026-11-23T22:16:54.928Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-notification-templates-77c6ecf59fcfa5415f47d7edda91d659ddab546d19f649ee4854c9cf5a2195d2.json",
+        "sha256": "77c6ecf59fcfa5415f47d7edda91d659ddab546d19f649ee4854c9cf5a2195d2"
+      }
+    },
+    {
+      "id": "admin-decisions",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:17:51.857Z",
+        "finishedAt": "2026-11-23T22:18:38.427Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-admin-decisions-7ef34dec18fb8276fec2d6d5221f57e4f2394dae3dedb4ee616afe383395aa7e.json",
+        "sha256": "7ef34dec18fb8276fec2d6d5221f57e4f2394dae3dedb4ee616afe383395aa7e"
+      }
+    },
+    {
+      "id": "recurring-requests",
+      "status": "PASSED",
+      "expectedTests": 10,
+      "browser": {
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:19:35.722Z",
+        "finishedAt": "2026-11-23T22:22:10.356Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-recurring-requests-b151212921cca801490346995d4762a8b63e19576779364a5dfe24f422c7a6d9.json",
+        "sha256": "b151212921cca801490346995d4762a8b63e19576779364a5dfe24f422c7a6d9"
+      }
+    },
+    {
+      "id": "functional-controls",
+      "status": "PASSED",
+      "expectedTests": 20,
+      "browser": {
+        "executed": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": []
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-functional-controls-ef480f60080c22cad827f09156c7b16a1375017336fa27c2438344f7d3c9dc8c.json",
+        "sha256": "ef480f60080c22cad827f09156c7b16a1375017336fa27c2438344f7d3c9dc8c"
+      }
+    },
+    {
+      "id": "ui-auth",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": []
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-ui-auth-3da8fe22f66eb5b5d2eeba944781abec8b59fe65fe1b33390d9babfc191de09e.json",
+        "sha256": "3da8fe22f66eb5b5d2eeba944781abec8b59fe65fe1b33390d9babfc191de09e"
+      }
+    },
+    {
+      "id": "route-smoke",
+      "status": "PASSED",
+      "expectedTests": 16,
+      "browser": {
+        "executed": 16,
+        "passed": 16,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": []
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-route-smoke-074573e0caa1f14763021b03938dc1e5008a6cd3a901d302846ac0e1af6d7125.json",
+        "sha256": "074573e0caa1f14763021b03938dc1e5008a6cd3a901d302846ac0e1af6d7125"
+      }
+    },
+    {
+      "id": "p05-onboarding",
+      "status": "PASSED",
+      "expectedTests": 28,
+      "browser": {
+        "executed": 28,
+        "passed": 28,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:32:13.053Z",
+        "finishedAt": "2026-11-23T22:33:07.904Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-p05-onboarding-211216ba957f207f2f02c4d4700359f8dd2fb8d8db970dc977c2bf4231ca0a8c.json",
+        "sha256": "211216ba957f207f2f02c4d4700359f8dd2fb8d8db970dc977c2bf4231ca0a8c"
+      }
+    },
+    {
+      "id": "v1-critical",
+      "status": "PASSED",
+      "expectedTests": 24,
+      "browser": {
+        "executed": 24,
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:34:08.043Z",
+        "finishedAt": "2026-11-23T22:36:04.536Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-v1-critical-7c523f0cfeade3f5e6f7d4194485c15d76f57fe275ef5b8876a26aec1591818c.json",
+        "sha256": "7c523f0cfeade3f5e6f7d4194485c15d76f57fe275ef5b8876a26aec1591818c"
+      }
+    },
+    {
+      "id": "client-journey",
+      "status": "PASSED",
+      "expectedTests": 6,
+      "browser": {
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:37:04.923Z",
+        "finishedAt": "2026-11-23T22:37:52.607Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-client-journey-fd5fa4b29929d029cac565fb1255a0fb363a5f56e45034a1df42706e00f9cf63.json",
+        "sha256": "fd5fa4b29929d029cac565fb1255a0fb363a5f56e45034a1df42706e00f9cf63"
+      }
+    },
+    {
+      "id": "linked-commercial",
+      "status": "PASSED",
+      "expectedTests": 8,
+      "browser": {
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:38:54.456Z",
+        "finishedAt": "2026-11-23T22:40:00.188Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-linked-commercial-b52ef1b809ed35e6459c1ef1ac4d7ea6efc151bb18ef6335948446f47f03dcc4.json",
+        "sha256": "b52ef1b809ed35e6459c1ef1ac4d7ea6efc151bb18ef6335948446f47f03dcc4"
+      }
+    },
+    {
+      "id": "benefit-fulfillment",
+      "status": "PASSED",
+      "expectedTests": 6,
+      "browser": {
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:41:01.561Z",
+        "finishedAt": "2026-11-23T22:41:40.448Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-benefit-fulfillment-5ea4661e240476ba64c54341ac0393fd834b208550897aed2f1b2dbbdc769433.json",
+        "sha256": "5ea4661e240476ba64c54341ac0393fd834b208550897aed2f1b2dbbdc769433"
+      }
+    },
+    {
+      "id": "p23-quotes",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:42:42.162Z",
+        "finishedAt": "2026-11-23T22:44:33.047Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-p23-quotes-ec34990457aa9a55bb77f4e1cb1b5ec410e20f593918123c162ada2a8dc4b59e.json",
+        "sha256": "ec34990457aa9a55bb77f4e1cb1b5ec410e20f593918123c162ada2a8dc4b59e"
+      }
+    },
+    {
+      "id": "final-core",
+      "status": "PASSED",
+      "expectedTests": 4,
+      "browser": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": [],
+        "startedAt": "2026-11-23T22:45:33.916Z",
+        "finishedAt": "2026-11-23T22:45:55.445Z"
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-final-core-45bccc1080e7606e0b7a9001a567e7fc17d36a1615905023540e247370b2694e.json",
+        "sha256": "45bccc1080e7606e0b7a9001a567e7fc17d36a1615905023540e247370b2694e"
+      }
+    },
+    {
+      "id": "p24-p26",
+      "status": "PASSED",
+      "expectedTests": 64,
+      "browser": {
+        "executed": 64,
+        "passed": 64,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "failures": []
+      },
+      "cleanupVerified": true,
+      "evidence": {
+        "path": "artifacts/test-results/local-acceptance/history/final-20261123-p24-p26-33565c627de77b5b2bba254105b7367a1318f6856bfa43e84836d15b98f7f185.json",
+        "sha256": "33565c627de77b5b2bba254105b7367a1318f6856bfa43e84836d15b98f7f185"
+      }
+    }
+  ],
+  "expectedTests": 404,
+  "passedTests": 404,
+  "externalRequirements": {
+    "stagingDeployment": "NOT_VALIDATED",
+    "hostedRestoreAndStorage": "NOT_VALIDATED",
+    "signatureProvider": "NOT_VALIDATED",
+    "livePaymentAndFiscalApproval": "NOT_VALIDATED",
+    "clientAcceptanceAndSignature": "NOT_SIGNED"
+  },
+  "failureCode": null
+}

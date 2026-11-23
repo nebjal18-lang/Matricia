@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "completedAt": "2026-11-23T22:28:01.245Z",
+  "environment": "development-local-docker",
+  "localProof": {
+    "authentication": "REAL_GOTRUE_OTP_AND_TOTP",
+    "authorizedOrganizations": 2,
+    "activeMandates": 2,
+    "activeCatalogMandates": 2,
+    "foreignSessionDenied": true,
+    "adminWithoutOrganization": true
+  },
+  "localUiAuthProof": {
+    "registrationConsentReceipts": 2,
+    "otpLength": 6,
+    "identityAndConsentVerified": true
+  },
+  "functionalControlsProof": null,
+  "mode": "LOCAL_UI_OTP_CONSENT_AND_MFA",
+  "status": "PASSED",
+  "expectedTests": 4,
+  "executedTests": 4,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": []
+  },
+  "stage": "complete",
+  "failureCode": null,
+  "diagnostic": null,
+  "cleanup": {
+    "remoteFixturesNeutralized": true,
+    "localAuthenticationArtifactsRemoved": true
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "suite": "questionnaire-simulation",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T21:39:17.396Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T21:38:57.145Z",
+    "finishedAt": "2026-11-23T21:39:16.424Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realUiScenarioEvaluations": 8,
+    "realUiInvalidAnswerRejections": 4,
+    "zeroAndFiveThousandScores": true,
+    "deterministicNativeEvaluation": true,
+    "foreignSimulationDenied": true,
+    "publishedSnapshotUnchanged": true,
+    "noRealQuestionnaireSessionCreated": true,
+    "historicalPublishedReference": true,
+    "frArDesktop360Accessibility": true,
+    "stage": "simulation-native-proof",
+    "failureLocations": [],
+    "engineReason": null
+  }
+}
