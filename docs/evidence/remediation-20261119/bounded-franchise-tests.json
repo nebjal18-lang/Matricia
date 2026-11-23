@@ -1,0 +1,18 @@
+{
+  "task": "bounded-franchise-tests",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "vitest",
+    "run",
+    "modules/franchise/data/operations/paging.test.ts",
+    "modules/franchise/data/operations/readers-integrity.test.ts",
+    "modules/franchise/data/operations/repository.test.ts"
+  ],
+  "startedAt": "2026-11-19T14:14:51.878Z",
+  "finishedAt": "2026-11-19T14:14:54.274Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

@@ -164,7 +164,7 @@ try {
     check((await workRow(currentWork)).status === 'CLAIMED', 'NATIVE_CLAIM_NOT_PERSISTED');
     record('NATIVE_CLAIM_REFRESH_WITHOUT_RELOAD', { locale, width });
     const stale = await first.client.rpc('claim_admin_work_item', { p_work_item_id: currentWork, p_expected_row_version: 1, p_reason: 'Version historique refusée', p_idempotency_key: randomUUID() });
-    check(stale.error?.code === '40001', 'STALE_VERSION_NOT_DENIED');
+    check(stale.error?.code === 'PT409', 'STALE_VERSION_NOT_DENIED');
     stage = `BROWSER_RESOLVE_${locale}`;
     const resolveForm = card.locator('form').filter({ has: page.locator('select[name="resolutionCode"]') });
     await resolveForm.locator('select[name="resolutionCode"]').selectOption('COMPLETED');

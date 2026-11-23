@@ -6,5 +6,5 @@ import {DsrDeliveryScreen} from "@/modules/admin/screens/privacy/delivery/screen
 export default async function MyDataRequestsPage({params, searchParams}: {params: Promise<{locale: string}>; searchParams: Promise<{page?: string}>}) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  return <main className="client-page client-stack" dir={locale === "ar" ? "rtl" : "ltr"}><h1>{locale === "ar" ? "طلبات بياناتي وردودي الخاصة" : "Mes demandes de données et réponses privées"}</h1><DsrDeliveryScreen locale={locale} staff={false} page={query.page}/><DsrRestrictionPanel locale={locale}/><DsrErasurePanel locale={locale}/></main>;
+  return <main className="client-page client-stack" dir={locale === "ar" ? "rtl" : "ltr"}><h1>{locale === "ar" ? "طلبات بياناتي وردودي الخاصة" : "Mes demandes de données et réponses privées"}</h1><DsrDeliveryScreen locale={locale} staff={false} {...(query.page !== undefined && { page: query.page })}/><DsrRestrictionPanel locale={locale}/><DsrErasurePanel locale={locale}/></main>;
 }

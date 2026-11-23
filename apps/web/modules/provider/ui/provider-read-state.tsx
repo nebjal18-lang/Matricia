@@ -24,7 +24,7 @@ const messages = {
 } as const;
 
 export function ProviderReadState({ locale, state, retryHref, reason, unavailableMessage }: {
-  locale: Locale; state: ReadState; retryHref: string; reason?: string; unavailableMessage?: string;
+  locale: Locale; state: ReadState; retryHref: string; reason?: string | undefined; unavailableMessage?: string;
 }) {
   const copy = messages[locale];
   const [title, detail] = copy[state];

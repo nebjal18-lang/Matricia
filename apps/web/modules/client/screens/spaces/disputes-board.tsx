@@ -227,7 +227,6 @@ function evidenceTypeLabel(type: string, locale: Locale): string {
 
 function LiveDisputeDetail({
   locale,
-  query,
   selected,
   messages,
   actions,

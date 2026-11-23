@@ -1,11 +1,12 @@
 import { createHash } from "node:crypto";
+import { isDemoIdentity, type DemoIdentity } from "./demo-identity";
 import type { DemoRegionalActor } from "./demo-regional-directory";
 
 type DemoAdminClient = {
   auth: {
     admin: {
       listUsers: (args: { page: number; perPage: number }) => Promise<{
-        data: { users: Array<{ id: string; email?: string | null }> };
+        data: { users: DemoIdentity[] };
         error: { message: string } | null;
       }>;
       createUser: (args: Record<string, unknown>) => Promise<{
@@ -41,9 +42,9 @@ export function demoRegionalIds(actor: DemoRegionalActor) {
 async function findUserIdByEmail(admin: DemoAdminClient, email: string) {
   for (let page = 1; page <= 10; page += 1) {
     const listed = await admin.auth.admin.listUsers({ page, perPage: 200 });
-    if (listed.error) return null;
+    if (listed.error) throw new Error("DEMO_IDENTITY_UNAVAILABLE");
     const found = listed.data.users.find((user) => (user.email || "").toLowerCase() === email.toLowerCase());
-    if (found) return found.id;
+    if (found) return found;
     if (listed.data.users.length < 200) break;
   }
   return null;
@@ -56,7 +57,11 @@ export async function ensureDemoRegionalActor(input: {
 }): Promise<{ userId: string; organizationId: string } | null> {
   const { organizationId, membershipId, userIdSeed } = demoRegionalIds(input.actor);
 
-  let userId = await findUserIdByEmail(input.admin, input.actor.email);
+  const existing = await findUserIdByEmail(input.admin, input.actor.email);
+  if (existing && (!isDemoIdentity(existing, input.actor.email, input.actor.persona)
+    || existing.app_metadata?.demo_territory !== input.actor.territoryCode
+    || existing.app_metadata?.demo_slot !== input.actor.slot)) return null;
+  let userId = existing?.id;
   if (!userId) {
     const created = await input.admin.auth.admin.createUser({
       id: userIdSeed,
@@ -76,7 +81,7 @@ export async function ensureDemoRegionalActor(input: {
     if (created.error || !created.data.user) return null;
     userId = created.data.user.id;
   } else {
-    await input.admin.auth.admin.updateUserById(userId, {
+    const updated = await input.admin.auth.admin.updateUserById(userId, {
       email_confirm: true,
       user_metadata: { full_name: input.actor.labelFr, preferred_locale: "fr-MA" },
       app_metadata: {
@@ -86,6 +91,7 @@ export async function ensureDemoRegionalActor(input: {
         demo_slot: input.actor.slot,
       },
     });
+    if (updated.error) return null;
   }
 
   const attached = await input.admin.rpc("ensure_demo_regional_actor_v1", {

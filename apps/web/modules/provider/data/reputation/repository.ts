@@ -1,8 +1,9 @@
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
+import { readAllPages, readRelatedPages } from "@/modules/shared/lib/data/read-pages";
 import { z } from "zod";
 import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
 import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
-import { reputationDimensions, type ClientFavoritesDashboard, type FeedbackAxis, type ProviderReputationDashboard } from "./model";
+import { maskedProviderReference, reputationDimensions, type ClientFavoritesDashboard, type FeedbackAxis, type ProviderReputationDashboard } from "./model";
 
 const id = z.string().uuid();
 const membership = z.object({ id, organization_id: id, organizations: z.object({ display_name: z.string().min(1) }), organization_member_roles: z.array(z.object({ role_code: z.string(), revoked_at: z.string().nullable() })).min(1) });
@@ -25,9 +26,10 @@ async function activeMembership(roleCodes: string[], requestedOrganizationId?: s
   const authFailure = classifyAuthReadFailure(authError);
   if (authFailure) return { client, failure: { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED" } as Failure };
   if (!auth.user) return { client, failure: { status: "error", reason: "UNAUTHENTICATED" } as Failure };
-  const result = await client.from("organization_memberships").select("id,organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", roleCodes).limit(100);
+  const actorId = auth.user.id;
+  const result = await readAllPages((from,to)=>client.from("organization_memberships").select("id,organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", actorId).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", roleCodes).order("id").range(from,to));
   if (result.error) return { client, failure: { status: "error", reason: "QUERY_FAILED" } as Failure };
-  const parsed = z.array(membership).max(100).safeParse(result.data);
+  const parsed = z.array(membership).safeParse(result.data);
   if (!parsed.success) return { client, failure: { status: "error", reason: "INVALID_RESPONSE" } as Failure };
   if (!requireExplicitSelection && requestedOrganizationId === undefined) {
     const selected = parsed.data[0];
@@ -41,11 +43,11 @@ async function activeMembership(roleCodes: string[], requestedOrganizationId?: s
 async function serviceLabels(client: Awaited<ReturnType<typeof getSupabaseServerClient>>, serviceIds: string[]) {
   const unique = [...new Set(serviceIds)];
   if (!unique.length) return { status: "success" as const, labels: new Map<string, { fr: string; ar: string }>() };
-  const servicesResult = await client.from("catalog_services").select("id,current_published_version_id").in("id", unique).limit(200);
+  const servicesResult = await readRelatedPages(unique,(ids,from,to)=>client.from("catalog_services").select("id,current_published_version_id").in("id", ids).order("id").range(from,to));
   const services = z.array(service).safeParse(servicesResult.data);
   if (servicesResult.error || !services.success) return { status: "error" as const };
   const versionIds = services.data.flatMap((item) => item.current_published_version_id ? [item.current_published_version_id] : []);
-  const versionsResult = versionIds.length ? await client.from("catalog_service_versions").select("id,name_fr,name_ar").in("id", versionIds).limit(200) : { data: [], error: null };
+  const versionsResult = await readRelatedPages(versionIds,(ids,from,to)=>client.from("catalog_service_versions").select("id,name_fr,name_ar").in("id", ids).order("id").range(from,to));
   const versions = z.array(serviceVersion).safeParse(versionsResult.data);
   if (versionsResult.error || !versions.success) return { status: "error" as const };
   const versionsById = new Map(versions.data.map((item) => [item.id, item]));
@@ -87,9 +89,9 @@ export async function loadClientFavorites(requestedOrganizationId?: string): Pro
   const organizationId = member.organization_id;
   const canManage = member.organization_member_roles.some((role) => role.revoked_at === null && ["CLIENT_OWNER", "CLIENT_ADMIN", "CLIENT_BUYER"].includes(role.role_code));
   const [favoritesResult, checksResult, requestsResult] = await Promise.all([
-    client.from("client_provider_favorites").select("id,provider_organization_id,service_id,status,note,row_version,created_at").eq("client_organization_id", organizationId).order("created_at", { ascending: false }).limit(100),
-    client.from("favorite_eligibility_revalidations").select("favorite_id,request_id,eligible,exclusion_reasons,checked_at").eq("client_organization_id", organizationId).order("checked_at", { ascending: false }).limit(300),
-    client.from("service_requests").select("id,service_id,status").eq("client_organization_id", organizationId).not("status", "in", "(CANCELLED,EXPIRED)").order("created_at", { ascending: false }).limit(100),
+    readAllPages((from,to)=>client.from("client_provider_favorites").select("id,provider_organization_id,service_id,status,note,row_version,created_at").eq("client_organization_id", organizationId).order("created_at", { ascending: false }).order("id").range(from,to)),
+    readAllPages((from,to)=>client.from("favorite_eligibility_revalidations").select("favorite_id,request_id,eligible,exclusion_reasons,checked_at").eq("client_organization_id", organizationId).order("checked_at", { ascending: false }).order("id").range(from,to)),
+    readAllPages((from,to)=>client.from("service_requests").select("id,service_id,status").eq("client_organization_id", organizationId).not("status", "in", "(CANCELLED,EXPIRED)").order("created_at", { ascending: false }).order("id").range(from,to)),
   ]);
   if (favoritesResult.error || checksResult.error || requestsResult.error) return { status: "error", reason: "QUERY_FAILED" };
   const favorites = z.array(favorite).safeParse(favoritesResult.data), checks = z.array(revalidation).safeParse(checksResult.data), requests = z.array(request).safeParse(requestsResult.data);
@@ -106,22 +108,23 @@ export async function loadFavoriteProviderOptions(requestedOrganizationId?: stri
   const auth = await activeMembership(["CLIENT_OWNER", "CLIENT_ADMIN", "CLIENT_BUYER"], requestedOrganizationId, true);
   if (auth.failure) return auth.failure;
   const { client, membership: member } = auth;
-  const requestsResult = await client.from("service_requests").select("id,service_id").eq("client_organization_id", member.organization_id).not("status", "in", "(CANCELLED,EXPIRED)").limit(100);
+  const requestsResult = await readAllPages((from,to)=>client.from("service_requests").select("id,service_id").eq("client_organization_id", member.organization_id).not("status", "in", "(CANCELLED,EXPIRED)").order("id").range(from,to));
   const requests = z.array(z.object({ id, service_id: id })).safeParse(requestsResult.data);
   if (requestsResult.error || !requests.success) return { status: "error", reason: "QUERY_FAILED" };
-  const rfqsResult = requests.data.length ? await client.from("rfqs").select("id,request_id").in("request_id", requests.data.map((item) => item.id)).limit(100) : { data: [], error: null };
+  const rfqsResult = await readRelatedPages(requests.data.map(item=>item.id),(ids,from,to)=>client.from("rfqs").select("id,request_id").in("request_id", ids).order("id").range(from,to));
   const rfqs = z.array(z.object({ id, request_id: id })).safeParse(rfqsResult.data);
   if (rfqsResult.error || !rfqs.success) return { status: "error", reason: "QUERY_FAILED" };
-  const quotesResult = rfqs.data.length ? await client.from("quotes").select("provider_organization_id,rfq_id,status").in("rfq_id", rfqs.data.map((item) => item.id)).in("status", ["SUBMITTED", "SELECTED"]).limit(200) : { data: [], error: null };
+  const quotesResult = await readRelatedPages(rfqs.data.map(item=>item.id),(ids,from,to)=>client.from("quotes").select("provider_organization_id,rfq_id,status").in("rfq_id", ids).in("status", ["SUBMITTED", "SELECTED"]).order("id").range(from,to));
   const quotes = z.array(z.object({ provider_organization_id: id, rfq_id: id, status: z.string() })).safeParse(quotesResult.data);
   if (quotesResult.error || !quotes.success) return { status: "error", reason: "QUERY_FAILED" };
   const providerIds = [...new Set(quotes.data.map((item) => item.provider_organization_id))];
-  const organizationsResult = providerIds.length ? await client.from("organizations").select("id,display_name").in("id", providerIds).limit(100) : { data: [], error: null };
+  const organizationsResult = await readRelatedPages(providerIds,(ids,from,to)=>client.from("organizations").select("id,display_name").in("id", ids).order("id").range(from,to));
   const organizations = z.array(z.object({ id, display_name: z.string().min(1) })).safeParse(organizationsResult.data);
   if (organizationsResult.error || !organizations.success) return { status: "error", reason: "QUERY_FAILED" };
   const requestById = new Map(requests.data.map((item) => [item.id, item])), rfqById = new Map(rfqs.data.map((item) => [item.id, item]));
   const servicesForProvider = (providerId: string) => [...new Set(quotes.data.filter((quote) => quote.provider_organization_id === providerId).flatMap((quote) => { const requestId = rfqById.get(quote.rfq_id)?.request_id; const serviceId = requestId ? requestById.get(requestId)?.service_id : null; return serviceId ? [serviceId] : []; }))];
   const allServiceIds = [...new Set(providerIds.flatMap(servicesForProvider))], labels = await serviceLabels(client, allServiceIds);
   if (labels.status === "error") return { status: "error", reason: "QUERY_FAILED" };
-  return { status: "success", options: organizations.data.map((organization) => ({ organizationId: organization.id, name: organization.display_name, services: servicesForProvider(organization.id).map((serviceId) => ({ id: serviceId, nameFr: labels.labels.get(serviceId)?.fr ?? serviceId, nameAr: labels.labels.get(serviceId)?.ar ?? serviceId })) })) };
+  const authorizedNames = new Map(organizations.data.map(organization=>[organization.id,organization.display_name]));
+  return { status: "success", options: providerIds.map((providerId) => ({ organizationId: providerId, name: authorizedNames.get(providerId) ?? maskedProviderReference(providerId), services: servicesForProvider(providerId).map((serviceId) => ({ id: serviceId, nameFr: labels.labels.get(serviceId)?.fr ?? serviceId, nameAr: labels.labels.get(serviceId)?.ar ?? serviceId })) })) };
 }

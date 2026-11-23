@@ -42,7 +42,7 @@ set local role authenticated;
 select set_config('test.tax213_request',public.create_service_request('a2130000-0000-4000-8000-000000000010','a2130000-0000-4000-8000-000000000100','a2130000-0000-4000-8000-000000000107','a2130000-0000-4000-8000-000000000201',current_setting('test.tax213_payload')::jsonb,'Création de recette avec fiscalité manquante','tax213-create')::text,true);
 select is(current_setting('test.tax213_request')::jsonb->>'status','DRAFT','a real DRAFT can be created without a mapping');
 select throws_ok($$select public.mark_service_request_ready((current_setting('test.tax213_request')::jsonb->>'request_id')::uuid,1,'Informations confirmées','tax213-ready-missing')$$,'55000','SERVICE_TAX_CATEGORY_POLICY_REQUIRED','READY fails closed without approved mapping');
-select throws_ok($$select public.mark_service_request_ready((current_setting('test.tax213_request')::jsonb->>'request_id')::uuid,null,'Informations confirmées','tax213-ready-null')$$,'40001','STALE_REQUEST_VERSION','NULL cannot bypass request CAS');
+select throws_ok($$select public.mark_service_request_ready((current_setting('test.tax213_request')::jsonb->>'request_id')::uuid,null,'Informations confirmées','tax213-ready-null')$$,'PT409','STALE_REQUEST_VERSION','NULL cannot bypass request CAS');
 reset role;
 select is((select count(*)::integer from public.service_request_tax_origins_v1 where request_id=(current_setting('test.tax213_request')::jsonb->>'request_id')::uuid),1,'one immutable fiscal origin is preserved even before mapping');
 select is((select country_code from public.service_request_tax_origins_v1 where request_id=(current_setting('test.tax213_request')::jsonb->>'request_id')::uuid),'MA','country is canonical rather than caller US');

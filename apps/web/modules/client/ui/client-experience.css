@@ -2014,6 +2014,11 @@ button.client-cta {
   outline: none;
 }
 
+.client-shell-search:focus-within {
+  outline: 3px solid var(--mat-violet);
+  outline-offset: 3px;
+}
+
 @media (max-width: 719px) {
   .client-shell-search {
     flex: 1 1 auto;
@@ -2515,7 +2520,8 @@ button.client-cta {
 }
 
 .client-kpi-cta[data-tone="violet"] { background: var(--client-cta); }
-.client-kpi-cta[data-tone="peach"] { background: var(--mat-coral); }
+.client-kpi-cta[data-tone="peach"] { background: var(--client-cta); }
+.client-kpi-cta:focus-visible { outline: 3px solid var(--mat-navy); outline-offset: 3px; }
 .client-kpi-cta[data-tone="mint"] { background: var(--mat-mint-ink); }
 
 .client-compare-page {
@@ -3227,26 +3233,6 @@ button.client-cta {
 
 .client-wizard-aside {
   background: var(--mat-violet-soft);
-}
-
-.client-workspace[data-theme="follow"] {
-  --client-cream: #14151c;
-  --client-ink: #f6f4fb;
-  --client-muted: #b7b4c6;
-  --client-line: #2a2c38;
-  --client-soft: #172554;
-  background: #14151c;
-}
-
-.client-workspace[data-theme="follow"] .client-side,
-.client-workspace[data-theme="follow"] .client-card {
-  background: #1c1e28;
-  border-color: #2a2c38;
-}
-
-.client-workspace[data-theme="follow"] .client-cta,
-.client-workspace[data-theme="follow"] .client-need-cta {
-  background: var(--client-cta);
 }
 
 .client-portfolio {

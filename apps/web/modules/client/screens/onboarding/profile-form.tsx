@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, type ReactNode } from "react";
+import { useActionState, useId, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
@@ -10,6 +10,9 @@ import { saveClientProfile, type ClientProfileDraft, type ProfileActionState } f
 import { formatVersionMessage, type ClientOnboardingMessages } from "./messages";
 
 const initialState: ProfileActionState = { status: "idle" };
+const subscribeHydration = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 
 export function ClientProfileForm({
   organizationId,
@@ -29,6 +32,7 @@ export function ClientProfileForm({
   expectedProfileVersion?: number;
 }) {
   const [state, action, pending] = useActionState(saveAction, initialState);
+  const hydrated = useSyncExternalStore(subscribeHydration, clientReady, serverReady);
   const prefix = useId();
   const statusId = `${prefix}-status`;
   const invalid = state.status === "error" && state.reason === "VALIDATION";
@@ -57,7 +61,7 @@ export function ClientProfileForm({
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
 
-      <fieldset className="space-y-4">
+      <fieldset disabled={!hydrated} className="space-y-4">
         <legend className="text-base font-semibold">{messages.sections.company}</legend>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <Field id={fieldId("legal-form")} label={messages.fields.legalForm}>
@@ -84,7 +88,7 @@ export function ClientProfileForm({
         </Field>
       </fieldset>
 
-      <fieldset className="space-y-4">
+      <fieldset disabled={!hydrated} className="space-y-4">
         <legend className="text-base font-semibold">{messages.sections.address}</legend>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <Field id={fieldId("registered-city")} label={messages.fields.registeredCity}>
@@ -110,7 +114,7 @@ export function ClientProfileForm({
         </Field>
       </fieldset>
 
-      <fieldset className="space-y-4">
+      <fieldset disabled={!hydrated} className="space-y-4">
         <legend className="text-base font-semibold">{messages.sections.representative}</legend>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <Field id={fieldId("representative-first-name")} label={messages.fields.representativeFirstName}>
@@ -134,13 +138,13 @@ export function ClientProfileForm({
         </Field>
       </fieldset>
 
-      <fieldset className="space-y-3">
+      <fieldset disabled={!hydrated} className="space-y-3">
         <legend className="text-base font-semibold">{messages.sections.declarations}</legend>
         <Consent name="accuracyConfirmed" text={messages.fields.accuracyConfirmed} defaultChecked={profile?.declarations.accuracy_confirmed ?? false} invalid={invalid} />
         <Consent name="representationAuthorized" text={messages.fields.representationAuthorized} defaultChecked={profile?.declarations.representation_authorized ?? false} invalid={invalid} />
       </fieldset>
 
-      <Button type="submit" disabled={pending} className="min-h-11 w-full sm:w-auto">
+      <Button type="submit" disabled={pending || !hydrated} className="min-h-11 w-full sm:w-auto">
         {pending ? messages.saving : messages.save}
       </Button>
       <p id={statusId} role={error ? "alert" : "status"} aria-live="polite" className={error ? "min-h-5 text-sm text-destructive" : "min-h-5 text-sm text-primary"}>{error ?? ""}</p>

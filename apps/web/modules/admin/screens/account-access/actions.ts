@@ -23,7 +23,7 @@ export async function manageAccountAccess(_:AccountAccessState,form:FormData):Pr
  }
  const client=await getSupabaseServerClient();const{data:auth}=await client.auth.getUser();if(!auth.user)return{status:"error",reason:"FORBIDDEN"};
  const response=await client.rpc(rpc,args);
- if(response.error){const message=response.error.message??"";return{status:"error",reason:message.includes("LAST_SUPER_ADMIN")?"LAST_ADMIN":message.includes("MEMBERSHIP_REVIEW")?"MEMBERSHIP":message.includes("ENVIRONMENT")||message.includes("PRODUCTION_AUTHORIZATION")?"ENVIRONMENT":response.error.code==="40001"?"CONFLICT":response.error.code==="42501"?"FORBIDDEN":"FAILED"};}
+ if(response.error){const message=response.error.message??"";return{status:"error",reason:message.includes("LAST_SUPER_ADMIN")?"LAST_ADMIN":message.includes("MEMBERSHIP_REVIEW")?"MEMBERSHIP":message.includes("ENVIRONMENT")||message.includes("PRODUCTION_AUTHORIZATION")?"ENVIRONMENT":(response.error.code==="40001" || response.error.code === "PT409")?"CONFLICT":response.error.code==="42501"?"FORBIDDEN":"FAILED"};}
  const expected=rpc==="request_platform_account_change_v1"?"ACCOUNT_CHANGE_REQUESTED":value("intent")==="approve"?"ACCOUNT_CHANGE_EXECUTED":"ACCOUNT_CHANGE_REJECTED";
  const parsed=z.object({outcome:z.literal(expected),request_id:z.string().uuid()}).safeParse(response.data);
  if(!parsed.success)return{status:"error",reason:"FAILED"};

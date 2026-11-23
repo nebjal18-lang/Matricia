@@ -9,7 +9,8 @@ describe("real franchise network filters",()=>{
   for(const field of Object.keys(filters))expect(matchesFranchiseNetwork(row,{...filters,[field]:"OTHER"},"2026-11-03")).toBe(false);
  });
  it("offers only actual options and never grants documents to an unlinked CRM prospect",()=>{
-  const prospect={...row,dossier:undefined,stage:"SENT"};
+  const prospect: PersonRow = {...row,stage:"SENT"};
+  delete prospect.dossier;
   expect(networkFilterOptions([row,prospect],"2026-11-03")).toEqual({services:["SERVICE_A"],statuses:["ACTIVE","SENT"],capacities:["LIMITED"],zones:["MA-06"],documents:["EXPIRED","NONE"]});
   expect(matchesFranchiseNetwork(prospect,{docs:"NONE"},"2026-11-03")).toBe(true);
   expect(matchesFranchiseNetwork(prospect,{service:"SERVICE_A"},"2026-11-03")).toBe(false);

@@ -224,7 +224,7 @@ select is((select jsonb_array_length(value->'accepted') from p06_w2_observed whe
 select is((select value->>'outcome' from p06_w2_observed where key='save-2'),'AUTOSAVE_SAVED','second required answer is saved');
 select is((select count(distinct correlation_id) from public.event_outbox where event_type in ('QuestionnaireSessionStartedV1','QuestionnaireAnswersSavedV1') and correlation_id='c25a0000-0000-0000-0000-000000000001'),1::bigint,'one correlation chain may contain distinct start and autosave commands');
 select ok(exists(select 1 from public.event_outbox o join private.questionnaire_command_keys k on k.command_id=o.causation_id where o.event_type='QuestionnaireAnswersSavedV1' and o.idempotency_key='p06-w2-save-0002' and k.operation_scope='questionnaire.session.autosave'),'Outbox causation points to the internal authenticated command');
-select is((select sqlstate||':'||message from p06_w2_errors where key='submit-stale'),'40001:STALE_SESSION_VERSION','submission rejects stale session version');
+select is((select sqlstate||':'||message from p06_w2_errors where key='submit-stale'),'PT409:STALE_SESSION_VERSION','submission rejects stale session version');
 select is((select value->>'outcome' from p06_w2_observed where key='submit'),'QUESTIONNAIRE_SESSION_SUBMITTED','complete fixed snapshot is submitted');
 select is((select value from p06_w2_observed where key='submit-retry'),(select value from p06_w2_observed where key='submit'),'submission retry is idempotent');
 select is((select status from public.questionnaire_sessions where id=(select (value->>'session_id')::uuid from p06_w2_observed where key='start')),'SUBMITTED','submitted session is terminal');
@@ -282,7 +282,7 @@ reset role;
 set constraints all immediate;
 set constraints all deferred;
 select is((select sqlstate||':'||message from p06_w2_errors where key='publish-aal1'),'42501:QUESTIONNAIRE_PUBLISH_DENIED','effective sensitive publication requires central MFA');
-select is((select sqlstate||':'||message from p06_w2_errors where key='publish-stale'),'40001:STALE_QUESTIONNAIRE_VERSION','publication rejects stale optimistic version');
+select is((select sqlstate||':'||message from p06_w2_errors where key='publish-stale'),'PT409:STALE_QUESTIONNAIRE_VERSION','publication rejects stale optimistic version');
 select is((select sqlstate||':'||message from p06_w2_errors where key='publish-invalid-metadata'),'23514:QUESTIONNAIRE_QUESTION_METADATA_INVALID','publication refuses linked question metadata that the runtime cannot validate');
 select is((select value->>'outcome' from p06_w2_observed where key='publish-v2'),'QUESTIONNAIRE_VERSION_PUBLISHED','central AAL2 publishes the approved sensitive version');
 select is((select value from p06_w2_observed where key='publish-v2-retry'),(select value from p06_w2_observed where key='publish-v2'),'publication replay is idempotent');

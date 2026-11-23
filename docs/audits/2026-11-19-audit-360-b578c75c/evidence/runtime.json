@@ -1,0 +1,10 @@
+{
+  "task": "runtime",
+  "command": "corepack pnpm exec node --version",
+  "startedAt": "2026-11-19T13:38:54.382Z",
+  "finishedAt": "2026-11-19T13:38:55.376Z",
+  "durationMs": 993,
+  "exitCode": 0,
+  "nodeVersion": "v22.23.5",
+  "scope": "Current working tree including the two preserved staged corrections; no application source corrections by audit"
+}

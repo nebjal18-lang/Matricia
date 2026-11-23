@@ -1,0 +1,50 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 build C:\Projects\Matricia\Matricia
+> pnpm -r build
+
+.                                        |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+apps/web                                 |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+packages/domain                          |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+Scope: 16 of 17 workspace projects
+packages/application build$ tsc --noEmit
+packages/config build$ tsc --noEmit
+packages/contracts build$ tsc --noEmit
+packages/domain build$ tsc --noEmit
+packages/contracts build: Done
+packages/forms build$ tsc --noEmit
+packages/application build: Done
+packages/infrastructure build$ tsc --noEmit
+packages/config build: Done
+packages/legal-v41 build$ tsc --noEmit
+packages/domain build: Done
+packages/observability build$ tsc --noEmit
+packages/forms build: Done
+packages/question-engine build$ tsc --noEmit
+packages/legal-v41 build: Done
+packages/resilience-v41 build$ tsc --noEmit
+packages/observability build: Done
+packages/signature-v41 build$ tsc --noEmit
+packages/infrastructure build: Done
+packages/testkit build$ tsc --noEmit
+packages/resilience-v41 build: Done
+packages/ui build$ tsc --noEmit
+packages/testkit build: Done
+packages/workflows build$ tsc --noEmit
+packages/question-engine build: Done
+packages/signature-v41 build: Done
+packages/workflows build: Done
+packages/ui build: Done
+apps/web build$ next build
+apps/worker build$ tsc --noEmit
+apps/web build: ▲ Next.js 16.4.1 (Turbopack)
+apps/web build: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
+apps/web build: > Build error occurred
+apps/web build: Error: PUBLIC_SUPABASE_CONFIGURATION_MISSING: NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL); NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY / SUPABASE_ANON_KEY). Configure these public variables for the Vercel deployment environment and redeploy.
+apps/web build:     at resolvePublicSupabaseEnvironment (C:\Projects\Matricia\Matricia\apps\web\modules\shared\lib\public-supabase-environment.ts:22:15)
+apps/web build:     at Object.<anonymous> (C:\Projects\Matricia\Matricia\apps\web\next.config.compiled.js:17:177)
+apps/web build: Failed
+C:\Projects\Matricia\Matricia\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @matricia/web@0.1.0 build: `next build`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.

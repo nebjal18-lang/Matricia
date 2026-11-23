@@ -1,0 +1,75 @@
+
+> @matricia/web@0.1.0 test C:\Projects\Matricia\Matricia\apps\web
+> vitest run
+
+
+ RUN  v5.0.3 C:/Projects/Matricia/Matricia/apps/web
+
+ ❯ modules/franchise/screens/library/question-routes.test.tsx (8 tests | 4 failed) 44ms
+   ❯ question bank and detail recovery fr (4)
+     × explains an absent mandate instead of calling it a temporary incident 17ms
+     × keeps search, paging and selected mandate while changing language 2ms
+   ❯ question bank and detail recovery ar (4)
+     × explains an absent mandate instead of calling it a temporary incident 1ms
+     × keeps search, paging and selected mandate while changing language 1ms
+ ❯ modules/shared/lib/format/display.test.ts (14 tests | 1 failed) 76ms
+   ❯ display helpers (14)
+     × keeps the same Casablanca wall clock on server and browser 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  modules/franchise/screens/library/question-routes.test.tsx > question bank and detail recovery fr > explains an absent mandate instead of calling it a temporary incident
+ FAIL  modules/franchise/screens/library/question-routes.test.tsx > question bank and detail recovery fr > keeps search, paging and selected mandate while changing language
+ FAIL  modules/franchise/screens/library/question-routes.test.tsx > question bank and detail recovery ar > explains an absent mandate instead of calling it a temporary incident
+ FAIL  modules/franchise/screens/library/question-routes.test.tsx > question bank and detail recovery ar > keeps search, paging and selected mandate while changing language
+Error: invariant expected app router to be mounted
+ ❯ useRouter ../../node_modules/.pnpm/next@16.4.5_@babel+core@7.2_cb2dde8b78fe6ee8907d56af993d9192/node_modules/next/src/client/components/navigation.ts:169:11
+ ❯ FranchiseOrganizationSelector modules/franchise/ui/franchise-access-state.tsx:135:18
+    133| }) {
+    134|   const c = copy[locale];
+    135|   const router = useRouter();
+       |                  ^
+    136|   const [pending, startTransition] = useTransition();
+    137|   if (organizations.length < 2) return null;
+ ❯ Object.react_stack_bottom_frame ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9808:18
+ ❯ renderWithHooks ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5062:19
+ ❯ renderElement ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5497:23
+ ❯ retryNode ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6428:21
+ ❯ renderNodeDestructive ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6367:11
+ ❯ renderNode ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6905:18
+ ❯ renderChildrenArray ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6674:11
+ ❯ retryNode ../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6441:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  modules/shared/lib/format/display.test.ts > display helpers > keeps the same Casablanca wall clock on server and browser
+AssertionError: expected '14 nov. 2026, 22:24' to match /23:24/
+
+- Expected:
+/23:24/
+
++ Received:
+"14 nov. 2026, 22:24"
+
+ ❯ modules/shared/lib/format/display.test.ts:49:80
+     47|   it("keeps the same Casablanca wall clock on server and browser", () …
+     48|     // UTC 22:24 → Casablanca UTC+1 → 23:24
+     49|     expect(formatDateTimeCasablanca("2026-11-14T22:24:00.548972+00:00"…
+       |                                                                                ^
+     50|     expect(formatDateTimeCasablanca("2026-11-14T22:24:00.548972+00:00"…
+     51|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  2 failed | 691 passed | 1 skipped (694)
+      Tests  5 failed | 4222 passed | 1 skipped (4228)
+   Start at  09:12:06
+   Duration  62.76s (import 72%, transform 16%, tests 6%, setup 4%, worker 1%)
+
+    Isolate  694 workers spawned · ~754ms startup each (spawn + environment, per file)
+             at least ~18.62s faster with isolate: false — reuses workers across files instead of one per file
+
+C:\Projects\Matricia\Matricia\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @matricia/web@0.1.0 test: `vitest run`
+Exit status 1

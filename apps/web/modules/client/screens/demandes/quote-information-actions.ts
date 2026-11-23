@@ -56,7 +56,7 @@ export async function completeRequestInformationAction(_: CompleteInformationSta
   if (result.error) {
     if(result.error.message?.includes("SERVICE_TAX_ORIGIN_REVIEW_REQUIRED")||result.error.message?.includes("SERVICE_TAX_EXACT_SOURCE_REQUIRED"))return{status:"error",reason:"TAX_ORIGIN_REVIEW"};
     if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-    if (result.error.code === "40001" || result.error.code === "55000") return { status: "error", reason: "CONFLICT" };
+    if ((result.error.code === "40001" || result.error.code === "PT409") || result.error.code === "55000") return { status: "error", reason: "CONFLICT" };
     if (result.error.code === "22023") return { status: "error", reason: "VALIDATION" };
     return { status: "error", reason: "UNAVAILABLE" };
   }

@@ -20,7 +20,7 @@ const uploadReservationSchema = z.object({
 const text = (data: FormData, key: string) => String(data.get(key) ?? "");
 function failure(error: { code?: string; message?: string } | null): ProviderActionState {
   if (error?.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-  if (error?.code === "40001" || error?.code === "23505" || error?.message?.includes("IDEMPOTENCY")) return { status: "error", reason: "CONFLICT" };
+  if ((error?.code === "40001" || error?.code === "PT409") || error?.code === "23505" || error?.message?.includes("IDEMPOTENCY")) return { status: "error", reason: "CONFLICT" };
   return { status: "error", reason: "FAILED" };
 }
 async function rpc(name: string, args: Record<string, unknown>): Promise<ProviderActionState> {

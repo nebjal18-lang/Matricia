@@ -5,8 +5,10 @@ type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 type PersistedIdentity = CommandIdentity & { payload: string; createdAt: number };
 const day = 24 * 60 * 60 * 1_000;
 
-export function canonicalRecurringPayload(form: FormData): string {
-  return JSON.stringify([...form.entries()].filter(([key]) => key !== "idempotencyKey" && key !== "correlationId").map(([key, value]) => [key, typeof value === "string" ? value : value.name]).sort(([a, av], [b, bv]) => a.localeCompare(b) || av.localeCompare(bv)));
+export function canonicalRecurringPayload(form: FormData, submitter?: { name: string; value: string } | null): string {
+  const entries = [...form.entries()];
+  if (submitter?.name) entries.push([submitter.name, submitter.value]);
+  return JSON.stringify(entries.filter(([key]) => key !== "idempotencyKey" && key !== "correlationId").map(([key, value]) => [key, typeof value === "string" ? value : value.name]).sort(([a, av], [b, bv]) => a.localeCompare(b) || av.localeCompare(bv)));
 }
 
 function storageKey(action: RecurringCommand): string { return `matricia:client-recurring:${action}`; }

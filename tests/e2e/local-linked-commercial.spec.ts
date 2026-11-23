@@ -8,7 +8,7 @@ if(!path||!existsSync(path))throw new Error('LOCAL_LINKED_COMMERCIAL_MANIFEST_RE
 const manifest=JSON.parse(readFileSync(path,'utf8'));
 if(!validFixtureProject(manifest)||Date.parse(manifest.expiresAt)<=Date.now())throw new Error('LOCAL_LINKED_COMMERCIAL_MANIFEST_INVALID');
 for(const locale of ['fr','ar'] as const){
- test(`${locale.toUpperCase()} same diagnostic contract and accepted delivery persist for both parties`,async({browser})=>{
+ test(`${locale.toUpperCase()} same diagnostic contract and ${manifest.chains[locale].deliveryAccepted?'accepted':'submitted'} delivery persist for both parties`,async({browser})=>{
   test.setTimeout(90_000);
   const chain=manifest.chains[locale] as Chain;
   if(!chain||chain.locale!==locale||!existsSync(chain.state)||!existsSync(chain.foreignState)||!existsSync(chain.providerState))throw new Error('LOCAL_LINKED_COMMERCIAL_STATE_REQUIRED');

@@ -11,7 +11,7 @@ export function canApplyAdminDemoFranchiseApplications() {
 }
 
 type DemoApplicationSpec = {
-  territoryCode: string;
+  territoryCode: ReturnType<typeof listDemoRegionalTerritories>[number]["code"];
   status: "REGISTERED" | "COMPANY_REVIEW" | "DOCUMENT_REVIEW" | "CONTRACT_PENDING";
   domainLabel: string;
   applicantLabel: string;

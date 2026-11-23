@@ -14,7 +14,7 @@ select ok((
 select ok((
  select pg_get_functiondef(p.oid) like '%hatim.ahmitech@%'
   and pg_get_functiondef(p.oid) like '%Ahmitech Franchise IT%'
-  and pg_get_functiondef(p.oid) like '%FRANCHISE[_]%'
+  and position('FRANCHISE_%' in pg_get_functiondef(p.oid)) > 0
  from pg_proc p join pg_namespace n on n.oid=p.pronamespace
  where n.nspname='private' and p.proname='repair_org002_demo_personas_v1'
 ),'persona repair promotes Hatim/IT identity and franchise scopes');

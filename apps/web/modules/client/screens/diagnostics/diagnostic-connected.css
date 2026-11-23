@@ -13,6 +13,8 @@
   --diag-amber-ink: #b45309;
   --diag-grad: var(--mat-gradient);
   display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   color: var(--diag-ink);
 }
@@ -198,7 +200,8 @@
   color: var(--diag-violet);
 }
 
-.diag-conn-btn-grad {
+.diag-conn-btn-grad,
+.diag-conn a.diag-conn-btn-grad {
   border: 0;
   background: var(--diag-grad);
   color: #fff;
@@ -326,12 +329,14 @@
 
 .diag-conn-split {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.55fr);
   gap: 16px;
   align-items: start;
 }
 
 .diag-conn-card {
+  min-width: 0;
   padding: 18px;
   border: 1px solid var(--diag-line);
   border-radius: 16px;
@@ -587,7 +592,7 @@
   .diag-conn-split,
   .diag-conn-q-layout,
   .diag-conn-score,
-  .diag-conn-hero { grid-template-columns: 1fr; }
+  .diag-conn-hero { grid-template-columns: minmax(0, 1fr); }
   .diag-conn-quote { justify-self: start; text-align: start; }
   .diag-conn-quote::after { margin-inline-start: 0; }
 }

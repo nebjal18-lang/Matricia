@@ -31,7 +31,7 @@ export async function linkMyFranchiseApplicationOrganization(_: CandidateLinkSta
   });
   if (result.error) {
     const code = result.error.code ?? "";
-    return { status: "error", reason: code === "42501" ? "DENIED" : code === "40001" ? "CONFLICT" : code === "22023" ? "VALIDATION" : "UNAVAILABLE" };
+    return { status: "error", reason: code === "42501" ? "DENIED" : (code === "40001" || code === "PT409") ? "CONFLICT" : code === "22023" ? "VALIDATION" : "UNAVAILABLE" };
   }
   revalidatePath(`/${parsed.data.locale}/franchise/candidature`);
   return { status: "success" };

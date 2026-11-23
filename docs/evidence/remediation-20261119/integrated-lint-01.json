@@ -1,0 +1,20 @@
+{
+  "task": "integrated-lint-01",
+  "command": [
+    "pnpm",
+    "lint"
+  ],
+  "startedAt": "2026-11-19T14:15:17.508Z",
+  "finishedAt": "2026-11-19T14:17:44.174Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0,
+  "sourceBefore": {
+    "commit": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "sourceSha256": "aace5a7e117af0dfb9f305b5fc261a0c9da06f806e3370e7b91b652312365c29"
+  },
+  "sourceAfter": {
+    "commit": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "sourceSha256": "aace5a7e117af0dfb9f305b5fc261a0c9da06f806e3370e7b91b652312365c29"
+  },
+  "sourceUnchanged": true
+}

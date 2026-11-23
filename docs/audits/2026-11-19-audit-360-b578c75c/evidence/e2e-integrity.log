@@ -1,0 +1,107 @@
+
+Running 4 tests using 2 workers
+
+(node:45940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+(node:50036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/4] [chromium-mobile-360] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé fr, sans soumission
+[2/4] [chromium-mobile-360] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission
+(node:46460) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[3/4] [chromium-desktop] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé fr, sans soumission
+  1) [chromium-mobile-360] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#need-service option[value="BTP-RENOV"]')
+    Expected substring: "الاسم العربي غير متاح"
+    Received string:    "تجديد مبنى أو محل"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('#need-service option[value="BTP-RENOV"]') with timeout 5000ms
+      - waiting for locator('#need-service option[value="BTP-RENOV"]')
+        14 × locator resolved to <option lang="ar" value="BTP-RENOV">تجديد مبنى أو محل</option>
+           - unexpected value "تجديد مبنى أو محل"
+
+
+      78 |     await expect(page.locator("#need-service")).toHaveValue("BTP-RENOV");
+      79 |     if (locale === "ar") {
+    > 80 |       await expect(page.locator('#need-service option[value="BTP-RENOV"]')).toContainText("الاسم العربي غير متاح");
+         |                                                                             ^
+      81 |       await expect(page.getByRole("note")).toContainText("أسماء عربية معتمدة");
+      82 |     }
+      83 |     await expect(page.getByText(originalNeed, { exact: true })).toBeVisible();
+        at C:\Projects\Matricia\Matricia\tests\e2e\public\diagnostic-need-integrity.spec.ts:80:77
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+(node:13348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[4/4] [chromium-desktop] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission
+  2) [chromium-desktop] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#need-service option[value="BTP-RENOV"]')
+    Expected substring: "الاسم العربي غير متاح"
+    Received string:    "تجديد مبنى أو محل"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('#need-service option[value="BTP-RENOV"]') with timeout 5000ms
+      - waiting for locator('#need-service option[value="BTP-RENOV"]')
+        14 × locator resolved to <option lang="ar" value="BTP-RENOV">تجديد مبنى أو محل</option>
+           - unexpected value "تجديد مبنى أو محل"
+
+
+      78 |     await expect(page.locator("#need-service")).toHaveValue("BTP-RENOV");
+      79 |     if (locale === "ar") {
+    > 80 |       await expect(page.locator('#need-service option[value="BTP-RENOV"]')).toContainText("الاسم العربي غير متاح");
+         |                                                                             ^
+      81 |       await expect(page.getByRole("note")).toContainText("أسماء عربية معتمدة");
+      82 |     }
+      83 |     await expect(page.getByText(originalNeed, { exact: true })).toBeVisible();
+        at C:\Projects\Matricia\Matricia\tests\e2e\public\diagnostic-need-integrity.spec.ts:80:77
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace docs\audits\2026-11-19-audit-360-b578c75c\evidence\e2e-integrity-artifacts\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+  2 failed
+    [chromium-mobile-360] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission 
+    [chromium-desktop] › tests\e2e\public\diagnostic-need-integrity.spec.ts:13:3 › M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission 
+  2 passed (35.0s)

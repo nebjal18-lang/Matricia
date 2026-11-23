@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   from: vi.fn(),
   rpc: vi.fn(),
+  review: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -25,7 +26,7 @@ vi.mock("@/modules/admin/ui/admin-app-shell", () => ({
   AdminCrumb: () => <nav>crumb</nav>,
 }));
 vi.mock("@/modules/admin/screens/franchise-applications/review-forms", () => ({
-  FranchiseApplicationReview: () => <div data-review="true" />,
+  FranchiseApplicationReview: (props: unknown) => { mocks.review(props); return <div data-review="true" />; },
 }));
 vi.mock("@/modules/shared/lib/supabase/server", () => ({
   getSupabaseServerClient: async () => ({
@@ -37,7 +38,7 @@ vi.mock("@/modules/shared/lib/supabase/server", () => ({
 
 import FranchiseApplicationsPage from "./page";
 
-function query(result: { data: unknown; error: null }) {
+function query(result: { data: unknown; error: { code: string } | null }) {
   const api: Record<string, unknown> = {};
   const next = () => api;
   api.select = next;
@@ -45,12 +46,14 @@ function query(result: { data: unknown; error: null }) {
   api.eq = next;
   api.order = next;
   api.limit = async () => result;
+  api.range = async () => result;
   api.then = (resolve: (value: typeof result) => unknown) => Promise.resolve(result).then(resolve);
   return api;
 }
 
 describe("FranchiseApplicationsPage", () => {
   beforeEach(() => {
+    mocks.review.mockReset();
     mocks.resolveAdminSpace.mockResolvedValue({
       status: "success",
       selectedQuery: "",
@@ -109,7 +112,30 @@ describe("FranchiseApplicationsPage", () => {
     expect(html).not.toMatch(/ACTIVE\s*·\s*[0-9A-F]{8}/i);
   });
 
-  it("overlays demo instruction dossiers when demo flag is on and DB queue is empty", async () => {
+  it("keeps persisted IDs under the demo flag and blocks review on failed related reads", async () => {
+    vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
+    vi.stubEnv("APP_ENV", "development");
+    mocks.from.mockImplementation((table: string) => query(table === "franchise_applications" ? {
+      data: [{ id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", applicant_name: "Persisted candidate", reply_email: "candidate@example.invalid", territory_code: "CASABLANCA_SETTAT", domain_label: "IT", status: "CONTRACT_PENDING", organization_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", franchise_id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd", row_version: 7, created_at: "2026-11-01T10:00:00.000Z" }], error: null,
+    } : { data: null, error: { code: "42501" } }));
+    try {
+      const html = renderToStaticMarkup(await FranchiseApplicationsPage({ params: Promise.resolve({ locale: "fr" }), searchParams: Promise.resolve({ fixtures: "1" }) }));
+      expect(html).toContain("Persisted candidate");
+      expect(html).toContain("Données de revue indisponibles");
+      expect(mocks.review).not.toHaveBeenCalled();
+    } finally { vi.unstubAllEnvs(); }
+  });
+
+  it("exposes continuation instead of silently truncating the 51st application", async () => {
+    mocks.from.mockImplementation((table: string) => query({ data: table === "franchise_applications" ? Array.from({ length: 51 }, (_, index) => ({ id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(index).padStart(12, "0")}`, applicant_name: `Candidate ${index}`, reply_email: "candidate@example.invalid", territory_code: "CASABLANCA_SETTAT", domain_label: "IT", status: "REGISTERED", organization_id: null, franchise_id: null, row_version: 1, created_at: "2026-11-01T10:00:00.000Z" })) : [], error: null }));
+    const html = renderToStaticMarkup(await FranchiseApplicationsPage({ params: Promise.resolve({ locale: "fr" }), searchParams: Promise.resolve({ fixtures: "1" }) }));
+    expect(html).toContain("page=2");
+    expect(html).toContain("Candidate 49");
+    expect(html).not.toContain("Candidate 50");
+    expect(mocks.review.mock.calls[0]?.[0]).toMatchObject({ application: { id: "bbbbbbbb-bbbb-4bbb-8bbb-000000000000", rowVersion: 1 } });
+  });
+
+  it("keeps the persisted empty state when demo flag is on", async () => {
     process.env.APP_ENV = "development";
     process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
     mocks.from.mockImplementation(() => query({ data: [], error: null }));
@@ -117,14 +143,14 @@ describe("FranchiseApplicationsPage", () => {
       params: Promise.resolve({ locale: "fr" }),
       searchParams: Promise.resolve({}),
     }));
-    expect(html).toContain("admin-franchise-card");
-    expect(html).toContain("@matricia.test");
+    expect(html).not.toContain("admin-franchise-card");
+    expect(html).not.toContain("@matricia.test");
     expect(html).toContain("Inscrit");
     expect(html).toContain("Revue de la société");
     expect(html).toContain("Pièces demandées");
     expect(html).toContain("Mandat proposé");
     expect(html).toContain("À traiter");
-    expect(html).not.toContain("Aucune candidature enregistrée");
+    expect(html).toContain("Aucune candidature sur cette page.");
     delete process.env.MATRICIA_DEMO_ACCESS_ENABLED;
     delete process.env.APP_ENV;
   });

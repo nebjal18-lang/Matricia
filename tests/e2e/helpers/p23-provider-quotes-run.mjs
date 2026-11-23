@@ -6,7 +6,8 @@ import { copyFile, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadSafeConfiguration } from "../../../scripts/p05-e2e/environment.mjs";
-import { provision } from "../../../scripts/p05-e2e/provision.mjs";
+import { publishLinkedLocalFiscalMapping } from "./linked-commercial-commands.mjs";
+import { provision, elevateToAal2 } from "../../../scripts/p05-e2e/provision.mjs";
 import { buildChildEnvironment, secureLocalPaths, sha256File, validateFreshManifest } from "../../../scripts/p05-e2e/security.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -26,8 +27,8 @@ async function createProviderFixture(fixture) {
   const foreignUserId = userByEmail.get(`p05-e2e-clientb-${runId}@example.invalid`);
   const providerUserId = userByEmail.get(`p05-e2e-norole-${runId}@example.invalid`);
   if (!clientUserId || !foreignUserId || !providerUserId) throw new Error("P23 isolated identities are incomplete");
-  const catalog = await database`select service.id as service_id,service.library_id
-    from public.catalog_services service where service.status='PUBLISHED' and (${fixture.resources.localCatalog?.service ?? null}::uuid is null or service.id=${fixture.resources.localCatalog?.service ?? null}::uuid) order by service.id limit 1`;
+  const catalog = await database`select service.id as service_id,service.library_id,version.content_hash
+    from public.catalog_services service join public.catalog_service_versions version on version.id=service.current_published_version_id where service.status='PUBLISHED' and (${fixture.resources.localCatalog?.service ?? null}::uuid is null or service.id=${fixture.resources.localCatalog?.service ?? null}::uuid) order by service.id limit 1`;
   if (catalog.length !== 1) throw new Error("P23 requires one existing catalog service");
 
   const targetOrganizationId = randomUUID();
@@ -65,7 +66,7 @@ async function createProviderFixture(fixture) {
       await transaction`insert into public.service_requests(id,client_organization_id,library_id,service_id,status,created_by)
         values(${item.requestId}::uuid,${fixture.manifest.fixtures.organizationA.id}::uuid,${catalog[0].library_id}::uuid,${catalog[0].service_id}::uuid,'MATCHING',${clientUserId}::uuid)`;
       await transaction`insert into public.service_request_versions(id,request_id,client_organization_id,library_id,version_number,description,urgency,currency_code,required_quote_data,required_fields_complete,catalog_snapshot_hash,questionnaire_snapshot_hash,change_reason,content_hash,created_by)
-        values(${item.requestVersionId}::uuid,${item.requestId}::uuid,${fixture.manifest.fixtures.organizationA.id}::uuid,${catalog[0].library_id}::uuid,1,${item.description},'NORMAL','MAD',jsonb_build_object('region_code','CASABLANCA','tax_category_code',${categoryCode}::text),true,${digest(`${item.requestId}:catalog`)},${digest(`${item.requestId}:questionnaire`)},'Fixture Provider P23',${digest(`${item.requestId}:content`)},${clientUserId}::uuid)`;
+        values(${item.requestVersionId}::uuid,${item.requestId}::uuid,${fixture.manifest.fixtures.organizationA.id}::uuid,${catalog[0].library_id}::uuid,1,${item.description},'NORMAL','MAD',jsonb_build_object('region_code','CASABLANCA','tax_category_code',${categoryCode}::text),true,${catalog[0].content_hash},${digest(`${item.requestId}:questionnaire`)},'Fixture Provider P23',${digest(`${item.requestId}:content`)},${clientUserId}::uuid)`;
       await transaction`update public.service_requests set current_version_id=${item.requestVersionId}::uuid where id=${item.requestId}::uuid`;
       await transaction`insert into public.matching_runs(id,request_id,request_version_id,policy_version,status,target_panel_size,started_by,completed_at)
         values(${item.matchingRunId}::uuid,${item.requestId}::uuid,${item.requestVersionId}::uuid,'MATCH-V1','COMPLETED',1,${clientUserId}::uuid,clock_timestamp())`;
@@ -103,10 +104,10 @@ async function verifyProviderResults(database, providerFixture, mobileOnly) {
     count(distinct version.id)::integer as versions,count(distinct item.id)::integer as items,
     bool_and(quote.status='SUBMITTED' and version.lifecycle_status='SUBMITTED'
       and version.currency='MAD' and item.quantity=1.2500::numeric
-      and item.unit_price_minor=900719925474099300::bigint
-      and item.subtotal_minor=1125899906842624125::bigint
-      and item.tax_minor=225179981368524825::bigint
-      and item.total_minor=1351079888211148950::bigint
+      and item.unit_price_minor=90071992547409920::bigint
+      and item.subtotal_minor=112589990684262400::bigint
+      and item.tax_minor=22517998136852480::bigint
+      and item.total_minor=135107988821114880::bigint
       and item.tax_rule_version_id=${providerFixture.taxRuleId}::uuid) as exact
     from public.quotes quote join public.quote_versions version on version.id=quote.current_version_id
     join public.quote_items item on item.quote_version_id=version.id
@@ -151,6 +152,20 @@ try {
   await validateFreshManifest(fixture.manifest, config);
   stage='provider-fixture';providerFixture = await createProviderFixture(fixture);
   stage='current-identity-review';if(config.runtimeMode==='isolated-local-docker')providerFixture.identity=await prepareLocalQuoteIdentity(fixture,providerFixture.targetOrganizationId,providerFixture.providerUserId);
+  if(config.runtimeMode==='isolated-local-docker'){
+    stage='reviewed-local-fiscal-mapping';
+    fixture.resources.localP23FiscalReviewers=[];
+    for(const actor of [fixture.sessions.central,fixture.sessions.clientA]){
+      const identity=await actor.client.auth.getUser();
+      const userId=identity.data.user?.id;
+      if(identity.error||!fixture.resources.userIds.includes(userId))throw new Error('P23_LOCAL_REVIEWER_SCOPE_INVALID');
+      await fixture.resources.database`insert into public.platform_user_roles(user_id,role_code)values(${userId}::uuid,'FINANCE_MANAGER')`;
+      fixture.resources.localP23FiscalReviewers.push(userId);
+    }
+    await elevateToAal2(fixture.sessions.clientA);
+    fixture.resources.localJourneyReviewers={fr:fixture.sessions.central,ar:fixture.sessions.clientA};
+    await publishLinkedLocalFiscalMapping(fixture,{taxCategoryCode:providerFixture.categoryCode});
+  }
   stage='real-session-isolation';
   await proveForeignTenantDenied(fixture, providerFixture);
   await mkdir(authDirectory, { recursive: false, mode: 0o700 });
@@ -177,6 +192,7 @@ try {
   console.log("PASS P23 Provider quotes E2E and exact financial evidence");
 } catch (error) { failure = error; suiteSummary ??= error.browserSummary; }
 finally {
+  if(fixture)try{for(const userId of fixture.resources.localP23FiscalReviewers??[])await fixture.resources.database`delete from public.platform_user_roles where user_id=${userId}::uuid and role_code='FINANCE_MANAGER'`;}catch(error){cleanupFailed=true;failure??=error;}
   if(fixture)try{await closePendingLocalProviderScans(fixture,fixture.resources.localQuoteIdentityPaths);}catch(error){cleanupFailed=true;failure??=error;}
   if(fixture)try{await cleanLocalQuoteIdentityFiles(fixture);}catch(error){cleanupFailed=true;failure??=error;}
   if (fixture && providerFixture) try { await neutralizeProviderFixture(fixture.resources.database, providerFixture); console.log("PASS P23 Provider fixture neutralized"); } catch (error) { cleanupFailed=true; failure = failure ? new AggregateError([failure, error], "P23 run and provider cleanup failed") : error; }

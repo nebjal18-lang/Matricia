@@ -156,8 +156,9 @@ export function createCatalogBuilderRepository(dependencies: BuilderRepositoryDe
           if (selectedResponse.error) return failure(selectedResponse.error);
           const selected = z.array(libraryRow).max(1).safeParse(selectedResponse.data);
           if (!selected.success) return { status: "error", reason: "INVALID_RESPONSE" };
-          if (selected.data.length !== 1 || selected.data[0].id !== libraryId) return { status: "error", reason: "INVALID_INPUT" };
-          libraries = preferOperationalLibraries([mapLibrary(selected.data[0]), ...libraries], libraryId);
+          const selectedLibrary = selected.data[0];
+          if (selected.data.length !== 1 || !selectedLibrary || selectedLibrary.id !== libraryId) return { status: "error", reason: "INVALID_INPUT" };
+          libraries = preferOperationalLibraries([mapLibrary(selectedLibrary), ...libraries], libraryId);
         }
         const servicesResponse = await dependencies.services(libraryId);
         if (servicesResponse.error) return failure(servicesResponse.error);

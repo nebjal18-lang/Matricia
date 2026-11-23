@@ -1,0 +1,12 @@
+{
+  "task": "dependencies",
+  "command": [
+    "pnpm",
+    "audit",
+    "--json"
+  ],
+  "startedAt": "2026-11-19T14:05:05.814Z",
+  "finishedAt": "2026-11-19T14:05:06.917Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

@@ -60,7 +60,7 @@ export default async function OrganizationPage({ params, searchParams }: { param
       </main>
     );
   }
-  const space = await resolveConnectedSpace({ locale, organizationId: query.organizationId });
+  const space = await resolveConnectedSpace({ locale, ...(query.organizationId !== undefined && { organizationId: query.organizationId }) });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: selfHref }));
   const c = spaceCopy(locale);
   const roles = await listOrganizationRoles();
@@ -82,7 +82,7 @@ export default async function OrganizationPage({ params, searchParams }: { param
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
       currentPath={selfHref}
       title={c.orgTitle}
       lead={c.orgLead}

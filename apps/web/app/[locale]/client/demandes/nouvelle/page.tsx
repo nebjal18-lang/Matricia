@@ -100,7 +100,7 @@ export default async function NewRequestPage({
   const subscription = entitlementOrgId ? await loadSubscriptionDashboard(entitlementOrgId) : { status: "error" as const, reason: "UNAVAILABLE" as const };
   const vault = entitlementOrgId ? await loadClientDocumentVault(entitlementOrgId) : { status: "error" as const, reason: "UNAVAILABLE" as const };
   const block = newRequestBlockReason({
-    subscriptionStatus: subscription.status === "success" ? subscription.dashboard.subscription?.status : undefined,
+    subscriptionStatus: subscription.status === "success" ? subscription.dashboard.subscription?.status ?? null : null,
     expiredDocumentCount: vault.status === "success" ? vault.value.expiredDocumentCount ?? expiredDocuments(vault.value.documents).length : 0,
   });
   return (

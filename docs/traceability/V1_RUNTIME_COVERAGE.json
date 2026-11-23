@@ -1,0 +1,2941 @@
+{
+  "schemaVersion": 1,
+  "authority": "Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md",
+  "functionalCoveragePercent": null,
+  "coverageMeaning": "All contract behaviors require executed evidence. Passing test count is not a coverage denominator.",
+  "requirements": [
+    {
+      "id": "MAT-FUNC-001",
+      "title": "Passeport Matricia unique",
+      "contract": "Organisation unique multi-rôles; données communes réutilisées.",
+      "historicalRegistryStatus": "VERIFIED",
+      "candidateBrowserTests": [
+        "tests/e2e/p04-identity.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0010_p04_identity_workflows.test.sql",
+        "supabase/tests/0013_p04_role_requests.test.sql",
+        "supabase/tests/0014_p04_invitation_decline.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/Connexion_OTP_MFA-442ab7d239a67f16eb64b0e499dc847538864e58f235dd6933166c50a5c1fbcd.json",
+          "behavior": "Real OTP, consent and MFA; full multi-role passport acceptance remains to review.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0010_p04_identity_workflows.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0013_p04_role_requests.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0014_p04_invitation_decline.test.sql",
+          "assertions": 16,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-002",
+      "title": "Santé globale",
+      "contract": "Score global + scores bibliothèques + anomalies + évolution.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p21-questionnaires-diagnostics.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0054_p07_diagnostics_opportunities.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/client-journey-e75bdec686093e0bb56da1716078baae14ec90c8a532618123b94b3d3f1cc540.json",
+          "behavior": "UI diagnostic and need conversion with persistence, idempotence, stale version and foreign-session checks.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0054_p07_diagnostics_opportunities.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-003",
+      "title": "Assistant IA",
+      "contract": "Assistant contextuel; aucune sanction/transaction critique autonome.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-assisted-intelligence.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+        "supabase/tests/0084_assistance_role_authorization_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+          "assertions": 43,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0084_assistance_role_authorization_hardening.test.sql",
+          "assertions": 15,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "behavior": "Four real UI analyses, two human acceptances and two refusals, durable decisions and correlated audit/outbox, foreign reads and mutation denied, no automatic business request creation. Full contextual and financial non-autonomy acceptance remains to review.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-004",
+      "title": "Détection proactive",
+      "contract": "Changements de profil déclenchent suggestions/réévaluations.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-profile-reassessment.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+        "supabase/tests/0079_assisted_intelligence_runtime_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+          "assertions": 43,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0079_assisted_intelligence_runtime_hardening.test.sql",
+          "assertions": 22,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "behavior": "Four real UI activity changes FR/AR desktop/mobile create pending profile reassessments, completed through UI analysis; changed keys, matching profile versions, audit/outbox and foreign read denial verified. Other profile fields and independent review remain.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-005",
+      "title": "Diagnostic continu",
+      "contract": "Questions expirantes et revalidation légère.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-questionnaire-revalidation.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0025_p06_question_engine_persistence.test.sql",
+        "supabase/tests/0054_p07_diagnostics_opportunities.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0025_p06_question_engine_persistence.test.sql",
+          "assertions": 119,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0054_p07_diagnostics_opportunities.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/questionnaire-revalidation-c5a081b484c9663aab682f18e8e51f6a31a9df881e86dbd9aca3ac3314f008e6.json",
+          "behavior": "Four real server-expired answers rejected before lightweight UI confirmation and submission; FR/AR desktop/360; original immutable revisions retained, current tenant and submitted session guards, correlated audit/outbox.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-006",
+      "title": "Actions requises",
+      "contract": "File universelle de tâches utilisateur.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p22-universal-actions.spec.ts",
+        "tests/e2e/mat-func-006-franchise-actions-smoke.spec.ts",
+        "tests/e2e/mat-func-006-provider-actions-smoke.spec.ts",
+        "tests/e2e/local-universal-actions.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0053_p17_admin_command_center.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0053_p17_admin_command_center.test.sql",
+          "assertions": 32,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/universal-actions-6317ec21d00d335a4c2eeff42ee9ef38bbe793c64cd4b83386ae5406898e9bef.json",
+          "behavior": "Sixteen universal action views across client/provider/franchise/admin roles, FR/AR desktop/360 with axe; twelve native notifications read via UI and removed from actions, four administrative dossier links; exact read replay, enqueue/read audit and foreign denials.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-007",
+      "title": "Inbox universelle",
+      "contract": "Messagerie liée aux objets métier.",
+      "historicalRegistryStatus": "VERIFIED",
+      "candidateBrowserTests": [
+        "tests/e2e/final-core-product.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0154_messaging_comparison_functional.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/final-core-220bb1ad4447208340f9b2fcbaaa0fcd2c8b5eeca7dadb752e8434cf0c71f436.json",
+          "behavior": "Messaging read/write, frozen comparison, matching history, four capacity transitions.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0154_messaging_comparison_functional.test.sql",
+          "assertions": 33,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-008",
+      "title": "Assistant création besoin",
+      "contract": "Texte libre → service → questions manquantes.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [],
+      "candidateDatabaseTests": [
+        "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+        "supabase/tests/0082_assistance_pii_minimization_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/client-journey-e75bdec686093e0bb56da1716078baae14ec90c8a532618123b94b3d3f1cc540.json",
+          "behavior": "UI diagnostic and need conversion with persistence, idempotence, stale version and foreign-session checks.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+          "assertions": 43,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0082_assistance_pii_minimization_hardening.test.sql",
+          "assertions": 16,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-009",
+      "title": "Solutions multiples",
+      "contract": "Essential/Standard/Advanced pour une même anomalie.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p21-questionnaires-diagnostics.spec.ts",
+        "tests/e2e/local-solution-decisions.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0075_solution_bundles_benchmarks.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0075_solution_bundles_benchmarks.test.sql",
+          "assertions": 44,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/solution-decisions-37c78a142cb9f47a9247162818699185b49d77fd86cd6dee663e14804a4d465e.json",
+          "behavior": "Four native solution sets attached to real questionnaire diagnostics; all three levels rendered and twelve real UI accept/reject/defer decisions persisted. Exact native replays, tenant denial, three audit/outbox decisions per set, Casablanca end-of-day deferral and FR/AR desktop/360 accessibility. Historical published catalogue reference and synthetic policy contents remain explicit; independent review remains required.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-010",
+      "title": "Bundles multi-bibliothèques",
+      "contract": "Ensembles de services pour projet transversal.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-solution-bundles.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0075_solution_bundles_benchmarks.test.sql",
+        "supabase/tests/0085_benchmark_registry_and_bundle_concurrency.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0075_solution_bundles_benchmarks.test.sql",
+          "assertions": 44,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0085_benchmark_registry_and_bundle_concurrency.test.sql",
+          "assertions": 20,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/solution-bundles-93f2f93b0ead91b3164cdfd87c77dff433eff8025cf9ea18e99742470738682b.json",
+          "behavior": "Four real native publications with two libraries and three source lines deduplicated to two services, exact total 150049 minor units. Four UI bundle displays and guided need continuations preserving title, description and organization; no request created automatically. Native replay, foreign read/write denial, audit/outbox and FR/AR desktop/360 accessibility. Published catalogue fixture is a historical precondition; downstream multi-service procurement and independent review remain separate.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-011",
+      "title": "Mode Projet",
+      "contract": "Projet avec budget, tâches, contrats et progression.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p22-client-portfolio.spec.ts",
+        "tests/e2e/local-functional-controls.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0065_client_projects_budgets_calendar.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+          "assertions": 34,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "behavior": "Four UI projects linked to sites, four pending milestones with persisted criteria, four exact approved project budgets, audit/outbox and foreign-tenant read denial. Contract linking and full progression lifecycle remain to test.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "behavior": "Four UI milestones move PENDING to IN_PROGRESS, SUBMITTED and ACCEPTED; progression stays zero before acceptance and reaches 100 percent afterward, with four persisted versions and four correlated audit/outbox pairs per task. Contract linkage remains unproven here.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-012",
+      "title": "Budget annuel",
+      "contract": "Budget par année/bibliothèque/site/projet.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-functional-controls.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+        "supabase/tests/0070_client_portfolio_integrity_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "scope": "PARTIAL",
+          "behavior": "Real FR/AR desktop/360 UI mutations with durable readback, exact approved budgets, versioned digest settings, notification modes, audit/outbox and foreign-tenant denial. Full contract and independent acceptance remain open."
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+          "assertions": 34,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0070_client_portfolio_integrity_hardening.test.sql",
+          "assertions": 25,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-013",
+      "title": "Comparateur intelligent",
+      "contract": "Comparaison normalisée de devis.",
+      "historicalRegistryStatus": "VERIFIED",
+      "candidateBrowserTests": [
+        "tests/e2e/final-core-product.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0044_p07_quotes_comparison.test.sql",
+        "supabase/tests/0154_messaging_comparison_functional.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/final-core-220bb1ad4447208340f9b2fcbaaa0fcd2c8b5eeca7dadb752e8434cf0c71f436.json",
+          "behavior": "Messaging read/write, frozen comparison, matching history, four capacity transitions.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0044_p07_quotes_comparison.test.sql",
+          "assertions": 19,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0154_messaging_comparison_functional.test.sql",
+          "assertions": 33,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-014",
+      "title": "Complétude devis",
+      "contract": "Score + blocage champs obligatoires.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p23-provider-quotes.spec.ts",
+        "tests/e2e/mat-func-014-quote-completeness-smoke.spec.ts",
+        "tests/e2e/mat-func-014-provider-quote-mandatory-fields.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0044_p07_quotes_comparison.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/p23-quotes-7c2a383271c000517a2fa8848b66b5bfd5986cfbe7af82e79238ae8e745d7532.json",
+          "behavior": "UI quote submission with exact persisted financial values and audit; all missing-field cases remain to review.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0044_p07_quotes_comparison.test.sql",
+          "assertions": 19,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-015",
+      "title": "Feedback non retenus",
+      "contract": "Classement personnel + amélioration anonymisée.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-015-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0066_provider_reputation_badges_favorites.test.sql",
+        "supabase/tests/0072_provider_feedback_outbox_backfill.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0066_provider_reputation_badges_favorites.test.sql",
+          "assertions": 45,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0072_provider_feedback_outbox_backfill.test.sql",
+          "assertions": 18,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-016",
+      "title": "Réputation multidimensionnelle",
+      "contract": "Qualité/délai/conformité/réponse/satisfaction/finance.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-016-atomic-smoke.spec.ts",
+        "tests/e2e/local-provider-reputation.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0066_provider_reputation_badges_favorites.test.sql",
+        "supabase/tests/0068_provider_feedback_privacy_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0066_provider_reputation_badges_favorites.test.sql",
+          "assertions": 45,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0068_provider_feedback_privacy_hardening.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/provider-reputation-ca562e40014838ebf06b162808df8de092ec7c6274a250ba761018dec61f78f4.json",
+          "behavior": "Two completed mission feedbacks, four UI refreshes from six authoritative dimensions, no automatic publication, four human badge decisions and four provider views with accessibility; foreign decision denied and correlated audit/outbox.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-017",
+      "title": "Badges",
+      "contract": "Badges calculés et versionnés.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-017-atomic-smoke.spec.ts",
+        "tests/e2e/local-provider-reputation.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0066_provider_reputation_badges_favorites.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0066_provider_reputation_badges_favorites.test.sql",
+          "assertions": 45,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/provider-reputation-ca562e40014838ebf06b162808df8de092ec7c6274a250ba761018dec61f78f4.json",
+          "behavior": "Two completed mission feedbacks, four UI refreshes from six authoritative dimensions, no automatic publication, four human badge decisions and four provider views with accessibility; foreign decision denied and correlated audit/outbox.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-018",
+      "title": "Matching évolutif",
+      "contract": "Règles explicables et historisées.",
+      "historicalRegistryStatus": "VERIFIED",
+      "candidateBrowserTests": [
+        "tests/e2e/final-core-product.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+        "supabase/tests/0100_admin_revocation_and_rfq_versioned_eligibility.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/final-core-220bb1ad4447208340f9b2fcbaaa0fcd2c8b5eeca7dadb752e8434cf0c71f436.json",
+          "behavior": "Messaging read/write, frozen comparison, matching history, four capacity transitions.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+          "assertions": 42,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0100_admin_revocation_and_rfq_versioned_eligibility.test.sql",
+          "assertions": 14,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-019",
+      "title": "Rotation équitable",
+      "contract": "Éviter monopolisation lorsque candidats équivalents.",
+      "historicalRegistryStatus": "VERIFIED",
+      "candidateBrowserTests": [
+        "tests/e2e/final-core-product.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+        "supabase/tests/0098_rfq_fair_rotation_recurring_scheduler.test.sql",
+        "supabase/tests/0155_matching_rotation_behavioral.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/final-core-220bb1ad4447208340f9b2fcbaaa0fcd2c8b5eeca7dadb752e8434cf0c71f436.json",
+          "behavior": "Messaging read/write, frozen comparison, matching history, four capacity transitions.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+          "assertions": 42,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0098_rfq_fair_rotation_recurring_scheduler.test.sql",
+          "assertions": 13,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0155_matching_rotation_behavioral.test.sql",
+          "assertions": 26,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-020",
+      "title": "Capacité provider",
+      "contract": "AVAILABLE/LIMITED/FULL/PAUSED.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/final-core-product.spec.ts",
+        "tests/e2e/mat-func-020-capacity-states-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0046_p09_provider_qualification.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/final-core-220bb1ad4447208340f9b2fcbaaa0fcd2c8b5eeca7dadb752e8434cf0c71f436.json",
+          "behavior": "Messaging read/write, frozen comparison, matching history, four capacity transitions.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0046_p09_provider_qualification.test.sql",
+          "assertions": 42,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-021",
+      "title": "Calendrier central",
+      "contract": "Échéances devis, missions, factures, documents.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p22-client-portfolio.spec.ts",
+        "tests/e2e/local-functional-controls.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0065_client_projects_budgets_calendar.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+          "assertions": 34,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "behavior": "Four UI calendar events linked to projects and four task deadlines, Casablanca display and UTC persistence, audit/outbox and foreign reads denied. Invoice, mission and document projections remain to review.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-022",
+      "title": "Jalons",
+      "contract": "Phases de mission validables.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts",
+        "tests/e2e/mat-func-022-mission-milestones.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0045_p08_contracts_missions_core.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/linked-commercial-079e3df7b9df24f0fad229750341eec9f4cbaa9bbfbc025aec543c12eb355397.json",
+          "behavior": "Linked mission, scanned private delivery proof, checklist and acceptance; signature is DEV_MOCK.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-023",
+      "title": "Preuves de réalisation",
+      "contract": "Preuves obligatoires par service.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-023-delivery-proof-scan-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+        "supabase/tests/0125_delivery_proof_trusted_scan.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/linked-commercial-079e3df7b9df24f0fad229750341eec9f4cbaa9bbfbc025aec543c12eb355397.json",
+          "behavior": "Linked mission, scanned private delivery proof, checklist and acceptance; signature is DEV_MOCK.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0125_delivery_proof_trusted_scan.test.sql",
+          "assertions": 11,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-024",
+      "title": "Checklists",
+      "contract": "Checklist versionnée par service.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts",
+        "tests/e2e/mat-func-024-mission-checklist-snapshot.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+        "supabase/tests/0104_contract_mission_checklist_snapshot.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/linked-commercial-079e3df7b9df24f0fad229750341eec9f4cbaa9bbfbc025aec543c12eb355397.json",
+          "behavior": "Linked mission, scanned private delivery proof, checklist and acceptance; signature is DEV_MOCK.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0104_contract_mission_checklist_snapshot.test.sql",
+          "assertions": 29,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-025",
+      "title": "Réception objective",
+      "contract": "Validation critère par critère.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts",
+        "tests/e2e/mat-func-025-delivery-acceptance-criteria.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0045_p08_contracts_missions_core.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/linked-commercial-079e3df7b9df24f0fad229750341eec9f4cbaa9bbfbc025aec543c12eb355397.json",
+          "behavior": "Linked mission, scanned private delivery proof, checklist and acceptance; signature is DEV_MOCK.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-026",
+      "title": "Avenant rapide",
+      "contract": "Demande supplémentaire → prix/délai/livrables.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts",
+        "tests/e2e/mat-func-026-contract-amendment-activation.spec.ts",
+        "tests/e2e/local-contract-amendments.spec.ts",
+        "tests/e2e/local-amendment-execution.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+        "supabase/tests/0118_contract_amendment_activation.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0118_contract_amendment_activation.test.sql",
+          "assertions": 15,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/contract-amendments-ca1b1ca443bab790d4145dc452141a169bc83765d507d57ec7e4c1aa88d5ba9e.json",
+          "behavior": "Four client requests and four provider amendment proposals, exact 5001 minor units and seven days, four structured additional deliverables, replay and audit/outbox; unchanged signed base, foreign read denied, provider submission denied and missing signature prerequisites block client submission. Activation not certified.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/amendment-activation-0222c22dfc831c797944ffae604236b2bb55045e0b64d3b034bbefbe6a36b82d.json",
+          "behavior": "Two governed DEV mock amendment activations after both signatures, bilingual canonical PDFs, exact price increase and immutable base versions; two real client UI execution confirmations, eight client/provider mission views in FR/AR desktop/360, initial PENDING deliverables with two criteria, Casablanca due dates, exact replay, foreign execution denials and correlated audit/outbox. External contractual signatures and independent review remain unvalidated.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-027",
+      "title": "Versionnage complet",
+      "contract": "Historique immuable des objets critiques.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-contract-amendments.spec.ts",
+        "tests/e2e/local-amendment-execution.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0003_immutable_ledgers.test.sql",
+        "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+        "supabase/tests/0385_immutable_inventory_ledger_guard.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0003_immutable_ledgers.test.sql",
+          "assertions": 5,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0385_immutable_inventory_ledger_guard.test.sql",
+          "assertions": 10,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/contract-amendments-ca1b1ca443bab790d4145dc452141a169bc83765d507d57ec7e4c1aa88d5ba9e.json",
+          "behavior": "Four client requests and four provider amendment proposals, exact 5001 minor units and seven days, four structured additional deliverables, replay and audit/outbox; unchanged signed base, foreign read denied, provider submission denied and missing signature prerequisites block client submission. Activation not certified.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/amendment-activation-0222c22dfc831c797944ffae604236b2bb55045e0b64d3b034bbefbe6a36b82d.json",
+          "behavior": "Two governed DEV mock amendment activations after both signatures, bilingual canonical PDFs, exact price increase and immutable base versions; two real client UI execution confirmations, eight client/provider mission views in FR/AR desktop/360, initial PENDING deliverables with two criteria, Casablanca due dates, exact replay, foreign execution denials and correlated audit/outbox. External contractual signatures and independent review remain unvalidated.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-028",
+      "title": "Coffre-fort documentaire",
+      "contract": "Documents privés, versionnés, réutilisables.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p05-client-compliance.spec.ts",
+        "tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts",
+        "tests/e2e/mat-func-028-document-reuse-cross-context.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0020_p05_client_compliance_documents.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/linked-commercial-079e3df7b9df24f0fad229750341eec9f4cbaa9bbfbc025aec543c12eb355397.json",
+          "behavior": "Linked mission, scanned private delivery proof, checklist and acceptance; signature is DEV_MOCK.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0020_p05_client_compliance_documents.test.sql",
+          "assertions": 31,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-029",
+      "title": "Expirations",
+      "contract": "Rappels et suspension ciblée.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-029-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0046_p09_provider_qualification.test.sql",
+        "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0046_p09_provider_qualification.test.sql",
+          "assertions": 42,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql",
+          "assertions": 40,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-030",
+      "title": "Centre financier unifié",
+      "contract": "Vue consolidée multi-rôles, ledgers séparés.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-030-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0003_immutable_ledgers.test.sql",
+        "supabase/tests/0004_financial_rpcs.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0003_immutable_ledgers.test.sql",
+          "assertions": 5,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0004_financial_rpcs.test.sql",
+          "assertions": 18,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-031",
+      "title": "Prévision commissions",
+      "contract": "Accruals estimés avant facturation.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-031-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0047_p10_provider_billing_reconciliation.test.sql",
+        "supabase/tests/0060_p14_morocco_tax_engine.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0047_p10_provider_billing_reconciliation.test.sql",
+          "assertions": 33,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0060_p14_morocco_tax_engine.test.sql",
+          "assertions": 49,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-032",
+      "title": "Rapprochement paiements",
+      "contract": "Allocation plusieurs factures/paiements.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-032-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0047_p10_provider_billing_reconciliation.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0047_p10_provider_billing_reconciliation.test.sql",
+          "assertions": 33,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-033",
+      "title": "Wallet crédits",
+      "contract": "Ledger crédits complet.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-033-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0055_p08_boxes_credits_security.test.sql",
+        "supabase/tests/0057_p08_credit_wallet_client_admin_rls.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/benefit-fulfillment-40e4a0a4184df46df0cdf97375dab6a4548516028e5fa31c108b1e84041d4f85.json",
+          "behavior": "Gift reservation, scheduling, rejection then acceptance and unique consumption; full wallet/ROI acceptance remains to review.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0055_p08_boxes_credits_security.test.sql",
+          "assertions": 35,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0057_p08_credit_wallet_client_admin_rls.test.sql",
+          "assertions": 14,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-034",
+      "title": "Récompenses",
+      "contract": "Règles bonus paramétrables.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-034-atomic-smoke.spec.ts",
+        "tests/e2e/local-reward-rules.spec.ts",
+        "tests/e2e/local-referral-rewards.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+        "supabase/tests/0071_rewards_referral_audience_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+          "assertions": 50,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0071_rewards_referral_audience_hardening.test.sql",
+          "assertions": 25,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/reward-rules-05e41f43a37c8691c4bb5a5a5e64ef5896de929ff49f62ace9f2a913d432f34c.json",
+          "behavior": "Eight UI-created draft/active reward rule versions and exact bigint credit displays in FR/AR desktop/360. Native replay, changed-payload rejection, unauthorized creation denial, preserved previous versions and audit/outbox; rule creation emits no credit. Actual reward issuance and independent review remain separate.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/referral-rewards-7e6dadf6e76d32a6164634bbbb087616a27bedcd5645390c19ffe2d8d28e4997.json",
+          "behavior": "Two UI-registered clients activated through native compliance, independent VERIFIED/ACTIVE referral transitions with exact replay, two real UI independent approvals, pending balances unchanged, two finance UI issuances, four granted recipient views, exact 17-credit unique BONUS lots and ledger grants with zero revenue, execution replay, unauthorized finance denial, tenant isolation, audit/outbox. FR/AR desktop and 360px accessibility. External registries and provider referrals remain separate.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-035",
+      "title": "Parrainage",
+      "contract": "Liens et conversion traçables.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-035-atomic-smoke.spec.ts",
+        "tests/e2e/local-client-referrals.spec.ts",
+        "tests/e2e/local-referral-rewards.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+        "supabase/tests/0073_referral_conversion_anti_oracle.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+          "assertions": 50,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0073_referral_conversion_anti_oracle.test.sql",
+          "assertions": 12,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/client-referrals-fd6a9c39dd26b50112eec19535fa4c1af087b5770e27aca8cd6acf8ac4a3b62b.json",
+          "behavior": "Four real client UI links and four consented claims through existing invitation links in FR/AR desktop/360. Exact Casablanca expiry, immutable consented origin, touchpoints, replay, mandatory consent, self-referral rejection, conversion cap, foreign read denial and audit/outbox. No automatic verification, activation or bonus. Provider referrals and full approved reward issuance remain separate.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/referral-rewards-7e6dadf6e76d32a6164634bbbb087616a27bedcd5645390c19ffe2d8d28e4997.json",
+          "behavior": "Two UI-registered clients activated through native compliance, independent VERIFIED/ACTIVE referral transitions with exact replay, two real UI independent approvals, pending balances unchanged, two finance UI issuances, four granted recipient views, exact 17-credit unique BONUS lots and ledger grants with zero revenue, execution replay, unauthorized finance denial, tenant isolation, audit/outbox. FR/AR desktop and 360px accessibility. External registries and provider referrals remain separate.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-036",
+      "title": "CRM franchisé",
+      "contract": "Prospects/clients/providers et activité.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-036-atomic-smoke.spec.ts",
+        "tests/e2e/local-franchise-crm.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+        "supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql",
+          "assertions": 23,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/franchise-crm-f9a20140232a3aae96ee23ed63e36ac7e5d3d5a6d86e66ad4f1ee684e123a33a.json",
+          "behavior": "Eight UI invitations, eight duplicate attempts and sixteen persisted notes across client/provider, FR/AR desktop/360.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-037",
+      "title": "Pipeline franchisé",
+      "contract": "Étapes de conversion standardisées.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-037-atomic-smoke.spec.ts",
+        "tests/e2e/local-franchise-crm.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+        "supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql",
+          "assertions": 23,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/franchise-crm-f9a20140232a3aae96ee23ed63e36ac7e5d3d5a6d86e66ad4f1ee684e123a33a.json",
+          "behavior": "Eight UI manual SENT to OPENED transitions, exact command replay, tenant denials and correlated immutable events. Further conversion stages remain outside this segment.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-038",
+      "title": "Relances automatiques",
+      "contract": "Rappels par règles et délais.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-franchise-followups.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+        "supabase/tests/0383_franchise_followup_lease_retry_dead_letter.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0383_franchise_followup_lease_retry_dead_letter.test.sql",
+          "assertions": 28,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/franchise-followups-283effbb13eda70dbe98ff5aabb5d679a82d484b5023181ba2486bb81b5ac931.json",
+          "behavior": "Four UI policies independently approved, eight preferences and four consent withdrawals in FR/AR desktop/360; eight native scheduled jobs, four queued requests, four withdrawn contacts excluded; replay, tenant denials and unchanged pipeline. No external email delivery.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-039",
+      "title": "Modèles communication",
+      "contract": "Templates FR/AR versionnés.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-039-atomic-smoke.spec.ts",
+        "tests/e2e/local-notification-templates.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "work/isolated-replay/8c941220-c6f7-46dd-95fb-a38b4c16c572/summary.json",
+          "test": "0224_notification_template_pair_editor.test.sql",
+          "assertions": 29,
+          "scope": "Includes replay and two-review production-policy simulation; not production authorization"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/notification-templates-0017cd43c6c9244702c6c1c7b79ab0ef09802bf9286d22fb2b21d209dee800e3.json",
+          "behavior": "Four real FR/AR desktop/360 previews, proposals and independent activations; exact persisted text after preview reset regression; immutable versions, correlated activation audit/outbox, self-approval/foreign/unknown-variable/stale denials, no notification emitted.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-040",
+      "title": "Bibliothèque modèles",
+      "contract": "Clonage de questionnaires/clauses/checklists.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-040-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0039_p06_question_builder_commands.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0039_p06_question_builder_commands.test.sql",
+          "assertions": 28,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-041",
+      "title": "IA qualité questionnaires",
+      "contract": "Ambiguïté, doublons, donnée déjà connue.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-041-atomic-smoke.spec.ts",
+        "tests/e2e/local-question-quality.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+        "supabase/tests/0086_assistance_role_helper_acl.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+          "assertions": 43,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0086_assistance_role_helper_acl.test.sql",
+          "assertions": 7,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/question-quality-310071763618624f1e804f3581e7e5d6da712d7e41a1eee063c4600f0649544f.json",
+          "behavior": "Four real UI quality analyses and human decisions on published historical questions. Ambiguity, known-data duplication and similarity suggestions persisted; analysis and decision replay, foreign read/write denial and correlated audit/outbox verified. No automatic question rewrite. FR/AR desktop/360 accessibility. Versioned heuristic model, no external AI provider; full semantic and cross-domain duplicate quality remains unproved.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-042",
+      "title": "Détection doublons",
+      "contract": "Questions/services/anomalies similaires.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-042-atomic-smoke.spec.ts",
+        "tests/e2e/local-question-quality.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+        "supabase/tests/0084_assistance_role_authorization_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0074_assisted_intelligence_quality.test.sql",
+          "assertions": 43,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0084_assistance_role_authorization_hardening.test.sql",
+          "assertions": 15,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/question-quality-310071763618624f1e804f3581e7e5d6da712d7e41a1eee063c4600f0649544f.json",
+          "behavior": "Four real UI quality analyses and human decisions on published historical questions. Ambiguity, known-data duplication and similarity suggestions persisted; analysis and decision replay, foreign read/write denial and correlated audit/outbox verified. No automatic question rewrite. FR/AR desktop/360 accessibility. Versioned heuristic model, no external AI provider; full semantic and cross-domain duplicate quality remains unproved.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-043",
+      "title": "Simulation questionnaire",
+      "contract": "Sandbox sans statistiques réelles.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-043-atomic-smoke.spec.ts",
+        "tests/e2e/local-questionnaire-simulation.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0061_p06_question_rule_advanced_engine.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0061_p06_question_rule_advanced_engine.test.sql",
+          "assertions": 28,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/questionnaire-simulation-ebb64f5b983ed9b85be6756a341ec570c3fb2ead85aa377b6c9cc0e42440070b.json",
+          "behavior": "Four FR/AR desktop/360 browser tests exercise eight scenario evaluations with 0 and 5000 basis-point scores, six triggered actions on the positive branch, four invalid input rejections, native determinism and foreign-library denial. Published snapshot and row version unchanged; no real questionnaire session created. Mandate and published content are historical local preconditions. Complex rule operators and independent audit remain separate.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-044",
+      "title": "Analyse abandons",
+      "contract": "Taux par section/question.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [],
+      "candidateDatabaseTests": [
+        "supabase/tests/0064_p06_questionnaire_sessions.test.sql",
+        "supabase/tests/0384_questionnaire_abandonment_analytics.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0064_p06_questionnaire_sessions.test.sql",
+          "assertions": 46,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0384_questionnaire_abandonment_analytics.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-045",
+      "title": "Benchmark anonymisé",
+      "contract": "Agrégats avec seuil minimal de groupe.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-045-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0075_solution_bundles_benchmarks.test.sql",
+        "supabase/tests/0088_benchmark_verified_value_binding.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0075_solution_bundles_benchmarks.test.sql",
+          "assertions": 44,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0088_benchmark_verified_value_binding.test.sql",
+          "assertions": 22,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-046",
+      "title": "Historique évolution",
+      "contract": "Snapshots scores/anomalies.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-046-atomic-smoke.spec.ts",
+        "tests/e2e/local-diagnostic-history.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0054_p07_diagnostics_opportunities.test.sql",
+        "supabase/tests/0059_p10_franchise_crm_performance.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0054_p07_diagnostics_opportunities.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0059_p10_franchise_crm_performance.test.sql",
+          "assertions": 30,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/diagnostic-history-bfe25e1e52ab7412949e5d63dcbd56956de4381eb793a319afb5bf6576790733.json",
+          "behavior": "Successive persisted diagnostics: 50 to 0, previous immutable snapshots, client and technical explanations, replay and foreign access denial; FR/AR desktop/360 accessibility. Other histories and all-domain language review remain unproved.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/diagnostic-history-24143c994aef82a66b230b24eaacfb99bc572d7107ff41728f336692fddbd977.json",
+          "behavior": "Successive persisted diagnostics: 50 to 0, previous immutable snapshots, client and technical explanations, replay and foreign access denial; FR/AR desktop/360 accessibility. Other histories and all-domain language review remain unproved.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-047",
+      "title": "ROI recommandations",
+      "contract": "Résultats seulement si base mesurable.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-047-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+        "supabase/tests/0071_rewards_referral_audience_hardening.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+          "assertions": 50,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0071_rewards_referral_audience_hardening.test.sql",
+          "assertions": 25,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-048",
+      "title": "Fournisseurs favoris",
+      "contract": "Favori réutilisable sous contrôle éligibilité.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-048-atomic-smoke.spec.ts",
+        "tests/e2e/local-provider-favorites.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0066_provider_reputation_badges_favorites.test.sql",
+        "supabase/tests/0068_provider_feedback_privacy_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "work/isolated-replay/951eb9a8-a603-4f20-abc2-999ae41a006e/summary.json",
+          "test": "provider_favorite_revalidation_runtime.test.sql",
+          "assertions": 12,
+          "scope": "Fresh complete migration replay, including legacy receipt compatibility and changed-payload denial"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/provider-favorites-8507a4e02c66d34e1caea498df95b272799f9399bfad0f53822e44e23d170943.json",
+          "behavior": "FR/AR desktop/360 creation, removal/restoration and 24 current eligibility checks; paused provider excluded; exact replay, foreign denial and correlated audit/outbox verified.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-049",
+      "title": "Commander similaire",
+      "contract": "Cloner une ancienne demande dans une nouvelle.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-049-atomic-smoke.spec.ts",
+        "tests/e2e/local-recurring-requests.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0076_rfq_clone_recurring_services.test.sql",
+        "supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0076_rfq_clone_recurring_services.test.sql",
+          "assertions": 14,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/recurring-requests-950cfcdebd956fa95407af9998d06c3bffaed1704e799d80694464fea4d79ef0.json",
+          "scope": "PARTIAL",
+          "behavior": "Four real UI clones, exact budget, provenance, audit/outbox, foreign write/read denial."
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-050",
+      "title": "Prestations récurrentes",
+      "contract": "Cycles mensuels/trimestriels/annuels.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-050-atomic-smoke.spec.ts",
+        "tests/e2e/local-recurring-requests.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0076_rfq_clone_recurring_services.test.sql",
+        "supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0076_rfq_clone_recurring_services.test.sql",
+          "assertions": 14,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/recurring-requests-950cfcdebd956fa95407af9998d06c3bffaed1704e799d80694464fea4d79ef0.json",
+          "scope": "PARTIAL",
+          "behavior": "Twelve UI plans, three cadences with exact second dates, 24 drafts, pause/resume/end history, replay after end, fresh generation denial, foreign read/write denial."
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-051",
+      "title": "Multi-sites",
+      "contract": "Site_id dans diagnostics/demandes/missions/budgets.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-functional-controls.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+        "supabase/tests/0165_client_site_and_rfq_open_entitlement.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "scope": "PARTIAL",
+          "behavior": "Real FR/AR desktop/360 UI mutations with durable readback, exact approved budgets, versioned digest settings, notification modes, audit/outbox and foreign-tenant denial. Full contract and independent acceptance remain open."
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+          "assertions": 34,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0165_client_site_and_rfq_open_entitlement.test.sql",
+          "assertions": 11,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-052",
+      "title": "Approvals multi-utilisateurs",
+      "contract": "Workflow d’approbation paramétrable.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-052-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0013_p04_role_requests.test.sql",
+        "supabase/tests/0053_p17_admin_command_center.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0013_p04_role_requests.test.sql",
+          "assertions": 24,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0053_p17_admin_command_center.test.sql",
+          "assertions": 32,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-053",
+      "title": "Centres de coûts",
+      "contract": "Rattachement dépenses/projets.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-053-atomic-smoke.spec.ts",
+        "tests/e2e/local-functional-controls.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+        "supabase/tests/0122_typed_cost_center_financial_links.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "scope": "PARTIAL",
+          "behavior": "Real FR/AR desktop/360 UI mutations with durable readback, exact approved budgets, versioned digest settings, notification modes, audit/outbox and foreign-tenant denial. Full contract and independent acceptance remain open."
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0065_client_projects_budgets_calendar.test.sql",
+          "assertions": 34,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0122_typed_cost_center_financial_links.test.sql",
+          "assertions": 10,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-054",
+      "title": "Mobile",
+      "contract": "Parcours critiques utilisables sur smartphone.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p05-client-compliance.spec.ts",
+        "tests/e2e/p06-catalog.spec.ts",
+        "tests/e2e/mat-func-054-viewport-matrix-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/p24-p26-05e657a5244df0a743efcef27df8e5f5ba807e285052bbe1c5f1ec2dcc06859d.json",
+          "behavior": "Scoped FR/AR desktop/360 route and workflow checks with axe; not all product controls.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": []
+    },
+    {
+      "id": "MAT-FUNC-055",
+      "title": "Autosave",
+      "contract": "Brouillons sauvegardés et conflits gérés.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-055-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0025_p06_question_engine_persistence.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/client-journey-e75bdec686093e0bb56da1716078baae14ec90c8a532618123b94b3d3f1cc540.json",
+          "behavior": "UI diagnostic and need conversion with persistence, idempotence, stale version and foreign-session checks.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0025_p06_question_engine_persistence.test.sql",
+          "assertions": 119,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-056",
+      "title": "Progression",
+      "contract": "Étapes/complétude réelles.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p21-questionnaires-diagnostics.spec.ts",
+        "tests/e2e/mat-func-056-missions-progression-smoke.spec.ts",
+        "tests/e2e/local-functional-controls.spec.ts"
+      ],
+      "candidateDatabaseTests": [],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-05101261c7142bc87835df6b93636422e0da02360d0b90feaf846ffe88fd7694.json",
+          "behavior": "Existing executed functional-controls segment: four real projects with milestones progress from IN_PROGRESS to SUBMITTED to ACCEPTED; UI progress remains 0 until acceptance and then reaches 100, verified again from persisted project.progress_basis_points. FR/AR desktop/360. This mapping adds no new executions. Other onboarding and questionnaire completion indicators still require acceptance review.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-057",
+      "title": "Préremplissage",
+      "contract": "Réutiliser données vérifiées/récentes.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-057-atomic-smoke.spec.ts",
+        "tests/e2e/local-questionnaire-assistance.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0124_versioned_prefill_freshness.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "work/isolated-replay/b3fe3d04-64ca-4ff4-9df7-74f1744d063c/summary.json",
+          "test": "prefill_fact_idempotency_runtime.test.sql",
+          "assertions": 13,
+          "scope": "Runtime replay, mismatch, foreign denial, immutable chain, historical receipt compatibility and ambiguous historical receipt denial"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/questionnaire-assistance-c14a5b86c77af5f9adc4683624f4fe3178d9aa49724cb41e4fd7379db7832333.json",
+          "behavior": "Four fresh fact confirmations and four expired fact exclusions in real FR/AR desktop/360 sessions; exact RPC replay, immutable facts, tenant denials and submitted values verified.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-058",
+      "title": "Aide contextuelle",
+      "contract": "Aide, exemple, pourquoi demandé.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p05-client-compliance.spec.ts",
+        "tests/e2e/mat-func-058-critical-field-help-smoke.spec.ts",
+        "tests/e2e/local-questionnaire-assistance.spec.ts"
+      ],
+      "candidateDatabaseTests": [],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/questionnaire-assistance-c14a5b86c77af5f9adc4683624f4fe3178d9aa49724cb41e4fd7379db7832333.json",
+          "behavior": "Eight FR/AR desktop/360 rendered help/example/why interactions during real answer confirmation and submission.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-059",
+      "title": "FR/AR",
+      "contract": "Traductions natives et RTL.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p05-client-compliance.spec.ts",
+        "tests/e2e/p21-questionnaires-diagnostics.spec.ts",
+        "tests/e2e/mat-func-059-bilingual-routes-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/p24-p26-05e657a5244df0a743efcef27df8e5f5ba807e285052bbe1c5f1ec2dcc06859d.json",
+          "behavior": "Scoped FR/AR desktop/360 route and workflow checks with axe; not all product controls.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": []
+    },
+    {
+      "id": "MAT-FUNC-060",
+      "title": "Langage simplifié",
+      "contract": "Texte technique + version client.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/public-experience.spec.ts",
+        "tests/e2e/mat-func-060-simplified-text-smoke.spec.ts",
+        "tests/e2e/local-diagnostic-history.spec.ts"
+      ],
+      "candidateDatabaseTests": [],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/diagnostic-history-bfe25e1e52ab7412949e5d63dcbd56956de4381eb793a319afb5bf6576790733.json",
+          "behavior": "Successive persisted diagnostics: 50 to 0, previous immutable snapshots, client and technical explanations, replay and foreign access denial; FR/AR desktop/360 accessibility. Other histories and all-domain language review remain unproved.",
+          "scope": "PARTIAL"
+        },
+        {
+          "path": "artifacts/test-results/local-acceptance/history/diagnostic-history-24143c994aef82a66b230b24eaacfb99bc572d7107ff41728f336692fddbd977.json",
+          "behavior": "Successive persisted diagnostics: 50 to 0, previous immutable snapshots, client and technical explanations, replay and foreign access denial; FR/AR desktop/360 accessibility. Other histories and all-domain language review remain unproved.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-061",
+      "title": "Accessibilité",
+      "contract": "Clavier, focus, contraste, labels.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/p05-client-compliance.spec.ts",
+        "tests/e2e/mat-func-061-accessibility-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/p24-p26-05e657a5244df0a743efcef27df8e5f5ba807e285052bbe1c5f1ec2dcc06859d.json",
+          "behavior": "Scoped FR/AR desktop/360 route and workflow checks with axe; not all product controls.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": []
+    },
+    {
+      "id": "MAT-FUNC-062",
+      "title": "Centre économies",
+      "contract": "Économies seulement sur bases vérifiables.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-062-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+        "supabase/tests/0071_rewards_referral_audience_hardening.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/benefit-fulfillment-40e4a0a4184df46df0cdf97375dab6a4548516028e5fa31c108b1e84041d4f85.json",
+          "behavior": "Gift reservation, scheduling, rejection then acceptance and unique consumption; full wallet/ROI acceptance remains to review.",
+          "scope": "PARTIAL"
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0067_rewards_referrals_roi_savings.test.sql",
+          "assertions": 50,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0071_rewards_referral_audience_hardening.test.sql",
+          "assertions": 25,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-063",
+      "title": "Préférences notifications",
+      "contract": "Immédiat/digest/disabled par catégorie.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-063-atomic-smoke.spec.ts",
+        "tests/e2e/local-notification-preferences.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "scope": "PARTIAL",
+          "behavior": "Real FR/AR desktop/360 UI mutations with durable readback, exact approved budgets, versioned digest settings, notification modes, audit/outbox and foreign-tenant denial. Full contract and independent acceptance remain open."
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql",
+          "assertions": 40,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-064",
+      "title": "Résumé franchisé",
+      "contract": "Digest quotidien configurable.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/local-functional-controls.spec.ts",
+        "tests/e2e/mat-func-064-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0077_franchise_daily_digest.test.sql",
+        "supabase/tests/0092_franchise_digest_scheduler_bounding.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/functional-controls-0b4dc7a687e6fd60eb20665b22f96fb1231da2b659cf85ba177fbe10c13f1da7.json",
+          "scope": "PARTIAL",
+          "behavior": "Real FR/AR desktop/360 UI mutations with durable readback, exact approved budgets, versioned digest settings, notification modes, audit/outbox and foreign-tenant denial. Full contract and independent acceptance remain open."
+        }
+      ],
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0077_franchise_daily_digest.test.sql",
+          "assertions": 55,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0092_franchise_digest_scheduler_bounding.test.sql",
+          "assertions": 22,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-065",
+      "title": "Résumé exécutif admin",
+      "contract": "À traiter aujourd’hui avant KPI.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-065-atomic-smoke.spec.ts",
+        "tests/e2e/local-admin-summary.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0053_p17_admin_command_center.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0053_p17_admin_command_center.test.sql",
+          "assertions": 32,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/admin-summary-25cc29edd7fafa90a8e68ad4f2e932162381065d2825f75b11bf9ce14debb093.json",
+          "behavior": "Eight native priority items, four real UI priority orderings and contextual selections; counters match rendered queue, triage precedes secondary tools, selection makes no decision, foreign read denied, FR/AR desktop/360 accessibility.",
+          "scope": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-066",
+      "title": "Moteur exceptions",
+      "contract": "Cas hors workflow vers file admin.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-066-atomic-smoke.spec.ts",
+        "tests/e2e/local-admin-decisions.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0053_p17_admin_command_center.test.sql",
+        "supabase/tests/0060_p14_morocco_tax_engine.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0053_p17_admin_command_center.test.sql",
+          "assertions": 32,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0060_p14_morocco_tax_engine.test.sql",
+          "assertions": 49,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/admin-decisions-ecc7893381a15bb13c7ab3bea96f75af7b18ada92a4e7ea5ecb0a7484bfb2d8c.json",
+          "scope": "PARTIAL",
+          "behavior": "Eight native queue openings, UI claims and human resolutions FR/AR desktop/360, immutable history and correlated open/resolve audit/outbox, replay after resolution, fast stale HTTP409 conflict, foreign access denial, no automatic organization sanction. Automatic flag detection and full queue production sources remain outside this segment."
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-067",
+      "title": "Protection contournement",
+      "contract": "Contacts masqués et échanges internes avant sélection.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-067-atomic-smoke.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+        "supabase/tests/0154_messaging_comparison_functional.test.sql"
+      ],
+      "currentAcceptance": "REVIEW_REQUIRED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0043_p07_rfq_matching_foundation.test.sql",
+          "assertions": 42,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0154_messaging_comparison_functional.test.sql",
+          "assertions": 33,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ]
+    },
+    {
+      "id": "MAT-FUNC-068",
+      "title": "Détection abus",
+      "contract": "Risk flags sans sanction automatique.",
+      "historicalRegistryStatus": "IN_PROGRESS",
+      "candidateBrowserTests": [
+        "tests/e2e/mat-func-068-atomic-smoke.spec.ts",
+        "tests/e2e/local-admin-decisions.spec.ts"
+      ],
+      "candidateDatabaseTests": [
+        "supabase/tests/0053_p17_admin_command_center.test.sql",
+        "supabase/tests/0123_transversal_abuse_detection.test.sql"
+      ],
+      "currentAcceptance": "PARTIAL_EXECUTED",
+      "requiredEvidence": [
+        "positive_business_behavior",
+        "negative_authorization",
+        "durable_state_and_history",
+        "sensitive_mutation_idempotence_audit_outbox",
+        "fr_ar_desktop_360px",
+        "independent_review"
+      ],
+      "note": "Source references and historical signoff are not current execution evidence.",
+      "executedDatabaseTests": [
+        {
+          "path": "supabase/tests/0053_p17_admin_command_center.test.sql",
+          "assertions": 32,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0123_transversal_abuse_detection.test.sql",
+          "assertions": 12,
+          "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
+          "semanticAcceptance": "REVIEW_REQUIRED"
+        }
+      ],
+      "executedEvidence": [
+        {
+          "path": "artifacts/test-results/local-acceptance/history/admin-decisions-ecc7893381a15bb13c7ab3bea96f75af7b18ada92a4e7ea5ecb0a7484bfb2d8c.json",
+          "scope": "PARTIAL",
+          "behavior": "Eight native queue openings, UI claims and human resolutions FR/AR desktop/360, immutable history and correlated open/resolve audit/outbox, replay after resolution, fast stale HTTP409 conflict, foreign access denial, no automatic organization sanction. Automatic flag detection and full queue production sources remain outside this segment."
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "GM25.2-01",
+      "description": "client normal de l’OTP à la mission terminée ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-02",
+      "description": "anomalie administrative puis correction ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-03",
+      "description": "essai expiré puis Gold et réactivation ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-04",
+      "description": "Box Gold, réservation, livraison et consommation ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-05",
+      "description": "achat de crédits supplémentaires ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-06",
+      "description": "sous-traitant qualifié puis devis/missions ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-07",
+      "description": "sous-traitant active le rôle Client ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-08",
+      "description": "organisation empêchée de répondre à elle-même ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-09",
+      "description": "feedback anonymisé non retenu ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-10",
+      "description": "demande hors périmètre transformée en avenant ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-11",
+      "description": "non-conformité confirmée et réaffectation ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-12",
+      "description": "double confirmation sans double pénalité ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-13",
+      "description": "commission normale sur encaissement ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-14",
+      "description": "facture, paiement partiel et restriction ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-15",
+      "description": "échéancier approuvé ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-16",
+      "description": "franchisé hors IT avec droit d’entrée ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-17",
+      "description": "retenue sur six mois et solde ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-18",
+      "description": "répartition 50/25/25 ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-19",
+      "description": "IT : bénéfice distribuable partagé 50 % Hatim Ahmitech / 50 % Jalil-NEOXA, Hatim exempt de droit d’entrée ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-20",
+      "description": "invitation franchisé ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-21",
+      "description": "création/publication questionnaire et simulation ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-22",
+      "description": "pool volume et stock faible ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-23",
+      "description": "webhook paiement doublé ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-24",
+      "description": "document obligatoire expiré ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-25",
+      "description": "doublon ICE et rattachement ;",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "GM25.2-26",
+      "description": "tentative d’accès inter-tenant bloquée.",
+      "currentAcceptance": "REVIEW_REQUIRED"
+    }
+  ],
+  "authoritySha256": "1cc2b0ccb0c03e0df48d881790e1173481d6b2a07283f64490648912638bde05",
+  "databaseReplay": {
+    "path": "work/isolated-replay/4b878f86-bb0c-4d57-9830-31dc8108de57/summary.json",
+    "migrations": 625,
+    "testFiles": 396,
+    "assertions": 9726,
+    "status": "PASSED",
+    "concurrencyIncluded": true,
+    "concurrencyScenarios": 4,
+    "cleanup": "passed"
+  },
+  "nativeConcurrency": {
+    "evidence": "work/isolated-replay/4b878f86-bb0c-4d57-9830-31dc8108de57/summary.json",
+    "scenarios": [
+      "outbox_claim",
+      "journal_idempotency",
+      "credit_idempotency",
+      "audit_chain"
+    ],
+    "nodeVersion": "v22.23.0",
+    "network": "none",
+    "publicPorts": 0,
+    "scope": "Same fresh replay as all 396 SQL files"
+  }
+}

@@ -1,3 +1,4 @@
+import { readPage, readRelatedPages } from "@/modules/shared/lib/data/read-pages";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
@@ -6,11 +7,6 @@ import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { adminFixturesHiddenLabel } from "@/modules/admin/data/spaces/actor-presentation";
-import {
-  buildDemoFranchiseApplicationOrganizationNames,
-  buildDemoFranchiseApplications,
-  canApplyAdminDemoFranchiseApplications,
-} from "@/modules/admin/data/spaces/demo-franchise-applications";
 import { FranchiseApplicationInviteForm } from "@/modules/admin/screens/franchise-applications/invite-form";
 import {
   FranchiseApplicationReview,
@@ -49,7 +45,7 @@ const organizationSchema = z.array(z.object({ id: z.string().uuid(), display_nam
 
 async function loadInvitations(client: Awaited<ReturnType<typeof getSupabaseServerClient>>, franchiseIds: string[]) {
   const result = franchiseIds.length
-    ? await client.from("franchise_invitations").select("id,franchise_id,status,expires_at").in("franchise_id", franchiseIds).order("created_at", { ascending: false })
+    ? await readRelatedPages(franchiseIds, (ids, from, to) => client.from("franchise_invitations").select("id,franchise_id,status,expires_at").in("franchise_id", ids).order("created_at", { ascending: false }).order("id").range(from, to))
     : { data: [], error: null };
   return { ...result, observedAt: Date.now() };
 }
@@ -93,12 +89,14 @@ function formatCreatedAt(value: string, locale: "fr" | "ar") {
   }).format(date);
 }
 
-function queueHref(locale: "fr" | "ar", baseQuery: string, next: { vue?: string; fixtures?: boolean }) {
+function queueHref(locale: "fr" | "ar", baseQuery: string, next: { vue?: string; fixtures?: boolean; page?: number }) {
   const params = new URLSearchParams(baseQuery.startsWith("?") ? baseQuery.slice(1) : baseQuery);
   if (!next.vue || next.vue === "all") params.delete("vue");
   else params.set("vue", next.vue);
   if (next.fixtures) params.set("fixtures", "1");
   else params.delete("fixtures");
+  if (next.page && next.page > 1) params.set("page", String(next.page));
+  else params.delete("page");
   const qs = params.toString();
   return `/${locale}/administration/candidatures-franchise${qs ? `?${qs}` : ""}`;
 }
@@ -108,11 +106,11 @@ export default async function FranchiseApplicationsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; vue?: string; fixtures?: string; ouvrir?: string }>;
+  searchParams: Promise<{ organizationId?: string; vue?: string; fixtures?: string; ouvrir?: string; page?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
+  const space = await resolveAdminSpace({ locale, ...(query.organizationId ? { organizationId: query.organizationId } : {}) });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/administration/candidatures-franchise` }));
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
@@ -123,42 +121,40 @@ export default async function FranchiseApplicationsPage({
   const inviteKey = randomUUID();
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
-  const demoOn = canApplyAdminDemoFranchiseApplications();
-  const loaded = await client.from("franchise_applications").select("id,applicant_name,reply_email,territory_code,domain_label,status,organization_id,franchise_id,row_version,created_at").order("created_at", { ascending: false }).order("id").limit(50);
+  const pageInput = z.coerce.number().int().min(1).max(20001).safeParse(query.page ?? "1");
+  const page = pageInput.success ? pageInput.data : 1;
+  const loaded = await readPage((from, to) => client.from("franchise_applications").select("id,applicant_name,reply_email,territory_code,domain_label,status,organization_id,franchise_id,row_version,created_at").order("created_at", { ascending: false }).order("id").range(from, to), { offset: (page - 1) * 50, pageSize: 50 });
   const rows = z.array(rowSchema).safeParse(loaded.data);
-  const list = demoOn ? buildDemoFranchiseApplications() : (rows.success ? rows.data : []);
-  const listReady = demoOn || (!loaded.error && rows.success);
+  const list = rows.success ? rows.data : [];
+  const listReady = pageInput.success && !loaded.error && rows.success;
   const { visible, hiddenFixtures, treatCount } = filterFranchiseApplications(list, { vue, includeFixtures });
-  const candidateRows = demoOn
-    ? []
-    : visible.filter((row) => !row.organization_id && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(row.status));
-  const candidatePairs: Array<readonly [string, Array<{ id: string; name: string }>]> = [];
+  const candidateRows = visible.filter((row) => !row.organization_id && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(row.status));
+  const candidatePairs: Array<readonly [string, Array<{ id: string; name: string }> | null]> = [];
   for (let offset = 0; offset < candidateRows.length; offset += 8) {
     const chunk = candidateRows.slice(offset, offset + 8);
     candidatePairs.push(...await Promise.all(chunk.map(async (row) => {
       const result = await client.rpc("franchise_application_organization_candidates", { p_application_id: row.id });
       const parsed = candidateSchema.safeParse(result.data);
-      return [row.id, result.error || !parsed.success ? [] : parsed.data.map((item) => ({ id: item.organization_id, name: item.display_name }))] as const;
+      return [row.id, result.error || !parsed.success ? null : parsed.data.map((item) => ({ id: item.organization_id, name: item.display_name }))] as const;
     })));
   }
   const candidates = new Map(candidatePairs);
+  const candidatesReady = candidatePairs.every(([, options]) => options !== null);
   const organizationIds = [...new Set(visible.flatMap((row) => row.organization_id ? [row.organization_id] : []))];
   const franchiseIds = visible.flatMap((row) => row.franchise_id ? [row.franchise_id] : []);
   const [organizationsResult, franchisesResult, approvalsResult, invitationsResult] = await Promise.all([
-    !demoOn && organizationIds.length ? client.from("organizations").select("id,display_name").in("id", organizationIds) : Promise.resolve({ data: [], error: null }),
-    !demoOn && organizationIds.length ? client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", organizationIds).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]) : Promise.resolve({ data: [], error: null }),
-    !demoOn && franchiseIds.length ? client.from("franchise_approval_requests").select("id,franchise_id,row_version,requested_by").in("franchise_id", franchiseIds).eq("status", "PENDING") : Promise.resolve({ data: [], error: null }),
-    demoOn ? Promise.resolve({ data: [], error: null, observedAt: Date.now() }) : loadInvitations(client, franchiseIds),
+    organizationIds.length ? readRelatedPages(organizationIds, (ids, from, to) => client.from("organizations").select("id,display_name").in("id", ids).order("id").range(from, to)) : Promise.resolve({ data: [], error: null }),
+    organizationIds.length ? readRelatedPages(organizationIds, (ids, from, to) => client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", ids).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]).order("id").range(from, to)) : Promise.resolve({ data: [], error: null }),
+    franchiseIds.length ? readRelatedPages(franchiseIds, (ids, from, to) => client.from("franchise_approval_requests").select("id,franchise_id,row_version,requested_by").in("franchise_id", ids).eq("status", "PENDING").order("id").range(from, to)) : Promise.resolve({ data: [], error: null }),
+    loadInvitations(client, franchiseIds),
   ]);
   const organizations = new Map((organizationSchema.safeParse(organizationsResult.data).data ?? []).map((item) => [item.id, item.display_name]));
-  if (demoOn) {
-    for (const [id, name] of buildDemoFranchiseApplicationOrganizationNames()) {
-      organizations.set(id, name);
-    }
-  }
   const franchises = franchiseSchema.safeParse(franchisesResult.data).data ?? [];
   const approvals = approvalSchema.safeParse(approvalsResult.data).data ?? [];
   const invitations = invitationSchema.safeParse(invitationsResult.data).data ?? [];
+  const relationsReady = candidatesReady && ![organizationsResult, franchisesResult, approvalsResult, invitationsResult].some(result => result.error)
+    && organizationSchema.safeParse(organizationsResult.data).success && franchiseSchema.safeParse(franchisesResult.data).success
+    && approvalSchema.safeParse(approvalsResult.data).success && invitationSchema.safeParse(invitationsResult.data).success;
   const bound = new Set(franchiseIds);
   const models: Array<{ row: z.infer<typeof rowSchema>; model: FranchiseApplicationReviewModel; keys: { propose: string; approve: string; resend: string }; organization: ReturnType<typeof organizationDisplayName> }> = visible.map((row) => {
     const approval = row.franchise_id ? approvals.find((item) => item.franchise_id === row.franchise_id) : undefined;
@@ -290,11 +286,16 @@ export default async function FranchiseApplicationsPage({
             </Link>
           </p>
         ) : null}
+        {listReady ? <nav aria-label={fr ? "Pages des candidatures" : "صفحات الترشيحات"}>
+          <p>{fr ? `Page ${page} — compteurs et filtres sur cette page` : `الصفحة ${page} — الأعداد والمرشحات تخص هذه الصفحة`}</p>
+          {page > 1 ? <Link href={queueHref(locale, space.selectedQuery, { vue, fixtures: includeFixtures, page: page - 1 })}>{fr ? "Précédente" : "السابق"}</Link> : null}
+          {loaded.nextOffset !== null ? <Link href={queueHref(locale, space.selectedQuery, { vue, fixtures: includeFixtures, page: page + 1 })}>{fr ? "Suivante" : "التالي"}</Link> : null}
+        </nav> : null}
         {!listReady ? <p role="alert" className="admin-panel">{fr ? "Les candidatures sont indisponibles." : "الترشيحات غير متاحة."}</p> : visible.length === 0 ? (
           <p className="admin-panel">
             {list.length === 0
-              ? (fr ? "Aucune candidature enregistrée." : "لا يوجد ترشيح مسجّل.")
-              : (fr ? "Aucune candidature ne correspond à ce filtre." : "لا يوجد ترشيح مطابق لهذا المرشح.")}
+              ? (fr ? "Aucune candidature sur cette page." : "لا يوجد ترشيح مسجّل.")
+              : (fr ? "Aucune candidature ne correspond à ce filtre sur cette page." : "لا يوجد ترشيح مطابق لهذا المرشح.")}
           </p>
         ) : (
           <ul className="admin-franchise-applications__list">
@@ -381,7 +382,7 @@ export default async function FranchiseApplicationsPage({
                             : (fr ? "Dossier clos ou restreint — aucune action de revue." : "ملف مغلق أو مقيّد — لا إجراء مراجعة.")}
                         </p>
                       ) : (
-                        <FranchiseApplicationReview locale={locale} application={model} copy={copy} keys={keys} />
+                        relationsReady ? <FranchiseApplicationReview locale={locale} application={model} copy={copy} keys={keys} /> : <p role="alert">{fr ? "Données de revue indisponibles. Rechargez le dossier." : "بيانات المراجعة غير متاحة. أعيدوا تحميل الملف."}</p>
                       )}
                     </div>
                   </div>

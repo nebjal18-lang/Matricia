@@ -1,5 +1,5 @@
 import{z}from"zod";
-export type CatalogPageInput={kind?:"SERVICE"|"QUESTIONNAIRE"|"RULE"|"QUESTION"|"ALL";search?:string;page?:string;objectId?:string;status?:string;categoryId?:string;language?:string;completeness?:string;validation?:string};
+export type CatalogPageInput={kind?:"SERVICE"|"QUESTIONNAIRE"|"RULE"|"QUESTION"|"ALL";search?:string|undefined;page?:string|undefined;objectId?:string|undefined;status?:string|undefined;categoryId?:string|undefined;language?:string|undefined;completeness?:string|undefined;validation?:string|undefined};
 const group=z.object({total:z.number().int().nonnegative(),ids:z.array(z.string().uuid()),versionIds:z.array(z.string().uuid())});
 export const catalogPageSchema=z.object({page:z.number().int().positive(),pageSize:z.literal(25),kind:z.enum(["SERVICE","QUESTIONNAIRE","RULE","QUESTION","ALL"]),search:z.string(),status:z.string(),categoryId:z.string().uuid().nullable(),language:z.string(),completeness:z.string(),validation:z.string(),bucketCounts:z.record(z.string(),z.number().int().nonnegative()).optional(),counts:z.object({drafts:z.number().int(),inReview:z.number().int(),published:z.number().int(),returns:z.number().int()}),groups:z.object({SERVICE:group,QUESTIONNAIRE:group,RULE:group,QUESTION:group})});
 export type CatalogServerPage=z.infer<typeof catalogPageSchema>;

@@ -5,7 +5,7 @@ import { ArrowUpRight, Check, Sparkles, Users, BriefcaseBusiness } from 'lucide-
 import type { Locale } from '@/modules/shared/lib/i18n/locale';
 import { getStaticPublicCatalogue } from '@/modules/public/data/catalogue/static-projection';
 import { getExperienceCopy } from './experience-copy';
-const combinations = [['LEGAL', 'ACC', 'COM', 'IT'], ['COM', 'SALES', 'IT', 'LEGAL'], ['IT', 'HR', 'QHSE', 'ACC']];
+const combinations = [['LEGAL', 'ACC', 'COM', 'IT'], ['COM', 'SALES', 'IT', 'LEGAL'], ['IT', 'HR', 'QHSE', 'ACC']] as const;
 export function ProjectStudio({ locale }: { locale: Locale }) {
   const [active, setActive] = useState(0);
   const c = getExperienceCopy(locale);
@@ -20,7 +20,7 @@ export function ProjectStudio({ locale }: { locale: Locale }) {
       <div className="mx-project-board" aria-live="polite" aria-atomic="true">
         <div className="mx-board-heading"><span className="mx-status-dot" /><span>{c.plan}</span><Sparkles size={18} aria-hidden="true" /></div>
         <div className="mx-board-client"><Users aria-hidden="true" /><div><small>{c.client}</small><h3>{c.scenarios[active]}</h3></div></div>
-        <div className="mx-board-services" key={active}>{combinations[active].map((code, i) => <Link className="mx-board-service" href={`/${locale}/services?library=${code}`} key={code}><span className="mx-number">0{i + 1}</span><span>{libraries.find(l => l.code === code)?.name}</span><ArrowUpRight size={18} aria-hidden="true" /></Link>)}</div>
+        <div className="mx-board-services" key={active}>{(combinations[active] ?? combinations[0]).map((code, i) => <Link className="mx-board-service" href={`/${locale}/services?library=${code}`} key={code}><span className="mx-number">0{i + 1}</span><span>{libraries.find(l => l.code === code)?.name}</span><ArrowUpRight size={18} aria-hidden="true" /></Link>)}</div>
         <div className="mx-board-bottom"><BriefcaseBusiness size={18} aria-hidden="true" /><span>{c.experts}</span><Check size={18} aria-hidden="true" /><span>{c.shared}</span></div>
       </div>
     </div>

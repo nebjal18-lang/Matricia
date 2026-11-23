@@ -179,13 +179,13 @@ export default async function AdminFinancePage({
         </details>
 
         {/* Ancres legacy hub → ateliers */}
-        <section id="boxes" className="sr-only" aria-hidden>
+        <section id="boxes" hidden>
           <Link href={`/${locale}/administration/finance/offres${orgQuery}`}>boxes</Link>
         </section>
-        <section id="plans" className="sr-only" aria-hidden>
+        <section id="plans" hidden>
           <Link href={`/${locale}/administration/finance/offres${orgQuery}`}>plans</Link>
         </section>
-        <section id="credits" className="sr-only" aria-hidden>
+        <section id="credits" hidden>
           <Link href={`/${locale}/administration/finance/credits${orgQuery}`}>credits</Link>
         </section>
       </div>

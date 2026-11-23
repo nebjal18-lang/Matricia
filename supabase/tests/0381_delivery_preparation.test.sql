@@ -45,7 +45,7 @@ select set_config('request.jwt.claims','{"sub":"a3810000-0000-4000-8000-00000000
 set local role authenticated;
 select is(public.save_delivery_preparation('LEGAL','LEGAL_ENTITY_NAME','Matricia Test SARL',null,0,'PREP381-legal')->>'replayed','false','an administrator stores a legal draft');
 select is(public.save_delivery_preparation('LEGAL','LEGAL_ENTITY_NAME','Autre nom',null,1,'PREP381-legal')->>'replayed','true','the same request does not overwrite the draft');
-select throws_ok($$select public.save_delivery_preparation('LEGAL','LEGAL_ENTITY_NAME','Autre nom',null,0,'PREP381-stale')$$,'40001','STALE_DELIVERY_PREPARATION','a stale draft version is refused');
+select throws_ok($$select public.save_delivery_preparation('LEGAL','LEGAL_ENTITY_NAME','Autre nom',null,0,'PREP381-stale')$$,'PT409','STALE_DELIVERY_PREPARATION','a stale draft version is refused');
 select throws_ok($$select public.save_delivery_preparation('LEGAL','LEGAL_PRIVACY_EMAIL','pas-un-email',null,0,'PREP381-email')$$,'22023','INVALID_DELIVERY_PREPARATION','the privacy contact must be an e-mail address');
 select throws_ok($$select public.save_delivery_preparation('CATALOG_SERVICE_AR','PREP381_SERVICE','Service copie PREP381',null,0,'PREP381-copy')$$,'22023','INVALID_DELIVERY_PREPARATION','a French copy is not accepted as an Arabic service name');
 select is(public.save_delivery_preparation('CATALOG_SERVICE_AR','PREP381_SERVICE','خدمة اختبار التحضير',null,0,'PREP381-service')->>'outcome','DELIVERY_PREPARATION_SAVED','an Arabic service name is stored as a draft');

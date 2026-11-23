@@ -1,4 +1,5 @@
 import { validFixtureProject } from "./helpers/fixture-project.mjs";
+import { settleVisualState } from "./helpers/settled-visual-state";
 import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
@@ -87,6 +88,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 async function expectNoAutomatedA11yViolation(page: Page) {
+  await settleVisualState(page);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
@@ -95,7 +97,7 @@ async function expectNoAutomatedA11yViolation(page: Page) {
     impact: violation.impact,
     targets: violation.nodes.flatMap((node) => node.target),
   }));
-  expect(summary, "Automated accessibility violations").toEqual([]);
+  expect(summary, `Automated accessibility violations ${JSON.stringify(summary)}`).toEqual([]);
 }
 
 for (const locale of ["fr", "ar"] as const) {
@@ -131,6 +133,8 @@ async function verifyAuthenticatedRoute(
   title: string,
   visibleTexts: string[] = [],
   absentTexts: string[] = [],
+  denied?: "mfa" | "role",
+  visibleCases: Array<{id:string;label:string}> = [],
 ) {
   const context = await browser.newContext({
     ...(baseURL ? { baseURL } : {}),
@@ -141,12 +145,22 @@ async function verifyAuthenticatedRoute(
   });
   try {
     const page = await context.newPage();
-    await page.goto(`/${locale}/${route}`);
-    await expect(page).toHaveURL(new RegExp(`/${locale}/${route}/?$`));
+    const target=new URL(`/${locale}/${route}`,baseURL??"http://localhost:5173");
+    await page.goto(target.href);
+    await expect(page).toHaveURL(url=>denied ? url.pathname===`/${locale}/${denied==="mfa"?"securite/compte":"tableau-de-bord"}` : url.pathname===target.pathname&&[...target.searchParams].every(([key,value])=>url.searchParams.get(key)===value));
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
     await expect(page.locator("html")).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
-    await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+    if(denied){
+      await expect(page.getByRole("heading", { level: 1, name: title })).toHaveCount(0);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      if(denied==="mfa")expect(new URL(page.url()).searchParams.get("workspace")).toBe("administration");
+    }else await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
     for (const visibleText of visibleTexts) await expect(page.getByText(visibleText, { exact: true }).first()).toBeVisible();
+    for(const item of visibleCases){
+      const link=page.locator(`a[href^="/${locale}/administration/conformite-clients/${item.id}"]`).first();
+      await expect(link).toBeVisible();
+      await expect(link.locator("xpath=ancestor::tr")).toContainText(item.label);
+    }
     for (const absentText of absentTexts) await expect(page.getByText(absentText, { exact: true })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await expectNoAutomatedA11yViolation(page);
@@ -178,22 +192,23 @@ for (const locale of ["fr", "ar"] as const) {
 
   test(`${locale.toUpperCase()} authorizes central compliance only with the AAL2 state`, async ({ browser, baseURL }) => {
     await verifyAuthenticatedRoute(
-      browser, baseURL, manifest.states.centralAal2.path, locale, "administration/conformite-clients", copy[locale].administrationTitle,
-      [manifest.fixtures.organizationA.name, manifest.fixtures.organizationB.name], [copy[locale].mfaTitle, copy[locale].forbiddenTitle],
+      browser, baseURL, manifest.states.centralAal2.path, locale, "administration/conformite-clients?fixtures=1", copy[locale].administrationTitle,
+      [], [copy[locale].mfaTitle, copy[locale].forbiddenTitle], undefined,
+      [{id:manifest.fixtures.organizationA.caseId,label:locale==="ar"?"عميل اختبار A":"Client test A"},{id:manifest.fixtures.organizationB.caseId,label:locale==="ar"?"عميل اختبار B":"Client test B"}],
     );
   });
 
   test(`${locale.toUpperCase()} requires MFA for the same central identity at AAL1`, async ({ browser, baseURL }) => {
     await verifyAuthenticatedRoute(
       browser, baseURL, manifest.states.centralAal1.path, locale, "administration/conformite-clients", copy[locale].administrationTitle,
-      [copy[locale].mfaTitle], [manifest.fixtures.organizationA.name, manifest.fixtures.organizationB.name],
+      [], [manifest.fixtures.organizationA.name, manifest.fixtures.organizationB.name], "mfa",
     );
   });
 
   test(`${locale.toUpperCase()} refuses central compliance to an authenticated identity without role`, async ({ browser, baseURL }) => {
     await verifyAuthenticatedRoute(
       browser, baseURL, manifest.states.noRole.path, locale, "administration/conformite-clients", copy[locale].administrationTitle,
-      [copy[locale].forbiddenTitle], [manifest.fixtures.organizationA.name, manifest.fixtures.organizationB.name],
+      [], [manifest.fixtures.organizationA.name, manifest.fixtures.organizationB.name], "role",
     );
   });
 }

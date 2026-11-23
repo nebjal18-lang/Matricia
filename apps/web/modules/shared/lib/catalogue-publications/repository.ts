@@ -74,7 +74,7 @@ export async function rollbackCatalogRelease(input: unknown): Promise<Publicatio
   });
   if (response.error) {
     if (response.error.code === "42501") return { status: "error", reason: /AAL|MFA/i.test(response.error.message ?? "") ? "AAL2_REQUIRED" : "FORBIDDEN" };
-    if (["23505", "40001", "55000"].includes(response.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
+    if (["23505", "40001", "PT409", "55000"].includes(response.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
     return { status: "error", reason: "UNAVAILABLE" };
   }
   const output = rollbackOutput.safeParse(response.data);

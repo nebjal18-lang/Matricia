@@ -11,15 +11,15 @@ export type Tone = "mint" | "peach" | "violet" | "sky";
 export type FolderActivity = { id: string; type: string; occurredAt: string; summary: string; evidence: string[] };
 export type FolderEvent = { id: string; from: string | null; to: string; reasonCode: string; occurredAt: string; evidence: string[] };
 export type MatchingRow = { id: string; name: string; status: string; href: string; tone: Tone };
-export type PersonRow = { id: string; linkedOrganizationId?:string|null;createdAt?:string;dossier?:ProviderDossier; name: string; services: string; status: string; next: string; tone: Tone; stage: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[] };
+export type PersonRow = { id: string; linkedOrganizationId?:string|null|undefined;createdAt?:string|undefined;dossier?:ProviderDossier|undefined; name: string; services: string; status: string; next: string; tone: Tone; stage: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[] };
 export type RequestRow = { id: string; title: string; stage: string; owner: string; flag: string; tone: Tone; stageCode?: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[]; matching?: MatchingRow[] };
-export type DocumentRow = { id: string; title: string; owner: string; status: string; href: string; kind: "evidence" | "renewal"; due?: string };
+export type DocumentRow = { id: string; title: string; owner: string; status: string; href: string; kind: "evidence" | "renewal"; due?: string | undefined };
 export type MessageRow = { id: string; title: string; meta: string; href: string; tone: Tone };
 export type NoticeRow = { id: string; title: string; meta: string; href: string };
-export type SupervisionRow = { id: string; title: string; status: string; meta?: string; href: string; tone?: Tone; rowVersion?: number };
+export type SupervisionRow = { id: string; title: string; status: string; meta?: string; href: string; tone?: Tone; rowVersion?: number | undefined };
 export type QualityRow = { evidence?:string[]; severity?:string; id: string; title: string; type: string; status: string; next: string; tone: Tone; href?: string };
 export type FinanceKind = "statement" | "entryFee" | "payout" | "preStatement";
-export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string; kind?: FinanceKind;href?:string;executionNotice?:string };
+export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string | undefined; kind?: FinanceKind;href?:string;executionNotice?:string };
 
 export function demoFranchiseSpaces(locale: Locale, query: string) {
   const fr = locale === "fr";

@@ -15,7 +15,7 @@ async function inspect(files){
 }
 test('unfinished work in a business module fails the actual gate',async()=>{
  const result=await inspect({'apps/web/modules/payments/action.ts':'// TO'+'DO: apply a real financial command\nexport const value=1;'});
- assert.equal(result.error,undefined);assert.equal(result.status,1);assert.match(result.stderr,/apps\/web\/modules\/payments\/action\.ts/);
+ assert.equal(result.error,undefined);assert.equal(result.status,1);assert.match(result.stderr.replaceAll('\\', '/'),/apps\/web\/modules\/payments\/action\.ts/);
 });
 test('test assertions may discuss markers while adjacent product code remains checked',async()=>{
  const accepted=await inspect({'apps/web/modules/payments/action.test.ts':'expect(html).not.toMatch(/TO'+'DO|FIX'+'ME/);','apps/web/modules/payments/action.ts':'export const ready=true;'});

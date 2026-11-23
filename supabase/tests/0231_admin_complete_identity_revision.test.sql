@@ -30,7 +30,7 @@ insert into public.admin_operational_action_decisions(action_request_id,decision
 set local role service_role;select set_config('request.jwt.claims','{"role":"service_role"}',true);select set_config('request.jwt.claim.sub','',true);
 insert into revision_results values('stale',public.execute_admin_operational_action_v1('e2310000-0000-4000-8000-000000000002',extensions.gen_random_uuid())),('injected',public.execute_admin_operational_action_v1('e2310000-0000-4000-8000-000000000003',extensions.gen_random_uuid()));
 reset role;
-select is((select v->>'failure_code'from revision_results where k='stale'),'40001','source identity hash mismatch is rejected before any effect');
+select is((select v->>'failure_code'from revision_results where k='stale'),'PT409','source identity hash mismatch is rejected before any effect');
 select is((select v->>'failure_code'from revision_results where k='injected'),'22023','identity revision cannot modify representative/contact fields');
 select is((select count(*)from public.client_profile_versions where compliance_case_id='f1940000-0000-4000-8000-000000000001'),1::bigint,'rejected revisions leave the immutable profile history unchanged');
 set local role service_role;
@@ -215,7 +215,7 @@ do $$declare u jsonb;d jsonb;job uuid;begin
 end$$;
 select ok(not private.provider_current_identity_is_verified_v1('fa122000-0000-4000-8000-000000000002'),'pending replacement evidence invalidates current identity without rewriting prior attestations');
 set local role authenticated;
-select throws_ok($$select public.revalidate_provider_identity_v1('fa122000-0000-4000-8000-000000000002',(select(v->>'organization_row_version')::integer from revision_results where k='before_renewal_context'),(select(v->>'profile_row_version')::integer from revision_results where k='before_renewal_context'),(select v->>'identity_hash'from revision_results where k='before_renewal_context'),(select(v->>'company_decision_id')::uuid from revision_results where k='before_renewal_context'),'TEST stale context cannot attest an unseen replacement document',extensions.gen_random_uuid())$$,'40001','PROVIDER_CURRENT_IDENTITY_CONFLICT','evidence insertion bumps the same profile CAS used by the existing review API');
+select throws_ok($$select public.revalidate_provider_identity_v1('fa122000-0000-4000-8000-000000000002',(select(v->>'organization_row_version')::integer from revision_results where k='before_renewal_context'),(select(v->>'profile_row_version')::integer from revision_results where k='before_renewal_context'),(select v->>'identity_hash'from revision_results where k='before_renewal_context'),(select(v->>'company_decision_id')::uuid from revision_results where k='before_renewal_context'),'TEST stale context cannot attest an unseen replacement document',extensions.gen_random_uuid())$$,'PT409','PROVIDER_CURRENT_IDENTITY_CONFLICT','evidence insertion bumps the same profile CAS used by the existing review API');
 reset role;
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 select public.record_provider_document_scan_result((select(v->>'scan_job_id')::uuid from revision_results where k='new_insurance'),'CLEAN','SQL_TEST_SCANNER','test-only',repeat('e',64),'identity231-renew-scan');

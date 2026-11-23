@@ -90,7 +90,7 @@ type VisibilityContext = { membershipCount: number; membershipRoles: ReadonlySet
 export type AuthorizedOrganizationMembership = {
   membershipId: string;
   organizationId: string;
-  displayName?: string;
+  displayName?: string | undefined;
 };
 
 /** Orgs de démo/test rattachées à des bibliothèques fixtures (ex. P06 concurrence). */

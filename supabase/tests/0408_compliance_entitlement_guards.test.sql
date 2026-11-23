@@ -2,8 +2,8 @@
 begin;
 select plan(4);
 
-select ok(
-  has_function('private', 'client_identity_allows_new_operations', array['uuid']),
+select has_function(
+  'private', 'client_identity_allows_new_operations', array['uuid'],
   'client identity gate exists before new commercial operations'
 );
 
@@ -12,8 +12,8 @@ select ok(
   'anon cannot execute private identity gate'
 );
 
-select ok(
-  has_table('public', 'client_compliance_cases'),
+select has_table(
+  'public', 'client_compliance_cases',
   'client_compliance_cases is the source of VERIFIED status'
 );
 

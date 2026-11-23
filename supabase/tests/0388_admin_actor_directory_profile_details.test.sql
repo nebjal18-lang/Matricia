@@ -1,6 +1,7 @@
 begin;
 set local search_path=public,extensions;
 select plan(6);
+grant usage on schema extensions to authenticated;
 
 select has_function(
  'public','list_admin_actor_directory_v1',

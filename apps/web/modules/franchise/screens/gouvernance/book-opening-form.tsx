@@ -1,4 +1,5 @@
 "use client";
+import { requireCommandKey } from "@/modules/franchise/screens/command-key";
 import Link from "next/link";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { useActionState, useId, useState } from "react";
@@ -17,7 +18,7 @@ export function FranchiseBookOpeningForm({ context, locale, keys, returnPath }: 
     {context.reviewRequired ? <p role="status" className="rounded-xl border border-amber-500 p-3">{m.review}</p> : null}
     {choice ? <><div className="space-y-2"><Label htmlFor={`${id}-choice`}>{m.select}</Label><select id={`${id}-choice`} value={selection} onChange={event => select(Number(event.target.value))} className="min-h-11 w-full min-w-0 rounded-md border bg-background px-3 text-base">
       {context.choices.map((value, index) => <option key={`${value.approvedMandateVersionId}:${value.financeRuleId}:${value.currency}`} value={index}>{value.libraryCode} · {value.organizationName} · {value.territoryCode} · {m.version} {value.mandateVersion} · {m.rule} {value.financeRuleVersion} · {value.currency}</option>)}
-    </select></div><BookConfirmation key={`${choice.approvedMandateVersionId}:${choice.financeRuleId}:${choice.currency}`} choice={choice} locale={locale} keyValue={keys[selection]} returnPath={returnPath}/></> : <p>{m.empty}</p>}
+    </select></div><BookConfirmation key={`${choice.approvedMandateVersionId}:${choice.financeRuleId}:${choice.currency}`} choice={choice} locale={locale} keyValue={requireCommandKey(keys[selection])} returnPath={returnPath}/></> : <p>{m.empty}</p>}
   </section>;
 }
 function BookConfirmation({ choice, locale, keyValue, returnPath }: { choice: BookOpeningContext["choices"][number]; locale: "fr" | "ar"; keyValue: string; returnPath: string }) {

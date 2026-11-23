@@ -1,0 +1,10 @@
+{
+  "task": "build",
+  "command": "corepack pnpm build",
+  "startedAt": "2026-11-19T13:18:42.849Z",
+  "finishedAt": "2026-11-19T13:18:48.594Z",
+  "durationMs": 5744,
+  "exitCode": 1,
+  "nodeVersion": "v24.11.0",
+  "scope": "Current working tree including the two preserved staged corrections; no application source corrections by audit"
+}

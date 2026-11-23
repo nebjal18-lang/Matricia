@@ -1,0 +1,21 @@
+{
+  "task": "strict-diagnostic",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "tsc",
+    "--noEmit",
+    "--incremental",
+    "false",
+    "--noUncheckedIndexedAccess",
+    "--exactOptionalPropertyTypes",
+    "--noImplicitOverride",
+    "--noFallthroughCasesInSwitch"
+  ],
+  "startedAt": "2026-11-19T13:58:47.885Z",
+  "finishedAt": "2026-11-19T13:59:30.808Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 1
+}

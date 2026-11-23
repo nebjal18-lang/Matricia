@@ -190,7 +190,7 @@ revoke all on function private.guard_credit_lot_funding_movement_v1()from public
 -- before FEFO allocation: an ineligible older lot must not hide an eligible gift.
 do $$declare d text;needle text;
 begin
- d:=pg_get_functiondef('public.reserve_benefit_credits(uuid,uuid,uuid,bigint,timestamptz,text,uuid)'::regprocedure);
+ d:=pg_get_functiondef('public.reserve_benefit_credits(uuid,uuid,uuid,bigint,timestamptz,text,uuid)'::regprocedure);d:=replace(d,chr(13),'');
  needle:='and(l.library_id is null or l.library_id=b.library_id)order by';
  if position(needle in d)=0 then raise exception'CREDIT_RESERVE_FUNDING_PATCH_SOURCE_MISMATCH';end if;
  d:=replace(d,needle,'and(l.library_id is null or l.library_id=b.library_id)and private.credit_lot_funding_status_v1(l.id)=''ELIGIBLE''order by');
@@ -198,7 +198,7 @@ begin
  if position(needle in d)=0 then raise exception'CREDIT_RESERVE_LOCK_PATCH_SOURCE_MISMATCH';end if;
  d:=replace(d,needle,'perform pg_advisory_xact_lock(hashtextextended(''subscription-financial:''||p_organization_id::text,0));perform 1 from public.credit_wallets');
  execute d;
- d:=pg_get_functiondef('public.issue_credits(uuid,uuid,text,bigint,timestamptz,uuid,text,bigint,text,text,text,uuid)'::regprocedure);
+ d:=pg_get_functiondef('public.issue_credits(uuid,uuid,text,bigint,timestamptz,uuid,text,bigint,text,text,text,uuid)'::regprocedure);d:=replace(d,chr(13),'');
  needle:='if p_source_type not in';
  if position(needle in d)=0 then raise exception'CREDIT_ISSUE_FUNDING_PATCH_SOURCE_MISMATCH';end if;
  d:=replace(d,needle,'if p_source_type=''SUBSCRIPTION_GRANT''and auth.jwt()->>''aal''is distinct from''aal2''then raise exception''CREDIT_SUBSCRIPTION_GRANT_DENIED''using errcode=''42501'';end if;if p_source_type not in');
@@ -208,12 +208,12 @@ begin
  execute d;
  -- The reward command is an existing caller of issue_credits and used to lock
  -- its wallet first. Acquire the same organization lock before that first lock.
- d:=pg_get_functiondef('public.award_reward(uuid,uuid,uuid,text,text,text,jsonb,text,text,uuid)'::regprocedure);
+ d:=pg_get_functiondef('public.award_reward(uuid,uuid,uuid,text,text,text,jsonb,text,text,uuid)'::regprocedure);d:=replace(d,chr(13),'');
  needle:='expected_wallet:=case when';
  if position(needle in d)=0 then raise exception'REWARD_CREDIT_LOCK_PATCH_SOURCE_MISMATCH';end if;
  d:=replace(d,needle,'perform pg_advisory_xact_lock(hashtextextended(''subscription-financial:''||p_organization_id::text,0));expected_wallet:=case when');
  execute d;
- d:=pg_get_functiondef('public.consume_benefit_credits(uuid,text,text,uuid)'::regprocedure);
+ d:=pg_get_functiondef('public.consume_benefit_credits(uuid,text,text,uuid)'::regprocedure);d:=replace(d,chr(13),'');
  needle:='  select * into d from public.benefit_redemptions where id = p_redemption_id for update;';
  if position(needle in d)=0 then raise exception'CREDIT_CONSUME_LOCK_PATCH_SOURCE_MISMATCH';end if;
  d:=replace(d,needle,'  perform pg_advisory_xact_lock(hashtextextended(''subscription-financial:''||r.organization_id::text,0))from public.benefit_redemptions r where r.id=p_redemption_id and private.credits_client_access(r.organization_id,a);'||chr(10)||needle);

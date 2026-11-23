@@ -113,7 +113,7 @@ export async function portfolioRpc(name: string, input: Record<string, unknown>)
   const { data: auth } = await client.auth.getUser();
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
   const { data, error } = await client.rpc(name, input);
-  if (error) return { status: "error", reason: error.code === "42501" ? "FORBIDDEN" : error.code === "40001" ? "CONFLICT" : "UNAVAILABLE" };
+  if (error) return { status: "error", reason: error.code === "42501" ? "FORBIDDEN" : (error.code === "40001" || error.code === "PT409") ? "CONFLICT" : "UNAVAILABLE" };
   if (name === "record_client_typed_cost_allocation" && data?.outcome === "CLIENT_APPROVAL_REQUIRED") {
     const pending=z.object({outcome:z.literal("CLIENT_APPROVAL_REQUIRED"),approval_request_id:z.string().uuid(),status:z.enum(["PENDING","REJECTED","CANCELLED"])}).safeParse(data);
     return pending.success ? {status:"success",value:pending.data} : {status:"error",reason:"UNAVAILABLE"};

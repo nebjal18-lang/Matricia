@@ -1,9 +1,9 @@
 type PreviewEnvironment = {
-  VERCEL_ENV?: string;
-  APP_ENV?: string;
-  NEXT_PUBLIC_SUPABASE_URL?: string;
-  STAGING_SUPABASE_PROJECT_REF?: string;
-  PRODUCTION_SUPABASE_PROJECT_REF?: string;
+  VERCEL_ENV?: string | undefined;
+  APP_ENV?: string | undefined;
+  NEXT_PUBLIC_SUPABASE_URL?: string | undefined;
+  STAGING_SUPABASE_PROJECT_REF?: string | undefined;
+  PRODUCTION_SUPABASE_PROJECT_REF?: string | undefined;
 };
 
 /** A Preview build must never silently inherit the public deployment's database. */

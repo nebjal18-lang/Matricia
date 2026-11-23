@@ -43,7 +43,8 @@ export function getPaymentRuntimeConfig(environment: Record<string, string | und
     ) {
       throw new Error("PAYMENT_DEMO_FORBIDDEN");
     }
-    return { provider, allowedProviders, liveEnabled, demoWebhookSecret: environment.PAYMENT_WEBHOOK_SECRET_DEMO };
+    const demoWebhookSecret = environment.PAYMENT_WEBHOOK_SECRET_DEMO;
+    return { provider, allowedProviders, liveEnabled, ...(demoWebhookSecret === undefined ? {} : { demoWebhookSecret }) };
   }
   if (provider === "CMI") {
     return {

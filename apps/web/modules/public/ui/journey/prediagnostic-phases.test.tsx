@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
-import { diagnosticQuestionIds } from "@/modules/public/data/journey/diagnostic-contract";
+import { diagnosticQuestionIds, type DiagnosticAnswers } from "@/modules/public/data/journey/diagnostic-contract";
 import { DetailView, HonestStatesView, RecapView, RecoveryStatesView, ResultView } from "./prediagnostic-phases";
 
 describe("états publics du prédiagnostic", () => {
@@ -59,6 +59,7 @@ describe.each(["fr", "ar"] as const)("diagnostic answer trace in %s", (locale) =
     expect(html).toContain(locale === "fr" ? "Livrable" : "المخرج");
     expect(html).toContain(locale === "fr" ? "Terminé lorsque" : "يكتمل عندما");
     const recommendation = getPublicJourneyCopy(locale).diagnostic.priorities.organization[3];
+    if (!recommendation) throw new Error("Diagnostic recommendation is required");
     expect(html.split(recommendation).length - 1).toBeLessThan(2);
     expect(html).toContain('data-question="priority_tracking"');
     expect(html).not.toContain('data-question="sales_tracking"');
@@ -87,7 +88,9 @@ describe.each(["fr", "ar"] as const)("diagnostic answer trace in %s", (locale) =
   });
 
   it.each(["unknown", undefined])("reports a %s sales answer as declared instead of asserting non-centralized customer data", (sales_tracking) => {
-    const source = { ...answers, goals: ["grow_sales"], sales_tracking };
+    const source: DiagnosticAnswers = { ...answers, goals: ["grow_sales"] };
+    if (sales_tracking === undefined) delete source.sales_tracking;
+    else source.sales_tracking = sales_tracking;
     const copy = getPublicJourneyCopy(locale).diagnostic;
     const detail = renderToStaticMarkup(<DetailView locale={locale} priority="sales" answers={source} onBack={() => undefined} />);
     const result = renderToStaticMarkup(<ResultView locale={locale} answers={source} storageAvailable onEdit={() => undefined} onDetail={() => undefined} onSave={() => undefined} onErase={() => undefined} />);
@@ -101,7 +104,8 @@ describe.each(["fr", "ar"] as const)("diagnostic answer trace in %s", (locale) =
     const source = { ...answers, goals: ["secure_activity"], backup_restore };
     const html = renderToStaticMarkup(<DetailView locale={locale} priority="security" answers={source} onBack={() => undefined} />);
     const copy = getPublicJourneyCopy(locale).diagnostic;
-    const value = copy.questions[5]![2][backup_restore === "no" ? 2 : 1];
+    const value = copy.questions[5]?.[2]?.[backup_restore === "no" ? 2 : 1];
+    if (!value) throw new Error("Backup answer label is required");
     expect(html).toContain(`${copy.questionLabels.backup_restore} : ${value}`);
     expect(html).not.toContain(locale === "fr" ? "outils essentiels ne sont pas toujours doublés" : "أدوات أساسية ليست دائماً مزدوجة");
   });

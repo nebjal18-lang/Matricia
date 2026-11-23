@@ -1,0 +1,9 @@
+PASS 0001_schema_rls.test.sql
+PASS 0002_tenant_isolation.test.sql
+PASS 0003_immutable_ledgers.test.sql
+PASS 0004_financial_rpcs.test.sql
+PASS outbox_concurrency (2 connections)
+PASS journal_idempotency_concurrency (2 connections)
+PASS credit_idempotency_concurrency (2 connections)
+PASS audit_chain_concurrency (2 connections)
+DB tests passed: 4 files, 43 assertions, 4 concurrency scenarios

@@ -1,0 +1,1950 @@
+{
+  "startedAt": "2026-11-19T13:28:28.070Z",
+  "finishedAt": "2026-11-19T13:28:43.493Z",
+  "baseURL": "http://127.0.0.1:5175",
+  "source": {
+    "snapshot": "C:\\Users\\jal18\\AppData\\Local\\Temp\\vscode-agent-codex-sandbox-59PsGz\\matricia-audit-b578c75c-h8qXI8",
+    "sha": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "startedAt": "2026-11-19T13:24:09.546Z",
+    "finishedAt": "2026-11-19T13:24:27.845Z",
+    "nodeVersion": "v22.23.5",
+    "installCommand": "corepack pnpm install --offline --frozen-lockfile",
+    "exitCode": 0,
+    "includesStagedLocalCorrections": false,
+    "applicationFilesModifiedByAuditor": false
+  },
+  "environment": "Node22 isolated checkout, development server, local API, demo disabled; no authenticated business mutations",
+  "limitations": [
+    "No authenticated journey proof",
+    "No screen-reader manual session",
+    "Viewport emulation, not real mobile hardware",
+    "No approved reference-image pixel comparison",
+    "Development timings cannot validate production Web Vitals"
+  ],
+  "pages": [
+    {
+      "locale": "ar",
+      "route": "",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar",
+      "navigationMs": 486,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "حوّل احتياجاً مهنياً إلى خدمة واضحة قابلة للتدبير. | Matricia",
+      "h1": [
+        "اكتشف ما يعيق تطور مؤسستك. وانتقل إلى الحلول المناسبة."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-home-360.png"
+    },
+    {
+      "locale": "ar",
+      "route": "",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar",
+      "navigationMs": 486,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "حوّل احتياجاً مهنياً إلى خدمة واضحة قابلة للتدبير. | Matricia",
+      "h1": [
+        "اكتشف ما يعيق تطور مؤسستك. وانتقل إلى الحلول المناسبة."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar",
+      "navigationMs": 486,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "حوّل احتياجاً مهنياً إلى خدمة واضحة قابلة للتدبير. | Matricia",
+      "h1": [
+        "اكتشف ما يعيق تطور مؤسستك. وانتقل إلى الحلول المناسبة."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar",
+      "navigationMs": 486,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "حوّل احتياجاً مهنياً إلى خدمة واضحة قابلة للتدبير. | Matricia",
+      "h1": [
+        "اكتشف ما يعيق تطور مؤسستك. وانتقل إلى الحلول المناسبة."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar",
+      "navigationMs": 486,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "حوّل احتياجاً مهنياً إلى خدمة واضحة قابلة للتدبير. | Matricia",
+      "h1": [
+        "اكتشف ما يعيق تطور مؤسستك. وانتقل إلى الحلول المناسبة."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-home-1440.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/diagnostic",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/diagnostic",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "تقييم أولي للشركة | ماتريسيا",
+      "h1": [
+        "بضع إجابات لتوجيه مؤسستكم بشكل أفضل"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-diagnostic-360.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/diagnostic",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/diagnostic",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "تقييم أولي للشركة | ماتريسيا",
+      "h1": [
+        "بضع إجابات لتوجيه مؤسستكم بشكل أفضل"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/diagnostic",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/diagnostic",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "تقييم أولي للشركة | ماتريسيا",
+      "h1": [
+        "بضع إجابات لتوجيه مؤسستكم بشكل أفضل"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/diagnostic",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/diagnostic",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "تقييم أولي للشركة | ماتريسيا",
+      "h1": [
+        "بضع إجابات لتوجيه مؤسستكم بشكل أفضل"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/diagnostic",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/diagnostic",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "تقييم أولي للشركة | ماتريسيا",
+      "h1": [
+        "بضع إجابات لتوجيه مؤسستكم بشكل أفضل"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-diagnostic-1440.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/besoin",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/besoin",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "طلب جديد | ماتريسيا",
+      "h1": [
+        "صفوا احتياجكم"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 27,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-besoin-360.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/besoin",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/besoin",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "طلب جديد | ماتريسيا",
+      "h1": [
+        "صفوا احتياجكم"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/besoin",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/besoin",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "طلب جديد | ماتريسيا",
+      "h1": [
+        "صفوا احتياجكم"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/besoin",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/besoin",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "طلب جديد | ماتريسيا",
+      "h1": [
+        "صفوا احتياجكم"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/besoin",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/besoin",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "طلب جديد | ماتريسيا",
+      "h1": [
+        "صفوا احتياجكم"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 28,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-besoin-1440.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/fournisseur",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/fournisseur",
+      "navigationMs": 249,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "طوّروا نشاطكم بمهام تناسب خبرتكم.",
+      "h1": [
+        "طوّروا نشاطكم بمهام تناسب خبرتكم."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 28,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-fournisseur-360.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/fournisseur",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/fournisseur",
+      "navigationMs": 249,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "طوّروا نشاطكم بمهام تناسب خبرتكم.",
+      "h1": [
+        "طوّروا نشاطكم بمهام تناسب خبرتكم."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/fournisseur",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/fournisseur",
+      "navigationMs": 249,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "طوّروا نشاطكم بمهام تناسب خبرتكم.",
+      "h1": [
+        "طوّروا نشاطكم بمهام تناسب خبرتكم."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/fournisseur",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/fournisseur",
+      "navigationMs": 249,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "طوّروا نشاطكم بمهام تناسب خبرتكم.",
+      "h1": [
+        "طوّروا نشاطكم بمهام تناسب خبرتكم."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/fournisseur",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/fournisseur",
+      "navigationMs": 249,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "طوّروا نشاطكم بمهام تناسب خبرتكم.",
+      "h1": [
+        "طوّروا نشاطكم بمهام تناسب خبرتكم."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-fournisseur-1440.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/franchise",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/franchise",
+      "navigationMs": 196,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني",
+      "h1": [
+        "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-franchise-360.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/franchise",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/franchise",
+      "navigationMs": 196,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني",
+      "h1": [
+        "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/franchise",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/franchise",
+      "navigationMs": 196,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني",
+      "h1": [
+        "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/franchise",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/franchise",
+      "navigationMs": 196,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني",
+      "h1": [
+        "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/franchise",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/franchise",
+      "navigationMs": 196,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني",
+      "h1": [
+        "أصبحوا صاحب امتياز ماتريسيا. نموذج محلي وأثر وطني"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-franchise-1440.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/abonnements",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/abonnements",
+      "navigationMs": 247,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "اشتراكات ماتريسيا",
+      "h1": [
+        "صيغ مناسبة لاحتياجاتكم المهنية"
+      ],
+      "mainCount": 2,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/abonnements",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/abonnements",
+      "navigationMs": 247,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "اشتراكات ماتريسيا",
+      "h1": [
+        "صيغ مناسبة لاحتياجاتكم المهنية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/abonnements",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/abonnements",
+      "navigationMs": 247,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "اشتراكات ماتريسيا",
+      "h1": [
+        "صيغ مناسبة لاحتياجاتكم المهنية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/abonnements",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/abonnements",
+      "navigationMs": 247,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "اشتراكات ماتريسيا",
+      "h1": [
+        "صيغ مناسبة لاحتياجاتكم المهنية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/abonnements",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/abonnements",
+      "navigationMs": 247,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "اشتراكات ماتريسيا",
+      "h1": [
+        "صيغ مناسبة لاحتياجاتكم المهنية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 27,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/entreprises",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/entreprises",
+      "navigationMs": 187,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "المؤسسات",
+      "h1": [
+        "المؤسسات"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/entreprises",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/entreprises",
+      "navigationMs": 187,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "المؤسسات",
+      "h1": [
+        "المؤسسات"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/entreprises",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/entreprises",
+      "navigationMs": 187,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "المؤسسات",
+      "h1": [
+        "المؤسسات"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/entreprises",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/entreprises",
+      "navigationMs": 187,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "المؤسسات",
+      "h1": [
+        "المؤسسات"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/entreprises",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/entreprises",
+      "navigationMs": 187,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "المؤسسات",
+      "h1": [
+        "المؤسسات"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 22,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/a-propos",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/a-propos",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة",
+      "h1": [
+        "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/a-propos",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/a-propos",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة",
+      "h1": [
+        "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/a-propos",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/a-propos",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة",
+      "h1": [
+        "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/a-propos",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/a-propos",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة",
+      "h1": [
+        "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/a-propos",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/a-propos",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة",
+      "h1": [
+        "مهمتنا: تحويل طموحات المؤسسات المغربية إلى نجاحات ملموسة"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/contact",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/contact",
+      "navigationMs": 206,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "لنتحدث عن احتياجك",
+      "h1": [
+        "لنتحدث عن احتياجك"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 28,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/contact",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/contact",
+      "navigationMs": 206,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "لنتحدث عن احتياجك",
+      "h1": [
+        "لنتحدث عن احتياجك"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/contact",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/contact",
+      "navigationMs": 206,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "لنتحدث عن احتياجك",
+      "h1": [
+        "لنتحدث عن احتياجك"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/contact",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/contact",
+      "navigationMs": 206,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "لنتحدث عن احتياجك",
+      "h1": [
+        "لنتحدث عن احتياجك"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/contact",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/contact",
+      "navigationMs": 206,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "لنتحدث عن احتياجك",
+      "h1": [
+        "لنتحدث عن احتياجك"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/mentions-legales",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/mentions-legales",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "الإشعارات القانونية",
+      "h1": [
+        "الإشعارات القانونية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/mentions-legales",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/mentions-legales",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "الإشعارات القانونية",
+      "h1": [
+        "الإشعارات القانونية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/mentions-legales",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/mentions-legales",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "الإشعارات القانونية",
+      "h1": [
+        "الإشعارات القانونية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/mentions-legales",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/mentions-legales",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "الإشعارات القانونية",
+      "h1": [
+        "الإشعارات القانونية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/mentions-legales",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/mentions-legales",
+      "navigationMs": 205,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "الإشعارات القانونية",
+      "h1": [
+        "الإشعارات القانونية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 22,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/confidentialite",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/confidentialite",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "الخصوصية",
+      "h1": [
+        "الخصوصية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "TABLE",
+          "text": "فئة البياناتغاية المعالجةمدة الحفظحقوقكمبيانات الهوية والاتصالإنشاء حسابكم وإدارته والتواص",
+          "class": "min-w-full text-sm"
+        }
+      ],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 26,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/confidentialite",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/confidentialite",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "الخصوصية",
+      "h1": [
+        "الخصوصية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/confidentialite",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/confidentialite",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "الخصوصية",
+      "h1": [
+        "الخصوصية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/confidentialite",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/confidentialite",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "الخصوصية",
+      "h1": [
+        "الخصوصية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/confidentialite",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/confidentialite",
+      "navigationMs": 213,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "الخصوصية",
+      "h1": [
+        "الخصوصية"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/conditions",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/conditions",
+      "navigationMs": 209,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "شروط الاستخدام",
+      "h1": [
+        "شروط الاستخدام"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/conditions",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/conditions",
+      "navigationMs": 209,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "شروط الاستخدام",
+      "h1": [
+        "شروط الاستخدام"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/conditions",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/conditions",
+      "navigationMs": 209,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "شروط الاستخدام",
+      "h1": [
+        "شروط الاستخدام"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/conditions",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/conditions",
+      "navigationMs": 209,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "شروط الاستخدام",
+      "h1": [
+        "شروط الاستخدام"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/conditions",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/conditions",
+      "navigationMs": 209,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "شروط الاستخدام",
+      "h1": [
+        "شروط الاستخدام"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 22,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/cookies",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/cookies",
+      "navigationMs": 211,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "ملفات تعريف الارتباط",
+      "h1": [
+        "ملفات تعريف الارتباط"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/cookies",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/cookies",
+      "navigationMs": 211,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "ملفات تعريف الارتباط",
+      "h1": [
+        "ملفات تعريف الارتباط"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/cookies",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/cookies",
+      "navigationMs": 211,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "ملفات تعريف الارتباط",
+      "h1": [
+        "ملفات تعريف الارتباط"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/cookies",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/cookies",
+      "navigationMs": 211,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "ملفات تعريف الارتباط",
+      "h1": [
+        "ملفات تعريف الارتباط"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/cookies",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/cookies",
+      "navigationMs": 211,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "ملفات تعريف الارتباط",
+      "h1": [
+        "ملفات تعريف الارتباط"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 22,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "ar",
+      "route": "/connexion",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "تسجيل دخول آمن | Matricia",
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 26,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-connexion-360.png"
+    },
+    {
+      "locale": "ar",
+      "route": "/connexion",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "تسجيل دخول آمن | Matricia",
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/connexion",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "تسجيل دخول آمن | Matricia",
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/connexion",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "تسجيل دخول آمن | Matricia",
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "ar",
+      "route": "/connexion",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "navigationMs": 218,
+      "lang": "ar",
+      "dir": "rtl",
+      "computedDirection": "rtl",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "تسجيل دخول آمن | Matricia",
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/ar-connexion-1440.png"
+    }
+  ],
+  "protectedRoutes": [
+    {
+      "locale": "ar",
+      "route": "/client/accueil",
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ]
+    },
+    {
+      "locale": "ar",
+      "route": "/sous-traitant/identite",
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ]
+    },
+    {
+      "locale": "ar",
+      "route": "/franchise/accueil",
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ]
+    },
+    {
+      "locale": "ar",
+      "route": "/administration/command-center",
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ]
+    },
+    {
+      "locale": "ar",
+      "route": "/organisation",
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ]
+    },
+    {
+      "locale": "ar",
+      "route": "/securite/compte",
+      "httpStatus": 200,
+      "finalPath": "/ar/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "تسجيل الدخول إلى ماتريسيا"
+      ]
+    }
+  ],
+  "keyboard": [
+    {
+      "locale": "ar",
+      "firstFocus": {
+        "tag": "A",
+        "text": "الانتقال إلى المحتوى الرئيسي",
+        "href": "#contenu-principal"
+      },
+      "afterSkip": {
+        "tag": "BODY",
+        "id": "",
+        "hash": "#contenu-principal"
+      },
+      "menuState": {
+        "expanded": "true",
+        "dialogCount": 0,
+        "afterEscapeExpanded": "false",
+        "focusReturned": true
+      }
+    }
+  ],
+  "blockedRequests": []
+}

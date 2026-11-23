@@ -387,8 +387,8 @@
 .premium-nav-action-mobile{width:100%;margin-top:4px}
 .premium-nav-account{display:none;width:44px;min-height:44px;place-items:center;border-radius:999px;color:var(--jp-navy)}
 .premium-nav-account:focus-visible{outline:2px solid var(--jp-blue);outline-offset:2px}
-/* Match the lg desktop navigation; keep the account entry visible on tablets. */
-@media(max-width:1023px){.premium-nav-account{display:grid}}
+/* Match the xl desktop navigation; keep the account entry visible on tablets. */
+@media(max-width:1279px){.premium-nav-account{display:grid}}
 .premium-lang{display:inline-flex;min-height:44px;align-items:center;gap:6px;padding:0 8px;color:rgb(26 35 64 / .7);font-size:.82rem;font-weight:700}
 /* Home overrides after base nav rules so light-on-dark wins the cascade. */
 .premium-nav.premium-nav--on-home,

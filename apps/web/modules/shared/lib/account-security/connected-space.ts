@@ -4,7 +4,7 @@ import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 /** Account security is available before an organization or a workspace role exists. */
-export async function resolveConnectedSpace(input: { locale: Locale; organizationId?: string; allowDirectoryFailure?: boolean }) {
+export async function resolveConnectedSpace(input: { locale: Locale; organizationId?: string | undefined; allowDirectoryFailure?: boolean }) {
   const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
   const { data: auth, error: authError } = authResult;
   if (authError) {

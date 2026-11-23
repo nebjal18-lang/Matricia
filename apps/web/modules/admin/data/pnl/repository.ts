@@ -4,7 +4,7 @@ import { adminPnlDashboardSchema, type AdminPnlDashboard, type AdminPnlErrorReas
 function mapError(code?: string): AdminPnlErrorReason {
   if (code === "42501") return "FORBIDDEN";
   if (code === "22023") return "INVALID_INPUT";
-  if (["22000", "23505", "23514", "40001", "55000"].includes(code ?? "")) return "CONFLICT";
+  if (["22000", "23505", "23514", "40001", "PT409", "55000"].includes(code ?? "")) return "CONFLICT";
   return "UNAVAILABLE";
 }
 

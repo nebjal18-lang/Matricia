@@ -7,7 +7,10 @@ function failure(error: QueryResponse["error"]): RuleValidationResult<never> {
 }
 
 function relation<T>(value: T | T[]): T {
-  return Array.isArray(value) ? value[0] : value;
+  if (!Array.isArray(value)) return value;
+  const first = value[0];
+  if (first === undefined) throw new Error("INVALID_RELATION");
+  return first;
 }
 
 export function createRuleValidationRepository(dependencies: RuleValidationDependencies): RuleValidationRepository {

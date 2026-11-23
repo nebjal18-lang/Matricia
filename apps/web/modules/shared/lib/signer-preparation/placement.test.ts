@@ -10,5 +10,5 @@ it.each([{page:3,x:40,y:600},{page:1,x:511,y:600},{page:1,x:40,y:805},{page:1,x:
   const {bytes,sha}=await source();await expect(validatePdfPlacements(bytes,sha,[{documentSha256:sha,...field}])).rejects.toThrow("INVALID_PLACEMENT");
 });
 it("rejects a PDF whose bytes no longer match the envelope hash", async () => {
-  const {bytes,sha}=await source();const changed=new Uint8Array(bytes);changed[20]^=1;await expect(validatePdfPlacements(changed,sha,[{documentSha256:sha,page:1,x:40,y:600}])).rejects.toThrow("DOCUMENT_CHANGED");
+  const {bytes,sha}=await source();const changed=new Uint8Array(bytes);const original=changed[20];if(original===undefined)throw new Error("PDF fixture is too short");changed[20]=original^1;await expect(validatePdfPlacements(changed,sha,[{documentSha256:sha,page:1,x:40,y:600}])).rejects.toThrow("DOCUMENT_CHANGED");
 });

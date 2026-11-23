@@ -39,12 +39,12 @@ export function FranchiseAppShell({
   selectedOrganizationId: string | null;
   userEmail: string | null;
   active: FranchiseNavKey;
-  title?: string;
-  lead?: string;
-  kicker?: string;
+  title?: string | undefined;
+  lead?: string | undefined;
+  kicker?: string | undefined;
   actions?: ReactNode;
   mandateName?: string | null;
-  mandates?: Array<{id:string;organizationId:string;label:string}>;
+  mandates?: Array<{id:string;organizationId:string;label:string}> | undefined;
   /** Photo hero mast — identity hubs only (accueil / territoire / finance). */
   sceneHero?: boolean;
   children: ReactNode;
@@ -208,7 +208,7 @@ export function FranchiseAppShell({
             </div>
           </header>
         ) : null}
-        <FranchiseMandateSelector locale={locale} mandates={mandates} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
+        <FranchiseMandateSelector locale={locale} mandates={mandates ?? []} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
         <div className="franchise-page-standard">{children}</div>
       </div>
     </div>

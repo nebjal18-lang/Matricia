@@ -1,0 +1,10 @@
+{
+  "task": "tooling",
+  "command": "corepack pnpm test:tooling",
+  "startedAt": "2026-11-19T13:17:26.402Z",
+  "finishedAt": "2026-11-19T13:17:28.056Z",
+  "durationMs": 1653,
+  "exitCode": 1,
+  "nodeVersion": "v24.11.0",
+  "scope": "Current working tree including the two preserved staged corrections; no application source corrections by audit"
+}

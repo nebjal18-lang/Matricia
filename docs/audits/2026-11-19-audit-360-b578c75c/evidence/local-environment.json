@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-19T13:21:28.166Z",
+  "localDockerOnly": true,
+  "identity": [
+    {
+      "database": "matricia_audit_20261119_b578c75c",
+      "actor": "supabase_admin",
+      "migration_count": 603
+    }
+  ],
+  "rls": [
+    {
+      "tables": 681,
+      "rls_tables": 681
+    }
+  ],
+  "publicWithoutRls": [],
+  "isolation": "Read-only snapshot from existing local database restored into a separate audit database; pg_cron excluded; no original application data modified",
+  "browserApiScope": "Existing local Supabase HTTP API is not the cloned SQL database; browser public/read-only checks do not prove clone persistence"
+}

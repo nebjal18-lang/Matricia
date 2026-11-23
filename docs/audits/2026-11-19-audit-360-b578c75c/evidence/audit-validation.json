@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-11-19T13:53:00.526Z",
+  "passed": true,
+  "reports": 9,
+  "findings": 36,
+  "requirements": 68,
+  "sourceReferences": 78,
+  "linksChecked": 394,
+  "jsonFiles": 45,
+  "head": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+  "preservesPreExistingIndex": true,
+  "failures": []
+}

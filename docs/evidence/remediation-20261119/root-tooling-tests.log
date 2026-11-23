@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: distinct names cannot conceal a shared migration version
+ok 1 - distinct names cannot conceal a shared migration version
+  ---
+  duration_ms: 1.0198
+  type: 'test'
+  ...
+# Subtest: unique canonical versions pass independently of enumeration order
+ok 2 - unique canonical versions pass independently of enumeration order
+  ---
+  duration_ms: 1.0863
+  type: 'test'
+  ...
+# Subtest: malformed SQL names cannot escape validation
+ok 3 - malformed SQL names cannot escape validation
+  ---
+  duration_ms: 0.7614
+  type: 'test'
+  ...
+# Subtest: keeps static assets patchable for Vercel preview comments
+ok 4 - keeps static assets patchable for Vercel preview comments
+  ---
+  duration_ms: 5.9644
+  type: 'test'
+  ...
+# Subtest: all Vercel entrypoints retain the same scheduled application endpoints
+ok 5 - all Vercel entrypoints retain the same scheduled application endpoints
+  ---
+  duration_ms: 159.5672
+  type: 'test'
+  ...
+# Subtest: exposes native Next output, assets and scoped runtime dependencies; preserves domain dependencies
+ok 6 - exposes native Next output, assets and scoped runtime dependencies; preserves domain dependencies
+  ---
+  duration_ms: 39.4233
+  type: 'test'
+  ...
+# Subtest: refuses public directory collisions before changing generated output
+ok 7 - refuses public directory collisions before changing generated output
+  ---
+  duration_ms: 22.4883
+  type: 'test'
+  ...
+# Subtest: requires a completed Next build before creating aliases
+ok 8 - requires a completed Next build before creating aliases
+  ---
+  duration_ms: 15.839
+  type: 'test'
+  ...
+# Subtest: refuses a conflicting installed dependency without replacing it
+ok 9 - refuses a conflicting installed dependency without replacing it
+  ---
+  duration_ms: 25.8608
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 388.6641

@@ -11,7 +11,7 @@ export async function prepareUpgradeQuote(_previous:UpgradeQuoteState,form:FormD
   const client=await getSupabaseServerClient();const auth=await client.auth.getUser();if(auth.error||!auth.data.user)return{status:"error",reason:"FORBIDDEN"};
   const aal=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(aal.error)return{status:"error",reason:"UNAVAILABLE"};if(aal.data.currentLevel!=="aal2")return{status:"error",reason:"MFA_REQUIRED"};
   const r=await client.rpc("create_client_subscription_upgrade_quote_v1",{p_organization_id:p.data.organizationId,p_policy_id:p.data.policyId,p_idempotency_key:p.data.key});
-  if(r.error)return{status:"error",reason:r.error.code==="42501"?"FORBIDDEN":["40001","55000","22003"].includes(r.error.code)?"CONFLICT":"UNAVAILABLE"};
+  if(r.error)return{status:"error",reason:r.error.code==="42501"?"FORBIDDEN":["40001", "PT409","55000","22003"].includes(r.error.code)?"CONFLICT":"UNAVAILABLE"};
   const parsed=output.safeParse(r.data);if(!parsed.success)return{status:"error",reason:"UNAVAILABLE"};const q=parsed.data;
   return{status:"quoted",quote:{id:q.quote_id,hash:q.content_hash,amountMinor:q.amount_minor,currency:q.currency,expiresAt:q.expires_at,targetPlanVersionId:q.snapshot.target_plan_version_id,billingInterval:q.snapshot.billing_interval,termsFr:q.snapshot.terms_fr,termsAr:q.snapshot.terms_ar,sourcePeriodEnd:q.snapshot.source_period_end,mode:q.snapshot.mode}};
  }catch{return{status:"error",reason:"UNAVAILABLE"};}

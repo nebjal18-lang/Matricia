@@ -9,6 +9,7 @@ export function parseScore(value: unknown): bigint | null {
   const text = typeof value === "number" && Number.isFinite(value) ? String(value) : typeof value === "string" ? value.trim() : "";
   if (!SCORE.test(text)) return null;
   const [whole, fraction = ""] = text.split(".");
+  if (whole === undefined) return null;
   return BigInt(whole) * SCALE + BigInt(fraction.padEnd(6, "0"));
 }
 

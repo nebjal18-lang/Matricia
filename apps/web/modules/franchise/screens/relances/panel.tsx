@@ -1,4 +1,5 @@
 "use client";
+import { requireCommandKey } from "@/modules/franchise/screens/command-key";
 import { useActionState, useId } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
@@ -49,7 +50,7 @@ export function FollowupPanel({
           <form action={act} key={f.id} className="mt-4 grid gap-3 rounded-2xl border bg-card p-4 sm:grid-cols-2">
             <input type="hidden" name="uiLocale" value={locale} />
             <input type="hidden" name="franchiseId" value={f.id} />
-            <input type="hidden" name="idempotencyKey" value={keys.propose[f.id]} />
+            <input type="hidden" name="idempotencyKey" value={requireCommandKey(keys.propose[f.id])} />
             <p className="font-semibold sm:col-span-2" dir="ltr">{f.operatorCode}</p>
             <fieldset className="sm:col-span-2">
               <legend className="mb-2 font-medium">{m.stages}</legend>
@@ -67,8 +68,8 @@ export function FollowupPanel({
             <Field id={`${prefix}-attempts-${f.id}`} name="maximumAttempts" label={m.attempts} type="number" defaultValue="4" />
             <Field id={`${prefix}-weekly-${f.id}`} name="maximumRemindersPer7Days" label={m.weekly} type="number" defaultValue="3" />
             <Field id={`${prefix}-lease-${f.id}`} name="leaseSeconds" label={m.lease} type="number" defaultValue="120" />
-            <Field id={`${prefix}-from-${f.id}`} name="effectiveFrom" label={m.effectiveFrom} type="datetime-local" />
-            <Field id={`${prefix}-until-${f.id}`} name="effectiveUntil" label={m.effectiveUntil} type="datetime-local" required={false} />
+            <Field id={`${prefix}-from-${f.id}`} name="effectiveFrom" label={`${m.effectiveFrom} · Africa/Casablanca`} type="datetime-local" />
+            <Field id={`${prefix}-until-${f.id}`} name="effectiveUntil" label={`${m.effectiveUntil} · Africa/Casablanca`} type="datetime-local" required={false} />
             <Field id={`${prefix}-reason-${f.id}`} name="changeReason" label={m.reason} />
             <Button className="w-full sm:w-auto" disabled={pending}>{pending ? m.pending : m.propose}</Button>
             <Feedback s={state} m={m} />
@@ -78,7 +79,7 @@ export function FollowupPanel({
       <section>
         <h2 className="text-2xl font-semibold">{m.prospects}</h2>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {d.prospects.filter((p) => !isDirectoryFixture({ displayName: p.displayName })).map((p) => <Preference key={p.id} p={p} locale={locale} m={m} keyValue={keys.preference[p.id]} />)}
+          {d.prospects.filter((p) => !isDirectoryFixture({ displayName: p.displayName })).map((p) => <Preference key={p.id} p={p} locale={locale} m={m} keyValue={requireCommandKey(keys.preference[p.id])} />)}
         </div>
       </section>
       <section>
@@ -97,7 +98,7 @@ export function FollowupPanel({
         <section>
           <h2 className="text-2xl font-semibold">{m.policy}</h2>
           {d.policies.filter((p) => p.status === "PENDING_APPROVAL" && p.proposedBy !== d.currentUserId).map((p) => (
-            <Decision key={p.id} id={p.id} locale={locale} m={m} keyValue={keys.decision[p.id]} />
+            <Decision key={p.id} id={p.id} locale={locale} m={m} keyValue={requireCommandKey(keys.decision[p.id])} />
           ))}
         </section>
       ) : null}
@@ -175,7 +176,7 @@ function Preference({
   );
 }
 
-function Decision({
+export function Decision({
   id,
   locale,
   m,

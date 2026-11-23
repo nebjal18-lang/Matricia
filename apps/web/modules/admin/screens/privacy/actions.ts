@@ -40,7 +40,7 @@ export async function managePrivacy(_: PrivacyState, form: FormData): Promise<Pr
     rpc = "assert_privacy_production_ready"; args = { p_organization_id: id.data };
   } else return { status: "error", message: "VALIDATION" };
   const response = await client.rpc(rpc, args);
-  if (response.error) return { status: "error", message: response.error.code === "42501" ? "FORBIDDEN" : response.error.code === "40001" ? "CONFLICT" : response.error.code === "55000" ? "BLOCKED" : "FAILED" };
+  if (response.error) return { status: "error", message: response.error.code === "42501" ? "FORBIDDEN" : (response.error.code === "40001" || response.error.code === "PT409") ? "CONFLICT" : response.error.code === "55000" ? "BLOCKED" : "FAILED" };
   revalidatePath(`/${locale}/administration/confidentialite`);
   return { status: "success", message: intent === "gate" ? "GATE_CHECKED" : intent === "retention" ? "RETENTION_REQUESTED" : "RECORDED" };
 }

@@ -12,7 +12,7 @@ export async function saveBoxEnvelopeAction(_: EnvelopeState, form: FormData): P
   const p = input.data;
   const result = await client.rpc("set_customer_box_envelope_v1", { p_customer_box_id: p.boxId, p_scope: p.scope, p_target_id: p.targetId, p_expected_version: p.expectedVersion, p_credit_limit: p.creditLimit, p_reason: p.reason, p_idempotency_key: p.idempotencyKey });
   if (result.error) {
-    const reason = result.error.code === "42501" ? "FORBIDDEN" : result.error.code === "40001" ? "STALE" : result.error.message === "BOX_ENVELOPE_TOTAL_BUDGET_EXCEEDED" ? "BUDGET" : result.error.message === "BOX_ENVELOPE_COMMITTED_CREDITS_REQUIRED" ? "COMMITTED" : "UNAVAILABLE";
+    const reason = result.error.code === "42501" ? "FORBIDDEN" : (result.error.code === "40001" || result.error.code === "PT409") ? "STALE" : result.error.message === "BOX_ENVELOPE_TOTAL_BUDGET_EXCEEDED" ? "BUDGET" : result.error.message === "BOX_ENVELOPE_COMMITTED_CREDITS_REQUIRED" ? "COMMITTED" : "UNAVAILABLE";
     return { status: "error", reason };
   }
   if (!z.object({ outcome: z.literal("BOX_ENVELOPE_SAVED") }).safeParse(result.data).success) return { status: "error", reason: "UNAVAILABLE" };

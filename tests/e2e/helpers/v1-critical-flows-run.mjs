@@ -21,6 +21,9 @@ try {
   fixture = await provision();
   config = await loadSafeConfiguration(root);
   await validateFreshManifest(fixture.manifest, config);
+  const central = await fixture.sessions.central.client.auth.getUser();
+  if (central.error || !central.data.user || !fixture.resources.userIds.includes(central.data.user.id)) throw new Error("FIXTURE_ADMIN_IDENTITY_INVALID");
+  await fixture.resources.database`insert into public.platform_user_roles(user_id,role_code,granted_by) values(${central.data.user.id}::uuid,'MATRICIA_ADMIN',null)`;
   await mkdir(authSnapshotDirectory, { recursive: false, mode: 0o700 });
   await secureLocalPaths(authSnapshotDirectory, []);
   const states = {};

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
+import { sqlInventory, validateDatabaseEvidence } from '../db-test-support-safety.mjs';
 
 export const REQUIRED_CHECKS = Object.freeze(['lint', 'typecheck', 'unit', 'integration', 'database', 'build', 'e2ePublic', 'e2eAuthenticated', 'e2eWorkflows', 'accessibility', 'performance', 'performanceApi', 'performanceCatalog', 'security', 'externalIntegrations', 'backupRestore']);
 export const REQUIRED_STAGING_CHECKS = Object.freeze(['performance', 'performanceApi', 'performanceCatalog', 'security', 'externalIntegrations', 'backupRestore']);
@@ -8,6 +9,22 @@ export const REQUIRED_APPROVALS = Object.freeze(['independentQuality', 'independ
 export const REQUIRED_IDS = Object.freeze([...Array.from({ length: 68 }, (_, i) => `MAT-FUNC-${String(i + 1).padStart(3, '0')}`), ...Array.from({ length: 8 }, (_, i) => `MARKETING-${String(i + 1).padStart(3, '0')}`)]);
 const sha = /^[0-9a-f]{40}$/;
 const digest = /^[0-9a-f]{64}$/;
+const nonempty = value => typeof value === 'string' && value.trim().length > 0;
+const identity = value => typeof value === 'string' ? value.normalize('NFKC').trim().toLowerCase() : '';
+
+export function validateApprovalReport(report, name, manifest) {
+  const claimed = manifest.approvals?.[name];
+  const keys = ['schemaVersion', 'approval', 'commit', 'status', 'approvedBy', 'approvedAt', 'reference'];
+  if (!report || Object.keys(report).sort().join() !== keys.sort().join()
+    || report.schemaVersion !== 1 || report.approval !== name || report.commit !== manifest.commit
+    || report.status !== 'approved' || !identity(report.approvedBy)
+    || report.approvedBy !== claimed?.approvedBy || report.approvedAt !== claimed?.approvedAt
+    || !nonempty(report.approvedAt) || !Number.isFinite(Date.parse(report.approvedAt)) || typeof report.reference !== 'string'
+    || !report.reference.trim() || report.reference !== claimed?.reference
+    || (name.startsWith('independent') && (manifest.authors ?? []).some(author => identity(author) === identity(report.approvedBy)))) {
+    throw new Error('APPROVAL_REPORT_INVALID');
+  }
+}
 
 export function validateManifestShape(manifest, { commit, now = Date.now(), maxAgeMs = 72 * 60 * 60 * 1000 } = {}) {
   const failures = [];
@@ -18,7 +35,7 @@ export function validateManifestShape(manifest, { commit, now = Date.now(), maxA
   if (!Number.isFinite(generated) || generated > now + 60_000 || now - generated > maxAgeMs) failures.push('RELEASE_MANIFEST_EXPIRED');
   for (const id of REQUIRED_IDS) {
     const row = manifest.requirements?.[id];
-    if (row?.status !== 'VERIFIED' || row.commit !== commit || !row.reviewer?.trim() || !row.signoffReference?.trim()) failures.push(`REQUIREMENT_NOT_SIGNED:${id}`);
+    if (row?.status !== 'VERIFIED' || row.commit !== commit || !nonempty(row.reviewer) || !nonempty(row.signoffReference)) failures.push(`REQUIREMENT_NOT_SIGNED:${id}`);
   }
   for (const name of REQUIRED_CHECKS) {
     const check = manifest.checks?.[name];
@@ -26,15 +43,15 @@ export function validateManifestShape(manifest, { commit, now = Date.now(), maxA
     if (!Number.isSafeInteger(check?.assertions) || check.assertions <= 0 || check.skipped !== 0 || check.flaky !== 0 || check.expectedFailures !== 0) failures.push(`CHECK_COUNTS_INVALID:${name}`);
     const start = Date.parse(check?.startedAt), end = Date.parse(check?.finishedAt);
     if (!Number.isFinite(start) || !Number.isFinite(end) || start > end || end > now + 60_000 || now - end > maxAgeMs) failures.push(`CHECK_TIME_INVALID:${name}`);
-    if (!check?.command?.trim() || !check?.artifact?.path || !digest.test(check.artifact.sha256 ?? '')) failures.push(`CHECK_EVIDENCE_INVALID:${name}`);
+    if (!nonempty(check?.command) || !check?.artifact?.path || !digest.test(check.artifact.sha256 ?? '')) failures.push(`CHECK_EVIDENCE_INVALID:${name}`);
   }
   if (!Array.isArray(manifest.authors) || manifest.authors.length === 0 || manifest.authors.some(author => typeof author !== 'string' || !author.trim())) failures.push('RELEASE_AUTHORS_REQUIRED');
   if (Object.keys(manifest.requirements ?? {}).length !== REQUIRED_IDS.length) failures.push('RELEASE_REQUIREMENT_SCOPE_INVALID');
-  const authors = new Set(manifest.authors ?? []);
+  const authors = new Set((Array.isArray(manifest.authors) ? manifest.authors : []).map(identity));
   for (const name of REQUIRED_APPROVALS) {
     const approval = manifest.approvals?.[name];
-    if (approval?.status !== 'approved' || approval.commit !== commit || !approval.approvedBy?.trim() || !approval.reference?.trim() || !Number.isFinite(Date.parse(approval.approvedAt)) || Date.parse(approval.approvedAt) > now + 60_000 || !approval.artifact?.path || !digest.test(approval.artifact.sha256 ?? '')) failures.push(`APPROVAL_REQUIRED:${name}`);
-    if (name.startsWith('independent') && authors.has(approval?.approvedBy)) failures.push(`REVIEWER_NOT_INDEPENDENT:${name}`);
+    if (approval?.status !== 'approved' || approval.commit !== commit || !nonempty(approval.approvedBy) || !nonempty(approval.reference) || !Number.isFinite(Date.parse(approval.approvedAt)) || Date.parse(approval.approvedAt) > now + 60_000 || now - Date.parse(approval.approvedAt) > maxAgeMs || !approval.artifact?.path || !digest.test(approval.artifact.sha256 ?? '')) failures.push(`APPROVAL_REQUIRED:${name}`);
+    if (name.startsWith('independent') && authors.has(identity(approval?.approvedBy))) failures.push(`REVIEWER_NOT_INDEPENDENT:${name}`);
   }
   if (!Array.isArray(manifest.openIssues) || manifest.openIssues.some(issue => ['P0', 'P1', 'P2'].includes(issue.priority) && issue.status !== 'closed')) failures.push('RELEASE_OPEN_PRODUCT_ISSUES');
   return failures;
@@ -56,9 +73,13 @@ export async function validateArtifacts(manifest, root) {
       if (REQUIRED_CHECKS.includes(name)) {
         const report = JSON.parse(bytes.toString('utf8'));
         const claimed = manifest.checks[name];
+        if (name === 'database') {
+          const count = validateDatabaseEvidence(report.databaseEvidence, await sqlInventory(root), { commit: manifest.commit });
+          if (count !== report.assertions) throw new Error('DATABASE_COUNTS');
+        }
         if (REQUIRED_STAGING_CHECKS.includes(name) && report.environment !== 'staging') throw new Error('STAGING_EVIDENCE_REQUIRED');
         if (report.schemaVersion !== 1 || report.check !== name || report.commit !== manifest.commit || report.status !== 'passed' || report.exitCode !== 0 || report.assertions !== claimed.assertions || report.assertions <= 0 || report.skipped !== 0 || report.flaky !== 0 || report.expectedFailures !== 0 || report.startedAt !== claimed.startedAt || report.finishedAt !== claimed.finishedAt) throw new Error('REPORT');
-      }
+      } else validateApprovalReport(JSON.parse(bytes.toString('utf8')), name, manifest);
     } catch { failures.push(`EVIDENCE_UNAVAILABLE_OR_CHANGED:${name}`); }
   }
   return failures;

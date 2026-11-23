@@ -24,7 +24,8 @@ do $$begin
   end if;
 end$$;
 create temporary table chain380(k text primary key,v jsonb);
-grant select,insert on chain380 to authenticated;
+grant select,insert on chain380 to authenticated, service_role;
+set local role service_role;
 insert into chain380 select 'application',to_jsonb(public.submit_franchise_application('Candidat TEST380','onboarding380-3@example.invalid','CASABLANCA_SETTAT','Dirigeant','TEST380 — Bibliothèque test','Immédiate',repeat('Motivation professionnelle suffisante. ',3),'fr',repeat('c',64)));
 
 -- Candidate links its own organization; another owner cannot.
@@ -43,7 +44,7 @@ select set_config('request.jwt.claims','{"sub":"a3800000-0000-4000-8000-00000000
 select public.review_franchise_application((select (v#>>'{}')::uuid from chain380 where k='application'),'COMPANY_REVIEW','TEST380 revue société',2,'TEST380-review-1');
 select public.review_franchise_application((select (v#>>'{}')::uuid from chain380 where k='application'),'DOCUMENT_REVIEW','TEST380 pièces demandées',3,'TEST380-review-2');
 select is((select array_agg(organization_id) from public.franchise_application_organization_candidates((select (v#>>'{}')::uuid from chain380 where k='application'))),array['b3800000-0000-4000-8000-000000000001'::uuid],'the reviewer chooses only organizations owned by the candidate address');
-select throws_ok($$select public.propose_franchise_from_application((select (v#>>'{}')::uuid from chain380 where k='application'),100000,'UPFRONT',0,36,'Casablanca-Settat','الدار البيضاء سطات','',repeat('e',64),'TEST380 proposition',3,'TEST380-stale')$$,'40001','STALE_FRANCHISE_APPLICATION','a stale dossier version cannot propose a mandate');
+select throws_ok($$select public.propose_franchise_from_application((select (v#>>'{}')::uuid from chain380 where k='application'),100000,'UPFRONT',0,36,'Casablanca-Settat','الدار البيضاء سطات','',repeat('e',64),'TEST380 proposition',3,'TEST380-stale')$$,'PT409','STALE_FRANCHISE_APPLICATION','a stale dossier version cannot propose a mandate');
 insert into chain380 select 'proposal',public.propose_franchise_from_application((select (v#>>'{}')::uuid from chain380 where k='application'),100000,'UPFRONT',0,36,'Casablanca-Settat','الدار البيضاء سطات','Aucune exclusivité supplémentaire.',repeat('e',64),'TEST380 proposition',4,'TEST380-propose');
 select is((select v->>'outcome' from chain380 where k='proposal'),'FRANCHISE_APPROVAL_REQUIRED','the proposal opens the central approval');
 select is((select status from public.franchise_applications where id=(select (v#>>'{}')::uuid from chain380 where k='application')),'CONTRACT_PENDING','the dossier is bound to the proposed mandate');
@@ -76,6 +77,7 @@ select is((select status from public.franchise_applications where id=(select (v#
 -- The IT exception always proposes Hatim Ahmitech with a zero, exempt entry fee.
 insert into public.catalog_libraries(code,slug,steward_organization_id,created_by)
 select 'IT','it-test380','b3800000-0000-4000-8000-000000000001','a3800000-0000-4000-8000-000000000001' where not exists(select 1 from public.catalog_libraries where code='IT');
+set local role service_role;
 insert into chain380 select 'application_it',to_jsonb(public.submit_franchise_application('Candidat TEST380','onboarding380-3@example.invalid','RABAT_SALE_KENITRA','Dirigeant','IT — Informatique','Immédiate',repeat('Motivation professionnelle suffisante. ',3),'fr',repeat('c',64)));
 select set_config('request.jwt.claims','{"sub":"a3800000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}',true);set local role authenticated;
 select public.link_my_franchise_application_organization((select (v#>>'{}')::uuid from chain380 where k='application_it'),'b3800000-0000-4000-8000-000000000001',1,'TEST380-link-it');

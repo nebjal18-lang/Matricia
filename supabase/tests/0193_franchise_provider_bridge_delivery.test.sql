@@ -1,4 +1,4 @@
-begin;set local search_path=public,extensions;select plan(17);
+begin;set local search_path=public,extensions;select plan(18);
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values
 ('a8900000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','manager-f1-89@example.invalid','',now(),'{}','{}',now(),now()),
 ('a8900000-0000-4000-8000-000000000002','00000000-0000-0000-0000-000000000000','authenticated','authenticated','recipient-f1-89@example.invalid','',now(),'{}','{}',now(),now()),
@@ -130,7 +130,7 @@ set local role authenticated;select set_config('request.jwt.claims','{"sub":"a89
 select throws_ok($$select public.franchise_provider_dossiers('d8900000-0000-4000-8000-000000000001')$$,'42501','FRANCHISE_PROVIDER_SCOPE_DENIED','sibling mandate cannot load these dossiers');
 select throws_ok($$select public.link_franchise_provider_organization('d8993000-0000-4000-8000-000000000001','f1541000-0000-4000-8000-000000000003',2,'Tentative autre mandat','franchise-provider-denied')$$,'42501','FRANCHISE_PROVIDER_LINK_DENIED','sibling mandate cannot reassign the bridge');
 select set_config('request.jwt.claims','{"sub":"a8900000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
-select throws_ok($$select public.link_franchise_provider_organization('d8993000-0000-4000-8000-000000000001','f1541000-0000-4000-8000-000000000003',1,'Version périmée du lien','franchise-provider-stale')$$,'40001','STALE_FRANCHISE_PROSPECT','stale bridge updates cannot overwrite another editor');
+select throws_ok($$select public.link_franchise_provider_organization('d8993000-0000-4000-8000-000000000001','f1541000-0000-4000-8000-000000000003',1,'Version périmée du lien','franchise-provider-stale')$$,'PT409','STALE_FRANCHISE_PROSPECT','stale bridge updates cannot overwrite another editor');
 reset role;
 select is((select count(*)from public.audit_events where action='franchise.provider.organization_linked'and resource_id='d8993000-0000-4000-8000-000000000001'),1::bigint,'one audited bridge mutation');
 select is((select count(*)from public.event_outbox where event_type='FranchiseProviderOrganizationLinkedV1'and aggregate_id='d8993000-0000-4000-8000-000000000001'),1::bigint,'one bridge outbox event');

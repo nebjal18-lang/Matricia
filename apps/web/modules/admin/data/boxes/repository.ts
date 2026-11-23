@@ -7,7 +7,7 @@ const writeRoles = ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER"] as const
 function mapError(code?: string): AdminBoxesErrorReason {
   if (code === "42501") return "FORBIDDEN";
   if (code === "22023" || code === "P0002") return "INVALID_INPUT";
-  if (["22000", "23505", "23514", "40001", "55000"].includes(code ?? "")) return "CONFLICT";
+  if (["22000", "23505", "23514", "40001", "PT409", "55000"].includes(code ?? "")) return "CONFLICT";
   return "UNAVAILABLE";
 }
 

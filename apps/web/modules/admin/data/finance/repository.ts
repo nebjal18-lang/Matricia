@@ -58,7 +58,7 @@ export async function reconcileAdminProviderPayment(input: unknown): Promise<Adm
   const response = await access.client.rpc("reconcile_provider_payment", { p_payment_id: value.paymentId, p_allocations: [{ invoice_id: value.invoiceId, amount_minor: value.amountMinor }], p_idempotency_key: value.idempotencyKey, p_correlation_id: value.correlationId });
   if (response.error) {
     if (response.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-    if (["22000", "23505", "23514", "40001", "55000"].includes(response.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
+    if (["22000", "23505", "23514", "40001", "PT409", "55000"].includes(response.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
     return { status: "error", reason: "UNAVAILABLE" };
   }
   const output = reconciliationOutput.safeParse(response.data);

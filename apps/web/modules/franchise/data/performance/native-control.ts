@@ -20,7 +20,7 @@ const responseSchema = z.object({ capabilities: z.object({ canWrite: z.boolean()
 export type NativeFranchiseControl = z.infer<typeof responseSchema>;
 export type NativeControlResult = { status: "success"; dashboard: NativeFranchiseControl } | { status: "error"; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" | "VALIDATION" };
 
-export async function loadNativeFranchiseControl(franchiseId: string, cursor?: { before?: string; id?: string; eventPlanId?: string; afterEventId?: string }): Promise<NativeControlResult> {
+export async function loadNativeFranchiseControl(franchiseId: string, cursor?: { before?: string | undefined; id?: string | undefined; eventPlanId?: string | undefined; afterEventId?: string | undefined }): Promise<NativeControlResult> {
   if (!z.string().uuid().safeParse(franchiseId).success) return { status: "error", reason: "VALIDATION" };
   const parsedCursor = cursor && (cursor.before || cursor.id) ? cursorSchema.safeParse(cursor) : null;
   if (parsedCursor && !parsedCursor.success) return { status: "error", reason: "VALIDATION" };

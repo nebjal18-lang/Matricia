@@ -32,7 +32,7 @@ insert into public.admin_operational_action_decisions(action_request_id,decision
 set local role service_role;select set_config('request.jwt.claims','{"role":"service_role"}',true);select set_config('request.jwt.claim.sub','',true);
 insert into revision_results values('stale',public.execute_admin_operational_action_v1('e2310000-0000-4000-8000-000000000002',extensions.gen_random_uuid())),('injected',public.execute_admin_operational_action_v1('e2310000-0000-4000-8000-000000000003',extensions.gen_random_uuid()));
 reset role;
-select is((select v->>'failure_code'from revision_results where k='stale'),'40001','source identity hash mismatch is rejected before any effect');
+select is((select v->>'failure_code'from revision_results where k='stale'),'PT409','source identity hash mismatch is rejected before any effect');
 select is((select v->>'failure_code'from revision_results where k='injected'),'22023','identity revision cannot modify representative/contact fields');
 select is((select count(*)from public.client_profile_versions where compliance_case_id='f1940000-0000-4000-8000-000000000001'),1::bigint,'rejected revisions leave the immutable profile history unchanged');
 set local role service_role;

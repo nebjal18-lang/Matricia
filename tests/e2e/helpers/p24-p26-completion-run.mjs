@@ -9,8 +9,10 @@ import { summarizeBrowserReport, validateBrowserReport } from "../../../scripts/
 import { provisionLocalCatalogReference, neutralizeLocalCatalogReference } from "./local-catalog-reference.mjs";
 import { provisionLocalUiAuthFixture, verifyLocalUiAuthProof, neutralizeLocalUiAuthFixture } from "./local-ui-auth-fixture.mjs";
 import { provisionLocalSecondaryMandate } from "./local-secondary-mandate.mjs";
+import { ownedLocalHttpServer } from "./owned-local-http-server.mjs";
+import { verifyFunctionalControls } from "./local-functional-controls-proof.mjs";
 import { loadSafeConfiguration, resolveExpectedDatabaseUrl } from "../../../scripts/p05-e2e/environment.mjs";
-import { cleanupRemote, provision } from "../../../scripts/p05-e2e/provision.mjs";
+import { cleanupRemote, provision, elevateToAal2, toPlaywrightState } from "../../../scripts/p05-e2e/provision.mjs";
 import {
   buildChildEnvironment,
   secureLocalPaths,
@@ -27,7 +29,11 @@ const authDirectory = resolve(root, "artifacts", "test-results", `.p24-p26-auth-
 const smokeOnly = process.argv.includes("--authenticated-route-smoke-only");
 const localAuthOnly = process.argv.includes("--local-auth-ui-only");
 const fixtureProofsOnly = process.argv.includes("--local-fixture-proofs-only");
-const expectedTests = fixtureProofsOnly ? 0 : localAuthOnly ? 4 : smokeOnly ? 16 : 64;
+const marketingOnly = process.argv.includes("--marketing-only");
+const marketingSpacesOnly = process.argv.includes("--marketing-spaces-only");
+const businessSpacesOnly = process.argv.includes("--business-spaces-only");
+const functionalControlsOnly = process.argv.includes("--functional-controls-only");
+const expectedTests = functionalControlsOnly ? 20 : fixtureProofsOnly ? 0 : localAuthOnly ? 4 : smokeOnly ? 16 : marketingOnly ? 8 : marketingSpacesOnly ? 24 : businessSpacesOnly ? 40 : 64;
 const smokeEvidencePath = resolve(root, "artifacts", "test-results", "authenticated-route-smoke-summary.json");
 
 const hash = (value) => createHash("sha256").update(value).digest("hex");
@@ -37,7 +43,8 @@ function combineFailure(current, next, message) {
 }
 
 function sanitizedFailureCode(error) {
-  const candidate = error?.code ?? error?.message;
+  const assertionLabel = error?.code === "ERR_ASSERTION" ? /^[A-Z][A-Z0-9_]{2,100}(?=\r?\n|$)/u.exec(error.message ?? "")?.[0] : null;
+  const candidate = assertionLabel ?? error?.code ?? error?.message;
   const sqlState = /^[0-9A-Z_-]{2,80}$/u.test(candidate ?? "") ? candidate : "UNKNOWN";
   const constraint = /^[a-z0-9_]{1,120}$/u.test(error?.constraint_name ?? "") ? error.constraint_name : "UNAVAILABLE";
   return `${sqlState}:${constraint}`;
@@ -82,7 +89,7 @@ async function provisionProviderAndFranchise(fixture, onStage = () => {}) {
   const workflows=[0,1].map(()=>({contractId:randomUUID(),contractVersionId:randomUUID(),missionId:randomUUID(),milestoneId:randomUUID(),deliverableId:randomUUID()}));
   const marketing={brandKitId:randomUUID(),brandKitVersionId:randomUUID(),campaignId:randomUUID(),consentId:randomUUID(),templateId:activeTemplate?.template_id??randomUUID(),templateVersionId:activeTemplate?.template_version_id??randomUUID(),ownsTemplate:!activeTemplate,serviceId:catalogSource.service_id,libraryId:catalogSource.library_id,sourceHash:catalogSource.content_hash,serviceName:catalogSource.name_fr};
   const territoryCode = `E2E_${runToken.replaceAll("-", "").slice(0, 20).toUpperCase()}`;
-  const organizationName = `P05 E2E rôles P24-P26 ${runToken}`;
+  const organizationName = `P05 E2E rôles P24-P26 ${runToken.replaceAll("-", "")}`;
   const contentHash = hash(`${runToken}:franchise-mandate`);
   const entryFeeMode = BigInt(economicRule.entry_fee_minor) === 0n ? "EXEMPT" : "UPFRONT";
   const roleFixture = { organizationId, franchiseId, providerFranchiseUserId, foreignUserId, workflows, marketing };
@@ -121,6 +128,7 @@ async function provisionProviderAndFranchise(fixture, onStage = () => {}) {
         (${membershipId}::uuid,'PROVIDER_OWNER',null,${providerFranchiseUserId}::uuid),
         (${membershipId}::uuid,'FRANCHISE_OWNER',${franchiseId}::uuid,${providerFranchiseUserId}::uuid)`;
     if (localCatalog) {
+      await transaction`update public.catalog_libraries set steward_organization_id=${organizationId}::uuid where id=${localCatalog.library}::uuid`;
       await transaction`insert into public.catalog_library_mandates(library_id,organization_id,status,valid_from,policy_version,created_by) values(${library.id}::uuid,${organizationId}::uuid,'ACTIVE',clock_timestamp(),1,${providerFranchiseUserId}::uuid)`;
     }
     onStage("role-fixture-workflows");
@@ -143,7 +151,7 @@ async function provisionProviderAndFranchise(fixture, onStage = () => {}) {
     onStage("role-fixture-marketing-brand");
     await transaction`insert into public.brand_kits(id,organization_id,status,created_by) values(${marketing.brandKitId}::uuid,${organizationId}::uuid,'DRAFT',${providerFranchiseUserId}::uuid)`;
     onStage("role-fixture-marketing-brand-version");
-    await transaction`insert into public.brand_kit_versions(id,brand_kit_id,version,payload,claims,certifications,content_hash,change_reason,created_by) values(${marketing.brandKitVersionId}::uuid,${marketing.brandKitId}::uuid,1,jsonb_build_object('legal_name',${organizationName}::text,'trade_name',${organizationName}::text,'primary_colors',jsonb_build_array('#123B5D'),'tone',jsonb_build_array('PROFESSIONAL'),'languages',jsonb_build_array('FR','AR'),'primary_cta','DIAGNOSTIC','tracked_url','https://matricia.ma/diagnostic','required_mentions','[]'::jsonb,'forbidden_terms','[]'::jsonb,'approved_hashtags',jsonb_build_array('#Matricia')),'[]'::jsonb,'[]'::jsonb,${hash(`${runToken}:brand`)},'Fixture E2E P24',${providerFranchiseUserId}::uuid)`;
+    await transaction`insert into public.brand_kit_versions(id,brand_kit_id,version,payload,claims,certifications,content_hash,change_reason,created_by) values(${marketing.brandKitVersionId}::uuid,${marketing.brandKitId}::uuid,1,jsonb_build_object('legal_name',${organizationName}::text,'trade_name',${organizationName}::text,'primary_colors',jsonb_build_array('#123B5D'),'tone',jsonb_build_array('PROFESSIONAL'),'languages',jsonb_build_array('FR','AR'),'primary_cta','DIAGNOSTIC','tracked_url','https://matricia.ma/diagnostic','allowed_url_hosts',jsonb_build_array('matricia.ma'),'logo_assets','[]'::jsonb,'asset_restrictions','[]'::jsonb,'required_mentions','[]'::jsonb,'forbidden_terms','[]'::jsonb,'approved_hashtags',jsonb_build_array('#Matricia')),'[]'::jsonb,'[]'::jsonb,${hash(`${runToken}:brand`)},'Fixture E2E P24',${providerFranchiseUserId}::uuid)`;
     onStage("role-fixture-marketing-brand-activate");
     await transaction`update public.brand_kits set status='READY',current_version_id=${marketing.brandKitVersionId}::uuid,row_version=row_version+1 where id=${marketing.brandKitId}::uuid`;
     onStage("role-fixture-marketing-consent");
@@ -183,37 +191,51 @@ async function proveP25StorageIsolation(fixture,roleFixture){
   }
 }
 
-async function neutralizeRoleFixture(database, roleFixture, admin) {
-  const deliverableIds=roleFixture.workflows.map(item=>item.deliverableId),milestoneIds=roleFixture.workflows.map(item=>item.milestoneId),missionIds=roleFixture.workflows.map(item=>item.missionId),contractVersionIds=roleFixture.workflows.map(item=>item.contractVersionId),contractIds=roleFixture.workflows.map(item=>item.contractId);
-  const storageObjects = await database`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
-  if (storageObjects.length) {
-    const removal = await admin.storage.from('delivery-proofs').remove(storageObjects.map(row => row.name));
-    if (removal.error) throw new Error('Unable to remove isolated delivery proof bytes');
+// Retain immutable native proofs and their mission/contract history after archival.
+export async function retainBoundDeliveryObjects(database,admin,objects){
+  const disposable=[];
+  for(const {name} of objects){
+    const proofs=await database`select p.evidence_hash from private.delivery_storage_object_bindings_v1 b join storage.objects o on o.id=b.object_id join public.delivery_proofs p on p.id=b.proof_id where o.bucket_id='delivery-proofs' and o.name=${name}`;
+    if(!proofs.length){disposable.push(name);continue;}
+    const result=await admin.storage.from('delivery-proofs').download(name);
+    if(result.error||!result.data)throw new Error('RETAINED_DELIVERY_READ_FAILED');
+    const digest=createHash('sha256').update(Buffer.from(await result.data.arrayBuffer())).digest('hex');
+    if(proofs.some(proof=>proof.evidence_hash!==digest))throw new Error('RETAINED_DELIVERY_HASH_MISMATCH');
   }
+  if(disposable.length){const result=await admin.storage.from('delivery-proofs').remove(disposable);if(result.error)throw new Error('UNBOUND_DELIVERY_CLEANUP_FAILED');}
+}
+
+async function neutralizeRoleFixture(database,roleFixture,admin){
+  const deliverableIds=roleFixture.workflows.map(item=>item.deliverableId);
+  const storageObjects = await database`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
+  await retainBoundDeliveryObjects(database,admin,storageObjects);
   await database.begin(async(transaction)=>{
     await transaction.unsafe("set local session_replication_role='replica'");
     await transaction`delete from public.service_checklist_templates template using public.audit_events audit where audit.resource_type='service_checklist_template' and audit.resource_id=template.id::text and audit.metadata->>'change_reason' like ${`E2E ${runToken}%`}`;
-    await transaction`delete from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',2)=any(${deliverableIds}::text[])`;
-    await transaction`delete from private.delivery_proof_scan_claims where proof_id in(select p.id from public.delivery_proofs p join public.delivery_versions v on v.id=p.delivery_version_id where v.deliverable_id=any(${deliverableIds}::uuid[]))`;
-    await transaction`delete from private.delivery_proof_scan_idempotency where proof_id in(select p.id from public.delivery_proofs p join public.delivery_versions v on v.id=p.delivery_version_id where v.deliverable_id=any(${deliverableIds}::uuid[]))`;
-    await transaction`delete from private.delivery_proof_scan_results where proof_id in(select p.id from public.delivery_proofs p join public.delivery_versions v on v.id=p.delivery_version_id where v.deliverable_id=any(${deliverableIds}::uuid[]))`;
-    await transaction`delete from public.delivery_proofs where delivery_version_id in(select id from public.delivery_versions where deliverable_id=any(${deliverableIds}::uuid[]))`;
-    await transaction`delete from public.delivery_versions where deliverable_id=any(${deliverableIds}::uuid[])`;
-    await transaction`delete from public.acceptance_checklists where deliverable_id=any(${deliverableIds}::uuid[])`;
-    await transaction`delete from public.deliverables where id=any(${deliverableIds}::uuid[])`;
-    await transaction`delete from public.mission_milestones where id=any(${milestoneIds}::uuid[])`;
-    await transaction`delete from public.missions where id=any(${missionIds}::uuid[])`;
-    await transaction`delete from public.contract_versions where id=any(${contractVersionIds}::uuid[])`;
-    await transaction`delete from public.contracts where id=any(${contractIds}::uuid[])`;
     await transaction`delete from public.marketing_conversion_paths where organization_id=${roleFixture.organizationId}::uuid`;
     await transaction`delete from public.marketing_leads where organization_id=${roleFixture.organizationId}::uuid`;
     await transaction`delete from public.marketing_attribution_events where organization_id=${roleFixture.organizationId}::uuid`;
     await transaction`delete from public.marketing_metric_events where organization_id=${roleFixture.organizationId}::uuid`;
-    await transaction`delete from public.marketing_content_sources where content_version_id in(select v.id from public.marketing_content_versions v join public.marketing_content c on c.id=v.content_id where c.campaign_id=${roleFixture.marketing.campaignId}::uuid)`;
-    await transaction`delete from public.marketing_content_versions where content_id in(select id from public.marketing_content where campaign_id=${roleFixture.marketing.campaignId}::uuid)`;
-    await transaction`delete from public.marketing_content where campaign_id=${roleFixture.marketing.campaignId}::uuid`;
-    await transaction`delete from public.marketing_campaigns where id=${roleFixture.marketing.campaignId}::uuid`;
-    await transaction`delete from public.marketing_consents where id=${roleFixture.marketing.consentId}::uuid`;
+    await transaction`delete from public.social_publication_attempt_events where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.social_publication_results where job_id in(select id from public.social_publication_jobs where organization_id=${roleFixture.organizationId}::uuid)`;
+    await transaction`delete from public.social_publication_jobs where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.marketing_calendar_items where campaign_id in(select id from public.marketing_campaigns where organization_id=${roleFixture.organizationId}::uuid)`;
+    await transaction`delete from public.marketing_calendars where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.marketing_schedule_rule_heads where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.marketing_schedule_rules where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.social_accounts where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.social_connection_security_versions where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.social_connections where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.marketing_brand_authorizations where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from private.marketing_cta_visits where token_hash in(select token_hash from private.marketing_cta_tokens where organization_id=${roleFixture.organizationId}::uuid)`;
+    await transaction`delete from private.marketing_cta_tokens where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from private.marketing_content_generation_claims where campaign_id in(select id from public.marketing_campaigns where organization_id=${roleFixture.organizationId}::uuid)`;
+    await transaction`delete from public.marketing_exceptions where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.marketing_content_sources where content_version_id in(select v.id from public.marketing_content_versions v join public.marketing_content c on c.id=v.content_id where c.campaign_id in(select id from public.marketing_campaigns where organization_id=${roleFixture.organizationId}::uuid))`;
+    await transaction`delete from public.marketing_content_versions where content_id in(select id from public.marketing_content where campaign_id in(select id from public.marketing_campaigns where organization_id=${roleFixture.organizationId}::uuid))`;
+    await transaction`delete from public.marketing_content where campaign_id in(select id from public.marketing_campaigns where organization_id=${roleFixture.organizationId}::uuid)`;
+    await transaction`delete from public.marketing_campaigns where organization_id=${roleFixture.organizationId}::uuid`;
+    await transaction`delete from public.marketing_consents where organization_id=${roleFixture.organizationId}::uuid`;
     await transaction`update public.brand_kits set current_version_id=null,status='SUSPENDED',row_version=row_version+1 where id=${roleFixture.marketing.brandKitId}::uuid`;
     await transaction`delete from public.brand_kit_versions where id=${roleFixture.marketing.brandKitVersionId}::uuid`;
     await transaction`delete from public.brand_kits where id=${roleFixture.marketing.brandKitId}::uuid`;
@@ -246,6 +268,13 @@ async function copyAndVerifyStates(fixture) {
   for (const [name, state] of Object.entries(definitions)) {
     if (await sha256File(paths[name]) !== state.sha256) throw new Error("P24-P26 authentication snapshot integrity failed");
   }
+  if (!smokeOnly && !localAuthOnly) {
+    for (const [session, names] of [[fixture.sessions.clientA, ["client"]], [fixture.sessions.noRole, ["provider", "franchise"]]]) {
+      await elevateToAal2(session);
+      for (const name of names) await writeFile(paths[name], JSON.stringify(toPlaywrightState(session.cookies, fixture.config.baseUrl)), {mode:0o600});
+    }
+    await secureLocalPaths(authDirectory, Object.values(paths));
+  }
   return paths;
 }
 
@@ -257,19 +286,26 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     PLAYWRIGHT_JSON_OUTPUT_FILE: resolve(outputDirectory, "browser-report.json"),
     E2E_BASE_URL: config.baseUrl,
     E2E_LOCAL_ISOLATED: config.runtimeMode === "isolated-local-docker" ? "1" : "0",
+    ...(config.runtimeMode === "isolated-local-docker" ? { E2E_EXTERNAL_SERVER: "1" } : {}),
     E2E_CLIENT_STORAGE_STATE: statePaths.client,
     E2E_CLIENT_B_STORAGE_STATE: fixture.manifest.states.clientB.path,
     E2E_PROVIDER_STORAGE_STATE: statePaths.provider,
     E2E_FRANCHISE_STORAGE_STATE: statePaths.franchise,
     E2E_ADMIN_STORAGE_STATE: statePaths.admin,
+    E2E_ROLE_ORGANIZATION_ID: roleFixture.organizationId,
+    E2E_FRANCHISE_ID: roleFixture.franchiseId,
     E2E_FOREIGN_ORGANIZATION_NAME: fixture.manifest.fixtures.organizationB.name,
     E2E_P25_WORKFLOWS: JSON.stringify(roleFixture.workflows),
     E2E_P28_RUN_TOKEN: runToken,
+    ...(fixture.resources.localCatalog ? {E2E_P28_SERVICE_VERSION_ID:fixture.resources.localCatalog.serviceVersion} : {}),
     E2E_CRON_SECRET: hash(`${runToken}:cron`),
     E2E_DELIVERY_PROOF_SCANNER_MODE: "SANDBOX",
     E2E_MARKETING_CHAIN_FIXTURE: JSON.stringify({content:{organizationId:roleFixture.organizationId,campaignId:roleFixture.marketing.campaignId,serviceId:roleFixture.marketing.serviceId,libraryId:roleFixture.marketing.libraryId,language:"FR",serviceName:roleFixture.marketing.serviceName,valueProposition:"Une valeur structurée et vérifiable.",primaryCta:"Diagnostiquer",trackedUrl:"https://matricia.ma/diagnostic",approvedHashtags:["#Matricia"],templateKey:"PROBLEM_SOLUTION",sourceHash:roleFixture.marketing.sourceHash,idempotencyKey:randomUUID()},attribution:{organizationId:roleFixture.organizationId,campaignId:roleFixture.marketing.campaignId,contentId:null,eventType:"CTA_CLICKED",source:"linkedin",medium:"social",visitorHash:hash(`${runToken}:visitor`),economicValueMinor:null,occurredAt:new Date().toISOString(),metadata:{utm_campaign:"p24-e2e"},idempotencyKey:randomUUID()}}),
   });
-  const specifications = localAuthOnly ? ["tests/e2e/local-auth-consent.spec.ts"] : smokeOnly ? [
+  const specifications = functionalControlsOnly ? ["tests/e2e/local-functional-controls.spec.ts", "tests/e2e/local-notification-preferences.spec.ts", "tests/e2e/local-assisted-intelligence.spec.ts", "tests/e2e/local-profile-reassessment.spec.ts"] : localAuthOnly ? ["tests/e2e/local-auth-consent.spec.ts"] : marketingSpacesOnly ? ["tests/e2e/p24-marketing-completion.spec.ts","tests/e2e/authenticated-route-smoke.spec.ts"] : marketingOnly ? ["tests/e2e/p24-marketing-completion.spec.ts"] : businessSpacesOnly ? [
+    "tests/e2e/p29-marketing-workspaces.spec.ts", "tests/e2e/p25-client-provider-completion.spec.ts",
+    "tests/e2e/p26-transversal-completion.spec.ts", "tests/e2e/p28-reputation-checklists.spec.ts",
+  ] : smokeOnly ? [
     "tests/e2e/authenticated-route-smoke.spec.ts",
   ] : [
     "tests/e2e/p24-marketing-completion.spec.ts",
@@ -286,13 +322,24 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     ...(localAuthOnly ? ["--project=chromium-desktop"] : []),
     "--workers=1",
     "--retries=0",
+    ...(process.env.E2E_FAIL_FAST === "1" ? ["--max-failures=1"] : []),
     "--reporter=line,json",
     "--output", outputDirectory,
   ], { cwd: root, env: environment, stdio: ["ignore", "pipe", "pipe"], shell: false });
   let playwrightOutput = "";
+  let lastProgress = 0;
   child.stdout.setEncoding("utf8");
   child.stderr.setEncoding("utf8");
-  child.stdout.on("data", (chunk) => { playwrightOutput += chunk; });
+  child.stdout.on("data", (chunk) => {
+    playwrightOutput += chunk;
+    for (const match of chunk.matchAll(/\[(\d+)\/(\d+)\]/gu)) {
+      const current = Number(match[1]), total = Number(match[2]);
+      if (total === expectedTests && current > lastProgress && current <= total && (current % 8 === 0 || current === total)) {
+        lastProgress = current;
+        console.log(`E2E started ${current}/${total}; final result pending`);
+      }
+    }
+  });
   child.stderr.on("data", (chunk) => { playwrightOutput += chunk; });
   const exitCode = await new Promise((resolveExit, reject) => {
     child.once("error", (cause) => {
@@ -334,9 +381,11 @@ async function main() {
   let browserSummary;
   let failureDiagnostic = null;
   let remoteCleanupPassed = false;
+  let roleCleanupPassed = false;
   let localCleanupPassed = false;
   let sharedAuthCleanupPassed = false;
   let stage = "base-fixture";
+  let localServer;
   try {
     stage = "configuration";
     const config = await loadSafeConfiguration(root);
@@ -344,24 +393,71 @@ async function main() {
     stage = "base-fixture";
     fixture = await provision();
     await validateFreshManifest(fixture.manifest, config);
+    if (config.runtimeMode === "isolated-local-docker") {
+      stage = "local-deployment-binding";
+      await fixture.resources.database.begin(async transaction => {
+        const [binding] = await transaction`select environment from private.admin_execution_environment_v1 where singleton for update`;
+        if (!binding || (binding.environment !== null && binding.environment !== "DEVELOPMENT")) throw new Error("LOCAL_DEPLOYMENT_BINDING_INVALID");
+        if (binding.environment === null) {
+          const [existing] = await transaction`select count(*)::int as count from private.admin_configuration_revisions_v1`;
+          if (existing.count !== 0) throw new Error("LOCAL_DEPLOYMENT_CONFIGURATION_REQUIRES_REVIEW");
+          // Infrastructure bootstrap for the verified local database only.
+          // Retain the binding across runs; never overwrite an established environment.
+          await transaction`update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configured_at=clock_timestamp(),configuration_reference='verified-local-docker-e2e-bootstrap' where singleton and environment is null`;
+        }
+      });
+    }
     stage = "role-fixture";
     roleFixture = await provisionProviderAndFranchise(fixture, (value) => { stage = value; });
+    // The base fixture is a Compliance officer. Marketing administration needs
+    // its own explicit platform permission; never broaden product authorization.
+    stage = "admin-platform-role";
+    const central = await fixture.sessions.central.client.auth.getUser();
+    if (central.error || !central.data.user || !fixture.resources.userIds.includes(central.data.user.id)) throw new Error("FIXTURE_ADMIN_IDENTITY_INVALID");
+    await fixture.resources.database`insert into public.platform_user_roles(user_id,role_code,granted_by) values(${central.data.user.id}::uuid,'MATRICIA_ADMIN',null)`;
     if (config.runtimeMode === "isolated-local-docker") {
       stage = "local-secondary-mandate";
       await provisionLocalSecondaryMandate(fixture, roleFixture);
     }
     stage = "role-isolation";
     await proveRoleIsolation(fixture, roleFixture);
+    if (functionalControlsOnly) {
+      const [baseline] = await fixture.resources.database`select count(*)::integer as count from public.service_requests where client_organization_id=${fixture.manifest.fixtures.organizationA.id}::uuid`;
+      roleFixture.assistanceBusinessRequestCount = baseline.count;
+    }
     if (!fixtureProofsOnly) {
       stage = "authentication-states";
       const statePaths = await copyAndVerifyStates(fixture);
       stage = "playwright";
-      playwrightResult = await runPlaywright(config, fixture, roleFixture, statePaths);
+      if (config.runtimeMode === "isolated-local-docker") {
+        localServer = ownedLocalHttpServer(root, config, {cronSecret: hash(`${runToken}:cron`)});
+        await localServer.start();
+      }
+      let browserFailure;
+      try { playwrightResult = await runPlaywright(config, fixture, roleFixture, statePaths); }
+      catch (error) { browserFailure = error; throw error; }
+      finally {
+        if (localServer) {
+          try { await localServer.stop(); localServer = undefined; }
+          catch (cleanupError) {
+            if (!browserFailure) throw cleanupError;
+            const combined = new AggregateError([browserFailure, cleanupError], "Browser and owned server cleanup failed");
+            combined.code = "BROWSER_AND_SERVER_CLEANUP_FAILED";
+            combined.browserSummary = browserFailure.browserSummary;
+            combined.playwrightDiagnostic = browserFailure.playwrightDiagnostic;
+            throw combined;
+          }
+        }
+      }
       if (localAuthOnly) {
         stage = "local-ui-consent-proof";
         roleFixture.localUiAuthProof = await verifyLocalUiAuthProof(fixture);
       }
-      if (!smokeOnly && !localAuthOnly) {
+      if (functionalControlsOnly) {
+        stage = "functional-controls-proof";
+        roleFixture.functionalControlsProof = await verifyFunctionalControls(fixture, roleFixture, runToken);
+      }
+      if (!functionalControlsOnly && !smokeOnly && !localAuthOnly && !marketingOnly && !marketingSpacesOnly) {
         stage = "storage-isolation";
         await proveP25StorageIsolation(fixture, roleFixture);
       }
@@ -375,11 +471,18 @@ async function main() {
     browserSummary = error?.browserSummary ?? null;
     failureDiagnostic = typeof error?.playwrightDiagnostic === "string" ? error.playwrightDiagnostic : null;
   } finally {
+    if (localServer) {
+      try { await localServer.stop(); }
+      catch (error) { failure = combineFailure(failure, error, "Local HTTP server cleanup failed"); }
+    }
     if (fixture && roleFixture) {
       try {
         await neutralizeRoleFixture(fixture.resources.database, roleFixture, fixture.resources.admin);
+        roleCleanupPassed = true;
       } catch (error) {
         failure = combineFailure(failure, error, "P24-P26 run and role-fixture neutralization failed");
+        stage = "role-fixture-neutralization";
+        failureCode = sanitizedFailureCode(error);
       }
     }
     if (fixture) {
@@ -423,7 +526,8 @@ async function main() {
     environment: fixture?.config?.runtimeMode === "isolated-local-docker" ? "development-local-docker" : "SANDBOX",
     localProof: roleFixture?.localProof ?? null,
     localUiAuthProof: roleFixture?.localUiAuthProof ?? null,
-    mode: fixtureProofsOnly ? "LOCAL_FIXTURE_PROOFS_ONLY_NO_BROWSER_ACCEPTANCE" : localAuthOnly ? "LOCAL_UI_OTP_CONSENT_AND_MFA" : smokeOnly ? "AUTHENTICATED_ROUTE_SMOKE_ONLY" : "FULL_P24_P26",
+    functionalControlsProof: roleFixture?.functionalControlsProof ?? null,
+    mode: functionalControlsOnly ? "LOCAL_FUNCTIONAL_CONTROLS" : fixtureProofsOnly ? "LOCAL_FIXTURE_PROOFS_ONLY_NO_BROWSER_ACCEPTANCE" : localAuthOnly ? "LOCAL_UI_OTP_CONSENT_AND_MFA" : smokeOnly ? "AUTHENTICATED_ROUTE_SMOKE_ONLY" : marketingOnly ? "MARKETING_ONLY" : marketingSpacesOnly ? "MARKETING_AND_SPACES" : businessSpacesOnly ? "BUSINESS_SPACES_ONLY" : "FULL_P24_P26",
     status: failure ? "FAILED" : "PASSED",
     expectedTests,
     executedTests: playwrightResult?.executed ?? browserSummary?.executed ?? 0,
@@ -431,7 +535,7 @@ async function main() {
     stage,
     failureCode: failure ? failureCode : null,
     diagnostic: failureDiagnostic,
-    cleanup: { remoteFixturesNeutralized: remoteCleanupPassed, localAuthenticationArtifactsRemoved: localCleanupPassed },
+    cleanup: { remoteFixturesNeutralized: remoteCleanupPassed && roleCleanupPassed, localAuthenticationArtifactsRemoved: localCleanupPassed },
   }, null, 2)}\n`, { mode: 0o600 });
   if (failure) {
     if (failureDiagnostic) console.error(`DIAGNOSTIC ${failureDiagnostic}`);
@@ -459,7 +563,7 @@ async function cleanupInterruptedRun(localRunToken) {
     const [roleOrganization] = await database`select organization.created_by,user_account.email
       from public.organizations organization
       join auth.users user_account on user_account.id=organization.created_by
-      where organization.display_name=${`P05 E2E rôles P24-P26 ${localRunToken}`}
+      where organization.display_name=any(${[`P05 E2E rôles P24-P26 ${localRunToken}`, `P05 E2E rôles P24-P26 ${localRunToken.replaceAll("-", "")}`]}::text[])
         and organization.status<>'ARCHIVED'
         and user_account.raw_app_meta_data @> '{"p05_e2e_fixture":true}'::jsonb
       order by organization.created_at desc limit 1`;
@@ -479,10 +583,7 @@ async function cleanupInterruptedRun(localRunToken) {
     const storagePaths = documents.map((row) => row.storage_object_path);
     cleanupStage = "delivery-storage-neutralization";
     const deliveryFiles = userIds.length === 0 ? [] : await database`select name from storage.objects where bucket_id='delivery-proofs' and split_part(name,'/',1)=any(${userIds}::text[])`;
-    if (deliveryFiles.length) {
-      const removal = await admin.storage.from('delivery-proofs').remove(deliveryFiles.map(row => row.name));
-      if (removal.error) throw new Error('Interrupted delivery Storage cleanup failed');
-    }
+    await retainBoundDeliveryObjects(database,admin,deliveryFiles);
     cleanupStage = "franchise-neutralization";
     if (organizationIds.length > 0) {
       await database`update public.franchises set status='TERMINATED',updated_at=clock_timestamp(),row_version=row_version+1
@@ -516,17 +617,17 @@ async function verifyNoActiveCompletionFixtures(localRunToken) {
   try {
     const [active] = await database`select
       (select count(*)::integer from public.organizations organization
-        where organization.display_name=${`P05 E2E rôles P24-P26 ${localRunToken}`} and organization.status<>'ARCHIVED') as organizations,
+        where organization.display_name=any(${[`P05 E2E rôles P24-P26 ${localRunToken}`, `P05 E2E rôles P24-P26 ${localRunToken.replaceAll("-", "")}`]}::text[]) and organization.status<>'ARCHIVED') as organizations,
       (select count(*)::integer from public.organization_memberships membership
         join public.organizations organization on organization.id=membership.organization_id
-        where organization.display_name=${`P05 E2E rôles P24-P26 ${localRunToken}`} and membership.status<>'REVOKED') as memberships,
+        where organization.display_name=any(${[`P05 E2E rôles P24-P26 ${localRunToken}`, `P05 E2E rôles P24-P26 ${localRunToken.replaceAll("-", "")}`]}::text[]) and membership.status<>'REVOKED') as memberships,
       (select count(*)::integer from public.organization_member_roles role
         join public.organization_memberships membership on membership.id=role.membership_id
         join public.organizations organization on organization.id=membership.organization_id
-        where organization.display_name=${`P05 E2E rôles P24-P26 ${localRunToken}`} and role.revoked_at is null) as roles,
+        where organization.display_name=any(${[`P05 E2E rôles P24-P26 ${localRunToken}`, `P05 E2E rôles P24-P26 ${localRunToken.replaceAll("-", "")}`]}::text[]) and role.revoked_at is null) as roles,
       (select count(*)::integer from public.franchises franchise
         join public.organizations organization on organization.id=franchise.operator_organization_id
-        where organization.display_name=${`P05 E2E rôles P24-P26 ${localRunToken}`} and franchise.status='ACTIVE') as franchises`;
+        where organization.display_name=any(${[`P05 E2E rôles P24-P26 ${localRunToken}`, `P05 E2E rôles P24-P26 ${localRunToken.replaceAll("-", "")}`]}::text[]) and franchise.status='ACTIVE') as franchises`;
     if (!active || Object.values(active).some((value) => value !== 0)) {
       throw new Error("P24-P26 active remote fixture remains");
     }

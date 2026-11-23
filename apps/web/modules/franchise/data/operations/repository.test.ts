@@ -92,7 +92,7 @@ describe("franchise operations repository", () => {
     const requests=Array.from({length:101},(_,index)=>({id:`aaaaaaaa-aaaa-4aaa-8aaa-${String(index).padStart(12,"0")}`,status:"DRAFT",service_id:serviceId,current_version_id:currentVersionId}));
     const chains:ReturnType<typeof chain>[]=[];
     mocks.from.mockImplementation((table:string)=>{
-      const query=chain(table==="service_requests"?requests:table==="service_request_versions"?[{id:currentVersionId,request_id:requests[0].id,urgency:"CRITICAL"},{id:serviceId,request_id:requests[0].id,urgency:"LOW"}]:[]);
+      const query=chain(table==="service_requests"?requests:table==="service_request_versions"?[{id:currentVersionId,request_id:`aaaaaaaa-aaaa-4aaa-8aaa-000000000000`,urgency:"CRITICAL"},{id:serviceId,request_id:`aaaaaaaa-aaaa-4aaa-8aaa-000000000000`,urgency:"LOW"}]:[]);
       if(table==="service_requests")chains.push(query);return query;
     });
     const snapshot=await loadFranchiseOperations({libraryId,franchiseId});

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "completedAt": "2026-09-14T03:14:34.676Z",
+  "completedAt": "2026-11-22T22:15:37.749Z",
   "environment": "development",
-  "projectRef": "nbqtuybebrhkqmtonhsd",
+  "projectRef": "local-Matricia",
   "result": {
     "expected": 28,
     "skipped": 0,

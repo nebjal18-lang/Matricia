@@ -39,7 +39,7 @@ export default defineConfig({
   ...(process.env.E2E_EXTERNAL_SERVER
     ? {}
     : { webServer: {
-        command: "corepack pnpm dev",
+        command: process.env.E2E_LOCAL_ISOLATED === "1" ? "node scripts/p05-e2e/local-web-server.mjs" : "corepack pnpm dev",
         url: baseURL,
         reuseExistingServer: !process.env.CI && process.env.E2E_LOCAL_ISOLATED !== "1",
         timeout: 120_000,

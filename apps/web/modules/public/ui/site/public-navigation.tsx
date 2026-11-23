@@ -11,7 +11,7 @@ import type { WorkspaceNavigation } from "@/modules/shared/lib/auth/workspace-na
 import { selectWorkspace } from "@/modules/shared/lib/auth/select-workspace";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
 
-export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale; sessionNavigation?: WorkspaceNavigation }) {
+export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale; sessionNavigation?: WorkspaceNavigation | undefined }) {
   const copy = getPublicSiteCopy(locale);
   const signedIn = sessionNavigation?.signedIn === true;
   const workspaceLabels = locale === "ar" ? { client: "عميل", provider: "مقدم خدمات", franchise: "امتياز", administration: "الإدارة" } : { client: "Client", provider: "Prestataire", franchise: "Franchisé", administration: "Administration" };
@@ -42,7 +42,7 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
     if (!menuOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const timer = window.setTimeout(() => mobileMenu.current?.querySelector<HTMLElement>(focusableSelector)?.focus(), 0);
+    const timer = window.setTimeout(() => mobileMenu.current && visibleMenuTargets(mobileMenu.current)[0]?.focus(), 0);
     return () => { window.clearTimeout(timer); document.body.style.overflow = previousOverflow; };
   }, [menuOpen]);
 
@@ -58,7 +58,7 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
   const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key === "Escape") { event.preventDefault(); closeMenu(); menuButton.current?.focus(); return; }
     if (event.key !== "Tab") return;
-    const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(focusableSelector));
+    const focusable = visibleMenuTargets(event.currentTarget);
     const index = nextMenuFocusIndex(focusable.indexOf(document.activeElement as HTMLElement), focusable.length, event.shiftKey);
     if (index === null) return;
     event.preventDefault();
@@ -66,7 +66,7 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
   };
   return <header dir={locale === "ar" ? "rtl" : "ltr"} className={cn("premium-nav", onHome && "premium-nav--on-home")} onKeyDown={event => { if (event.key === "Escape" && menuOpen) { closeMenu(); menuButton.current?.focus(); } }}>
     <div className="premium-nav-inner">
-      <div className="premium-mobile-cluster relative lg:hidden">
+      <div className="premium-mobile-cluster relative xl:hidden">
         <button ref={menuButton} type="button" aria-label={menuOpen ? journey.closeMenu : journey.openMenu} aria-expanded={menuOpen} aria-controls="public-mobile-navigation" onClick={() => setMenuState({ open: !menuOpen, pathname })} className={cn(buttonVariants({ variant: "outline", size: "icon" }), "premium-menu-trigger")}>{menuOpen ? <X aria-hidden="true"/> : <Menu aria-hidden="true"/>}</button>
         {menuOpen ? <nav ref={mobileMenu} id="public-mobile-navigation" aria-label={copy.navigationLabel} onKeyDown={handleMenuKeyDown} className="absolute start-0 z-50 mt-2 w-64 rounded-xl border bg-popover p-2 text-popover-foreground shadow-lg">
           <ul className="space-y-1">
@@ -83,7 +83,7 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
           <small className="premium-nav-tagline">{copy.tagline}</small>
         </span>
       </Link>
-      <nav aria-label={copy.navigationLabel} className="hidden items-center gap-1 lg:flex">
+      <nav aria-label={copy.navigationLabel} className="hidden items-center gap-1 xl:flex">
         {links.map(link => <Link key={link.href} href={link.href} aria-current={isPublicNavLinkActive(pathname, link.href) ? "page" : undefined} className="premium-nav-link">{link.label}</Link>)}
         <span className="premium-lang" aria-label={locale === "fr" ? "Langue" : "اللغة"}>
           <Link href={pathname} hrefLang={locale} lang={locale} aria-current="true" className="premium-lang-current">{locale.toUpperCase()}</Link>
@@ -92,14 +92,25 @@ export function PublicNavigation({ locale, sessionNavigation }: { locale: Locale
         </span>
         {signedIn ? <><Link href={spaceHref} className="premium-nav-login">{spaceLabel}</Link>{workspaceChoices}</> : <><Link href={`/${locale}/connexion`} className="premium-nav-login">{journey.login}</Link><Link href={`/${locale}/inscription`} className="premium-nav-action">{journey.register}<ArrowRightIcon /></Link></>}
       </nav>
-      <Link href={signedIn ? spaceHref : `/${locale}/connexion`} className="premium-nav-account lg:hidden" aria-label={signedIn ? spaceLabel : journey.login}>
+      <Link href={signedIn ? spaceHref : `/${locale}/connexion`} className="premium-nav-account xl:hidden" aria-label={signedIn ? spaceLabel : journey.login}>
         <UserRound size={20} aria-hidden="true" />
       </Link>
     </div>
   </header>;
 }
 
-const focusableSelector = "a[href],button:not([disabled])";
+const focusableSelector = 'a[href],button:not([disabled]),summary,input:not([type="hidden"]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]';
+
+export function visibleMenuTargets(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(focusableSelector)).filter(element => {
+    if (element.tabIndex < 0 || element.matches(":disabled") || element.closest("[hidden],[inert]")) return false;
+    for (let parent = element.parentElement; parent && parent !== container; parent = parent.parentElement) {
+      if (parent instanceof HTMLDetailsElement && !parent.open && parent.querySelector("summary") !== element) return false;
+    }
+    const style = getComputedStyle(element);
+    return style.visibility !== "hidden" && style.visibility !== "collapse" && element.getClientRects().length > 0;
+  });
+}
 
 export function nextMenuFocusIndex(currentIndex: number, count: number, backwards: boolean): number | null {
   if (count < 1) return null;

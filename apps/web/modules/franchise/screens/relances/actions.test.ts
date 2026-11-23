@@ -72,6 +72,15 @@ beforeEach(() => {
 });
 
 describe("franchise followup actions", () => {
+  it("interprets local policy dates in Casablanca instead of the server timezone", async () => {
+    const form=policyForm();form.set("effectiveFrom","2024-11-01T09:00");
+    expect(await proposePolicy(idle,form)).toEqual({status:"success"});
+    expect(mocks.rpc).toHaveBeenCalledWith("propose_franchise_followup_policy",expect.objectContaining({p_effective_from:"2024-11-01T09:00:00+01:00"}));
+  });
+  it("returns validation for an impossible date without throwing",async()=>{
+    const form=policyForm();form.set("effectiveFrom","2026-02-31T09:00");
+    expect(await proposePolicy(idle,form)).toEqual({status:"error",reason:"VALIDATION"});expect(mocks.rpc).not.toHaveBeenCalled();
+  });
   it("propose une politique uniquement via le RPC versionné", async () => {
     expect(await proposePolicy(idle, policyForm())).toEqual({ status: "success" });
     expect(mocks.rpc).toHaveBeenCalledTimes(1);

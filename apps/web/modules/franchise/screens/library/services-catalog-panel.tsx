@@ -27,14 +27,14 @@ export function ServicesCatalogPanel({
   commandIdentity,
   serverPage,
 }: {
-  serverPage?:CatalogServerPage;
+  serverPage?:CatalogServerPage|undefined;
   locale: Locale;
   workspaceName: string;
   categories: FranchiseCategoryNode[];
   services: FranchiseCatalogRow[];
   selectedId: string | null;
   libraryId: string;
-  franchiseId?: string;
+  franchiseId?: string | undefined;
   organizationId: string | null;
   commandIdentity: { idempotencyKey: string; correlationId: string };
 }) {

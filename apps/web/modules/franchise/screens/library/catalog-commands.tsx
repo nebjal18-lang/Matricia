@@ -356,7 +356,7 @@ export function FranchiseCategoryCreateForm({
 }: {
   locale: Locale;
   libraryId: string;
-  franchiseId?: string;
+  franchiseId?: string | undefined;
   organizationId: string | null;
   commandIdentity: { idempotencyKey: string; correlationId: string };
 }) {
@@ -389,7 +389,7 @@ export function FranchiseSubcategoryCreateForm({
 }: {
   locale: Locale;
   libraryId: string;
-  franchiseId?: string;
+  franchiseId?: string | undefined;
   organizationId: string | null;
   commandIdentity: { idempotencyKey: string; correlationId: string };
   categories: FranchiseCategoryNode[];
@@ -430,11 +430,11 @@ export function FranchiseHierarchySubmitForm({
 }: {
   locale: Locale;
   libraryId: string;
-  franchiseId?: string;
+  franchiseId?: string | undefined;
   organizationId: string | null;
   commandIdentity: { idempotencyKey: string; correlationId: string };
   objectType: "CATEGORY" | "SUBCATEGORY";
-  item: { id: string; title: string; status?: string; draftVersionId?: string | null; identityRowVersion?: number; versionRowVersion?: number };
+  item: { id: string; title: string; status?: string; draftVersionId?: string | null; identityRowVersion?: number; versionRowVersion?: number | undefined };
 }) {
   const c = libraryCopy(locale);
   const [state, action, pending] = useActionState(submitFranchiseHierarchyAction, initial);

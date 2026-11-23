@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-11-19T13:37:40.780Z",
+  "target": "matricia_audit_20261119_b578c75c",
+  "scope": "Diagnostic reconciliation of audit clone ONLY; applies existing repository SQL, does not fix sources, does not alter original DB or migration history, and does not prove clean CLI replay",
+  "appliedExistingSql": [
+    "20261118161000_ensure_demo_regional_actor_v1.sql",
+    "20261118170000_reset_demo_workspace_v1.sql",
+    "20261118180000_admin_fiche_membership_identity_v1.sql"
+  ],
+  "databaseSpecificSettingRestored": "pgrst.db_pre_request=public.enforce_current_auth_session_v1",
+  "originalAndCloneOrganizationCounts": {
+    "clone": 0
+  },
+  "succeeded": true,
+  "finishedAt": "2026-11-19T13:37:40.844Z"
+}

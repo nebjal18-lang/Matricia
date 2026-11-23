@@ -1,4 +1,5 @@
 "use client";
+import { franchiseReviewAvailability } from "../../../../../../packages/workflows/src/franchise-review";
 
 import { useActionState, useId, useState } from "react";
 import {
@@ -144,12 +145,9 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
   const [reasonTouched, setReasonTouched] = useState(false);
   const reasonInvalid = reasonTouched && reasonValue.trim().length < 3;
   const open = isFranchiseApplicationOpen(application.status);
-  const needsOrganization = !application.organizationId && ["COMPANY_REVIEW", "DOCUMENT_REVIEW"].includes(application.status);
-  const canPropose = application.status === "DOCUMENT_REVIEW" && Boolean(application.organizationId) && !application.franchiseId;
-  const canApprove = application.status === "CONTRACT_PENDING";
-  const canResend = application.invitationPending && ["CONTRACT_PENDING", "LIBRARY_ASSIGNED"].includes(application.status);
+  const { needsOrganization, canPropose, canApprove, canResend, missingPrerequisites } = franchiseReviewAvailability(application);
   const reasonFieldId = useId();
-  if (!open && !needsOrganization && !canPropose && !canApprove && !canResend) return null;
+  if (!open && !needsOrganization && !canPropose && !canApprove && !canResend && !missingPrerequisites) return null;
   const prefix = `review-${application.id}`;
   return (
     <div className="admin-franchise-review" data-status={application.status}>
@@ -239,6 +237,7 @@ export function FranchiseApplicationReview({ locale, application, copy, keys }: 
           ) : null}
         </>
       ) : null}
+      {missingPrerequisites ? <p role="alert">{locale === "fr" ? "Mandat incomplet : approbation ou invitation persistée manquante. Vérifiez le dossier avant de poursuivre." : "التفويض غير مكتمل: الموافقة أو الدعوة المحفوظة مفقودة. تحققوا من الملف قبل المتابعة."}</p> : null}
       {canApprove ? <ApproveMandate locale={locale} application={application} copy={copy} idempotencyKey={keys.approve} /> : null}
       {canResend ? <ResendCode locale={locale} application={application} copy={copy} idempotencyKey={keys.resend} /> : null}
     </div>

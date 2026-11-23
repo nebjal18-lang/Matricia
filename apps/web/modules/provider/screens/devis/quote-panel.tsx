@@ -36,7 +36,7 @@ export function InvitationDecisionForm({ item, locale, m, identity }: { item:Pro
 }
 
 
-function QuoteForm({ item, taxRules, organizationId, locale, m, identity, prefill }: { item:ProviderQuoteDashboard["invitations"][number];taxRules:ProviderQuoteDashboard["taxRules"];organizationId:string;locale:"fr"|"ar";m:ProviderQuoteMessages;identity:{revision:string;correlation:string};prefill?:QuotePrefill }) {
+function QuoteForm({ item, taxRules, organizationId, locale, m, identity, prefill }: { item:ProviderQuoteDashboard["invitations"][number];taxRules:ProviderQuoteDashboard["taxRules"];organizationId:string;locale:"fr"|"ar";m:ProviderQuoteMessages;identity:{revision:string;correlation:string};prefill?:QuotePrefill|undefined }) {
   const router=useRouter();
   const [state, action, pending] = useActionState(saveQuoteRevision, idle);
   const [score, setScore] = useState(0), [formValid, setFormValid] = useState(false), [effectiveOn, setEffectiveOn] = useState(prefill?.proposedStartDate??""), [draftStatus, setDraftStatus] = useState<""|"saved"|"restored"|"failed"|"conflict">("");
@@ -112,7 +112,7 @@ function QuoteForm({ item, taxRules, organizationId, locale, m, identity, prefil
   </form>;
 }
 
-export function QuoteSubmitForm({ item, locale, m, identity,identityReview,organizationId }: { item:ProviderQuoteDashboard["invitations"][number];locale:"fr"|"ar";m:ProviderQuoteMessages;identity:{submit:string;correlation:string};identityReview?:ProviderQuoteIdentityReview;organizationId?:string }) {
+export function QuoteSubmitForm({ item, locale, m, identity,identityReview,organizationId }: { item:ProviderQuoteDashboard["invitations"][number];locale:"fr"|"ar";m:ProviderQuoteMessages;identity:{submit:string;correlation:string};identityReview?:ProviderQuoteIdentityReview|undefined;organizationId?:string|undefined }) {
   const [state, action, pending] = useActionState(submitQuote, idle);
   const quoteVersionId = item.quote?.currentVersionId ?? "";
   const submitKey = `matricia:provider-quote-submit:v1:${quoteVersionId}`;

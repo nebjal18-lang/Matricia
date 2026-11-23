@@ -47,7 +47,7 @@ async function rpc(name: string, args: Record<string, unknown>): Promise<Franchi
   if (result.error) {
     if (result.error.code === "42501" && /(?:^|_)(?:MFA|AAL2)(?:_|$)/i.test(result.error.message ?? "")) return { status: "error", reason: "MFA_REQUIRED" };
     if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-    if (["40001", "23505", "23514", "23P01"].includes(result.error.code ?? "") || /STALE|IDEMPOTENCY|TRANSITION|INVALID_/i.test(result.error.message ?? "")) {
+    if (["40001", "PT409", "23505", "23514", "23P01"].includes(result.error.code ?? "") || /STALE|IDEMPOTENCY|TRANSITION|INVALID_/i.test(result.error.message ?? "")) {
       return { status: "error", reason: "CONFLICT" };
     }
     return { status: "error", reason: "FAILED" };

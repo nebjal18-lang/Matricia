@@ -38,7 +38,7 @@ export default async function OrganizationRolesPage({
     return (
       <ConnectedAppShell
         locale={locale}
-        organizationId={query.organizationId}
+        {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
         title={messages.title}
         lead={messages.description}
         kicker={messages.eyebrow}
@@ -63,7 +63,7 @@ export default async function OrganizationRolesPage({
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
       title={messages.title}
       lead={messages.description}
       kicker={messages.eyebrow}

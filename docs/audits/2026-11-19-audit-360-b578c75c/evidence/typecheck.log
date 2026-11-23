@@ -1,0 +1,41 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 typecheck C:\Projects\Matricia\Matricia
+> pnpm -r typecheck
+
+.                                        |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+apps/web                                 |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+packages/domain                          |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+Scope: 16 of 17 workspace projects
+packages/application typecheck$ tsc --noEmit
+packages/config typecheck$ tsc --noEmit
+packages/contracts typecheck$ tsc --noEmit
+packages/domain typecheck$ tsc --noEmit
+packages/application typecheck: Done
+packages/forms typecheck$ tsc --noEmit
+packages/contracts typecheck: Done
+packages/infrastructure typecheck$ tsc --noEmit
+packages/config typecheck: Done
+packages/legal-v41 typecheck$ tsc --noEmit
+packages/domain typecheck: Done
+packages/observability typecheck$ tsc --noEmit
+packages/forms typecheck: Done
+packages/question-engine typecheck$ tsc --noEmit
+packages/legal-v41 typecheck: Done
+packages/resilience-v41 typecheck$ tsc --noEmit
+packages/observability typecheck: Done
+packages/signature-v41 typecheck$ tsc --noEmit
+packages/infrastructure typecheck: Done
+packages/testkit typecheck$ tsc --noEmit
+packages/resilience-v41 typecheck: Done
+packages/ui typecheck$ tsc --noEmit
+packages/testkit typecheck: Done
+packages/workflows typecheck$ tsc --noEmit
+packages/question-engine typecheck: Done
+packages/signature-v41 typecheck: Done
+packages/workflows typecheck: Done
+packages/ui typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/worker typecheck$ tsc --noEmit
+apps/worker typecheck: Done
+apps/web typecheck: Done

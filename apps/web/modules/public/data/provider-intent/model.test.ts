@@ -16,7 +16,9 @@ describe("public provider intent", () => {
 
   it("stores only known stable codes, bounds free text and expires", () => {
     const codes = getPublicProviderTaxonomy("fr").libraries.flatMap((library) => library.categories.flatMap((category) => category.services.map((service) => service.code)));
-    const draft = createProviderIntentDraft({ serviceCodes: [...codes, codes[0], "UNKNOWN"], otherService: `  ${"x".repeat(700)}  ` }, now);
+    const firstCode = codes[0];
+    if (!firstCode) throw new Error("Provider taxonomy must contain a service");
+    const draft = createProviderIntentDraft({ serviceCodes: [...codes, firstCode, "UNKNOWN"], otherService: `  ${"x".repeat(700)}  ` }, now);
     expect(draft.serviceCodes).toHaveLength(MAX_PROVIDER_SERVICES);
     expect(draft.otherService).toHaveLength(500);
     expect(Date.parse(draft.expiresAt) - now.getTime()).toBe(PROVIDER_INTENT_TTL_MS);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertSafeEnvironment, parseEnv, resolveExpectedDatabaseUrl } from "./environment.mjs";
+import { assertSafeEnvironment, localStatusEnvironment, parseEnv, resolveExpectedDatabaseUrl } from "./environment.mjs";
 
 const metadata = { project_ref: "abcdefghijklmnopqrst", region: "us-west-2", environment: "development" };
 const env = {
@@ -49,6 +49,16 @@ test("rejects URL ports, credentials, query and hash outside the exact allowlist
 import { validateLocalConfiguration } from './local-environment.mjs';
 const localEnv = { ...env, E2E_LOCAL_ISOLATED:'1', E2E_LOCAL_PROJECT_ID:'Matricia', NEXT_PUBLIC_SUPABASE_URL:'http://127.0.0.1:54321', DIRECT_URL:'postgresql://postgres:synthetic@127.0.0.1:54322/postgres' };
 const docker = Object.fromEntries(['db','kong','auth','storage'].map(role => [role, { running:true, totpEnrollment:true, totpVerification:true, project:'Matricia', composeProject:'Matricia', image:'ghcr.io/supabase/test:1', ports: { '5432/tcp':[{HostPort:'54322'}], '8000/tcp':[{HostPort:'54321'}] } }]));
+
+test('CLI local configuration cannot fall back to hosted credentials', () => {
+  const status = { API_URL:'http://127.0.0.1:54321', DB_URL:localEnv.DIRECT_URL, ANON_KEY:'local-anon', SERVICE_ROLE_KEY:'local-service' };
+  const selected = localStatusEnvironment({...localEnv, SUPABASE_DB_POOLER_URL:env.DIRECT_URL}, status);
+  assert.equal(selected.SUPABASE_DB_POOLER_URL, '');
+  assert.equal(selected.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, 'local-anon');
+  assert.equal(validateLocalConfiguration(selected, 'Matricia', docker).serviceRoleKey, 'local-service');
+  assert.throws(() => validateLocalConfiguration(localStatusEnvironment(localEnv, {}), 'Matricia', docker));
+  assert.throws(() => validateLocalConfiguration(localStatusEnvironment(localEnv, {...status, DB_URL:env.DIRECT_URL}), 'Matricia', docker));
+});
 test('explicit local Docker configuration cannot be mistaken for hosted staging evidence', () => {
   const config = validateLocalConfiguration(localEnv, 'Matricia', docker);
   assert.equal(config.environment, 'development');
@@ -67,4 +77,14 @@ test('local mode rejects stopped or differently labelled Docker services and wro
 
 test('local mode refuses disabled TOTP before creating any identity', () => {
   for (const key of ['totpEnrollment','totpVerification']) assert.throws(() => validateLocalConfiguration(localEnv,'Matricia',{...docker,auth:{...docker.auth,[key]:false}}),/LOCAL_TOTP_DISABLED/);
+});
+
+test('local mode accepts official ECR images while retaining identity guards', () => {
+  const ecr = Object.fromEntries(Object.entries(docker).map(([role, container]) => [role, {...container, image: container.image.replace('ghcr.io/', 'public.ecr.aws/')} ]));
+  assert.equal(validateLocalConfiguration(localEnv, 'Matricia', ecr).localDockerVerified, true);
+  for (const role of Object.keys(ecr)) {
+    for (const override of [{project:'other'}, {composeProject:'other'}, {running:false}, {image:'public.ecr.aws/supabase-impostor/postgres:17'}, {image:'public.ecr.aws.attacker.invalid/supabase/postgres:17'}]) {
+      assert.throws(() => validateLocalConfiguration(localEnv, 'Matricia', {...ecr, [role]: {...ecr[role], ...override}}), /Docker identity/);
+    }
+  }
 });

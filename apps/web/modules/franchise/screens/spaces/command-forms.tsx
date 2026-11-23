@@ -59,7 +59,7 @@ function useCommand(command: (state: FranchiseCommandState, data: FormData) => P
 function HiddenScope({
   locale, libraryId, organizationId, extra, keys,
 }: {
-  locale: Locale; libraryId?: string; organizationId?: string | null; extra?: Record<string, string>; keys: CommandKeys;
+  locale: Locale; libraryId?: string; organizationId?: string | null | undefined; extra?: Record<string, string>; keys: CommandKeys;
 }) {
   return (
     <>
@@ -73,7 +73,7 @@ function HiddenScope({
   );
 }
 
-export function FranchiseAnomalyDefinitionForm({ locale, libraryId, organizationId }: { locale: Locale; libraryId: string; organizationId?: string | null }) {
+export function FranchiseAnomalyDefinitionForm({ locale, libraryId, organizationId }: { locale: Locale; libraryId: string; organizationId?: string | null | undefined }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
   const { state, action, pending, keys } = useCommand(upsertFranchiseAnomalyDefinition);
@@ -98,7 +98,7 @@ export function FranchiseAnomalyDefinitionForm({ locale, libraryId, organization
   );
 }
 
-export function FranchiseRiskDefinitionForm({ locale, libraryId, organizationId }: { locale: Locale; libraryId: string; organizationId?: string | null }) {
+export function FranchiseRiskDefinitionForm({ locale, libraryId, organizationId }: { locale: Locale; libraryId: string; organizationId?: string | null | undefined }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
   const { state, action, pending, keys } = useCommand(upsertFranchiseRiskDefinition);
@@ -124,7 +124,7 @@ export function FranchiseRiskDefinitionForm({ locale, libraryId, organizationId 
 export function FranchiseRecommendationDefinitionForm({
   locale, libraryId, organizationId, services, anomalies,
 }: {
-  locale: Locale; libraryId: string; organizationId?: string | null; services: Array<{ id: string; title: string }>; anomalies?: Array<{ id: string; title: string }>;
+  locale: Locale; libraryId: string; organizationId?: string | null | undefined; services: Array<{ id: string; title: string }>; anomalies?: Array<{ id: string; title: string }>;
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
@@ -168,7 +168,7 @@ export function FranchiseRecommendationDefinitionForm({
 export function FranchiseIncidentInstructForm({
   locale, organizationId, incidents,
 }: {
-  locale: Locale; organizationId?: string | null; incidents: Array<{ id: string; title: string; status?: string }>;
+  locale: Locale; organizationId?: string | null | undefined; incidents: Array<{ id: string; title: string; status?: string }>;
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
@@ -195,7 +195,7 @@ export function FranchiseIncidentInstructForm({
 export function FranchiseQualificationDecisionForm({
   locale, organizationId, qualifications,
 }: {
-  locale: Locale; organizationId?: string | null; qualifications: Array<{ id: string; title: string; status: string; rowVersion?: number }>;
+  locale: Locale; organizationId?: string | null | undefined; qualifications: Array<{ id: string; title: string; status: string; rowVersion?: number }>;
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();
@@ -274,7 +274,7 @@ export function FranchiseMandateInviteForm({ locale, organizationId }: { locale:
 export function FranchiseVolumeProposeForm({
   locale, libraryId, franchiseId, organizationId, skus,
 }: {
-  locale: Locale; libraryId: string;franchiseId:string; organizationId?: string | null; skus: Array<{ id: string; title: string }>;
+  locale: Locale; libraryId: string;franchiseId:string; organizationId?: string | null | undefined; skus: Array<{ id: string; title: string }>;
 }) {
   const c = franchiseCopy(locale);
   const prefix = useId();

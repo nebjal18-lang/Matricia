@@ -98,7 +98,7 @@ export function ConsultationDetailWorkbench({
   invitation?: ProviderQuoteDashboard["invitations"][number] | null;
   quotePanel?: ReactNode;
   canManage?: boolean;
-  decisionIdentity?: { decision: string; correlation: string };
+  decisionIdentity?: { decision: string; correlation: string } | undefined;
 }) {
   const w = workbenchCopy(locale);
   const quoteMessages = getProviderQuoteMessages(locale);
@@ -274,7 +274,7 @@ export function QuoteMultilineWorkbench({
   quoteId: string;
   invitation?: ProviderQuoteDashboard["invitations"][number] | null;
   quotePanel?: ReactNode;
-  prefill?: QuotePrefill;
+  prefill?: QuotePrefill | undefined;
   history?: ProviderQuoteRevision[] | null;
 }) {
   const w = workbenchCopy(locale);
@@ -376,7 +376,7 @@ export function QuoteRevisionWorkbench({
   quoteId: string;
   invitation?: ProviderQuoteDashboard["invitations"][number] | null;
   quotePanel?: ReactNode;
-  prefill?: QuotePrefill;
+  prefill?: QuotePrefill | undefined;
   history?: ProviderQuoteRevision[] | null;
 }) {
   const w = workbenchCopy(locale);
@@ -463,7 +463,7 @@ export function MissionDeliveryWorkbench({
   const current = steps.find((step) => step.state === "current") ?? steps[0];
   return (
     <main className="client-page provider-workbench provider-mission-delivery">
-      {mission ? <SignedScopePendingNotice pending={mission.signedScopePending} locale={locale} audience="provider" contractId={mission.contractId} query={query} /> : null}
+      {mission ? <SignedScopePendingNotice pending={mission.signedScopePending ?? false} locale={locale} audience="provider" contractId={mission.contractId} query={query} /> : null}
       <p className="provider-breadcrumb">
         <Crumb href={`/${locale}/sous-traitant/missions${query}`}>{w.breadcrumbMissions}</Crumb>
         <span aria-hidden>›</span>
@@ -546,7 +546,6 @@ export function MissionDeliveryWorkbench({
 export function InvoiceSettlementWorkbench({
   locale,
   query,
-  invoiceId,
   invoice,
   billingPanel,
   dossier,

@@ -15,6 +15,7 @@ $patch$;
 $patch$;
  foreach function_id in array array['public.open_service_request_rfq(uuid,uuid,timestamptz,text,uuid)','private.open_approved_admin_rfq_v1(uuid,uuid,timestamptz,text,uuid,uuid,uuid[])']loop
   select pg_get_functiondef(function_id::regprocedure)into source;
+  source:=replace(source,chr(13),'');
   if position(initial_entitlement in source)=0 or position(initial_deadline in source)=0 then raise exception'CLIENT_RFQ_INITIAL_GUARD_TARGET_MISSING %',function_id;end if;
   source:=replace(replace(source,initial_entitlement,''),initial_deadline,'');
   marker:=' perform pg_advisory_xact_lock(hashtextextended(''service-request:''||p_request_id::text,0));';

@@ -35,7 +35,7 @@ insert into public.notification_instances(id,recipient_user_id,organization_id,t
 insert into public.notification_deliveries(id,notification_id,channel,delivery_mode,status,next_attempt_at)values('18560000-0000-4000-8000-000000000002','18540000-0000-4000-8000-000000000002','EMAIL','IMMEDIATE','PENDING',clock_timestamp());
 delete from p185_claim;
 insert into p185_claim select*from public.claim_notification_deliveries_v1('p185-worker',1,60);
-select throws_ok($$select public.authorize_notification_delivery_send_v1('18560000-0000-4000-8000-000000000002','18550000-0000-4000-8000-000000000099','p185-worker')$$,'40001','NOTIFICATION_LEASE_INVALID','suppression cannot bypass lease validation');
+select throws_ok($$select public.authorize_notification_delivery_send_v1('18560000-0000-4000-8000-000000000002','18550000-0000-4000-8000-000000000099','p185-worker')$$,'PT409','NOTIFICATION_LEASE_INVALID','suppression cannot bypass lease validation');
 select is(public.authorize_notification_delivery_send_v1('18560000-0000-4000-8000-000000000002',(select(value->>'lease_token')::uuid from p185_claim),'p185-worker')->>'reason','EMAIL_RECIPIENT_SUPPRESSED','later sends to invalid mailbox are blocked before external effect');
 select is((select status from public.notification_deliveries where id='18560000-0000-4000-8000-000000000002'),'SKIPPED','suppression closes the claimed attempt without dispatch');
 select is((select count(*)from public.audit_events where action='notification.delivery.send_blocked'and resource_id='18560000-0000-4000-8000-000000000002'),1::bigint,'suppressed send is audited');

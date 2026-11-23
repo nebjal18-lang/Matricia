@@ -36,7 +36,7 @@ describe("candidate organization link", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
-  it.each([["42501", "DENIED"], ["40001", "CONFLICT"], ["22023", "VALIDATION"], ["XX000", "UNAVAILABLE"]])("maps database code %s to %s", async (code, reason) => {
+  it.each([["42501", "DENIED"], ["PT409", "CONFLICT"], ["22023", "VALIDATION"], ["XX000", "UNAVAILABLE"]])("maps database code %s to %s", async (code, reason) => {
     rpc.mockResolvedValue({ data: null, error: { code, message: "refused" } });
     await expect(linkMyFranchiseApplicationOrganization(idle, form(values))).resolves.toEqual({ status: "error", reason });
     expect(revalidatePath).not.toHaveBeenCalled();

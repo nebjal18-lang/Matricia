@@ -43,7 +43,7 @@ export async function decideClientApproval(_previous: ApprovalActionState, form:
   });
   if (result.error) {
     if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-    if (result.error.code === "40001") return { status: "error", reason: "CONFLICT" };
+    if ((result.error.code === "40001" || result.error.code === "PT409")) return { status: "error", reason: "CONFLICT" };
     return { status: "error", reason: "FAILED" };
   }
   const completed = z.object({
