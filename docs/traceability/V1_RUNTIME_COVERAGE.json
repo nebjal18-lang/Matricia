@@ -1209,7 +1209,8 @@
       ],
       "candidateDatabaseTests": [
         "supabase/tests/0046_p09_provider_qualification.test.sql",
-        "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql"
+        "supabase/tests/0056_p17_notifications_preferences_delivery.test.sql",
+        "supabase/tests/0370_provider_review_credential_reminders.test.sql"
       ],
       "currentAcceptance": "REVIEW_REQUIRED",
       "requiredEvidence": [
@@ -1233,6 +1234,13 @@
           "assertions": 40,
           "evidence": "work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json",
           "semanticAcceptance": "REVIEW_REQUIRED"
+        },
+        {
+          "path": "supabase/tests/0370_provider_review_credential_reminders.test.sql",
+          "assertions": 15,
+          "evidence": "work/isolated-replay/5b741104-8870-4228-ab2b-7397c4b5b638/summary.json",
+          "semanticAcceptance": "PARTIAL_NATIVE_SQL",
+          "scope": "Native credential reminders J-60/J-30/J-7, FR/AR recipients, bounded pagination, idempotent replay and recipient RLS. Synthetic document scan metadata. Targeted suspension and browser continuity remain unproven."
         }
       ]
     },

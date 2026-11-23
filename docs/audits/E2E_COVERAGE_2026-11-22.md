@@ -1,5 +1,11 @@
 # Couverture E2E — contrôle du 22 novembre 2026
 
+## 2026-11-23 — Expiration des certifications : preuve SQL native
+
+**15/15 assertions PASS**, 629 migrations sur clone isolé neuf, nettoyage PASS. Onze assertions comportementales ajoutées aux quatre contrôles statiques de [0370_provider_review_credential_reminders.test.sql](../../supabase/tests/0370_provider_review_credential_reminders.test.sql). Les commandes natives déposent et font vérifier les documents, puis le worker génère six rappels J-60/J-30/J-7 pour deux destinataires FR/AR. Pagination, refus utilisateur, absence de rappel hors échéance, rejeu sans doublon et lectures RLS par destinataire sont vérifiés. [Reçu final](../../work/isolated-replay/5b741104-8870-4228-ab2b-7397c4b5b638/summary.json).
+
+MAT-FUNC-029 reste REVIEW_REQUIRED : suspension ciblée et parcours navigateur restent à prouver ; métadonnées Storage et résultat antivirus synthétiques, aucun email externe certifié. Le total E2E reste inchangé. Une erreur de résolution de pgTAP sous le rôle authenticated a été corrigée dans le test en collectant les lectures sous ce rôle avant les assertions ; aucun droit applicatif ajouté.
+
 ## 2026-11-23 — Rapprochement : refus serveur et reprise navigateur
 
 Treize nouveaux tests de l'action serveur couvrent la confirmation obligatoire, les locales autorisées, la transmission exacte des montants et identifiants, les refus et l'absence de rafraîchissement après échec. Résultat ciblé avec le repository : **21/21 PASS**. Deux nouveaux tests de composant navigateur FR/AR vérifient le bouton désactivé pendant l'envoi, le conflit visible, la reprise avec la même identité de requête et le montant exact `9007199254740993`. Suite composant : **6/6 PASS** en 5,4 secondes, compilation et navigateur partagés. Sources : [action serveur](../../apps/web/modules/admin/screens/finance/actions.test.ts), [composant navigateur](../../tests/remediation/finance-reconciliation-browser.test.mjs).
