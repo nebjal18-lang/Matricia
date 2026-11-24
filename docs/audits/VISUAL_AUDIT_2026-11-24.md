@@ -4,7 +4,7 @@
 
 Référence obligatoire : Gold Master V4 FINAL, Design Authority Version A, cinq espaces, FR/AR, RTL et largeur minimale de 360 px. Les [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines) ont servi de contrôle complémentaire pour la navigation, le focus et le contenu responsive.
 
-Le dépôt contient **223 routes de page** : 38 publiques ou partagées, 39 Client, 37 Sous-traitant, 37 Franchisé et 72 Administration. Le contrôle visuel exécuté dans cette passe porte sur l’accueil public FR/AR (360, 1280 et 1440 px), le diagnostic FR/AR (360 px), la connexion FR (360 px), puis les **quatre habillages d’espace** dans une prévisualisation locale avec contenu synthétique (FR/AR, 360 et 1280 px). Les routes protégées redirigent vers la connexion sans session : leurs contenus réels n’ont pas été inspectés visuellement dans cette passe.
+Le dépôt contient **222 fichiers de page** : 37 publiques ou partagées, 39 Client, 37 Sous-traitant, 37 Franchisé et 72 Administration. Le contrôle visuel exécuté dans cette passe porte sur l’accueil public FR/AR (360, 1280 et 1440 px), le diagnostic FR/AR (360 px), la connexion FR (360 px), puis les **quatre habillages d’espace** dans une prévisualisation locale avec contenu synthétique (FR/AR, 360 et 1280 px). Les routes protégées redirigent vers la connexion sans session : leurs contenus réels n’ont pas été inspectés visuellement dans cette passe.
 
 ## Constats et corrections
 
@@ -27,4 +27,4 @@ Captures après correction : [accueil public 1280 px](./visual-2026-11-24/home-l
 
 ## Limites et suite nécessaire
 
-Ce résultat **ne certifie ni la perfection visuelle, ni les 223 routes**. La prévisualisation des espaces utilisait leurs vrais composants de navigation et de style avec un contenu synthétique ; la suite authentifiée vérifie des comportements, mais ne produit pas une comparaison visuelle de chaque donnée, tableau, formulaire et état vide/erreur. Il reste à capturer les pages authentifiées par rôle, FR/AR, 360 px et bureau, à les comparer aux maquettes de `docs/design/`, puis à corriger les écarts page par page. Les 462 exécutions E2E déjà rapportées prouvent des parcours fonctionnels locaux et ne constituent pas une mesure de couverture visuelle exhaustive.
+Ce résultat **ne certifie ni la perfection visuelle, ni les 222 pages actuelles**. La prévisualisation des espaces utilisait leurs vrais composants de navigation et de style avec un contenu synthétique ; la suite authentifiée vérifie des comportements, mais ne produit pas une comparaison visuelle de chaque donnée, tableau, formulaire et état vide/erreur. Il reste à capturer les pages authentifiées par rôle, FR/AR, 360 px et bureau, à les comparer aux maquettes de `docs/design/`, puis à corriger les écarts page par page. Les 462 exécutions E2E déjà rapportées prouvent des parcours fonctionnels locaux et ne constituent pas une mesure de couverture visuelle exhaustive.

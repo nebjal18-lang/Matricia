@@ -27,14 +27,19 @@ const runToken = randomUUID();
 const outputDirectory = resolve(root, "artifacts", "test-results", `p24-p26-completion-${runToken}`);
 const authDirectory = resolve(root, "artifacts", "test-results", `.p24-p26-auth-${runToken}`);
 const smokeOnly = process.argv.includes("--authenticated-route-smoke-only");
+const visualOnly = process.argv.includes("--visual-route-matrix-only");
+const visualDynamicOnly = process.argv.includes("--visual-dynamic-matrix-only");
 const localAuthOnly = process.argv.includes("--local-auth-ui-only");
 const fixtureProofsOnly = process.argv.includes("--local-fixture-proofs-only");
 const marketingOnly = process.argv.includes("--marketing-only");
 const marketingSpacesOnly = process.argv.includes("--marketing-spaces-only");
 const businessSpacesOnly = process.argv.includes("--business-spaces-only");
 const functionalControlsOnly = process.argv.includes("--functional-controls-only");
-const expectedTests = functionalControlsOnly ? 20 : fixtureProofsOnly ? 0 : localAuthOnly ? 4 : smokeOnly ? 16 : marketingOnly ? 8 : marketingSpacesOnly ? 24 : businessSpacesOnly ? 40 : 64;
-const smokeEvidencePath = resolve(root, "artifacts", "test-results", "authenticated-route-smoke-summary.json");
+const visualSpaceCount = (process.env.VISUAL_MATRIX_SPACES ?? "public,shared,client,provider,franchise,admin").split(",").filter(Boolean).length;
+const visualLocaleCount = (process.env.VISUAL_MATRIX_LOCALES ?? "fr,ar").split(",").filter(Boolean).length;
+const visualProjectCount = process.env.VISUAL_MATRIX_PROJECT ? 1 : 2;
+const expectedTests = visualDynamicOnly ? visualSpaceCount : visualOnly ? visualSpaceCount * visualLocaleCount * visualProjectCount : functionalControlsOnly ? 20 : fixtureProofsOnly ? 0 : localAuthOnly ? 4 : smokeOnly ? 16 : marketingOnly ? 8 : marketingSpacesOnly ? 24 : businessSpacesOnly ? 40 : 64;
+const smokeEvidencePath = resolve(root, "artifacts", "test-results", visualDynamicOnly ? "visual-dynamic-matrix-summary.json" : visualOnly ? "visual-route-matrix-summary.json" : "authenticated-route-smoke-summary.json");
 
 const hash = (value) => createHash("sha256").update(value).digest("hex");
 
@@ -285,6 +290,13 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     ...(uiAuthManifest ? { E2E_LOCAL_UI_AUTH_MANIFEST: uiAuthManifest } : {}),
     PLAYWRIGHT_JSON_OUTPUT_FILE: resolve(outputDirectory, "browser-report.json"),
     E2E_BASE_URL: config.baseUrl,
+    ...(visualOnly || visualDynamicOnly ? {
+      E2E_VISUAL_MATRIX_SPACES: process.env.VISUAL_MATRIX_SPACES ?? "public,shared,client,provider,franchise,admin",
+      E2E_VISUAL_MATRIX_LOCALES: process.env.VISUAL_MATRIX_LOCALES ?? "fr,ar",
+      E2E_VISUAL_MATRIX_AXE: process.env.VISUAL_MATRIX_AXE ?? "0",
+      E2E_VISUAL_MATRIX_RUN_ID: runToken,
+      E2E_VISUAL_MATRIX_ROUTES: process.env.VISUAL_MATRIX_ROUTES ?? "",
+    } : {}),
     E2E_LOCAL_ISOLATED: config.runtimeMode === "isolated-local-docker" ? "1" : "0",
     ...(config.runtimeMode === "isolated-local-docker" ? { E2E_EXTERNAL_SERVER: "1" } : {}),
     E2E_CLIENT_STORAGE_STATE: statePaths.client,
@@ -302,7 +314,7 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     E2E_DELIVERY_PROOF_SCANNER_MODE: "SANDBOX",
     E2E_MARKETING_CHAIN_FIXTURE: JSON.stringify({content:{organizationId:roleFixture.organizationId,campaignId:roleFixture.marketing.campaignId,serviceId:roleFixture.marketing.serviceId,libraryId:roleFixture.marketing.libraryId,language:"FR",serviceName:roleFixture.marketing.serviceName,valueProposition:"Une valeur structurée et vérifiable.",primaryCta:"Diagnostiquer",trackedUrl:"https://matricia.ma/diagnostic",approvedHashtags:["#Matricia"],templateKey:"PROBLEM_SOLUTION",sourceHash:roleFixture.marketing.sourceHash,idempotencyKey:randomUUID()},attribution:{organizationId:roleFixture.organizationId,campaignId:roleFixture.marketing.campaignId,contentId:null,eventType:"CTA_CLICKED",source:"linkedin",medium:"social",visitorHash:hash(`${runToken}:visitor`),economicValueMinor:null,occurredAt:new Date().toISOString(),metadata:{utm_campaign:"p24-e2e"},idempotencyKey:randomUUID()}}),
   });
-  const specifications = functionalControlsOnly ? ["tests/e2e/local-functional-controls.spec.ts", "tests/e2e/local-notification-preferences.spec.ts", "tests/e2e/local-assisted-intelligence.spec.ts", "tests/e2e/local-profile-reassessment.spec.ts"] : localAuthOnly ? ["tests/e2e/local-auth-consent.spec.ts"] : marketingSpacesOnly ? ["tests/e2e/p24-marketing-completion.spec.ts","tests/e2e/authenticated-route-smoke.spec.ts"] : marketingOnly ? ["tests/e2e/p24-marketing-completion.spec.ts"] : businessSpacesOnly ? [
+  const specifications = visualDynamicOnly ? ["tests/e2e/visual-dynamic-matrix.spec.ts"] : visualOnly ? ["tests/e2e/visual-route-matrix.spec.ts"] : functionalControlsOnly ? ["tests/e2e/local-functional-controls.spec.ts", "tests/e2e/local-notification-preferences.spec.ts", "tests/e2e/local-assisted-intelligence.spec.ts", "tests/e2e/local-profile-reassessment.spec.ts"] : localAuthOnly ? ["tests/e2e/local-auth-consent.spec.ts"] : marketingSpacesOnly ? ["tests/e2e/p24-marketing-completion.spec.ts","tests/e2e/authenticated-route-smoke.spec.ts"] : marketingOnly ? ["tests/e2e/p24-marketing-completion.spec.ts"] : businessSpacesOnly ? [
     "tests/e2e/p29-marketing-workspaces.spec.ts", "tests/e2e/p25-client-provider-completion.spec.ts",
     "tests/e2e/p26-transversal-completion.spec.ts", "tests/e2e/p28-reputation-checklists.spec.ts",
   ] : smokeOnly ? [
@@ -319,7 +331,7 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     resolve(root, "node_modules", "@playwright", "test", "cli.js"),
     "test",
     ...specifications,
-    ...(localAuthOnly ? ["--project=chromium-desktop"] : []),
+    ...(localAuthOnly || visualDynamicOnly ? ["--project=chromium-desktop"] : visualOnly && process.env.VISUAL_MATRIX_PROJECT ? [`--project=${process.env.VISUAL_MATRIX_PROJECT}`] : []),
     "--workers=1",
     "--retries=0",
     ...(process.env.E2E_FAIL_FAST === "1" ? ["--max-failures=1"] : []),
@@ -457,7 +469,7 @@ async function main() {
         stage = "functional-controls-proof";
         roleFixture.functionalControlsProof = await verifyFunctionalControls(fixture, roleFixture, runToken);
       }
-      if (!functionalControlsOnly && !smokeOnly && !localAuthOnly && !marketingOnly && !marketingSpacesOnly) {
+      if (!functionalControlsOnly && !smokeOnly && !visualOnly && !visualDynamicOnly && !localAuthOnly && !marketingOnly && !marketingSpacesOnly) {
         stage = "storage-isolation";
         await proveP25StorageIsolation(fixture, roleFixture);
       }
@@ -527,7 +539,7 @@ async function main() {
     localProof: roleFixture?.localProof ?? null,
     localUiAuthProof: roleFixture?.localUiAuthProof ?? null,
     functionalControlsProof: roleFixture?.functionalControlsProof ?? null,
-    mode: functionalControlsOnly ? "LOCAL_FUNCTIONAL_CONTROLS" : fixtureProofsOnly ? "LOCAL_FIXTURE_PROOFS_ONLY_NO_BROWSER_ACCEPTANCE" : localAuthOnly ? "LOCAL_UI_OTP_CONSENT_AND_MFA" : smokeOnly ? "AUTHENTICATED_ROUTE_SMOKE_ONLY" : marketingOnly ? "MARKETING_ONLY" : marketingSpacesOnly ? "MARKETING_AND_SPACES" : businessSpacesOnly ? "BUSINESS_SPACES_ONLY" : "FULL_P24_P26",
+    mode: visualDynamicOnly ? "VISUAL_DYNAMIC_MATRIX_ONLY" : visualOnly ? "VISUAL_ROUTE_MATRIX_ONLY" : functionalControlsOnly ? "LOCAL_FUNCTIONAL_CONTROLS" : fixtureProofsOnly ? "LOCAL_FIXTURE_PROOFS_ONLY_NO_BROWSER_ACCEPTANCE" : localAuthOnly ? "LOCAL_UI_OTP_CONSENT_AND_MFA" : smokeOnly ? "AUTHENTICATED_ROUTE_SMOKE_ONLY" : marketingOnly ? "MARKETING_ONLY" : marketingSpacesOnly ? "MARKETING_AND_SPACES" : businessSpacesOnly ? "BUSINESS_SPACES_ONLY" : "FULL_P24_P26",
     status: failure ? "FAILED" : "PASSED",
     expectedTests,
     executedTests: playwrightResult?.executed ?? browserSummary?.executed ?? 0,
