@@ -7,6 +7,7 @@ import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { buildAdminFinanceLinks, buildAdminNav, buildAdminPilotLinks, buildAdminSettingsLinks, type AdminNavKey } from "@/modules/admin/ui/admin-nav";
 import { AdminSideGroup } from "@/modules/admin/ui/admin-side-group";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
 import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -85,6 +86,7 @@ export function AdminAppShell({
             <small>{c.space}</small>
           </span>
         </Link>
+        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav" aria-label={active === "home" ? c.commandNav : c.space}>
           {nav.map((item) => {
             const Icon = item.icon;
@@ -141,6 +143,7 @@ export function AdminAppShell({
             );
           })}
         </nav>
+        </WorkspaceMobileNavigation>
         <p className="client-side-foot"><span aria-hidden>◆</span>{locale === "ar" ? "منصة لريادة الأعمال معاً" : "Une plateforme pour entreprendre demain, ensemble."}</p>
       </aside>
       <Frame className="client-frame">

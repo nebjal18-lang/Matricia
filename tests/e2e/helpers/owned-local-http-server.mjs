@@ -41,12 +41,13 @@ export function ownedLocalHttpServer(root,config,options={}){
    child.stdout.resume();child.stderr.resume();
    closed=new Promise(done=>{child.once('exit',()=>{exited=true;done();});child.once('error',()=>{exited=true;done();});});
    const end=Date.now()+120_000;
+   let lastStatus=null;
    while(Date.now()<end){
     assert.equal(exited,false,'LOCAL_HTTP_SERVER_EXITED');
-    try{const response=await fetch(`${config.baseUrl}/fr`,{redirect:'manual',signal:AbortSignal.timeout(2000)});await response.arrayBuffer();if(response.status<500)return;}catch{}
+    try{const response=await fetch(`${config.baseUrl}/fr`,{redirect:'manual',signal:AbortSignal.timeout(2000)});await response.arrayBuffer();lastStatus=response.status;if(response.status<500)return;}catch{}
     await delay(250);
    }
-   throw new Error('LOCAL_HTTP_SERVER_NOT_READY');
+   throw new Error(`LOCAL_HTTP_SERVER_NOT_READY_${lastStatus??'NO_RESPONSE'}`);
   },
   async stop(){
    if(!child)return;

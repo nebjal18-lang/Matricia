@@ -185,12 +185,36 @@ async function attachSanitizedEvidence(
 for (const locale of ["fr", "ar"] as const) {
   for (const role of Object.keys(surfaces) as Role[]) {
     test(`${locale.toUpperCase()} ${role} authenticated route smoke is responsive and role-isolated`, async ({ browser }, testInfo) => {
-      test.setTimeout(120_000);
+      test.setTimeout(240_000);
       const mobile = testInfo.project.name.includes("mobile");
       const { context, page } = await createSession(browser, role, locale, mobile);
       try {
-        for (const surface of surfaces[role]) {
+        for (const [index, surface] of surfaces[role].entries()) {
           await test.step(`ALLOW ${surface.route}`, () => assertAllowed(page, locale, surface, role));
+          if (index === 0) {
+            await test.step("responsive workspace navigation", async () => {
+              const toggle = page.getByRole("button", { name: locale === "ar" ? "القائمة" : "Navigation" });
+              const panel = page.locator(".workspace-nav-panel");
+              if (mobile && role === "franchise") {
+                await expect(page.locator(".franchise-mobile-dock")).toBeVisible();
+                await expect(toggle).toBeHidden();
+              } else if (mobile) {
+                await expect(toggle).toBeVisible();
+                await expect(toggle).toHaveAttribute("aria-expanded", "false");
+                await expect(panel).toBeHidden();
+                await toggle.click();
+                await expect(toggle).toHaveAttribute("aria-expanded", "true");
+                await expect(panel).toBeVisible();
+                await panel.locator("a[href]").first().focus();
+                await page.keyboard.press("Escape");
+                await expect(toggle).toHaveAttribute("aria-expanded", "false");
+                await expect(toggle).toBeFocused();
+              } else {
+                await expect(toggle).toBeHidden();
+                await expect(panel).toBeVisible();
+              }
+            });
+          }
         }
         for (const surface of deniedSurfaces[role]) {
           await test.step(`DENY ${surface.route}`, () => assertDenied(page, locale, surface));

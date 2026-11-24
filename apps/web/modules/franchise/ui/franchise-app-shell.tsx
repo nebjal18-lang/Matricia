@@ -8,6 +8,7 @@ import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { buildFranchiseNav, type FranchiseNavKey } from "@/modules/franchise/ui/franchise-nav";
 import { HashAwareLink, WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { FranchiseMandateSelector } from "./franchise-access-state";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -90,6 +91,7 @@ export function FranchiseAppShell({
             <small>{n.brandSpace}</small>
           </span>
         </Link>
+        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -101,6 +103,7 @@ export function FranchiseAppShell({
             );
           })}
         </nav>
+        </WorkspaceMobileNavigation>
         <p className="client-side-foot"><span aria-hidden>◆</span>{n.sideFoot}</p>
       </aside>
       <div className="client-frame">

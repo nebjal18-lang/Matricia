@@ -13,6 +13,7 @@ import { buildClientNav } from "@/modules/client/ui/client-nav";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
 import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import "./client-experience.css";
 import "./client-page-standard.css";
@@ -90,7 +91,9 @@ export function ClientAppShell({
             <small>{c.brandTagline}</small>
           </span>
         </Link>
-        <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
+        <WorkspaceMobileNavigation locale={locale}>
+          <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
+        </WorkspaceMobileNavigation>
         <figure className="client-side-art">
           <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>

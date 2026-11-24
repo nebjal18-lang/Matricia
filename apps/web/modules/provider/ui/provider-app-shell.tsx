@@ -10,6 +10,7 @@ import { ProviderOrganizationSelector } from "./provider-organization-selector";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { buildProviderNav, type ProviderNavKey } from "@/modules/provider/ui/provider-nav";
 import "@/modules/client/ui/client-experience.css";
@@ -96,6 +97,7 @@ export function ProviderAppShell({
             <small className="provider-brand-space">{c.brandSpace}</small>
           </span>
         </Link>
+        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -107,6 +109,7 @@ export function ProviderAppShell({
             );
           })}
         </nav>
+        </WorkspaceMobileNavigation>
         <figure className="client-side-art">
           <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
