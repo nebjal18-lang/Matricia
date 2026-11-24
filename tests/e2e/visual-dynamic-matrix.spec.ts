@@ -11,6 +11,7 @@ if (!["localhost", "127.0.0.1", "::1"].includes(new URL(baseURL).hostname)) {
   throw new Error("Visual dynamic matrix requires a local application URL");
 }
 const states: Partial<Record<Space, string>> = {
+  public: process.env.E2E_CLIENT_STORAGE_STATE,
   shared: process.env.E2E_CLIENT_STORAGE_STATE,
   client: process.env.E2E_CLIENT_STORAGE_STATE,
   provider: process.env.E2E_PROVIDER_STORAGE_STATE,
@@ -20,6 +21,7 @@ const states: Partial<Record<Space, string>> = {
 const spaces = (process.env.E2E_VISUAL_MATRIX_SPACES ?? "public,shared,client,provider,franchise,admin")
   .split(",").map((value) => value.trim()) as Space[];
 const filter = (process.env.E2E_VISUAL_MATRIX_ROUTES ?? "").split(",").map((value) => value.trim()).filter(Boolean);
+const seedPaths = JSON.parse(process.env.E2E_VISUAL_SEED_PATHS ?? "{}") as Partial<Record<Space, string[]>>;
 const inventory = visualRouteInventory();
 const staticPaths = new Set(inventory.filter(({ dynamic }) => !dynamic).map(({ route }) => route));
 const evidenceRoot = resolve(".tmp/visual-route-matrix", process.env.E2E_VISUAL_MATRIX_RUN_ID ?? "manual", "dynamic");
@@ -71,13 +73,19 @@ async function inspect(page: Page, url: URL, template: string, space: Space, loc
     await page.locator("h1").first().waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
     const observed = await page.evaluate(() => ({ pathname: location.pathname.replace(/\/$/u, ""),
       heading: Boolean(document.querySelector("h1")), bodyLength: document.body.innerText.trim().length,
+      readReason: document.querySelector("[data-error-reason]")?.getAttribute("data-error-reason") ?? null,
+      detailAlert: Boolean(document.querySelector('main p[role="alert"]')),
       overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
       lang: document.documentElement.lang, dir: document.documentElement.dir,
       fatal: /Application error|Internal Server Error|ChunkLoadError/u.test(document.body.innerText) }));
+    const expectedAlias = template === "client/demandes/[requestId]/comparaison"
+      && observed.pathname === url.pathname.replace(/\/comparaison\/?$/u, "/offres");
     const issues = [
-      observed.pathname !== url.pathname.replace(/\/$/u, "") && "redirected",
+      observed.pathname !== url.pathname.replace(/\/$/u, "") && !expectedAlias && "redirected",
       (response?.status() ?? 500) >= 400 && "http-error",
       !observed.heading && "missing-h1",
+      observed.readReason && "read-error",
+      ["administration/support/[id]", "administration/assistance/[id]", "client/abonnement/cycles/[cycleId]", "sous-traitant/facturation/[invoiceId]", "franchise/finance/releves/[closureId]", "franchise/invitations/[invitationId]", "franchise/fournisseurs/contrats/[decisionId]"].includes(template) && observed.detailAlert && "record-unavailable",
       observed.bodyLength < 30 && "empty-content",
       observed.overflow && "horizontal-overflow",
       observed.lang !== locale && "wrong-language",
@@ -92,7 +100,7 @@ async function inspect(page: Page, url: URL, template: string, space: Space, loc
         if (audit.violations.length) issues.push(...audit.violations.map(({ id }) => `axe:${id}`));
       }
     }
-    return { template, locale, width, status: response?.status() ?? null, issues, screenshot: issues.length ? null : screenshot };
+    return { template, locale, width, status: response?.status() ?? null, redirectedTo: expectedAlias ? observed.pathname : null, readReason: issues.length ? observed.readReason : null, issues, screenshot: issues.length ? null : screenshot };
   } catch (error) {
     return { template, locale, width, status: null, issues: [String(error).split("\n")[0]?.slice(0, 160) ?? "capture-error"], screenshot: null };
   }
@@ -105,21 +113,34 @@ if (process.env.E2E_VISUAL_MATRIX_RUN_ID) for (const space of spaces) {
     const sources = inventory.filter((entry) => entry.space === space && !entry.dynamic);
     const patterns = new Map(templates.map(({ route }) => [route, pattern(route)]));
     const found = new Map<string, URL>();
+    const pending: URL[] = [];
+    const seen = new Set<string>();
+    const addCandidate = (href: string) => {
+      let candidate: URL;
+      try { candidate = new URL(href, baseURL); } catch { return; }
+      if (candidate.origin !== new URL(baseURL).origin || !candidate.pathname.startsWith("/fr/")) return;
+      const path = candidate.pathname.slice(4).replace(/\/$/u, "");
+      if (staticPaths.has(path)) return;
+      for (const [template, regexp] of patterns) {
+        if (!found.has(template) && regexp.test(path)) {
+          found.set(template, candidate);
+          pending.push(candidate);
+        }
+      }
+    };
     const discovery = await contextFor(browser, space, "fr", 1280);
     const discoveryPage = await discovery.newPage();
     try {
+      for (const path of seedPaths[space] ?? []) addCandidate(`/${"fr"}/${path}`);
       for (const source of sources) {
         if (found.size === templates.length) break;
-        for (const href of await linksOn(discoveryPage, sourceUrl("fr", space, source.route))) {
-          let candidate: URL;
-          try { candidate = new URL(href, baseURL); } catch { continue; }
-          if (candidate.origin !== new URL(baseURL).origin || !candidate.pathname.startsWith("/fr/")) continue;
-          const path = candidate.pathname.slice(4).replace(/\/$/u, "");
-          if (staticPaths.has(path)) continue;
-          for (const [template, regexp] of patterns) {
-            if (!found.has(template) && regexp.test(path)) found.set(template, candidate);
-          }
-        }
+        for (const href of await linksOn(discoveryPage, sourceUrl("fr", space, source.route))) addCandidate(href);
+      }
+      while (pending.length && found.size < templates.length) {
+        const candidate = pending.shift()!;
+        if (seen.has(candidate.href)) continue;
+        seen.add(candidate.href);
+        for (const href of await linksOn(discoveryPage, candidate)) addCandidate(href);
       }
     } finally { await discovery.close(); }
     const rows = [];
