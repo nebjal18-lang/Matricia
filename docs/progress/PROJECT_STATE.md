@@ -1,3 +1,7 @@
+## 2026-11-25 — MAT-FINAL lot 05, contexte des liens Client
+
+Le [reçu du lot 05](../mat-final/LOT05_CONTEXTE_CLIENT_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) consignent C01 et C03 **EN COURS**. Les liens d'action, messagerie et échéance gardent une seule organisation active et le dossier exact ; les liens externes ne reçoivent pas son identifiant. Preuves locales : 7 fichiers/102 tests ciblés PASS, TypeScript web PASS, ESLint ciblé PASS, `git diff --check` PASS. La classification des quatre états de C01 et le parcours connecté multi-organisations restent à faire. Node local 24.11.0, aucune production, aucun visa.
+
 ## 2026-11-25 — MAT-FINAL lot 04, conservation des précisions du besoin
 
 Le [reçu du lot 04](../mat-final/LOT04_SAUVEGARDE_SANS_TRONCATURE_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) consignent D08, D14 et D18 **EN COURS**. Le besoin long reste visible dans le brouillon ; l'UI bloque la confirmation et l'enregistrement et l'action serveur refuse le dépassement, y compris après ajout de la classification. Preuves locales : sélection Vitest 102 fichiers/838 tests PASS, TypeScript PASS, lint PASS, `git diff --check` PASS ; Node 24.11.0, pas de preuve Node 22 ou de sauvegarde distante. Aucun déploiement ni visa.

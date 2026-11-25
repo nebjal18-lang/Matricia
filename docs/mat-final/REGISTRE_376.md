@@ -16,9 +16,9 @@ Source : tickets GitHub #24–#29 relevés le 2026-11-25. Chaque ligne ci-dessou
 | V10 | [#24](https://github.com/nebjal18-lang/Matricia/issues/24) | Centraliser les preuves |  | EN COURS — voir lot 01 | [Constat, tests et limites](./LOT01_CANDIDATE_2026-11-25.md) |
 | V11 | [#24](https://github.com/nebjal18-lang/Matricia/issues/24) | Définir les dépendances externes |  | EN COURS — voir lot 01 | [Constat, tests et limites](./LOT01_CANDIDATE_2026-11-25.md) |
 | V12 | [#24](https://github.com/nebjal18-lang/Matricia/issues/24) | Établir le verdict |  | EN COURS — voir lot 01 | [Constat, tests et limites](./LOT01_CANDIDATE_2026-11-25.md) |
-| C01 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Accueil |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| C01 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Accueil |  | EN COURS - lot 05 | [Accueil examine](./LOT05_CONTEXTE_CLIENT_2026-11-25.md) ; statuts et E2E connecte ouverts. |
 | C02 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Profil et organisation |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| C03 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Contexte |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| C03 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Contexte |  | EN COURS - lot 05 | [Liens de dossier corriges et testes](./LOT05_CONTEXTE_CLIENT_2026-11-25.md) ; autres parcours multi-organisations ouverts. |
 | C04 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Onboarding |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | C05 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Diagnostic |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | C06 | [#25](https://github.com/nebjal18-lang/Matricia/issues/25) | Recommandations |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
