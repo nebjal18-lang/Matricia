@@ -3,14 +3,12 @@ import type { NextConfig } from "next";
 import { resolve } from "node:path";
 import { resolvePublicSupabaseEnvironment } from "./modules/shared/lib/public-supabase-environment";
 import { paymentFormActionPolicy } from "./modules/shared/lib/payment-form-policy";
-import { assertPreviewIsolation } from "./modules/shared/lib/preview-isolation";
+import { applyPreviewIsolationDefaults, assertPreviewIsolation } from "./modules/shared/lib/preview-isolation";
 
 loadEnvConfig(resolve(import.meta.dirname, "../.."), process.env.NODE_ENV !== "production", console, true);
 
-// Preview inherits Production APP_ENV on Vercel; force the staging label before isolation checks.
-if (process.env.VERCEL_ENV === "preview") {
-  process.env.APP_ENV = "staging";
-}
+// Preview inherits Production APP_ENV / URL / missing isolation refs on Vercel.
+applyPreviewIsolationDefaults(process.env);
 
 const {
   NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
