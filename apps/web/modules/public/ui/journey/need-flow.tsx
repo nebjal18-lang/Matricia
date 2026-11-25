@@ -9,6 +9,8 @@ import { canonicalizePublicNeedClassification, formatNeedScoreBasisPoints, publi
 import { getPublicProviderTaxonomy } from "@/modules/public/data/provider-intent/model";
 import { publicCatalogueTranslationNotice } from "@/modules/public/data/catalogue/localized-label";
 import { getNeedStages, needRecapStep, needStageForStep, needStageIds } from "@/modules/public/data/journey/need-stages";
+import { diagnosticNeedHandoff } from "@/modules/public/data/journey/diagnostic-handoff";
+import type { PriorityKey } from "@/modules/public/data/journey/diagnostic-priorities";
 
 type Draft = {
   version: 3;
@@ -24,6 +26,7 @@ type Draft = {
   confirmed: boolean;
   answers: Record<string, string>;
   organizationId: string;
+  diagnosticPriority?: PriorityKey;
   expiresAt: number;
 };
 type Organization = { id: string; name: string };
@@ -143,6 +146,7 @@ export function parseNeedDraft(
         confirmed: classificationChanged ? false : value.confirmed === true,
         answers: asAnswers(value.answers),
         organizationId: typeof value.organizationId === "string" ? value.organizationId.slice(0, 80) : "",
+        ...(value.diagnosticPriority === "organization" || value.diagnosticPriority === "sales" || value.diagnosticPriority === "security" || value.diagnosticPriority === "verify" ? { diagnosticPriority: value.diagnosticPriority } : {}),
         expiresAt: value.expiresAt,
       },
     };
@@ -156,6 +160,7 @@ export function NeedFlow({
   initialNeed = "",
   initialClassification = null,
   initialOrganizationId = "",
+  diagnosticPriority,
   invalidSelection = false,
   authenticated = false,
   organizations = [],
@@ -166,6 +171,7 @@ export function NeedFlow({
   initialNeed?: string;
   initialClassification?: PublicNeedClassification | null;
   initialOrganizationId?: string;
+  diagnosticPriority?: PriorityKey;
   invalidSelection?: boolean;
   authenticated?: boolean;
   organizations?: Organization[];
@@ -177,6 +183,7 @@ export function NeedFlow({
   const [loaded, setLoaded] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
   const [storageNotice, setStorageNotice] = useState<"expired" | "invalid" | null>(null);
+  const [pendingHandoff, setPendingHandoff] = useState<NonNullable<ReturnType<typeof diagnosticNeedHandoff>> | null>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -192,15 +199,26 @@ export function NeedFlow({
             if (legacy.status !== "empty") parsed = legacy;
           }
         }
+        const handoff = diagnosticPriority
+          ? diagnosticNeedHandoff(window.localStorage.getItem("matricia.public-diagnostic.v2"), diagnosticPriority, locale)
+          : null;
         setStorageNotice(parsed.status === "expired" || parsed.status === "invalid" ? parsed.status : null);
-        setDraft(parsed.draft ?? blank(initialNeed, initialClassification, initialOrganizationId));
+        if (handoff && parsed.draft?.need.trim() && parsed.draft.diagnosticPriority !== diagnosticPriority) {
+          setDraft(parsed.draft);
+          setPendingHandoff(handoff);
+        } else {
+          setPendingHandoff(null);
+          setDraft(parsed.draft ?? (handoff
+            ? { ...blank(handoff.need, initialClassification, initialOrganizationId), constraints: handoff.constraints, diagnosticPriority }
+            : blank(initialNeed, initialClassification, initialOrganizationId)));
+        }
       } catch {
         setStorageAvailable(false);
       }
       setLoaded(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialClassification, initialNeed, initialOrganizationId, locale]);
+  }, [diagnosticPriority, initialClassification, initialNeed, initialOrganizationId, locale]);
 
   useEffect(() => {
     if (!loaded || !storageAvailable) return;
@@ -232,6 +250,27 @@ export function NeedFlow({
           <h1>{copy.title}</h1>
           <NeedStageProgress authenticated={authenticated} stageCurrent={1} stageTotal={needStageIds.length} />
           <p role="status">{locale === "fr" ? "Reprise de votre brouillon…" : "جارٍ استعادة مسودتكم…"}</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (pendingHandoff) {
+    return (
+      <main id="contenu-principal" className="journey-shell" dir={locale === "ar" ? "rtl" : "ltr"}>
+        <section className="journey-card">
+          <h1>{locale === "ar" ? "لديكم مسودة طلب محفوظة" : "Vous avez déjà un brouillon de besoin"}</h1>
+          <p className="journey-intro">{locale === "ar" ? "اختاروا متابعة المسودة الحالية أو بدء طلب جديد من التشخيص. لن تُستبدل مسودتكم إلا إذا اخترتم البدء من التشخيص." : "Choisissez de reprendre votre brouillon actuel ou de commencer un nouveau besoin depuis le diagnostic. Votre brouillon ne sera remplacé que si vous choisissez le nouveau besoin."}</p>
+          <div className="journey-actions">
+            <button type="button" className="journey-secondary" onClick={() => {
+              window.history.replaceState(null, "", `/${locale}/besoin`);
+              setPendingHandoff(null);
+            }}>{locale === "ar" ? "متابعة مسودتي" : "Reprendre mon brouillon"}</button>
+            <button type="button" className="journey-primary" onClick={() => {
+              setDraft({ ...blank(pendingHandoff.need, initialClassification, initialOrganizationId), constraints: pendingHandoff.constraints, diagnosticPriority: pendingHandoff.priority });
+              setPendingHandoff(null);
+            }}>{locale === "ar" ? "البدء من التشخيص" : "Commencer depuis le diagnostic"}</button>
+          </div>
         </section>
       </main>
     );

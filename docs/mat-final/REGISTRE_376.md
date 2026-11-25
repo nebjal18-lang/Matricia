@@ -109,23 +109,23 @@ Source : tickets GitHub #24–#29 relevés le 2026-11-25. Chaque ligne ci-dessou
 | F19 | [#26](https://github.com/nebjal18-lang/Matricia/issues/26) | Notifications |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | F20 | [#26](https://github.com/nebjal18-lang/Matricia/issues/26) | Assistance |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D01 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Inventorier tout référentiel, versions, familles et services |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D02 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Distinguer secteur d'activité du domaine de compétences |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| D02 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Distinguer secteur d'activité du domaine de compétences |  | EN COURS — lot 02 | [Constat, correction et limites](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) : aucun service inféré du secteur. |
 | D03 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Profil initial adaptatif |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D04 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Orientation courte |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D05 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sélection des axes |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| D04 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Orientation courte |  | EN COURS — lot 02 | [Scénario à huit réponses FR/AR](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; couverture des 200 services ouverte. |
+| D05 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sélection des axes |  | EN COURS — lot 02 | [Priorité choisie et reprise testées](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; choix local uniquement. |
 | D06 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Questions conditionnelles |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D07 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Aide et exemples |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D08 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sauvegarde |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D09 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Recommandation |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D10 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Explication |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| D08 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sauvegarde |  | EN COURS — lot 02 | [Brouillon local et actualisation testés](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; persistance authentifiée non testée. |
+| D09 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Recommandation |  | EN COURS — lot 02 | [Rentabilité chantier signalée comme non mesurée](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; règles des 200 services ouvertes. |
+| D10 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Explication |  | EN COURS — lot 02 | [Réponses déclarées conservées](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; justification des services ouverte. |
 | D11 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Options |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D12 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Multibibliothèque |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D13 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Décision client |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D14 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Passage au besoin |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| D13 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Décision client |  | EN COURS — lot 02 | [Sélection client testée](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; validation du service et envoi distincts. |
+| D14 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Passage au besoin |  | EN COURS — lot 02 | [Transfert du texte et du contexte testé](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; flux connecté non prouvé. |
 | D15 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Fiches service |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D16 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Gouvernance |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D17 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Lacunes |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D18 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Tests |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
+| D18 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Tests |  | EN COURS — lot 02 | [53 unitaires et 10 E2E locaux](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; matrice intégrale non exécutée. |
 | IT-01 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Audit SI et feuille de route |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | IT-02 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Architecture SI |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | IT-03 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Réseau LAN/Wi-Fi |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |

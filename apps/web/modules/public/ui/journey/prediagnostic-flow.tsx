@@ -188,6 +188,8 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
         locale={locale}
         answers={state.answers}
         storageAvailable={storageAvailable}
+        selectedPriority={state.selectedPriority}
+        onSelectPriority={(selectedPriority) => setState((current) => ({ ...current, selectedPriority }))}
         onEdit={() => goQuestions(0)}
         onDetail={(key) => { setDetailKey(key); setPhase("detail"); }}
         onSave={() => setPhase("save")}
