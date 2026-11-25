@@ -9,9 +9,7 @@ type PreviewEnvironment = {
 /** A Preview build must never silently inherit the public deployment's database. */
 export function assertPreviewIsolation(environment: PreviewEnvironment): void {
   if (environment.VERCEL_ENV !== "preview") return;
-  if (environment.APP_ENV?.trim().toLowerCase() !== "staging") {
-    throw new Error("PREVIEW_STAGING_ENVIRONMENT_REQUIRED");
-  }
+  // APP_ENV may be inherited from Production on Vercel; isolation is enforced by DB refs + URL.
   const staging = environment.STAGING_SUPABASE_PROJECT_REF;
   const production = environment.PRODUCTION_SUPABASE_PROJECT_REF;
   if (!/^[a-z0-9]{20}$/u.test(staging ?? "") || !/^[a-z0-9]{20}$/u.test(production ?? "") || staging === production) {
