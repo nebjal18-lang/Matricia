@@ -1,3 +1,7 @@
+## 2026-11-25 — MAT-FINAL lot 01, candidat en cours
+
+Source figée pour l'inventaire : `ec09db5de9de8289fbc177994891a5ff695f5898` sur `codex/mat-final-01-candidate` ; aucune fusion ni production. [Registre des 376 points](../mat-final/REGISTRE_376.md) initialisé sans clôture automatique et [matrice V01–V12](../mat-final/LOT01_CANDIDATE_2026-11-25.md) actualisée : 223 pages, 377 actions serveur, 2 388 interactions recensées statiquement, 648 dettes de validation runtime. Scanner `--check` PASS et tests de preuve 3/3 PASS sous Node 24.11.0, sans valeur de gate Node 22. CI du SHA source : navigateur public et qualité PASS, SQL FAIL `0043`/`42501` sur un `session_replication_role=replica` du test. Docker local indisponible pour rejouer le clone. Lot et release NO-GO ; prochaine étape : corriger la fixture SQL sans désactiver les triggers, puis recette commune au même SHA.
+
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 
 ## 2026-11-23 — Vérification globale du candidat d5e3cf2c
