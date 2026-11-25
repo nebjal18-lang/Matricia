@@ -20,6 +20,7 @@ export function execute(command, args, { input, env = process.env, signal, cwd, 
       if (command === process.execPath && !failed) {
         const output = Buffer.concat(chunks).toString('utf8');
         error.safeSummary = output.match(/^database: failed; observations\/assertions=\d+; skipped=\d+; last-sql-pass=(?:none|[A-Za-z0-9_.-]+\.test\.sql)$/m)?.[0];
+        error.safeFailure = output.match(/^DB_TEST_FAILED file=(?:preflight|[A-Za-z0-9_.-]+\.test\.sql) sqlstate=(?:NON_SQL|[0-9A-Z]{5}) assertion=(?:none|\d+): raw diagnostics withheld$/m)?.[0];
       }
       reject(error);
     });
@@ -141,6 +142,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }).catch(error => {
     console.error(`ISOLATED_DB_FAILED at ${phase}: raw diagnostics withheld`);
     if (error.cause?.safeSummary) console.error(error.cause.safeSummary);
+    if (error.cause?.safeFailure) console.error(error.cause.safeFailure);
     process.exitCode = 1;
   });
 }
