@@ -1,13 +1,30 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { resolveSafeDatabaseTarget, verifyDatabaseClone, sqlInventory } from './db-test-support-safety.mjs';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 let postgres;
-import { prepareSqlTestBatches } from './db-test-support.mjs';
+import { prepareSqlTest, prepareSqlTestBatches } from './db-test-support.mjs';
 let activeTestFile = 'preflight';
 let activeBatch = 0;
+
+async function diagnoseSqlLine(file) {
+  if (!/^[A-Za-z0-9_.-]+\.test\.sql$/.test(file)) return 'none';
+  const target = resolveSafeDatabaseTarget(process.env);
+  const script = prepareSqlTest(await readFile(resolve(import.meta.dirname, '..', 'supabase', 'tests', file), 'utf8'));
+  const container = `matricia-test-${target.cloneId}`;
+  return new Promise((done) => {
+    const child = spawn('docker', ['exec', '-i', container, 'psql', '-X', '-U', 'postgres', '-d', target.database,
+      '-v', 'ON_ERROR_STOP=1', '-f', '-'], { stdio: ['pipe', 'ignore', 'pipe'], windowsHide: true, timeout: 60_000 });
+    let stderr = '';
+    child.stderr.on('data', chunk => { if (stderr.length < 1024 * 1024) stderr += chunk.toString(); });
+    child.stdin.on('error', () => {});
+    child.on('error', () => done('none'));
+    child.on('close', () => done(/:(\d+): ERROR:/.exec(stderr)?.[1] ?? 'none'));
+    child.stdin.end(script);
+  });
+}
 
 function tapLines(value, target = []) {
   if (Array.isArray(value)) for (const item of value) tapLines(item, target);
@@ -669,14 +686,15 @@ async function main() {
 
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  main().catch(error => {
+  main().catch(async error => {
     const sqlstate = /^[0-9A-Z]{5}$/.test(error?.code ?? '') ? error.code : 'NON_SQL';
     const assertion = /not ok (\d+)\b/.exec(error?.message ?? '')?.[1] ?? 'none';
     const position = /^\d+$/.test(String(error?.position ?? '')) ? error.position : 'none';
     const functionMatch = /PL\/pgSQL function (?:[a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)\([^)]*\) line (\d+)/i.exec(error?.where ?? '');
     const functionName = functionMatch?.[1] ?? 'none';
     const functionLine = functionMatch?.[2] ?? 'none';
-    console.error(`DB_TEST_FAILED: file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion} position=${position} function=${functionName} function-line=${functionLine}; raw diagnostics withheld`);
+    const scriptLine = sqlstate === '42501' ? await diagnoseSqlLine(activeTestFile).catch(() => 'none') : 'none';
+    console.error(`DB_TEST_FAILED: file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion} position=${position} function=${functionName} function-line=${functionLine} script-line=${scriptLine}; raw diagnostics withheld`);
     process.exitCode = 1;
   });
 }
