@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+afterEach(() => vi.unstubAllEnvs());
 
 vi.mock("next/navigation", () => ({ notFound: vi.fn(() => { throw new Error("NOT_FOUND"); }) }));
 vi.mock("next/image", () => ({
@@ -8,10 +10,30 @@ vi.mock("next/image", () => ({
     <img src={props.src} alt={props.alt} />
   ),
 }));
+vi.mock("../connexion/demo-access", () => ({
+  DemoAccess: () => (
+    <section id="demo-access-title">
+      {["client", "provider", "franchise", "admin"].map((persona) => (
+        <input key={persona} name="persona" value={persona} readOnly />
+      ))}
+    </section>
+  ),
+}));
 
 import PublicHomePage from "./page";
 
 describe("PublicHomePage", () => {
+  it("affiche les quatre raccourcis avant le contenu principal lorsque la démo production est activée", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
+    vi.stubEnv("MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED", "true");
+    const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
+    for (const persona of ["client", "provider", "franchise", "admin"]) {
+      expect(html).toContain(`name="persona" value="${persona}"`);
+    }
+    expect(html.indexOf('id="demo-access-title"')).toBeLessThan(html.indexOf('id="home-title"'));
+  });
+
   it("présente les trois intentions, sept étapes et l’aperçu en français", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
     for (const label of ["Comprendre", "Structurer", "Matcher", "Comparer", "Contractualiser", "Exécuter", "Suivre"]) expect(html).toContain(label);
