@@ -1,7 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-afterEach(() => vi.unstubAllEnvs());
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ notFound: vi.fn(() => { throw new Error("NOT_FOUND"); }) }));
 vi.mock("next/image", () => ({
@@ -14,18 +12,10 @@ vi.mock("next/image", () => ({
 import PublicHomePage from "./page";
 
 describe("PublicHomePage", () => {
-  it("affiche les quatre accès aux tableaux de bord quand la démo production est activée", async () => {
-    vi.stubEnv("APP_ENV", "production");
-    vi.stubEnv("VERCEL_ENV", "production");
-    vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
-    vi.stubEnv("MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED", "true");
+  it("ne duplique pas les raccourcis démo déjà présents sur la connexion", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
-    expect(html).toContain("Explorer les tableaux de bord démo");
-    expect(html.indexOf("Explorer les tableaux de bord démo")).toBeLessThan(html.indexOf('id="home-title"'));
-    for (const persona of ["client", "provider", "franchise", "admin"]) {
-      expect(html).toContain(`name="persona" value="${persona}"`);
-    }
-    expect(html).toContain('name="next" value="/fr/administration/command-center"');
+    expect(html).not.toContain("Explorer les tableaux de bord démo");
+    expect(html).not.toContain('name="persona" value="admin"');
   });
 
   it("présente les trois intentions, sept étapes et l’aperçu en français", async () => {
