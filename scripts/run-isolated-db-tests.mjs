@@ -20,7 +20,7 @@ export function execute(command, args, { input, env = process.env, signal, cwd, 
       if (command === process.execPath && !failed) {
         const output = Buffer.concat(chunks).toString('utf8');
         error.safeSummary = output.match(/^database: failed; observations\/assertions=\d+; skipped=\d+; last-sql-pass=(?:none|[A-Za-z0-9_.-]+\.test\.sql)$/m)?.[0];
-        error.safeFailure = output.match(/^DB_TEST_FAILED file=(?:preflight|[A-Za-z0-9_.-]+\.test\.sql) sqlstate=(?:NON_SQL|[0-9A-Z]{5}) assertion=(?:none|\d+): raw diagnostics withheld$/m)?.[0];
+        error.safeFailure = output.match(/^DB_TEST_FAILED file=(?:preflight|[A-Za-z0-9_.-]+\.test\.sql) batch=\d+ sqlstate=(?:NON_SQL|[0-9A-Z]{5}) assertion=(?:none|\d+): raw diagnostics withheld$/m)?.[0];
       }
       reject(error);
     });

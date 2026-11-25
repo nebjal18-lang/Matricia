@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url';
 let postgres;
 import { prepareSqlTestBatches } from './db-test-support.mjs';
 let activeTestFile = 'preflight';
+let activeBatch = 0;
 
 function tapLines(value, target = []) {
   if (Array.isArray(value)) for (const item of value) tapLines(item, target);
@@ -621,11 +622,13 @@ async function main() {
     `;
     for (const file of files) {
       activeTestFile = file;
+      activeBatch = 0;
       const source = await readFile(resolve(testDirectory, file), 'utf8');
       const results = [];
       // Keep BEGIN/ROLLBACK and role-local state on the same max:1 connection,
       // while explicit request boundaries get their own statement timestamp.
       for (const batch of prepareSqlTestBatches(source)) {
+        activeBatch += 1;
         results.push(await sql.unsafe(batch, [], { simple: true }));
       }
       const lines = tapLines(results);
@@ -669,7 +672,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   main().catch(error => {
     const sqlstate = /^[0-9A-Z]{5}$/.test(error?.code ?? '') ? error.code : 'NON_SQL';
     const assertion = /not ok (\d+)\b/.exec(error?.message ?? '')?.[1] ?? 'none';
-    console.error(`DB_TEST_FAILED file=${activeTestFile} sqlstate=${sqlstate} assertion=${assertion}: raw diagnostics withheld`);
+    console.error(`DB_TEST_FAILED file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion}: raw diagnostics withheld`);
     process.exitCode = 1;
   });
 }
