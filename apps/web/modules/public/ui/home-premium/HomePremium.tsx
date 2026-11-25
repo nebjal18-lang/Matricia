@@ -12,9 +12,9 @@ type HomePremiumProps = {
 export function HomePremium({ locale, demoAccess }: HomePremiumProps) {
   return (
     <main id="contenu-principal" className={`${styles.page} home-premium-page`} dir={locale === "ar" ? "rtl" : "ltr"}>
+      {demoAccess}
       <HomePremiumHero locale={locale} />
       <HomePremiumBelow locale={locale} />
-      {demoAccess}
     </main>
   );
 }

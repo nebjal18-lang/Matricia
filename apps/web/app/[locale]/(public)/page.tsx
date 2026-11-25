@@ -4,6 +4,8 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { isPublicDemoAccessEnabled } from "../connexion/demo-policy";
 import { DemoDashboardButtons } from "../connexion/demo-access";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicHomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();

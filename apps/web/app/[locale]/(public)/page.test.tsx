@@ -21,6 +21,7 @@ describe("PublicHomePage", () => {
     vi.stubEnv("MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED", "true");
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
     expect(html).toContain("Explorer les tableaux de bord démo");
+    expect(html.indexOf("Explorer les tableaux de bord démo")).toBeLessThan(html.indexOf('id="home-title"'));
     for (const persona of ["client", "provider", "franchise", "admin"]) {
       expect(html).toContain(`name="persona" value="${persona}"`);
     }
