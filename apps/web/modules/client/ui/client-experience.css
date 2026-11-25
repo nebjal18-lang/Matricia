@@ -2513,12 +2513,30 @@ button.client-cta {
 }
 
 .client-home-bar-row,
-.client-home-progress li {
+.client-home-progress li,
+.client-home-progress a {
   display: grid;
   grid-template-columns: minmax(4rem, 5.5rem) minmax(0, 1fr) auto;
   gap: 0.55rem;
   align-items: center;
   font-size: 0.82rem;
+}
+
+.client-home-progress a {
+  flex: 1;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.client-home-progress a:hover strong,
+.client-home-progress a:focus-visible strong {
+  color: var(--client-cta);
+}
+
+.client-home-next-action {
+  color: #fff;
+  text-underline-offset: 3px;
 }
 
 .client-home-bar-track {
