@@ -15,7 +15,7 @@ async function diagnoseSqlLine(file) {
   const script = prepareSqlTest(await readFile(resolve(import.meta.dirname, '..', 'supabase', 'tests', file), 'utf8'));
   const container = `matricia-test-${target.cloneId}`;
   return new Promise((done) => {
-    const child = spawn('docker', ['exec', '-i', container, 'psql', '-X', '-U', 'postgres', '-d', target.database,
+    const child = spawn('docker', ['exec', '-i', container, 'psql', '-X', '-h', '/tmp', '-U', 'postgres', '-d', target.database,
       '-v', 'ON_ERROR_STOP=1', '-f', '-'], { stdio: ['pipe', 'ignore', 'pipe'], windowsHide: true, timeout: 60_000 });
     let stderr = '';
     child.stderr.on('data', chunk => { if (stderr.length < 1024 * 1024) stderr += chunk.toString(); });
