@@ -2,7 +2,7 @@ import{classifyAuthReadFailure}from"@/modules/shared/lib/auth/read-failure";
 import{readAllPages,readRelatedPages}from"@/modules/shared/lib/data/read-pages";
 import { selectProviderMembership } from "@/modules/provider/data/spaces/organization-context";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { BillingDashboard, ProviderCommissionReceipt } from "./model";
 
 const id = z.string().uuid();
@@ -24,15 +24,15 @@ type BillingLoadResult =
   | { status: "error"; reason: "UNAUTHENTICATED" | "NO_BILLING_ORGANIZATION" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
 export async function loadProviderBilling(requestedOrganizationId?: string, requestedInvoiceId?: string, requestedPage=1): Promise<BillingLoadResult> {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error:authError } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth, error:authError } = authResult;
   if(classifyAuthReadFailure(authError)==="UNAVAILABLE")return{status:"error",reason:"QUERY_FAILED"};
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
 
   let membershipQuery = client.from("organization_memberships")
     .select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)")
     .eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null)
-    .in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_ACCOUNTING"]);
+    .in("organization_member_roles.role_code", ["PROVIDER_OWNER", "PROVIDER_ACCOUNTING", "PROVIDER_MANAGER"]);
   if(requestedOrganizationId&&id.safeParse(requestedOrganizationId).success)membershipQuery=membershipQuery.eq("organization_id",requestedOrganizationId);
   const membershipResult=await membershipQuery.limit(100);
   if (membershipResult.error) return { status: "error", reason: "QUERY_FAILED" };
@@ -114,7 +114,7 @@ export async function loadProviderBilling(requestedOrganizationId?: string, requ
     }),
     allocations: allocations.data.map((item) => ({
       id: item.id, batchId: item.reconciliation_batch_id, paymentId: item.payment_id,
-      paymentReference: paymentById.get(item.payment_id)?.payment_reference ?? item.payment_id.slice(0, 8),
+      paymentReference: paymentById.get(item.payment_id)?.payment_reference ?? "Paiement",
       invoiceId: item.invoice_id, invoiceNumber: invoiceById.get(item.invoice_id)!.invoice_number,
       currency: paymentById.get(item.payment_id)!.currency,
       amountMinor: item.amount_minor, createdAt: item.created_at,
@@ -176,7 +176,7 @@ export async function loadProviderCommissions(organizationId: string): Promise<
     receipts: parsed.data.map((item) => ({
       id: item.id,
       invoiceId: item.provider_invoice_id,
-      invoiceNumber: numbers.get(item.provider_invoice_id) ?? item.provider_invoice_id.slice(0, 8),
+      invoiceNumber: numbers.get(item.provider_invoice_id) ?? "Facture",
       reference: item.matricia_receipt_reference,
       currency: item.currency,
       commissionMinor: item.commission_amount_minor,

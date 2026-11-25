@@ -106,9 +106,17 @@ describe.each(["fr", "ar"] as const)("admin actor pages in %s", (locale) => {
     expect(mocks.rpc).toHaveBeenCalledWith("get_admin_account_access_v1", { p_user_id: userId });
   });
 
-  it.each([UserPage, RolesPage])("reserves notFound for a successful empty lookup", async (page) => {
-    mocks.load.mockResolvedValue({ status: "success", rows: [], fiche: null, organizations: [] });
+  it.each([UserPage, RolesPage])("reserves notFound for an explicit missing account", async (page) => {
+    mocks.load.mockResolvedValue({ status: "error", reason: "NOT_FOUND" });
     await expect(render(page, locale)).rejects.toThrow("ACTOR_NOT_FOUND");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it.each([UserPage, RolesPage])("explains an organization scope miss instead of a fake 404", async (page) => {
+    mocks.load.mockResolvedValue({ status: "success", rows: [], fiche: null, organizations: [] });
+    const html = await render(page, locale);
+    expect(html).toContain(locale === "ar" ? "المؤسسة غير مرتبطة بهذا الحساب" : "Organisation hors périmètre");
+    expect(mocks.notFound).not.toHaveBeenCalled();
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 

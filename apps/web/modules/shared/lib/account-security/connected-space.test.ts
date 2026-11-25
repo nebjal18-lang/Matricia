@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks=vi.hoisted(()=>({from:vi.fn(),getUser:vi.fn()}));
-vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({from:mocks.from,auth:{getUser:mocks.getUser}})}));
+vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({from:mocks.from,auth:{getUser:mocks.getUser}}),getServerAuthUser:async()=>mocks.getUser()}));
 vi.mock("next/navigation",()=>({notFound:()=>{throw new Error("NOT_FOUND");}}));
 import { resolveConnectedSpace } from "./connected-space";
 function response(data:unknown){const q={select:vi.fn(),eq:vi.fn(),order:vi.fn(),maybeSingle:vi.fn(),then:(resolve:(value:unknown)=>unknown)=>Promise.resolve({data,error:null}).then(resolve)};for(const f of[q.select,q.eq,q.order,q.maybeSingle])f.mockReturnValue(q);return q;}
@@ -11,9 +11,14 @@ describe("role independent account workspace",()=>{
    await expect(resolveConnectedSpace({ locale: "fr" })).rejects.toThrow("WORKSPACE_CONTEXT_UNAVAILABLE");
    expect(mocks.from).not.toHaveBeenCalled();
  });
- it.each([401, 403])("requests reconnection for a verified invalid session (%s)", async status => {
+ it.each([401])("requests reconnection for a verified invalid session (%s)", async status => {
    mocks.getUser.mockResolvedValue({ data: { user: null }, error: { status } });
    await expect(resolveConnectedSpace({ locale: "ar" })).resolves.toEqual({ status: "unauthenticated" });
+   expect(mocks.from).not.toHaveBeenCalled();
+ });
+ it("preserves an authorization denial without creating a reconnection loop", async () => {
+   mocks.getUser.mockResolvedValue({ data: { user: null }, error: { status: 403 } });
+   await expect(resolveConnectedSpace({ locale: "ar" })).rejects.toThrow("WORKSPACE_CONTEXT_UNAVAILABLE");
    expect(mocks.from).not.toHaveBeenCalled();
  });
  it.each(["aal1","aal2"])("allows administrator without an organization at %s",async aal=>{mocks.getUser.mockResolvedValue({data:{user:{id:"admin",email:"admin@example.invalid",aal}}});mocks.from.mockReturnValue(response([]));await expect(resolveConnectedSpace({locale:"fr"})).resolves.toMatchObject({status:"success",selectedOrganizationId:null,selectedQuery:""});});

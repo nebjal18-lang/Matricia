@@ -13,8 +13,21 @@ insert into public.question_rule_versions(id,rule_id,library_id,version,status,c
 ('fb151000-0000-0000-0000-000000000001','fb150000-0000-0000-0000-000000000001','fb120000-0000-0000-0000-000000000001',1,'APPROVED','{"kind":"TRUE"}','[{"type":"NOOP"}]','{}',10,false,repeat('d',64),'Version approuvée','fb100000-0000-0000-0000-000000000001'),
 ('fb151000-0000-0000-0000-000000000002','fb150000-0000-0000-0000-000000000002','fb120000-0000-0000-0000-000000000001',1,'APPROVED','{"kind":"TRUE"}','[{"type":"NOOP"}]','{}',20,true,repeat('e',64),'Version sensible','fb100000-0000-0000-0000-000000000001');
 
+-- Independent governance review backs the historical balance fixture. The
+-- outsider remains unprivileged; the new reviewer is a separate fixture actor.
+insert into auth.users(id,instance_id,aud,role,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('fb100000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000000','authenticated','authenticated','balance191-reviewer@example.invalid',now(),'{}','{}',now(),now());
+insert into public.platform_user_roles(user_id,role_code)values('fb100000-0000-0000-0000-000000000001','FINANCE_MANAGER'),('fb100000-0000-0000-0000-000000000003','MATRICIA_ADMIN');
+-- Baseline imports are not a prerequisite of this isolated fixture.
+insert into public.catalog_libraries(id,code,slug,steward_organization_id,created_by)values('fb120000-0000-0000-0000-000000000002','IT','it','fb110000-0000-0000-0000-000000000001','fb100000-0000-0000-0000-000000000001')on conflict(code)do nothing;
+create temporary table balance191_basis(proposal jsonb);
+select set_config('request.jwt.claims','{"sub":"fb100000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
+insert into balance191_basis select public.propose_franchise_governance((select id from public.catalog_libraries where code='IT'),'fb110000-0000-0000-0000-000000000001','HATIM_AHMITECH','BALANCE191','Territoire de recette191','نطاق اختبار191','{}',now()-interval'1 day',now()+interval'1 year',0,'EXEMPT',0,'{}','{}','{}','p06-composition-admin@example.invalid',repeat('1',64),'fr-MA','{}','TEST191 independently reviewed balance basis','TEST191-propose-basis');
+select set_config('request.jwt.claims','{"sub":"fb100000-0000-0000-0000-000000000003","role":"authenticated","aal":"aal2"}',true);
+select public.decide_franchise_governance((proposal->>'approval_request_id')::uuid,'APPROVE','TEST191 independent economic review',1,'TEST191-review-basis')from balance191_basis;
 insert into public.franchise_pnl_books(id,library_id,franchise_organization_id,franchise_type,operator_code,currency,opened_under_rule_version_id,created_by)
-select 'fb190000-0000-0000-0000-000000000001','fb120000-0000-0000-0000-000000000001','fb110000-0000-0000-0000-000000000001','IT','HATIM_AHMITECH','MAD',id,'fb100000-0000-0000-0000-000000000001' from public.franchise_finance_rule_versions where franchise_type='IT' and version=1;
+select 'fb190000-0000-0000-0000-000000000001',(select id from public.catalog_libraries where code='IT'),'fb110000-0000-0000-0000-000000000001','IT','HATIM_AHMITECH','MAD',id,'fb100000-0000-0000-0000-000000000001' from public.franchise_finance_rule_versions where franchise_type='IT' and version=1;
+select set_config('request.jwt.claims','{"sub":"fb100000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
+select public.open_franchise_pnl_book_for_mandate_v1((proposal->>'franchise_id')::uuid,(proposal->>'mandate_version_id')::uuid,(select content_hash from public.franchise_mandate_versions where id=(proposal->>'mandate_version_id')::uuid),'MAD',(select id from public.franchise_finance_rule_versions where franchise_type='IT'and version=1),'TEST191-bind-existing-book')from balance191_basis;
 insert into public.franchise_distribution_ledger_entries(book_id,beneficiary_code,entry_type,amount_minor,currency,reference_type,reference_id,correlation_id,created_by)
 select 'fb190000-0000-0000-0000-000000000001','HATIM_AHMITECH','ADJUSTMENT',9007199254740993,'MAD','DELIVERY_TEST',n::text,'fb190000-0000-0000-0000-000000000002','fb100000-0000-0000-0000-000000000001' from generate_series(1,2501)n;
 create temporary table observed_balances(balance text);grant select,insert on observed_balances to authenticated;grant usage on schema extensions to authenticated;

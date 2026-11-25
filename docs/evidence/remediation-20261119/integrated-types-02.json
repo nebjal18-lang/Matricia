@@ -1,0 +1,26 @@
+{
+  "task": "integrated-types-02",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "tsc",
+    "--noEmit",
+    "--incremental",
+    "false"
+  ],
+  "startedAt": "2026-11-19T14:21:28.208Z",
+  "finishedAt": "2026-11-19T14:22:49.926Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 1,
+  "sourceBefore": {
+    "commit": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "sourceSha256": "22f554517df8fbe21d1652d46e9b0c7162fcd11124556961ec8cb9c5d02fed56"
+  },
+  "sourceAfter": {
+    "commit": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "sourceSha256": "22f554517df8fbe21d1652d46e9b0c7162fcd11124556961ec8cb9c5d02fed56"
+  },
+  "sourceUnchanged": true
+}

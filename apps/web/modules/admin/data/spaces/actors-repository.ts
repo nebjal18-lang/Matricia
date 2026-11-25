@@ -3,7 +3,7 @@ import { listInvitations, type InvitationOrganization, type SafeInvitation } fro
 import { loadAdminClients } from "@/modules/admin/data/clients/repository";
 import { loadAdminOrganizationFiche, loadAdminSupervisionDashboard } from "@/modules/admin/data/supervision/repository";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";
-import { canApplyAdminDemo, demoActorUsers as overlayActorUsers, demoClientCases, demoClientOrganizations, demoDiagnostics, demoSupervisionOrganizations } from "./demo-overlay";
+import { canApplyAdminDemo, demoActorUsers as overlayActorUsers, demoClientCases, demoClientOrganizations, demoDiagnostics, listDemoSupervisionOrganizations } from "./demo-overlay";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 
@@ -26,7 +26,7 @@ export type ActorUserResult =
     fiche: AdminOrganizationFiche | null;
     organizations: AdminSupervisionDashboard["organizations"];
   }
-  | { status: "error"; reason: NonNullable<ActorDirectory["reason"]> | "NOT_FOUND" };
+  | { status: "error"; reason: NonNullable<ActorDirectory["reason"]> | "NOT_FOUND" | "ORG_SCOPE_MISS" };
 
 export async function loadAdminActorDirectory(consistent = false): Promise<ActorDirectory> {
   const [supervision, invitations] = await Promise.all([loadAdminSupervisionDashboard(80,consistent), listInvitations()]);
@@ -37,8 +37,9 @@ export async function loadAdminActorDirectory(consistent = false): Promise<Actor
   const users = actorResult.users;
   let forbidden = supervision.status === "error" && supervision.reason === "FORBIDDEN";
   if (canApplyAdminDemo()) {
-    if (organizations.length === 0) organizations = demoSupervisionOrganizations;
-    if (users.length === 0) users.push(...overlayActorUsers());
+    organizations = listDemoSupervisionOrganizations();
+    users.length = 0;
+    users.push(...overlayActorUsers());
     forbidden = false;
   }
   return {
@@ -52,20 +53,30 @@ export async function loadAdminActorDirectory(consistent = false): Promise<Actor
 }
 
 export async function loadAdminActorUser(userId: string, organizationId?: string): Promise<ActorUserResult> {
-  const [directory, actorResult] = await Promise.all([loadAdminActorDirectory(), loadActorRows(userId)]);
-  const reason = actorResult.reason ?? directory.reason ?? (directory.forbidden ? "FORBIDDEN" : undefined);
-  if (reason) return { status: "error", reason };
-  const rows = organizationId === undefined
-    ? actorResult.users
-    : actorResult.users.filter((row) => row.organizationId === organizationId);
-  const first = rows[0];
+  const actorResult = await loadActorRows(userId);
+  if (actorResult.reason) return { status: "error", reason: actorResult.reason };
+  if (actorResult.users.length === 0) return { status: "error", reason: "NOT_FOUND" };
+  if (organizationId !== undefined) {
+    const scoped = actorResult.users.filter((row) => row.organizationId === organizationId);
+    if (scoped.length === 0) return { status: "error", reason: "ORG_SCOPE_MISS" };
+    const first = scoped[0];
+    const fiche = first?.organizationId ? await loadAdminOrganizationFiche(first.organizationId) : null;
+    if (fiche?.status === "error") return fiche;
+    return {
+      status: "success",
+      rows: scoped,
+      fiche: fiche?.status === "success" ? fiche.value : null,
+      organizations: [],
+    };
+  }
+  const first = actorResult.users[0];
   const fiche = first?.organizationId ? await loadAdminOrganizationFiche(first.organizationId) : null;
   if (fiche?.status === "error") return fiche;
   return {
     status: "success",
-    rows,
+    rows: actorResult.users,
     fiche: fiche?.status === "success" ? fiche.value : null,
-    organizations: directory.organizations,
+    organizations: [],
   };
 }
 
@@ -88,9 +99,9 @@ export async function loadAdminClientDirectory(locale: Locale) {
     let diagnostics = supervision.status === "success" ? supervision.value.diagnostics : [];
     const reason = clients.status === "error" ? clients.reason : supervision.status === "error" ? supervision.reason : null;
     if (!reason && canApplyAdminDemo()) {
-      if (organizations.length === 0) organizations = demoClientOrganizations(locale);
-      if (cases.length === 0) cases = demoClientCases();
-      if (diagnostics.length === 0) diagnostics = demoDiagnostics();
+      organizations = demoClientOrganizations(locale);
+      cases = demoClientCases();
+      diagnostics = demoDiagnostics();
     }
     return {
       organizations,

@@ -19,7 +19,7 @@ export function AdminProcessStrip({
   title: string;
   owner: string;
   nextAction: string;
-  blocker?: string | null;
+  blocker?: string | null | undefined;
   steps: readonly ProcessStep[];
   className?: string;
 }) {

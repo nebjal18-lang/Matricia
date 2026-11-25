@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks=vi.hoisted(()=>({path:"",query:"",space:vi.fn(),roles:vi.fn()}));
-vi.mock("next/navigation",()=>({usePathname:()=>mocks.path,useSearchParams:()=>new URLSearchParams(mocks.query),notFound:()=>{throw Error("NOT_FOUND")},redirect:(href:string)=>{throw Error(`REDIRECT:${href}`)}}));
+vi.mock("next/navigation",()=>({usePathname:()=>mocks.path,useSearchParams:()=>new URLSearchParams(mocks.query),useRouter:()=>({replace:vi.fn(),push:vi.fn(),refresh:vi.fn()}),notFound:()=>{throw Error("NOT_FOUND")},redirect:(href:string)=>{throw Error(`REDIRECT:${href}`)}}));
 vi.mock("@/modules/shared/ui/workspace-account-menu",()=>({WorkspaceAccountMenu:({returnTo}:{returnTo:string})=><div data-account-return={returnTo}/> }));
 vi.mock("@/modules/provider/data/spaces/context",()=>({resolveProviderSpace:mocks.space}));
 vi.mock("@/app/[locale]/organisation/roles/actions",()=>({listOrganizationRoles:mocks.roles}));
@@ -25,7 +25,7 @@ describe("Provider dashboard entry remains explicit for a dual-role member",()=>
   const html=renderToStaticMarkup(shell(locale));
   const homeLinks=links(html).filter(({url})=>/^\/(fr|ar)\/tableau-de-bord$/u.test(url.pathname));
   expect(homeLinks.length).toBeGreaterThanOrEqual(5);for(const {url}of homeLinks){expect(url.searchParams.getAll("workspace")).toEqual(["provider"]);expect(url.searchParams.get("organizationId")).toBe(org);expect(url.searchParams.get("q")).toBe("mission");expect(url.searchParams.get("page")).toBe("4");}
-  expect(html.match(/name="workspace" value="provider"/gu)).toHaveLength(2);
+  expect(html.match(/name="workspace" value="provider"/gu)).toHaveLength(1);
  });
  it.each(["fr","ar"] as const)("replaces a wrong workspace in an explicit home languagePath but preserves detail paths in %s",locale=>{
   const home=`/${locale}/tableau-de-bord${query}#priorities`;mocks.path=`/${locale}/tableau-de-bord`;mocks.query=query.slice(1);

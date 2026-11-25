@@ -6,11 +6,15 @@ import type { ReactNode } from "react";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { buildFranchiseNav, type FranchiseNavKey } from "@/modules/franchise/ui/franchise-nav";
+import { HashAwareLink, WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { FranchiseMandateSelector } from "./franchise-access-state";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import "@/modules/client/ui/client-experience.css";
 import "./franchise-experience.css";
+import "./franchise-page-standard.css";
 
 export type { FranchiseNavKey };
 
@@ -27,6 +31,7 @@ export function FranchiseAppShell({
   actions,
   mandateName,
   mandates,
+  sceneHero = false,
   children,
 }: {
   locale: Locale;
@@ -35,12 +40,14 @@ export function FranchiseAppShell({
   selectedOrganizationId: string | null;
   userEmail: string | null;
   active: FranchiseNavKey;
-  title?: string;
-  lead?: string;
-  kicker?: string;
+  title?: string | undefined;
+  lead?: string | undefined;
+  kicker?: string | undefined;
   actions?: ReactNode;
   mandateName?: string | null;
-  mandates?: Array<{id:string;organizationId:string;label:string}>;
+  mandates?: Array<{id:string;organizationId:string;label:string}> | undefined;
+  /** Photo hero mast — identity hubs only (accueil / territoire / finance). */
+  sceneHero?: boolean;
   children: ReactNode;
 }): ReactNode {
   const c = franchiseCopy(locale);
@@ -70,6 +77,7 @@ export function FranchiseAppShell({
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace franchise-workspace">
+      <WorkspaceHashScroll />
       <aside className="client-side" aria-label={c.space}>
         <Link href={`/${locale}/franchise/accueil${selectedQuery}`} className="client-brand">
           <span className="client-brand-mark" aria-hidden>
@@ -83,6 +91,7 @@ export function FranchiseAppShell({
             <small>{n.brandSpace}</small>
           </span>
         </Link>
+        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -94,6 +103,7 @@ export function FranchiseAppShell({
             );
           })}
         </nav>
+        </WorkspaceMobileNavigation>
         <p className="client-side-foot"><span aria-hidden>◆</span>{n.sideFoot}</p>
       </aside>
       <div className="client-frame">
@@ -130,7 +140,7 @@ export function FranchiseAppShell({
           <Link href={`/${locale}/franchise/recherche${selectedQuery}`} className="client-icon-btn franchise-mobile-search" aria-label={n.search}>
             <Search aria-hidden className="size-4" />
           </Link>
-          <Link href={`/${locale}/notifications${selectedQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
+          <Link href={`/${locale}/franchise/notifications${selectedQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
             <Bell className="size-4" />
             <span className="franchise-notify-dot" aria-hidden />
           </Link>
@@ -178,7 +188,18 @@ export function FranchiseAppShell({
             <span>{locale === "ar" ? "المزيد" : "Plus"}</span>
           </Link>
         </nav>
-        {title ? (
+        {title && sceneHero ? (
+          <div className="client-scene-mast">
+            <SpaceSceneHero
+              sceneSrc="/scenes/arch-city.png"
+              title={title}
+              meta={lead}
+              badge={kicker ? <span className="mat-status" data-tone="violet">{kicker}</span> : undefined}
+              actions={actions}
+              priority
+            />
+          </div>
+        ) : title ? (
           <header className="client-mast">
             <div>
               {kicker ? <p className="sr-only">{kicker}</p> : null}
@@ -190,13 +211,13 @@ export function FranchiseAppShell({
             </div>
           </header>
         ) : null}
-        <FranchiseMandateSelector locale={locale} mandates={mandates} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
-        {children}
+        <FranchiseMandateSelector locale={locale} mandates={mandates ?? []} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
+        <div className="franchise-page-standard">{children}</div>
       </div>
     </div>
   );
 }
 
 export function FranchiseActions({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="client-cta">{label}</Link>;
+  return <HashAwareLink href={href} className="client-cta">{label}</HashAwareLink>;
 }

@@ -61,7 +61,7 @@ select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000001'
 insert into p256 values('approval-context',public.get_box_configuration_approval_context_v1(current_setting('test.rule256')::uuid));
 select throws_ok($$select public.approve_box_configuration_v1(current_setting('test.rule256')::uuid,(select v->>'source_hash'from p256 where k='approval-context'),'Approbaton de son propre contenu interdite','box256-self-approve')$$,'42501','BOX_CONFIGURATION_SELF_APPROVAL_DENIED','the Box and rule author cannot self-approve');
 select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"a2560000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
-select throws_ok($$select public.approve_box_configuration_v1(current_setting('test.rule256')::uuid,repeat('f',64),'Refus du contexte qui a changé','box256-stale-approval')$$,'40001','STALE_BOX_CONFIGURATION_SOURCE','the reviewer must approve the source hash actually read');
+select throws_ok($$select public.approve_box_configuration_v1(current_setting('test.rule256')::uuid,repeat('f',64),'Refus du contexte qui a changé','box256-stale-approval')$$,'PT409','STALE_BOX_CONFIGURATION_SOURCE','the reviewer must approve the source hash actually read');
 insert into p256 values('approved',public.approve_box_configuration_v1(current_setting('test.rule256')::uuid,(select v->>'source_hash'from p256 where k='approval-context'),'Approbation indépendante synthétique de recette256','box256-independent-approval'));
 select is((select v->>'outcome'from p256 where k='approved'),'BOX_CONFIGURATION_APPROVED','independent Finance approves the real rule, Box and allowed benefits');
 
@@ -95,6 +95,8 @@ select is(private.subscription_prepared_box_terms_for_preparation_v1((select(v->
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 
 insert into p256 values('paid',public.process_verified_subscription_payment_v2('DEMO','DEMO','SYNTHETIC-DEMO-EVENT-256','SYNTHETIC-DEMO-ORDER-256','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-DEMO-CAPTURE-256',repeat('d',64),repeat('e',64)));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2560000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p256 values('context',public.get_customer_box_configuration_v1('b2560000-0000-4000-8000-000000000001'));
 select is((select v->>'status'from p256 where k='context'),'CONFIGURABLE','a real compatible payment makes the pre-approved Box configurable');
@@ -112,7 +114,7 @@ select is((public.get_subscription_credit_grant_context_v1('b2560000-0000-4000-8
 select set_config('test.context256',(select v->>'context_hash'from p256 where k='context'),true);
 select is(public.get_benefit_admission_availability_v1('b2560000-0000-4000-8000-000000000001',(select(v->>'benefit_version_id')::uuid from p256 where k='benefit3'))->>'blocked_reason','BENEFIT_ELIGIBILITY_NOT_MET','payment alone does not satisfy an actual governed required-Box condition');
 insert into p256 values('selection',jsonb_build_array(jsonb_build_object('slot_code','CORE','benefit_version_id',(select v->>'benefit_version_id'from p256 where k='benefit3'),'units','1'),jsonb_build_object('slot_code','EXTRA','benefit_version_id',(select v->>'benefit_version_id'from p256 where k='benefit7'),'units','1')));
-select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,repeat('f',64),(select v from p256 where k='selection'),'box256-stale-context')$$,'40001','STALE_CUSTOMER_BOX_CONTEXT','browser cannot confirm a different financing or policy context');
+select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,repeat('f',64),(select v from p256 where k='selection'),'box256-stale-context')$$,'PT409','STALE_CUSTOMER_BOX_CONTEXT','browser cannot confirm a different financing or policy context');
 select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,current_setting('test.context256'),'[]','box256-empty')$$,'23514','CUSTOMER_BOX_SLOT_LIMIT','mandatory slots cannot be omitted');
 select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,current_setting('test.context256'),jsonb_set((select v from p256 where k='selection'),'{0,units}','"2"'),'box256-budget-overflow')$$,'23514','CUSTOMER_BOX_BUDGET_EXCEEDED','exact arithmetic refuses spending beyond the approved Box budget');
 select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,current_setting('test.context256'),jsonb_set((select v from p256 where k='selection'),'{0,benefit_version_id}',to_jsonb((select v->>'benefit_version_id'from p256 where k='benefit7'))),'box256-wrong-benefit')$$,'22023','INVALID_CUSTOMER_BOX_SELECTION','a benefit from another slot cannot be substituted');
@@ -123,6 +125,8 @@ select throws_ok($$select public.configure_customer_box_v1('b2560000-0000-4000-8
 select set_config('request.jwt.claim.sub','a2560000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2560000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 select set_config('test.ledger256',(select count(*)::text from public.credit_ledger_entries where organization_id='b2560000-0000-4000-8000-000000000001'),true);
 insert into p256 values('configured',public.configure_customer_box_v1('b2560000-0000-4000-8000-000000000001',current_setting('test.rule256')::uuid,current_setting('test.context256'),(select v from p256 where k='selection'),'box256-configure'));
+-- Acquired Box evidence is consumed in a later native request.
+-- matricia:test-request-boundary
 select is((select v->>'outcome'from p256 where k='configured'),'CUSTOMER_BOX_CONFIGURED','the real command creates the customer Box');
 select is((select v->>'allocated_credits'from p256 where k='configured'),'10','selected costs exactly use the approved credit budget');
 select is(public.get_benefit_admission_availability_v1('b2560000-0000-4000-8000-000000000001',(select(v->>'benefit_version_id')::uuid from p256 where k='benefit3'))->>'admissible','true','the real funded assignment satisfies the approved Box condition even after catalogue retirement');

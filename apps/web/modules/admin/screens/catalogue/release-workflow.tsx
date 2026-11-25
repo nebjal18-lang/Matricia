@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/mod
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
-import type { CatalogEntityStatus } from "@/modules/shared/lib/catalogue-builder/model";
+import { presentCatalogEntityLabel, type CatalogEntityStatus } from "@/modules/shared/lib/catalogue-builder/model";
 import { addReleaseItemAction, createReleaseAction, submitReleaseAction, type BuilderActionState } from "./actions";
 import type { BuilderMessages } from "./messages";
 import { usePersistentCommandIdentity } from "./use-command-identity";
@@ -23,7 +23,7 @@ function ActionStatus({ state, messages, id }: { state: BuilderActionState; mess
     return (
       <div id={id} role="status" aria-live="polite" className="min-h-6 space-y-1 text-sm text-primary">
         <p>{message}</p>
-        {state.releaseStatus ? <p>{messages.resultStatus}: {messages.releaseStatuses[state.releaseStatus]} (<bdi dir="ltr">{state.releaseStatus}</bdi>)</p> : null}
+        {state.releaseStatus ? <p>{messages.resultStatus}: {messages.releaseStatuses[state.releaseStatus]}</p> : null}
       </div>
     );
   }
@@ -52,8 +52,8 @@ function TechnicalInput({ id, name, label, defaultValue, pattern, type = "text",
 
 export function ReleaseWorkflow({ locale, library, service, draftReleases, approvedVersions, messages, commandIdentities }: {
   locale: Locale;
-  library: { id: string; code: string; rowVersion: number; status: CatalogEntityStatus };
-  service: { id: string; code: string; status: CatalogEntityStatus };
+  library: { id: string; code: string; rowVersion: number; status: CatalogEntityStatus; nameFr?: string | null; nameAr?: string | null };
+  service: { id: string; code: string; status: CatalogEntityStatus; nameFr?: string | null; nameAr?: string | null };
   draftReleases: Array<{ id: string; key: string }>;
   approvedVersions: Array<{ id: string; version: number; nameFr: string; nameAr: string }>;
   messages: BuilderMessages;
@@ -70,17 +70,19 @@ export function ReleaseWorkflow({ locale, library, service, draftReleases, appro
   const [createIdempotencyRef, createCorrelationRef, prepareCreate] = usePersistentCommandIdentity("CREATE_RELEASE", createState.status === "success" && createState.operation === "CREATED", commandIdentities.create);
   const [addIdempotencyRef, addCorrelationRef, prepareAdd] = usePersistentCommandIdentity("ADD_RELEASE_ITEM", addState.status === "success" && addState.operation === "ITEM_ADDED", commandIdentities.add);
   const [submitIdempotencyRef, submitCorrelationRef, prepareSubmit] = usePersistentCommandIdentity("SUBMIT_RELEASE", submitState.status === "success" && submitState.operation === "SUBMITTED", commandIdentities.submit);
+  const libraryLabel = presentCatalogEntityLabel(locale, library);
+  const serviceLabel = presentCatalogEntityLabel(locale, service);
 
   return (
     <section aria-labelledby={`${prefix}-title`} className="space-y-5">
       <div>
         <h2 id={`${prefix}-title`} className="text-2xl font-semibold tracking-tight">{messages.releaseTitle}</h2>
         <p className="mt-2 max-w-3xl leading-7 text-muted-foreground">{messages.releaseDescription}</p>
-        <p className="mt-2 break-words text-sm font-medium">{messages.selectedContext}: <bdi dir="ltr" className="font-mono">{library.code}</bdi> — {messages.entityStatuses[library.status]} / <bdi dir="ltr" className="font-mono">{service.code}</bdi> — {messages.entityStatuses[service.status]}</p>
+        <p className="mt-2 break-words text-sm font-medium">{messages.selectedContext}: {libraryLabel} — {messages.entityStatuses[library.status]} / {serviceLabel} — {messages.entityStatuses[service.status]}</p>
       </div>
       <div className="grid gap-5 xl:grid-cols-3">
         <Card>
-          <CardHeader><CardTitle><h3>{messages.createTitle}</h3></CardTitle><CardDescription><bdi dir="ltr" className="font-mono">{library.code}</bdi> — {messages.entityStatuses[library.status]}</CardDescription></CardHeader>
+          <CardHeader><CardTitle><h3>{messages.createTitle}</h3></CardTitle><CardDescription>{libraryLabel} — {messages.entityStatuses[library.status]}</CardDescription></CardHeader>
           <CardContent>
             <form action={createAction} onSubmitCapture={prepareCreate} aria-describedby={`${prefix}-create-status`} className="space-y-4">
               <input type="hidden" name="locale" value={locale} /><input type="hidden" name="libraryId" value={library.id} /><input type="hidden" name="expectedLibraryRowVersion" value={library.rowVersion} />
@@ -101,7 +103,7 @@ export function ReleaseWorkflow({ locale, library, service, draftReleases, appro
         </Card>
 
         <Card>
-          <CardHeader><CardTitle><h3>{messages.addTitle}</h3></CardTitle><CardDescription><bdi dir="ltr" className="font-mono">{service.code}</bdi> — {messages.entityStatuses[service.status]}</CardDescription></CardHeader>
+          <CardHeader><CardTitle><h3>{messages.addTitle}</h3></CardTitle><CardDescription>{serviceLabel} — {messages.entityStatuses[service.status]}</CardDescription></CardHeader>
           <CardContent>
             <form action={addAction} onSubmitCapture={prepareAdd} aria-describedby={`${prefix}-add-status`} className="space-y-4">
               <input type="hidden" name="locale" value={locale} /><input ref={addIdempotencyRef} type="hidden" name="idempotencyKey" defaultValue={commandIdentities.add.idempotencyKey} /><input ref={addCorrelationRef} type="hidden" name="correlationId" defaultValue={commandIdentities.add.correlationId} />

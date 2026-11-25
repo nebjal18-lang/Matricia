@@ -43,7 +43,7 @@ create function pg_temp.approve_checkout_box_fixture(
  p_audit_org uuid,p_plan_version uuid,p_maker uuid,p_reviewer uuid,p_code text,
  p_currency text,p_credit_budget bigint,p_rollover_months integer
 )returns jsonb language plpgsql as $$
-declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;begin
+declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;admission_context jsonb;admission_policy jsonb;begin
  if p_maker=p_reviewer then raise exception'TEST_REQUIRES_INDEPENDENT_FINANCE';end if;
  perform set_config('request.jwt.claim.sub',p_maker::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_maker,'role','authenticated','aal','aal2')::text,true);
@@ -52,9 +52,13 @@ declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;begin
  box:=public.create_box_version(p_audit_org,p_code,'FIXED','Box synthétique de recette','صندوق اصطناعي للاختبار',p_credit_budget,p_rollover_months,'{}',0,0,0,p_currency,clock_timestamp()-interval'1 minute',jsonb_build_array(jsonb_build_object('slot_code','CORE','slot_kind','MANDATORY','minimum_selections',1,'maximum_selections',1,'allowed_benefit_version_ids',jsonb_build_array(benefit->>'benefit_version_id'))),p_code||'-create');
  perform public.activate_box_version(p_audit_org,(box->>'box_version_id')::uuid,null,p_code||'-activate');
  rule:=public.link_plan_box_rule(p_audit_org,p_plan_version,(box->>'box_version_id')::uuid,'{"schema_version":1,"period_unit":"SUBSCRIPTION_CYCLE","budget_rule":"EXACT"}',clock_timestamp()-interval'1 minute',p_code||'-link');
- context:=public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
+ -- Explicit synthetic internal execution policy, independently reviewed before Box approval.
+ admission_context:=public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+ admission_policy:=public.propose_benefit_admission_policy_v1((benefit->>'benefit_version_id')::uuid,admission_context->>'source_hash',(admission_context->>'head_id')::uuid,'NONE',null,null,'{}',array[(box->>'box_version_id')::uuid],now()-interval '1 minute',null,'TEST ONLY explicit internal benefit execution policy','TEST_ONLY_CHECKOUT_POLICY','HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
  perform set_config('request.jwt.claim.sub',p_reviewer::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_reviewer,'role','authenticated','aal','aal2')::text,true);
+ perform public.decide_benefit_admission_policy_v1((admission_policy->>'policy_id')::uuid,admission_policy->>'content_hash',true,'TEST_ONLY_CHECKOUT_POLICY_REVIEW','TEST ONLY independent approval of internal benefit execution policy');
+ context:=public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
  approval:=public.approve_box_configuration_v1((rule->>'plan_box_rule_id')::uuid,context->>'source_hash','Approbation indépendante exclusivement synthétique de recette',p_code||'-approve');
  perform set_config('request.jwt.claim.sub',p_maker::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_maker,'role','authenticated','aal','aal2')::text,true);
@@ -67,6 +71,8 @@ insert into p259 values('prep',public.prepare_subscription_payment_intent_v2('b2
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p259 values('intent',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p259 where k='prep'),'SANDBOX','SYNTHETIC-SC-ORDER-259',123450,'EUR'));
 insert into p259 values('paid',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-SC-EVENT-259','SYNTHETIC-SC-ORDER-259','PAYMENT_SUCCEEDED',123450,'EUR',statement_timestamp(),'SYNTHETIC-SC-CAPTURE-259',repeat('b',64),repeat('c',64),'e2590000-0000-4000-8000-000000000005'));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select is((select v->>'outcome'from p259 where k='paid'),'SUBSCRIPTION_ACTIVATED','actual paid plan creates the native cycle and balanced journal');
 insert into p259 values('tracked',public.track_subscription_paid_credit_jobs_v1((select id from public.event_outbox where event_type='SubscriptionPaidV1'and organization_id='b2590000-0000-4000-8000-000000000001'), 'e2590000-0000-4000-8000-000000000001'));
 select is((select v->>'outcome'from p259 where k='tracked'),'SUBSCRIPTION_CREDIT_JOBS_TRACKED','payment event tracks jobs without claiming credits issued');
@@ -99,6 +105,8 @@ insert into p259 values('prep2',public.prepare_subscription_payment_intent_v2('b
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p259 values('intent2',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p259 where k='prep2'),'SANDBOX','SYNTHETIC-SC-ORDER-259-2',12345,'EUR'));
 insert into p259 values('paid2',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-SC-EVENT-259-2','SYNTHETIC-SC-ORDER-259-2','PAYMENT_SUCCEEDED',12345,'EUR',statement_timestamp(),'SYNTHETIC-SC-CAPTURE-259-2',repeat('d',64),repeat('e',64),'e2590000-0000-4000-8000-000000000006'));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select public.track_subscription_paid_credit_jobs_v1((select id from public.event_outbox where event_type='SubscriptionPaidV1'and organization_id='b2590000-0000-4000-8000-000000000002'),'e2590000-0000-4000-8000-000000000002');
 select public.record_verified_payment_inbox_v1('PAYPAL','SANDBOX','SYNTHETIC-SC-DISPUTE-259','DISPUTE_OPENED','SYNTHETIC-SC-CAPTURE-259-2',jsonb_build_object('provider_payment_id','SYNTHETIC-SC-CAPTURE-259-2','provider_adjustment_id','SYNTHETIC-SC-CASE-259','merchant_reference',null,'amount_minor','12345','currency','EUR','occurred_at',statement_timestamp()),repeat('f',64),repeat('a',64),extensions.gen_random_uuid());
 insert into p259 values('lease2',(select v from public.claim_subscription_credit_jobs_v1('f2590000-0000-4000-8000-000000000001',1,120)v));

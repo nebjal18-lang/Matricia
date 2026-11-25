@@ -48,7 +48,7 @@ export default async function AdminInviteUserPage({
       title={a.inviteTitle}
       lead={a.inviteLead}
     >
-      <main className="client-page">
+      <div className="client-page">
         <InviteUserForm {...createAdminInvitationFormDefaults()}
           locale={locale}
           query={space.selectedQuery}
@@ -58,7 +58,7 @@ export default async function AdminInviteUserPage({
           defaultRole={query.role}
           franchises={!franchisesResult.error&&franchises.success?franchises.data:[]}
         />
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

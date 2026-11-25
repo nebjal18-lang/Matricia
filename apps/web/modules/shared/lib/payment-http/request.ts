@@ -10,6 +10,10 @@ export async function readPaymentJson(request:Request,maximumBytes:number):Promi
 }
 export function paymentOriginAllowed(request:Request,appUrl:string):boolean {
   const supplied=request.headers.get("origin");if(!supplied)return false;
+  const site=request.headers.get("sec-fetch-site");
+  if(site!==null&&site!=="same-origin"&&site!=="none")return false;
+  const contentType=request.headers.get("content-type");
+  if(contentType!==null&&!/^application\/json(?:\s*;|$)/i.test(contentType))return false;
   try{return new URL(supplied).origin===new URL(appUrl).origin;}catch{return false;}
 }
 export const paymentResponseHeaders={"cache-control":"no-store"} as const;

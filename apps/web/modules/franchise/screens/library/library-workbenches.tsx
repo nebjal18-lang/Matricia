@@ -2,10 +2,10 @@ import{CatalogServerPagination}from"./server-pagination";
 import Link from "next/link";
 import { Beaker, ClipboardList, Eye, GitBranch, ListOrdered, Lock, Plus, RotateCcw, Send, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
-import { QuestionnaireBuilder } from "@/modules/admin/screens/catalogue/questionnaire-builder";
-import { QuestionBuilder } from "@/modules/admin/screens/catalogue/question-builder";
-import { RuleBuilder } from "@/modules/admin/screens/catalogue/rule-builder";
-import { getBuilderMessages } from "@/modules/admin/screens/catalogue/messages";
+import { getBuilderMessages } from "@/modules/shared/catalogue-builders/messages";
+import { QuestionBuilder } from "@/modules/shared/catalogue-builders/question-builder";
+import { QuestionnaireBuilder } from "@/modules/shared/catalogue-builders/questionnaire-builder";
+import { RuleBuilder } from "@/modules/shared/catalogue-builders/rule-builder";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import type { FranchiseCatalogRow, FranchiseLibraryWorkspace, FranchiseQuestionRow } from "@/modules/franchise/data/library/workspace-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -14,6 +14,7 @@ import { FranchiseScopeInfo } from "./library-chrome";
 import { FranchiseServiceDraftForm, FranchiseServiceCommandForms } from "./service-builder";
 import { FranchiseQuestionnaireSandbox } from "./sandbox-form";
 import { FranchiseArchiveServiceForm, FranchiseCatalogSubmitForm, FranchiseCloneQuestionnaireForm, FranchiseDuplicateServiceForm, FranchisePublishReleaseForm } from "./catalog-commands";
+import { Suspense } from "react";
 import { ServicesCatalogPanel } from "./services-catalog-panel";
 
 function Toolbar({ children }: { children: ReactNode }) {
@@ -62,7 +63,9 @@ export function FranchiseServicesWorkbench({
         <ToolLink href={selected ? `/${locale}/franchise/services/${selected.id}/validation${query}` : `/${locale}/franchise/validations${query}`} label={c.submitValidation} />
       </Toolbar>
       <section className="franchise-workbench franchise-workbench-services">
-        <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
+        <Suspense fallback={<p role="status">{locale === "ar" ? "جارٍ تحميل الكتالوج…" : "Chargement du catalogue…"}</p>}>
+          <ServicesCatalogPanel serverPage={workspace.serverPage} locale={locale} workspaceName={workspace.mandate.libraryName} categories={workspace.categories} services={workspace.services} selectedId={selected?.id ?? null} libraryId={workspace.mandate.libraryId} franchiseId={workspace.mandate.franchiseId} organizationId={organizationId} commandIdentity={commandIdentity} />
+        </Suspense>
         <aside className="client-card franchise-service-drawer">
           {createMode || !selected ? (
             <>

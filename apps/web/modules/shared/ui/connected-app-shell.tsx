@@ -1,8 +1,3 @@
-import "@/modules/client/ui/client-experience.css";
-import "@/modules/provider/ui/provider-experience.css";
-import "@/modules/franchise/ui/franchise-experience.css";
-import "@/modules/admin/ui/admin-experience.css";
-import "@/modules/shared/shell/admin-experience.css";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
@@ -15,6 +10,7 @@ import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigati
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { AdminAppShell } from "@/modules/admin/ui/admin-app-shell";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import { WorkspaceFailure } from "./workspace-failure";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
@@ -32,6 +28,7 @@ export async function ConnectedAppShell({
   clientActive,
   providerActive,
   franchiseActive,
+  sceneHero = false,
   children,
 }: {
   locale: Locale;
@@ -47,6 +44,7 @@ export async function ConnectedAppShell({
   clientActive?: ClientNavKey;
   providerActive: ProviderNavKey;
   franchiseActive: FranchiseNavKey;
+  sceneHero?: boolean;
   children: ReactNode;
 }): Promise<ReactNode> {
   const returnPath = safeReturnPath(currentPath, locale) ?? `/${locale}/tableau-de-bord`;
@@ -69,17 +67,19 @@ export async function ConnectedAppShell({
   }
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: returnPath }));
   const alternateHref = translateLocalPath(returnPath, locale, locale === "fr" ? "ar" : "fr");
+  const resolvedKicker = kicker ?? (space.organizationName ? organizationDisplayLabel(space.organizationName, locale) : undefined);
   const shared = {
     locale,
     selectedQuery: space.selectedQuery,
     selectedOrganizationId: space.selectedOrganizationId,
     userEmail: space.userEmail,
     title,
-    lead,
-    kicker: kicker ?? space.organizationName ?? undefined,
+    ...(lead === undefined ? {} : { lead }),
+    ...(resolvedKicker === undefined ? {} : { kicker: resolvedKicker }),
     actions,
     alternateHref,
     languagePath: returnPath,
+    sceneHero,
     children: <>{space.directoryUnavailable ? <WorkspaceFailure locale={locale} reason="QUERY_FAILED" returnPath={returnPath} /> : null}{children}</>,
   };
   if (kind === "administration") return <AdminAppShell {...shared} active="home" />;
@@ -89,5 +89,5 @@ export async function ConnectedAppShell({
   if (kind === "franchise") {
     return <FranchiseAppShell {...shared} active={franchiseActive} />;
   }
-  return <ClientAppShell {...shared} organizationName={space.organizationName} active={clientActive} />;
+  return <ClientAppShell {...shared} organizationName={space.organizationName} {...(clientActive === undefined ? {} : { active: clientActive })} />;
 }

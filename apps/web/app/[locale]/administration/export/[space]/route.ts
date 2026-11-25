@@ -5,19 +5,30 @@ import { NextResponse } from "next/server";
 import { isAdminSpaceId } from "@/modules/admin/data/spaces/admin-nav";
 import { spaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
 import { loadAdminSpaceSnapshot } from "@/modules/admin/data/spaces/space-data";
+import { loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
 export async function GET(request: Request, { params }: { params: Promise<{ locale: string; space: string }> }) {
   const { locale, space } = await params;
   if (!isLocale(locale) || !isAdminSpaceId(space)) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+  const access = await loadMyPlatformAccess();
+  if (access.status === "error") {
+    if (access.reason === "UNAUTHENTICATED") return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
+    return NextResponse.json({ error: "UNAVAILABLE" }, { status: 503 });
+  }
+  if (!access.requirementSatisfied) return NextResponse.json({ error: "MFA_REQUIRED" }, { status: 403 });
   const search = new URL(request.url).searchParams;
   const query = search.toString();
   const snapshot = await loadAdminSpaceSnapshot(locale, space, query ? `?${query}` : "",true);
   if (snapshot.reason === "UNAUTHENTICATED") return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
-  if (snapshot.reason === "FORBIDDEN") return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  if (snapshot.reason === "FORBIDDEN" || snapshot.reason === "MFA_REQUIRED") {
+    return NextResponse.json({ error: snapshot.reason }, { status: 403 });
+  }
+  if (snapshot.reason && snapshot.reason !== "OK") {
+    return NextResponse.json({ error: snapshot.reason }, { status: 503 });
+  }
   const spec = spaceSpec(space);
   const header = dataColumns(spec.columns(locale));
-  if (snapshot.reason && snapshot.reason !== "OK") return NextResponse.json({ error: snapshot.reason }, { status: snapshot.reason === "MFA_REQUIRED" ? 403 : 503 });
   const rows = filterAdminRows(snapshot.rows, space, search.get("vue") ?? undefined, search.get("q") ?? undefined);
   const body = csvDocument([["id", ...header], ...rows.map((row) => [row.id, ...row.cells])]);
   return new NextResponse(body, {

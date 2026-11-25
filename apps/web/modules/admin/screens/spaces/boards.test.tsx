@@ -25,7 +25,14 @@ const fiche = {
     created_at: "2026-09-01T10:00:00.000Z",
     updated_at: "2026-09-18T10:00:00.000Z",
   },
-  memberships: [{ id: "22222222-2222-4222-8222-222222222222", user_id: "33333333-3333-4333-8333-333333333333", status: "ACTIVE", roles: ["CLIENT_OWNER"] }],
+  memberships: [{
+    id: "22222222-2222-4222-8222-222222222222",
+    user_id: "33333333-3333-4333-8333-333333333333",
+    status: "ACTIVE",
+    roles: ["CLIENT_OWNER"],
+    display_name: "Leila Mansouri",
+    email: "leila.mansouri@studio-atlas.test",
+  }],
   requests: [{ id: "44444444-4444-4444-8444-444444444444", status: "OPEN", created_at: "2026-09-18T10:00:00.000Z", service_id: "55555555-5555-4555-8555-555555555555" }],
   missions: [],
   disputes: [],
@@ -42,16 +49,81 @@ describe("admin space boards", () => {
       renderToStaticMarkup(<OrganizationFicheBoard locale="fr" query="" fiche={fiche} />),
     ].join("\n");
     expect(html).toContain("Acteurs &amp; accès");
+    expect(html).toContain("Organisations");
+    expect(html).not.toContain("admin-dir-tip");
     expect(html).toContain("Actions sensibles");
     expect(html).toContain("Toutes les pages d’administration");
     expect(html).toContain("Créer");
     expect(html).toContain("Archiver / restaurer");
     expect(html).toContain("Client · Communication");
     expect(html).toContain("Studio Atlas");
+    expect(html).toContain("Leila Mansouri");
+    expect(html).toContain("mat-scene-hero");
+    expect(html).toContain("admin-org-hero");
+    expect(html).toContain("arch-city.png");
+    expect(html).toContain("id=\"membres\"");
+    expect(html).toContain('data-panel="membres"');
+    expect(html).toContain('data-panel="overview"');
     expect(html).toContain("Aucune suppression définitive");
     expect(html).toContain("À traiter");
+    expect(html).toContain("1 résultat");
+    expect(html).toContain('data-layout="orgs"');
+    expect(html).not.toContain("admin-chart-grid");
     expect(html).toContain('data-tone="amber"');
     expect(html).toContain('data-tone="plum"');
     expect(html).not.toMatch(/exemple illustratif/i);
   });
+
+  it("masque les fixtures E2E par défaut et nettoie l’affichage", () => {
+    const fixture = {
+      ...row,
+      id: "c7d9160c-c012-4926-8165-2aa6646f0f19",
+      name: "Client test A",
+      legalName: "P05 E2E A c7d9160c-c012-4926-8165-2aa6646f0f19",
+      type: "Non renseigné",
+      typeCodes: [] as string[],
+      typeTone: "peach" as const,
+      fixture: true,
+    };
+    const hidden = renderToStaticMarkup(<OrganizationsBoard locale="fr" query="" rows={[row, fixture]} treat={[]} />);
+    expect(hidden).toContain("Client · Communication");
+    expect(hidden).not.toContain("Client test A");
+    expect(hidden).not.toContain("P05 A");
+    expect(hidden).toContain("1 élément(s) de test / démo masqué(s).");
+    expect(hidden).toContain("fixtures=1");
+    const shown = renderToStaticMarkup(<OrganizationsBoard locale="fr" query="?fixtures=1" rows={[row, fixture]} treat={[]} includeFixtures />);
+    expect(shown).toContain("Client test A");
+    expect(shown).toContain("Non renseigné");
+    expect(shown).toContain('value="NONE"');
+    expect(shown).toContain("2 résultats");
+  });
 });
+
+for (const locale of ["fr", "ar"] as const) {
+  it(`shows legal facts, exact membership statuses and unavailable Boxes in ${locale}`, () => {
+    const html = renderToStaticMarkup(<OrganizationFicheBoard locale={locale} query="?organizationId=other" fiche={{ ...fiche,
+      organization: { ...fiche.organization, client_legal_profile: { version: 1, legal_form: "SARL", activity: "Conseil technique", registered_city: null, registered_address: null, if_number: "12345678", rc_number: "87654" } },
+      memberships: ["ACTIVE", "INVITED", "SUSPENDED", "REVOKED"].map((status, index) => ({ ...fiche.memberships[0]!, id: `member-${index}`, status, roles: index === 0 ? ["CLIENT_OWNER"] : ["PROVIDER_OWNER"] })),
+      subscriptions: [...fiche.subscriptions, { ...fiche.subscriptions[0]!, id: "cancelled", status: "CANCELLED" }],
+    }} />);
+    expect(html).toContain("Conseil technique");
+    expect(html).toContain("12345678");
+    expect(html).toContain("87654");
+    expect(html).toContain(locale === "ar" ? "مسؤول" : "Administrateur");
+    expect(html).toContain("Leila Mansouri");
+    expect(html).toContain("leila.mansouri@studio-atlas.test");
+    expect(html).toContain(`${locale === "ar" ? "دعوة معلّقة" : "Invitation en attente"}</strong>`);
+    expect(html).toContain(`${locale === "ar" ? "وصول نشط" : "Accès actif"}</strong>`);
+    expect(html).toContain("admin-fiche-member-table");
+    expect(html).toContain(locale === "ar" ? "مدعوّة" : "Invitée");
+    expect(html).toContain(`${locale === "ar" ? "اشتراكات مرئية" : "Abonnements visibles"}</strong><small dir="ltr">2</small>`);
+    expect(html).toContain(`/administration/finance/offres?organizationId=${encodeURIComponent(row.id)}`);
+    expect(html).toContain(`/administration/utilisateurs?organizationId=${row.id}&amp;org=${row.id}`);
+    expect(html).toContain(`/administration/utilisateurs/inviter?organizationId=${row.id}`);
+    expect(html).toContain(`id="membres"`);
+    expect(html).toContain(locale === "ar" ? "— للتعبئة" : "— à compléter");
+    expect(html).toContain('data-tone="mint"');
+    expect(html).toContain('data-tone="violet"');
+    expect(html).toContain(locale === "ar" ? "دعوة عضو" : "Inviter un membre");
+  });
+}

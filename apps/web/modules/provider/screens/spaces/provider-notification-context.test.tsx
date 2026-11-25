@@ -51,6 +51,8 @@ describe("Provider notification callers retain authorized organization context",
   it.each(["fr","ar"])("does not fall back to the first employer when notification context is absent in %s",async locale=>{
     mocks.space.mockResolvedValue({...space,selectedOrganizationId:null,selectedQuery:""});
     const html=renderToStaticMarkup(await SettingsPage({params:Promise.resolve({locale}),searchParams:Promise.resolve({})}));
-    expect(mocks.notifications).toHaveBeenCalledExactlyOnceWith(locale,undefined);expect(html).toContain('data-workspace-failure="NO_ORGANIZATION"');expect(html).not.toContain('name="deliveryMode"');
+    expect(mocks.notifications).not.toHaveBeenCalled();
+    expect(html).toContain(locale==="ar"?"اختاروا مؤسسة":"Choisissez une organisation");
+    expect(html).not.toContain('name="deliveryMode"');
   });
 });

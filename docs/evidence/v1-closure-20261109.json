@@ -1,0 +1,930 @@
+{
+  "schemaVersion": 1,
+  "scope": "LOCAL_CODE_CORRECTIONS_AND_VALIDATION_NOT_PRODUCTION_RELEASE",
+  "incomingVersion2Head": "10c4fc32e8aabcd9b89c29ffef1ed41ef4050bf7",
+  "candidateCodeCommit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+  "sourceFileSha256": {
+    "apps/web/app/[locale]/franchise/candidature/page.tsx": "36a5e84103f8e9eef9b6dd82f8d37b3b530b7695c9599e48847f44c7086604ca",
+    "apps/web/app/[locale]/franchise/documents/[documentId]/page.tsx": "3d0eaeec1943f7c72970494e99c5b2d82b9bfc5f8f9a632383d7fc237752cb09",
+    "apps/web/app/[locale]/franchise/fournisseurs/contrats/[decisionId]/page.tsx": "65bd1c68d815d6e8340070a5099c2dff053ab08887eb068759089d917f8ba1f4",
+    "apps/web/modules/client/data/spaces/context.test.ts": "f371e705b8ff2639d208cf0f9cbcfde1460fd85627bcb3db170cbad494950c80",
+    "apps/web/modules/client/data/spaces/context.ts": "c65ad42d7e5d0fac7fd5e3a1737db21f248e40464489d6c58a1a402711ba7c48",
+    "apps/web/modules/client/screens/diagnostics/solutions/actions.test.ts": "d2d77b0207d539470421a9732f7ca64b8769f781715ab5b62951207577d7040b",
+    "apps/web/modules/client/screens/diagnostics/solutions/actions.ts": "56c4e80ab98bafcc070cb5da546dadd3d4fb0b501d92fc2e0d8c58c7674d402f",
+    "apps/web/modules/franchise/screens/missing-reference-context.test.tsx": "5f9ff5670d03112ac40384a21060ca410291eb339ca0d3d481d6664fe12b0bab",
+    "apps/web/modules/franchise/screens/missing-reference-context.tsx": "9a4de1d0299de55184b614db6aec8e19735eee7af68797f6f9db10480d373a1f",
+    "apps/web/modules/public/data/franchise-presentation.test.tsx": "8ce9c9f9b44383ac1919279d932c020c726eca863e4f84f18279dc2d71d0bf7c",
+    "apps/web/modules/shared/lib/payment-form-policy.test.ts": "1af3c0de6ca191e587a0f483476b429e17529ecd6853bbdc70701ae7583e459a",
+    "apps/web/modules/shared/lib/payment-form-policy.ts": "62fb39ac4f79b5535a1932bddd181b767e49987bda8d83d06a0bd0f66d6313af",
+    "apps/web/next.config.ts": "7a54756b425f1b6661eda163c277af745ae1d3e06ea9b8080f07f2a2c750ffb8",
+    "apps/web/package.json": "1dfea33da410a5571b9352c117466115b429a3d6d9f90256c39cbfb84d4f201c",
+    "apps/web/vitest.config.ts": "0ea6f72586694047f4845fc81d8719ad2e2e88bcf56b55bfdcc6a068cbe20823",
+    "apps/web/vitest.setup.ts": "b6dc72931ed327eaa168432d3d903c4ca85e567cd3cfb42873b66dd6efe71f89",
+    "package.json": "fa53f81ff29fa299400f49d6e84a79da3bad52b530973f21c9002cf5f42acfa5",
+    "pnpm-lock.yaml": "b7a3947dc77bec963713d6807edbc3c1f0b4ccb87862918d8f13f044b0ab157e",
+    "scripts/release/closure-inventory.mjs": "7a05e6f9c70c837e35b996d997509ce11936817cfae5771b79af1be63b2bcdde",
+    "scripts/release/closure-inventory.test.mjs": "fb359507f29068758ba1bebc4d2590aabfb23a88b94093acc97a2c0ec7fe0608",
+    "scripts/release/payment-form-browser.mjs": "9a3d9e659ab255b3028a897fa5063139280d22ed9bfb92e4cddc88dd78b842f8",
+    "scripts/release/surface-outcome.mjs": "409c7db05dc7dab103d7810d9967b5cab38348bf5603b32813bd57130449d90e",
+    "scripts/release/surface-outcome.test.mjs": "57c6c840d388d5c6cce503bc8064b1946781e06de5dff887fe1b0ec8a27100dc",
+    "supabase/migrations/20261109090000_franchise_link_final_row_version.sql": "0faa4393729d752a0e9754a5f0d698d47d676655b9fdeae2011ecf95569cf153",
+    "supabase/tests/0193_franchise_provider_bridge_delivery.test.sql": "28f6140a97e555e1ff567f6193202d1db6039e953ed9c91aac69cb2b64cae89f",
+    "tests/e2e/parcours-dynamic-surfaces.spec.ts": "253344f547faebe2269ad937bd2bf68f2d7f9fe870cbd0433996c0b977bd2786",
+    ".github/workflows/ci.yml": "c0deaa41dc9a2256c8b9733ac6faf9ce2f0d6f78e1387d2479a994fa84f5edfa",
+    "apps/web/modules/provider/screens/devis/quote-panel.test.tsx": "8b7fdceaa836ed3cb1e5de1532a3708dc610cd1cbdce565c3c7b6b501d8e65ee",
+    ".env.example": "d5443eaca4607393ad1bdbb4518a517027ea45581280e0bd3cc6d01c508cd059"
+  },
+  "productionModified": false,
+  "existingItDossierModified": false,
+  "checks": {
+    "install": {
+      "status": "PASS",
+      "packageManager": "pnpm10.17.1",
+      "frozenOfflineInstall": true,
+      "addedDependency": "server-only@0.0.1"
+    },
+    "webUnit": {
+      "status": "PASS_WITH_EXISTING_OPT_IN_SKIP",
+      "passed": 3780,
+      "failed": 0,
+      "skipped": 1,
+      "filesPassed": 604,
+      "scope": "web unit suite, not native Storage acceptance",
+      "skipReason": "Existing RUN_LOCAL_SIGNATURE_STORAGE_TEST opt-in source-PDF Storage recipe, not exercised without its dedicated native Storage setup.",
+      "localFullSuiteCommit": "888bcaf4a26979ddcba0511981290f05ee3b6d26"
+    },
+    "otherWorkspaceUnits": {
+      "status": "PASS",
+      "passed": 296,
+      "failed": 0
+    },
+    "tooling": {
+      "status": "PASS",
+      "passed": 63,
+      "failed": 0
+    },
+    "integration": {
+      "status": "PASS",
+      "passed": 3,
+      "failed": 0
+    },
+    "build": {
+      "status": "PASS",
+      "node": "22.23.4",
+      "framework": "Next16.4.1",
+      "bundler": "Turbopack",
+      "typecheckIncluded": true,
+      "publicEnvironment": "synthetic loopback build bindings only"
+    },
+    "lint": {
+      "status": "PASS",
+      "errors": 0,
+      "existingWarnings": 4
+    },
+    "publicBrowser": {
+      "status": "PASS",
+      "passed": 18,
+      "origin": "http://127.0.0.1:5187",
+      "locales": [
+        "fr",
+        "ar"
+      ],
+      "viewports": [
+        "360",
+        "desktop"
+      ],
+      "authenticated": false,
+      "hostedVercelVerified": false,
+      "axeIncluded": true
+    },
+    "cmiBrowser": {
+      "environment": "local-intercepted-browser",
+      "liveGatewayContacted": false,
+      "policy": "form-action 'self' https://testpayment.cmi.co.ma",
+      "policySha256": "fa3afad2f55a89fdc693a75239b409611612624c96e33dec0646cdbc4183535f",
+      "cases": [
+        {
+          "target": "https://testpayment.cmi.co.ma/gateway",
+          "expectedPosts": 1,
+          "actualPosts": 1,
+          "status": "PASS"
+        },
+        {
+          "target": "https://untrusted.invalid/gateway",
+          "expectedPosts": 0,
+          "actualPosts": 0,
+          "status": "PASS"
+        }
+      ]
+    },
+    "freshDatabase": {
+      "status": "PASS",
+      "migrations": 575,
+      "seed": "PASS",
+      "identity": "MatriciaV1Closure20261109",
+      "port": 55322,
+      "existingDatabasePort54322Modified": false
+    },
+    "sqlFull": {
+      "status": "PASS",
+      "files": 360,
+      "assertions": 9301,
+      "concurrencyScenarios": 4,
+      "environment": "development",
+      "evidence": "docs/evidence/v1-closure-sql-full-20261109.json"
+    },
+    "phase00": {
+      "status": "PASS",
+      "requirements": 76,
+      "verified": 5,
+      "serverActionSourcesChecked": 2003
+    },
+    "boundaries": {
+      "status": "PASS",
+      "packages": 14
+    },
+    "vercelDeployment": {
+      "status": "success",
+      "commit": "888bcaf4a26979ddcba0511981290f05ee3b6d26",
+      "source": "GitHub commit status and Vercel bot on PR14",
+      "inspectionUrl": "https://vercel.com/epitaphemarket-5584s-projects/matricia-domain/7q9Aucr2ndW8pLTnrNtdMNc1diD7",
+      "previewUrl": "https://matricia-domain-git-codex-db015e-epitaphemarket-5584s-projects.vercel.app",
+      "hostedBrowserVerified": false,
+      "hostedProbe": "Audit proxy denies destination before HTTPS CONNECT; not a website outage diagnosis."
+    },
+    "githubInitialRun": {
+      "runId": 42641637545,
+      "commit": "888bcaf4a26979ddcba0511981290f05ee3b6d26",
+      "database": "PASS",
+      "publicBrowser": "PASS",
+      "quality": "FAIL: quote form native browser timeout, addressed by ciBrowserDependencyFix"
+    },
+    "githubCI": {
+      "status": "PASS",
+      "commit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+      "runId": 42644570334,
+      "url": "https://github.com/nebjal18-lang/Matricia/actions/runs/42644570334",
+      "jobs": {
+        "quality": "PASS",
+        "browser-public": "PASS",
+        "database": "PASS"
+      },
+      "qualityUnitSummary": {
+        "webPassed": 3780,
+        "webSkipped": 1,
+        "otherWorkspacePassed": 296,
+        "nativeQuoteFormTests": 10,
+        "nativeQuoteFormDurationMs": 1070
+      },
+      "ciBrowserInstall": "Playwright-matched Chromium installed before unit tests"
+    }
+  },
+  "artifacts": {
+    "work/v1-closure/targeted-latest.log": {
+      "sha256": "1efa5336d4139b43679b07365d3d0f50fb921ee0147b5ce9443b29d55c3d4788",
+      "bytes": 462
+    },
+    "work/v1-closure/web-unit-final.log": {
+      "sha256": "0da8403be4fb1b9983c50ae0ca96ff47a2e186a9f7d603917cf8920448bb4c3c",
+      "bytes": 551
+    },
+    "work/v1-closure/packages-unit-final.log": {
+      "sha256": "ec50e58dbdd501164a2ed78e4784173e0fb8cc8acbed72197232fc68a4a146d3",
+      "bytes": 5658
+    },
+    "work/v1-closure/tooling-final.log": {
+      "sha256": "ca238c232e85e62d8fca618f904c1bc88884ee00c00b178ae219170a532ad503",
+      "bytes": 5616
+    },
+    "work/v1-closure/integration-final.log": {
+      "sha256": "f27af712f611f0490c6d7f91f6396d6e4b4beb1289b6a1a5cd6780a1e4a2d2f0",
+      "bytes": 879
+    },
+    "work/v1-closure/build-final.log": {
+      "sha256": "a200c76fab72bc5f9817374915611420b95bc01bb36a2c9ce666b83f69da6ddf",
+      "bytes": 13337
+    },
+    "work/v1-closure/lint-final.log": {
+      "sha256": "7bf44172d56ce774e3528f07401ef4d8ece658ffb7f66fa11a0c5a35e9483a61",
+      "bytes": 2541
+    },
+    "work/v1-closure/public-browser.log": {
+      "sha256": "3f1dd925f89bbc83ab37e1d17f3737af7ebf71eef83d2236cd7f1c9476d5aafd",
+      "bytes": 3262
+    },
+    "work/v1-closure/cmi-browser.json": {
+      "sha256": "039e83ab0afb56579e7636b15af464e8fafa5e1ab06fbb4279e8269f12b674b9",
+      "bytes": 531
+    },
+    "work/v1-closure/fresh-db-latest.log": {
+      "sha256": "005a17e36a5d4c2db8e751a4938c3d0137a2dd64e17062f276197daf629d21b5",
+      "bytes": 42958
+    },
+    "work/v1-closure/inventory.json": {
+      "sha256": "cb99df26e4645a1cdffe4adc54da7909ef6b28aeaf87b28af00d62228923edf3",
+      "bytes": 105477
+    },
+    "artifacts/test-results/playwright/public-experience-public-e-16b71-bonnements-et-accessibilité-chromium-desktop/home-ar.png": {
+      "sha256": "e3e8e1737d642682541c13229c4a643b63f479d8c0474c754515295400043e6b",
+      "bytes": 872500
+    },
+    "artifacts/test-results/playwright/public-experience-public-e-16b71-bonnements-et-accessibilité-chromium-mobile-360/home-ar.png": {
+      "sha256": "f5feae4202f674d186f9d82527729ad3b6b629124b7ce521533dda076bbf66d6",
+      "bytes": 325453
+    },
+    "artifacts/test-results/playwright/public-experience-public-e-12c9d-bonnements-et-accessibilité-chromium-mobile-360/home-fr.png": {
+      "sha256": "56c54a94d6cdeb57139c9932ebf580844b6879e33b56267209b3ee77052d8c65",
+      "bytes": 381311
+    },
+    "artifacts/test-results/playwright/public-experience-public-e-12c9d-bonnements-et-accessibilité-chromium-desktop/home-fr.png": {
+      "sha256": "f54371ec48bc68ab22663010778929284d133198c6d5342e1f3d8250997085b4",
+      "bytes": 925840
+    },
+    "work/v1-closure/install-final.log": {
+      "sha256": "5748946351dcb731bd4a448588e88bab07a5fa2ff3ee5466604020db597748a0",
+      "bytes": 135
+    },
+    "work/v1-closure/sql-full-latest.log": {
+      "sha256": "dbf07d5e44d1fd0cb889521d9d5ea4579c7401791602bcc36627f93560c5ab94",
+      "bytes": 30483
+    },
+    "work/v1-closure/phase00-final.log": {
+      "sha256": "89f5a1ca20c7188d4d5f3bae7d2406b789129f4468bd1d4b7616bf7a64ba0ee5",
+      "bytes": 1521
+    },
+    "work/v1-closure/boundaries-final.log": {
+      "sha256": "493c5379435e3d0ae585fc38015f3079664eb925f1bd5ddacd58e6a911e686a0",
+      "bytes": 49
+    },
+    "docs/evidence/v1-closure-sql-full-20261109.json": {
+      "sha256": "e2f197ca5174c45efb3295d2d9ed3f5669e4ae8bf5c6202fbe550373d1e4049a",
+      "bytes": 19275
+    },
+    "work/v1-closure/release-final.log": {
+      "sha256": "d62f9b6ce525cdd6959191b6ca4604e49d72364c5970ac52556af165223f83fc",
+      "bytes": 3146
+    },
+    "work/v1-closure/quote-bundled-browser.log": {
+      "sha256": "905efacb2d51cb25f1e75ca7f727eaec42da6072a0223e1797dbf5d7c2f11c7e",
+      "bytes": 195
+    },
+    "work/v1-closure/quote-explicit-browser.log": {
+      "sha256": "0da3c4e452c03469bed685fda597da52819984cd5ba914e74c702b3c1974b87e",
+      "bytes": 195
+    },
+    "work/v1-closure/playwright-install.log": {
+      "sha256": "344ece9d85e5f4064cb5b21387c4d293a1d8e873b11ad556064a5c79add19837",
+      "bytes": 8217
+    },
+    "work/v1-closure/release-ci-final.log": {
+      "sha256": "d62f9b6ce525cdd6959191b6ca4604e49d72364c5970ac52556af165223f83fc",
+      "bytes": 3146
+    }
+  },
+  "release": {
+    "status": "REFUSED",
+    "verifiedRequirements": 5,
+    "totalRequirements": 76,
+    "newVerifiedRequirements": 0,
+    "exitCode": 1,
+    "conditionsNotSatisfied": 73,
+    "evaluatedCommit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+    "worktreeWasFrozen": true,
+    "failureCodes": [
+      "INTERACTION_RUNTIME_PROOF_REQUIRED",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-002",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-003",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-004",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-005",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-006",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-008",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-009",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-010",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-011",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-012",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-014",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-015",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-016",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-017",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-020",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-021",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-022",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-023",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-024",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-025",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-026",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-027",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-028",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-029",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-030",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-031",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-032",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-033",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-034",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-035",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-036",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-037",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-038",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-039",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-040",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-041",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-042",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-043",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-044",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-045",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-046",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-047",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-048",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-049",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-050",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-051",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-052",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-053",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-054",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-055",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-056",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-057",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-058",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-059",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-060",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-061",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-062",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-063",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-064",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-065",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-066",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-067",
+      "REGISTRY_NOT_APPROVED:MAT-FUNC-068",
+      "REGISTRY_NOT_APPROVED:MARKETING-001",
+      "REGISTRY_NOT_APPROVED:MARKETING-002",
+      "REGISTRY_NOT_APPROVED:MARKETING-003",
+      "REGISTRY_NOT_APPROVED:MARKETING-004",
+      "REGISTRY_NOT_APPROVED:MARKETING-005",
+      "REGISTRY_NOT_APPROVED:MARKETING-006",
+      "REGISTRY_NOT_APPROVED:MARKETING-007",
+      "REGISTRY_NOT_APPROVED:MARKETING-008",
+      "RELEASE_MANIFEST_MISSING_OR_INVALID"
+    ],
+    "conditions": [
+      {
+        "code": "INTERACTION_RUNTIME_PROOF_REQUIRED",
+        "classification": "MISSING_RELEASE_EVIDENCE",
+        "owner": "release-orchestrator",
+        "evidenceReferences": null
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-002",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-003",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-004",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-005",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-006",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "admin_command_center_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-008",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-009",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-010",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "library_catalog_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-011",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-012",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "client_onboarding_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-014",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "quote_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-015",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "quote_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-016",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_qualification_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-017",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_qualification_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-020",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_qualification_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-021",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-022",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-023",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-002-023.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-024",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-025",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-026",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-027",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "domain_modeler",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-027-immutable-inventory-run.json]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-028",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "privacy_data_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-029",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-030",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_finance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-031",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_finance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-032",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "payments_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-033",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "boxes_credits_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-034",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "boxes_credits_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-035",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "subscription_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-036",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "franchise_governance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-037",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "franchise_governance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-038",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-038-sql-relance-run.json]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-039",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-040",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-041",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-042",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-043",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-044",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-044-sql-abandons-run.json]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-045",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-024-045.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-046",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-047",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "diagnostics_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-048",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-049",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-050",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "contract_mission_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-051",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "auth_identity_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-052",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "auth_identity_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-053",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "client_onboarding_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-054",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-055",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-056",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "ux_information_architect",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-057",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "question_engine_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-058",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "ux_information_architect",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-059",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-060",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-061",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "i18n_rtl_accessibility_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-062",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "provider_finance_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-063",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-064",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "notifications_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-065",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "admin_command_center_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-066",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "admin_command_center_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-067",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "rfq_matching_agent",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MAT-FUNC-068",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "security_architect",
+        "evidenceReferences": "[docs/evidence/atomic/mat-func-046-068-marketing.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-001",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-content-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-002",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-content-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-003",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-content-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-004",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-automation-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-005",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "social-integration-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-006",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-analytics-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-007",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-automation-agent",
+        "evidenceReferences": "[docs/traceability/V1_ATOMIC_GAP_AUDIT_2026-09-13.md, docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "REGISTRY_NOT_APPROVED:MARKETING-008",
+        "classification": "MISSING_INDEPENDENT_APPROVAL_OR_RUNTIME_EVIDENCE",
+        "owner": "marketing-analytics-agent",
+        "evidenceReferences": "[docs/progress/PROJECT_STATE.md]"
+      },
+      {
+        "code": "RELEASE_MANIFEST_MISSING_OR_INVALID",
+        "classification": "MISSING_RELEASE_EVIDENCE",
+        "owner": "release-orchestrator",
+        "evidenceReferences": null
+      }
+    ]
+  },
+  "openPrerequisites": [
+    "Identified authorized staging deployment and its actual secret bindings",
+    "Yousign sandbox adapter and externally verified evidence chain; no EXTERNAL activation performed",
+    "Real legal/KYC approvals and two distinct authorized AAL2 approvers",
+    "CNDP/fiscality/legal approvals and dated external references",
+    "Five missing dynamic recipe datasets for the authorized parcours actors",
+    "Native authenticated C1-C8 workflows and real Storage/scanner/PSP evidence"
+  ],
+  "limitations": [
+    "Public browser checks used the local compiled candidate, not the hosted Vercel URL.",
+    "One existing opt-in Storage test remains skipped; tests do not certify real Storage acceptance.",
+    "Source commit and file hashes describe the tested application. Documentation commits may follow without changing the tested code."
+  ],
+  "commands": {
+    "install": {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "cwd": "."
+    },
+    "webUnit": {
+      "argv": [
+        "node",
+        "../../node_modules/vitest/vitest.mjs",
+        "run",
+        "--maxWorkers=2"
+      ],
+      "cwd": "apps/web"
+    },
+    "otherWorkspaceUnits": {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "-r",
+        "--filter",
+        "!@matricia/web",
+        "--workspace-concurrency=1",
+        "test",
+        "--maxWorkers=1"
+      ],
+      "cwd": "."
+    },
+    "build": {
+      "argv": [
+        "node",
+        "node_modules/next/dist/bin/next",
+        "build"
+      ],
+      "cwd": "apps/web",
+      "nodeVersion": "22.23.4",
+      "environment": "hermetic synthetic build bindings; no production credential"
+    },
+    "lint": {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "-r",
+        "--workspace-concurrency=1",
+        "lint"
+      ],
+      "cwd": "."
+    },
+    "publicBrowser": {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "tests/e2e/public-experience.spec.ts",
+        "tests/e2e/cookie-preferences.spec.ts",
+        "--workers=1",
+        "--reporter=line"
+      ],
+      "cwd": ".",
+      "origin": "http://127.0.0.1:5187"
+    },
+    "sql": {
+      "argv": [
+        "node",
+        "scripts/run-db-tests.mjs"
+      ],
+      "cwd": ".",
+      "targetHost": "127.0.0.1",
+      "targetPort": 55322,
+      "credentialValuesRecorded": false
+    },
+    "cmiBrowser": {
+      "argv": [
+        "node",
+        "--experimental-strip-types",
+        "scripts/release/payment-form-browser.mjs"
+      ],
+      "cwd": "."
+    }
+  },
+  "applicationTree": "29b758e5af0b609a5f70f6b7d0070dcdb325017a",
+  "inventoryEvidence": "docs/evidence/v1-closure-inventory-20261109.json",
+  "ciBrowserDependencyFix": {
+    "commit": "60e6b1c7f400e50eb0b83af4f34bf2667c994a8a",
+    "changedFiles": [
+      ".github/workflows/ci.yml",
+      "apps/web/modules/provider/screens/devis/quote-panel.test.tsx"
+    ],
+    "productionLogicChanged": false,
+    "reason": "GitHub quality failed one native quote form browser test at its existing 30-second deadline; the job used an implicit system Chromium path.",
+    "fix": "Install the Playwright-matched Chromium in quality and use it by default; keep an explicit executable override.",
+    "assertionsRemoved": 0,
+    "timeoutIncreased": false,
+    "retryAdded": false,
+    "localTargetedValidation": {
+      "bundledBrowserTestsPassed": 10,
+      "explicitBrowserTestsPassed": 10
+    },
+    "githubRun": 42644570334,
+    "githubQuality": "PASS",
+    "githubDatabase": "PASS",
+    "githubPublicBrowser": "PASS"
+  }
+}

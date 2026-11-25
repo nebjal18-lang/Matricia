@@ -1,0 +1,201 @@
+{
+  "scope": "LOCAL_NATIVE_ADMIN_AAL2_LOT3",
+  "runId": "f395a13e-69f3-4b10-ab6c-d96d3bee8c33",
+  "status": "PASSED",
+  "bootstrap": "LOCAL_FIXTURE_ROLES_ONLY_NOT_GOVERNED_ASSIGNMENT_PROOF",
+  "checks": [
+    {
+      "code": "REAL_GOTRUE_IDENTITIES_AND_TOTP",
+      "status": "PASS",
+      "aal2Actors": 3,
+      "aal1Actors": 1
+    },
+    {
+      "code": "PAGINATION_OUT_OF_RANGE_REPRODUCED",
+      "status": "PASS"
+    },
+    {
+      "code": "RPC_READ_AND_THREE_MUTATIONS_DENIED",
+      "status": "PASS",
+      "actor": "ordinary"
+    },
+    {
+      "code": "RPC_READ_AND_THREE_MUTATIONS_DENIED",
+      "status": "PASS",
+      "actor": "admin-aal1"
+    },
+    {
+      "code": "RPC_READ_AND_THREE_MUTATIONS_DENIED",
+      "status": "PASS",
+      "actor": "anonymous"
+    },
+    {
+      "code": "SELF_APPROVAL_DENIED",
+      "status": "PASS"
+    },
+    {
+      "code": "BROWSER_ACCESS_DENIED",
+      "status": "PASS",
+      "locale": "fr",
+      "actor": "ordinary",
+      "target": "/fr/tableau-de-bord"
+    },
+    {
+      "code": "BROWSER_ACCESS_DENIED",
+      "status": "PASS",
+      "locale": "fr",
+      "actor": "admin-aal1",
+      "target": "/fr/securite/compte"
+    },
+    {
+      "code": "BROWSER_ACCESS_DENIED",
+      "status": "PASS",
+      "locale": "fr",
+      "actor": "anonymous",
+      "target": "/fr/connexion"
+    },
+    {
+      "code": "BROWSER_ACCESS_DENIED",
+      "status": "PASS",
+      "locale": "ar",
+      "actor": "ordinary",
+      "target": "/ar/tableau-de-bord"
+    },
+    {
+      "code": "BROWSER_ACCESS_DENIED",
+      "status": "PASS",
+      "locale": "ar",
+      "actor": "admin-aal1",
+      "target": "/ar/securite/compte"
+    },
+    {
+      "code": "BROWSER_ACCESS_DENIED",
+      "status": "PASS",
+      "locale": "ar",
+      "actor": "anonymous",
+      "target": "/ar/connexion"
+    },
+    {
+      "code": "FILTER_CONTEXT_AND_PAGE_RESET",
+      "status": "PASS",
+      "locale": "fr",
+      "width": 360
+    },
+    {
+      "code": "NATIVE_CLAIM_REFRESH_WITHOUT_RELOAD",
+      "status": "PASS",
+      "locale": "fr",
+      "width": 360
+    },
+    {
+      "code": "NATIVE_RESOLVE_REFRESH_WITHOUT_RELOAD",
+      "status": "PASS",
+      "locale": "fr",
+      "width": 360,
+      "staleVersionDenied": true
+    },
+    {
+      "code": "FILTER_CONTEXT_AND_PAGE_RESET",
+      "status": "PASS",
+      "locale": "ar",
+      "width": 1280
+    },
+    {
+      "code": "NATIVE_CLAIM_REFRESH_WITHOUT_RELOAD",
+      "status": "PASS",
+      "locale": "ar",
+      "width": 1280
+    },
+    {
+      "code": "NATIVE_RESOLVE_REFRESH_WITHOUT_RELOAD",
+      "status": "PASS",
+      "locale": "ar",
+      "width": 1280,
+      "staleVersionDenied": true
+    },
+    {
+      "code": "INDEPENDENT_REJECTION_REFRESH_WITHOUT_RELOAD",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": {
+    "verified": true,
+    "ownedServerStopped": true,
+    "actors": 4,
+    "organizations": 1,
+    "remaining": {
+      "roles": 0,
+      "sessions": 0,
+      "organizations": 0,
+      "open_work": 0,
+      "pending_actions": 0
+    },
+    "immutableEvidenceRetained": true
+  },
+  "provenance": {
+    "commit": "e37e76e1b2160da857bac2247f93638db5908df3",
+    "appTree": "84eafb417ba2fd6607aec0232587609b9dedd666",
+    "buildId": "Eq-OWRaer6dsux7Hm6Ras",
+    "harnessSha256": "c7ec61d010b45616a3ea39700796b592d2b026441c1f4618f53001d44f8cd3ca",
+    "localSchema": {
+      "migration_count": 229,
+      "version_fingerprint": "de7d7c33ca0e80aed4ff153f9ed4f261"
+    },
+    "cleanReplayCertified": false,
+    "ownedServer": true
+  },
+  "commandCenterReadProbe": {
+    "validation": [
+      {
+        "part": "workItems",
+        "valid": true,
+        "issues": []
+      },
+      {
+        "part": "actions",
+        "valid": true,
+        "issues": []
+      },
+      {
+        "part": "queues",
+        "valid": true,
+        "issues": []
+      }
+    ],
+    "security": {
+      "code": null,
+      "array": true,
+      "requirements": [
+        {
+          "satisfied": true,
+          "roles": [
+            "MATRICIA_ADMIN"
+          ]
+        }
+      ]
+    },
+    "work": {
+      "code": null,
+      "count": 1
+    },
+    "actions": {
+      "code": null,
+      "count": 6
+    },
+    "queues": {
+      "code": null,
+      "count": 4
+    }
+  },
+  "paginationProbe": {
+    "code": "PGRST103",
+    "status": 416
+  },
+  "limitations": [
+    "Local Docker backend, not staging or production.",
+    "Bootstrap roles are fixture setup, not proof of governed role assignment.",
+    "Local schema fingerprint recorded; clean replay of all current migrations is not certified.",
+    "HTTPS metadata/public URL with HTTP loopback browser; file/DSR origin checks are not covered.",
+    "Only synthetic run-owned organizations, work items and action requests are created."
+  ]
+}

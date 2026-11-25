@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 import { canApplyClientSpaceDemo, demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { MilestoneDecisionForm } from "@/modules/client/screens/missions/milestone-decision-form";
+import { DeliverableReceipt } from "@/modules/client/screens/missions/mission-panel";
 import type { MissionMessages } from "@/modules/client/screens/missions/messages";
 import type { ContractMissionDashboard } from "@/modules/shared/lib/contracts-missions/model";
 import { AssistanceCue } from "@/modules/client/screens/diagnostics/assistance-cue";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function toneFor(state: "done" | "current" | "todo") {
   if (state === "done") return "mint" as const;
@@ -30,6 +32,20 @@ function statusLabel(state: "done" | "current" | "todo", status: string, locale:
   return c.comingSoon;
 }
 
+function missionMastLabel(status: string | undefined, completedAt: string | null | undefined, locale: Locale, c: ReturnType<typeof spaceCopy>) {
+  if (status === "COMPLETED" || completedAt) return locale === "ar" ? "مكتملة" : "Terminée";
+  if (status === "CANCELLED") return locale === "ar" ? "ملغاة" : "Annulée";
+  if (status === "SUSPENDED" || status === "ON_HOLD") return locale === "ar" ? "موقوفة" : "En pause";
+  return c.inProgress;
+}
+
+function withJalonQuery(query: string, jalonId: string) {
+  const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+  params.set("jalonId", jalonId);
+  const encoded = params.toString();
+  return encoded ? `?${encoded}` : "";
+}
+
 export function JalonsBoard({
   locale,
   query,
@@ -37,6 +53,7 @@ export function JalonsBoard({
   mission,
   messages,
   assistanceHref,
+  selectedJalonId,
   children,
 }: {
   locale: Locale;
@@ -45,6 +62,7 @@ export function JalonsBoard({
   mission: ContractMissionDashboard["missions"][number] | null;
   messages: MissionMessages;
   assistanceHref?: string;
+  selectedJalonId?: string | null;
   children?: ReactNode;
 }) {
   const c = spaceCopy(locale);
@@ -59,17 +77,29 @@ export function JalonsBoard({
         status: item.status,
         state: milestoneState(item.status),
       }));
-  const selected = jalons.find((item) => item.state === "current") ?? jalons[0] ?? null;
+  const selected =
+    (selectedJalonId ? jalons.find((item) => item.id === selectedJalonId) : null)
+    ?? jalons.find((item) => item.state === "current")
+    ?? jalons[0]
+    ?? null;
   const selectedLive = mission?.milestones.find((item) => item.id === selected?.id) ?? null;
-  const files = preferDemo ? demo.jalonFiles : (mission?.deliverables ?? []).map((item) => ({
-    id: item.id,
-    title: item.label,
-    file: item.label,
-    kind: "file" as const,
-    scan: item.proofScanStatus === "CLEAN" ? "ok" as const : "wait" as const,
-    href: `/${locale}/client/documents${query}`,
-  }));
-  const submittedCount = files.filter((file) => file.scan === "ok").length;
+  const scopedDeliverables = preferDemo
+    ? null
+    : (mission?.deliverables ?? []).filter((item) => !selected?.id || item.milestoneId === selected.id || item.milestoneId === null);
+  const files = preferDemo
+    ? demo.jalonFiles
+    : (scopedDeliverables ?? []).map((item) => ({
+        id: item.id,
+        title: item.label,
+        file: item.label,
+        kind: "file" as const,
+        scan: item.proofScanStatus === "CLEAN" ? "ok" as const : item.proofScanStatus === "NONE" ? "none" as const : "wait" as const,
+        submitted: item.status === "SUBMITTED" || item.status === "ACCEPTED" || item.status === "REJECTED",
+        href: `/${locale}/client/documents${query}`,
+      }));
+  const contractIsSigned = mission ? mission.contractSnapshot.signatures.length >= 2 : true;
+  const submittedCount = preferDemo ? files.filter((file) => file.scan === "ok").length : files.filter((file) => "submitted" in file && file.submitted).length;
+  const pendingReceipts = (scopedDeliverables ?? []).filter((item) => item.status === "SUBMITTED" && !item.retirement);
   const progressPct = files.length === 0 ? 0 : Math.round((submittedCount / files.length) * 100);
   const started = mission?.startedAt
     ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(mission.startedAt))
@@ -78,6 +108,8 @@ export function JalonsBoard({
     ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(mission.completedAt))
     : "—";
   const selectedIndex = selected ? jalons.findIndex((item) => item.id === selected.id) + 1 : 0;
+  const mastLabel = missionMastLabel(mission?.status, mission?.completedAt, locale, c);
+  const mastTone = mission?.status === "COMPLETED" || mission?.completedAt ? "mint" : mission?.status === "CANCELLED" ? "peach" : "mint";
 
   return (
     <main className="client-page">
@@ -90,7 +122,7 @@ export function JalonsBoard({
           </div>
         </div>
         <div className="client-mission-mast-meta">
-          <span className="client-status-chip" data-tone="mint">{c.inProgress}</span>
+          <span className="client-status-chip" data-tone={mastTone}>{mastLabel}</span>
           <p dir="ltr">{started} → {ended}</p>
         </div>
         <div>
@@ -98,37 +130,46 @@ export function JalonsBoard({
           <p className="client-mission-participants"><Users className="size-4" aria-hidden /> {c.yourCompany} · {c.matriciaTeam} · {c.partners}</p>
         </div>
         <div className="client-mission-mast-foot">
-          <span className="client-status-chip" data-tone="mint">{c.contractSigned}</span>
+          <span className="client-status-chip" data-tone={contractIsSigned ? "mint" : "peach"}>{contractIsSigned ? c.contractSigned : c.contractUnsigned}</span>
           <span className="client-access-note"><Shield className="size-4" aria-hidden />{c.immutableVersion}</span>
           {mission ? <Link href={`/${locale}/client/missions/${mission.id}${query}`} className="client-text-link">{c.seeAmendment}</Link> : null}
         </div>
       </article>
       {assistanceHref ? <AssistanceCue locale={locale} href={assistanceHref} context="milestone" /> : null}
       <nav className="client-tabs" aria-label={c.jalonsTitle}>
-        <a href="#jalons" aria-current="page">{c.tabJalons}</a>
+        <HashAwareLink href="#jalons" aria-current="page">{c.tabJalons}</HashAwareLink>
         <Link href={mission ? `/${locale}/client/missions/${mission.id}${query}` : `/${locale}/client/missions${query}`}>{c.tabMission}</Link>
         <Link href={`/${locale}/client/documents${query}`}>{c.docsTab}</Link>
         <Link href={`/${locale}/messagerie${query}`}>{c.messagesTab}</Link>
-        <a href="#jalon-history">{c.tabHistory}</a>
+        <HashAwareLink href="#jalon-history">{c.tabHistory}</HashAwareLink>
       </nav>
       <section className="client-dispute-layout" id="jalons">
         <article className="client-card">
           <ol className="client-mediation client-jalon-rail">
-            {jalons.map((item, index) => (
-              <li key={item.id} data-state={item.state} data-selected={selected?.id === item.id ? "true" : undefined}>
-                <span className="client-jalon-marker" aria-hidden>
-                  {item.state === "done" ? <CheckCircle2 className="size-4" /> : <span>{index + 1}</span>}
-                </span>
-                <span>
-                  <strong>{locale === "ar" ? `المرحلة ${index + 1}` : `Jalon ${index + 1}`} — {item.title}</strong>
-                  <small>{c.dueOn} : {item.due}</small>
-                </span>
-                <span className="client-status-chip" data-tone={toneFor(item.state)}>{statusLabel(item.state, item.status, locale, c)}</span>
-              </li>
-            ))}
+            {jalons.map((item, index) => {
+              const href = mission
+                ? `/${locale}/client/missions/${mission.id}/jalons${withJalonQuery(query, item.id)}`
+                : `#jalon-${item.id}`;
+              const isSelected = selected?.id === item.id;
+              const RailLink = href.startsWith("#") ? HashAwareLink : Link;
+              return (
+                <li key={item.id} data-state={item.state} data-selected={isSelected ? "true" : undefined}>
+                  <RailLink href={href} aria-current={isSelected ? "true" : undefined} className="client-jalon-rail-link">
+                    <span className="client-jalon-marker" aria-hidden>
+                      {item.state === "done" ? <CheckCircle2 className="size-4" /> : <span>{index + 1}</span>}
+                    </span>
+                    <span>
+                      <strong>{locale === "ar" ? `المرحلة ${index + 1}` : `Jalon ${index + 1}`} — {item.title}</strong>
+                      <small>{c.dueOn} : {item.due}</small>
+                    </span>
+                    <span className="client-status-chip" data-tone={toneFor(item.state)}>{statusLabel(item.state, item.status, locale, c)}</span>
+                  </RailLink>
+                </li>
+              );
+            })}
           </ol>
         </article>
-        <article className="client-card">
+        <article className="client-card" id={selected ? `jalon-${selected.id}` : undefined}>
           {selected ? (
             <>
               <header className="client-priority-head">
@@ -161,7 +202,7 @@ export function JalonsBoard({
                         <td dir="ltr">{index + 1}</td>
                         <td><span className="client-doc-cell"><FileText className="size-4" aria-hidden />{file.title}</span></td>
                         <td>{file.file}</td>
-                        <td><span className="client-status-chip" data-tone={file.scan === "ok" ? "mint" : "peach"}>{file.scan === "ok" ? c.scanOk : c.scanWait}</span></td>
+                        <td><span className="client-status-chip" data-tone={file.scan === "ok" ? "mint" : "peach"}>{file.scan === "ok" ? c.scanOk : file.scan === "none" ? c.scanNone : c.scanWait}</span></td>
                         <td><Link href={file.href} className="client-text-link">{c.open}</Link></td>
                       </tr>
                     ))}
@@ -179,17 +220,24 @@ export function JalonsBoard({
                 <div className="client-jalon-history">
                   <h3>{c.jalonHistory}</h3>
                   <ol className="client-mediation">
-                    <li data-state="done"><span><strong>{c.contractSigned}</strong><small>{started}</small></span></li>
+                    <li data-state={contractIsSigned ? "done" : "current"}><span><strong>{contractIsSigned ? c.contractSigned : c.contractUnsigned}</strong><small>{started}</small></span></li>
                     <li data-state={selected.state === "done" ? "done" : "current"}><span><strong>{selected.title}</strong><small>{selected.due}</small></span></li>
                   </ol>
                 </div>
               </div>
               <div className="client-jalon-actions">
-                {selectedLive && selectedLive.status === "SUBMITTED" ? (
+                {pendingReceipts.map((deliverable) => (
+                  <section key={deliverable.id} aria-labelledby={`receipt-${deliverable.id}`}>
+                    <h3 id={`receipt-${deliverable.id}`}>{deliverable.label}</h3>
+                    <DeliverableReceipt deliverable={deliverable} locale={locale} m={messages} />
+                  </section>
+                ))}
+                {pendingReceipts.length === 0 && selectedLive && selectedLive.status === "SUBMITTED" ? (
                   <p className="client-access-note">{locale === "ar" ? "سجّلوا قراركم في النموذج أعلاه." : "Enregistrez votre décision dans le formulaire ci-dessus."}</p>
-                ) : (
+                ) : null}
+                {pendingReceipts.length === 0 && !(selectedLive && selectedLive.status === "SUBMITTED") ? (
                   <p className="client-access-note">{locale === "ar" ? "لا يوجد قرار معلّق على هذا المعلم." : "Aucune décision en attente sur ce jalon."}</p>
-                )}
+                ) : null}
                 <Link href={`/${locale}/messagerie${query}`} className="client-jalon-btn" data-tone="peach">{c.requestChanges}</Link>
               </div>
             </>

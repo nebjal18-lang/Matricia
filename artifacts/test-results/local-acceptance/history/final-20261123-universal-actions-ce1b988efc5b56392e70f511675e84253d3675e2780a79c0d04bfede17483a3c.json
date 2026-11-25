@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "suite": "universal-actions",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T21:49:51.726Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T21:49:02.978Z",
+    "finishedAt": "2026-11-23T21:49:50.439Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realRoleActionViews": 16,
+    "realUiNotificationReads": 12,
+    "realAdminTaskLinks": 4,
+    "readActionsDisappear": true,
+    "notificationReplayAndAudit": true,
+    "foreignNotificationReadAndWriteDenied": true,
+    "frArDesktop360Accessibility": true,
+    "noAutomaticAdministrativeDecision": true,
+    "externalEmailDelivered": false,
+    "stage": "native-read-proof",
+    "failureLocations": [],
+    "responseCode": null,
+    "responseLabel": null
+  }
+}

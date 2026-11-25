@@ -198,8 +198,15 @@ reset role;
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('a2500010-0000-4000-8000-000000000003','00000000-0000-0000-0000-000000000000','authenticated','authenticated','amend-signature250@example.invalid','',now(),'{}','{}',now(),now());
 insert into public.organization_memberships(id,organization_id,user_id,status)values('a2500010-0000-4000-8000-000000000103','b250000e-0000-4000-8000-000000000002','a2500010-0000-4000-8000-000000000003','ACTIVE');
 insert into public.organization_member_roles(membership_id,role_code)values('a2500010-0000-4000-8000-000000000103','PROVIDER_OWNER');
-insert into private.contract_signature_policy_versions_v1(environment,source_kind,version,provider_config_id,minimum_level,allow_development_mock,require_certificate,require_trusted_timestamp,approval_reference,adapter_registration_reference,approved_by,reviewed_by,approved_at)
-select'DEVELOPMENT','CONTRACT',(select coalesce(max(version),0)+1 from private.contract_signature_policy_versions_v1 where environment='DEVELOPMENT'and source_kind='CONTRACT'),id,'SIMPLE',true,false,false,'transaction-only-synthetic-signature-policy250','transaction-only-development-adapter250','b2500001-0000-4000-8000-000000000002','b250000a-0000-4000-8000-000000000002',clock_timestamp()-interval'1 second'from public.signature_provider_configs where provider_code='MATRICIA_DEV_MOCK'and environment='DEVELOPMENT';
+do $$declare cfg uuid;proposal jsonb;begin
+ select id into cfg from public.signature_provider_configs where provider_code='MATRICIA_DEV_MOCK'and environment='DEVELOPMENT'and status='ACTIVE'order by version desc limit 1;
+ perform set_config('request.jwt.claim.sub','b2500001-0000-4000-8000-000000000002',true);perform set_config('request.jwt.claims','{"sub":"b2500001-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
+ proposal:=public.propose_signature_policy_v1('b250000e-0000-4000-8000-000000000001','CONTRACT',cfg,'SIMPLE',false,false,'DEV-NON-CONTRACTUAL-FIXTURE250','DEV-INSTALLED-MOCK',1,'Transactional noncontractual protocol fixture',md5('policy:native-envelope250')::uuid);
+ perform set_config('request.jwt.claim.sub','b250000a-0000-4000-8000-000000000002',true);perform set_config('request.jwt.claims','{"sub":"b250000a-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
+ perform public.decide_signature_policy_v1((proposal->>'proposal_id')::uuid,proposal->>'content_hash',true,'Independent review of noncontractual test policy');
+end$$;
+-- The approved native policy becomes effective on the following RPC request.
+-- matricia:test-request-boundary
 do $$declare contract_ref uuid;version_ref uuid;envelope uuid;client_signer uuid;provider_signer uuid;begin
  select(v->>'contract_id')::uuid,(v->>'contract_version_id')::uuid into contract_ref,version_ref from amend_results where k='draft';
  perform set_config('request.jwt.claim.sub','b2500001-0000-4000-8000-000000000001',true);perform set_config('request.jwt.claims','{"sub":"b2500001-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
@@ -291,6 +298,8 @@ select set_config('request.jwt.claim.sub','b250000a-0000-4000-8000-000000000002'
 select set_config('request.jwt.claims','{"sub":"b250000a-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
 select public.decide_catalog_editorial_review((select id from public.catalog_change_requests where target_type='RELEASE'and target_id=current_setting('test.release250')::uuid),'APPROVE','Revue indépendante de la nouvelle publication250',1,true,'catalog250-release-review');
 select public.schedule_reviewed_catalog_release(current_setting('test.release250')::uuid,(select row_version from public.catalog_releases where id=current_setting('test.release250')::uuid),(select snapshot_hash from public.catalog_releases where id=current_setting('test.release250')::uuid),clock_timestamp()-interval'1 second',clock_timestamp()+interval'3 seconds','catalog250-release-schedule');
+-- The publishing worker claims the newly scheduled release in a new request.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into catalog250 values('LEASE',public.claim_catalog_release('b2500030-0000-4000-8000-000000000090',current_setting('test.release250')::uuid,300));
 insert into catalog250 values('PUBLISHED',public.complete_catalog_release_publish(current_setting('test.release250')::uuid,(select(result->>'lease_token')::uuid from catalog250 where k='LEASE'),(select(result->>'release_row_version')::integer from catalog250 where k='LEASE')));
@@ -300,6 +309,8 @@ select is((select current_published_version_id::text from public.catalog_service
 -- Let the genuinely scheduled short fixture publication expire before archive;
 -- no catalogue status/date is forged to bypass the archive dependency check.
 select pg_sleep(greatest(0,extract(epoch from((select effective_until from public.catalog_releases where id=current_setting('test.release250')::uuid)-clock_timestamp())))+0.05);
+-- Archive evaluates the elapsed publication window in its own request.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','b2500001-0000-4000-8000-000000000002',true);
 select set_config('request.jwt.claims','{"sub":"b2500001-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
 insert into catalog250 values('ARCHIVED',public.archive_catalog_service('b2500010-0000-4000-8000-000000000004',current_setting('test.new_sv250')::uuid,(select row_version from public.catalog_services where id='b2500010-0000-4000-8000-000000000004'),(select row_version from public.catalog_service_versions where id=current_setting('test.new_sv250')::uuid),'Archive après échéance de publication de recette250','catalog250-archive'));

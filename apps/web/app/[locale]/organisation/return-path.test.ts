@@ -7,6 +7,12 @@ describe("organizationReturnPath", () => {
     expect(organizationReturnPath("ar", "/ar/diagnostic?reprendre=enregistrer")).toBe("/ar/diagnostic?reprendre=enregistrer");
   });
 
+  it("returns a franchise candidate to its dossier in the same locale", () => {
+    expect(organizationReturnPath("fr", "/fr/franchise/candidature")).toBe("/fr/franchise/candidature");
+    expect(organizationReturnPath("ar", "/ar/franchise/candidature")).toBe("/ar/franchise/candidature");
+    expect(organizationReturnPath("fr", "/ar/franchise/candidature")).toBeNull();
+  });
+
   it("preserves only a safe same-language referral after company creation",()=>{
     expect(organizationReturnPath("fr","/fr/invitation/TESTCODE123")).toBe("/fr/invitation/TESTCODE123");
     for(const value of ["/ar/invitation/TESTCODE123","/fr/invitation/TESTCODE123?next=//evil.example","/fr/invitation/../admin"])expect(organizationReturnPath("fr",value)).toBeNull();

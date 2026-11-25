@@ -1,16 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
-import { translateLocalPath, withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
+import { queryWithWorkspace, translateLocalPath, withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Bell, Search, Sprout } from "lucide-react";
+import { HashAwareLink, WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { Suspense, type ReactNode } from "react";
 import { ProviderLanguageLinks } from "./provider-language-links";
+import { ProviderOrganizationSelector } from "./provider-organization-selector";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { buildProviderNav, type ProviderNavKey } from "@/modules/provider/ui/provider-nav";
 import "@/modules/client/ui/client-experience.css";
 import "./provider-experience.css";
+import "./provider-page-standard.css";
 
 export type { ProviderNavKey };
 
@@ -48,6 +53,7 @@ export function ProviderAppShell({
   lead,
   kicker,
   actions,
+  sceneHero = false,
   children,
 }: {
   locale: Locale;
@@ -61,20 +67,23 @@ export function ProviderAppShell({
   lead?: string;
   kicker?: string;
   actions?: ReactNode;
+  /** Photo hero mast — identity hubs only (identité / missions / devis). */
+  sceneHero?: boolean;
   children: ReactNode;
 }): ReactNode {
   const c = providerCopy(locale);
   const nav = buildProviderNav(locale, selectedQuery);
   const alternate = locale === "fr" ? "ar" : "fr";
   const route = routeByActive[active];
+  const notificationsQuery = queryWithWorkspace(selectedQuery, "provider");
   const currentPath = safeReturnPath(languagePath, locale);
   const providerHomeHref = withDashboardWorkspaceHint(`/${locale}/tableau-de-bord${selectedQuery}`, locale, "provider");
   const homeHref = withDashboardWorkspaceHint(currentPath ?? `/${locale}/${route}${selectedQuery}`, locale, "provider");
   const altHref = translateLocalPath(homeHref, locale, alternate);
-  const dashboardHome = new URL(homeHref, "https://matricia.invalid").pathname === `/${locale}/tableau-de-bord`;
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace provider-workspace">
+      <WorkspaceHashScroll />
       <aside className="client-side" aria-label={c.space}>
         <Link href={providerHomeHref} className="client-brand">
           <span className="client-brand-mark" aria-hidden>
@@ -88,6 +97,7 @@ export function ProviderAppShell({
             <small className="provider-brand-space">{c.brandSpace}</small>
           </span>
         </Link>
+        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -99,8 +109,9 @@ export function ProviderAppShell({
             );
           })}
         </nav>
+        </WorkspaceMobileNavigation>
         <figure className="client-side-art">
-          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>
@@ -114,17 +125,16 @@ export function ProviderAppShell({
           <form
             className="client-top-search client-shell-search provider-shell-search"
             method="get"
-            action={homeHref.split("?")[0]}
+            action={`/${locale}/sous-traitant/consultations`}
             role="search"
             aria-label={c.searchConsult}
           >
-            {dashboardHome ? <input type="hidden" name="workspace" value="provider" /> : null}
             {selectedOrganizationId ? <input type="hidden" name="organizationId" value={selectedOrganizationId} /> : null}
             <Search aria-hidden className="size-4" />
             <label className="sr-only" htmlFor="provider-shell-search">{c.searchConsult}</label>
             <input id="provider-shell-search" name="q" placeholder={c.searchGlobal} />
           </form>
-          <Link href={`/${locale}/notifications${selectedQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
+          <Link href={`/${locale}/notifications${notificationsQuery}`} className="client-icon-btn" aria-label={locale === "ar" ? "الإشعارات" : "Notifications"}>
             <Bell className="size-4" />
           </Link>
           <Suspense fallback={<nav className="client-lang-switch" aria-label={locale === "ar" ? "اللغة" : "Langue"}><Link href={homeHref} aria-current="page">{locale.toUpperCase()}</Link><Link href={altHref}>{alternate.toUpperCase()}</Link></nav>}>
@@ -143,8 +153,27 @@ export function ProviderAppShell({
             {alternate.toUpperCase()}
           </Link>
         </div>
-        {organizations.length?<form action={`/${locale}/${route}`} method="get" className="client-card mx-4 flex flex-wrap items-end gap-3">{active === "home" ? <input type="hidden" name="workspace" value="provider" /> : null}<label className="grid gap-2" htmlFor="provider-organization-selector">{locale==="ar"?"منظمة مقدم الخدمات":"Organisation prestataire"}<select id="provider-organization-selector" name="organizationId" defaultValue={selectedOrganizationId??""} required className="min-h-11 rounded-md border px-3"><option value="" disabled>{locale==="ar"?"اختر مؤسسة":"Choisir une organisation"}</option>{organizations.map(org=><option key={org.id} value={org.id}>{org.name}</option>)}</select></label><button className="client-cta" type="submit">{locale==="ar"?"عرض":"Afficher"}</button></form>:null}
-        {title ? (
+        {organizations.length ? (
+          <ProviderOrganizationSelector
+            locale={locale}
+            organizations={organizations}
+            selectedOrganizationId={selectedOrganizationId}
+            returnPath={languagePath ?? `/${locale}/${route}`}
+            active={active}
+          />
+        ) : null}
+        {title && sceneHero ? (
+          <div className="client-scene-mast">
+            <SpaceSceneHero
+              sceneSrc="/scenes/arch-city.png"
+              title={title}
+              meta={lead}
+              badge={kicker ? <span className="mat-status" data-tone="mint">{kicker}</span> : undefined}
+              actions={actions}
+              priority
+            />
+          </div>
+        ) : title ? (
           <header className="client-mast provider-mast">
             <div>
               <p className="client-space-label">{c.space}</p>
@@ -162,12 +191,12 @@ export function ProviderAppShell({
             </div>
           </header>
         ) : null}
-        {children}
+        <div className="provider-page-standard">{children}</div>
       </div>
     </div>
   );
 }
 
 export function ProviderActions({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="client-cta">{label} →</Link>;
+  return <HashAwareLink href={href} className="client-cta">{label} →</HashAwareLink>;
 }

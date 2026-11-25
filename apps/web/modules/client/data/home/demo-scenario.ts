@@ -1,9 +1,11 @@
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ClientHomeSnapshot } from "./repository";
+import { isDemoAccessEnabled } from "@/modules/shared/lib/demo-access";
 
+/** Use the same demo gate as the login page. */
 export function isDemoClientHomeEnabled() {
-  return process.env.MATRICIA_DEMO_ACCESS_ENABLED === "true" && process.env.APP_ENV !== "production";
+  return isDemoAccessEnabled();
 }
 
 export function isDemoClientOrganization(name: string | null) {

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useActionState, useId, useState } from "react";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { PlanOwnerContext } from "@/modules/franchise/data/performance/owner-context";
 import { proposeNativePlanOwner, reviewNativePlanOwner, searchNativePlanOwners, type NativeOwnerActionState, type NativeOwnerSearchState } from "./native-owner-actions";
@@ -41,7 +42,7 @@ export function NativePlanOwnerControls({ locale, planId, context }: { locale: L
     <h4 className="font-semibold">{context.ownerConfirmed ? ar ? "المسؤول الفعلي" : "Responsable effectif" : ar ? "المسؤول المقترح قبل الاعتماد" : "Responsable suggéré avant validation"} : <span dir="auto">{context.ownerName ?? (context.ownerUserId ? ar ? "عضو التكليف" : "Membre du mandat" : ar ? "غير مسند" : "Non affecté")}</span></h4>
     {!context.ownerActive ? <p role="status">{ar ? "المسؤول غير متاح أو لم يعد مخوّلاً. يتوقف تسجيل التقدم حتى إسناد مسؤول مخوّل عبر مراجعة مستقلة. يبقى سجل الخطة محفوظاً." : "Le responsable est absent ou n’est plus habilité. L’avancement reste bloqué jusqu’à une affectation validée indépendamment. L’historique du plan est conservé."}</p> : null}
     {context.canProposeAssignment ? <Propose locale={locale} planId={planId} context={context}/> : null}
-    <ol className="space-y-3">{page.requests.map(request => <li key={request.id} className="rounded border p-3"><p><span dir="auto">{request.ownerName ?? (ar ? "عضو التكليف" : "Membre du mandat")}</span> · {request.decision === "APPROVE" ? ar ? "إسناد معتمد" : "Affectation approuvée" : request.decision === "REJECT" ? ar ? "اقتراح مرفوض" : "Proposition refusée" : ar ? "قيد المراجعة المستقلة" : "En revue indépendante"}</p><time dateTime={request.createdAt}>{request.createdAt.slice(0, 10)}</time>{request.canReview ? <Review locale={locale} requestId={request.id}/> : null}</li>)}</ol>
+    <ol className="space-y-3">{page.requests.map(request => <li key={request.id} className="rounded border p-3"><p><span dir="auto">{request.ownerName ?? (ar ? "عضو التكليف" : "Membre du mandat")}</span> · {request.decision === "APPROVE" ? ar ? "إسناد معتمد" : "Affectation approuvée" : request.decision === "REJECT" ? ar ? "اقتراح مرفوض" : "Proposition refusée" : ar ? "قيد المراجعة المستقلة" : "En revue indépendante"}</p><time dateTime={request.createdAt}>{formatDateTimeCasablanca(request.createdAt, locale)}</time>{request.canReview ? <Review locale={locale} requestId={request.id}/> : null}</li>)}</ol>
     {page.nextRequestCursor ? <form action={historyAction}><input type="hidden" name="planId" value={planId}/><input type="hidden" name="before" value={page.nextRequestCursor.before}/><input type="hidden" name="beforeId" value={page.nextRequestCursor.id}/><button className="franchise-tool" disabled={loading}>{ar ? "الإسنادات السابقة" : "Affectations précédentes"}</button><Feedback state={history} locale={locale}/></form> : null}
   </section>;
 }

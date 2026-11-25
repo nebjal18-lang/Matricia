@@ -1,0 +1,69 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "pnpm install --frozen-lockfile --prod=false",
+  "buildCommand": "pnpm run build:vercel",
+  "outputDirectory": "apps/web/.next",
+  "crons": [
+    {
+      "path": "/api/workers/marketing-calendars",
+      "schedule": "0 3 25 * *"
+    },
+    {
+      "path": "/api/workers/marketing-publications?limit=10",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/marketing-content",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/marketing-trends",
+      "schedule": "15 4 * * 1"
+    },
+    {
+      "path": "/api/workers/marketing-frequency",
+      "schedule": "45 4 * * 1"
+    },
+    {
+      "path": "/api/workers/franchise-digests?limit=50",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/workers/delivery-proof-scans?limit=20",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/notifications?limit=10",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/domain-schedulers?limit=100",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/provider-document-scans",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/marketing-media",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/internal-message-attachment-scans",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/privacy-file-scans",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/subscription-credit-grants",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/workers/finance-cost-scans",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

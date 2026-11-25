@@ -257,6 +257,8 @@ declare c public.contracts%rowtype;v public.contract_versions%rowtype;client_par
 end$$;
 insert into public.organization_member_roles(membership_id,role_code)values('fa123000-0000-4000-8000-000000000001','PROVIDER_OWNER');
 select pg_temp.prepare_governed_mock_policy_v1('fa122000-0000-4000-8000-000000000001','a2200000-0000-4000-8000-000000000002','f2120000-0000-4000-8000-000000000002','core-bounds235');
+-- Native approval and the following signing request have distinct statement clocks.
+-- matricia:test-request-boundary
 select pg_temp.complete_governed_mock_contract_v1((select(v->>'contract_id')::uuid from contract_results where k='draft'),'a2200000-0000-4000-8000-000000000001','fa120000-0000-4000-8000-000000000001','a2200000-0000-4000-8000-000000000002','f2120000-0000-4000-8000-000000000002','core-bounds235');
 create function pg_temp.core235_amend(p_delta bigint,p_days integer,p_key text)returns jsonb language sql security invoker as $$
  select public.create_contract_amendment((select(v->>'contract_id')::uuid from contract_results where k='draft'),'TEST core amendment legal bounds','{"description":"TEST unchanged service scope"}',p_delta,p_days,'[]',(select commission_rule_snapshot from public.contract_versions where id=(select(v->>'contract_version_id')::uuid from contract_results where k='draft')),p_key)

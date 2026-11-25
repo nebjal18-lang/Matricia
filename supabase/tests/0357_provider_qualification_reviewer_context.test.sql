@@ -68,8 +68,10 @@ insert into entry_observed values('work-scope',public.declare_provider_work_scop
 ('work-scope-replay',public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',80,'Synthetic small and medium missions',0,'Initial declared work scope','d3450000-0000-4000-8000-000000000030'));
 select is((select v from entry_observed where k='work-scope'),(select v from entry_observed where k='work-scope-replay'),'work scope exact replay does not create a duplicate version');
 select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic small and medium missions',0,'Initial declared work scope','d3450000-0000-4000-8000-000000000030')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','changed work facts cannot reuse operation key');
-select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic new mission scope',0,'Stale concurrent scope edit','d3450000-0000-4000-8000-000000000031')$$,'40001','STALE_PROVIDER_WORK_SCOPE','concurrent work scope preserves current version');
+select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic new mission scope',0,'Stale concurrent scope edit','d3450000-0000-4000-8000-000000000031')$$,'PT409','STALE_PROVIDER_WORK_SCOPE','concurrent work scope preserves current version');
 insert into entry_observed values('capacity',public.declare_provider_capacity('d0610000-0000-0000-0000-000000000001',null,'AVAILABLE',7,9,'Synthetic global capacity','entry-capacity-0345'));
+-- Read the newly declared capacity in the next logical RPC request.
+-- matricia:test-request-boundary
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_available_units','7','global capacity units match authoritative fallback');
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_lead_time_days','9','global lead time matches authoritative fallback');
 reset role;
@@ -79,6 +81,8 @@ insert into public.provider_capacity_versions(provider_organization_id,service_i
 set local role authenticated;
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_available_units','7','future and expired service declarations cannot override effective global capacity');
 insert into entry_observed values('service-capacity',public.declare_provider_capacity('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003','LIMITED',2,4,'Synthetic effective service capacity','entry-service-capacity-0345'));
+-- Read the newly declared capacity in the next logical RPC request.
+-- matricia:test-request-boundary
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_available_units','2','effective service-specific declaration overrides global units');
 select is(public.explain_provider_service_eligibility('d0610000-0000-0000-0000-000000000001','d3450000-0000-4000-8000-000000000003')->>'capacity_lead_time_days','4','effective service-specific lead time matches status');
 
@@ -135,7 +139,7 @@ select throws_ok($$select pg_temp.decide_review357('forged')$$,'23514','QUALIFIC
 insert into entry_observed values('decision',pg_temp.decide_review357((select v#>>'{selected,contextHash}'from entry_observed where k='review'))),('decision-replay',pg_temp.decide_review357((select v#>>'{selected,contextHash}'from entry_observed where k='review')));
 select is((select v from entry_observed where k='decision'),(select v from entry_observed where k='decision-replay'),'lost response returns the same governed decision after its state change');
 select is((select v->>'outcome'from entry_observed where k='decision'),'PROVIDER_QUALIFICATION_DECIDED','independent Compliance reviewer completes the actual decision command');
-select throws_ok($$select public.decide_provider_qualification(current_setting('test.review357_qualification')::uuid,'SUSPENDED',null,null,'[]','[]','Concurrent stale qualification review','PROVIDER-QUALIFICATION-V1',null,1,'review357-stale')$$,'40001','STALE_PROVIDER_QUALIFICATION','stale expected row version cannot mutate an approved qualification');
+select throws_ok($$select public.decide_provider_qualification(current_setting('test.review357_qualification')::uuid,'SUSPENDED',null,null,'[]','[]','Concurrent stale qualification review','PROVIDER-QUALIFICATION-V1',null,1,'review357-stale')$$,'PT409','STALE_PROVIDER_QUALIFICATION','stale expected row version cannot mutate an approved qualification');
 select is(public.decide_provider_qualification(current_setting('test.review357_qualification')::uuid,'SUSPENDED',null,null,'[]','[]','Suspend pending fresh independent review','PROVIDER-QUALIFICATION-V1',null,2,'review357-suspend')->>'outcome','PROVIDER_QUALIFICATION_DECIDED','approved qualification can be suspended through governed command');
 select is(public.decide_provider_qualification(current_setting('test.review357_qualification')::uuid,'PENDING',null,null,'[]','[]','Reopen fresh independent review','PROVIDER-QUALIFICATION-V1',null,3,'review357-reopen')->>'outcome','PROVIDER_QUALIFICATION_DECIDED','suspended qualification can reopen PENDING without direct write');
 select throws_ok($$select pg_temp.decide_review357((select v#>>'{selected,contextHash}'from entry_observed where k='review'),null,'review357-old-hash')$$,'23514','QUALIFICATION_QUESTIONNAIRE_REVIEW_REQUIRED','old reviewed context cannot authorize approval after qualification changed');

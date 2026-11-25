@@ -50,8 +50,86 @@ export const builderDraftSchema = z.object({
 });
 
 export type BuilderDraft = z.infer<typeof builderDraftSchema>;
-export type BuilderLibrary = { id: string; code: string; status: CatalogEntityStatus; rowVersion: number; currentReleaseId: string | null };
-export type BuilderService = { id: string; libraryId: string; code: string; slug: string; status: CatalogEntityStatus };
+export type BuilderLibrary = {
+  id: string;
+  code: string;
+  status: CatalogEntityStatus;
+  rowVersion: number;
+  currentReleaseId: string | null;
+  nameFr: string | null;
+  nameAr: string | null;
+  fixture: boolean;
+};
+export type BuilderService = {
+  id: string;
+  libraryId: string;
+  code: string;
+  slug: string;
+  status: CatalogEntityStatus;
+  nameFr: string | null;
+  nameAr: string | null;
+  fixture: boolean;
+};
+
+/** Audit / E2E library codes that must not crowd the operator picker. */
+export function isCatalogFixtureCode(code: string): boolean {
+  const key = code.trim().toUpperCase();
+  return /^A_P\d+/u.test(key) || /^E2E([._-]|$)/u.test(key) || /_[0-9A-F]{8}$/u.test(key);
+}
+
+function normalizeCatalogLabel(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/gu, " ");
+}
+
+/** Scratch / demo labels created during UI saves — hide from the operator picker. */
+export function isCatalogScratchLabel(label: string | null | undefined): boolean {
+  if (!label) return false;
+  const key = normalizeCatalogLabel(label);
+  if (key.length < 3) return true;
+  if (/^(cc|xx+|test|tmp|demo|asdf|qwerty|foo|bar)$/u.test(key)) return true;
+  if (/^bibliotheque(\s+service)?\s+(test|demo|e2e|sauv)/u.test(key)) return true;
+  if (/\b(test|demo|e2e|fixture|scratch|sauv[ée]?e?|saved|placeholder)\b/u.test(key)) return true;
+  return false;
+}
+
+/** Libraries safe to offer in the admin catalogue workspace selector. */
+export function isCatalogOperatorLibrary(library: {
+  code: string;
+  status: CatalogEntityStatus;
+  nameFr?: string | null;
+  nameAr?: string | null;
+  fixture?: boolean;
+}): boolean {
+  if (library.fixture ?? isCatalogFixtureCode(library.code)) return false;
+  if (isCatalogScratchLabel(library.nameFr) || isCatalogScratchLabel(library.nameAr)) return false;
+  const hasName = Boolean(library.nameFr?.trim() || library.nameAr?.trim());
+  if (!hasName) return false;
+  if (library.status === "ARCHIVED" || library.status === "RETIRED") return false;
+  return true;
+}
+
+export function presentCatalogEntityLabel(
+  locale: "fr" | "ar",
+  item: { nameFr?: string | null; nameAr?: string | null; code: string },
+): string {
+  const named = (locale === "ar" ? item.nameAr : item.nameFr)?.trim();
+  if (named && !isCatalogScratchLabel(named)) return named;
+  const cleaned = item.code
+    .replace(/(?:^|[_\s-])E2E(?=$|[_\s-])/giu, " ")
+    .replace(/[_-]+/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+  if (!cleaned) return locale === "ar" ? "عنصر الدليل" : "Élément catalogue";
+  const parts = cleaned.split(" ").filter((part) => !/^[0-9A-F]{8,}$/iu.test(part) && !/^A$/iu.test(part) && !/^P\d+$/iu.test(part));
+  if (!parts.length) return locale === "ar" ? "مكتبة اختبار" : "Bibliothèque de test";
+  const loc = locale === "ar" ? "ar" : "fr-FR";
+  return parts.map((part) => part.charAt(0).toLocaleUpperCase(loc) + part.slice(1).toLocaleLowerCase(loc)).join(" ");
+}
 export type BuilderRelease = { id: string; libraryId: string; key: string; rowVersion: number };
 export type BuilderApprovedServiceVersion = { id: string; serviceId: string; libraryId: string; version: number; nameFr: string; nameAr: string };
 export type BuilderWorkspace = { libraries: BuilderLibrary[]; services: BuilderService[]; draftReleases: BuilderRelease[]; approvedServiceVersions: BuilderApprovedServiceVersion[]; questionnairePersistenceAvailable: false };

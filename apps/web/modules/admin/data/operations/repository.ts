@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { hasPlatformRole, loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
+import { buildDemoOperationsDashboard, canApplyAdminDemoHubs } from "@/modules/admin/data/spaces/demo-hubs";
 import type { AdminOperationsResult, SafeAuditEvent } from "./model";
 
 const allowedRoles = ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER", "READ_ONLY_AUDITOR"] as const;
@@ -29,6 +30,9 @@ export async function loadAdminOperationsDashboard(): Promise<AdminOperationsRes
   }
   if (!hasPlatformRole(access.roles, allowedRoles)) return { status: "error", reason: "FORBIDDEN" };
   if (!access.requirementSatisfied) return { status: "error", reason: "MFA_REQUIRED" };
+  if (canApplyAdminDemoHubs()) {
+    return { status: "success", value: buildDemoOperationsDashboard() };
+  }
 
   // Deliberately excludes organization/user identifiers, IP, user-agent and metadata/payload.
   const eventsQuery = await access.client.from("audit_events")

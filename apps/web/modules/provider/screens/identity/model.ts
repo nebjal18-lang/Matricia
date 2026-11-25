@@ -11,7 +11,7 @@ export type IdentityError = "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "CO
 export type IdentitySubmitState = { status: "idle" | "success" } | { status: "error"; reason: IdentityError };
 export function identityError(error: { code?: string; message?: string }): IdentityError {
   if (error.code === "42501") return "FORBIDDEN";
-  if (error.code === "40001" || error.code === "23505" || error.code === "22000") return "CONFLICT";
+  if ((error.code === "40001" || error.code === "PT409") || error.code === "23505" || error.code === "22000") return "CONFLICT";
   if (error.code === "55000") return "DOCUMENTS_REQUIRED";
   if (error.code === "22023") return "VALIDATION";
   return "FAILED";

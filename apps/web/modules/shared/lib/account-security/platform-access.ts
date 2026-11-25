@@ -1,7 +1,8 @@
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { withRequestCache } from "@/modules/shared/lib/supabase/request-cache";
 
 const security = z.object({
   requirement_satisfied: z.boolean(),
@@ -19,10 +20,10 @@ export type PlatformAccess =
     }
   | { status: "error"; reason: "UNAUTHENTICATED" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-export async function loadMyPlatformAccess(): Promise<PlatformAccess> {
+async function loadMyPlatformAccessUncached(): Promise<PlatformAccess> {
   try {
-    const client = await getSupabaseServerClient();
-    const { data: auth, error: authError } = await client.auth.getUser();
+    const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+    const { data: auth, error: authError } = authResult;
     if (authError) {
       const sessionMissing = classifyAuthReadFailure(authError) === "UNAUTHENTICATED";
       return { status: "error", reason: sessionMissing ? "UNAUTHENTICATED" : "QUERY_FAILED" };
@@ -46,6 +47,8 @@ export async function loadMyPlatformAccess(): Promise<PlatformAccess> {
     return { status: "error", reason: "QUERY_FAILED" };
   }
 }
+
+export const loadMyPlatformAccess = withRequestCache(loadMyPlatformAccessUncached);
 
 export function hasPlatformRole(roles: Set<string>, allowed: readonly string[]) {
   return allowed.some((role) => roles.has(role));

@@ -4,8 +4,8 @@ Les travaux indépendants continuent; cette liste ne contient que les choix exte
 
 ## DR-001 — fournisseur de signature électronique
 
-- État : modèle, niveaux de signature, preuves et mock de développement présents; fournisseur réel non identifié.
-- Décision requise : fournisseur contractuel, environnement sandbox, niveau de signature attendu par type de contrat, politique de webhook et exigences de certification.
+- État : modèle, niveaux de signature, preuves et mock de développement présents. Le 9 novembre 2026, le demandeur a retenu **Yousign en sandbox**, avec un lien vers l’espace de gestion des clés. Ce choix ne constitue ni une activation, ni une preuve de signature.
+- Décision/validation restante : niveau de signature attendu par type de contrat, politique de webhook, exigences de certification et preuve d’intégration de l’adaptateur Yousign. Les clés doivent être configurées dans le gestionnaire de secrets, sans copie dans Git ou les rapports.
 - Option sûre en attendant : maintenir la signature réelle désactivée et échouer fermé; ne jamais présenter le mock comme une signature réelle.
 - Impact : bloque la preuve P0 de contractualisation électronique en production, sans bloquer les corrections UX indépendantes.
 

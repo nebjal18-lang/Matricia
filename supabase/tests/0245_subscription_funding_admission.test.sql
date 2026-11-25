@@ -14,7 +14,7 @@ declare
   prior_sub text := current_setting('request.jwt.claim.sub', true);
   prior_claims text := current_setting('request.jwt.claims', true);
   plan public.subscription_plan_versions%rowtype;
-  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb;
+  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb; admission_context jsonb; admission_policy jsonb;
   fixture_key text := 'checkout-fixture-' || p_plan_version_id::text;
 begin
   select * into strict plan from public.subscription_plan_versions where id = p_plan_version_id;
@@ -36,9 +36,20 @@ begin
   perform public.activate_box_version(p_organization_id,(box->>'box_version_id')::uuid,null,fixture_key||'-box-active');
   rule := public.link_plan_box_rule(p_organization_id,p_plan_version_id,(box->>'box_version_id')::uuid,
     '{"schema_version":1,"period_unit":"SUBSCRIPTION_CYCLE","budget_rule":"AT_MOST"}',clock_timestamp()-interval '1 minute',fixture_key||'-rule');
-  approval_context := public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
+  -- The advertised internal benefit must have its own current execution policy
+  -- before the independent reviewer approves the complete checkout promise.
+  admission_context := public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+  admission_policy := public.propose_benefit_admission_policy_v1(
+    (benefit->>'benefit_version_id')::uuid,admission_context->>'source_hash',(admission_context->>'head_id')::uuid,
+    'NONE',null,null,'{}',array[(box->>'box_version_id')::uuid],now()-interval '1 minute',null,
+    'TEST ONLY explicit internal benefit execution policy','TEST_ONLY_CHECKOUT_POLICY',
+    'HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
   perform set_config('request.jwt.claim.sub',reviewer_id::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',reviewer_id,'role','authenticated','aal','aal2')::text,true);
+  perform public.decide_benefit_admission_policy_v1((admission_policy->>'policy_id')::uuid,
+    admission_policy->>'content_hash',true,'TEST_ONLY_CHECKOUT_POLICY_REVIEW',
+    'TEST ONLY independent approval of internal benefit execution policy');
+  approval_context := public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
   perform public.approve_box_configuration_v1((rule->>'plan_box_rule_id')::uuid,approval_context->>'source_hash',
     'TEST ONLY independent approval of synthetic checkout terms',fixture_key||'-approve');
   perform set_config('request.jwt.claim.sub',coalesce(prior_sub,''),true);
@@ -83,6 +94,8 @@ insert into p245 values('prep',public.prepare_subscription_payment_intent_v2('b2
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p245 values('intent',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p245 where k='prep'),'DEMO','SYNTHETIC-CLONE-DEMO-ORDER-245',12345,'EUR'));
 insert into p245 values('paid',public.process_verified_subscription_payment_v2('DEMO','DEMO','SYNTHETIC-DEMO-EVENT-245','SYNTHETIC-CLONE-DEMO-ORDER-245','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-DEMO-CAPTURE-245',repeat('d',64),repeat('e',64)));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2450000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 
 select ok(private.subscription_payment_cycle_v1((select id from public.subscription_payment_events where provider_event_id='SYNTHETIC-DEMO-EVENT-245'))is not null,'canonical DEMO fixture binds its real intent, cycle and balanced journal');
@@ -116,6 +129,8 @@ select set_config('request.jwt.claim.sub','',true);select set_config('request.jw
 insert into p245 values('live-intent',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p245 where k='live-prep'),'LIVE','SYNTHETIC-CLONE-LIVE-ORDER-245',12345,'EUR'));
 insert into p245 values('live-other-intent',private.register_subscription_intent_before_coordination_v2((select(v->>'preparation_id')::uuid from p245 where k='live-other-prep'),'LIVE','SYNTHETIC-CLONE-OTHER-ORDER-245',12345,'EUR'));
 insert into p245 values('live-paid',public.process_verified_subscription_payment_v2('PAYPAL','LIVE','SYNTHETIC-LIVE-EVENT-245','SYNTHETIC-CLONE-LIVE-ORDER-245','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-LIVE-CAPTURE-245',repeat('1',64),repeat('2',64)));
+-- Entitlement reads are a new request after the native PSP callback.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2450000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
 select ok(private.subscription_payment_funding_environment_compatible_v1((select id from public.subscription_payment_events where provider_event_id='SYNTHETIC-LIVE-EVENT-245')),'canonical LIVE fixture has compatible production funding');
 select ok(public.subscription_has_entitlement('b2450000-0000-4000-8000-000000000002','FUNDING_PROBE'),'paid rights follow the canonical LIVE-funded plan snapshot');

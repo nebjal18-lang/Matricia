@@ -37,7 +37,7 @@ export default async function RewardsPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="rewards"
       title={messages.title}
       lead={messages.intro}
@@ -51,7 +51,7 @@ export default async function RewardsPage({
       {result.status === "error" ? (
         <Alert variant={result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? "default" : "destructive"}>
           <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertTitle>
-          <AlertDescription>{result.reason}</AlertDescription>
+          <AlertDescription>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertDescription>
         </Alert>
       ) : (
         <RewardsBoard locale={locale} query={space.selectedQuery} dashboard={result.dashboard}>

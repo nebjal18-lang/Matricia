@@ -3,12 +3,12 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
-import { submitContactRequest, type ContactActionState } from "../contact/actions";
+import { submitFranchiseApplication, type FranchiseApplicationActionState } from "./actions";
 import { getFranchisePresentation } from "@/modules/public/data/franchise-presentation";
 import { getPublicProviderTaxonomy } from "@/modules/public/data/provider-intent/model";
 import { moroccoRegionLabel, moroccoRegions } from "@/modules/franchise/data/territories/morocco-regions";
 
-const initial: ContactActionState = { status: "idle" };
+const initial: FranchiseApplicationActionState = { status: "idle" };
 const profiles = {
   fr: ["Dirigeant", "Professionnel indépendant", "Porteur de projet", "Autre parcours"],
   ar: ["مسير", "مهني مستقل", "صاحب مشروع", "مسار آخر"],
@@ -21,7 +21,7 @@ const availability = {
 const copy = {
   fr: {
     title: "Votre candidature",
-    intro: "Remplissez ce formulaire pour nous faire part de votre intérêt. Notre équipe l’examinera avec attention.",
+    intro: "Ce formulaire ouvre un dossier au statut inscrit et vous envoie sa référence par e-mail. Connectez-vous ensuite avec la même adresse pour rattacher votre société ; Matricia vous propose alors le mandat.",
     name: "Nom et prénom",
     email: "Adresse e-mail",
     city: "Territoire",
@@ -29,9 +29,11 @@ const copy = {
     availability: "Disponibilité estimée",
     motivation: "Votre motivation",
     consent: "Je confirme l’exactitude des informations fournies et j’accepte d’être recontacté(e) par l’équipe Matricia dans le cadre de l’étude de ma candidature.",
-    send: "Enregistrer et continuer par code sécurisé",
+    send: "Enregistrer la candidature",
     pending: "Enregistrement…",
-    success: "Candidature enregistrée. Référence",
+    success: "Candidature enregistrée au statut inscrit. Référence",
+    mailed: "Cette référence vient de vous être envoyée par e-mail.",
+    mailPending: "Conservez cette référence affichée. L’e-mail n’a pas pu partir maintenant.",
     next: "Prochaine étape : examen par Matricia. Aucune contractualisation n’est engagée à ce stade. Déposer une candidature ne garantit pas son acceptation.",
     validation: "Complétez les champs requis (motivation ≥ 40 caractères) et confirmez l’exactitude des informations.",
     rate: "Trop de candidatures récemment. Réessayez plus tard.",
@@ -40,7 +42,7 @@ const copy = {
   },
   ar: {
     title: "ترشيحكم",
-    intro: "املؤوا هذا النموذج لإبلاغنا باهتمامكم. ستدرسه فرقنا بعناية.",
+    intro: "يفتح هذا النموذج ملفاً بحالة مسجّل ويرسل مرجعه إلى بريدكم. سجّلوا الدخول بعد ذلك بالعنوان نفسه لربط شركتكم، ثم تقترح عليكم ماتريسيا التفويض.",
     name: "الاسم والنسب",
     email: "البريد الإلكتروني",
     city: "الإقليم",
@@ -48,9 +50,11 @@ const copy = {
     availability: "التوفر التقديري",
     motivation: "دافعكم",
     consent: "أؤكد دقة المعلومات وأوافق على أن يتواصل فريق ماتريسيا في إطار دراسة الترشيح.",
-    send: "التسجيل والمتابعة برمز آمن",
+    send: "تسجيل الترشيح",
     pending: "جارٍ التسجيل…",
-    success: "تم تسجيل الترشيح. المرجع",
+    success: "تم تسجيل الترشيح بحالة مسجّل. المرجع",
+    mailed: "أُرسل هذا المرجع إلى بريدكم.",
+    mailPending: "احتفظوا بالمرجع الظاهر. تعذر إرسال البريد الآن.",
     next: "الخطوة التالية: مراجعة ماتريسيا. لا تعاقد في هذه المرحلة. إيداع ترشيح لا يضمن القبول.",
     validation: "أكملوا الحقول المطلوبة (الدافع ≥ 40 حرفاً) وأكدوا دقة المعلومات.",
     rate: "ترشيحات كثيرة مؤخراً. حاولوا لاحقاً.",
@@ -60,7 +64,7 @@ const copy = {
 } as const;
 
 export function FranchiseApplicationForm({ locale }: { locale: Locale }) {
-  const [state, action, pending] = useActionState(submitContactRequest, initial);
+  const [state, action, pending] = useActionState(submitFranchiseApplication, initial);
   const presentation = getFranchisePresentation(locale);
   const messages = { ...copy[locale], domain: presentation.domain, motivationHint: presentation.motivationHint };
   const domains = getPublicProviderTaxonomy(locale).libraries;
@@ -73,25 +77,8 @@ export function FranchiseApplicationForm({ locale }: { locale: Locale }) {
       <form
         action={action}
         className="mt-7"
-        onSubmit={(event) => {
-          const form = event.currentTarget;
-          const data = new FormData(form);
-          const composed = [
-            `${messages.name}: ${data.get("displayName")}`,
-            `${messages.city}: ${moroccoRegionLabel(String(data.get("zone") ?? ""), "fr")}`,
-            `${messages.profile}: ${data.get("profile")}`,
-            `${messages.domain}: ${data.get("domain")}`,
-            `${messages.availability}: ${data.get("availability")}`,
-            "",
-            String(data.get("motivation") ?? ""),
-          ].join("\n");
-          (form.elements.namedItem("message") as HTMLInputElement).value = composed;
-        }}
       >
         <input type="hidden" name="locale" value={locale} />
-        <input type="hidden" name="category" value="FRANCHISE" />
-        <input type="hidden" name="sourcePath" value={`/${locale}/franchise`} />
-        <input type="hidden" name="message" defaultValue="" />
         <div className="absolute -start-[10000px]" aria-hidden="true">
           <label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
         </div>
@@ -156,7 +143,7 @@ export function FranchiseApplicationForm({ locale }: { locale: Locale }) {
         <p className="mt-3 text-xs text-slate-500">* {messages.required}</p>
         {state.status === "success" ? (
           <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-emerald-900">
-            {messages.success} <strong dir="ltr">{state.reference}</strong>. {messages.next}{" "}
+            {messages.success} <strong dir="ltr">{state.reference}</strong>. {state.mailed ? messages.mailed : messages.mailPending} {messages.next}{" "}
             <Link className="font-semibold underline" href={`/${locale}/connexion?next=${encodeURIComponent(`/${locale}/franchise/candidature`)}`}>
               {locale === "fr" ? "Continuer par code sécurisé" : "المتابعة برمز آمن"}
             </Link>

@@ -83,7 +83,7 @@ select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-00000000
 insert into storage.objects(bucket_id,name,owner_id,metadata)values('delivery-proofs','fd100000-0000-4000-8000-000000000002/fd180000-0000-4000-8000-000000000001/proof.pdf','fd100000-0000-4000-8000-000000000002','{"mimetype":"application/pdf","size":20}');
 insert into public.delivery_proofs(id,delivery_version_id,proof_type,storage_path,evidence_hash,metadata,created_by) values('fd200000-0000-4000-8000-000000000001','fd190000-0000-4000-8000-000000000001','DOCUMENT','fd100000-0000-4000-8000-000000000002/fd180000-0000-4000-8000-000000000001/proof.pdf',repeat('b',64),'{"mime_type":"application/pdf"}','fd100000-0000-4000-8000-000000000002');
 
-insert into public.acceptance_checklists(mission_id,deliverable_id,criterion_key) values('fd160000-0000-4000-8000-000000000001','fd180000-0000-4000-8000-000000000001','QUALITY');
+insert into public.acceptance_checklists(mission_id,deliverable_id,delivery_version,criterion_key) values('fd160000-0000-4000-8000-000000000001','fd180000-0000-4000-8000-000000000001',1,'QUALITY');
 
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',true);
 select is((public.submit_mission_milestone('fd170000-0000-4000-8000-000000000001',1,'p25-submit-replay')->>'outcome'),'MILESTONE_SUBMITTED','provider owner submits its own milestone');

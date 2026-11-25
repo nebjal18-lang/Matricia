@@ -1,6 +1,8 @@
 import type { ProviderMissionDashboard } from "@/modules/provider/data/missions/model";
 import type { ProviderQuoteDashboard, ProviderQuoteInvitation } from "@/modules/provider/data/quotes/model";
 import { quoteStatusLabel } from "@/modules/provider/screens/devis/status-labels";
+import { moroccoRegionLabel } from "@/modules/shared/lib/geo/morocco-regions";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export type ProviderListRow = {
@@ -35,15 +37,12 @@ export function consultationRowsFromInvitations(
   const ar = locale === "ar";
   return invitations.map((item) => {
     const quoteStatus = item.quote?.status ?? null;
-    const status = quoteStatus
-      ? quoteStatusLabel(quoteStatus, locale)
-      : quoteStatusLabel(item.status, locale);
     return {
       id: item.id,
       title: item.description,
-      scope: item.regionCode,
+      scope: moroccoRegionLabel(item.regionCode, locale),
       deadline: formatDeadline(item.deadline, locale),
-      status,
+      status: quoteStatusLabel(item.status, locale),
       action: ar ? "فتح الملف" : "Ouvrir le dossier",
       tone: invitationTone(item.status, quoteStatus),
       href: `/${locale}/sous-traitant/consultations/${item.id}${query}`,
@@ -76,7 +75,7 @@ export function quoteRowsFromInvitations(
     return [{
       id: item.quote.id,
       title: item.description,
-      scope: item.regionCode,
+      scope: moroccoRegionLabel(item.regionCode, locale),
       status: quoteStatusLabel(status, locale),
       next,
       action,
@@ -94,12 +93,12 @@ export function missionRowsFromDashboard(
   const ar = locale === "ar";
   return dashboard.missions.map((mission) => {
     const open = mission.milestones.find((item) => !["DONE", "COMPLETED"].includes(item.status));
-    const title = open?.title || mission.deliverables[0]?.label || mission.id.slice(0, 8);
+    const title = open?.title || mission.deliverables[0]?.label || (ar ? "مهمة" : "Mission");
     return {
       id: mission.id,
       title,
-      scope: mission.status,
-      status: mission.status,
+      scope: workflowStatusLabel(mission.status, locale),
+      status: workflowStatusLabel(mission.status, locale),
       next: open?.title ?? (ar ? "متابعة" : "Suivre"),
       action: ar ? "فتح" : "Ouvrir",
       tone: mission.status === "COMPLETED" ? "mint" : open ? "violet" : "sky",

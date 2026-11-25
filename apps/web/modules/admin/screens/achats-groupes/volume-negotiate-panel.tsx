@@ -8,10 +8,17 @@ import { Input } from "@/modules/shared/ui/input";
 import type { AdminVolumeDashboard } from "@/modules/admin/data/volume/model";
 import { formatExactUnits, formatMinorExact } from "@/modules/shared/lib/volume-procurement/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { activateFrameworkPoolAction, createFrameworkAction } from "@/modules/admin/screens/finance/commerce-actions";
 import { getCommerceMessages } from "@/modules/admin/screens/finance/commerce-messages";
 
 const control = "min-h-11 w-full rounded-md border bg-background px-3";
+function paymentModelLabel(value: string, locale: Locale) {
+  if (value === "PAY_PER_USE") return locale === "ar" ? "دفع حسب الاستخدام" : "Paiement à l’usage";
+  if (value === "PREPAID") return locale === "ar" ? "مسبق الدفع" : "Prépayé";
+  if (value === "HYBRID") return locale === "ar" ? "هجين" : "Hybride";
+  return localizeStatus(value, locale);
+}
 
 export function VolumeNegotiatePanel({
   locale, dashboard, ownerOrganizationId, keys, providerOptions = [],
@@ -33,41 +40,16 @@ export function VolumeNegotiatePanel({
   const canActivate = dashboard.capabilities.can_activate_pool !== false && activatable.length > 0;
 
   return (
-    <div className="mt-8 space-y-6">
-      <section aria-labelledby="volume-agreements">
-        <h2 id="volume-agreements" className="mb-3 text-xl font-semibold">{m.agreements}</h2>
-        {agreements.length === 0 ? <p>{m.empty}</p> : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {agreements.map((item) => (
-              <article key={item.id} className="rounded-xl border bg-card p-4">
-                <div className="flex flex-wrap justify-between gap-2">
-                  <h3 className="font-semibold">{item.agreement_code}</h3>
-                  <Badge>{item.pool_status ?? item.status}</Badge>
-                </div>
-                <p className="mt-2 text-sm">{item.sku_code} · {item.payment_model ?? "—"} · {item.currency ?? "—"}</p>
-                {item.forecast_units ? <p className="text-sm" dir="ltr">{formatExactUnits(item.forecast_units, locale)}</p> : null}
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-      <section aria-labelledby="volume-profit">
-        <h2 id="volume-profit" className="mb-3 text-xl font-semibold">{m.profitability}</h2>
-        {profitability.length === 0 ? <p>{m.empty}</p> : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {profitability.map((item) => (
-              <article key={`${item.agreement_code}-${item.sku_code}`} className="rounded-xl border bg-card p-4 text-sm">
-                <h3 className="font-semibold">{item.agreement_code} · {item.sku_code}</h3>
-                <p>{m.consumedCost}: <span dir="ltr">{formatMinorExact(item.consumed_cost_minor, item.currency, locale)}</span></p>
-                <p>{m.referenceCost}: <span dir="ltr">{formatMinorExact(item.reference_cost_minor, item.currency, locale)}</span></p>
-                <p dir="ltr">{formatExactUnits(item.consumed_units, locale)}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+    <div id="negotiate" className="mt-8 scroll-mt-24 space-y-6">
+      {!ownerOrganizationId ? (
+        <p role="status" className="admin-notice">
+          {locale === "ar"
+            ? "يلزم سياق مؤسسة (?organizationId=) لفتح نماذج التفاوض أدناه."
+            : "Un contexte entreprise (?organizationId=) est requis pour ouvrir les formulaires de négociation ci-dessous."}
+        </p>
+      ) : null}
       {canWrite ? (
-        <form action={draftAction} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+        <form action={draftAction} className="grid gap-3 admin-panel p-4 md:grid-cols-2">
           <h3 className="font-semibold md:col-span-2">{m.negotiate}</h3>
           <p className="text-sm text-muted-foreground md:col-span-2">{m.negotiateHint}</p>
           <input type="hidden" name="locale" value={locale} />
@@ -84,27 +66,27 @@ export function VolumeNegotiatePanel({
           <label className="grid gap-1 text-sm">{m.maxUnits}<Input name="maximumUnits" required dir="ltr" className="min-h-11" pattern="(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?" /></label>
           <label className="grid gap-1 text-sm">{m.paymentModel}
             <select name="paymentModel" required className={control}>
-              <option value="PAY_PER_USE">PAY_PER_USE</option>
-              <option value="PREPAID">PREPAID</option>
-              <option value="HYBRID">HYBRID</option>
+              <option value="PAY_PER_USE">{paymentModelLabel("PAY_PER_USE", locale)}</option>
+              <option value="PREPAID">{paymentModelLabel("PREPAID", locale)}</option>
+              <option value="HYBRID">{paymentModelLabel("HYBRID", locale)}</option>
             </select>
           </label>
           <label className="grid gap-1 text-sm">{m.currency}<Input name="currency" required defaultValue="MAD" maxLength={3} className="min-h-11" dir="ltr" /></label>
           <label className="grid gap-1 text-sm">{m.unitPrice}<Input name="unitPriceMinor" required inputMode="numeric" pattern="[0-9]+" className="min-h-11" dir="ltr" /></label>
           <Button type="submit" disabled={drafting} className="min-h-11 md:col-span-2">{drafting ? m.processing : m.save}</Button>
-          {draftState.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {draftState.outcome}</p> : null}
+          {draftState.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {localizeStatus(draftState.outcome, locale)}</p> : null}
           {draftState.status === "error" ? <p role="alert" className="text-sm text-destructive md:col-span-2">{m.errors[draftState.reason]}</p> : null}
         </form>
       ) : null}
       {canActivate ? (
-        <form action={poolAction} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+        <form action={poolAction} className="grid gap-3 admin-panel p-4 md:grid-cols-2">
           <h3 className="font-semibold md:col-span-2">{m.activatePool}</h3>
           <p className="text-sm text-muted-foreground md:col-span-2">{m.activatePoolHint}</p>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="idempotencyKey" value={keys.activate} />
           <label className="grid gap-1 text-sm">{m.agreements}
             <select name="agreementId" required className={control}>
-              {activatable.map((item) => <option key={item.id} value={item.id}>{item.agreement_code} · {item.status}</option>)}
+              {activatable.map((item) => <option key={item.id} value={item.id}>{item.agreement_code} · {localizeStatus(item.status, locale)}</option>)}
             </select>
           </label>
           <label className="grid gap-1 text-sm">{m.contracted}<Input name="contractedUnits" dir="ltr" className="min-h-11" pattern="(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?" /></label>
@@ -119,10 +101,42 @@ export function VolumeNegotiatePanel({
           <label className="grid gap-1 text-sm">{m.providerCapacity}<Input name="providerCapacityUnits" dir="ltr" className="min-h-11" pattern="(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?" /></label>
           <label className="grid gap-1 text-sm">{m.unitPrice}<Input name="unitPriceMinor" inputMode="numeric" pattern="[0-9]+" className="min-h-11" dir="ltr" /></label>
           <Button type="submit" disabled={activating} className="min-h-11 md:col-span-2">{activating ? m.processing : m.activatePool}</Button>
-          {poolState.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {poolState.outcome}</p> : null}
+          {poolState.status === "success" ? <p role="status" className="text-sm text-primary md:col-span-2">{m.success} {localizeStatus(poolState.outcome, locale)}</p> : null}
           {poolState.status === "error" ? <p role="alert" className="text-sm text-destructive md:col-span-2">{m.errors[poolState.reason]}</p> : null}
         </form>
       ) : null}
+      <section aria-labelledby="volume-agreements">
+        <h2 id="volume-agreements" className="mb-3 text-xl font-semibold">{m.agreements}</h2>
+        {agreements.length === 0 ? <p>{m.empty}</p> : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {agreements.map((item) => (
+              <article key={item.id} className="admin-panel p-4">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <h3 className="font-semibold">{item.agreement_code}</h3>
+                  <Badge>{localizeStatus(item.pool_status ?? item.status, locale)}</Badge>
+                </div>
+                <p className="mt-2 text-sm"><span dir="ltr">{item.sku_code}</span> · {item.payment_model ? paymentModelLabel(item.payment_model, locale) : "—"} · {item.currency ?? "—"}</p>
+                {item.forecast_units ? <p className="text-sm" dir="ltr">{formatExactUnits(item.forecast_units, locale)}</p> : null}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+      <section aria-labelledby="volume-profit">
+        <h2 id="volume-profit" className="mb-3 text-xl font-semibold">{m.profitability}</h2>
+        {profitability.length === 0 ? <p>{m.empty}</p> : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {profitability.map((item) => (
+              <article key={`${item.agreement_code}-${item.sku_code}`} className="admin-panel p-4 text-sm">
+                <h3 className="font-semibold">{item.agreement_code} · {item.sku_code}</h3>
+                <p>{m.consumedCost}: <span dir="ltr">{formatMinorExact(item.consumed_cost_minor, item.currency, locale)}</span></p>
+                <p>{m.referenceCost}: <span dir="ltr">{formatMinorExact(item.reference_cost_minor, item.currency, locale)}</span></p>
+                <p dir="ltr">{formatExactUnits(item.consumed_units, locale)}</p>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

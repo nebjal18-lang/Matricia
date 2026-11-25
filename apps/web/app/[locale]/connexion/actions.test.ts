@@ -9,8 +9,11 @@ const mocks = vi.hoisted(() => ({
   userRpc: vi.fn(),
   getUser: vi.fn(),
   assurance: vi.fn(),
-  ensureConsent:vi.fn(),
+  ensureConsent: vi.fn(),
   navigation: vi.fn(),
+  verifyOtp: vi.fn(),
+  signInWithPassword: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 vi.mock("@/modules/shared/lib/auth/workspace-navigation-server", () => ({ readWorkspaceNavigation: mocks.navigation }));
@@ -18,22 +21,26 @@ vi.mock("@/modules/shared/lib/auth/consent/current-documents",()=>({ensureCurren
 vi.mock("@/modules/shared/lib/supabase/admin", () => ({
   getSupabaseAdminClient: () => ({ rpc: mocks.rpc, auth: { signInWithOtp: mocks.signInWithOtp } }),
 }));
-vi.mock("@/modules/shared/lib/auth/otp", () => ({
-  normalizeEmail: (value: string) => {
-    const normalized = value.trim().toLowerCase();
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) ? normalized : null;
-  },
-}));
+vi.mock("@/modules/shared/lib/auth/otp", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/shared/lib/auth/otp")>();
+  return {
+    ...actual,
+    normalizeEmail: (value: string) => {
+      const normalized = value.trim().toLowerCase();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) ? normalized : null;
+    },
+  };
+});
 vi.mock("@/modules/shared/lib/i18n/locale", () => ({
   isLocale: (value: string) => value === "fr" || value === "ar",
 }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: () => ({ rpc: mocks.userRpc, auth: { getUser: mocks.getUser, mfa: { getAuthenticatorAssuranceLevel: mocks.assurance } } }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: () => ({ rpc: mocks.userRpc, auth: { getUser: mocks.getUser, verifyOtp: mocks.verifyOtp, signInWithPassword: mocks.signInWithPassword, signOut: mocks.signOut, mfa: { getAuthenticatorAssuranceLevel: mocks.assurance } } }) }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({ set: mocks.setCookie, delete: mocks.deleteCookie, get: mocks.getCookie }),
   headers: async () => new Headers({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }),
 }));
 
-import { requestOtp, confirmRegistrationConsent, postLoginDestination } from "./actions";
+import { requestOtp, confirmRegistrationConsent, postLoginDestination, completeEmailLogin, completePasswordLogin } from "./actions";
 import { legalConsent } from "@/modules/shared/lib/auth/legal-consent";
 
 describe("requestOtp", () => {
@@ -64,6 +71,18 @@ describe("requestOtp", () => {
     mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
     mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "over_email_send_rate_limit", status: 429 } });
     await expect(requestOtp("personne@example.ma", "fr")).resolves.toEqual({ accepted: false, reason: "RATE_LIMITED" });
+  });
+
+  it("ne révèle pas un courriel inconnu quand GoTrue renvoie otp_disabled", async () => {
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
+    mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "otp_disabled", status: 422, message: "Signups not allowed for otp" } });
+    await expect(requestOtp("inconnu@example.ma", "fr")).resolves.toEqual({ accepted: true });
+  });
+
+  it("ne masque pas otp_disabled pendant l’inscription", async () => {
+    mocks.rpc.mockResolvedValueOnce({ data: [{ allowed: true }], error: null }).mockResolvedValueOnce({ data: "a2010000-0000-4000-8000-000000000001", error: null });
+    mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "otp_disabled", status: 422, message: "Signups not allowed for otp" } });
+    await expect(requestOtp("nouveau@example.ma", "fr", undefined, "registration", legalConsent)).resolves.toEqual({ accepted: false, reason: "UNAVAILABLE" });
   });
 
   it("interdit la création implicite et envoie un OTP sans lien magique", async () => {
@@ -128,6 +147,14 @@ describe("requestOtp", () => {
         data: { locale: "fr" },
       },
     });
+    expect(mocks.setCookie).toHaveBeenCalledWith("matricia.registration-consent", "a2010000-0000-4000-8000-000000000001", expect.objectContaining({ httpOnly: true, maxAge: 1800 }));
+  });
+
+  it("ne pose le cookie de consentement qu’après envoi OTP réussi", async () => {
+    mocks.rpc.mockResolvedValueOnce({ data: [{ allowed: true }], error: null }).mockResolvedValueOnce({ data: "a2010000-0000-4000-8000-000000000001", error: null });
+    mocks.signInWithOtp.mockResolvedValue({ data: {}, error: { code: "unexpected_failure", status: 500 } });
+    await expect(requestOtp("nouveau@example.ma", "fr", undefined, "registration", legalConsent)).resolves.toEqual({ accepted: false, reason: "UNAVAILABLE" });
+    expect(mocks.setCookie).not.toHaveBeenCalled();
   });
 });
 
@@ -138,7 +165,12 @@ describe("post login assurance routing", () => {
   });
   it("keeps a verified AAL2 dossier and query", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal2",nextLevel:"aal2"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:true,current_aal:"aal2",requirement_satisfied:true}],error:null});const next="/ar/client/demandes/id?organizationId=org&tab=offres";await expect(postLoginDestination("ar",next)).resolves.toBe(next); });
   it("preserves a deep return during the MFA challenge", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1",nextLevel:"aal2"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:true,current_aal:"aal1",requirement_satisfied:false}],error:null});const next="/fr/client/demandes/id?organizationId=org";const result=new URL(await postLoginDestination("fr",next),"https://test.invalid");expect(result.pathname).toBe("/fr/securite/compte");expect(result.searchParams.get("next")).toBe(next); });
-  it("requires enrollment when the role policy requires MFA", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1",nextLevel:"aal1"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:true,current_aal:"aal1",requirement_satisfied:false}],error:null});expect(await postLoginDestination("fr","/fr/administration")).toContain("/fr/securite/compte?"); });
+  it("requires enrollment when the role policy requires MFA", async () => {
+    mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: false, navigation: { signedIn: true, landing: "administration", options: [{ kind: "administration", href: "/fr/administration/command-center" }] } });
+    mocks.assurance.mockResolvedValue({data:{currentLevel:"aal1",nextLevel:"aal1"},error:null});
+    expect(await postLoginDestination("fr","/fr/administration")).toContain("/fr/securite/compte?");
+    expect(mocks.userRpc).not.toHaveBeenCalled();
+  });
   it("never resumes an Administration target for a client-only account", async () => {
     mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
     mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
@@ -150,11 +182,89 @@ describe("post login assurance routing", () => {
     mocks.userRpc.mockResolvedValue({ data: [{ mfa_required: true, current_aal: "aal2", requirement_satisfied: true }], error: null });
     expect(await postLoginDestination("ar", "/ar/administration/entreprises/nouvelle?organizationId=org")).toBe("/ar/administration/entreprises/nouvelle?organizationId=org");
   });
-  it("keeps MFA closed if the role read fails", async () => {
+  it("routes a navigation query failure to recovery instead of a fake MFA challenge", async () => {
     mocks.navigation.mockResolvedValue({ status: "error", reason: "QUERY_FAILED" });
     mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
     mocks.userRpc.mockResolvedValue({ data: [{ mfa_required: false, current_aal: "aal2", requirement_satisfied: true }], error: null });
-    expect(await postLoginDestination("fr", "/fr/administration/entreprises/nouvelle")).toContain("/fr/securite/compte?next=");
+    expect(await postLoginDestination("fr", "/fr/administration/entreprises/nouvelle")).toBe("/fr/indisponible?next=%2Ffr%2Fadministration%2Fentreprises%2Fnouvelle");
   });
   it("rejects an external target", async () => { mocks.assurance.mockResolvedValue({data:{currentLevel:"aal2",nextLevel:"aal2"},error:null});mocks.userRpc.mockResolvedValue({data:[{mfa_required:false,current_aal:"aal2",requirement_satisfied:true}],error:null});await expect(postLoginDestination("fr","https://evil.invalid")).resolves.toBe("/fr/tableau-de-bord"); });
 });
+
+describe("completeEmailLogin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "actor" } } });
+    mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
+    mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
+    mocks.verifyOtp.mockResolvedValue({ error: null });
+    mocks.signOut.mockResolvedValue({ error: null });
+  });
+
+  it("verifies OTP on the server then returns the post-login destination", async () => {
+    await expect(completeEmailLogin("user@example.test", "123456", "fr", "/fr/client/demandes")).resolves.toEqual({
+      ok: true,
+      destination: "/fr/client/demandes",
+    });
+    expect(mocks.verifyOtp).toHaveBeenCalledWith({ email: "user@example.test", token: "123456", type: "email" });
+    expect(mocks.rpc).toHaveBeenCalledWith("reserve_otp_request", { p_identifier: "otp-verify:user@example.test", p_client_ip: "203.0.113.7" });
+  });
+
+  it("refuses OTP verification when the persistent attempt quota is exhausted", async () => {
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: false, retry_after_seconds: 60 }], error: null });
+    await expect(completeEmailLogin("user@example.test", "123456", "fr")).resolves.toEqual({ ok: false, reason: "RATE_LIMITED" });
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the OTP attempt quota is unavailable", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "503" } });
+    await expect(completeEmailLogin("user@example.test", "123456", "fr")).resolves.toEqual({ ok: false, reason: "UNAVAILABLE" });
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+  });
+
+  it("maps an expired OTP without calling navigation", async () => {
+    mocks.verifyOtp.mockResolvedValue({ error: { code: "otp_expired" } });
+    await expect(completeEmailLogin("user@example.test", "123456", "fr")).resolves.toEqual({ ok: false, reason: "EXPIRED" });
+    expect(mocks.navigation).not.toHaveBeenCalled();
+  });
+
+  it("signs out and reports consent failure for registration", async () => {
+    mocks.getCookie.mockReturnValue(undefined);
+    await expect(completeEmailLogin("user@example.test", "123456", "fr", undefined, "registration")).resolves.toEqual({ ok: false, reason: "CONSENT" });
+    expect(mocks.signOut).toHaveBeenCalled();
+  });
+});
+
+describe("completePasswordLogin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "actor" } } });
+    mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
+    mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
+    mocks.signInWithPassword.mockResolvedValue({ error: null });
+  });
+
+  it("authenticates on the server then returns the destination", async () => {
+    await expect(completePasswordLogin("user@example.test", "password-long-enough", "ar", "/ar/client/demandes")).resolves.toEqual({
+      ok: true,
+      destination: "/ar/client/demandes",
+    });
+    expect(mocks.signInWithPassword).toHaveBeenCalledWith({ email: "user@example.test", password: "password-long-enough" });
+    expect(mocks.rpc).toHaveBeenCalledWith("reserve_otp_request", { p_identifier: "password-login:user@example.test", p_client_ip: "203.0.113.7" });
+  });
+
+  it("refuses a password attempt when the trusted quota is exhausted", async () => {
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: false, retry_after_seconds: 60 }], error: null });
+    await expect(completePasswordLogin("user@example.test", "password-long-enough", "fr")).resolves.toEqual({ ok: false, reason: "RATE_LIMITED" });
+    expect(mocks.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the password quota cannot be read", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "503" } });
+    await expect(completePasswordLogin("user@example.test", "password-long-enough", "fr")).resolves.toEqual({ ok: false, reason: "UNAVAILABLE" });
+    expect(mocks.signInWithPassword).not.toHaveBeenCalled();
+  });
+});
+

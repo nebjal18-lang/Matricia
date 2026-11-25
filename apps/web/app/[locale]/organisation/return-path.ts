@@ -2,7 +2,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 /** Only explicit same-site journeys that resume after an organization exists. */
 export function organizationReturnPath(locale: Locale, value: string | undefined): string | null {
-  const allowed = [`/${locale}/diagnostic?reprendre=enregistrer`];
+  const allowed = [`/${locale}/diagnostic?reprendre=enregistrer`, `/${locale}/franchise/candidature`];
   if(value && new RegExp(`^/${locale}/invitation/[A-Z0-9][A-Z0-9_-]{7,63}$`, "u").test(value)) return value;
   if (value?.startsWith(`/${locale}/rejoindre-reseau?`)) {
     try {

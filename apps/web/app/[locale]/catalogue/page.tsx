@@ -28,7 +28,7 @@ export default async function CatalogPage({
 }) {
   const [{ locale }, rawQuery] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const query = parseCatalogQuery({ releaseId: rawQuery.release, librarySlug: rawQuery.bibliotheque, search: rawQuery.q, cursor: rawQuery.cursor });
+  const query = parseCatalogQuery({ ...(rawQuery.release !== undefined && { releaseId: rawQuery.release }), ...(rawQuery.bibliotheque !== undefined && { librarySlug: rawQuery.bibliotheque }), ...(rawQuery.q !== undefined && { search: rawQuery.q }), ...(rawQuery.cursor !== undefined && { cursor: rawQuery.cursor }) });
   const libraryResult = await listPublishedLibraries(locale);
   if (libraryResult.status === "error" && libraryResult.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/catalogue` }));
   const copy = getCatalogMessages(locale);

@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "id": "ADMIN-DELIVERY-20261109",
+  "generatedAt": "2026-11-09T20:10:30.698855+00:00",
+  "technicalStatus": "PASS",
+  "scope": "Admin initial configuration, governed runtime integrations, finance setup and own-party contract signer preparation",
+  "validatedCodeCommit": "3d04c50a9523d903bbb97a89a8d0277060441117",
+  "sourceObjects": {
+    "apps": "d99c3a36188466b44187cfb9e26d822e36603603",
+    "packages": "8032b66df63273bdc1e3dac232ded052ce34515c",
+    "supabase": "6ab283b760b09e31065d87a0db4248427a256717",
+    "scripts": "01a60f14e0496691792081106a457752d3ea8233",
+    "package.json": "02ee2615ba8e9985f8c1f752788e9ffee4e8e5a8",
+    "pnpm-lock.yaml": "5949c29caf72108eea4872b7fdbae1574ea5dabe",
+    ".github/workflows/ci.yml": "bc8329b4572afd27d3260dc6f60e7c4cc7451dbf"
+  },
+  "pullRequest": "https://github.com/nebjal18-lang/Matricia/pull/17",
+  "stagingUrl": "https://matricia-staging.vercel.app",
+  "hostedConfiguration": {
+    "schemaVersion": 1,
+    "observedAt": "2026-11-09T19:51:29.552Z",
+    "environment": "STAGING",
+    "projectRef": "vuwvkpfprixzysjfpgkw",
+    "appliedMigrations": [
+      "20261109110000",
+      "20261109111000",
+      "20261109112000",
+      "20261109113000"
+    ],
+    "applyHttpStatus": 201,
+    "finalInventoryHttpStatus": 201,
+    "migrations": 581,
+    "authUsers": 0,
+    "activeConfigurations": 0,
+    "sourceCommit": "b1470f66c2bddefad8852fdac20addb55a9e2b74",
+    "productionMutations": 0,
+    "secretValuesIncluded": false,
+    "credentialProcessTerminated": true,
+    "accessBootstrapPending": true,
+    "externalServicesCertified": false
+  },
+  "ci": {
+    "schemaVersion": 1,
+    "observedAt": "2026-11-09T20:08:47.652Z",
+    "codeCommit": "3d04c50a9523d903bbb97a89a8d0277060441117",
+    "workflow": {
+      "id": 42688036269,
+      "url": "https://github.com/nebjal18-lang/Matricia/actions/runs/42688036269",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "jobs": [
+      {
+        "id": 129400031218,
+        "name": "quality",
+        "conclusion": "success"
+      },
+      {
+        "id": 129400031428,
+        "name": "database",
+        "conclusion": "success"
+      },
+      {
+        "id": 129400031601,
+        "name": "browser-public",
+        "conclusion": "success"
+      }
+    ],
+    "unit": {
+      "passed": 4331,
+      "skipped": 1,
+      "projectPassedCounts": [
+        2,
+        36,
+        4,
+        38,
+        38,
+        3,
+        62,
+        5,
+        3960,
+        183
+      ]
+    },
+    "database": {
+      "files": 365,
+      "assertions": 9429,
+      "concurrencyScenarios": 4,
+      "jobId": 129400031428,
+      "logLine": "2026-11-09T20:05:24.4004820Z DB tests passed: 365 files, 9429 assertions, 4 concurrency scenarios"
+    },
+    "vercel": {
+      "state": "success",
+      "dashboard": "https://vercel.com/epitaphemarket-5584s-projects/matricia-domain/2rrhHwmnZh64bZyhV4PfvXQb76XW",
+      "staging": "https://matricia-staging.vercel.app"
+    },
+    "productionPromoted": false
+  },
+  "nativeAdmin": {
+    "environment": "OWNED_LOCAL_NATIVE_STAGING",
+    "status": "PASSED",
+    "functionalChecks": [
+      {
+        "code": "REAL_GOTRUE_MAGICLINK_AND_TOTP",
+        "status": "PASS",
+        "aal2Administrators": 2,
+        "aal1Administrator": 1,
+        "ordinaryAal1": 1
+      },
+      {
+        "code": "ORDINARY_AND_AAL1_ADMIN_READ_DENIED",
+        "status": "PASS"
+      },
+      {
+        "code": "COMPANY_UI_SAVE_NATIVE_READBACK",
+        "status": "PASS"
+      },
+      {
+        "code": "SELF_APPROVAL_DENIED_WITH_DRAFT_UNCHANGED",
+        "status": "PASS"
+      },
+      {
+        "code": "INDEPENDENT_COMPANY_UI_ACTIVATION_AND_RELOAD_PERSISTENCE",
+        "status": "PASS"
+      },
+      {
+        "code": "FAILED_SERVER_VALIDATION_PRESERVES_NONSECRET_AND_CLEARS_SECRETS",
+        "status": "PASS"
+      },
+      {
+        "code": "PROVIDER_UI_SAVE_SEALED_WITHOUT_EXTERNAL_OPERATION",
+        "status": "PASS"
+      },
+      {
+        "code": "BROWSER_CONFIGURATION_ACCESS_DENIED",
+        "status": "PASS",
+        "actor": "ordinary"
+      },
+      {
+        "code": "BROWSER_CONFIGURATION_ACCESS_DENIED",
+        "status": "PASS",
+        "actor": "aal1-admin"
+      },
+      {
+        "code": "FR_AR_360_1440_NATIVE_A11Y_AND_KEYBOARD",
+        "status": "PASS",
+        "pages": 4,
+        "violations": 0
+      },
+      {
+        "code": "SAVED_SECRETS_ABSENT_FROM_DOM_AND_SERVER_RESPONSES",
+        "status": "PASS"
+      },
+      {
+        "code": "ACTUAL_UI_DEACTIVATION_AND_PROVIDER_DRAFT_REJECTION",
+        "status": "PASS"
+      }
+    ],
+    "browser": [
+      {
+        "locale": "fr",
+        "width": 360,
+        "axeViolations": [],
+        "axeIncomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": 180
+          }
+        ],
+        "keyboardStepNavigation": true,
+        "overflow": false
+      },
+      {
+        "locale": "fr",
+        "width": 1440,
+        "axeViolations": [],
+        "axeIncomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": 183
+          }
+        ],
+        "keyboardStepNavigation": true,
+        "overflow": false
+      },
+      {
+        "locale": "ar",
+        "width": 360,
+        "axeViolations": [],
+        "axeIncomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": 81
+          }
+        ],
+        "keyboardStepNavigation": true,
+        "overflow": false
+      },
+      {
+        "locale": "ar",
+        "width": 1440,
+        "axeViolations": [],
+        "axeIncomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": 83
+          }
+        ],
+        "keyboardStepNavigation": true,
+        "overflow": false
+      }
+    ],
+    "cleanup": {
+      "verified": true,
+      "failures": [],
+      "actors": 4,
+      "immutableConfigurationHistoryRetainedInOwnedDatabase": true,
+      "authTokensPersisted": false
+    },
+    "sourceReceipt": "/workspace/outputs/admin-delivery/admin-configuration-browser-native.json",
+    "scopeLimit": "Automatic contrast checks marked incomplete are retained; no global WCAG certificate."
+  },
+  "nativeSigner": {
+    "generatedAt": "2026-11-09T19:57:13.169Z",
+    "scope": "OWNED_LOCAL_NATIVE_SIGNER_PREPARATION",
+    "productionMutations": 0,
+    "externalProviderOperations": 0,
+    "fixtureGovernance": "SYNTHETIC_CANONICAL_SQL_PREREQUISITES_NOT_LEGAL_OR_KYC_CERTIFICATION",
+    "realGoTrueActors": 4,
+    "checks": [
+      {
+        "name": "CANONICAL_PDF_ROUTE_REAL_BYTES",
+        "status": "PASS",
+        "httpStatus": 200,
+        "size": 25597,
+        "sha256": "ecc57757e99f40e088d12aff413e319fd6350b0cd752ccc145a41c219935fa9c"
+      },
+      {
+        "name": "DEDICATED_STORAGE_READBACK",
+        "status": "PASS",
+        "size": 25597,
+        "sha256": "ecc57757e99f40e088d12aff413e319fd6350b0cd752ccc145a41c219935fa9c"
+      },
+      {
+        "name": "GOVERNED_LOCAL_ENVELOPE",
+        "status": "PASS",
+        "envelopeId": "5558914a-506a-47fb-ba3b-263f38d50b0b"
+      },
+      {
+        "name": "OWN_PARTY_NATIVE_WORKSPACE",
+        "status": "PASS",
+        "documents": 1,
+        "canConfigure": true
+      }
+    ],
+    "status": "PASS",
+    "browser": [
+      {
+        "locale": "fr",
+        "width": 1440,
+        "pageStatus": 200,
+        "pdfStatus": 200,
+        "pdfSha256": "ecc57757e99f40e088d12aff413e319fd6350b0cd752ccc145a41c219935fa9c",
+        "putStatus": 200,
+        "reloadPersisted": true,
+        "otherPartyPutStatus": 403,
+        "otherPartyUnchanged": true,
+        "jsErrors": 0,
+        "cspErrors": 0,
+        "consoleErrors": 0,
+        "horizontalOverflow": false,
+        "screenshot": "/workspace/outputs/admin-delivery/signer-native-fr-1440.png"
+      }
+    ],
+    "completedAt": "2026-11-09T20:06:01.445Z",
+    "nativeApiStatus": "PASS",
+    "browserStatus": "PASS",
+    "pdfSource": "Actual Next.js canonical document route rendered and archived both FR/AR PDFs to the dedicated local Storage API; exact-byte service download confirmed.",
+    "secretValuesIncluded": false,
+    "evidenceObservedAt": "2026-11-09T20:01:29.162367+00:00",
+    "browserBaseUrl": "http://localhost:5183",
+    "cleanup": {
+      "verified": true,
+      "actors": 4,
+      "softDeletedActors": 4,
+      "activeNativeSessions": 0,
+      "unrevokedPlatformRoles": 0,
+      "activeMemberships": 0,
+      "unrevokedMemberRoles": 0,
+      "onlyOwnFixtureActors": true,
+      "sessionTokenFileDeleted": true,
+      "immutableArchivesAndLedgersPreserved": true,
+      "ownedDatabaseAndStorageVolumePreserved": true,
+      "checkedAt": "2026-11-09T20:07:22.975Z"
+    },
+    "provenance": {
+      "commit": "3d04c50a9523d903bbb97a89a8d0277060441117",
+      "buildId": "7nHRKbabqlsfa9ET1MR05",
+      "browserAppOrigin": "http://localhost:5183",
+      "nativeSupabaseProxyOrigin": "http://127.0.0.1:55419",
+      "nativeStorageOrigin": "http://127.0.0.1:55423",
+      "originNote": "Local Next uses localhost as its request URL origin; browser test aligned to that canonical local host. The 127.0.0.1 alias was correctly refused by the strict origin guard. No origin enforcement was disabled."
+    },
+    "finishedAt": "2026-11-09T20:07:23.008Z"
+  },
+  "independentReview": {
+    "status": "ADMIN_CONFIGURATION_TECHNICAL_REVIEW_NO_OPEN_P1_IN_REVIEWED_SCOPE",
+    "independentOfImplementation": true,
+    "openFindings": [],
+    "pendingFollowups": [],
+    "source": "/workspace/outputs/admin-delivery/independent-review.json"
+  },
+  "targetedUnitTests": 235,
+  "toolingTests": 103,
+  "serverActionSourceFiles": 2052,
+  "productionAuthorized": false,
+  "productionMutations": 0,
+  "productionCertified": false,
+  "clientAccessProvisioned": false,
+  "externalProviderRecipeExecuted": false,
+  "humanRequirementStatusesChanged": false,
+  "requirementRegister": "5/76 VERIFIED unchanged",
+  "remaining": [
+    "Two authorized client administrators and native MFA enrollment before access",
+    "Custom Supabase Auth SMTP for the first OTP; independent of Resend notification settings",
+    "Client provider credentials, verified sender/webhooks/currencies and successful external recipes",
+    "Worker/ClamAV hosting, allowed endpoints, fresh engine database and CLEAN/EICAR recipe",
+    "Human business/legal/fiscal/CNDP approvals, independent attestation and separate production authorization"
+  ],
+  "secretValuesIncluded": false
+}

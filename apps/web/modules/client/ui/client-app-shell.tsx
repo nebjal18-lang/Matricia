@@ -6,12 +6,17 @@ import { Bell, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { clientDashboardCopy } from "@/modules/client/data/home/copy";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ClientNavKey } from "@/modules/client/ui/client-nav";
 import { buildClientNav } from "@/modules/client/ui/client-nav";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
+import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import "./client-experience.css";
+import "./client-page-standard.css";
 
 export type { ClientNavKey };
 
@@ -28,6 +33,7 @@ export function ClientAppShell({
   selectedOrganizationId,
   userEmail,
   organizationName,
+  organizations = [],
   active,
   languagePath,
   searchAction,
@@ -38,6 +44,7 @@ export function ClientAppShell({
   actions,
   messagesUnread,
   theme = "default",
+  sceneHero = false,
   children,
 }: {
   locale: Locale;
@@ -45,6 +52,7 @@ export function ClientAppShell({
   selectedOrganizationId: string | null;
   userEmail: string | null;
   organizationName?: string | null;
+  organizations?: Array<{ id: string; name: string }>;
   active?: ClientNavKey;
   messagesUnread?: boolean;
   languagePath?: string;
@@ -55,18 +63,24 @@ export function ClientAppShell({
   kicker?: string;
   actions?: ReactNode;
   theme?: "default" | "follow";
+  /** Photo hero mast — identity hubs only (home / org / dossiers). */
+  sceneHero?: boolean;
   children: ReactNode;
 }): ReactNode {
   const c = clientDashboardCopy[locale];
   const space = spaceCopy(locale);
   const alternate: Locale = locale === "fr" ? "ar" : "fr";
   const searchPath = searchAction ?? `/${locale}/client/recherche`;
-  const accountLabel = organizationName?.trim() || space.space;
+  const accountLabel = organizationName?.trim()
+    ? organizationDisplayLabel(organizationName, locale)
+    : space.space;
   const currentPath = safeReturnPath(languagePath,locale);
   const langHref = currentPath ? translateLocalPath(currentPath, locale, alternate) : localeSwitchHref(locale, selectedQuery, active);
+  const switchBase = (currentPath ?? `/${locale}/tableau-de-bord`).split("?")[0]!;
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace" data-theme={theme}>
+      <WorkspaceHashScroll />
       <aside className="client-side" aria-label={c.navHome}>
         <Link href={`/${locale}/tableau-de-bord${selectedQuery}`} className="client-brand">
           <span className="client-brand-mark" aria-hidden>
@@ -77,9 +91,11 @@ export function ClientAppShell({
             <small>{c.brandTagline}</small>
           </span>
         </Link>
-        <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
+        <WorkspaceMobileNavigation locale={locale}>
+          <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
+        </WorkspaceMobileNavigation>
         <figure className="client-side-art">
-          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>
@@ -99,6 +115,29 @@ export function ClientAppShell({
             <input id="client-shell-search" name="q" defaultValue={searchQuery} placeholder={c.searchSpace} />
           </form>
           <div className="client-top-actions">
+            {organizations.length > 1 ? (
+              <details className="client-org-switch">
+                <summary>{accountLabel}</summary>
+                <ul>
+                  {organizations.map((organization) => {
+                    const current = organization.id === selectedOrganizationId;
+                    const params = new URLSearchParams((currentPath ?? "").includes("?") ? (currentPath!.split("?")[1] ?? "") : "");
+                    params.set("organizationId", organization.id);
+                    const landHash =
+                      switchBase.includes("/organisation") || switchBase.includes("/securite")
+                        ? "#invitation"
+                        : "";
+                    const href = `${switchBase}?${params.toString()}${landHash}`;
+                    return (
+                      <li key={organization.id}>
+                        {current ? <span data-selected="true">{organization.name}</span> : <Link href={href}>{organization.name}</Link>}
+                      </li>
+                    );
+                  })}
+                  <li><Link href={`/${locale}/organisation`}>{locale === "ar" ? "مؤسساتي" : "Mes organisations"}</Link></li>
+                </ul>
+              </details>
+            ) : null}
             <Link href={`/${locale}/notifications${selectedQuery}`} className="client-icon-btn" aria-label={c.notifications}>
               <Bell className="size-4" />
             </Link>
@@ -117,7 +156,18 @@ export function ClientAppShell({
             />
           </div>
         </div>
-        {title ? (
+        {title && sceneHero ? (
+          <div className="client-scene-mast">
+            <SpaceSceneHero
+              sceneSrc="/scenes/arch-city.png"
+              title={title}
+              meta={lead}
+              badge={kicker ? <span className="mat-status" data-tone="sky">{kicker}</span> : undefined}
+              actions={actions}
+              priority
+            />
+          </div>
+        ) : title ? (
           <header className="client-mast">
             <div>
               <p className="client-space-label">{space.space}</p>
@@ -130,7 +180,7 @@ export function ClientAppShell({
             </div>
           </header>
         ) : null}
-        {children}
+        <div className="client-page-standard">{children}</div>
       </div>
     </div>
   );

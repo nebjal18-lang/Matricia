@@ -10,7 +10,7 @@ export async function loadNotificationCenter(locale: "fr" | "ar", organizationId
   try {
     const client = await getSupabaseServerClient();
     const { data: auth, error: authError } = await client.auth.getUser();
-    if (authError) return { status: "error", reason: authError.status === 401 || authError.status === 403 || authError.name === "AuthSessionMissingError" ? "UNAUTHENTICATED" : "QUERY_FAILED" };
+    if (authError) return { status: "error", reason: authError.status === 401 || authError.name === "AuthSessionMissingError" ? "UNAUTHENTICATED" : authError.status === 403 ? "FORBIDDEN" : "QUERY_FAILED" };
     if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
     if (!organizationId) return { status: "error", reason: "NO_ORGANIZATION" };
     if (!z.string().uuid().safeParse(organizationId).success) return { status: "error", reason: "FORBIDDEN" };

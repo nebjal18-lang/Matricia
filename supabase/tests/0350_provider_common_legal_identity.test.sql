@@ -29,7 +29,7 @@ select pg_temp.actor(3);
 select throws_ok($$select public.get_my_provider_legal_identity_v1('a3501000-0000-4000-8000-000000000001')$$,'42501','PROVIDER_IDENTITY_SCOPE_DENIED','Viewer cannot read representative data');
 select pg_temp.actor(2);
 select is((public.get_my_provider_legal_identity_v1('a3501000-0000-4000-8000-000000000001')->>'profile_version')::integer,1,'Provider Manager can read shared profile');
-select throws_ok($$select public.save_provider_legal_profile_v1('a3501000-0000-4000-8000-000000000001',pg_temp.profile(),0,'stale-save-0350')$$,'40001','STALE_PROVIDER_LEGAL_PROFILE','Stale draft cannot overwrite a newer version');
+select throws_ok($$select public.save_provider_legal_profile_v1('a3501000-0000-4000-8000-000000000001',pg_temp.profile(),0,'stale-save-0350')$$,'PT409','STALE_PROVIDER_LEGAL_PROFILE','Stale draft cannot overwrite a newer version');
 select throws_ok($$select public.submit_provider_legal_identity_v1('a3501000-0000-4000-8000-000000000001',1,'a3503000-0000-4000-8000-000000000001')$$,'55000','PROVIDER_PROFILE_REQUIRED','Submission requires Provider qualification profile');
 select public.submit_provider_profile('a3501000-0000-4000-8000-000000000001','{"activity_summary":"Activité de TEST pour l’identité commune","team_size":4,"years_experience":3,"secondary_subcontracting_allowed":false,"accounting_contact_email":"accounting0350@example.invalid"}',0,'qualification-profile0350');
 select throws_ok($$select public.submit_provider_legal_identity_v1('a3501000-0000-4000-8000-000000000001',1,'a3503000-0000-4000-8000-000000000001')$$,'55000','PROVIDER_LEGAL_DOCUMENTS_REQUIRED','Submission requires all three Provider documents');

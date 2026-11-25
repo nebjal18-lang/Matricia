@@ -12,12 +12,6 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      # Public, deliberately non-secret values for hermetic Next.js validation.
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-local-publishable-key-not-a-secret
-      NEXT_PUBLIC_APP_URL: https://matricia.example
-      SUPABASE_SERVICE_ROLE_KEY: ci-local-service-role-key-not-a-secret
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,15 +28,29 @@ jobs:
       - run: node --experimental-strip-types scripts/validate-boundaries.ts
       - run: pnpm lint
       - run: pnpm typecheck
+      # Quote FormData unit recipes use a real browser. Install the version
+      # matching Playwright instead of relying on an Ubuntu Chromium wrapper.
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm -r --workspace-concurrency=1 test --maxWorkers=2
       - run: pnpm test:integration
       - run: pnpm test:tooling
       - run: pnpm no-placeholders
+      - run: pnpm security:public-assets
+      - run: pnpm audit --audit-level high
       - run: pnpm build
+        env:
+          # Hermetic build bindings belong only to the build. Unit tests inject
+          # their dependencies; a fake service key must not imply a live vault.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-local-publishable-key-not-a-secret
+          NEXT_PUBLIC_APP_URL: https://matricia.example
+          SUPABASE_SERVICE_ROLE_KEY: ci-local-service-role-key-not-a-secret
 
   database:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Replay the complete migration inventory, then test a separately identified
+    # disposable clone. Reset is restricted to this ephemeral CI job.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -55,11 +63,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec supabase start
       - run: pnpm exec supabase db reset
-      - run: pnpm test:db
+      - run: node scripts/run-isolated-db-tests.mjs
         env:
-          APP_ENV: development
-          DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          DB_TEST_SOURCE_KIND: clean-local-supabase
+          DB_TEST_SOURCE_PROJECT: Matricia
+          DB_TEST_RELEASE: '1'
 
   browser-public:
     runs-on: ubuntu-latest

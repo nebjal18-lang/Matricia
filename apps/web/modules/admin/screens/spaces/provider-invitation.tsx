@@ -14,15 +14,15 @@ export async function ProviderInvitationWorkspace({ locale, query, snapshot }: {
   const invitation = await listInvitations().catch(error=>{unstable_rethrow(error);return {status:"error" as const,reason:"UNAVAILABLE" as const};});
   if(invitation.status==="error") {
     if(invitation.reason==="UNAUTHENTICATED") redirect(connexionHref(locale,{next:href}));
-    return <main className="client-page"><AdminReadError locale={locale} reason="UNAVAILABLE" retryHref={href}/></main>;
+    return <div className="client-page"><AdminReadError locale={locale} reason="UNAVAILABLE" retryHref={href}/></div>;
   }
   const organizations=[...new Map(snapshot.rows.filter(row=>row.organizationId).map(row=>[row.organizationId!,{id:row.organizationId!,displayName:row.title}])).values()];
   const selectedOrganization=new URLSearchParams(query).get("organizationId");
-  return <main className="client-page">
+  return <div className="client-page">
     <section className="client-card"><h2>{ar ? "المستلم والمؤسسة وصلاحيات الدعوة" : "Destinataire, organisation et droits de l’invitation"}</h2>
       <p>{ar ? "تستهدف الدعوة شخصاً عبر بريده الإلكتروني ضمن مؤسسة مقدمة للخدمات موجودة. لا يُنشأ ملف شركة أو تأهيل مهني بمجرد الدعوة. عند غياب صلاحية الدعوة المباشرة، يُرسل الطلب للمراجعة المستقلة أولاً." : "L’invitation vise une personne par son adresse email dans une organisation prestataire existante. Elle ne crée ni société ni qualification professionnelle. Sans habilitation d’invitation directe, la demande est d’abord soumise à une revue indépendante."}</p>
       <Link href={`/${locale}/administration/entreprises/nouvelle${query}`}>{ar ? "إعداد مؤسسة جديدة أولاً" : "Préparer d’abord une nouvelle organisation"}</Link>
     </section>
     {organizations.length ? <InviteUserForm {...createAdminInvitationFormDefaults()} locale={locale} query={query} organizations={organizations} eligibleIds={invitation.organizations.map(org=>org.id)} defaultOrganizationId={selectedOrganization && organizations.some(org=>org.id===selectedOrganization)?selectedOrganization:""} defaultRole="PROVIDER_VIEWER" roleFamily="PROVIDER"/> : <p role="status">{ar ? "لا توجد مؤسسة مقدمة للخدمات متاحة في النطاق الحالي. أنشئ المؤسسة وتحقق منها قبل دعوة ممثلها." : "Aucune organisation prestataire disponible dans ce périmètre. Créez et vérifiez l’organisation avant d’inviter son représentant."}</p>}
-  </main>;
+  </div>;
 }

@@ -54,12 +54,12 @@ export default async function ClientComplianceDecisionPage({
       kicker={item ? messages.statuses[item.status] : a.inInstruction}
     >
       {result.status === "error" ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert variant="destructive">
             <AlertTitle>{result.reason === "FORBIDDEN" ? messages.forbiddenTitle : result.reason === "MFA_REQUIRED" ? messages.mfaTitle : messages.unavailableTitle}</AlertTitle>
             <AlertDescription>{result.reason}</AlertDescription>
           </Alert>
-        </main>
+        </div>
       ) : item ? (
         <>
           <Link className="admin-soft-cta" href={`/${locale}/administration/conformite-clients/${item.id}/identite`}>{locale==="ar"?"مراجعة ICE وIF وRC والوثائق":"Revoir ICE, IF, RC et les pièces"}</Link>

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "completedAt": "2026-11-23T22:31:13.402Z",
+  "environment": "development-local-docker",
+  "localProof": {
+    "authentication": "REAL_GOTRUE_OTP_AND_TOTP",
+    "authorizedOrganizations": 2,
+    "activeMandates": 2,
+    "activeCatalogMandates": 2,
+    "foreignSessionDenied": true,
+    "adminWithoutOrganization": true
+  },
+  "localUiAuthProof": null,
+  "functionalControlsProof": null,
+  "mode": "AUTHENTICATED_ROUTE_SMOKE_ONLY",
+  "status": "PASSED",
+  "expectedTests": 16,
+  "executedTests": 16,
+  "browser": {
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": []
+  },
+  "stage": "complete",
+  "failureCode": null,
+  "diagnostic": null,
+  "cleanup": {
+    "remoteFixturesNeutralized": true,
+    "localAuthenticationArtifactsRemoved": true
+  }
+}

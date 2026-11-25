@@ -9,7 +9,7 @@ const { getUser, from, response, query } = vi.hoisted(() => {
   };
   return { response, query, from: vi.fn(() => query), getUser: vi.fn() };
 });
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ auth: { getUser }, from }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ auth: { getUser }, from }), getServerAuthUser: async () => getUser() }));
 import { resolveProviderSpace } from "./context";
 import { providerContextReadState } from "./organization-context";
 

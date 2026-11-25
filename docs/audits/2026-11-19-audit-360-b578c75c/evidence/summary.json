@@ -1,0 +1,446 @@
+{
+  "generatedAt": "2026-11-19T13:31:29.872Z",
+  "browser": {
+    "pages": 140,
+    "axeScans": 56,
+    "violations": [],
+    "overflow": [
+      {
+        "locale": "fr",
+        "route": "",
+        "width": 1024,
+        "contentWidth": 1046,
+        "elements": []
+      },
+      {
+        "locale": "fr",
+        "route": "/diagnostic",
+        "width": 1024,
+        "contentWidth": 1026,
+        "elements": []
+      }
+    ],
+    "errors": [],
+    "protectedRoutes": [
+      {
+        "locale": "fr",
+        "route": "/client/accueil",
+        "httpStatus": 200,
+        "finalPath": "/fr/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "Connectez-vous à Matricia"
+        ]
+      },
+      {
+        "locale": "fr",
+        "route": "/sous-traitant/identite",
+        "httpStatus": 200,
+        "finalPath": "/fr/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "Connectez-vous à Matricia"
+        ]
+      },
+      {
+        "locale": "fr",
+        "route": "/franchise/accueil",
+        "httpStatus": 200,
+        "finalPath": "/fr/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "Connectez-vous à Matricia"
+        ]
+      },
+      {
+        "locale": "fr",
+        "route": "/administration/command-center",
+        "httpStatus": 200,
+        "finalPath": "/fr/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "Connectez-vous à Matricia"
+        ]
+      },
+      {
+        "locale": "fr",
+        "route": "/organisation",
+        "httpStatus": 200,
+        "finalPath": "/fr/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "Connectez-vous à Matricia"
+        ]
+      },
+      {
+        "locale": "fr",
+        "route": "/securite/compte",
+        "httpStatus": 200,
+        "finalPath": "/fr/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "Connectez-vous à Matricia"
+        ]
+      },
+      {
+        "locale": "ar",
+        "route": "/client/accueil",
+        "httpStatus": 200,
+        "finalPath": "/ar/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "تسجيل الدخول إلى ماتريسيا"
+        ]
+      },
+      {
+        "locale": "ar",
+        "route": "/sous-traitant/identite",
+        "httpStatus": 200,
+        "finalPath": "/ar/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "تسجيل الدخول إلى ماتريسيا"
+        ]
+      },
+      {
+        "locale": "ar",
+        "route": "/franchise/accueil",
+        "httpStatus": 200,
+        "finalPath": "/ar/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "تسجيل الدخول إلى ماتريسيا"
+        ]
+      },
+      {
+        "locale": "ar",
+        "route": "/administration/command-center",
+        "httpStatus": 200,
+        "finalPath": "/ar/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "تسجيل الدخول إلى ماتريسيا"
+        ]
+      },
+      {
+        "locale": "ar",
+        "route": "/organisation",
+        "httpStatus": 200,
+        "finalPath": "/ar/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "تسجيل الدخول إلى ماتريسيا"
+        ]
+      },
+      {
+        "locale": "ar",
+        "route": "/securite/compte",
+        "httpStatus": 200,
+        "finalPath": "/ar/connexion",
+        "loginRedirect": true,
+        "h1": [
+          "تسجيل الدخول إلى ماتريسيا"
+        ]
+      }
+    ],
+    "keyboard": [
+      {
+        "locale": "ar",
+        "firstFocus": {
+          "tag": "A",
+          "text": "الانتقال إلى المحتوى الرئيسي",
+          "href": "#contenu-principal"
+        },
+        "afterSkip": {
+          "tag": "BODY",
+          "id": "",
+          "hash": "#contenu-principal"
+        },
+        "menuState": {
+          "expanded": "true",
+          "dialogCount": 0,
+          "afterEscapeExpanded": "false",
+          "focusReturned": true
+        }
+      }
+    ],
+    "caveats": [
+      "FR keyboard probe aborted after gathering all FR pages due to its own name-changing locator; page scans retained",
+      "AR probe used corrected stable element handle",
+      "No authenticated pages scanned"
+    ]
+  },
+  "e2e": {
+    "stats": {
+      "startTime": "2026-11-19T13:26:43.095Z",
+      "duration": 35025.291,
+      "expected": 2,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "failures": [
+      {
+        "file": "public/diagnostic-need-integrity.spec.ts",
+        "title": "M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission",
+        "project": "chromium-mobile-360",
+        "status": "failed",
+        "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('#need-service option[value=\"BTP-RENOV\"]')\nExpected substring: \"الاسم العربي غير متاح\"\nReceived string:    \"تجديد مبنى أو محل\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" locator('#need-service option[value=\"BTP-RENOV\"]') with timeout 5000ms\n  - waiting for locator('#need-service option[value=\"BTP-RENOV\"]')\n    14 × locator resolved to <option lang=\"ar\" value=\"BTP-RENOV\">تجديد مبنى أو محل</option>\n       - unexpected value \"تجديد مبنى أو محل\"\n"
+      },
+      {
+        "file": "public/diagnostic-need-integrity.spec.ts",
+        "title": "M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission",
+        "project": "chromium-desktop",
+        "status": "failed",
+        "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('#need-service option[value=\"BTP-RENOV\"]')\nExpected substring: \"الاسم العربي غير متاح\"\nReceived string:    \"تجديد مبنى أو محل\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" locator('#need-service option[value=\"BTP-RENOV\"]') with timeout 5000ms\n  - waiting for locator('#need-service option[value=\"BTP-RENOV\"]')\n    14 × locator resolved to <option lang=\"ar\" value=\"BTP-RENOV\">تجديد مبنى أو محل</option>\n       - unexpected value \"تجديد مبنى أو محل\"\n"
+      }
+    ]
+  },
+  "sql": {
+    "files": 383,
+    "passed": 364,
+    "failed": 10,
+    "errors": 9,
+    "assertionsExecuted": 9280,
+    "failures": [
+      {
+        "file": "0060_p14_morocco_tax_engine.test.sql",
+        "status": "FAIL",
+        "planned": 49,
+        "assertions": 49,
+        "numberingValid": true,
+        "failures": [
+          "not ok 31 - tax administration binds the caller identity, fails closed on AAL2 and checks privileged roles"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 31: \"tax administration binds the caller identity, fails closed on AAL2 and checks privileged roles\"",
+          "# Looks like you failed 1 test of 49"
+        ],
+        "durationMs": 161
+      },
+      {
+        "file": "0091_assistance_purge_execution_hardening.test.sql",
+        "status": "ERROR",
+        "code": "42P01",
+        "message": "relation \"cron.job\" does not exist",
+        "durationMs": 116
+      },
+      {
+        "file": "0193_franchise_provider_bridge_delivery.test.sql",
+        "status": "FAIL",
+        "planned": 17,
+        "assertions": 18,
+        "numberingValid": true,
+        "failures": [],
+        "skips": [],
+        "diagnostics": [
+          "# Looks like you planned 17 tests but ran 18"
+        ],
+        "durationMs": 829
+      },
+      {
+        "file": "0198_franchise_network_contract_calendar.test.sql",
+        "status": "FAIL",
+        "planned": 12,
+        "assertions": 12,
+        "numberingValid": true,
+        "failures": [
+          "not ok 6 - only provider with signed contract and current approved qualification is active",
+          "not ok 8 - calendar uses latest immutable company decision"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 6: \"only provider with signed contract and current approved qualification is active\"",
+          "#         have: 0",
+          "#         want: 1",
+          "# Failed test 8: \"calendar uses latest immutable company decision\"",
+          "#         have: NULL",
+          "#         want: 2",
+          "# Looks like you failed 2 tests of 12"
+        ],
+        "durationMs": 790
+      },
+      {
+        "file": "0234_live_session_authorization.test.sql",
+        "status": "FAIL",
+        "planned": 18,
+        "assertions": 18,
+        "numberingValid": true,
+        "failures": [
+          "not ok 17 - request hook configuration is bound to this database, not other projects in the cluster"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 17: \"request hook configuration is bound to this database, not other projects in the cluster\"",
+          "# Looks like you failed 1 test of 18"
+        ],
+        "durationMs": 963
+      },
+      {
+        "file": "0242_central_fiscal_governance.test.sql",
+        "status": "FAIL",
+        "planned": 24,
+        "assertions": 24,
+        "numberingValid": true,
+        "failures": [
+          "not ok 3 - administration role alone cannot read central fiscal governance"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 3: \"administration role alone cannot read central fiscal governance\"",
+          "#       caught: no exception",
+          "#       wanted: 42501",
+          "# Looks like you failed 1 test of 24"
+        ],
+        "durationMs": 1017
+      },
+      {
+        "file": "0347_provider_monthly_closing.test.sql",
+        "status": "ERROR",
+        "code": "55000",
+        "message": "REVERSAL_NOT_INVOICED",
+        "durationMs": 982
+      },
+      {
+        "file": "0356_provider_dispute_economic_authority.test.sql",
+        "status": "ERROR",
+        "code": "55000",
+        "message": "REVERSAL_NOT_INVOICED",
+        "durationMs": 1078
+      },
+      {
+        "file": "0359_provider_finance_civil_date.test.sql",
+        "status": "FAIL",
+        "planned": 27,
+        "assertions": 27,
+        "numberingValid": true,
+        "failures": [
+          "not ok 20 - Finance approval still requires an authorized AAL2 reviewer"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 20: \"Finance approval still requires an authorized AAL2 reviewer\"",
+          "# Looks like you failed 1 test of 27"
+        ],
+        "durationMs": 1372
+      },
+      {
+        "file": "0360_admin_territoires_queue_cells.test.sql",
+        "status": "FAIL",
+        "planned": 6,
+        "assertions": 6,
+        "numberingValid": true,
+        "failures": [
+          "not ok 5 - Bibliothèque uses the library version name"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 5: \"Bibliothèque uses the library version name\"",
+          "#         have: TERR_360",
+          "#         want: Informatique",
+          "# Looks like you failed 1 test of 6"
+        ],
+        "durationMs": 1375
+      },
+      {
+        "file": "0360_provider_finance_close_to_payment.test.sql",
+        "status": "ERROR",
+        "code": "42501",
+        "message": "PROVIDER_PAYMENT_PLAN_DENIED",
+        "durationMs": 1002
+      },
+      {
+        "file": "0367_franchise_application_dossiers.test.sql",
+        "status": "ERROR",
+        "code": "42501",
+        "message": "FRANCHISE_APPLICATION_DENIED",
+        "durationMs": 778
+      },
+      {
+        "file": "0368_franchise_role_capabilities_volume_scope.test.sql",
+        "status": "FAIL",
+        "planned": 24,
+        "assertions": 24,
+        "numberingValid": true,
+        "failures": [
+          "not ok 9 - old A document is not revived as current when the latest family version targets B only"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 9: \"old A document is not revived as current when the latest family version targets B only\"",
+          "#         have: 1",
+          "#         want: 0",
+          "# Looks like you failed 1 test of 24"
+        ],
+        "durationMs": 1506
+      },
+      {
+        "file": "0380_onboarding_chain_completion.test.sql",
+        "status": "ERROR",
+        "code": "42501",
+        "message": "FRANCHISE_APPLICATION_DENIED",
+        "durationMs": 782
+      },
+      {
+        "file": "0388_admin_actor_directory_profile_details.test.sql",
+        "status": "ERROR",
+        "code": "42883",
+        "message": "function is(text, unknown, unknown) does not exist",
+        "durationMs": 771
+      },
+      {
+        "file": "0390_org002_user_fiche_excellence.test.sql",
+        "status": "FAIL",
+        "planned": 5,
+        "assertions": 5,
+        "numberingValid": true,
+        "failures": [
+          "not ok 2 - persona repair promotes Hatim/IT identity and franchise scopes"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 2: \"persona repair promotes Hatim/IT identity and franchise scopes\"",
+          "# Looks like you failed 1 test of 5"
+        ],
+        "durationMs": 1485
+      },
+      {
+        "file": "0405_reset_demo_workspace_v1.test.sql",
+        "status": "FAIL",
+        "planned": 3,
+        "assertions": 3,
+        "numberingValid": true,
+        "failures": [
+          "not ok 1 - reset_demo_workspace_v1 exists",
+          "not ok 2 - demo workspace org registry exists",
+          "not ok 3 - reset denied in PRODUCTION"
+        ],
+        "skips": [],
+        "diagnostics": [
+          "# Failed test 1: \"reset_demo_workspace_v1 exists\"",
+          "# Failed test 2: \"demo workspace org registry exists\"",
+          "# Failed test 3: \"reset denied in PRODUCTION\"",
+          "#       caught: 42883: function public.reset_demo_workspace_v1() does not exist",
+          "#       wanted: 42501: DEMO_WORKSPACE_RESET_ENVIRONMENT_DENIED",
+          "# Looks like you failed 3 tests of 3"
+        ],
+        "durationMs": 1520
+      },
+      {
+        "file": "0408_compliance_entitlement_guards.test.sql",
+        "status": "ERROR",
+        "code": "42883",
+        "message": "function ok(text, unknown) does not exist",
+        "durationMs": 801
+      },
+      {
+        "file": "0409_qualification_company_gate.test.sql",
+        "status": "ERROR",
+        "code": "42883",
+        "message": "function ok(text, unknown) does not exist",
+        "durationMs": 771
+      }
+    ]
+  }
+}

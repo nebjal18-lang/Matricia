@@ -16,9 +16,9 @@ const crm: FranchiseCrmDashboard = {
     territory: { id: "33333333-3333-4333-8333-333333333333", code: "CASA", nameFr: "Casablanca-Settat", nameAr: "الدار البيضاء-سطات", version: 1 },
   }],
   prospects: [
-    { id: "44444444-4444-4444-8444-444444444444", franchiseId: "22222222-2222-4222-8222-222222222222", territoryVersionId: "33333333-3333-4333-8333-333333333333", type: "PROVIDER", displayName: "Studio Atlas", contactEmail: "a@example.invalid", organizationName: "Studio Atlas", sourceCode: "NETWORK", stage: "VERIFIED", nextFollowupAt: null, rowVersion: 1, activities: [{ id: "1", type: "INVITATION", occurredAt: "2026-09-10T10:00:00.000Z", summary: "Invitation envoyée", evidenceRefs: [{ reference: "invite://atlas" }] }], pipelineEvents: [] },
-    { id: "55555555-5555-4555-8555-555555555555", franchiseId: "22222222-2222-4222-8222-222222222222", territoryVersionId: "33333333-3333-4333-8333-333333333333", type: "CLIENT", displayName: "Conseil stratégique", contactEmail: "c@example.invalid", organizationName: "Conseil stratégique", sourceCode: "RFQ", stage: "RFQ_STARTED", nextFollowupAt: null, rowVersion: 1, activities: [{ id: "3", type: "NOTE", occurredAt: "2026-09-15T09:00:00.000Z", summary: "Besoin cadré", evidenceRefs: [] }], pipelineEvents: [] },
-    { id: "55555555-5555-4555-8555-555555555556", franchiseId: "22222222-2222-4222-8222-222222222222", territoryVersionId: "33333333-3333-4333-8333-333333333333", type: "PROVIDER", displayName: "Conseil Anfa", contactEmail: "anfa@example.invalid", organizationName: "Conseil Anfa", sourceCode: "NETWORK", stage: "PROFILE_STARTED", nextFollowupAt: "2026-09-21T00:00:00.000Z", rowVersion: 1, activities: [], pipelineEvents: [] },
+    { id: "44444444-4444-4444-8444-444444444444", franchiseId: "22222222-2222-4222-8222-222222222222", territoryVersionId: "33333333-3333-4333-8333-333333333333", type: "PROVIDER", displayName: "Studio Atlas", contactEmail: "contact@studio-atlas.ma", organizationName: "Studio Atlas", sourceCode: "NETWORK", stage: "VERIFIED", nextFollowupAt: null, rowVersion: 1, activities: [{ id: "1", type: "INVITATION", occurredAt: "2026-09-10T10:00:00.000Z", summary: "Invitation envoyée", evidenceRefs: [{ reference: "invite://atlas" }] }], pipelineEvents: [] },
+    { id: "55555555-5555-4555-8555-555555555555", franchiseId: "22222222-2222-4222-8222-222222222222", territoryVersionId: "33333333-3333-4333-8333-333333333333", type: "CLIENT", displayName: "Conseil stratégique", contactEmail: "ops@conseil-strategique.ma", organizationName: "Conseil stratégique", sourceCode: "RFQ", stage: "RFQ_STARTED", nextFollowupAt: null, rowVersion: 1, activities: [{ id: "3", type: "NOTE", occurredAt: "2026-09-15T09:00:00.000Z", summary: "Besoin cadré", evidenceRefs: [] }], pipelineEvents: [] },
+    { id: "55555555-5555-4555-8555-555555555556", franchiseId: "22222222-2222-4222-8222-222222222222", territoryVersionId: "33333333-3333-4333-8333-333333333333", type: "PROVIDER", displayName: "Conseil Anfa", contactEmail: "equipe@conseil-anfa.ma", organizationName: "Conseil Anfa", sourceCode: "NETWORK", stage: "PROFILE_STARTED", nextFollowupAt: "2026-09-21T00:00:00.000Z", rowVersion: 1, activities: [], pipelineEvents: [] },
   ],
   metrics: [],
   snapshots: [],
@@ -77,6 +77,9 @@ describe("franchise space boards", () => {
     const folder = renderToStaticMarkup(<NetworkBoard locale="fr" query="" board={board} itemId="44444444-4444-4444-8444-444444444444" view="qualification" />);
     expect(folder).toContain("invite://atlas");
     expect(folder).toContain("/fr/franchise/fournisseurs/44444444-4444-4444-8444-444444444444/capacite");
+    const reseau = renderToStaticMarkup(<NetworkBoard locale="fr" query="" board={board} networkBase="reseau" itemId="44444444-4444-4444-8444-444444444444" view="capacite" />);
+    expect(reseau).toContain("/fr/franchise/reseau/44444444-4444-4444-8444-444444444444/capacite");
+    expect(reseau).not.toContain("/fr/franchise/fournisseurs/44444444-4444-4444-8444-444444444444");
     expect(folder).toContain("Consigner une activité");
     const matching = renderToStaticMarkup(<FranchiseRequestsBoard locale="fr" query="" board={board} itemId="55555555-5555-4555-8555-555555555555" view="matching" />);
     expect(matching).toContain("name=\"q\"");

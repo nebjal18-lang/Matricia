@@ -1,22 +1,14 @@
 export type HomeLocale = "fr" | "ar";
 
 export type HomePremiumCopy = {
-  eyebrow: string;
+  brand: string;
+  brandLead: string;
   titleLead: string;
   titleAccent: string;
   intro: string;
   primaryAction: string;
   providerAction: string;
   preciseNeedAction: string;
-  trust: readonly [string, string, string];
-  quote: string;
-  values: readonly [string, string, string];
-  script: string;
-  spines: readonly [string, string, string];
-  flowLabel: string;
-  flow: readonly { title: string; description: string }[];
-  stagesLabel: string;
-  stages: readonly [string, string, string, string];
   cycleTitle: readonly [string, string];
   cycleLabel: string;
   cycle: readonly string[];
@@ -37,27 +29,15 @@ export type HomePremiumCopy = {
 };
 
 const fr: HomePremiumCopy = {
-  eyebrow: "Des questions au bon partenaire",
+  brand: "Matricia",
+  brandLead: "Pour les entreprises qui veulent avancer avec méthode",
   titleLead: "Découvrez ce qui freine votre entreprise.",
   titleAccent: "Passez aux bonnes solutions.",
   intro:
-    "Répondez à quelques questions. Matricia vous aide à comprendre vos priorités et à trouver les professionnels adaptés pour agir.",
+    "Répondez à quelques questions. Matricia structure vos priorités et vous relie aux professionnels adaptés.",
   primaryAction: "Analyser mon entreprise",
   providerAction: "Proposer mes services",
   preciseNeedAction: "J’ai déjà un besoin précis",
-  trust: ["Simple et confidentiel", "Indépendant et objectif", "Des professionnels qualifiés"],
-  quote: "Des entreprises plus fortes pour un Maroc qui avance",
-  values: ["Expertise", "Confiance", "Progrès"],
-  script: "Des idées en actions",
-  spines: ["Stratégie", "Organisation", "Croissance"],
-  flowLabel: "Comment Matricia vous accompagne",
-  flow: [
-    { title: "Votre situation", description: "Vous répondez à quelques questions" },
-    { title: "Priorité structurée", description: "Matricia analyse et cadre vos priorités" },
-    { title: "Professionnel adapté", description: "Vous êtes mis en relation avec les bons experts" },
-  ],
-  stagesLabel: "Votre parcours, du besoin à la mission",
-  stages: ["Besoin", "Offres", "Choix", "Mission"],
   cycleTitle: ["Un cycle complet", "pour avancer sereinement"],
   cycleLabel: "Le cycle Matricia, étape par étape",
   cycle: ["Comprendre", "Structurer", "Matcher", "Comparer", "Contractualiser", "Exécuter", "Suivre"],
@@ -108,26 +88,14 @@ const fr: HomePremiumCopy = {
 };
 
 const ar: HomePremiumCopy = {
-  eyebrow: "من الأسئلة إلى الشريك المناسب",
+  brand: "ماتريسيا",
+  brandLead: "للمؤسسات التي تريد التقدم بمنهجية",
   titleLead: "اكتشف ما يعيق تطور مؤسستك.",
   titleAccent: "وانتقل إلى الحلول المناسبة.",
-  intro: "أجب عن بعض الأسئلة. تساعدك ماتريسيا على فهم أولوياتك وعلى إيجاد المهنيين المناسبين للتحرك.",
+  intro: "أجب عن بعض الأسئلة. تنظّم ماتريسيا أولوياتك وتربطك بالمهنيين المناسبين.",
   primaryAction: "تحليل مؤسستي",
   providerAction: "تقديم خدماتي",
   preciseNeedAction: "لدي حاجة محددة",
-  trust: ["بسيط وسري", "مستقل وموضوعي", "مهنيون مؤهلون"],
-  quote: "مؤسسات أقوى من أجل مغرب يتقدم",
-  values: ["الخبرة", "الثقة", "التقدم"],
-  script: "أفكار تتحول إلى أفعال",
-  spines: ["الاستراتيجية", "التنظيم", "النمو"],
-  flowLabel: "كيف ترافقك ماتريسيا",
-  flow: [
-    { title: "وضعيتك", description: "تجيب عن بعض الأسئلة" },
-    { title: "أولوية مهيكلة", description: "تحلل ماتريسيا وتؤطر أولوياتك" },
-    { title: "مهني مناسب", description: "نربطك بالخبراء المناسبين" },
-  ],
-  stagesLabel: "مسارك من الحاجة إلى المهمة",
-  stages: ["الحاجة", "العروض", "الاختيار", "المهمة"],
   cycleTitle: ["دورة كاملة", "للتقدم بكل اطمئنان"],
   cycleLabel: "دورة ماتريسيا خطوة بخطوة",
   cycle: ["الفهم", "الهيكلة", "المطابقة", "المقارنة", "التعاقد", "التنفيذ", "المتابعة"],

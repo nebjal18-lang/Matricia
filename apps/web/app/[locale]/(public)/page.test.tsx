@@ -10,28 +10,22 @@ vi.mock("next/image", () => ({
     <img src={props.src} alt={props.alt} />
   ),
 }));
-vi.mock("../connexion/demo-access", () => ({
-  DemoAccess: () => (
-    <section id="demo-access-title">
-      {["client", "provider", "franchise", "admin"].map((persona) => (
-        <input key={persona} name="persona" value={persona} readOnly />
-      ))}
-    </section>
-  ),
-}));
 
 import PublicHomePage from "./page";
 
 describe("PublicHomePage", () => {
-  it("affiche les quatre raccourcis avant le contenu principal lorsque la démo production est activée", async () => {
+  it("affiche les quatre accès aux tableaux de bord quand la démo production est activée", async () => {
+    vi.stubEnv("APP_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
     vi.stubEnv("MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED", "true");
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
+    expect(html).toContain("Explorer les tableaux de bord démo");
+    expect(html.indexOf("Explorer les tableaux de bord démo")).toBeLessThan(html.indexOf('id="home-title"'));
     for (const persona of ["client", "provider", "franchise", "admin"]) {
       expect(html).toContain(`name="persona" value="${persona}"`);
     }
-    expect(html.indexOf('id="demo-access-title"')).toBeLessThan(html.indexOf('id="home-title"'));
+    expect(html).toContain('name="next" value="/fr/administration/command-center"');
   });
 
   it("présente les trois intentions, sept étapes et l’aperçu en français", async () => {
@@ -44,7 +38,7 @@ describe("PublicHomePage", () => {
     expect(html).toContain('href="/fr/besoin"');
     expect(html).toContain("Un cycle complet");
     expect(html).not.toContain("/home-v2/hero-plate.png");
-    expect(html).toContain("Votre situation");
+    expect(html).toContain("Des priorités claires");
     expect(html).toContain("/home-v2/hero-collaboration.png");
     expect(html).not.toContain("200 services");
     expect((html.match(/<section/g) ?? []).length).toBeGreaterThanOrEqual(5);

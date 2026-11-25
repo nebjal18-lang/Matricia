@@ -35,7 +35,7 @@ describe("native governed catalogue calendar commands", () => {
         rpc.mockResolvedValue({ data: { outcome: "CATALOG_RELEASE_WINDOW_CLOSED", request_id: other, release_id: other, effective_until: time }, error: null });
         expect(await decideWindowClosure(client, review, true, "Clôture vérifiée indépendamment", key)).toEqual({ ok: false, reason: "INVALID_RESPONSE" });
     });
-    it.each([["42501", "CENTRAL_MFA_REQUIRED", "MFA_REQUIRED"], ["42501", "CATALOG_SCOPE_DENIED", "FORBIDDEN"], ["42501", "CATALOG_AUTH_REQUIRED", "UNAUTHENTICATED"], ["40001", "SOURCE_CHANGED", "CONFLICT"], ["55000", "SOURCE_INELIGIBLE", "CONFLICT"], ["PGRST202", "MISSING", "CONFIGURATION"], ["08006", "CONNECTION", "QUERY_FAILED"]])("keeps %s/%s distinct", async (code, message, reason) => {
+    it.each([["42501", "CENTRAL_MFA_REQUIRED", "MFA_REQUIRED"], ["42501", "CATALOG_SCOPE_DENIED", "FORBIDDEN"], ["42501", "CATALOG_AUTH_REQUIRED", "UNAUTHENTICATED"], ["PT409", "SOURCE_CHANGED", "CONFLICT"], ["55000", "SOURCE_INELIGIBLE", "CONFLICT"], ["PGRST202", "MISSING", "CONFIGURATION"], ["08006", "CONNECTION", "QUERY_FAILED"]])("keeps %s/%s distinct", async (code, message, reason) => {
         expect(calendarRpcFailure({ code, message })).toBe(reason);
         rpc.mockResolvedValue({ data: null, error: { code, message } });
         expect(await requestWindowClosure(client, conflict, "Motif de la demande", key)).toEqual({ ok: false, reason });

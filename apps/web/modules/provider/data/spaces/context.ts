@@ -1,11 +1,12 @@
 import {z}from"zod";
 import {readAllPages}from"@/modules/shared/lib/data/read-pages";
-import {getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
+import {getServerAuthUser,getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
 import type{Locale}from"@/modules/shared/lib/i18n/locale";
 import {selectProviderMembership}from"./organization-context";
 import {classifyAuthReadFailure}from"@/modules/shared/lib/auth/read-failure";
 export async function resolveProviderSpace(input:{locale:Locale;organizationId?:string}){
- const client=await getSupabaseServerClient(),{data:auth,error:authError}=await client.auth.getUser();
+ const [client,authResult]=await Promise.all([getSupabaseServerClient(),getServerAuthUser()]);
+ const {data:auth,error:authError}=authResult;
  const authFailure=classifyAuthReadFailure(authError);
  if(authFailure==="UNAVAILABLE")return{status:"success"as const,readError:"AUTH_QUERY_FAILED"as const,locale:input.locale,userEmail:null,selectedOrganizationId:null,selectedQuery:"",organizationName:null,organizations:[]};
  if(authFailure==="UNAUTHENTICATED"||!auth.user)return{status:"unauthenticated"as const};

@@ -2,7 +2,7 @@ import {interventionMode} from "./intervention-modes";
 import { loadProviderRegions } from "./regions-repository";
 import { selectProviderMembership } from "@/modules/provider/data/spaces/organization-context";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import type { ProviderDashboard } from "./model";
 
@@ -50,8 +50,8 @@ export function diagnoseProviderServiceLabelCoverage(serviceIds: readonly string
 }
 
 export async function loadProviderDashboard(requestedOrganizationId?: string, documentPage = 1, documentFilter:{search?:string;kinds?:string[]} = {}): Promise<{ status: "success"; dashboard: ProviderDashboard } | { status: "error"; reason: ProviderDashboardErrorReason }> {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth, error: authError } = authResult;
   const authFailure = classifyAuthReadFailure(authError);
   if (authFailure) return { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "AUTH_QUERY_FAILED" };
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };

@@ -30,6 +30,20 @@ const dashboard: MarketingDashboard = {
 const keys = { consent: own, campaign: own, scheduleRule: own, brandKit: own, templates: own };
 
 describe("espace Marketing prestataire et franchisé", () => {
+  it.each(["fr", "ar"] as const)("renders scheduled instants identically across server and browser timezones (%s)", (locale) => {
+    const scheduled: MarketingDashboard = {...dashboard,
+      calendars:[{id:own,organizationId:own,scheduleRuleId:own,monthStart:"2026-11-01",status:"APPROVED",generatedAt:null,approvedAt:null,rowVersion:1}],
+      calendar:[{id:content,calendarId:own,campaignId:ownCampaign,contentVersionId:content,scheduledAt:"2026-11-22T23:30:00Z",status:"SANDBOXED"}],
+    };
+    const render=()=>renderToStaticMarkup(<MarketingPanel workspace dashboard={scheduled} locale={locale} m={getMarketingMessages(locale)} keys={keys}/>);
+    try {
+      vi.stubEnv("TZ","America/Toronto");
+      const server=render();
+      vi.stubEnv("TZ","Africa/Casablanca");
+      expect(render()).toBe(server);
+      expect(server).toContain("23:30");
+    } finally {vi.unstubAllEnvs();}
+  });
   it("ne garde que l’organisation de l’espace", () => {
     const scoped = scopeMarketingDashboard(dashboard, own);
     expect(scoped.organizations.map((value) => value.id)).toEqual([own]);

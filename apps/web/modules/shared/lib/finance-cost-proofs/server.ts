@@ -11,7 +11,7 @@ export function financeCostFileFailure(code: string, status = 503): Response {
   return Response.json({ code }, { status, headers: financeCostFileHeaders });
 }
 function rpcStatus(code: string | undefined): number {
-  return code === "42501" ? 403 : code === "22023" ? 400 : code === "40001" || code === "55000" || code === "55P03" ? 409 : 503;
+  return code === "42501" ? 403 : code === "22023" ? 400 : (code === "40001" || code === "PT409") || code === "55000" || code === "55P03" ? 409 : 503;
 }
 async function deadline<T>(input: PromiseLike<T>, ms: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;

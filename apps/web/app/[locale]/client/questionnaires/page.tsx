@@ -33,7 +33,7 @@ export default async function ClientQuestionnairesPage({ params, searchParams }:
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="needs"
       title={messages.title}
       lead={messages.description}

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import { loadProviderBilling } from "@/modules/provider/data/billing/repository";
 import { BillingBoard } from "@/modules/provider/screens/spaces/boards";
@@ -10,21 +11,30 @@ import { BillingPanel } from "@/modules/provider/screens/facturation/billing-pan
 import { getBillingMessages } from "@/modules/provider/screens/facturation/messages";
 import { loadBillingMissionOptions } from "@/modules/provider/screens/facturation/options";
 import { ProviderActions, ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 
-export default async function ProviderBillingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string;page?:string }> }) {
+export default async function ProviderBillingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string; page?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const space = await resolveProviderSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/facturation` }));
+  const contextState = providerContextReadState(space, query.organizationId);
   const m = getBillingMessages(locale);
   const c = providerCopy(locale);
-  const result = await loadProviderBilling(query.organizationId,undefined,/^\d{1,6}$/.test(query.page??"")?Number(query.page):1);
+  if (contextState) {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={c.finTitle} lead={c.finLead} kicker={c.kicker}>
+        <ProviderReadState locale={locale} state={contextState} retryHref={`/${locale}/sous-traitant/facturation${space.selectedQuery}`} reason={space.readError ?? undefined} />
+      </ProviderAppShell>
+    );
+  }
+  const result = await loadProviderBilling(space.selectedOrganizationId ?? undefined, undefined, /^\d{1,6}$/.test(query.page ?? "") ? Number(query.page) : 1);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/facturation` }));
   const missions = result.status === "success" ? await loadBillingMissionOptions(result.dashboard.organizationId, locale) : [];
   return (
     <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="billing" title={c.finTitle} lead={c.finLead} kicker={c.kicker} actions={<ProviderActions href="#facturation-operation" label={c.createInvoice} />}>
-      {result.status==="success"?<ProviderListPagination locale={locale} path={`/${locale}/sous-traitant/facturation`} query={space.selectedQuery} page={result.dashboard.listPage??1} hasMore={Boolean(result.dashboard.hasMoreInvoices)}/>:null}
+      {result.status === "success" ? <ProviderListPagination locale={locale} path={`/${locale}/sous-traitant/facturation`} query={space.selectedQuery} page={result.dashboard.listPage ?? 1} hasMore={Boolean(result.dashboard.hasMoreInvoices)} /> : null}
       <BillingBoard locale={locale} query={space.selectedQuery} dashboard={result.status === "success" ? result.dashboard : null} />
       <details id="facturation-operation" className="client-ops">
         <summary>{c.opsBilling}</summary>

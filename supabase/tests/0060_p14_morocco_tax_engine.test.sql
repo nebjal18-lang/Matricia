@@ -63,7 +63,7 @@ select ok(not exists(select 1 from public.tax_rule_versions where jurisdiction_c
 -- 30
 select ok(not exists(select 1 from public.tax_rule_versions where jurisdiction_code='MA'and status='ACTIVE'and professional_validation_status='DEMO'),'no DEMO tax rule remains ACTIVE');
 -- 31
-select ok((select p.prosrc like'%p_actor=auth.uid()%'and p.prosrc like'%coalesce(auth.jwt()->>''aal'','''')=''aal2''%'and p.prosrc like'%FINANCE_MANAGER%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='morocco_tax_admin'),'tax administration binds the caller identity, fails closed on AAL2 and checks privileged roles');
+select ok((select regexp_replace(p.prosrc, '\s+', '', 'g') like '%p_actor=auth.uid()%' and regexp_replace(p.prosrc, '\s+', '', 'g') like '%coalesce(auth.jwt()->>''aal'','''')=''aal2''%' and p.prosrc like '%FINANCE_MANAGER%' and p.prosrc like '%MATRICIA_ADMIN%'from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'and p.proname='morocco_tax_admin'),'tax administration binds the caller identity, fails closed on AAL2 and checks privileged roles');
 -- 32
 select ok((select count(*)=4 and bool_and(pg_get_functiondef(p.oid)like'%morocco_tax_admin%')from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'and p.proname=any(array['list_morocco_tax_rules','simulate_morocco_tax','propose_morocco_tax_rule','decide_morocco_tax_rule'])),'all public tax workflows enforce the central AAL2 authorization helper');
 -- 33

@@ -169,6 +169,8 @@ do $$declare requested jsonb; started jsonb; submitted jsonb; reviewed jsonb;beg
  perform set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
  perform public.declare_provider_capacity('fd110000-0000-4000-8000-000000000002','fd300000-0000-4000-8000-000000000007','AVAILABLE',5,2,'TEST provider capacity declaration','TEST-0104-capacity');
 end$$;
+-- Eligibility observes native qualification and capacity on the next request.
+-- matricia:test-request-boundary
 insert into public.matching_runs(id,request_id,request_version_id,policy_version,status,target_panel_size,started_by,completed_at)
 values('fd170000-0000-4000-8000-000000000001','fd140000-0000-4000-8000-000000000001','fd160000-0000-4000-8000-000000000001','MATCH-V1','COMPLETED',1,'fd100000-0000-4000-8000-000000000001',clock_timestamp());
 insert into public.matching_candidates(id,matching_run_id,provider_organization_id,eligible,score_basis_points,score_explanation,rotation_component)
@@ -243,6 +245,8 @@ declare c public.contracts%rowtype;v public.contract_versions%rowtype;client_par
  return result||jsonb_build_object('development_mock',true,'mode','NON_CONTRACTUAL_DEMO');
 end$$;
 select pg_temp.prepare_governed_mock_policy_v1('fd110000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000004','fd100000-0000-4000-8000-000000000005','accept338');
+-- The approved native policy becomes effective on the following RPC request.
+-- matricia:test-request-boundary
 select pg_temp.complete_governed_mock_contract_v1('fd210000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000001','fd100000-0000-4000-8000-000000000002','fd100000-0000-4000-8000-000000000004','fd100000-0000-4000-8000-000000000005','accept338');
 select ok(private.contract_version_signature_effective_v1('fd210000-0000-4000-8000-000000000001','fd220000-0000-4000-8000-000000000001'),'contract is sealed by real native governed DEV-mock flow, not forged signature validation');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);set local role authenticated;
@@ -252,7 +256,7 @@ select is((select v#>>'{deliverables,0,label_fr}'from accept338 where k='prepara
 select is((select v#>>'{deliverables,0,source_description}'from accept338 where k='preparation'),'Le texte libre signé reste en français.','user-authored source is preserved verbatim');
 select is((select v#>>'{criteria,1,key}'from accept338 where k='preparation'),'VERIFY','criteria come from frozen governed checklist');
 create function pg_temp.mission338(p_hash text,p_key text,p_deliverable text default'SIGNED_REPORT',p_criterion text default'VERIFY',p_owner uuid default'fd110000-0000-4000-8000-000000000002')returns jsonb language sql as $$select public.create_client_prepared_mission_v1('fd210000-0000-4000-8000-000000000001','fd220000-0000-4000-8000-000000000001',p_hash,jsonb_build_array(jsonb_build_object('deliverable_key',p_deliverable,'due_at',(current_date+14)::text||'T12:00:00Z','owner_organization_id',p_owner,'criterion_keys',jsonb_build_array(p_criterion))),p_key)$$;
-select throws_ok($$select pg_temp.mission338(repeat('0',64),'accept338-stale')$$,'40001','MISSION_CHECKLIST_CHANGED','stale checklist hash is refused before writing');
+select throws_ok($$select pg_temp.mission338(repeat('0',64),'accept338-stale')$$,'PT409','MISSION_CHECKLIST_CHANGED','stale checklist hash is refused before writing');
 select throws_ok($$select pg_temp.mission338((select v->>'template_hash'from accept338 where k='preparation'),'accept338-invented-deliverable','INVENTED')$$,'22023','INVALID_MISSION_ASSIGNMENT_SCOPE','Client cannot invent a signed deliverable');
 select throws_ok($$select pg_temp.mission338((select v->>'template_hash'from accept338 where k='preparation'),'accept338-invented-criterion','SIGNED_REPORT','INVENTED')$$,'22023','MISSION_CRITERION_OUTSIDE_CHECKLIST','Client cannot invent checklist criterion');
 select throws_ok($$select pg_temp.mission338((select v->>'template_hash'from accept338 where k='preparation'),'accept338-foreign-owner','SIGNED_REPORT','VERIFY','fd110000-0000-4000-8000-000000000003')$$,'22023','INVALID_MISSION_ASSIGNMENT_SCOPE','responsibility cannot be assigned outside contract parties');

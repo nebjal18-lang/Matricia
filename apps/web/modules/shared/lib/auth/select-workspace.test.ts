@@ -19,4 +19,12 @@ describe("authorized workspace switch", () => {
     expect(mocks.destination).toHaveBeenCalledWith("fr", "/fr/tableau-de-bord?workspace=client&organizationId=member-org");
     expect(mocks.set).toHaveBeenCalledWith("matricia.workspace", "client", expect.objectContaining({ httpOnly: true, sameSite: "lax" }));
   });
+  it("preserves the dashboard return path when the session is missing", async () => {
+    mocks.read.mockResolvedValue({ status: "error", reason: "UNAUTHENTICATED" });
+    await expect(selectWorkspace(form("client"))).rejects.toThrow("REDIRECT:/fr/connexion?next=%2Ffr%2Ftableau-de-bord");
+  });
+  it("routes a navigation query failure to recovery", async () => {
+    mocks.read.mockResolvedValue({ status: "error", reason: "QUERY_FAILED" });
+    await expect(selectWorkspace(form("client"))).rejects.toThrow("REDIRECT:/fr/indisponible?next=%2Ffr%2Ftableau-de-bord");
+  });
 });

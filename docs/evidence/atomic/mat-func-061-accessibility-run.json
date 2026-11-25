@@ -1,0 +1,17 @@
+{
+  "requirementId": "MAT-FUNC-061",
+  "date": "2026-11-09",
+  "result": "PASS",
+  "command": "pnpm.cmd exec playwright test --project=chromium-desktop tests/e2e/mat-func-061-accessibility-smoke.spec.ts",
+  "env": {
+    "E2E_EXTERNAL_SERVER": "1",
+    "E2E_BASE_URL": "http://localhost:5173",
+    "E2E_CLIENT_STORAGE_STATE": ".tmp/e2e-states/client.json"
+  },
+  "summary": "FR+AR axe (wcag2a/aa + wcag21a/aa) on authenticated client documents and questionnaires surfaces; zero violations.",
+  "surfaces": ["client/documents", "client/questionnaires"],
+  "tests": 2,
+  "passed": 2,
+  "failed": 0,
+  "notes": "Headings aligned to live copy Documents/الوثائق. Exit code 1 from PowerShell NO_COLOR/FORCE_COLOR stderr noise; Playwright reported 2/2 passed."
+}

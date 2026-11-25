@@ -7,6 +7,7 @@ import {formatMinorExact as formatMinor} from "@/modules/shared/lib/solution-ins
 import {workflowStatusLabel} from "@/modules/shared/lib/i18n/workflow-statuses";
 import {subscriptionDateLabel} from "../abonnement/display";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 export type SubscriptionCreditsView = {
   balance: string;
@@ -38,10 +39,10 @@ export function SubscriptionBoard({
   return (
     <main className="client-page">
       <nav className="client-tabs" aria-label={c.subPageTitle}>
-        <a href="#abonnement" aria-current="page">{c.mySub}</a>
-        <a href="#factures">{c.paymentsTab}</a>
-        <a href="#credits">{c.myCredits}</a>
-        <a href="#boxes">{c.boxesTab}</a>
+        <HashAwareLink href="#abonnement" aria-current="page">{c.mySub}</HashAwareLink>
+        <HashAwareLink href="#factures">{c.paymentsTab}</HashAwareLink>
+        <HashAwareLink href="#credits">{c.myCredits}</HashAwareLink>
+        <HashAwareLink href="#boxes">{c.boxesTab}</HashAwareLink>
       </nav>
       <section className="client-board client-board-compare" id="abonnement">
         <article className="client-card">
@@ -51,7 +52,7 @@ export function SubscriptionBoard({
           </header>
           <h3>{plan ? `${plan.code} · v${plan.version}` : dashboard.organizationName}</h3>
           {subscription?.currentPeriodEnd ? <p>{locale === "ar" ? "التجديد" : "Renouvellement"}: {subscriptionDateLabel(subscription.currentPeriodEnd,locale)}</p> : null}
-          <a href="#plans" className="client-cta">{c.manageSub}</a>
+          <HashAwareLink href="#plans" className="client-cta">{c.manageSub}</HashAwareLink>
         </article>
         <article className="client-card">
           <header><h2>{c.inBrief}</h2></header>
@@ -67,7 +68,7 @@ export function SubscriptionBoard({
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{locale==="fr"?"Derniers cycles comptabilisés":"آخر الدورات المسجلة"}</h2>
-            <Link href={`/${locale}/client/finances${query}#documents-commerciaux`} className="client-text-link">{c.seeAllFin}</Link>
+            <HashAwareLink href={`/${locale}/client/finances${query}#documents-commerciaux`} className="client-text-link">{c.seeAllFin}</HashAwareLink>
           </header>
           {cycles.length === 0 ? <p>{locale === "ar" ? "لا توجد دورة فوترة بعد." : "Aucun cycle de facturation pour le moment."}</p> : (
             <div className="client-table-wrap">
@@ -96,7 +97,9 @@ export function SubscriptionBoard({
           </header>
           <p>{c.creditExplain}</p>
           <p><strong dir="ltr">{credits.balance} {credits.unitCode}</strong></p>
-          {credits.operations.length === 0 ? null : (
+          {credits.operations.length === 0 ? (
+            <p role="status">{locale === "ar" ? "لا عمليات رصيد ظاهرة بعد." : "Aucune opération de crédits visible pour le moment."}</p>
+          ) : (
             <ul className="client-feed">
               {credits.operations.slice(0, 4).map((item) => (
                 <li key={item.id}><Link href={item.href}><span>{item.title}</span><em dir="ltr">{item.quantity}</em></Link></li>
@@ -105,7 +108,9 @@ export function SubscriptionBoard({
           )}
           <Link href={`/${locale}/client/credits${query}`} className="client-cta">{c.seeCredits}</Link>
         </article>
-        <article className="client-card" id="boxes">
+      </section>
+      <section className="client-board client-board-compare" id="boxes">
+        <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.myBoxes}</h2>
             <Link href={`/${locale}/client/credits${query}`} className="client-text-link">{c.seeAllBoxes}</Link>

@@ -146,7 +146,7 @@ select is((select v->>'outcome'from p333 where k='pending'),'CLIENT_APPROVAL_REQ
 select is((select count(*)::integer from public.client_cost_allocations where organization_id='f7010000-0000-0000-0000-000000000001'),1,'pending approval leaves the allocation ledger untouched');
 select is((select count(*)::integer from private.client_approval_commands_v1 where organization_id='f7010000-0000-0000-0000-000000000001'),1,'exact authorized command and original key are retained');
 select ok((select not can_resume and not completed from public.list_my_client_approval_command_states_v1('f7010000-0000-0000-0000-000000000001',array[(select(v->>'approval_request_id')::uuid from p333 where k='pending')])),'pending operation is not presented as executable');
-select throws_ok($$select public.execute_client_approved_commitment_v1((select(v->>'approval_request_id')::uuid from p333 where k='pending'),1)$$,'40001','CLIENT_APPROVAL_NOT_APPROVED_OR_CHANGED','a pending command cannot be resumed');
+select throws_ok($$select public.execute_client_approved_commitment_v1((select(v->>'approval_request_id')::uuid from p333 where k='pending'),1)$$,'PT409','CLIENT_APPROVAL_NOT_APPROVED_OR_CHANGED','a pending command cannot be resumed');
 select set_config('request.jwt.claim.sub','f7000000-0000-0000-0000-000000000002',true);select set_config('request.jwt.claims','{"sub":"f7000000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal2"}',true);
 select public.decide_business_approval((select(v->>'approval_request_id')::uuid from p333 where k='pending'),1,'APPROVE','TEST independent execution approval','client333-approve');
 select throws_ok($$select public.execute_client_approved_commitment_v1((select(v->>'approval_request_id')::uuid from p333 where k='pending'),2)$$,'42501','CLIENT_APPROVAL_RESUME_DENIED','the approver cannot execute by impersonating the original requester');
@@ -162,7 +162,7 @@ insert into p333 values('pending-2',public.record_client_typed_cost_allocation('
 select set_config('request.jwt.claim.sub','f7000000-0000-0000-0000-000000000002',true);select set_config('request.jwt.claims','{"sub":"f7000000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal2"}',true);
 select public.decide_business_approval((select(v->>'approval_request_id')::uuid from p333 where k='pending-2'),1,'REJECT','TEST independent refusal','client333-reject');
 select set_config('request.jwt.claim.sub','f7000000-0000-0000-0000-000000000001',true);select set_config('request.jwt.claims','{"sub":"f7000000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
-select throws_ok($$select public.execute_client_approved_commitment_v1((select(v->>'approval_request_id')::uuid from p333 where k='pending-2'),2)$$,'40001','CLIENT_APPROVAL_NOT_APPROVED_OR_CHANGED','a rejected operation cannot be resurrected');
+select throws_ok($$select public.execute_client_approved_commitment_v1((select(v->>'approval_request_id')::uuid from p333 where k='pending-2'),2)$$,'PT409','CLIENT_APPROVAL_NOT_APPROVED_OR_CHANGED','a rejected operation cannot be resurrected');
 select is((select count(*)::integer from public.client_cost_allocations where organization_id='f7010000-0000-0000-0000-000000000001'),2,'refusal leaves no financial effect');
 
 select * from finish();

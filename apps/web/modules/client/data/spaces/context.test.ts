@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ from: vi.fn(), getUser: vi.fn() }));
 vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("NOT_FOUND"); }, redirect: (path: string) => { throw new Error(`REDIRECT:${path}`); } }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ from: mocks.from, auth: { getUser: mocks.getUser } }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ from: mocks.from, auth: { getUser: mocks.getUser } }), getServerAuthUser: async () => mocks.getUser() }));
 import { resolveClientSpace } from "./context";
 const org = "11111111-1111-4111-8111-111111111111";
 function table(data: unknown[], error: unknown = null) {
@@ -16,7 +16,7 @@ describe("selected client organization", () => {
   await expect(resolveClientSpace({ locale:"fr",organizationId:"other-org" })).rejects.toThrow("NOT_FOUND");
  });
  it("preserves the authorized explicit tenant", async () => {
-  mocks.from.mockImplementation((name: string) => name === "organization_memberships" ? table([{id:"member1",organization_id:org}]) : name === "organization_member_roles" ? table([{membership_id:"member1"}]) : table([{display_name:"Entreprise"}]));
+  mocks.from.mockImplementation((name: string) => name === "organization_memberships" ? table([{id:"member1",organization_id:org,organizations:{display_name:"Entreprise"}}]) : name === "organization_member_roles" ? table([{membership_id:"member1"}]) : table([]));
   const result=await resolveClientSpace({locale:"fr",organizationId:org});
   expect(result).toMatchObject({status:"success",selectedOrganizationId:org,selectedQuery:`?organizationId=${org}`,organizationName:"Entreprise"});
  });
@@ -26,7 +26,7 @@ describe("selected client organization", () => {
   expect(mocks.from).not.toHaveBeenCalled();
  });
  it("rejects an organization projection error instead of displaying an unnamed tenant", async () => {
-  mocks.from.mockImplementation((name:string)=>name==="organization_memberships"?table([{id:"member1",organization_id:org}]):name==="organization_member_roles"?table([{membership_id:"member1"}]):table([],{code:"503"}));
+  mocks.from.mockImplementation((name:string)=>name==="organization_memberships"?table([{id:"member1",organization_id:org,organizations:null}]):name==="organization_member_roles"?table([{membership_id:"member1"}]):table([]));
   await expect(resolveClientSpace({locale:"ar",organizationId:org})).rejects.toThrow("CLIENT_CONTEXT_UNAVAILABLE");
  });
  it("surfaces membership read failure", async () => { mocks.from.mockReturnValue(table([],{code:"503"})); await expect(resolveClientSpace({locale:"fr"})).rejects.toThrow("CLIENT_CONTEXT_UNAVAILABLE"); });

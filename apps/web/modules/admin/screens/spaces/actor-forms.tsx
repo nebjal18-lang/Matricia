@@ -205,6 +205,7 @@ export function ActorIntentForm({
       <input type="hidden" name="reason" value={reason} />
       <button type="submit" className={tone === "danger" ? "admin-danger-cta" : tone === "soft" ? "admin-soft-cta" : "client-ghost-link"} disabled={pending}>{pending ? "…" : label}</button>
       {state.status === "success" ? <p role="status">{locale === "ar" ? "طلب مسجَّل." : "Demande enregistrée."}</p> : null}
+      {state.status === "error" ? <p role="alert" className="admin-error">{locale === "ar" ? "تعذّر تسجيل الطلب. تحققوا من الصلاحيات وحاولوا مجدداً." : "Demande non enregistrée. Vérifiez vos habilitations puis réessayez."}</p> : null}
     </form>
   );
 }
@@ -239,7 +240,7 @@ export function EditUserRolesForm({
   const [newRole, setNewRole] = useState(currentRole);
   const [reason, setReason] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  const elevated = /OWNER|ADMIN|MANAGER/.test(newRole) && !/OWNER|ADMIN|MANAGER/.test(currentRole);
+  const elevated = /OWNER|ADMIN|MANAGER/.test(newRole) && !/OWNER|ADMIN|MANAGER/.test(sourceRole || currentRole);
   const labels: Record<string, string> = locale === "ar"
     ? {
       seeUsers: "عرض المستخدمين", createUsers: "إنشاء مستخدمين", editUsers: "تعديل المستخدمين", manageRoles: "إدارة الأدوار", sendInvites: "إرسال دعوات",
@@ -274,7 +275,6 @@ export function EditUserRolesForm({
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="resourceId" value={userId} />
       <input type="hidden" name="resourceType" value="MEMBERSHIP" />
-      <input type="hidden" name="intent" value="CHANGE_CONFIGURATION" />
       <input type="hidden" name="currentRole" value={sourceRole} />
       <input type="hidden" name="currentFranchiseId" value={sourceFranchise??""}/>
       <div className="client-stack">
@@ -359,7 +359,7 @@ export function EditUserRolesForm({
         <div className="admin-form-foot">
           <Link href={`/${locale}/administration/utilisateurs/${userId}${query}`} className="client-ghost-link">{c.cancel}</Link>
           <button type="submit" name="intent" value="SAVE_DRAFT" className="admin-soft-cta" disabled={pending}>{c.saveDraft}</button>
-          <button type="submit" className="admin-primary-cta" disabled={pending}>{pending ? "…" : a.submitChange}</button>
+          <button type="submit" name="intent" value="CHANGE_CONFIGURATION" className="admin-primary-cta" disabled={pending}>{pending ? "…" : a.submitChange}</button>
         </div>
         <Feedback state={state} locale={locale} success={locale === "ar" ? "طلب التعديل مسجَّل للمصادقة." : "Modification soumise à la validation à quatre yeux."} />
       </div>
@@ -390,7 +390,7 @@ export function EditUserRolesForm({
           <strong>{a.archiveUser}</strong>
           <p>{a.archiveUserLead}</p>
           <p className="client-access-note">{a.audited}</p>
-          <ActorIntentForm locale={locale} organizationId={organizationId} resourceId={userId} resourceType="MEMBERSHIP" intent="SUSPEND_ENTITY" reason="Archivage utilisateur demandé. Aucune suppression définitive." label={a.archiveUser} />
+          <ActorIntentForm locale={locale} organizationId={organizationId} resourceId={userId} resourceType="MEMBERSHIP" intent="RESTRICT_ENTITY" reason="Archivage utilisateur demandé. Aucune suppression définitive." label={a.archiveUser} />
         </article>
         <article className="admin-note">
           <strong>{a.noDelete}</strong>

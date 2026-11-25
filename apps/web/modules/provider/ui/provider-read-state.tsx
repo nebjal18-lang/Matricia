@@ -24,7 +24,7 @@ const messages = {
 } as const;
 
 export function ProviderReadState({ locale, state, retryHref, reason, unavailableMessage }: {
-  locale: Locale; state: ReadState; retryHref: string; reason?: string; unavailableMessage?: string;
+  locale: Locale; state: ReadState; retryHref: string; reason?: string | undefined; unavailableMessage?: string;
 }) {
   const copy = messages[locale];
   const [title, detail] = copy[state];
@@ -32,6 +32,7 @@ export function ProviderReadState({ locale, state, retryHref, reason, unavailabl
     <section className="client-card" role={state === "choose-organization" || state === "no-organization" ? "status" : "alert"} data-error-reason={reason}>
       <h2>{title}</h2>
       <p>{state === "unavailable" && unavailableMessage ? unavailableMessage : detail}</p>
+      {reason && state !== "choose-organization" ? <span className="sr-only" data-error-reason-code={reason}>{reason}</span> : null}
       {state === "unavailable" ? <Link href={retryHref} className="client-ghost-link">{copy.retry}</Link> : null}
       {state === "choose-organization" ? <a href="#provider-organization-selector" className="client-ghost-link">{copy.choose}</a> : null}
       {state === "no-organization" || state === "forbidden" ? <Link href={`/${locale}/contact`} className="client-ghost-link">{copy.contact}</Link> : null}

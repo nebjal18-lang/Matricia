@@ -1,11 +1,13 @@
 "use client";
 
-import { useActionState, useId } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useActionState, useId, useTransition, type FormEvent } from "react";
 import { Alert, AlertDescription } from "@/modules/shared/ui/alert";
 import { Badge } from "@/modules/shared/ui/badge";
 import { Button } from "@/modules/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/shared/ui/card";
 import { Label } from "@/modules/shared/ui/label";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 import type { RuleValidationWorkspace } from "@/modules/shared/lib/rule-validation/model";
 import { simulateRules, validateRules, type RuleValidationActionState } from "./actions";
 import type { RuleValidationMessages } from "./messages";
@@ -43,7 +45,7 @@ function ValidationEvidence({ state, messages, locale }: { state: RuleValidation
       <div><dt className="text-muted-foreground">{messages.policy}</dt><dd className={technical} dir="ltr">{report.policy_version}</dd></div>
     </dl>
     <h4 className="font-medium">{messages.errors}</h4>
-    {report.errors.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noErrors}</p> : <ul className="space-y-2">{report.errors.map((error) => <li key={`${error.rule_version_id}-${error.code}`} className="rounded-md border border-destructive/40 p-3 text-sm"><bdi className={technical}>{error.rule_version_id}</bdi><span className="mt-1 block">{localized(messages.validationCodes, error.code, messages.failed)}</span></li>)}</ul>}
+    {report.errors.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noErrors}</p> : <ul className="space-y-2">{report.errors.map((error) => <li key={`${error.rule_version_id}-${error.code}`} className="rounded-md border border-destructive/40 p-3 text-sm"><span className="font-medium">{localized(messages.validationCodes, error.code, messages.failed)}</span><details className="mt-1"><summary className="cursor-pointer text-xs text-muted-foreground">{locale === "ar" ? "مرجع تقني" : "Référence technique"}</summary><bdi className={`mt-1 block ${technical}`}>{error.rule_version_id}</bdi></details></li>)}</ul>}
   </section>;
 }
 
@@ -59,47 +61,84 @@ function SimulationEvidence({ state, messages, locale }: { state: RuleValidation
       <div><dt className="text-muted-foreground">{messages.reproducibility}</dt><dd className={technical} dir="ltr">{simulation.reproducibility_hash}</dd></div>
     </dl>
     <h4 className="font-medium">{messages.actionsTriggered}</h4>
-    {simulation.triggered_actions.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noActions}</p> : <ol className="space-y-2">{simulation.triggered_actions.map((action, index) => <li key={`${action.rule_version_id}-${action.evaluation_order}-${index}`} className="rounded-md border p-3 text-sm"><span className="font-medium">{localized(messages.actions, action.type, messages.unknown)}</span><bdi className={`mt-1 block ${technical}`}>{action.rule_version_id}</bdi></li>)}</ol>}
+    {simulation.triggered_actions.length === 0 ? <p className="text-sm text-muted-foreground">{messages.noActions}</p> : <ol className="space-y-2">{simulation.triggered_actions.map((action, index) => <li key={`${action.rule_version_id}-${action.evaluation_order}-${index}`} className="rounded-md border p-3 text-sm"><span className="font-medium">{localized(messages.actions, action.type, messages.unknown)}</span><span className="mt-1 block text-xs text-muted-foreground">{locale === "ar" ? `الترتيب ${action.evaluation_order}` : `Ordre ${action.evaluation_order}`}</span><details className="mt-1"><summary className="cursor-pointer text-xs text-muted-foreground">{locale === "ar" ? "مرجع تقني" : "Référence technique"}</summary><bdi className={`mt-1 block ${technical}`}>{action.rule_version_id}</bdi></details></li>)}</ol>}
   </section>;
 }
 
 export function RuleValidationPanel({ workspace, locale, messages }: { workspace: RuleValidationWorkspace; locale: "fr" | "ar"; messages: RuleValidationMessages }) {
   const prefix = useId();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [pending, startTransition] = useTransition();
   const [validationState, validationAction, validationPending] = useActionState(validateRules, initialState);
   const [simulationState, simulationAction, simulationPending] = useActionState(simulateRules, initialState);
   const selected = workspace.versions.find((version) => version.id === workspace.selectedVersionId) ?? null;
+
+  function openVersion(versionId: string) {
+    const params = new URLSearchParams();
+    params.set("questionnaire", versionId);
+    const href = `${pathname}?${params.toString()}#regles`;
+    startTransition(() => {
+      router.replace(href);
+    });
+    window.setTimeout(() => {
+      const target = document.getElementById("regles");
+      if (!(target instanceof HTMLElement)) return;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      const focusable = target.querySelector<HTMLElement>("button,input,select,textarea,a");
+      focusable?.focus({ preventScroll: true });
+    }, 350);
+  }
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const versionId = String(data.get("questionnaire") ?? "");
+    if (!versionId) return;
+    openVersion(versionId);
+  }
 
   if (workspace.versions.length === 0) return <Alert><AlertDescription>{messages.emptyVersions}</AlertDescription></Alert>;
 
   return <div className="space-y-6">
     <Card><CardHeader><CardTitle>{messages.selector}</CardTitle></CardHeader><CardContent>
-      <form method="get" className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <div className="space-y-2"><Label htmlFor={`${prefix}-version`}>{messages.chooseVersion}</Label><select id={`${prefix}-version`} name="questionnaire" defaultValue={workspace.selectedVersionId ?? ""} className={controlClass} dir={locale === "ar" ? "rtl" : "ltr"} required>{workspace.versions.map((version) => <option key={version.id} value={version.id}>{version.libraryCode} · {locale === "ar" ? version.titleAr : version.titleFr} · {messages.version} {version.version}</option>)}</select></div>
-        <Button variant="outline">{messages.chooseVersion}</Button>
+      <form onSubmit={onSubmit} className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="space-y-2"><Label htmlFor={`${prefix}-version`}>{messages.chooseVersion}</Label><select id={`${prefix}-version`} name="questionnaire" defaultValue={workspace.selectedVersionId ?? ""} className={controlClass} dir={locale === "ar" ? "rtl" : "ltr"} required onChange={(event) => { const form = event.currentTarget.form; if (form) openVersion(event.currentTarget.value); }}>{workspace.versions.map((version) => <option key={version.id} value={version.id}>{locale === "ar" ? version.titleAr : version.titleFr} · {messages.version} {version.version}</option>)}</select></div>
+        <Button type="submit" variant="outline" disabled={pending}>{pending ? (locale === "ar" ? "جارٍ الفتح…" : "Ouverture…") : messages.chooseVersion}</Button>
       </form>
-      {selected ? <dl className="mt-4 grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-        <div><dt className="text-muted-foreground">{messages.library}</dt><dd>{selected.libraryCode}</dd></div>
+      {selected ? <>
+        <dl className="mt-4 grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div><dt className="text-muted-foreground">{messages.library}</dt><dd>{locale === "ar" ? selected.titleAr : selected.titleFr}<span className="mt-1 block text-xs text-muted-foreground" dir="ltr">{selected.libraryCode}</span></dd></div>
         <div><dt className="text-muted-foreground">{messages.status}</dt><dd>{localized(messages.statuses, selected.status, messages.unknown)}</dd></div>
         <div><dt className="text-muted-foreground">{messages.audience}</dt><dd>{localized(messages.audiences, selected.audience, messages.unknown)}</dd></div>
         <div><dt className="text-muted-foreground">{messages.engine} / {messages.policy}</dt><dd className={technical} dir="ltr">{selected.engineVersion} / {selected.policyVersion}</dd></div>
-      </dl> : null}
+      </dl>
+        <div className="admin-notice mt-4 flex flex-wrap items-center justify-between gap-3">
+          <p role="status">{locale === "ar" ? "الإصدار جاهز. نماذج التحقق والمحاكاة مفتوحة أدناه." : "Version prête. Les formulaires de validation et de simulation sont ouverts ci-dessous."}</p>
+          <HashAwareLink href="#regles" className="admin-btn-primary min-h-11 inline-flex items-center">{locale === "ar" ? "الانتقال إلى التحقق" : "Aller à la validation"}</HashAwareLink>
+        </div>
+      </> : null}
     </CardContent></Card>
 
-    {selected ? <section className="grid gap-5 xl:grid-cols-2">
+    <section className="grid gap-5 xl:grid-cols-2">
       <Card id="regles" className="scroll-mt-24"><CardHeader><CardTitle>{messages.validationTitle}</CardTitle><CardDescription>{messages.validationDescription}</CardDescription></CardHeader><CardContent className="space-y-4">
-        <form action={validationAction}><input type="hidden" name="locale" value={locale}/><input type="hidden" name="questionnaireVersionId" value={selected.id}/><Button className="w-full" disabled={validationPending}>{validationPending ? messages.processing : messages.validate}</Button></form>
-        <div aria-live="polite"><Feedback state={validationState} messages={messages}/><ValidationEvidence state={validationState} messages={messages} locale={locale}/></div>
+        {selected ? <>
+          <form action={validationAction}><input type="hidden" name="locale" value={locale}/><input type="hidden" name="questionnaireVersionId" value={selected.id}/><Button className="w-full" disabled={validationPending}>{validationPending ? messages.processing : messages.validate}</Button></form>
+          <div aria-live="polite"><Feedback state={validationState} messages={messages}/><ValidationEvidence state={validationState} messages={messages} locale={locale}/></div>
+        </> : <p className="text-sm text-muted-foreground">{messages.chooseVersion}</p>}
       </CardContent></Card>
 
       <Card id="simulation" className="scroll-mt-24"><CardHeader><CardTitle>{messages.simulationTitle}</CardTitle><CardDescription>{messages.simulationDescription}</CardDescription></CardHeader><CardContent className="space-y-4">
-        <form action={simulationAction} className="space-y-4"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="questionnaireVersionId" value={selected.id}/>
-          <fieldset className="space-y-3"><legend className="font-semibold">{messages.answers}</legend>{workspace.questions.map((question) => <SimulationField key={`answer:${question.id}`} question={question} prefix="answer:" locale={locale} messages={messages}/>)}</fieldset>
-          <details className="rounded-lg border p-3"><summary className="min-h-11 cursor-pointer py-2 font-medium">{messages.previousAnswers}</summary><div className="mt-3 space-y-3">{workspace.questions.map((question) => <SimulationField key={`previous:${question.id}`} question={question} prefix="previous:" locale={locale} messages={messages}/>)}</div></details>
-          <p className="text-sm text-muted-foreground">{messages.jsonHelp}</p><Button className="w-full" disabled={simulationPending}>{simulationPending ? messages.processing : messages.simulate}</Button>
-        </form>
-        <div aria-live="polite"><Feedback state={simulationState} messages={messages}/><SimulationEvidence state={simulationState} messages={messages} locale={locale}/></div><Alert><AlertDescription>{messages.pureSimulation}</AlertDescription></Alert>
+        {selected ? <>
+          <form action={simulationAction} className="space-y-4"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="questionnaireVersionId" value={selected.id}/>
+            <fieldset className="space-y-3"><legend className="font-semibold">{messages.answers}</legend>{workspace.questions.map((question) => <SimulationField key={`answer:${question.id}`} question={question} prefix="answer:" locale={locale} messages={messages}/>)}</fieldset>
+            <details className="rounded-lg border p-3"><summary className="min-h-11 cursor-pointer py-2 font-medium">{messages.previousAnswers}</summary><div className="mt-3 space-y-3">{workspace.questions.map((question) => <SimulationField key={`previous:${question.id}`} question={question} prefix="previous:" locale={locale} messages={messages}/>)}</div></details>
+            <p className="text-sm text-muted-foreground">{messages.jsonHelp}</p><Button className="w-full" disabled={simulationPending}>{simulationPending ? messages.processing : messages.simulate}</Button>
+          </form>
+          <div aria-live="polite"><Feedback state={simulationState} messages={messages}/><SimulationEvidence state={simulationState} messages={messages} locale={locale}/></div><Alert><AlertDescription>{messages.pureSimulation}</AlertDescription></Alert>
+        </> : <p className="text-sm text-muted-foreground">{messages.chooseVersion}</p>}
       </CardContent></Card>
-    </section> : null}
+    </section>
 
     <Card id="revue" className="scroll-mt-24"><CardHeader><CardTitle>{messages.questionsTitle}</CardTitle></CardHeader><CardContent>{workspace.questions.length === 0 ? <p className="text-sm text-muted-foreground">{messages.emptyQuestions}</p> : <ol className="grid gap-3 lg:grid-cols-2">{workspace.questions.map((question) => <li key={question.id} className="min-w-0 rounded-lg border p-4"><div className="flex flex-wrap items-start justify-between gap-2"><span className="font-medium">{locale === "ar" ? question.labelAr : question.labelFr}</span><Badge variant={question.required ? "default" : "secondary"}>{question.required ? messages.required : messages.optional}</Badge></div><dl className="mt-3 space-y-2 text-sm"><div><dt className="text-muted-foreground">{messages.answerType}</dt><dd>{localized(messages.answerTypes, question.answerType, messages.unknown)}</dd></div></dl></li>)}</ol>}</CardContent></Card>
 

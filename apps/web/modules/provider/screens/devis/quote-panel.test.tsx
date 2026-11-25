@@ -64,7 +64,7 @@ describe("Selected quote identity reconfirmation entry",()=>{
 
 describe("native browser quote FormData",()=>{
  it.each(["fr","ar"]as const)("keeps positional recurrence entries in the real %s form for one-time, recurring and mixed lines",async(locale)=>{
-   const browser=await chromium.launch({executablePath:"/usr/bin/chromium"});
+   const browser=await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{});
    try {
     const page=await browser.newPage();
     for(const kinds of [["ONE_TIME"],["RECURRING"],["ONE_TIME","RECURRING","ONE_TIME"]]as const){

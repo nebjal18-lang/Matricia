@@ -1,11 +1,12 @@
 "use client";
 
 import{ProductionReference}from"./production-reference";
-import { useActionState, type ReactNode } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import type { DecisionContext } from "@/modules/shared/lib/dispute-economics/model";
 import { EconomicRulePanel, DecisionRestriction } from "@/modules/shared/lib/dispute-economics/panel";
 import Link from "next/link";
 import { ActorIntentForm } from "@/modules/admin/screens/spaces/actor-forms";
+import { QualificationQuestionnaireReview } from "@/modules/admin/screens/providers/qualification-questionnaire-review";
 import {
   requestSpaceMutation,
   submitFranchiseGovernance,
@@ -18,6 +19,7 @@ import {
 } from "./space-actions";
 import { decideAdminDispute, type DomainActionState } from "./domain-actions";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { StableIdempotencyField } from "@/modules/shared/ui/stable-idempotency-field";
 
 const idle: AdminActionState = { status: "idle" };
 const idleProvider: AdminProviderActionState = { status: "idle" };
@@ -93,30 +95,48 @@ export function QualificationDecisionForm({
   query,
   qualificationId,
   organizationId,
+  rowVersion = "1",
 }: {
   locale: Locale;
   query: string;
   qualificationId: string;
   organizationId?: string;
+  rowVersion?: string;
 }) {
   const [state, action, pending] = useActionState(submitProviderQualification, idleProvider);
+  const [status, setStatus] = useState("INFORMATION_REQUIRED");
+  const [score, setScore] = useState("");
+  const [ready, setReady] = useState(false);
+  const [expectedRowVersion, setExpectedRowVersion] = useState(rowVersion);
   const ar = locale === "ar";
+  const needsEvidence = status === "APPROVED" || status === "CONDITIONAL";
   return (
     <form action={action} className="client-stack">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="qualificationId" value={qualificationId} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <input type="hidden" name="expectedRowVersion" value={expectedRowVersion} />
+      <StableIdempotencyField />
       <article className="client-card">
         <header><h2>{ar ? "قرار التأهيل" : "Décision de qualification"}</h2></header>
         <div className="admin-radio-row" data-cards="true">
-          <label data-tone="mint"><input type="radio" name="status" value="APPROVED" defaultChecked /><strong>{ar ? "تأهيل" : "Qualifier"}</strong><small>{ar ? "مطابق للمتطلبات" : "Prestataire conforme aux exigences"}</small></label>
-          <label data-tone="violet"><input type="radio" name="status" value="CONDITIONAL" /><strong>{ar ? "بشروط" : "Qualifier sous conditions"}</strong><small>{ar ? "مع تحفظات" : "Sous réserve de la réalisation de conditions"}</small></label>
-          <label data-tone="sky"><input type="radio" name="status" value="INFORMATION_REQUIRED" /><strong>{ar ? "طلب تكميل" : "Demander un complément"}</strong><small>{ar ? "وثائق إضافية" : "Informations ou pièces supplémentaires nécessaires"}</small></label>
-          <label data-tone="peach"><input type="radio" name="status" value="REJECTED" /><strong>{ar ? "رفض" : "Refuser"}</strong><small>{ar ? "غير مطابق" : "Prestataire non conforme"}</small></label>
+          <label data-tone="mint"><input type="radio" name="status" value="APPROVED" checked={status === "APPROVED"} onChange={() => setStatus("APPROVED")} /><strong>{ar ? "تأهيل" : "Qualifier"}</strong><small>{ar ? "مطابق للمتطلبات" : "Prestataire conforme aux exigences"}</small></label>
+          <label data-tone="violet"><input type="radio" name="status" value="CONDITIONAL" checked={status === "CONDITIONAL"} onChange={() => setStatus("CONDITIONAL")} /><strong>{ar ? "بشروط" : "Qualifier sous conditions"}</strong><small>{ar ? "مع تحفظات" : "Sous réserve de la réalisation de conditions"}</small></label>
+          <label data-tone="sky"><input type="radio" name="status" value="INFORMATION_REQUIRED" checked={status === "INFORMATION_REQUIRED"} onChange={() => setStatus("INFORMATION_REQUIRED")} /><strong>{ar ? "طلب تكميل" : "Demander un complément"}</strong><small>{ar ? "وثائق إضافية" : "Informations ou pièces supplémentaires nécessaires"}</small></label>
+          <label data-tone="peach"><input type="radio" name="status" value="REJECTED" checked={status === "REJECTED"} onChange={() => setStatus("REJECTED")} /><strong>{ar ? "رفض" : "Refuser"}</strong><small>{ar ? "غير مطابق" : "Prestataire non conforme"}</small></label>
         </div>
+        <QualificationQuestionnaireReview
+          qualificationId={qualificationId}
+          locale={locale}
+          required={needsEvidence}
+          onReviewed={(selection) => {
+            setReady(Boolean(selection));
+            setScore(selection?.engineScorePercent ?? "");
+            if (selection) setExpectedRowVersion(String(selection.rowVersion));
+          }}
+        />
         <div className="admin-form-grid">
           <Field id="qual-score" label={ar ? "النتيجة %" : "Score %"}>
-            <input id="qual-score" name="scorePercent" inputMode="decimal" />
+            <input id="qual-score" name="scorePercent" inputMode="decimal" value={score} onChange={(event) => setScore(event.target.value)} required={needsEvidence} disabled={!needsEvidence} />
           </Field>
           <Field id="qual-expires" label={ar ? "انتهاء القرار" : "Expiration"}>
             <input id="qual-expires" name="expiresAt" type="datetime-local" />
@@ -128,15 +148,11 @@ export function QualificationDecisionForm({
             <textarea id="qual-reason" name="rationale" required minLength={3} maxLength={2000} />
           </Field>
         </div>
-        <label className="admin-check">
-          <input type="checkbox" name="evidenceConfirmed" value="yes" />
-          {ar ? "تم التحقق من الأدلة الإلزامية" : "Contrôles obligatoires confirmés"}
-        </label>
       </article>
       <aside className="client-stack">
         <article className="admin-banner" data-tone="warn">
           <strong>{ar ? "تحقق بأربعة أعين" : "Contrôle à quatre yeux"}</strong>
-          <p>{ar ? "لا يمكن للمستخدم أن يصادق على ملفه." : "Un utilisateur ne peut pas approuver son propre dossier."}</p>
+          <p>{ar ? "لا يمكن للمستخدم أن يصادق على ملفه. تتطلب الموافقة مراجعة الاستبيان." : "Un utilisateur ne peut pas approuver son propre dossier. L’approbation exige la revue du questionnaire."}</p>
         </article>
         {organizationId ? (
           <ActorIntentForm locale={locale} organizationId={organizationId} resourceId={qualificationId} resourceType="PROVIDER_QUALIFICATION" intent="RESTRICT_ENTITY" reason="Mode auditeur demandé depuis la décision de qualification." label={ar ? "وضع المدقق" : "Mode auditeur"} />
@@ -145,7 +161,7 @@ export function QualificationDecisionForm({
       <div className="admin-form-foot">
         <Link href={`/${locale}/administration/qualification${query}`} className="client-ghost-link">{ar ? "إلغاء" : "Annuler"}</Link>
         <button type="submit" className="admin-soft-cta" name="status" value="INFORMATION_REQUIRED" disabled={pending}>{ar ? "طلب تكميل" : "Demander un complément"}</button>
-        <button type="submit" className="admin-primary-cta" disabled={pending}>{pending ? "…" : ar ? "إرسال القرار" : "Soumettre la décision"}</button>
+        <button type="submit" className="admin-primary-cta" disabled={pending || (needsEvidence && !ready)}>{pending ? "…" : ar ? "إرسال القرار" : "Soumettre la décision"}</button>
       </div>
       <Feedback state={state} locale={locale} />
     </form>
@@ -169,7 +185,7 @@ export function CompanyDecisionForm({
     <form action={action} className="client-stack"><a href={`/${locale}/administration/providers/${organizationId}/identite`}>{ar?"مراجعة الهوية الحالية ووثائقها":"Revoir l’identité courante et ses pièces"}</a>
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="expectedRowVersion" value={rowVersion} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <input type="hidden" name="locale" value={locale} />
       <div className="admin-form-grid">
         <Field id="company-status" label={ar ? "قرار الشركة" : "Décision société"} required>
@@ -276,7 +292,7 @@ export function DocumentDecisionForm({ locale, documentVersionId }: { locale: Lo
   return (
     <form action={action} className="client-stack">
       <input type="hidden" name="documentVersionId" value={documentVersionId} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <input type="hidden" name="locale" value={locale} />
       <div className="admin-form-grid">
         <Field id="doc-status" label={ar ? "القرار" : "Décision"} required>
@@ -316,7 +332,7 @@ export function GovernanceDecisionForm({
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="approvalRequestId" value={approvalRequestId} />
       <input type="hidden" name="rowVersion" value={rowVersion} />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField />
       <article className="client-card">
         <header><h2>{ar ? "منطقة القرار" : "Zone de décision"}</h2></header>
         <div className="admin-radio-row">
@@ -329,7 +345,6 @@ export function GovernanceDecisionForm({
       </article>
       <div className="admin-form-foot">
         <Link href={`/${locale}/administration/gouvernance${query}`} className="client-ghost-link">{ar ? "إلغاء" : "Annuler"}</Link>
-        <button type="submit" className="admin-soft-cta" disabled={pending}>{ar ? "حفظ المسودة" : "Enregistrer le brouillon"}</button>
         <button type="submit" className="admin-primary-cta" disabled={pending}>{pending ? "…" : ar ? "إرسال القرار" : "Soumettre la décision"}</button>
       </div>
       <Feedback state={state} locale={locale} />
@@ -357,7 +372,7 @@ export function SpaceSensitiveActions({
       </article>
       <article data-tone="danger">
         <strong>{ar ? "أرشفة" : "Archiver"}</strong>
-        <ActorIntentForm locale={locale} organizationId={organizationId} resourceId={resourceId} resourceType={resourceType} intent="SUSPEND_ENTITY" reason="Archivage demandé. Aucune suppression définitive." label={ar ? "أرشفة" : "Archiver"} tone="danger" />
+        <ActorIntentForm locale={locale} organizationId={organizationId} resourceId={resourceId} resourceType={resourceType} intent="RESTRICT_ENTITY" reason="Archivage demandé. Aucune suppression définitive." label={ar ? "أرشفة" : "Archiver"} tone="danger" />
       </article>
     </div>
   );

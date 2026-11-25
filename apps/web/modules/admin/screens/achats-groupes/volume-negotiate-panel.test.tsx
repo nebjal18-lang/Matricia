@@ -49,8 +49,7 @@ describe("VolumeNegotiatePanel", () => {
       />,
     );
     expect(html).toContain("VOL_IT_2026");
-    expect(html).toContain("Activer le contrat et ouvrir le pool");
-    expect(html).toContain("POOL_ACTIVE");
-    expect(html).not.toMatch(/\bTODO\b|\bFIXME\b/);
+    expect(html).toContain("Activer le contrat et ouvrir le stock");
+    expect(html).not.toMatch(/\bTODO\b|\bFIXME\b|\bPOOL_ACTIVE\b/);
   });
 });

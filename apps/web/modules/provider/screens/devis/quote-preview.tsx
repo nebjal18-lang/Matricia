@@ -6,6 +6,7 @@ import type { ProviderQuoteDashboard } from "@/modules/provider/data/quotes/mode
 import { workbenchCopy } from "@/modules/provider/data/spaces/workbench-copy";
 import type { QuotePrefill } from "@/modules/provider/screens/devis/prefill";
 import { getProviderQuoteMessages } from "@/modules/provider/screens/devis/messages";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ReactNode } from "react";
 
@@ -30,7 +31,7 @@ export function QuotePreviewWorkbench({
   query: string;
   quoteId: string;
   invitation: ProviderQuoteDashboard["invitations"][number] | null;
-  prefill?: QuotePrefill;
+  prefill?: QuotePrefill | undefined;
   organizationName: string;
   submitPanel?: ReactNode;
 }) {
@@ -45,10 +46,14 @@ export function QuotePreviewWorkbench({
   const checklist = [
     { ok: Boolean(organizationName), label: w.quoteCheckOrg, detail: organizationName || "—" },
     { ok: true, label: w.quoteCheckClient, detail: w.quoteClientMasked },
-    { ok: Boolean(quote?.id), label: w.quoteCheckRef, detail: quote ? `${quote.id.slice(0, 8)} (v${quote.versionNumber})` : "—" },
+    { ok: Boolean(quote?.id), label: w.quoteCheckRef, detail: quote ? `v${quote.versionNumber}` : "—" },
     { ok: lineCount > 0 && quote?.totalMinor != null, label: w.quoteCheckItems, detail: `${lineCount} ${w.quoteLinesCount}` },
     { ok: Boolean(prefill?.proposedStartDate || prefill?.durationDays), label: w.quoteCheckPlanning, detail: prefill?.proposedStartDate ? formatDay(locale, prefill.proposedStartDate) : "—" },
-    { ok: Boolean(prefill?.paymentTerms), label: w.quoteCheckTerms, detail: w.quoteFilled },
+    {
+      ok: Boolean(prefill?.inclusions?.trim() || prefill?.exclusions?.trim()),
+      label: w.quoteCheckTerms,
+      detail: prefill?.inclusions?.trim() || prefill?.exclusions?.trim() ? w.quoteFilled : "—",
+    },
     { ok: Boolean(prefill?.warranty && prefill.validUntil), label: w.quoteCheckWarranty, detail: prefill?.warranty ?? "—" },
     { ok: true, label: w.quoteCheckAttachments, detail: prefill?.attachments?.length ? String(prefill.attachments.length) : locale==="ar"?"لا توجد مرفقات — اختيارية":"Aucune pièce jointe — facultatives" },
   ];
@@ -62,7 +67,7 @@ export function QuotePreviewWorkbench({
       <header className="provider-workbench-hero">
         <div>
           <div className="provider-chip-row">
-            <h2>{w.quotePreviewTitle}{quote?.id ? <span className="client-space-label" dir="ltr">{quote.id.slice(0, 12)}</span> : null}</h2>
+            <h2>{w.quotePreviewTitle}{quote?.versionNumber != null ? <span className="client-space-label" dir="ltr">v{quote.versionNumber}</span> : null}</h2>
             {quote?.status ? <span className="client-status-chip" data-tone="violet">{workflowStatusLabel(quote.status,locale)}</span> : null}
           </div>
           <p>{invitation?.description ?? w.quotePreviewLead}</p>
@@ -114,7 +119,7 @@ export function QuotePreviewWorkbench({
                 <div className="provider-doc-parties">
                   <div>
                     <small>{w.quoteIssuer}</small>
-                    <strong>{organizationName}</strong>
+                    <strong>{organizationDisplayLabel(organizationName, locale)}</strong>
                   </div>
                   <div>
                     <small>{w.quoteClient}</small>
@@ -126,7 +131,7 @@ export function QuotePreviewWorkbench({
                   <div><dt>{w.quoteObject}</dt><dd>{prefill.solution}</dd></div>
                   <div><dt>{w.quoteValidityLabel}</dt><dd dir="ltr">{prefill.validUntil ? formatDay(locale, prefill.validUntil) : "—"}</dd></div>
                 </dl>
-                <div className="client-table-wrap">
+                <div className="client-table-wrap" role="region" aria-label={m.priceLines} tabIndex={0}>
                   <table className="client-space-table">
                     <thead>
                       <tr>

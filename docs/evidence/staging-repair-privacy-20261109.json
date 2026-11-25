@@ -1,0 +1,35 @@
+{
+  "id": "STAGING-PRIVACY-REPAIR-20261109",
+  "observedAt": "2026-11-09T18:16:29Z",
+  "status": "NATIVE_PRIVACY_REGRESSION_PASS_SQL_CAMPAIGN_RESUMING",
+  "sourceCommit": "67123a8",
+  "correctiveMigration": "20261109101000_yousign_subject_privacy_inventory.sql",
+  "migrationSha256": "f075c91d04febf1df1125f3039bd330d33615ba7ee92f750a441ddbcd1bc23a4",
+  "stagingApplied": true,
+  "stagingMigrationCount": 577,
+  "productionMutations": 0,
+  "nativePrivacyAssertions": 108,
+  "nativePrivacyRun": "PASS",
+  "fixtureEvidence": "synthetic canonical SQL and private Storage metadata; entire test transaction rolled back",
+  "originalDsrAssertionsPreviouslyFailed": [
+    30,
+    39,
+    42,
+    46,
+    50,
+    51
+  ],
+  "originalDsr73Assertions": "PASS as executed by author; preserved in final test with one additional family assertion",
+  "fullSqlCampaign": {
+    "firstSegmentPassedFiles": 251,
+    "remainingFiles": 110,
+    "interruption": "managed environment restart",
+    "sameSourceFilesVerified": true,
+    "status": "IN_PROGRESS"
+  },
+  "independentStaticReview": "NO_BLOCKER_IN_YOUSIGN_PRIVACY_DELTA",
+  "noApprovalInvented": true,
+  "nativeFilesRemainUntrustedUntilReview": true,
+  "existingApprovedInventoriesRequireNormalReapprovalAfterCatalogHashChange": true,
+  "secretValuesIncluded": false
+}

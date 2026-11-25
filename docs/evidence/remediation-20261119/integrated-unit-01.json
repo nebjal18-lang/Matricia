@@ -1,0 +1,13 @@
+{
+  "task": "integrated-unit-01",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "test"
+  ],
+  "startedAt": "2026-11-19T14:12:05.552Z",
+  "finishedAt": "2026-11-19T14:13:09.968Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 1
+}

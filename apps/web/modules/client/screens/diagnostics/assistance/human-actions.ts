@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 export type HumanAssistanceState = { status: "idle" } | { status: "success"; id: string } | { status: "error"; reason: "VALIDATION" | "FORBIDDEN" | "CONFLICT" | "UNAVAILABLE" };
 const request = z.object({ locale: z.enum(["fr", "ar"]), organizationId: z.string().uuid(), requestId: z.union([z.string().uuid(), z.literal("")]), subject: z.string().trim().min(3).max(200), body: z.string().trim().min(10).max(10000), version: z.coerce.number().int().nonnegative(), key: z.string().min(8).max(200), intent: z.enum(["save", "submit"]) });
-function failure(code: string | undefined): HumanAssistanceState { return { status: "error", reason: code === "42501" ? "FORBIDDEN" : code === "40001" || code === "22000" ? "CONFLICT" : "UNAVAILABLE" }; }
+function failure(code: string | undefined): HumanAssistanceState { return { status: "error", reason: code === "42501" ? "FORBIDDEN" : (code === "40001" || code === "PT409") || code === "22000" ? "CONFLICT" : "UNAVAILABLE" }; }
 export async function saveHumanAssistance(_: HumanAssistanceState, form: FormData): Promise<HumanAssistanceState> {
   const parsed = request.safeParse(Object.fromEntries(form));
   const documents = z.array(z.string().uuid()).max(10).safeParse(form.getAll("documents"));

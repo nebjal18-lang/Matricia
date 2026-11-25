@@ -12,6 +12,8 @@ import { getMissionMessages } from "@/modules/client/screens/missions/messages";
 import { MilestoneDecisions } from "@/modules/client/screens/missions/milestone-decisions";
 import { MissionPanel } from "@/modules/client/screens/missions/mission-panel";
 import { JalonsBoard } from "@/modules/client/screens/spaces/milestones-board";
+import { loadMissionFeedbackFacts } from "@/modules/client/screens/missions/feedback-facts";
+import { MissionFeedbackPanel } from "@/modules/client/screens/missions/mission-feedback";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 
 export default async function ClientMissionJalonsPage({
@@ -19,7 +21,7 @@ export default async function ClientMissionJalonsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; missionId: string }>;
-  searchParams: Promise<{ organizationId?: string }>;
+  searchParams: Promise<{ organizationId?: string; jalonId?: string }>;
 }) {
   const [{ locale, missionId }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale) || !missionId) notFound();
@@ -32,12 +34,15 @@ export default async function ClientMissionJalonsPage({
     ? { ...result.dashboard, missions: result.dashboard.missions.filter((item) => item.id === missionId) }
     : null;
   const mission = dashboard?.missions[0] ?? null;
+  const feedbackFacts = mission?.status === "COMPLETED" ? await loadMissionFeedbackFacts(mission.id) : null;
+  const languageParams = new URLSearchParams(space.selectedQuery.startsWith("?") ? space.selectedQuery.slice(1) : space.selectedQuery);
+  if (query.jalonId) languageParams.set("jalonId", query.jalonId);
 
   return (
-    <ClientAppShell languagePath={`/${locale}/client/missions/${missionId}/jalons${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
-      <JalonsBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} mission={mission} messages={messages} assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>
+    <ClientAppShell languagePath={`/${locale}/client/missions/${missionId}/jalons?${languageParams}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={c.jalonsTitle} lead={c.jalonsLead} kicker={c.kicker}>
+      <JalonsBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} mission={mission} messages={messages} {...(query.jalonId === undefined ? {} : {selectedJalonId:query.jalonId})} assistanceHref={`/${locale}/client/diagnostics/assistance${space.selectedQuery}`}>
         {result.status === "error" ? (
-          <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
+          <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason === "FORBIDDEN_ORGANIZATION" ? messages.forbidden : result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.failed}</AlertDescription></Alert>
         ) : dashboard && dashboard.missions.length === 0 ? (
           <p role="status">{messages.empty}</p>
         ) : dashboard ? (
@@ -54,6 +59,7 @@ export default async function ClientMissionJalonsPage({
           </details>
         ) : null}
       </JalonsBoard>
+      {mission ? <MissionFeedbackPanel locale={locale} missionId={mission.id} missionStatus={mission.status} facts={feedbackFacts} /> : null}
     </ClientAppShell>
   );
 }

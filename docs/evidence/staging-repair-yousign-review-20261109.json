@@ -1,0 +1,228 @@
+{
+  "generatedAt": "2026-11-09T17:28:43.629776+00:00",
+  "reviewer": "/root/yousign_independent_review",
+  "scope": {
+    "readOnly": true,
+    "externalProviderCalls": false,
+    "databaseMutations": false,
+    "sourceEdits": false
+  },
+  "verdict": "APPROVED_FOR_RESTRICTED_STAGING_RECIPE_WITH_LIMITS",
+  "productionCertified": false,
+  "reviewedGitHead": "d8c3a751bc8853841b658d5860c710fc72b94f39",
+  "workingTreeIncluded": false,
+  "sourceSnapshotSha256": {
+    "packages/signature-v41/src/yousign-provider.test.ts": "abc55611466b5309650f72e669e53ea2f08bd15613e599773014532fa3045fe2",
+    "packages/signature-v41/src/provider.ts": "11935cc8a6e7e377ebfc0bd9e1db806595a3adb2c08d711aba6a0b1cb7e288ba",
+    "packages/signature-v41/src/index.ts": "4a056d571f97dedb64c4a4a8e9b49f6efb4b6ffb6c62ff513608f35509c5d1d1",
+    "packages/signature-v41/src/workflow.test.ts": "a3856138f5d33d83df0ac72484af5f87e726bdfe5f407de572c161cc40609bca",
+    "packages/signature-v41/src/yousign-provider.ts": "5c72a8e17b8ce7f616a0129633e4dc0bd4e76795e88ccd57cc1e676eda7fa6af",
+    "packages/signature-v41/src/provider.test.ts": "3907696f8d47cdde8d00ce27da9f82f856c48c991165312f7a664626291f1237",
+    "packages/signature-v41/src/workflow.ts": "90d415f8314753d63e8eba7f6f5b05d2ceba3367064b5ea584ce7aada733002d",
+    "packages/signature-v41/src/mock-provider.ts": "cfb671984debe09d77d7273afa35c5d04add132d38dd95cd5a4988a6cfeef853",
+    "apps/web/modules/shared/lib/signature-runtime/yousign.test.ts": "41aa65eaaa2e57f8a139f2b131ca6069100d36cc6387f7fd162b170bf0f850b1",
+    "apps/web/modules/shared/lib/signature-runtime/yousign.ts": "e795b5ba17f6799ed2cb88f7514b5a3ee3ee3808b4e29eb6584fad827d428be0",
+    "apps/web/app/api/webhooks/yousign/route.test.ts": "a0d253edefded744f426e90135286d5caaf79da06c8c3a570602375cb838dc02",
+    "apps/web/app/api/webhooks/yousign/route.ts": "8c475e80538aa035227a465d77ba1bb6acb7f3a036af177d02786ae4d260607c",
+    "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.test.ts": "73013ac129cc6d1067636ee4b0b0254df24a3f7d834f85c3a110cc528cd5da8e",
+    "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.ts": "4d9d5bc70c1e9773b838be912ddbbc0b8703eda9e85606d583ca0a19908d70c3",
+    "supabase/migrations/20261109100000_yousign_sandbox_transport.sql": "0592fc09805b1dc9d48de00e6d4029579949a8dce93bd8bdbe4af7605abd3be2",
+    "supabase/tests/0390_yousign_sandbox_transport.test.sql": "e764d4f54523b36a1e25b4a5b95f23c2823a72592a5644983b4b8a488a8bb4a0",
+    "docs/integrations/YOUSIGN_SANDBOX.md": "211f56146c760d095d8dc0aaa9cd214b6cf370d3b04df4fbac99cae276d06dc9",
+    "scripts/release/yousign-transport-acceptance.mjs": "7fed7bdd586b87721ccf1be2f8b9728290a774d752f67929ee9c119b3b3ce74d",
+    "supabase/tests/helpers/yousign-transport-acceptance.sql": "f1964dbf92e4b1e507bd1ff367b773e03e8a94b3d368820df45cbc648a28b3b8"
+  },
+  "findings": [
+    {
+      "id": "YSREV-001",
+      "severity": "P1",
+      "title": "PDF final non lié aux attestations du fournisseur",
+      "status": "RESOLVED",
+      "resolution": "Le digest des octets téléchargés doit égaler le checksum GET Document avec is_signed=true et être présent dans les hashes d’au moins un audit authentifié. Les formats ambigus restent fermés.",
+      "evidence": [
+        "packages/signature-v41/src/yousign-provider.ts:302",
+        "packages/signature-v41/src/yousign-provider.ts:337",
+        "commit 167f207501b4f5f8653878ac17364c42fbde443e"
+      ]
+    },
+    {
+      "id": "YSREV-002",
+      "severity": "P1",
+      "title": "Ordre inverse des verrous de dispatch et de persistance des références",
+      "status": "RESOLVED_IN_REVIEWED_SOURCE",
+      "resolution": "begin_yousign_dispatch et record_yousign_reference prennent les verrous des parties financières avant celui de l’enveloppe. Aucun test de concurrence de ces deux nouveaux RPC n’a été exécuté par ce reviewer.",
+      "evidence": [
+        "supabase/migrations/20261109100000_yousign_sandbox_transport.sql:155"
+      ]
+    },
+    {
+      "id": "YSREV-003",
+      "severity": "P2",
+      "title": "Corps du formulaire signataire entièrement mis en mémoire avant limite",
+      "status": "RESOLVED",
+      "resolution": "Lecteur borné à 8192 octets avant Auth/RPC ; rejet de la taille déclarée invalide et du chunked trop volumineux.",
+      "evidence": [
+        "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.ts",
+        "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.test.ts"
+      ]
+    },
+    {
+      "id": "YSREV-004",
+      "severity": "P2",
+      "title": "Collisions de références distantes silencieusement ignorées",
+      "status": "RESOLVED_IN_REVIEWED_SOURCE",
+      "resolution": "ON CONFLICT cible seulement la clé locale ; une référence distante unique déjà liée ailleurs déclenche une erreur. La mise à jour de provider_envelope_id doit réellement affecter une ligne.",
+      "evidence": [
+        "supabase/migrations/20261109100000_yousign_sandbox_transport.sql:155"
+      ]
+    },
+    {
+      "id": "YSREV-005",
+      "severity": "P2",
+      "title": "Manifeste natif absent du reçu de preuve existant",
+      "status": "RESOLVED_IN_REVIEWED_SOURCE",
+      "resolution": "Liaison native séparée, immuable et auditée entre evidence_package_id, manifeste exact, hash canonique du manifeste et hash de l’adaptateur. Le paquet historique conserve son format.",
+      "evidence": [
+        "supabase/migrations/20261109100000_yousign_sandbox_transport.sql:49",
+        "supabase/migrations/20261109100000_yousign_sandbox_transport.sql:225"
+      ]
+    },
+    {
+      "id": "YSREV-006",
+      "severity": "P2",
+      "title": "Provider réel accepté par readiness en mode DEVELOPMENT_MOCK",
+      "status": "RESOLVED_IN_REVIEWED_SOURCE",
+      "resolution": "DEVELOPMENT_MOCK refuse les providers sans developmentOnly. Le wrapper hébergé exige également EXTERNAL.",
+      "evidence": [
+        "packages/signature-v41/src/provider.ts:93",
+        "packages/signature-v41/src/provider.test.ts"
+      ]
+    },
+    {
+      "id": "YSREV-007",
+      "severity": "P2",
+      "title": "Nouveau bucket privé dépendant des seules politiques existantes",
+      "status": "HARDENED",
+      "resolution": "Politique restrictive explicite interdisant le bucket aux rôles anon/authenticated, même si une autre politique permissive était ajoutée.",
+      "evidence": [
+        "supabase/migrations/20261109100000_yousign_sandbox_transport.sql:69"
+      ]
+    },
+    {
+      "id": "YSREV-008",
+      "severity": "P2",
+      "title": "Collecte finale basée sur un compte de signataires prétransactionnel",
+      "status": "MITIGATED_FAIL_CLOSED",
+      "resolution": "Un event signer.done dont le payload HMAC indique request.status=done exige la preuve finale même si le compte local est encore deux. Le garde SQL final reste en place ; les callbacks désordonnés peuvent encore nécessiter un retry.",
+      "evidence": [
+        "packages/signature-v41/src/yousign-provider.ts:281",
+        "packages/signature-v41/src/workflow.ts",
+        "packages/signature-v41/src/workflow.test.ts"
+      ]
+    },
+    {
+      "id": "YSREV-009",
+      "severity": "P1",
+      "title": "Consentement fournisseur non vérifié explicitement avant remplissage du consent_snapshot",
+      "status": "RESOLVED",
+      "observation": "Le JSON officiel distingue signer.consent_given_at et signer.signature_process_completed_at. La validation actuelle vérifie seulement completed_at. Remplir le snapshot avec des références d’audit sans vérifier consent_given_at ne suffit pas.",
+      "requiredFix": "Vérifier la présence, la date et la chronologie du consentement explicitement attesté, conserver les octets/auditSHA qui le portent, rejeter absence ou date incohérente.",
+      "officialSource": "https://developers.youtrust.com/reference/get-signature_requests-signaturerequestid-signers-signerid-audit_trails-1",
+      "resolution": "Le transport exige le champ officiel signer.consent_given_at, valide le calendrier ISO et le fuseau, puis vérifie sent_at <= consent_given_at <= signature_process_completed_at avec précision nanoseconde. Absence ou incohérence interdit archivage et preuve. Le snapshot SQL référence les véritables audits privés par identité et digest ; aucun booléen ni texte de consentement juridique n’est inventé.",
+      "evidence": [
+        "commit ed485833e1f0b3ef899de0f81c68a4b1a565fd1f",
+        "packages/signature-v41/src/yousign-provider.ts:93",
+        "packages/signature-v41/src/yousign-provider.test.ts:272",
+        "docs/integrations/YOUSIGN_SANDBOX.md:116"
+      ]
+    }
+  ],
+  "verifiedStaticControls": [
+    "Endpoint sandbox fixé ; redirections refusées ; aucun endpoint fourni par le payload.",
+    "HMAC SHA256 constant-time sur le corps brut borné, avant parsing et lookup de l’enveloppe.",
+    "APP_ENV STAGING/DEVELOPMENT + tag de confiance DB ; aucune activation en production.",
+    "Politique légale/four-eyes, source PDF, parties et autorités courantes revérifiées ; aucune attestation créée par la migration.",
+    "Les POST externes ne sont pas automatiquement rejoués après résultat inconnu ; références durables préservées.",
+    "L’activation HTTP ne crée pas SENT ou SIGNED ; seul l’inbox du fournisseur vérifié avance le domaine.",
+    "PDF/audits téléchargés, hashés, archivés privés, relus et liés à l’enveloppe ; aucun certificat ni TSA inventé."
+  ],
+  "independentTests": [
+    {
+      "command": "corepack pnpm --filter @matricia/signature-v41 test --maxWorkers=2",
+      "observedAt": "2026-11-09T17:15:07.114431+00:00",
+      "result": "PASS",
+      "tests": 57,
+      "files": 3,
+      "providerCalls": "mocked HTTP transport; independently rerun after final consent fix"
+    },
+    {
+      "command": "corepack pnpm --filter @matricia/web test --maxWorkers=2 modules/shared/lib/signature-runtime/yousign.test.ts app/api/webhooks/yousign/route.test.ts app/api/signatures/yousign/signers/[signerId]/configuration/route.test.ts",
+      "observedAt": "2026-11-09T17:08:12Z",
+      "result": "PASS",
+      "tests": 18,
+      "files": 3,
+      "rpcCalls": "mocked"
+    }
+  ],
+  "limitationsAndOpenEvidence": [
+    "SIMPLE sandbox seulement. Aucune validation PKI/certificat/TSA, ADVANCED ou QUALIFIED.",
+    "La sémantique exacte des checksums GET Document et audit.signatures[].hash doit être confirmée par une recette sandbox réelle ; les écarts ne doivent pas être contournés.",
+    "Aucun compte, clé, webhook natif ni signature réelle n’a été utilisé pendant la revue.",
+    "Préparation des emplacements PDF via API seulement ; aucun écran interactif de placement dans ce lot.",
+    "Résultats UNKNOWN et callbacks retardés au-delà de 300 secondes exigent une réconciliation opérateur ; aucun mécanisme automatique de reprise n’est fourni.",
+    "Callbacks synchrones : latence du fournisseur, ordre et retries doivent être éprouvés sur le staging hébergé.",
+    "Expiration distante et annulation de la demande lors de révocation métier doivent être traitées avant toute extension en production.",
+    "La chaîne SQL positive a été exécutée par l’auteur puis son runner, ses 58 assertions et son journal ont été relus indépendamment. Aucun octet Storage hébergé ni signature fournisseur réelle n’a été produit par cette recette synthétique."
+  ],
+  "officialSources": [
+    "https://developers.youtrust.com/reference/get-signature_requests-signaturerequestid-signers-signerid-audit_trails-1",
+    "https://developers.youtrust.com/reference/get-signature_requests-signaturerequestid-documents-documentid-1",
+    "https://developers.youtrust.com/docs/use-webhooks-in-your-app",
+    "https://help.youtrust.com/en/articles/72939-esignature-audit-trails",
+    "https://developers.youtrust.com/docs/signer-consent-requests"
+  ],
+  "positiveSqlAcceptanceReview": {
+    "runnerReviewed": true,
+    "runner": "scripts/release/yousign-transport-acceptance.mjs",
+    "cases": "supabase/tests/helpers/yousign-transport-acceptance.sql",
+    "scope": "Real SQL domain commands with synthetic users, independently approved policy fixture, provider events and Storage metadata in one disposable rollback transaction",
+    "covers": [
+      "four-eyes policy",
+      "own signer configuration",
+      "submission gate",
+      "durable claim",
+      "references",
+      "accepted replay",
+      "SENT/PARTIAL/SIGNED",
+      "missing final evidence rejection",
+      "manifest binding and replay"
+    ],
+    "executionReceiptPending": false,
+    "assertions": 58,
+    "executionReceipt": "/workspace/outputs/staging-repair/yousign-positive-sql.log",
+    "receiptReviewedByIndependentReviewer": true,
+    "executedBy": "implementation author; local rollback; not a provider recipe",
+    "result": "PASS"
+  },
+  "initialReviewGitHead": "90e123144bd0a197cd2df7426fa48fe7d2f2382f",
+  "deltaReview": {
+    "reviewer": "/root/yousign_independent_review",
+    "commit": "d8c3a751bc8853841b658d5860c710fc72b94f39",
+    "files": [
+      "packages/signature-v41/src/index.ts",
+      "packages/signature-v41/src/workflow.ts"
+    ],
+    "scope": "Five runtime import/export module specifiers changed from explicit .js to extensionless source module paths; security/domain logic unchanged.",
+    "reason": "Package exports src/index.ts and uses TypeScript moduleResolution=Bundler. Next16 Turbopack requires source module resolution for these workspace imports.",
+    "staticResult": "PASS",
+    "rootRegressionReceipt": {
+      "path": "/workspace/work/matricia-staging-repair/work/staging-secure/signature-unit-final.log",
+      "result": "PASS",
+      "tests": 57,
+      "files": 3,
+      "observedAt": "2026-11-09T17:26:36Z",
+      "executedBy": "root integrator; log independently inspected"
+    },
+    "productionCertified": false
+  }
+}

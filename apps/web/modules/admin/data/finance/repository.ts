@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { hasPlatformRole, loadMyPlatformAccess } from "@/modules/shared/lib/account-security/platform-access";
+import { buildDemoFinanceDashboard, canApplyAdminDemoHubs } from "@/modules/admin/data/spaces/demo-hubs";
 import { adminFinanceDashboardSchema, adminFinanceUuid, exactMinor, reconciliationSchema, type AdminFinanceDashboard, type AdminFinanceResult } from "./model";
 
 const paymentRow = z.object({ id: adminFinanceUuid, provider_organization_id: adminFinanceUuid, currency: z.string().regex(/^[A-Z]{3}$/u), amount_minor: exactMinor }).strict();
@@ -21,6 +22,11 @@ async function authorizedClient() {
 export async function loadAdminFinanceDashboard(): Promise<AdminFinanceResult<AdminFinanceDashboard>> {
   const access = await authorizedClient();
   if (access.status === "error") return access;
+  if (canApplyAdminDemoHubs()) {
+    const demo = buildDemoFinanceDashboard();
+    const parsed = adminFinanceDashboardSchema.safeParse(demo);
+    return parsed.success ? { status: "success", value: parsed.data } : { status: "error", reason: "INVALID_RESPONSE" };
+  }
   const response = await access.client.rpc("list_admin_finance_dashboard", { p_limit: 100 });
   if (response.error) return { status: "error", reason: response.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
   const parsed = adminFinanceDashboardSchema.safeParse(response.data);
@@ -37,12 +43,14 @@ export async function reconcileAdminProviderPayment(input: unknown): Promise<Adm
   const value = parsed.data;
   const [paymentQuery, allocationsQuery, invoiceQuery] = await Promise.all([
     access.client.from("provider_payments").select("id,provider_organization_id,currency,amount_minor::text").eq("id", value.paymentId).limit(1).maybeSingle(),
-    access.client.from("provider_payment_allocations").select("amount_minor::text").eq("payment_id", value.paymentId).limit(200),
+    access.client.from("provider_payment_allocations").select("amount_minor::text").eq("payment_id", value.paymentId).limit(201),
     access.client.from("provider_invoice_balances").select("id,provider_organization_id,currency,outstanding_minor::text").eq("id", value.invoiceId).limit(1).maybeSingle(),
   ]);
   if (paymentQuery.error || allocationsQuery.error || invoiceQuery.error) return { status: "error", reason: "UNAVAILABLE" };
-  const payment = paymentRow.safeParse(paymentQuery.data), allocations = z.array(allocationRow).max(200).safeParse(allocationsQuery.data), invoice = invoiceRow.safeParse(invoiceQuery.data);
+  const payment = paymentRow.safeParse(paymentQuery.data), allocations = z.array(allocationRow).max(201).safeParse(allocationsQuery.data), invoice = invoiceRow.safeParse(invoiceQuery.data);
   if (!payment.success || !allocations.success || !invoice.success) return { status: "error", reason: "INVALID_INPUT" };
+  // Fail closed when the pre-check page is saturated — never undercount allocated totals.
+  if (allocations.data.length > 200) return { status: "error", reason: "UNAVAILABLE" };
   if (payment.data.provider_organization_id !== invoice.data.provider_organization_id || payment.data.currency !== invoice.data.currency) return { status: "error", reason: "INVALID_INPUT" };
   const allocated = allocations.data.reduce((total, item) => total + BigInt(item.amount_minor), BigInt(0));
   const amount = BigInt(value.amountMinor);
@@ -50,7 +58,7 @@ export async function reconcileAdminProviderPayment(input: unknown): Promise<Adm
   const response = await access.client.rpc("reconcile_provider_payment", { p_payment_id: value.paymentId, p_allocations: [{ invoice_id: value.invoiceId, amount_minor: value.amountMinor }], p_idempotency_key: value.idempotencyKey, p_correlation_id: value.correlationId });
   if (response.error) {
     if (response.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-    if (["22000", "23505", "23514", "40001", "55000"].includes(response.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
+    if (["22000", "23505", "23514", "40001", "PT409", "55000"].includes(response.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
     return { status: "error", reason: "UNAVAILABLE" };
   }
   const output = reconciliationOutput.safeParse(response.data);

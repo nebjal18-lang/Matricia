@@ -10,6 +10,7 @@ import { GovernancePanel } from "@/modules/admin/screens/marketing-autopilot/gov
 import { MarketingPanel } from "@/modules/admin/screens/marketing-autopilot/marketing-panel";
 import { getMarketingMessages } from "@/modules/admin/screens/marketing-autopilot/messages";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminOffFilmGate } from "@/modules/admin/ui/admin-off-film-gate";
 
 export default async function MarketingAutopilotPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -43,6 +44,10 @@ export default async function MarketingAutopilotPage({ params }: { params: Promi
   const dimensionLabels = result.status === "success" ? await loadMarketingDimensionLabels(result.dashboard, locale) : {};
   return (
     <AdminModulePage locale={locale} active="pilot" path="marketing-autopilot" title={m.title} lead={m.subtitle}>
+      <AdminOffFilmGate
+        locale={locale}
+        role={locale === "ar" ? "تشغيل الحملات التسويقية بموافقة وموافقة المحتوى" : "Pilotage des campagnes marketing avec consentement et validation de contenu"}
+      />
       {result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "FORBIDDEN" ? m.accessDenied : m.loadFailed}</AlertTitle>

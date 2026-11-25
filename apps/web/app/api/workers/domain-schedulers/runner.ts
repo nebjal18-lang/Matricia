@@ -7,8 +7,15 @@ export async function runDomainSchedulerWorker(request: Request, dependencies:Sc
   const expected=dependencies.env.CRON_SECRET??"",supplied=request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]??"",a=Buffer.from(expected),b=Buffer.from(supplied);
   if (!(a.length>=32&&a.length===b.length&&timingSafeEqual(a,b))) return Response.json({ code: "UNAUTHORIZED" }, { status: 401, headers });
   const url = new URL(request.url), limitRaw = url.searchParams.get("limit") ?? "100";
-  const asOf = url.searchParams.get("asOf") ?? new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  const asOf = url.searchParams.get("asOf") ?? today;
   if (!/^\d{1,3}$/.test(limitRaw) || Number(limitRaw) < 1 || Number(limitRaw) > 500 || !/^\d{4}-\d{2}-\d{2}$/.test(asOf)) return Response.json({ code: "INVALID_SCHEDULER_INPUT" }, { status: 400, headers });
+  const asOfUtc = Date.parse(`${asOf}T00:00:00.000Z`);
+  const todayUtc = Date.parse(`${today}T00:00:00.000Z`);
+  // Replay window: today UTC and at most seven prior calendar days — never open-ended history.
+  if (!Number.isFinite(asOfUtc) || asOfUtc > todayUtc || todayUtc - asOfUtc > 7 * 86_400_000) {
+    return Response.json({ code: "INVALID_SCHEDULER_INPUT" }, { status: 400, headers });
+  }
   const correlationId = randomUUID(), deadline = Date.now() + 45_000;
   let pageCount = 0, data: unknown = null, outcome = "";
   do {

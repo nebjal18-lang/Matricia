@@ -5,12 +5,13 @@
   "type": "module",
   "packageManager": "pnpm@10.17.1",
   "engines": {
-    "node": ">=22.13.0"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "pnpm --filter @matricia/web dev",
     "start": "pnpm --filter @matricia/worker start",
     "build": "pnpm -r build",
+    "build:vercel": "pnpm --filter @matricia/web build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
@@ -18,6 +19,9 @@
     "test:db": "node scripts/run-db-tests.mjs",
     "test:rls": "node scripts/run-db-tests.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:local-spaces": "node scripts/run-local-spaces-e2e.mjs",
+    "test:application": "node scripts/run-application-validation.mjs",
+    "test:finance:browser": "node --test tests/remediation/finance-reconciliation-browser.test.mjs",
     "catalog:validate": "node --experimental-strip-types scripts/validate-catalog.ts",
     "spec:validate": "node --experimental-strip-types scripts/validate-spec.ts",
     "context:pack": "node --experimental-strip-types scripts/context-pack.ts",
@@ -25,10 +29,15 @@
     "no-placeholders": "node --experimental-strip-types scripts/validate-no-placeholders.ts",
     "release:validate": "node --experimental-strip-types scripts/validate-release.ts",
     "demo:provision": "node scripts/provision-demo-library-personas.mjs",
-    "verify:phase00": "pnpm catalog:validate && pnpm spec:validate && pnpm traceability:validate && pnpm server-actions:validate",
-    "test:tooling": "node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/db-test-support.test.mjs",
+    "demo:journey": "node scripts/provision-demo-journey.mjs",
+    "demo:admin": "node scripts/provision-demo-admin-overview.mjs",
+    "demo:seed-admin": "node scripts/provision-demo-journey.mjs && node scripts/provision-demo-admin-overview.mjs",
+    "verify:phase00": "pnpm migrations:validate && pnpm catalog:validate && pnpm spec:validate && pnpm traceability:validate && pnpm server-actions:validate",
+    "migrations:validate": "node scripts/migration-identities.mjs",
+    "test:tooling": "node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/staging/*.test.mjs scripts/db-test-support.test.mjs",
     "release:prepare": "node scripts/prepare-release.mjs",
     "release:structure": "node --experimental-strip-types scripts/validate-release.ts --structure-only",
+    "security:public-assets": "node scripts/security/check-public-assets.mjs",
     "test:e2e:public": "node scripts/run-browser-acceptance.mjs public",
     "test:e2e:authenticated": "node scripts/run-browser-acceptance.mjs authenticated",
     "test:e2e:workflows": "node scripts/run-browser-acceptance.mjs workflows",
@@ -43,7 +52,10 @@
     "server-actions:validate": "node scripts/release/server-action-exports.mjs",
     "test:e2e:admin-organizations": "node --experimental-strip-types tests/e2e/helpers/final-admin-acceptance.mjs",
     "test:e2e:audit30-native": "node --experimental-strip-types tests/e2e/helpers/audit30-native-acceptance.mjs",
-    "test:e2e:audit30-public": "playwright test --config=playwright.audit30.config.ts tests/e2e/public/diagnostic-need-integrity.spec.ts --workers=1"
+    "test:e2e:audit30-public": "playwright test --config=playwright.audit30.config.ts tests/e2e/public/diagnostic-need-integrity.spec.ts --workers=1",
+    "test:e2e:admin-native": "node --experimental-strip-types tests/e2e/helpers/admin-lot3-native-acceptance.mjs",
+    "closure:inventory": "node scripts/release/closure-inventory.mjs",
+    "staging:preflight": "node scripts/staging/preflight.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -53,7 +65,10 @@
     "supabase": "2.117.0",
     "typescript": "5.9.3",
     "vitest": "5.0.3",
-    "vite": "8.1.6"
+    "vite": "8.1.6",
+    "next": "16.4.5",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "pnpm": {
     "overrides": {

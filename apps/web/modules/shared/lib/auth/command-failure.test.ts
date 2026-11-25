@@ -8,7 +8,7 @@ describe("public action failure categories",()=>{
  it("does not call a transient outage a logout or a conflict",()=>{
   expect(classifyCommandFailure({status:503,code:"08006"})).toBe("FAILED");
   expect(classifyCommandFailure({status:401})).toBe("UNAUTHENTICATED");
-  expect(classifyCommandFailure({code:"40001"})).toBe("CONFLICT");
+  expect(classifyCommandFailure({code:"PT409"})).toBe("CONFLICT");
   expect(classifyCommandFailure({code:"22003"})).toBe("VALIDATION");
  });
 });

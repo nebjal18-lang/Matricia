@@ -34,7 +34,20 @@ export default async function FranchiseFollowupsPage({ params, searchParams }: {
             <AlertDescription>{r.reason}</AlertDescription>
           </Alert>
         ) : (
-          <FollowupPanel dashboard={r.dashboard} locale={locale} m={m} keyValue={randomUUID()} />
+          <FollowupPanel
+            dashboard={r.dashboard}
+            locale={locale}
+            m={m}
+            keys={{
+              propose: Object.fromEntries(r.dashboard.franchises.filter((f) => f.canWrite).map((f) => [f.id, randomUUID()])),
+              preference: Object.fromEntries(r.dashboard.prospects.map((p) => [p.id, randomUUID()])),
+              decision: Object.fromEntries(
+                r.dashboard.policies
+                  .filter((p) => p.status === "PENDING_APPROVAL" && p.proposedBy !== r.dashboard.currentUserId)
+                  .map((p) => [p.id, randomUUID()]),
+              ),
+            }}
+          />
         )}
       </details>
     </FranchiseAppShell>

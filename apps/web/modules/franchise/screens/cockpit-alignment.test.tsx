@@ -38,22 +38,30 @@ describe("alignement cockpit SIP de l’espace franchisé", () => {
   });
 
   it("chaque module franchise passe par FranchiseAppShell, sans ancien chrome", async () => {
+    const networkScreen = new URL("./spaces/network-page.tsx", import.meta.url);
     for (const url of Object.values(pages)) {
       const code = await source(url);
-      expect(code).toContain("FranchiseAppShell");
+      const usesShellDirectly = code.includes("FranchiseAppShell");
+      const usesSharedNetworkScreen = code.includes("FranchiseNetworkPage");
+      expect(usesShellDirectly || usesSharedNetworkScreen).toBe(true);
+      if (usesSharedNetworkScreen) {
+        expect(await source(networkScreen)).toContain("FranchiseAppShell");
+      }
       expect(code).not.toContain("AdminModuleChrome");
       expect(code).not.toContain("bg-muted/40");
     }
   });
 
   it("les pages opérationnelles exposent le bandeau de mandat et le workbench visuel", async () => {
+    const messagesWorkspace = new URL("./messages/messages-workspace.tsx", import.meta.url);
+    const networkScreen = new URL("./spaces/network-page.tsx", import.meta.url);
     expect(await source(pages.validations)).toContain("FranchiseValidationsWorkbench");
     expect(await source(pages.validationBucket)).toContain("FranchiseValidationsWorkbench");
     expect(await source(pages.documents)).toContain("DocumentsBoard");
     expect(await source(pages.messages)).toContain("loadFranchiseMessaging");
-    expect(await source(pages.messages)).toContain("SendFranchiseMessageForm");
+    expect(await source(messagesWorkspace)).toContain("SendFranchiseMessageForm");
     expect(await source(pages.requests)).toContain("mandateName");
-    expect(await source(pages.network)).toContain("mandateName");
+    expect(await source(networkScreen)).toContain("mandateName");
     expect(await source(pages.quality)).toContain("mandateName");
     expect(await source(pages.governance)).toContain("GovernanceBoard");
     expect(await source(pages.performance)).toContain("PerformanceBoard");

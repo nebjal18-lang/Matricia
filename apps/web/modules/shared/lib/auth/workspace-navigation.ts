@@ -55,3 +55,11 @@ export function withDashboardWorkspaceHint(value: string, locale: Locale, worksp
   url.searchParams.set("workspace", workspace);
   return `${url.pathname}${url.search}${url.hash}`;
 }
+
+/** Preserves existing query keys and sets an explicit workspace hint for cross-space navigation. */
+export function queryWithWorkspace(query: string, workspace: WorkspaceLanding): string {
+  const params = new URLSearchParams(query.replace(/^\?/, ""));
+  params.set("workspace", workspace);
+  const text = params.toString();
+  return text ? `?${text}` : "";
+}

@@ -21,7 +21,7 @@ describe("governed zero cost commands",()=>{
  it("refuses a nonzero or malformed proposal receipt instead of presenting a false approved cost",async()=>{
   rpc.mockResolvedValue({data:{...receipt(),net_cost_minor:"1200"},error:null});expect(await proposeFinanceZeroCost(client,input())).toEqual({ok:false,code:"INVALID_RESPONSE"});
  });
- it.each([["42501","MFA_AAL2_REQUIRED","MFA_REQUIRED"],["42501","INDEPENDENT_FINANCE_REQUIRED","FORBIDDEN"],["40001","SOURCE_CHANGED","CONFLICT"],["55000","FINANCE_COST_DOCUMENT_READ_RECEIPT_REQUIRED","EVIDENCE_REQUIRED"],["55000","ADVERSE_FUNDING_REVIEW_REQUIRED","CONFLICT"]])("keeps failed prerequisites precise %s/%s",async(code,message,expected)=>{
+ it.each([["42501","MFA_AAL2_REQUIRED","MFA_REQUIRED"],["42501","INDEPENDENT_FINANCE_REQUIRED","FORBIDDEN"],["PT409","SOURCE_CHANGED","CONFLICT"],["55000","FINANCE_COST_DOCUMENT_READ_RECEIPT_REQUIRED","EVIDENCE_REQUIRED"],["55000","ADVERSE_FUNDING_REVIEW_REQUIRED","CONFLICT"]])("keeps failed prerequisites precise %s/%s",async(code,message,expected)=>{
   rpc.mockResolvedValue({data:null,error:{code,message}});expect(await proposeFinanceZeroCost(client,input())).toEqual({ok:false,code:expected});
  });
  it("pins approval to the exact expected source with a reason and no invented read receipt",async()=>{

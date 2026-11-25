@@ -3,6 +3,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { AdminCommandCenter } from "@/modules/admin/data/command-center/model";
 import { dossierHref } from "@/modules/admin/data/command-center/view-model";
 import { adminDirectoryGroups } from "@/modules/admin/data/spaces/directory";
+import { shortReference } from "@/modules/shared/lib/format/display";
 
 const normalize = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase().trim();
 export function searchAdminLoadedContent(locale: Locale, query: string, organizationQuery: string, dashboard: AdminCommandCenter | null) {
@@ -13,17 +14,17 @@ export function searchAdminLoadedContent(locale: Locale, query: string, organiza
   const pages = adminDirectoryGroups(locale, organizationQuery).flatMap(group => group.links);
   const seen = new Set<string>();
   const links = pages.flatMap((page, index) => {
-    if (seen.has(page.href) || !matches(`${page.label} ${alternate[index]?.label ?? ""} ${page.href.split("?")[0]}`)) return [];
+    if (seen.has(page.href) || !matches(`${page.label} ${page.summary} ${alternate[index]?.label ?? ""} ${alternate[index]?.summary ?? ""} ${page.href.split("?")[0]}`)) return [];
     seen.add(page.href);
     return [{ ...page, kind: "page" as const }];
   });
   const dossiers = (dashboard?.workItems ?? []).filter(item => matches(`${item.titleFr} ${item.titleAr} ${item.resourceId} ${item.resourceType}`)).map(item => ({
-    href: `${dossierHref(locale, item)}${organizationQuery}`,
+    href: dossierHref(locale, item, organizationQuery),
     label: locale === "ar" ? item.titleAr : item.titleFr,
     kind: "dossier" as const,
   }));
   const actions = (dashboard?.actions ?? []).filter(item => matches(`${item.reason} ${item.resourceType} ${item.resourceId} ${item.actionType}`)).map(item => ({
-    href: `#admin-action-${item.id}`, label: `${item.reason} · ${item.resourceId}`, kind: "action" as const,
+    href: `#admin-action-${item.id}`, label: `${item.reason} · ${shortReference(item.resourceId)}`, kind: "action" as const,
   }));
   return [...links, ...dossiers, ...actions];
 }

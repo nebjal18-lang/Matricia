@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "suite": "notification-templates",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:16:55.857Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:16:33.494Z",
+    "finishedAt": "2026-11-23T22:16:54.928Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realUiBilingualPreviews": 4,
+    "realUiBilingualProposals": 4,
+    "realUiIndependentActivations": 4,
+    "exactPersistedTranslations": true,
+    "immutableVersionsRetained": true,
+    "selfApprovalDenied": true,
+    "unknownVariablesDenied": true,
+    "staleHttp409WithoutRetry": true,
+    "foreignAccessDenied": true,
+    "noNotificationSent": true,
+    "activationAuditAndOutbox": true,
+    "stage": "native-proof",
+    "failureLine": null
+  }
+}

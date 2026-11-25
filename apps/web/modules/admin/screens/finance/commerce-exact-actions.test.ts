@@ -17,6 +17,17 @@ describe("exact Admin financial catalog commands",()=>{
  it("refuses an unchosen budget rule before RPC",async()=>{await linkPlanBoxAction({status:"idle"},form({budgetRule:""}));expect(mocks.command).not.toHaveBeenCalled();});
  it("preserves all BIGINT benefit fields as decimal text",async()=>{await createBenefitAction({status:"idle"},form(benefit));expect(mocks.command).toHaveBeenCalledWith("create_benefit_version",expect.objectContaining({p_credit_cost:benefit.creditCost,p_reference_value_minor:benefit.referenceValueMinor,p_internal_cost_minor:benefit.internalCostMinor,p_quota:benefit.quota}));});
  it("preserves every box amount while using bounded int4 counters",async()=>{await createBoxAction({status:"idle"},form(box));expect(mocks.command).toHaveBeenCalledWith("create_box_version",expect.objectContaining({p_credit_budget:box.creditBudget,p_cost_low_minor:box.costLowMinor,p_cost_expected_minor:box.costExpectedMinor,p_cost_full_minor:box.costFullMinor,p_rollover_months:12,p_rules_snapshot:{},p_slots:[expect.objectContaining({minimum_selections:0,maximum_selections:2})]}));});
+ it("accepts a multi-service offer via slotsJson",async()=>{
+  const slotsJson=JSON.stringify([
+   {slot_code:"COMPTABLE",slot_kind:"MANDATORY",minimum_selections:1,maximum_selections:1,allowed_benefit_version_ids:["11111111-1111-4111-8111-111111111111"]},
+   {slot_code:"MARKETING",slot_kind:"OPTIONAL",minimum_selections:0,maximum_selections:2,allowed_benefit_version_ids:["22222222-2222-4222-8222-222222222222"]},
+  ]);
+  await createBoxAction({status:"idle"},form({...box,slotsJson}));
+  expect(mocks.command).toHaveBeenCalledWith("create_box_version",expect.objectContaining({p_slots:[
+   expect.objectContaining({slot_code:"COMPTABLE",slot_kind:"MANDATORY",minimum_selections:1,maximum_selections:1}),
+   expect.objectContaining({slot_code:"MARKETING",slot_kind:"OPTIONAL",minimum_selections:0,maximum_selections:2}),
+  ]}));
+ });
  it.each(["10.5","1e3","9223372036854775808","-1"])("rejects invalid benefit BIGINT %s before RPC",async value=>{expect(await createBenefitAction({status:"idle"},form({...benefit,creditCost:value}))).toEqual({status:"error",reason:"VALIDATION"});expect(mocks.command).not.toHaveBeenCalled();});
  it.each(["10.5","1e3","9223372036854775808"])("rejects invalid box BIGINT %s before RPC",async value=>{expect(await createBoxAction({status:"idle"},form({...box,costExpectedMinor:value}))).toEqual({status:"error",reason:"VALIDATION"});expect(mocks.command).not.toHaveBeenCalled();});
  it.each(["1.5","1e2","2147483648"])("rejects an invalid int4 rollover counter %s",async value=>{await createBoxAction({status:"idle"},form({...box,rolloverMonths:value}));expect(mocks.command).not.toHaveBeenCalled();});

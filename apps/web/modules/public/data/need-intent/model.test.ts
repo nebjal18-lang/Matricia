@@ -31,6 +31,9 @@ describe("public need intent", () => {
     expect(serviceCodeFromNeedSnapshot(classificationSnapshot(classification!, "fr"))).toBe("IT-AUDIT-SI");
     expect(serviceCodeFromNeedSnapshot("Domaine présélectionné : Informatique (IT).")).toBeNull();
     expect(publicNeedRequestHref("fr", "11111111-1111-4111-8111-111111111111", "IT-AUDIT-SI")).toBe("/fr/client/demandes/nouvelle?intakeId=11111111-1111-4111-8111-111111111111&serviceCode=IT-AUDIT-SI");
+    expect(publicNeedRequestHref("fr", "11111111-1111-4111-8111-111111111111", "IT-AUDIT-SI", "22222222-2222-4222-8222-222222222222")).toBe(
+      "/fr/client/demandes/nouvelle?intakeId=11111111-1111-4111-8111-111111111111&serviceCode=IT-AUDIT-SI&organizationId=22222222-2222-4222-8222-222222222222",
+    );
   });
 
   it("ranks published services from bounded free text without loading questions", () => {
@@ -44,11 +47,11 @@ describe("public need intent", () => {
     expect(rankPublicNeedServices("court", "fr")).toEqual([]);
   });
 
-  it("signals missing approved Arabic service labels rather than silently returning French", () => {
+  it("uses the approved Arabic service name rather than the French label", () => {
     const fr = canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "fr");
     const ar = canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "ar");
-    expect(ar?.serviceName).toContain("الاسم العربي");
-    expect(ar?.serviceName).not.toBe(canonicalizePublicNeedClassification({ serviceCode: "IT-AUDIT-SI", libraryCode: "IT" }, "fr")?.serviceName);
+    expect(ar?.serviceName).toBe("تدقيق نظام المعلومات وخارطة الطريق");
+    expect(ar?.serviceName).not.toBe(fr?.serviceName);
     expect(fr?.serviceName ?? "").not.toContain("الاسم العربي");
   });
 

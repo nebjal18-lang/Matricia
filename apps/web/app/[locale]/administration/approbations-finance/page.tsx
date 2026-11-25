@@ -5,6 +5,7 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { FinanceApprovalPanel } from "@/modules/admin/screens/approbations-finance/panel";
 import { AdminModulePage } from "@/modules/admin/ui/admin-module-page";
+import { AdminStep11Gate } from "@/modules/admin/ui/admin-step11-gate";
 
 const id = z.string().uuid();
 const request = z.object({ id, status: z.string(), row_version: z.number().int().positive(), resource_type: z.string(), resource_id: z.string() });
@@ -39,8 +40,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       active="finance"
       path="approbations-finance"
       title={ar ? "موافقات الأعمال والعمولات" : "Approbations métier et commissions"}
-      lead={ar ? "ضوابط AAL2 وفصل المهام ومبالغ صحيحة ومطابقة واحد لواحد." : "Contrôles AAL2, séparation des tâches, montants exacts et réconciliation strictement un-à-un."}
+      lead={ar ? "الخطوة 11 — موافقات مالية بالعامل الثاني ومبالغ دقيقة." : "Étape 11 — approbations financières avec second facteur et montants exacts."}
     >
+      <AdminStep11Gate locale={locale} current="approbations" />
       {failed ? (
         <p role="alert">{ar ? "تعذر تحميل البيانات المصرح بها." : "Impossible de charger les données autorisées."}</p>
       ) : (

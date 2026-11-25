@@ -1,0 +1,11 @@
+{
+  "mode": "db",
+  "startedAt": "2026-11-19T13:32:15.472Z",
+  "finishedAt": "2026-11-19T13:32:16.921Z",
+  "durationMs": 1449,
+  "exitCode": 0,
+  "nodeVersion": "v22.23.5",
+  "localOnly": true,
+  "filter": "^000[1-4]_",
+  "sqlTarget": "matricia_audit_20261119_b578c75c"
+}

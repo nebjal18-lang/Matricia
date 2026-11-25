@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ client: vi.fn(), user: vi.fn(), rpc: vi.fn() }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: m.client }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: m.client, getServerAuthUser: async () => m.user() }));
 import { loadAdminOrganizationFiche, loadAdminSupervisionDashboard as load } from "./repository";
 const empty = () => ({ as_of: "2026-11-02T10:00:00Z", read_only: false, organizations: [], requests: [], quotes: [], missions: [], diagnostics: [] });
 const row = (n: number) => ({ id: `a1230000-0000-4000-8000-${String(n).padStart(12, "0")}`, display_name: `Organisation ${n}`, legal_name: `Organisation ${n}`, status: "ACTIVE", created_at: "2026-11-01T10:00:00Z", member_count: 0, open_requests: 0, open_disputes: 0 });

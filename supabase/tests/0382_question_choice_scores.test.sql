@@ -1,0 +1,10 @@
+begin;
+select plan(6);
+select is(private.weighted_question_percentage('[{"weight":"2","maximum_score":"10","answer_score":"8"},{"weight":"1","maximum_score":"4","answer_score":"2"},{"weight":"0","maximum_score":"10","answer_score":"10"}]'::jsonb),75.00::numeric,'percentage is answer score times weight over maximum score times weight');
+select is(private.weighted_question_percentage('[{"weight":"1","maximum_score":"4","answer_score":"5"}]'::jsonb),null,'an answer above its maximum does not produce a percentage');
+select is(private.resolve_answer_score('SINGLE_CHOICE','[{"value":"OPT_1","label_fr":"Oui","label_ar":"نعم","score":"8"}]'::jsonb,10,'"OPT_1"'::jsonb),8::numeric,'a single choice uses the score stored on that choice');
+select is(private.resolve_answer_score('MULTIPLE_CHOICE','[{"value":"OPT_1","label_fr":"Faible","label_ar":"ضعيف","score":"2"},{"value":"OPT_2","label_fr":"Eleve","label_ar":"مرتفع","score":"8"}]'::jsonb,10,'["OPT_1","OPT_2"]'::jsonb),10::numeric,'multiple choices add the score of each selected choice');
+select ok(private.question_options_valid('["Oui","Non"]'::jsonb,'SINGLE_CHOICE','0'::jsonb,'0'::jsonb) and not private.question_options_valid('[{"value":"OPT_1","label_fr":"Oui","label_ar":"نعم","score":"11"}]'::jsonb,'SINGLE_CHOICE','10'::jsonb,'1'::jsonb),'legacy text choices remain valid and a score above the maximum is refused');
+select ok(not has_function_privilege('anon','private.session_question_percentage(uuid)','EXECUTE') and not has_function_privilege('authenticated','private.session_question_percentage(uuid)','EXECUTE') and not has_function_privilege('authenticated','private.resolve_answer_score(text,jsonb,numeric,jsonb)','EXECUTE'),'score resolution stays on the server');
+select * from finish();
+rollback;

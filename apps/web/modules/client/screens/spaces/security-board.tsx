@@ -19,6 +19,7 @@ export type SecurityMemberRow = {
   id: string;
   name: string;
   role: string;
+  access: string;
   status: string;
   lastSeen?: string;
 };
@@ -81,19 +82,19 @@ export function SecurityBoard({
             <li>
               <span className="client-feed-icon" data-tone="violet"><Shield className="size-4" aria-hidden /></span>
               <span><strong>{c.verificationMethod}</strong><small>{method}</small></span>
-              <a href="#mfa" className="client-text-link">{c.manageMethod}</a>
+              <Link href={`/${locale}/securite/compte${query}`} className="client-text-link">{c.manageMethod}</Link>
             </li>
-            <li>
+            <li id="telephone">
               <span className="client-feed-icon" data-tone="sky"><Smartphone className="size-4" aria-hidden /></span>
               <span><strong>{c.recoveryPhone}</strong><small>{locale === "ar" ? "يُدار مع عامل التحقق القوي أدناه" : "Géré avec le second facteur ci-dessous"}</small></span>
-              <a href="#mfa" className="client-text-link">{c.manageMethod}</a>
+              <Link href={`/${locale}/securite/compte${query}`} className="client-text-link">{c.manageMethod}</Link>
             </li>
           </ul>
         </article>
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.activeSessions}</h2>
-            <Link href={`/${locale}/securite/sessions`} className="client-text-link">{c.seeHistory}</Link>
+            <Link href={`/${locale}/securite/sessions${query}`} className="client-text-link">{c.seeHistory}</Link>
           </header>
           {sessions.length === 0 ? <p>{locale === "ar" ? "لا جلسات ظاهرة." : "Aucune session visible."}</p> : (
             <ul className="client-feed">
@@ -104,17 +105,17 @@ export function SecurityBoard({
                   </span>
                   <span><strong>{session.label}</strong><small>{session.detail}</small></span>
                   <em>{session.isCurrent ? c.currentSession : session.lastSeen}</em>
-                  {!session.isCurrent ? <Link href={`/${locale}/securite/sessions`} className="client-text-link">{c.revoke}</Link> : null}
+                  {!session.isCurrent ? <Link href={`/${locale}/securite/sessions${query}`} className="client-text-link">{c.revoke}</Link> : null}
                 </li>
               ))}
             </ul>
           )}
-          <Link href={`/${locale}/securite/sessions`} className="client-ghost-link">{c.revokeAll}</Link>
+          <Link href={`/${locale}/securite/sessions${query}`} className="client-ghost-link">{c.revokeAll}</Link>
         </article>
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.securityHistory}</h2>
-            <Link href={`/${locale}/securite/sessions`} className="client-text-link">{c.seeHistory}</Link>
+            <Link href={`/${locale}/securite/sessions${query}`} className="client-text-link">{c.seeHistory}</Link>
           </header>
           {history.length === 0 ? <p>{c.historyEmpty}</p> : (
             <ol className="client-feed">
@@ -129,6 +130,21 @@ export function SecurityBoard({
         </article>
       </section>
       <section className="client-board">
+        <article className="client-card" id="invitation">
+          <header><h2>{c.inviteMember}</h2></header>
+          <p>{c.accessNote}</p>
+          {organizationId ? (
+            <p role="status" className="client-access-note">
+              {locale === "ar" ? "المؤسسة جاهزة. يمكنكم إرسال الدعوة أدناه." : "Organisation prête. Vous pouvez envoyer l’invitation ci-dessous."}
+            </p>
+          ) : (
+            <p role="status" className="client-access-note">
+              {locale === "ar" ? "اختاروا مؤسسة في أعلى الصفحة لفتح الدعوة." : "Choisissez une organisation en haut de page pour ouvrir l’invitation."}
+            </p>
+          )}
+          <MemberInviteForm locale={locale} organizationId={organizationId ?? null} />
+          <p className="client-access-note"><UserPlus className="size-4" aria-hidden /> {c.inviteNote}</p>
+        </article>
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.people}</h2>
@@ -151,7 +167,7 @@ export function SecurityBoard({
                     <tr key={member.id}>
                       <td>{member.name}</td>
                       <td>{member.role}</td>
-                      <td>{member.role}</td>
+                      <td>{member.access}</td>
                       <td>{member.lastSeen ?? "—"}</td>
                       <td><span className="client-status-chip" data-tone="mint">{member.status}</span></td>
                     </tr>
@@ -160,12 +176,6 @@ export function SecurityBoard({
               </table>
             </div>
           )}
-        </article>
-        <article className="client-card" id="invitation">
-          <header><h2>{c.inviteMember}</h2></header>
-          <p>{c.accessNote}</p>
-          <MemberInviteForm locale={locale} organizationId={organizationId ?? null} />
-          <p className="client-access-note"><UserPlus className="size-4" aria-hidden /> {c.inviteNote}</p>
         </article>
       </section>
       <div id="mfa">{children}</div>

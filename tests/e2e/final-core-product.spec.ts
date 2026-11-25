@@ -15,10 +15,10 @@ test("MAT-FUNC-007 dossier messaging is readable by a participant and denied to 
   const allowed = await pageFor(browser, fixture.clientState);
   try {
     await allowed.page.goto(`/fr/messagerie?fil=${fixture.messaging.threadId}`, { waitUntil: "domcontentloaded", timeout: 20_000 });
-    await expect(allowed.page.getByRole("heading", { level: 1, name: "Messagerie sécurisée" })).toBeVisible();
+    await expect(allowed.page.getByRole("heading", { level: 1, name: "Messages" })).toBeVisible();
     if (await allowed.page.getByText("Impossible de charger la messagerie.", { exact: true }).isVisible()) throw new Error("Messaging repository rejected the provisioned participant fixture");
     if (await allowed.page.getByText("Sélectionnez une conversation pour lire les échanges.", { exact: true }).isVisible()) throw new Error("Messaging repository omitted the provisioned conversation");
-    await expect(allowed.page.getByRole("region", { name: fixture.messaging.subject })).toBeVisible();
+    await expect(allowed.page.getByRole("heading", { level: 2, name: fixture.messaging.subject, exact: true })).toBeVisible();
     await expect(allowed.page.getByText(fixture.messaging.message, { exact: true })).toBeVisible();
     const sentMessage = `${fixture.messaging.message} — réponse persistée`;
     const sendForm = allowed.page.locator('form').filter({ has: allowed.page.locator('textarea[name="body"]') });
@@ -44,8 +44,8 @@ test("MAT-FUNC-013 frozen comparison contains two selected quotes and denies a f
     await allowed.page.goto(`/fr/client/demandes/${fixture.comparison.requestId}/comparaison?rfq=${fixture.comparison.rfqId}`, { waitUntil: "domcontentloaded", timeout: 20_000 });
     await expect(allowed.page.getByRole("heading", { level: 1, name: "Comparer les offres" })).toBeVisible();
     if (await allowed.page.getByText("Aucune comparaison figée n’est encore disponible.", { exact: true }).isVisible()) throw new Error("Comparison repository omitted the provisioned snapshot");
-    await expect(allowed.page.getByRole("heading", { name: /Offre 1/u })).toBeVisible();
-    await expect(allowed.page.getByRole("heading", { name: /Offre 2/u })).toBeVisible();
+    await expect(allowed.page.getByRole("heading", { name: "Offre A", exact: true })).toBeVisible();
+    await expect(allowed.page.getByRole("heading", { name: "Offre B", exact: true })).toBeVisible();
     await expect(allowed.page.locator("body")).not.toContainText(fixture.comparison.foreignMarker);
   } finally { await allowed.context.close(); }
   const denied = await pageFor(browser, fixture.foreignClientState);
@@ -86,7 +86,7 @@ test("MAT-FUNC-020 provider capacity drives matching inclusion and exclusion thr
 
     const serviceSection = provider.page.getByRole("heading", { name: "Services demandés" }).locator("xpath=ancestor::section[1]");
     const serviceCard = serviceSection.locator("li").filter({ hasText: fixture.providerQualification.serviceLabelFr }).last();
-    await expect(serviceCard).toContainText("Qualification : Approuvé · État de capacité : Non déclarée");
+    await expect(serviceCard).toContainText(/Qualification\s*:\s*Approuvé\s*·\s*État de capacité\s*:\s*Non déclarée/u);
     await expect(serviceCard).toContainText("Non éligible aux nouvelles consultations");
 
     const capacitySection = provider.page.getByRole("heading", { name: "Déclarer une capacité" }).locator("xpath=ancestor::section[1]");
@@ -97,10 +97,9 @@ test("MAT-FUNC-020 provider capacity drives matching inclusion and exclusion thr
     const leadTime = form.getByLabel("Délai de démarrage (jours)", { exact: true });
     const reason = form.getByLabel("Motif de cette déclaration", { exact: true });
     const save = form.getByRole("button", { name: "Enregistrer la capacité" });
-    await service.selectOption(fixture.providerQualification.serviceId);
-    await leadTime.fill("3");
-
     const declare = async (value: "AVAILABLE" | "LIMITED" | "FULL" | "PAUSED", availableUnits: string, expectedLabel: string) => {
+      await service.selectOption(fixture.providerQualification.serviceId);
+      await leadTime.fill("3");
       await status.selectOption(value);
       if (value === "PAUSED") {
         await expect(units).toBeDisabled();
@@ -112,7 +111,7 @@ test("MAT-FUNC-020 provider capacity drives matching inclusion and exclusion thr
       await reason.fill(`Transition contrôlée ${value}`);
       await save.click();
       await expect(capacitySection.getByText("Opération enregistrée. L’état affiché va être actualisé.", { exact: true })).toBeVisible();
-      await expect(serviceCard).toContainText(`Qualification : Approuvé · État de capacité : ${expectedLabel}`);
+      await expect(serviceCard).toContainText(new RegExp(`Qualification\\s*:\\s*Approuvé\\s*·\\s*État de capacité\\s*:\\s*${expectedLabel}`, "u"));
     };
 
     await declare("AVAILABLE", "8", "Disponible");

@@ -1,0 +1,62 @@
+
+> matricia@0.1.0 lint C:\Projects\Matricia\Matricia
+> pnpm -r lint
+
+Scope: 16 of 17 workspace projects
+packages/application lint$ tsc --noEmit
+packages/config lint$ tsc --noEmit
+packages/contracts lint$ tsc --noEmit
+packages/domain lint$ tsc --noEmit
+packages/config lint: Done
+packages/forms lint$ tsc --noEmit
+packages/contracts lint: Done
+packages/infrastructure lint$ tsc --noEmit
+packages/domain lint: Done
+packages/legal-v41 lint$ tsc --noEmit
+packages/application lint: Done
+packages/observability lint$ tsc --noEmit
+packages/forms lint: Done
+packages/question-engine lint$ tsc --noEmit
+packages/legal-v41 lint: Done
+packages/resilience-v41 lint$ tsc --noEmit
+packages/observability lint: Done
+packages/signature-v41 lint$ tsc --noEmit
+packages/infrastructure lint: Done
+packages/testkit lint$ tsc --noEmit
+packages/resilience-v41 lint: Done
+packages/ui lint$ tsc --noEmit
+packages/testkit lint: Done
+packages/workflows lint$ tsc --noEmit
+packages/ui lint: Done
+packages/workflows lint: Done
+packages/signature-v41 lint: Done
+packages/question-engine lint: Done
+apps/worker lint$ tsc --noEmit
+apps/web lint$ eslint . --ignore-pattern dist --ignore-pattern .next
+apps/worker lint: Done
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\data\providers\repository.ts
+apps/web lint:   45:23  warning  '_organizationId' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint:   49:30  warning  '_serviceId' is defined but never used       @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\data\spaces\demo-catalog-questions.ts
+apps/web lint:   66:3  warning  '_selectedVersionId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\data\spaces\demo-supervision.ts
+apps/web lint:   131:3  warning  '_value' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\screens\finance\box-wholesale-workshop.tsx
+apps/web lint:   68:9  warning  The 'offers' logical expression could make the dependencies of useMemo Hook (at line 75) change on every render. To fix this, wrap the initialization of 'offers' in its own useMemo() Hook  react-hooks/exhaustive-deps
+apps/web lint:   68:9  warning  The 'offers' logical expression could make the dependencies of useMemo Hook (at line 79) change on every render. To fix this, wrap the initialization of 'offers' in its own useMemo() Hook  react-hooks/exhaustive-deps
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\screens\finance\finance-sorties.tsx
+apps/web lint:   6:36  warning  '_locale' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\screens\spaces\actor-boards.tsx
+apps/web lint:   14:10  warning  'actorAccountSubtitle' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\client\screens\missions\amendment-panel.tsx
+apps/web lint:   6:233  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\client\screens\spaces\disputes-board.tsx
+apps/web lint:   230:3  warning  'query' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\franchise\screens\relances\messages.ts
+apps/web lint:   4:107  warning  'V' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\franchise\screens\spaces\boards.tsx
+apps/web lint:   3:30  warning  'moroccoRegions' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\provider\screens\spaces\workbenches.tsx
+apps/web lint:   549:3  warning  'invoiceId' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: ✖ 13 problems (0 errors, 13 warnings)
+apps/web lint: Done

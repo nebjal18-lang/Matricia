@@ -16,7 +16,7 @@ export default async function FranchisePerimeterPage({ params, searchParams }: {
   const board = await loadFranchiseSpaceFromLibrary({ locale, query: space.selectedQuery, result });
   const scope = franchiseCommandScope(result, space.selectedOrganizationId);
   return (
-    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="perimeter" title={c.periTitle} lead={c.periLead} kicker={c.kicker} mandateName={mandateName}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="perimeter" title={c.periTitle} lead={c.periLead} kicker={c.kicker} sceneHero mandateName={mandateName}>
       <PerimeterBoard locale={locale} query={space.selectedQuery} mandateName={mandateName} board={board} organizationId={scope.organizationId} />
     </FranchiseAppShell>
   );

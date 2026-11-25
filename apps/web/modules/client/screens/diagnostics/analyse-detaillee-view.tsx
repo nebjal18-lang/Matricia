@@ -40,7 +40,7 @@ export function AnalyseDetailleeView({ detail, locale, m, solutionsHref, assista
   const opportunityTitle=(item:DiagnosticDetail["opportunities"][number])=>{const metadata=item.knownData.published_opportunity;const title=metadata&&typeof metadata==="object"&&!Array.isArray(metadata)?(metadata as Record<string,unknown>)[locale==="fr"?"title_fr":"title_ar"]:null;return typeof title==="string"&&title.trim()?title:(locale==="ar"?item.serviceNameAr:item.serviceNameFr)??`${m.priority} ${labelDiagnosticPriority(locale,item.priority)}`;};
   const t = locale === "fr"
     ? {
-        crumb: "Bilan & besoins > Analyse détaillée",
+        crumb: "Bilans > Analyse détaillée",
         title: "Analyse détaillée",
         lead: "Votre diagnostic complet pour identifier vos priorités et passer à l’action.",
         quote: "Des diagnostics clairs, des décisions plus sereines.",
@@ -91,7 +91,7 @@ export function AnalyseDetailleeView({ detail, locale, m, solutionsHref, assista
         missing: "Informations encore nécessaires",
       }
     : {
-        crumb: "التشخيص والاحتياجات > تحليل مفصل",
+        crumb: "التشخيصات > تحليل مفصل",
         title: "تحليل مفصل",
         lead: "تشخيصكم الكامل لتحديد الأولويات والانتقال إلى التنفيذ.",
         quote: "تشخيصات واضحة وقرارات أكثر اطمئناناً.",

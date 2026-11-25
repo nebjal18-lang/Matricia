@@ -11,12 +11,17 @@ export default async function OfferDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; requestId: string; quoteId: string }>;
-  searchParams: Promise<{ organizationId?: string;versionId?:string }>;
+  searchParams: Promise<{ organizationId?: string | string[]; versionId?: string | string[] }>;
 }) {
   const [{ locale, requestId, quoteId }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const selectedOrganizationId = typeof query.organizationId === "string" ? query.organizationId : null;
   const selectedQuery = selectedOrganizationId ? `?organizationId=${encodeURIComponent(selectedOrganizationId)}` : "";
+  const versionId = typeof query.versionId === "string" ? query.versionId : undefined;
+  const contextQuery = new URLSearchParams();
+  if (selectedOrganizationId) contextQuery.set("organizationId", selectedOrganizationId);
+  if (versionId) contextQuery.set("versionId", versionId);
+  const languagePath = `/${locale}/client/demandes/${encodeURIComponent(requestId)}/offres/${encodeURIComponent(quoteId)}${contextQuery.size ? `?${contextQuery}` : ""}`;
   const client = await getSupabaseServerClient();
   const { data: auth } = await client.auth.getUser();
   const organizationName = selectedOrganizationId
@@ -28,15 +33,16 @@ export default async function OfferDetailPage({
     quoteId,
     organizationQuery: selectedQuery,
     organizationName,
-    versionId:query.versionId,
+    ...(versionId ? { versionId } : {}),
   });
-  if (result.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/demandes/${requestId}/offres/${quoteId}` }));
+  if (result.status === "unauthenticated") redirect(connexionHref(locale, { next: languagePath }));
   if (result.status === "not_found") notFound();
   if (result.status === "error") {
     return (
       <ClientAppShell
         locale={locale}
         selectedQuery={selectedQuery}
+        languagePath={languagePath}
         selectedOrganizationId={selectedOrganizationId}
         userEmail={auth.user?.email ?? null}
         organizationName={organizationName}
@@ -52,6 +58,7 @@ export default async function OfferDetailPage({
     <ClientAppShell
       locale={locale}
       selectedQuery={selectedQuery}
+      languagePath={languagePath}
       selectedOrganizationId={selectedOrganizationId}
       userEmail={auth.user?.email ?? null}
       organizationName={organizationName}

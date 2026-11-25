@@ -59,12 +59,12 @@ export default async function AdminClientFichePage({
       }
     >
       {!fiche ? (
-        <main className="client-page">
+        <div className="client-page">
           <Alert variant="destructive">
             <AlertTitle>{result.status === "error" && result.reason === "FORBIDDEN" ? a.forbiddenSection : (locale === "ar" ? "تعذر التحميل" : "Chargement indisponible")}</AlertTitle>
             <AlertDescription>{result.status === "error" ? result.reason : ""}</AlertDescription>
           </Alert>
-        </main>
+        </div>
       ) : (
         <ClientFicheBoard locale={locale} query={space.selectedQuery} fiche={fiche} />
       )}

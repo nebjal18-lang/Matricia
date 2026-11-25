@@ -70,6 +70,11 @@ describe("informations complémentaires pour les devis", () => {
     expect(mocks.revalidate).toHaveBeenCalledWith(`/fr/client/demandes/${uid(1)}`);
   });
 
+  it("signale complete quand les champs sont remplis même en INFORMATION_REQUIRED", async () => {
+    mocks.rpc.mockResolvedValue({ data: { status: "INFORMATION_REQUIRED", missing_quote_keys: [] }, error: null });
+    await expect(completeRequestInformationAction({ status: "idle" }, form({ locale: "fr", requestId: uid(1), rowVersion: "4", regionCode: "CASABLANCA_SETTAT", idempotencyKey: uid(5) }))).resolves.toEqual({ status: "success", complete: true, missing: [] });
+  });
+
   it("enregistre uniquement le mode canonique choisi et refuse un libellé traduit",async()=>{
     mocks.rpc.mockResolvedValue({data:{status:"DRAFT",missing_quote_keys:[]},error:null});
     const base={locale:"ar",requestId:uid(1),rowVersion:"3",idempotencyKey:uid(5),interventionMode:"HYBRID"};
@@ -87,7 +92,7 @@ describe("informations complémentaires pour les devis", () => {
 
   it("traduit les refus serveur", async () => {
     const base = { locale: "fr", requestId: uid(1), rowVersion: "3", regionCode: "", idempotencyKey: uid(5) };
-    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "42501" } }).mockResolvedValueOnce({ data: null, error: { code: "40001" } });
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "42501" } }).mockResolvedValueOnce({ data: null, error: { code: "PT409" } });
     await expect(completeRequestInformationAction({ status: "idle" }, form(base))).resolves.toEqual({ status: "error", reason: "FORBIDDEN" });
     await expect(completeRequestInformationAction({ status: "idle" }, form(base))).resolves.toEqual({ status: "error", reason: "CONFLICT" });
     mocks.getUser.mockResolvedValueOnce({ data: { user: null } });

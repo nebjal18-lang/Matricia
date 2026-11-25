@@ -48,7 +48,7 @@ export default async function AccountSecurityPage({
     getAccountSecurity(),
     listMySessions(),
     listOrganizationRoles(),
-    resolveConnectedSpace({ locale, organizationId: navigation.status === "ok" && navigation.navigation.landing === "administration" ? undefined : effectiveOrganizationId, allowDirectoryFailure: true }).catch(error => {
+    resolveConnectedSpace({ locale, ...(navigation.status === "ok" && navigation.navigation.landing === "administration" || effectiveOrganizationId === undefined ? {} : { organizationId: effectiveOrganizationId }), allowDirectoryFailure: true }).catch(error => {
       unstable_rethrow(error);
       if (!(error instanceof Error) || error.message !== "WORKSPACE_CONTEXT_UNAVAILABLE") throw error;
       return { status: "success" as const, selectedOrganizationId: null, selectedQuery: "", organizationName: null, userEmail: null, directoryUnavailable: true };
@@ -62,11 +62,11 @@ export default async function AccountSecurityPage({
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
       allowContextFailure
       currentPath={selfPath}
-      nextPath={nextPath}
-      workspace={query.workspace}
+      {...(nextPath !== undefined && { nextPath })}
+      {...(query.workspace !== undefined && { workspace: query.workspace })}
       title={locale === "ar" ? "أمان حسابي" : "Sécurité de mon compte"}
       lead={locale === "ar" ? "العامل الثاني وحماية الجلسات في مساحتكم الحالية." : "Second facteur et protection des sessions dans votre espace actuel."}
       clientActive="company"
@@ -97,12 +97,13 @@ export default async function AccountSecurityPage({
             id: member.id,
             name: member.isCurrentUser ? (locale === "ar" ? "أنتم" : "Vous") : (member.organizationName ?? roleMessages.anotherMember),
             role: member.roles[0] ? roleMessages.roles[member.roles[0]] : roleMessages.noRole,
+            access: member.organizationName ?? roleMessages.unknownOrganization,
             status: roleMessages.membershipStatuses[member.status],
           })) : []}
         >
           <details className="client-ops" open>
             <summary>{messages.mfaTitle}</summary>
-            <AccountSecurityPanel nextPath={nextPath} locale={locale} security={result} messages={messages} />
+            <AccountSecurityPanel {...(nextPath !== undefined && { nextPath })} locale={locale} security={result} messages={messages} />
           </details>
         </SecurityBoard>
       )}

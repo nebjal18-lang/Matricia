@@ -44,7 +44,7 @@ export default async function ClientMissionFollowPage({
   if (result.status === "success" && !mission) notFound();
 
   return (
-    <ClientAppShell languagePath={followPath} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" theme="follow" title={c.followTitle} lead={c.followLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/besoin${space.selectedQuery}`} label={locale === "ar" ? "وصف حاجتي" : "Décrire mon besoin"} />}>
+    <ClientAppShell languagePath={followPath} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" theme="follow" title={c.followTitle} lead={c.followLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/besoin${space.selectedQuery}`} label={locale === "ar" ? "وصف حاجتي" : "Décrire mon besoin"} />}>
       {result.status === "error" && result.reason === "FORBIDDEN_ORGANIZATION" ? <>
         <WorkspaceFailure locale={locale} reason="FORBIDDEN" returnPath={followPath} />
         <Link href={`/${locale}/organisation/roles`} className="client-ghost-link">{locale === "ar" ? "طلب صلاحية مناسبة" : "Demander une habilitation"}</Link>

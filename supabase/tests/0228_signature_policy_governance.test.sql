@@ -115,6 +115,8 @@ select pg_temp.as_user('f9800000-0000-4000-8000-000000000001');
 insert into p228 values('amendment-policy',pg_temp.propose_policy('AMENDMENT',1,'p228-amendment-policy'));
 select pg_temp.as_user('f9800000-0000-4000-8000-000000000002');
 select public.decide_signature_policy_v1((select(v->>'proposal_id')::uuid from p228 where k='amendment-policy'),(select v->>'content_hash'from p228 where k='amendment-policy'),true,'Reviewed separate temporary amendment policy');
+-- Approved policies are consumed by a subsequent client request.
+-- matricia:test-request-boundary
 -- A configured URL is not evidence of an installed native adapter or legal approval.
 insert into public.signature_provider_configs(id,provider_code,environment,version,status,supported_levels,endpoint_base_url)values('f9890000-0000-4000-8000-000000000001','UNINSTALLED_TEST_ONLY','DEVELOPMENT',1,'ACTIVE',array['SIMPLE'],'https://not-contacted.example.invalid');
 select pg_temp.as_user('f9800000-0000-4000-8000-000000000001');
@@ -162,7 +164,7 @@ select is(pg_temp.governed_mock(pg_temp.env('contract'),'SIGNER_SIGNED',(select(
 select is((select count(*)from public.contract_signatures where contract_id='f9830000-0000-4000-8000-000000000001'),2::bigint,'callback retry never creates more signatures');
 select pg_temp.as_user('f9800000-0000-4000-8000-000000000001');
 insert into p228 select'proof',jsonb_build_object('envelope_id',pg_temp.env('contract'),'evidence_package_id',v->>'evidence_package_id','final_hash',v->>'final_hash')from p228 where k='completed';
-select throws_ok($$select public.sign_contract('f9830000-0000-4000-8000-000000000001','f9840000-0000-4000-8000-000000000001','f9810000-0000-4000-8000-000000000001',repeat('b',64),'CLIENT_OWNER',(select v from p228 where k='proof'),'p228-wrong-sourcehash')$$,'40001','STALE_CONTRACT_VERSION','a PDF hash cannot stand in for the canonical contract source hash');
+select throws_ok($$select public.sign_contract('f9830000-0000-4000-8000-000000000001','f9840000-0000-4000-8000-000000000001','f9810000-0000-4000-8000-000000000001',repeat('b',64),'CLIENT_OWNER',(select v from p228 where k='proof'),'p228-wrong-sourcehash')$$,'PT409','STALE_CONTRACT_VERSION','a PDF hash cannot stand in for the canonical contract source hash');
 select throws_ok($$select public.sign_contract('f9830000-0000-4000-8000-000000000001','f9840000-0000-4000-8000-000000000001','f9810000-0000-4000-8000-000000000001',repeat('a',64),'CLIENT_OWNER',(select v||jsonb_build_object('final_hash',repeat('f',64))from p228 where k='proof'),'p228-forged-finalhash')$$,'23514','SIGNATURE_EVIDENCE_HASH_MISMATCH','client cannot substitute a final evidence hash');
 select is(public.sign_contract('f9830000-0000-4000-8000-000000000001','f9840000-0000-4000-8000-000000000001','f9810000-0000-4000-8000-000000000001',repeat('a',64),'CLIENT_OWNER',(select v from p228 where k='proof'),'p228-verify-existing')->>'outcome','CONTRACT_SIGNED','legacy API can read only the verified imported fact');
 select throws_ok($$select public.sign_contract('f9830000-0000-4000-8000-000000000001','f9840000-0000-4000-8000-000000000001','f9810000-0000-4000-8000-000000000002',repeat('a',64),'PROVIDER_OWNER',(select v from p228 where k='proof'),'p228-cross-party-proof')$$,'42501','CONTRACT_SIGN_DENIED','client cannot claim the other party signature');

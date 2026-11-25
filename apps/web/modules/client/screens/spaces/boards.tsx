@@ -1,13 +1,13 @@
 import { getClientRfqMessages } from "@/modules/client/screens/demandes/messages";
 import Link from "next/link";
-import { ArrowRight, Briefcase, Cloud, FileText, Filter, Folder, Goal, MessageSquare, Plus, Scale, Search, Target } from "lucide-react";
+import { ArrowRight, Briefcase, Cloud, FileText, Folder, Goal, MessageSquare, Scale, Search, Target } from "lucide-react";
 import type { ReactNode } from "react";
-import { canApplyClientSpaceDemo } from "@/modules/client/data/spaces/demo";
+import { HashAwareCta, HashAwareFilterLink } from "@/modules/shared/ui/hash-aware-actions";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
-import { demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { OrganizationTabs } from "./organization-tabs";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function Cta({
   href,
@@ -18,14 +18,14 @@ function Cta({
   href: string;
   children: ReactNode;
   soft?: boolean;
-  tone?: "violet" | "peach" | "mint" | "sky";
+  tone?: "violet" | "peach" | "mint" | "sky" | undefined;
 }) {
   const className = tone && !soft ? "client-kpi-cta" : soft ? "client-soft-link" : "client-ghost-link";
   return (
-    <Link href={href} className={className} data-tone={tone}>
+    <HashAwareLink href={href} className={className} data-tone={tone}>
       {children}
       <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
-    </Link>
+    </HashAwareLink>
   );
 }
 
@@ -76,6 +76,7 @@ export function DiagnosticsBoard({
   locale,
   questionnaireHref,
   evolutionHref,
+  analyseHref,
   score,
   ratingLabel,
   libraryScores,
@@ -89,6 +90,8 @@ export function DiagnosticsBoard({
   locale: Locale;
   questionnaireHref: string;
   evolutionHref: string;
+  /** Target for « Calculer la santé globale » — CompleteForm #analyse, not evolution. */
+  analyseHref?: string;
   score: string | null;
   ratingLabel: string | null;
   libraryScores: Array<{ key: string; score: string }>;
@@ -100,21 +103,8 @@ export function DiagnosticsBoard({
   continuity?: DiagnosticContinuity;
 }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, "");
-  const analyseHref = evolutionHref;
-  const preferDemo = canApplyClientSpaceDemo() && findings.length === 0;
-  const priorities = preferDemo
-    ? demo.priorities.map((row) => ({
-        id: row.id,
-        title: row.title,
-        constat: row.constat,
-        impact: row.impact,
-        action: row.action,
-        why: row.why,
-        href: row.href,
-        cta: row.cta,
-      }))
-    : findings.map((row) => ({
+  const computeHref = analyseHref ?? `${questionnaireHref.replace(/\/questionnaires(?=\?|$)/, "/diagnostics").split("#")[0]}#analyse`;
+  const priorities = findings.map((row) => ({
         id: row.id,
         title: row.title,
         constat: `${row.severity}${row.blocking ? ` · ${locale === "ar" ? "إجراء مطلوب" : "Action requise"}` : ""}`,
@@ -124,10 +114,8 @@ export function DiagnosticsBoard({
         href: row.href,
         cta: row.cta ?? "plan" as const,
       }));
-  const shownRuns = runs.length > 0 ? runs : preferDemo ? demo.runs : [];
-  const understood = preferDemo
-    ? demo.understood
-    : {
+  const shownRuns = runs;
+  const understood = {
         activity: organizationName?.trim() || c.activity,
         objectives: findings[0]?.action || c.objectives,
         attention: (findings.find((row) => row.blocking) ?? findings[0])?.title || c.attention,
@@ -165,7 +153,7 @@ export function DiagnosticsBoard({
               <Cta href={questionnaireHref} soft>
                 {c.startQuestionnaire}
               </Cta>
-              {hasSubmittedAssessment ? <Cta href={analyseHref}>{c.computeAnalysis}</Cta> : null}
+              {hasSubmittedAssessment ? <Cta href={computeHref}>{c.computeAnalysis}</Cta> : null}
             </div>
           ) : (
             priorities.map((row, index) => {
@@ -243,7 +231,7 @@ export function DiagnosticsBoard({
             </ul>
             <div className="client-offer-actions">
               <Cta href={questionnaireHref}>{c.modify}</Cta>
-              <Cta href={analyseHref} soft>
+              <Cta href={computeHref} soft>
                 {c.validate}
               </Cta>
             </div>
@@ -354,12 +342,8 @@ export function DiagnosticsBoard({
 
 export function RequestsBoard({ locale, query, compareHref, rows, searchQuery, statusFilter }: { locale: Locale; query: string; compareHref: string; searchQuery?: string; statusFilter?: string; rows: Array<{ id: string; title: string; status: string; last: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }>; organizationName?: string | null }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const demoOn = canApplyClientSpaceDemo();
-  const list = demoOn ? demo.requests : rows;
-  const kpis = demoOn
-    ? demo.requestKpis
-    : [
+  const list = rows;
+  const kpis = [
         { id: "k1", title: c.toComplete, detail: rows.filter((row) => row.tone === "violet" || row.tone === "peach").length ? String(rows.filter((row) => row.tone === "violet" || row.tone === "peach").length) : c.emptyBoard, href: `/${locale}/client/documents${query}`, tone: "peach" as const },
         { id: "k2", title: c.offersToCompare, detail: rows.filter((row) => row.tone === "mint").length ? String(rows.filter((row) => row.tone === "mint").length) : c.emptyBoard, href: compareHref, tone: "violet" as const },
         { id: "k3", title: c.questions, detail: c.msgTitle, href: `/${locale}/messagerie${query}`, tone: "mint" as const },
@@ -445,9 +429,7 @@ export type MissionBoardView = {
 
 export function MissionsBoard({ locale, query, view }: { locale: Locale; query: string; organizationName?: string | null; view?: MissionBoardView }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo() && !view?.validations.length && !view?.steps.length;
-  const data = preferDemo ? demo.missions : {
+  const data = {
     validations: view?.validations ?? [],
     steps: view?.steps ?? [],
     decision: view?.decision ?? null,
@@ -512,7 +494,7 @@ export function MissionsBoard({ locale, query, view }: { locale: Locale; query: 
               <h2>{c.docsExchanges}</h2>
             </header>
             <nav className="client-tabs" aria-label={c.docsExchanges}>
-              <a href="#dossier-docs" aria-current="page">{c.all}</a>
+              <HashAwareLink href="#dossier-docs" aria-current="page">{c.all}</HashAwareLink>
               <Link href={`/${locale}/client/documents${query}`}>{c.docsTab}</Link>
               <Link href={`/${locale}/messagerie${query}`}>{c.messagesTab}</Link>
             </nav>
@@ -550,11 +532,9 @@ export type DocumentBoardRow = {
 
 export function DocumentsBoard({ locale, query, children, documents, toHandle, recent }: { locale: Locale; query: string; children?: ReactNode; organizationName?: string | null; documents?: DocumentBoardRow[]; toHandle?: Array<{ id: string; title: string; href: string; tone: "violet" | "sky" | "mint" | "peach"; action: "examine" | "confirm" | "reply" }>; recent?: DocumentBoardRow[] }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo() && (!documents || documents.length === 0);
-  const rows = preferDemo ? demo.documents : documents ?? [];
-  const handle = preferDemo ? demo.toHandle : toHandle ?? [];
-  const recentRows = preferDemo ? demo.recentDocuments : recent ?? rows;
+  const rows = documents ?? [];
+  const handle = toHandle ?? [];
+  const recentRows = recent ?? rows;
   const actionLabel = { examine: c.examine, confirm: c.confirm, reply: c.reply } as const;
   return (
     <main className="client-page">
@@ -608,11 +588,11 @@ export function DocumentsBoard({ locale, query, children, documents, toHandle, r
           <Link href={`/${locale}/client/documents${query}`} className="client-text-link">{c.seeAllToHandle}</Link>
         </header>
         <nav className="client-tabs" aria-label={c.recent}>
-          <a href="#documents-recents" aria-current="page">{c.all}</a>
+          <HashAwareLink href="#documents-recents" aria-current="page">{c.all}</HashAwareLink>
           <Link href={`/${locale}/client/demandes${query}`}>{c.requestsTab}</Link>
           <Link href={`/${locale}/client/missions${query}`}>{c.missionsTab}</Link>
           <Link href={`/${locale}/client/contrats${query}`}>{c.contractsTab}</Link>
-          <Link href={`/${locale}/client/documents${query}`}>{c.contractsTab}</Link>
+          <Link href={`/${locale}/client/documents${query}`}>{c.docsTab}</Link>
         </nav>
         {recentRows.length === 0 ? <p>{c.emptyBoard}</p> : (
           <ul className="client-feed" id="documents-recents">
@@ -627,11 +607,9 @@ export function DocumentsBoard({ locale, query, children, documents, toHandle, r
   );
 }
 
-export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: string; organizationName?: string | null; rows?: Array<{ id: string; title: string; folder: string; status: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }> }) {
+export function FinancesBoard({ locale, query, rows, omitRegister = false }: { locale: Locale; query: string; organizationName?: string | null; rows?: Array<{ id: string; title: string; folder: string; status: string; next: string; href: string; tone: "violet" | "sky" | "mint" | "peach" }>; omitRegister?: boolean }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const preferDemo = canApplyClientSpaceDemo() && (!rows || rows.length === 0);
-  const list = preferDemo ? demo.finances : rows ?? [];
+  const list = rows ?? [];
   return (
     <main className="client-page">
       <section className="client-space-kpis">
@@ -655,7 +633,7 @@ export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: 
         </article>
       </section>
       <section className="client-board client-board-compare">
-        <article className="client-card">
+        {omitRegister ? null : <article className="client-card">
           <header className="client-priority-head"><h2>{c.finDocs}</h2><Link href={`/${locale}/client/abonnement${query}`} className="client-text-link">{c.seeAllToHandle}</Link></header>
           <p>{c.finDocsLead}</p>
           {list.length === 0 ? <p>{c.emptyBoard}</p> : (
@@ -677,7 +655,7 @@ export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: 
             </div>
           )}
           <Link href={`/${locale}/client/abonnement${query}`} className="client-text-link">{c.seeAllFin}</Link>
-        </article>
+        </article>}
         <div className="client-stack">
           <article className="client-card">
             <header><h2>{c.understand}</h2></header>
@@ -701,10 +679,8 @@ export function FinancesBoard({ locale, query, rows }: { locale: Locale; query: 
 
 export function CompanyBoard({ locale, query, organizationName, people }: { locale: Locale; query: string; organizationName: string | null; alternate: "fr" | "ar"; people?: Array<{ id: string; name: string; role: string }> }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const demoOn = canApplyClientSpaceDemo();
-  const legalName = organizationName ?? (demoOn ? (locale === "ar" ? "عميل · تواصل وتسويق وإبداع" : "Client · Communication, marketing et création") : "—");
-  const members = people ?? (demoOn ? demo.people : []);
+  const legalName = organizationName ?? "—";
+  const members = people ?? [];
   return (
     <main className="client-page" data-client-layout="company">
       <OrganizationTabs locale={locale} query={query} active="profile" />
@@ -713,20 +689,14 @@ export function CompanyBoard({ locale, query, organizationName, people }: { loca
           <header className="client-priority-head"><h2>{c.orgInfo}</h2><Cta href={`/${locale}/organisation${query}#modifier`}>{c.modify}</Cta></header>
           <dl className="client-fact-grid client-org-grid">
             <div><small>{c.legalName}</small><span>{legalName}</span></div>
-            {demoOn ? (
-              <>
-                <div><small>{c.address}</small><span>{locale === "ar" ? "الدار البيضاء، المغرب" : "Casablanca, Maroc"}</span></div>
-                <div><small>{c.orgActivity}</small><span>{demo.understood.activity}</span></div>
-                <div><small>{c.contacts}</small><span>{locale === "ar" ? "عبر فضاء ماتريسيا" : "Via l’espace Matricia"}</span></div>
-              </>
-            ) : (
+
               <div>
                 <small>{locale === "ar" ? "الملف" : "Compléter"}</small>
                 <span className="client-access-note">
                   {locale === "ar" ? "العنوان والنشاط وجهات الاتصال تُدار من تعديل المؤسسة." : "Adresse, activité et contacts se gèrent depuis la modification de l’entreprise."}
                 </span>
               </div>
-            )}
+
           </dl>
         </article>
         <article className="client-card">
@@ -734,7 +704,7 @@ export function CompanyBoard({ locale, query, organizationName, people }: { loca
           <ul className="client-feed">
             <li><Link href={`/${locale}/confidentialite/demandes`}><span>{locale==="fr"?"Mes demandes de données":"طلباتي المتعلقة بالبيانات"}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/securite/compte${query}`}><span>{c.accountSec}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
-            <li><Link href={`/${locale}/securite/sessions`}><span>{c.sessions}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
+            <li><Link href={`/${locale}/securite/sessions${query}`}><span>{c.sessions}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
             <li><Link href={`/${locale}/notifications${query}`}><span>{c.notif}</span><ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link></li>
           </ul>
         </article>
@@ -786,11 +756,9 @@ export function CompanyBoard({ locale, query, organizationName, people }: { loca
 
 export function MessagesBoard({ locale, query, search, children, threads,serverFiltered=false,inboxError=false,inboxFooter }: { locale: Locale; query: string; search?: string; children: ReactNode; threads?: Array<{ id: string; title: string; meta: string; href: string }>; organizationName?: string | null;serverFiltered?:boolean;inboxError?:boolean;inboxFooter?:ReactNode }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
   const liveThreads = threads ?? [];
-  const showDemo = !serverFiltered && canApplyClientSpaceDemo() && liveThreads.length === 0;
   const needle = (search ?? "").trim().toLocaleLowerCase();
-  const inbox = (showDemo ? demo.inbox : liveThreads).filter((item) => serverFiltered || !needle || `${item.title} ${item.meta}`.toLocaleLowerCase().includes(needle));
+  const inbox = liveThreads.filter((item) => serverFiltered || !needle || `${item.title} ${item.meta}`.toLocaleLowerCase().includes(needle));
   const organizationId = new URLSearchParams(query.replace(/^\?/, "")).get("organizationId");
   return (
     <main className="client-page">
@@ -814,43 +782,12 @@ export function MessagesBoard({ locale, query, search, children, threads,serverF
           {inboxFooter}
         </article>
         <article className="client-card client-msg-thread">
-          {showDemo ? (
-            <>
-              <header className="client-priority-head">
-                <h2>{c.threadTitle} — {demo.thread.folder}</h2>
-              </header>
-              <ol className="client-msg-list">
-                {demo.thread.messages.map((message) => (
-                  <li key={message.id} data-side={message.side}>
-                    <strong>{message.title}</strong>
-                    <p>{message.body}</p>
-                  </li>
-                ))}
-              </ol>
-              <p className="client-access-note">{c.accessNote}</p>
-            </>
-          ) : null}
+
           {children}
         </article>
         <article className="client-card">
           <header><h2>{c.context}</h2></header>
-          {showDemo ? (
-            <>
-              <p><strong>{demo.thread.folder}</strong></p>
-              <ul className="client-feed">
-                <li><span><strong>{c.status}</strong></span><em>{demo.thread.status}</em></li>
-                <li><span><strong>{c.typeLabel}</strong><small>{demo.thread.type}</small></span></li>
-                <li><span><strong>{c.associatedItems}</strong><small>{demo.thread.associated}</small></span></li>
-              </ul>
-              <Cta href={`/${locale}/client/demandes${query}`} soft>{c.openTheFolder}</Cta>
-              <header><h2>{c.associated}</h2></header>
-              <ul className="client-feed">
-                {demo.missions.files.slice(0, 3).map((file) => (
-                  <li key={file.id}><Link href={file.href}><FileGlyph kind={file.kind} /><span>{file.title}</span></Link></li>
-                ))}
-              </ul>
-            </>
-          ) : (
+
             <>
               <p>{c.msgLead}</p>
               <ul className="client-feed">
@@ -858,7 +795,7 @@ export function MessagesBoard({ locale, query, search, children, threads,serverF
                 <li><Link href={`/${locale}/client/documents${query}`}><FileGlyph kind="file" /><span>{c.docsTitle}</span></Link></li>
               </ul>
             </>
-          )}
+
           <p className="client-access-note">{c.accessNote}</p>
         </article>
       </div>
@@ -868,9 +805,9 @@ export function MessagesBoard({ locale, query, search, children, threads,serverF
 
 export function SpaceActions({ href, label, variant = "primary" }: { href: string; label: string; variant?: "primary" | "soft" | "ghost" }) {
   const className = variant === "ghost" ? "client-ghost-link" : variant === "soft" ? "client-soft-link" : "client-cta";
-  return <Link href={href} className={className}><Plus className="size-4" aria-hidden />{label}</Link>;
+  return <HashAwareCta href={href} label={label} className={className} withPlus />;
 }
 
 export function SpaceFilters({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="client-ghost-link"><Filter className="size-4" aria-hidden />{label}</Link>;
+  return <HashAwareFilterLink href={href} label={label} className="client-ghost-link" />;
 }

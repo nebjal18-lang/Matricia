@@ -89,7 +89,7 @@ export function FranchiseLibraryHomeBoard({ locale, query, workspace }: { locale
   ];
   return (
     <main className="client-page franchise-home-page">
-      {(workspace.mandates?.length??0)>1?<nav aria-label={locale==="ar"?"اختيار التفويض":"Choisir le mandat"} className="flex flex-wrap gap-3">{workspace.mandates?.map((mandate)=><Link key={mandate.id} aria-current={mandate.id===workspace.mandate.franchiseId?"page":undefined} className="franchise-tool" href={`/${locale}/franchise/accueil?organizationId=${mandate.organizationId}&franchiseId=${mandate.id}`}>{mandate.operatorCode} · {mandate.id.slice(0,8).toUpperCase()}</Link>)}</nav>:null}
+      {(workspace.mandates?.length??0)>1?<nav aria-label={locale==="ar"?"اختيار التفويض":"Choisir le mandat"} className="flex flex-wrap gap-3">{workspace.mandates?.map((mandate)=><Link key={mandate.id} aria-current={mandate.id===workspace.mandate.franchiseId?"page":undefined} className="franchise-tool" href={`/${locale}/franchise/accueil?organizationId=${mandate.organizationId}&franchiseId=${mandate.id}`}>{mandate.operatorCode}</Link>)}</nav>:null}
       <p className="franchise-home-lead-mobile">{c.homeLeadMobile}</p>
       <section className="franchise-treat franchise-home-kpis">
         {kpis.map((item, index) => {

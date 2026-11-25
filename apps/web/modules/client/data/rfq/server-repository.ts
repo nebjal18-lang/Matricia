@@ -1,9 +1,9 @@
 import { readAllPages,readRelatedPages } from "@/modules/shared/lib/data/read-pages";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { createClientRfqRepository } from "./repository";
 
 export async function createServerClientRfqRepository(options?: {organizationId:string;query?:string;status?:string;page?:number;allForOrganization?:boolean}){const client=await getSupabaseServerClient();let versionIds:string[]=[];return createClientRfqRepository({
- async userId(){const{data,error}=await client.auth.getUser();return error?null:data.user?.id??null;},
+ async userId(){const{data,error}=await getServerAuthUser();return error?null:data.user?.id??null;},
  async memberships(userId){return await readAllPages((from,to)=>client.from("organization_memberships").select("id,organization_id").eq("user_id",userId).eq("status","ACTIVE").order("id").range(from,to));},
  async roles(ids){if(ids.length===0)return{data:[],error:null};return await readRelatedPages(ids,(batch,from,to)=>client.from("organization_member_roles").select("membership_id,role_code,revoked_at").in("membership_id",batch).in("role_code",["CLIENT_OWNER","CLIENT_ADMIN","CLIENT_BUYER","CLIENT_VIEWER"]).order("membership_id").order("role_code").range(from,to));},
  async organizations(ids){if(ids.length===0)return{data:[],error:null};return await readRelatedPages(ids,(batch,from,to)=>client.from("organizations").select("id,display_name").in("id",batch).order("display_name").order("id").range(from,to));},

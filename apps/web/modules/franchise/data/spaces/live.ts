@@ -9,6 +9,7 @@ import type { FranchiseCorrectivePlan } from "@/modules/franchise/data/quality/r
 import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { franchiseStageLabel } from "@/modules/franchise/data/spaces/labels";
 import { demoFranchiseSpaces, type FinanceRow, type FranchiseSpaceBoardData, type MessageRow, type PersonRow, type QualityRow, type RequestRow, type SupervisionRow } from "@/modules/franchise/data/spaces/demo";
+import { isDirectoryFixture, isDirectoryOrgFixture, organizationDisplayLabel, personDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 
@@ -55,7 +56,7 @@ export function emptyFranchiseSpaces(locale: Locale, query: string): FranchiseSp
   const demo = demoFranchiseSpaces(locale, query);
   return {
     ...demo,
-    // Never leak invented narrative CTAs / rights from the demo seed.
+    // Keep pipeline shells for live metric mapping; clear invented narrative CTAs/rights.
     treat: [],
     pipeline: demo.pipeline.map((step) => ({ ...step, detail: "—", status: "—" })),
     attention: [],
@@ -107,20 +108,25 @@ export function buildFranchiseSpaceBoard(input: {
   locale: Locale;
   query: string;
   unavailableSections?:string[];
-  libraryName?: string | null;
+  libraryName?: string | null | undefined;
   crm?: FranchiseCrmDashboard | null;
   followups?: FollowupDashboard | null;
   governance?: FranchiseDashboard | null;
   plans?: FranchiseCorrectivePlan[] | null;
   digest?: FranchiseDigestDashboard | null;
   operations?: FranchiseOperationsSnapshot | null;
-  volumeServices?: Array<{ id: string; title: string; status: string; href: string }>;
-  catalogRules?: Array<{ id: string; title: string; status: string; href: string; actions?: Array<{ type: string; target?: string }> }>;
+  volumeServices?: Array<{ id: string; title: string; status: string; href: string }> | undefined;
+  catalogRules?: Array<{ id: string; title: string; status: string; href: string; actions?: Array<{ type: string; target?: string }> }> | undefined;
 }): FranchiseSpaceBoardData {
   const empty = emptyFranchiseSpaces(input.locale, input.query);
   const c = franchiseCopy(input.locale);
   const q = input.query;
   const locale = input.locale;
+  const withItem = (path: string, id: string) => {
+    const params = new URLSearchParams(q.startsWith("?") ? q.slice(1) : q);
+    params.set("itemId", id);
+    return `${path}?${params.toString()}`;
+  };
   const franchise = input.crm?.franchises[0] ?? input.governance?.franchises[0] ?? null;
   const territory = input.crm?.franchises[0]?.territory
     ? (locale === "ar" ? input.crm.franchises[0].territory.nameAr : input.crm.franchises[0].territory.nameFr)
@@ -139,11 +145,19 @@ export function buildFranchiseSpaceBoard(input: {
     status: mandate.status,
   })));
   const providerByOrganization=new Map((input.operations?.providerDossiers??[]).map(dossier=>[dossier.organizationId,dossier]));
-  const people: PersonRow[] = providers.map((item) => {
+  const people: PersonRow[] = providers
+    .filter((item) => !isDirectoryFixture({
+      email: item.contactEmail,
+      displayName: item.displayName,
+      organizationName: item.organizationName,
+    }) && !isDirectoryOrgFixture(item.organizationName ?? item.displayName ?? ""))
+    .map((item) => {
     const dossier=providerByOrganization.get(item.linkedOrganizationId??"");
     return ({
     id: item.id,
-    name: item.organizationName || item.displayName,
+    name: organizationDisplayLabel(item.organizationName, locale) !== (locale === "ar" ? "بدون مؤسسة" : "Sans organisation")
+      ? organizationDisplayLabel(item.organizationName, locale)
+      : personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
     linkedOrganizationId:item.linkedOrganizationId,
     createdAt:item.createdAt,
     dossier,
@@ -160,8 +174,9 @@ export function buildFranchiseSpaceBoard(input: {
     pipelineEvents: folderEvents(item),
   });});
   for(const dossier of input.operations?.providerDossiers??[]){
+    if(isDirectoryOrgFixture(dossier.name))continue;
     if(people.some(row=>row.linkedOrganizationId===dossier.organizationId))continue;
-    people.push({id:dossier.organizationId,linkedOrganizationId:dossier.organizationId,createdAt:dossier.createdAt,dossier,name:dossier.name,services:dossier.qualifications.map(q=>q.serviceCode).join(", "),status:networkStateLabel(dossier.status,locale),next:locale==="ar"?"ملف مقدم الخدمة":"Dossier prestataire",tone:dossier.status==="ACTIVE"?"mint":"sky",stage:dossier.status,source:"PROVIDER_PROFILE",activities:[],pipelineEvents:[]});
+    people.push({id:dossier.organizationId,linkedOrganizationId:dossier.organizationId,createdAt:dossier.createdAt,dossier,name:organizationDisplayLabel(dossier.name, locale),services:dossier.qualifications.map(q=>q.serviceCode).join(", "),status:networkStateLabel(dossier.status,locale),next:locale==="ar"?"ملف مقدم الخدمة":"Dossier prestataire",tone:dossier.status==="ACTIVE"?"mint":"sky",stage:dossier.status,source:"PROVIDER_PROFILE",activities:[],pipelineEvents:[]});
   }
   const operationalMatching = (input.operations?.matching ?? []).map((item) => ({
     id: item.id,
@@ -173,11 +188,19 @@ export function buildFranchiseSpaceBoard(input: {
     tone: item.eligible ? "mint" as const : "peach" as const,
     requestId: item.requestId,
   }));
-  const crmRequests = clients.map((item) => ({
+  const crmRequests = clients
+    .filter((item) => !isDirectoryFixture({
+      email: item.contactEmail,
+      displayName: item.displayName,
+      organizationName: item.organizationName,
+    }) && !isDirectoryOrgFixture(item.organizationName ?? item.displayName ?? ""))
+    .map((item) => ({
     id: item.id,
-    title: item.organizationName || item.displayName,
+    title: organizationDisplayLabel(item.organizationName, locale) !== (locale === "ar" ? "بدون مؤسسة" : "Sans organisation")
+      ? organizationDisplayLabel(item.organizationName, locale)
+      : personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
     stage: franchiseStageLabel(item.stage, locale),
-    owner: item.displayName,
+    owner: personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
     flag: [item.nextFollowupAt ? item.nextFollowupAt.slice(0, 10) : item.sourceCode,franchiseInvitationLabel(item.invitation,locale)].filter(Boolean).join(" · "),
     tone: providerTone(item.stage),
     stageCode: item.stage,
@@ -221,9 +244,11 @@ export function buildFranchiseSpaceBoard(input: {
       meta: item.severity,
       href: `/${locale}/franchise/qualite${q}`,
     })),
-    ...followupRows.map((item) => ({
+    ...followupRows
+      .filter((item) => !isDirectoryFixture({ displayName: item.displayName }))
+      .map((item) => ({
       id: item.id,
-      title: item.displayName,
+      title: personDisplayLabel({ displayName: item.displayName }, locale),
       meta: (item.nextFollowupAt ?? "").slice(0, 10),
       href: `/${locale}/franchise/relances${q}`,
     })),
@@ -234,11 +259,19 @@ export function buildFranchiseSpaceBoard(input: {
       href: `/${locale}/franchise/digest${q}`,
     })),
   ];
-  const journal = [...providers, ...clients].flatMap((item) => item.pipelineEvents.map((event) => ({
+  const journal = [...providers, ...clients]
+    .filter((item) => !isDirectoryFixture({
+      email: item.contactEmail,
+      displayName: item.displayName,
+      organizationName: item.organizationName,
+    }))
+    .flatMap((item) => item.pipelineEvents.map((event) => ({
     id: event.id,
     date: event.occurredAt.slice(0, 10),
     event: `${event.from ?? "—"} → ${event.to}`,
-    doc: item.organizationName || item.displayName,
+    doc: organizationDisplayLabel(item.organizationName, locale) !== (locale === "ar" ? "بدون مؤسسة" : "Sans organisation")
+      ? organizationDisplayLabel(item.organizationName, locale)
+      : personDisplayLabel({ displayName: item.displayName, email: item.contactEmail }, locale),
   })));
   const quality: QualityRow[] = [
     ...alerts.map((item) => ({
@@ -250,7 +283,7 @@ export function buildFranchiseSpaceBoard(input: {
       evidence:evidenceLabels(item.evidenceRefs),
       next: item.metricCode ?? item.status,
       tone: item.severity === "CRITICAL" ? "peach" as const : item.severity === "WARNING" ? "violet" as const : "sky" as const,
-      href: `/${locale}/franchise/qualite${q}`,
+      href: withItem(`/${locale}/franchise/qualite`, item.id),
     })),
     ...(input.operations?.anomalies ?? []).map((item) => ({
       id: item.id,
@@ -260,7 +293,7 @@ export function buildFranchiseSpaceBoard(input: {
       status: item.status,
       next: item.status,
       tone: item.severity === "CRITICAL" || item.severity === "HIGH" ? "peach" as const : "violet" as const,
-      href: `/${locale}/franchise/qualite/anomalies${q}`,
+      href: withItem(`/${locale}/franchise/qualite/anomalies`, item.id),
     })),
   ];
   const performance = objectives.map((item) => ({
@@ -271,7 +304,13 @@ export function buildFranchiseSpaceBoard(input: {
   }));
   const followups = (followupRows.length ? followupRows : jobs.map((job) => {
     const prospect = input.followups?.prospects.find((item) => item.id === job.prospectId);
-    return { id: job.id, displayName: prospect?.displayName ?? job.prospectId, nextFollowupAt: job.nextAttemptAt };
+    return {
+      id: job.id,
+      displayName: personDisplayLabel(prospect ? { displayName: prospect.displayName } : {}, locale),
+      nextFollowupAt: job.nextAttemptAt,
+    };
+  })).filter((item) => !isDirectoryFixture({
+    displayName: "displayName" in item ? item.displayName : "",
   })).map((item, index) => {
     const prospect = input.followups?.prospects.find((row) => row.id === item.id);
     const href = prospect?.type === "PROVIDER"
@@ -295,22 +334,38 @@ export function buildFranchiseSpaceBoard(input: {
     void now;
     return {
       id: "id" in item && typeof item.id === "string" ? item.id : String(index),
-      title: "displayName" in item ? item.displayName : "",
-      due: (dueAt ?? "").slice(0, 10) || "—",
+      title: "displayName" in item
+        ? personDisplayLabel({ displayName: item.displayName }, locale)
+        : "",
+      due: dueAt ?? "",
       action: c.contact,
       tone,
       href,
     };
   });
+  const presentApprovalType = (code: string) => {
+    const known: Record<string, [string, string]> = {
+      MANDATE_CHANGE: ["Changement de mandat", "تغيير التفويض"],
+      TERRITORY_CHANGE: ["Changement de territoire", "تغيير الإقليم"],
+      FINANCE_RELEASE: ["Libération financière", "تحرير مالي"],
+      PROVIDER_EXCEPTION: ["Exception prestataire", "استثناء مقدم خدمة"],
+      DOCUMENT_EXCEPTION: ["Exception documentaire", "استثناء وثائقي"],
+      QUALITY_OVERRIDE: ["Dérogation qualité", "تجاوز جودة"],
+      BOOK_BINDING: ["Rattachement du livre", "ربط الدفتر"],
+    };
+    const hit = known[code];
+    if (hit) return locale === "ar" ? hit[1] : hit[0];
+    return code.replaceAll("_", " ").toLowerCase().replace(/^\w/u, (char) => char.toUpperCase());
+  };
   const decisions = approvals.map((item) => ({
     id: item.id,
-    title: item.requestType,
+    title: presentApprovalType(item.requestType),
     type: item.status,
     status: item.decision?.decision ?? item.status,
   }));
   const govHistory = approvals.filter((item) => item.decidedAt).map((item) => ({
     id: item.id,
-    title: item.requestType,
+    title: presentApprovalType(item.requestType),
     actor: item.decision?.decision ?? item.status,
   }));
   const governanceBinding=input.governance&&"bookBindingReviewRequired"in input.governance?input.governance.bookBindingReviewRequired:null;
@@ -429,7 +484,7 @@ export function buildFranchiseSpaceBoard(input: {
       id: item.id,
       title: item.paymentModel,
       status: item.status,
-      meta: item.skuId.slice(0, 8),
+      meta: item.paymentModel,
       href: `/${locale}/franchise/finance/volume${q}`,
     })),
   ];
@@ -453,7 +508,7 @@ export function buildFranchiseSpaceBoard(input: {
       id: item.id,
       title: locale === "ar" ? item.titleAr : item.titleFr,
       status: item.solutionLevel,
-      meta: item.serviceId.slice(0, 8),
+      meta: item.solutionLevel,
       href: `/${locale}/franchise/qualite/recommandations${q}`,
     })),
   ];
@@ -551,8 +606,8 @@ export function buildFranchiseSpaceBoard(input: {
     treat,
     pipeline:empty.pipeline.map((step,index)=>{const metrics=input.operations?.metrics;const net=metrics?.network;const values=[net?.providers,metrics?.requestCount,metrics?.missionCount,metrics?.qualitySnapshot?`${metrics.qualitySnapshot.scoreBasisPoints/100}%`:null,metrics?.completedMissions];const labels=locale==="ar"?["مزودون مرتبطون بالخدمات","طلبات · كامل التاريخ","مهام · كامل التاريخ","آخر تقييم مؤرخ","مهام مكتملة"]:["Prestataires liés aux services","Demandes · historique complet","Missions · historique complet","Dernière évaluation datée","Missions terminées"];return{...step,title:labels[index]??step.title,detail:values[index]==null?"—":String(values[index]),status:metrics?new Date(metrics.asOf).toLocaleDateString(locale==="ar"?"ar-MA":"fr-MA"):"—"};}),
     attention: [
-      ...quality.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: `/${locale}/franchise/qualite${q}` })),
-      ...followups.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: `/${locale}/franchise/relances${q}` })),
+      ...quality.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: withItem(`/${locale}/franchise/qualite`, item.id) })),
+      ...followups.slice(0, 2).map((item) => ({ id: item.id, title: item.title, href: withItem(`/${locale}/franchise/relances`, item.id) })),
     ],
     perimeter: {
       territory,

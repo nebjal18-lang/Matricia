@@ -1,0 +1,1053 @@
+[
+  {
+    "id": "FIN-01",
+    "domain": "Finance",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "SQL natif, contraintes validées sous authenticated",
+    "title": "Le pot Core reconnaît un revenu sans rapprochement avec le journal",
+    "sources": [
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        220
+      ]
+    ],
+    "evidence": [
+      "evidence/core-pot-post-probe.json",
+      "probes/core-pot-post.sql"
+    ],
+    "reproduce": "Exécuter la sonde sur la copie isolée avec un acteur Finance AAL2 synthétique.",
+    "observed": "Un journal équilibré de dépense de 100, sans crédit de revenu, alimente le pot de 10 000 unités mineures. bug1_reproduced=true ; contraintes contrôlées sous authenticated ; rollback vérifié.",
+    "impact": "Bénéfice distribuable calculé depuis une entrée qui ne correspond pas à un encaissement HT acquis.",
+    "remediation": "Dériver montant et catégorie depuis une source canonique vérifiée, rapprocher journal/lignes/date/devise et interdire la réutilisation économique.",
+    "regression": "Rejeter journal de dépense, montant majoré, TVA présentée comme revenu et même journal réutilisé avec une autre référence.",
+    "limitations": "Acteur Finance autorisé ; aucun accès non autorisé, commit conservé ou versement réel démontré."
+  },
+  {
+    "id": "FIN-02",
+    "domain": "Finance",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "SQL natif et ACL effectives vérifiées",
+    "title": "La clôture du pot Core échoue lors de la vérification différée",
+    "sources": [
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        135
+      ],
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        433
+      ],
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        441
+      ]
+    ],
+    "evidence": [
+      "evidence/core-pot-probe.json"
+    ],
+    "reproduce": "Exécuter la sonde core-pot sous authenticated puis SET CONSTRAINTS ALL IMMEDIATE sans changer le rôle.",
+    "observed": "42501 permission denied for function platform_core_pot_access depuis assert_platform_core_pot_allocation_total. Le trigger est INVOKER ; authenticated n'a pas EXECUTE sur le helper RLS, également confirmé dans la base locale originale.",
+    "impact": "La clôture ne peut pas atteindre normalement la validation différée de la transaction, malgré un rôle Finance et AAL2.",
+    "remediation": "Rendre les contrôles de lecture et de contraintes cohérents avec le moindre privilège, sans ouvrir arbitrairement tous les helpers privés.",
+    "regression": "Tester clôture par vraie RPC avec rôle SQL authenticated, validation différée et lecture autorisée ; anonyme et rôle métier insuffisant restent refusés.",
+    "limitations": "La sonde force l'évaluation avant rollback, pas un paiement. Le propriétaire DB n'est pas un substitut valable au rôle applicatif."
+  },
+  {
+    "id": "FIN-03",
+    "domain": "Finance",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Code + diagnostic SQL avec validation propriétaire",
+    "title": "Les périodes chevauchantes accumulent deux fois les mêmes droits",
+    "sources": [
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        281
+      ]
+    ],
+    "evidence": [
+      "evidence/core-pot-owner-constraints-diagnostic-probe.json",
+      "probes/core-pot-owner-constraints-diagnostic.sql"
+    ],
+    "reproduce": "Sur deux intervalles contenant le même revenu du 14 novembre, appeler close_platform_core_pot_period avec des clés différentes.",
+    "observed": "Source unique 10 000 ; deux versions initiales de clôture ; droits ACCRUAL cumulés 20 000.",
+    "impact": "Double droit distribuable latent après résolution du blocage ACL.",
+    "remediation": "Interdire les chevauchements distincts et sérialiser les clôtures à l'échelle du livre ; les corrections doivent versionner le même intervalle.",
+    "regression": "Tests séquentiels et concurrents de chevauchement, réouverture et conservation des montants.",
+    "limitations": "La variante de diagnostic valide les contraintes comme propriétaire DB : elle ne prouve PAS une double distribution native persistée. FIN-02 bloque actuellement cette persistance."
+  },
+  {
+    "id": "FIN-04",
+    "domain": "Finance",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Analyse source et définitions SQL",
+    "title": "Les sources remboursées ne sont pas revalidées avant distribution Core",
+    "sources": [
+      [
+        "supabase/migrations/20261113100000_platform_core_pot_ingest_sources_v1.sql",
+        35
+      ],
+      [
+        "supabase/migrations/20261031268023_subscription_refund_frozen_posting_accounts.sql",
+        27
+      ],
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        281
+      ]
+    ],
+    "evidence": [
+      "reviewers/finance.md"
+    ],
+    "reproduce": "Suivre classification d'un abonnement, ingestion Core, remboursement canonique puis construction d'une clôture.",
+    "observed": "Le remboursement invalide le financement en SOURCE_REVIEW_REQUIRED ; ingestion/clôture/payout Core ne rapprochent pas cette invalidation ni une contre-écriture obligatoire.",
+    "impact": "Un revenu remboursé peut rester dans la base distribuable si aucune correction n'est enregistrée.",
+    "remediation": "Rapprocher les événements défavorables et bloquer la distribution non rapprochée ; contre-écritures immuables et correction de clôture.",
+    "regression": "Remboursement avant ingestion, après ingestion, après clôture et avant payout.",
+    "limitations": "Chaîne de remboursement complète non rejouée ; risque financier établi par l'absence de revalidation, pas perte monétaire observée."
+  },
+  {
+    "id": "FIN-05",
+    "domain": "Finance",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Diagnostic SQL + analyse source",
+    "title": "Les reprises Core et volume vérifient trop tôt l'état modifié",
+    "sources": [
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        318
+      ],
+      [
+        "supabase/migrations/20261112200000_platform_core_pot_finance.sql",
+        392
+      ],
+      [
+        "supabase/migrations/20260912006600_volume_procurement_pools.sql",
+        278
+      ]
+    ],
+    "evidence": [
+      "evidence/core-pot-owner-constraints-diagnostic-probe.json",
+      "reviewers/finance.md"
+    ],
+    "reproduce": "Rejouer la même clôture ; examiner aussi les gardes d'allocation/consommation complète et de payout intégral.",
+    "observed": "La clôture identique retourne 22000 IDEMPOTENCY_PAYLOAD_MISMATCH ; volume et payout vérifient état/solde avant de rechercher leur résultat canonique.",
+    "impact": "Erreur de reprise après réponse réseau perdue ; incertitude pour l'appelant.",
+    "remediation": "Empreinte stable des paramètres métier ; autoriser puis rechercher la réponse canonique avant les gardes dépendant des effets antérieurs.",
+    "regression": "Rejeux identiques après allocation/consommation complètes, payout total et clôture, y compris deux sessions.",
+    "limitations": "Clôture : variante propriétaire de FIN-03. Volume/payout : ordre de code confirmé, mutations correspondantes non exécutées."
+  },
+  {
+    "id": "FIN-06",
+    "domain": "Finance",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Exécution de la fonction source importée",
+    "title": "Le formatter monétaire fusionne deux montants bigint distincts",
+    "sources": [
+      [
+        "apps/web/modules/shared/lib/format/display.ts",
+        32
+      ]
+    ],
+    "evidence": [
+      "evidence/source-probes.json"
+    ],
+    "reproduce": "Appeler formatMinorAmount avec les chaînes 9007199254740992 et 9007199254740993.",
+    "observed": "Les deux entrées affichent 90.071.992.547.409,92 MAD ; la seconde perd un centime.",
+    "impact": "Présentation financière inexacte aux limites bigint.",
+    "remediation": "Formater depuis une représentation entière/décimale exacte, sans conversion par Number.",
+    "regression": "FR/AR, valeurs négatives, limites bigint et décimales applicables à chaque devise.",
+    "limitations": "Défaut d'affichage ; aucune altération de ledger démontrée."
+  },
+  {
+    "id": "DATE-01",
+    "domain": "Données",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Exécution source contre Intl/Africa/Casablanca",
+    "title": "Le décalage fixe UTC+1 peut afficher un autre jour civil",
+    "sources": [
+      [
+        "apps/web/modules/shared/lib/format/display.ts",
+        16
+      ]
+    ],
+    "evidence": [
+      "evidence/source-probes.json",
+      "reviewers/finance-final.md"
+    ],
+    "reproduce": "Formater 2026-03-01T23:30:00Z.",
+    "observed": "Application : 2 mars 00:30 ; Intl Africa/Casablanca : 1 mars 23:30, tzdata 2026e ; confirmé indépendamment avec tzdata 2025b.",
+    "impact": "Mauvaise heure et parfois mauvaise date dans les listes et suivis.",
+    "remediation": "Utiliser le fuseau IANA requis et maîtriser la cohérence SSR/client sans substituer un offset permanent.",
+    "regression": "Tester changements de décalage et limites de jour/période, plusieurs années.",
+    "limitations": "Affichage seulement ; aucune dérive du calcul SQL des échéances n'est démontrée."
+  },
+  {
+    "id": "SEC-01",
+    "domain": "Sécurité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Matrice SQL ALLOW/DENY, sessions synthétiques et RLS actives",
+    "title": "Le téléchargement documentaire autorise un Viewer exclu du coffre",
+    "sources": [
+      [
+        "supabase/migrations/20260922150000_audit_fiscal_invitation_outbox_hardening.sql",
+        489
+      ],
+      [
+        "apps/web/app/api/client/documents/[documentId]/route.ts",
+        60
+      ]
+    ],
+    "evidence": [
+      "evidence/document-authorization-probe.json",
+      "probes/document-authorization.sql"
+    ],
+    "reproduce": "Exécuter la sonde document-authorization avec Owner A, Viewer A et Owner B, sans binding documentaire.",
+    "observed": "Owner A : SELECT 1/RPC autorisée ; Viewer A : SELECT 0/RPC autorisée ; autre tenant : SELECT 0/RPC refusée 42501.",
+    "impact": "Une pièce de conformité peut être autorisée hors de la politique de lecture du coffre pour le même tenant.",
+    "remediation": "Aligner permissions de coffre et téléchargement ou exiger un partage explicite lié à un objet accessible.",
+    "regression": "Owner ALLOW, Viewer sans partage DENY, autre tenant DENY, partage révoqué DENY.",
+    "limitations": "Document et scan sont des métadonnées synthétiques ; aucun objet Storage ni transfert binaire HTTP. Aucune fuite inter-tenant démontrée."
+  },
+  {
+    "id": "SEC-02",
+    "domain": "Sécurité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + doubles en mémoire",
+    "title": "La démo valide le persona après la session et les effets MFA",
+    "sources": [
+      [
+        "apps/web/app/[locale]/connexion/demo-actions.ts",
+        30
+      ],
+      [
+        "apps/web/app/[locale]/connexion/demo-assurance.ts",
+        39
+      ],
+      [
+        "apps/web/app/[locale]/connexion/demo-policy.ts",
+        34
+      ]
+    ],
+    "evidence": [
+      "reviewers/security.md"
+    ],
+    "reproduce": "Configurer un compte ne satisfaisant pas le persona, puis suivre l'ordre d'exécution avec doubles sans serveur Auth réel.",
+    "observed": "Session et assurance MFA sont manipulées avant le refus de persona ; le refus ne ferme pas explicitement la session.",
+    "impact": "Mauvaise configuration d'un compte non synthétique : effets Auth/MFA avant l'autorisation attendue.",
+    "remediation": "Valider identité synthétique et persona avant tout effet Auth ; fermer les sessions établies en cas d'échec.",
+    "regression": "Refus avant génération de lien/MFA ; facteurs existants inchangés ; production toujours refusée.",
+    "limitations": "Environnement démo autorisé seulement ; pas d'attaque Auth native ni de compromission de production démontrée. Le fallback d'upsert de rôles n'a pas été retenu comme escalade exploitable."
+  },
+  {
+    "id": "SEC-03",
+    "domain": "Sécurité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Risque conditionnel",
+    "proof": "Configuration locale inspectée",
+    "title": "L'autoconfirmation locale ne prouve pas la possession du courriel",
+    "sources": [
+      [
+        "supabase/config.toml",
+        175
+      ],
+      [
+        "supabase/config.toml",
+        225
+      ],
+      [
+        "supabase/migrations/20260911002500_identity_security_hardening.sql",
+        168
+      ]
+    ],
+    "evidence": [
+      "reviewers/security.md"
+    ],
+    "reproduce": "Examiner inscription directe et acceptation d'invitation sur un environnement jetable.",
+    "observed": "Signup activé et confirmation désactivée localement ; les contrôles d'invitation utilisent le courriel confirmé/JWT.",
+    "impact": "Le réglage de développement ne doit pas être repris tel quel pour une recette d'identité ou un environnement hébergé.",
+    "remediation": "Vérifier la configuration Auth de chaque environnement et lier la recette à une possession réelle du courriel.",
+    "regression": "Inscription directe avec une adresse invitée mais non possédée : acceptation refusée avant vérification réelle.",
+    "limitations": "Exploitation non exécutée ; la configuration locale de développement n'est pas une preuve de mauvaise configuration production."
+  },
+  {
+    "id": "REL-01",
+    "domain": "Release",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + exécution du résolveur en mémoire",
+    "title": "Le runner SQL accepte une cible arbitraire sans identité non-production",
+    "sources": [
+      [
+        "scripts/run-db-tests.mjs",
+        15
+      ],
+      [
+        "scripts/run-db-tests.mjs",
+        608
+      ],
+      [
+        "scripts/run-db-tests.mjs",
+        267
+      ]
+    ],
+    "evidence": [
+      "reviewers/architecture.md"
+    ],
+    "reproduce": "Évaluer le résolveur seul avec APP_ENV=staging et une URL fictive non Supabase, sans connexion.",
+    "observed": "La cible arbitraire est acceptée ; les nettoyages ultérieurs du runner peuvent effectuer des écritures privilégiées.",
+    "impact": "Une erreur de binding peut orienter une recette mutante vers une base réelle.",
+    "remediation": "Vérifier la cible effective avant toute écriture, refuser environnement inconnu et incohérences d'identité ; séparer les modes locaux/hosted.",
+    "regression": "Tests de refus avec APP_ENV trompeur, pooler et project-ref incohérents.",
+    "limitations": "Aucune connexion à la cible fictive ou à une production n'a été tentée."
+  },
+  {
+    "id": "REL-02",
+    "domain": "Release",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Exécution du parseur de preuves en mémoire",
+    "title": "Un sous-ensemble SQL peut satisfaire un check de release complet",
+    "sources": [
+      [
+        "scripts/run-db-tests.mjs",
+        613
+      ],
+      [
+        "scripts/release/run-checks.mjs",
+        27
+      ],
+      [
+        "scripts/release/manifest.mjs",
+        60
+      ]
+    ],
+    "evidence": [
+      "reviewers/architecture.md",
+      "evidence/db-filtered-concurrency.json"
+    ],
+    "reproduce": "Fournir au parseur le résumé positif d'un seul fichier avec DB_TEST_PATTERN actif.",
+    "observed": "Le check peut devenir passed sans comparer les fichiers exécutés aux 383 attendus.",
+    "impact": "Preuve incomplète présentée comme certification SQL complète.",
+    "remediation": "Refuser les filtres en release ; vérifier liste, empreinte et nombre attendus des suites.",
+    "regression": "Une recette filtrée doit toujours être PARTIAL et ne peut pas autoriser la release.",
+    "limitations": "Le run filtré de cet audit est explicitement limité à quatre fichiers et quatre scénarios de concurrence ; il ne remplace jamais le run complet."
+  },
+  {
+    "id": "REL-03",
+    "domain": "Release",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Inventaire + historique SQL",
+    "title": "Deux migrations partagent le même identifiant",
+    "sources": [
+      [
+        "supabase/migrations/20261118160000_ensure_demo_admin_platform_role_v1.sql",
+        1
+      ],
+      [
+        "supabase/migrations/20261118160000_reset_demo_box_network_v1.sql",
+        1
+      ]
+    ],
+    "evidence": [
+      "evidence/inventory.json"
+    ],
+    "reproduce": "Regrouper les fichiers par préfixe de version et examiner la clé de schema_migrations.",
+    "observed": "607 fichiers, 606 versions uniques ; deux fichiers 20261118160000, une seule version enregistrable.",
+    "impact": "Replay et état de déploiement non reproductibles sans régularisation.",
+    "remediation": "Régulariser selon l'historique réellement appliqué, sans réécrire aveuglément une migration déjà déployée.",
+    "regression": "Unicité automatique des versions et replay CLI intégral sur base neuve.",
+    "limitations": "Aucun reset de la base partagée ; un replay CLI complet neuf n'est pas certifié."
+  },
+  {
+    "id": "REL-04",
+    "domain": "Release",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Build réel + typecheck sans incrémental",
+    "title": "Le build et la vérification TypeScript à froid échouent",
+    "sources": [
+      [
+        "apps/web/modules/franchise/data/digest/repository.ts",
+        35
+      ]
+    ],
+    "evidence": [
+      "evidence/build-local.json",
+      "evidence/build-local.log",
+      "evidence/typecheck-clean.json",
+      "evidence/typecheck-clean.log"
+    ],
+    "reproduce": "Sous Node22, fournir uniquement les paramètres Supabase locaux en mémoire puis lancer build et tsc --noEmit --incremental false.",
+    "observed": "Compilation Next réussie, puis TS2589 sur le scope générique digest. Le typecheck incrémental initial passait.",
+    "impact": "Candidat non construisible dans les conditions contrôlées ; le cache peut masquer le défaut.",
+    "remediation": "Simplifier le contrat de la requête typée sans any de contournement ; inclure un typecheck propre dans la recette.",
+    "regression": "Build et tsc à froid depuis installation propre, avec conservation des types des filtres.",
+    "limitations": "L'échec initial sans variables est séparé de cet échec de code ; aucun secret n'a été écrit."
+  },
+  {
+    "id": "REL-05",
+    "domain": "Qualité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Exécutions et lecture des causes",
+    "title": "Lint, tests web et tooling ne sont pas verts",
+    "sources": [
+      [
+        "apps/web/modules/franchise/ui/franchise-access-state.tsx",
+        82
+      ],
+      [
+        "apps/web/modules/admin/ui/admin-side-group.tsx",
+        19
+      ],
+      [
+        "tests/e2e/public/diagnostic-need-integrity.spec.ts",
+        80
+      ],
+      [
+        "scripts/release/no-placeholders.test.mjs",
+        18
+      ]
+    ],
+    "evidence": [
+      "evidence/lint.log",
+      "evidence/unit.log",
+      "evidence/tooling.log",
+      "evidence/e2e-integrity-report.json",
+      "evidence/continuation-report.json"
+    ],
+    "reproduce": "Exécuter les commandes consignées et lire les causes, pas seulement les comptes.",
+    "observed": "Lint : 6 erreurs/15 warnings. Web : 6 échecs/4186 succès/1 skip. Tooling : 3 échecs/103. E2E AR attend une traduction absente alors que le libellé arabe existe.",
+    "impact": "Gates rouges et contrats de tests désynchronisés ; les erreurs Hooks restent un défaut réel de structure.",
+    "remediation": "Corriger les Hooks conditionnels et fixtures Router, acter le contrat 403, actualiser les attentes de traduction ; documenter Windows/symlinks.",
+    "regression": "Suites initiales vertes sans supprimer assertions ; garder la sonde séparée de continuation FR→AR.",
+    "limitations": "Les six échecs unitaires ne sont pas six pannes utilisateur ; les deux échecs E2E AR ne prouvent pas une régression de traduction."
+  },
+  {
+    "id": "REL-06",
+    "domain": "Release",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Validation en mémoire",
+    "title": "Le contenu des visas n'est pas validé",
+    "sources": [
+      [
+        "scripts/release/manifest.mjs",
+        19
+      ],
+      [
+        "scripts/release/manifest.mjs",
+        36
+      ],
+      [
+        "scripts/release/manifest.test.mjs",
+        42
+      ]
+    ],
+    "evidence": [
+      "reviewers/architecture.md"
+    ],
+    "reproduce": "Référencer un fichier quelconque avec son bon hash comme artefact d'approbation.",
+    "observed": "Les contrôles d'intégrité/confinement passent sans vérifier décision, candidat ou cohérence du signataire.",
+    "impact": "Des pièces étrangères peuvent satisfaire cette partie du gate automatique.",
+    "remediation": "Valider le schéma et la cohérence du visa, le candidat et l'indépendance attendue.",
+    "regression": "Rejeter document quelconque, mauvais candidat et auto-revue incompatible.",
+    "limitations": "Les autres contrôles techniques du manifeste subsistent ; aucune release frauduleuse complète n'est démontrée."
+  },
+  {
+    "id": "REL-07",
+    "domain": "Qualité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Inventaire et configuration",
+    "title": "Les preuves atomiques et la couverture exigée restent incomplètes",
+    "sources": [
+      [
+        "docs/specs/registries/screens.yaml",
+        3
+      ],
+      [
+        "apps/web/vitest.config.ts",
+        5
+      ],
+      [
+        "scripts/release/run-checks.mjs",
+        19
+      ]
+    ],
+    "evidence": [
+      "evidence/phase00.log",
+      "evidence/inventory.json",
+      "reviewers/product.md",
+      "reviewers/architecture.md"
+    ],
+    "reproduce": "Compter les contrats de registres, comparer aux routes et examiner les collecteurs de couverture.",
+    "observed": "Deux écrans atomiques, un formulaire et deux API dans les registres initiaux ; pas de seuil de couverture exécutable ; 5/68 statuts historiques VERIFIED.",
+    "impact": "Les gates de structure ne démontrent pas la couverture exhaustive des 68 fonctions ou des branches critiques.",
+    "remediation": "Réconcilier les contrats et mesurer la couverture utile ; lier preuves et visas au candidat.",
+    "regression": "Détection des routes/actions non référencées ; seuils du Gold Master sur les branches critiques.",
+    "limitations": "Les sorties de phase00 disent explicitement que P01 reste ouverte. Présence de code distincte d'une preuve d'acceptation."
+  },
+  {
+    "id": "ARCH-01",
+    "domain": "Architecture",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Options effectives TypeScript calculées",
+    "title": "Le web n'hérite pas de plusieurs options strictes requises",
+    "sources": [
+      [
+        "apps/web/tsconfig.json",
+        2
+      ]
+    ],
+    "evidence": [
+      "evidence/source-probes.json"
+    ],
+    "reproduce": "Résoudre les configurations via l'API TypeScript.",
+    "observed": "strict=true, mais noUncheckedIndexedAccess/exactOptionalPropertyTypes/noImplicitOverride/noFallthroughCasesInSwitch=false dans le web, true à la racine et au worker.",
+    "impact": "Le typecheck web ne garantit pas le standard TypeScript annoncé.",
+    "remediation": "Centraliser les options et traiter explicitement les incompatibilités révélées.",
+    "regression": "Contrôler les options résolues de toutes les applications en CI.",
+    "limitations": "Aucune activation d'option ou correction applicative effectuée pendant l'audit."
+  },
+  {
+    "id": "ARCH-02",
+    "domain": "Architecture",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Analyse source et validateur",
+    "title": "Les packages de domaine et le contrôle de frontières restent largement déclaratifs",
+    "sources": [
+      [
+        "packages/application/src/index.ts",
+        1
+      ],
+      [
+        "packages/contracts/src/index.ts",
+        1
+      ],
+      [
+        "scripts/validate-boundaries.ts",
+        45
+      ]
+    ],
+    "evidence": [
+      "reviewers/architecture.md"
+    ],
+    "reproduce": "Examiner les exports, imports workspace réels et surfaces parcourues par le validateur.",
+    "observed": "Application/contrats/forms/workflows sont minimaux ; le gate des packages ne vérifie pas les dépendances effectives du web.",
+    "impact": "Écart entre architecture cible et architecture contrôlée, risque de couplage et dette de maintenance.",
+    "remediation": "Documenter l'architecture réellement retenue puis migrer par use cases et contrôler aussi les applications.",
+    "regression": "Tests de frontières avec imports interdits depuis apps et preuve des contrats utilisés.",
+    "limitations": "Le métier n'est pas déclaré absent : beaucoup de règles sont implémentées en SQL et modules web."
+  },
+  {
+    "id": "ARCH-03",
+    "domain": "Performance",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Fonction source exécutée avec transport synthétique",
+    "title": "La pagination de transport charge toujours tout l'historique",
+    "sources": [
+      [
+        "apps/web/modules/shared/lib/data/read-pages.ts",
+        2
+      ],
+      [
+        "apps/web/modules/provider/data/billing/workspace.ts",
+        13
+      ],
+      [
+        "apps/web/modules/franchise/data/crm/repository.ts",
+        73
+      ]
+    ],
+    "evidence": [
+      "evidence/source-probes.json"
+    ],
+    "reproduce": "Appeler readAllPages sur un transport synthétique de 100000 lignes.",
+    "observed": "201 appels séquentiels et 100000 lignes accumulées avant retour ; plusieurs ensembles sont chargés ainsi pour un workspace.",
+    "impact": "Coût réseau et mémoire proportionnel à tout l'historique pour afficher une page.",
+    "remediation": "Pagination métier côté serveur, bornes de période, agrégats et index adaptés.",
+    "regression": "Nombre de requêtes et volume retourné bornés lorsque l'historique croît.",
+    "limitations": "Pas de mesure réelle du p95 ni de test de charge production."
+  },
+  {
+    "id": "ARCH-04",
+    "domain": "Architecture",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Exécution du helper avec RPC simulées",
+    "title": "Des erreurs métier différentes deviennent indiscernables",
+    "sources": [
+      [
+        "apps/web/modules/admin/screens/incitations/actions.ts",
+        2
+      ],
+      [
+        "apps/web/modules/admin/screens/incitations/actions.test.ts",
+        13
+      ]
+    ],
+    "evidence": [
+      "reviewers/architecture.md"
+    ],
+    "reproduce": "Faire retourner 42501 puis 23505 à la dépendance RPC du helper.",
+    "observed": "Réponse identique status:error sans code sûr discriminant ni référence de requête.",
+    "impact": "L'interface et le support confondent refus, conflit et indisponibilité.",
+    "remediation": "Conserver un résultat typé avec code stable et corrélation, sans détails sensibles.",
+    "regression": "Succès, validation, refus, conflit et indisponibilité distingués.",
+    "limitations": "Exemple inspecté, pas affirmation que toutes les commandes du dépôt ont ce défaut."
+  },
+  {
+    "id": "PROD-01",
+    "domain": "Produit",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Chemin de code complet inspecté",
+    "title": "Le besoin sans service précis n'a pas de reprise exploitable",
+    "sources": [
+      [
+        "apps/web/modules/public/ui/journey/need-flow.tsx",
+        727
+      ],
+      [
+        "apps/web/modules/client/screens/demandes/need-context.ts",
+        108
+      ],
+      [
+        "supabase/migrations/20260915020200_public_need_intake.sql",
+        65
+      ]
+    ],
+    "evidence": [
+      "reviewers/product.md"
+    ],
+    "reproduce": "Suivre la branche sans serviceCode après enregistrement : effacement local, intake DRAFT_REVIEW puis lien vers la liste des demandes.",
+    "observed": "La conversion dépend d'un code service ; aucune file de reprise des intakes non classés n'a été trouvée dans les routes inspectées.",
+    "impact": "Rupture de l'entrée commerciale pour un besoin que le client ne sait pas classifier.",
+    "remediation": "Conserver une reprise durable, exposer une qualification humaine et la conversion liée au même intake.",
+    "regression": "Sauvegarde/rechargement/qualification/conversion sans service précis en FR/AR.",
+    "limitations": "Enregistrement authentifié de bout en bout non exécuté ; constat source, pas abandon commercial mesuré."
+  },
+  {
+    "id": "PROD-02",
+    "domain": "Produit",
+    "severity": "Haute",
+    "priority": "P1",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + évaluation déterministe des helpers",
+    "title": "La restauration du besoin perd l'organisation explicite",
+    "sources": [
+      [
+        "apps/web/modules/public/ui/journey/need-flow.tsx",
+        196
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Initialiser l'organisation B avec deux organisations autorisées, puis restaurer sans brouillon.",
+    "observed": "Le fallback blank omet initialOrganizationId ; le composeur peut choisir la première organisation A.",
+    "impact": "Préparation d'une demande dans une organisation différente du contexte choisi, sans fuite hors des memberships démontrée.",
+    "remediation": "Conserver l'organisation explicite et ne jamais la remplacer silencieusement par un ancien brouillon ou un défaut.",
+    "regression": "Deux organisations : stockage vide, invalide, expiré et ancien brouillon ; refus de soumettre tant que le contexte n'est pas confirmé.",
+    "limitations": "Pas de création réelle de demande dans la mauvaise organisation pendant l'audit."
+  },
+  {
+    "id": "PROD-03",
+    "domain": "Produit",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Expression de sérialisation exécutée en mémoire",
+    "title": "Les réponses du besoin sont tronquées silencieusement",
+    "sources": [
+      [
+        "apps/web/modules/public/ui/journey/need-flow.tsx",
+        745
+      ],
+      [
+        "apps/web/app/[locale]/(public)/besoin/actions.ts",
+        113
+      ]
+    ],
+    "evidence": [
+      "reviewers/product.md"
+    ],
+    "reproduce": "Combiner 1200 caractères de contraintes avec une réponse structurée puis appliquer l'expression source.",
+    "observed": "La charge sauvegardée s'arrête à 1200 caractères et la réponse site.count est absente.",
+    "impact": "Perte de préremplissage et ressaisie malgré succès affiché.",
+    "remediation": "Stocker séparément champs libres, classification et réponses structurées ; validation de taille explicite.",
+    "regression": "Conservation exacte aux tailles limites et lors de la conversion en demande.",
+    "limitations": "Preuve en mémoire et chemin source ; pas d'enregistrement persistant de données utilisateur."
+  },
+  {
+    "id": "PROD-04",
+    "domain": "Produit",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Helper source exécuté en mémoire",
+    "title": "La projection embarquée exclut les nouveaux services publiés",
+    "sources": [
+      [
+        "apps/web/modules/public/data/need-intent/model.ts",
+        20
+      ],
+      [
+        "apps/web/modules/public/data/need-intent/model.ts",
+        52
+      ],
+      [
+        "apps/web/app/[locale]/(public)/besoin/actions.ts",
+        193
+      ]
+    ],
+    "evidence": [
+      "reviewers/product.md"
+    ],
+    "reproduce": "Passer un code connu puis un nouveau code au helper de classification.",
+    "observed": "Le nouveau code est rejeté même si la découverte amont pourrait le lire depuis une publication DB.",
+    "impact": "L'autonomie de publication ne suffit pas à rendre un nouveau service découvrable sans reconstruire la projection.",
+    "remediation": "Aligner validation et découverte sur le catalogue publié versionné courant.",
+    "regression": "Publier un nouveau code en test et l'utiliser sans rebuild frontend.",
+    "limitations": "Aucun nouveau service créé en base partagée ; exemple de code nouveau synthétique."
+  },
+  {
+    "id": "DEMO-01",
+    "domain": "Produit",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + helpers purs",
+    "title": "Les overlays démo masquent le réel et coupent des parcours",
+    "sources": [
+      [
+        "apps/web/modules/client/screens/spaces/boards.tsx",
+        364
+      ],
+      [
+        "apps/web/app/[locale]/administration/candidatures-franchise/page.tsx",
+        129
+      ],
+      [
+        "apps/web/modules/admin/screens/franchise-applications/review-forms.tsx",
+        92
+      ]
+    ],
+    "evidence": [
+      "reviewers/product.md"
+    ],
+    "reproduce": "Activer le gate démo dans une lecture source et comparer listes, liens et dépendances d'approbation.",
+    "observed": "Demandes persistées remplacées par cinq cartes sans lien vers une fiche demande ; candidature synthétique CONTRACT_PENDING sans invitation/approval nécessaires.",
+    "impact": "Film de démonstration non équivalent à une chaîne persistée et navigation circulaire.",
+    "remediation": "Fixtures synthétiques persistées et reliées ; couche d'affichage ne remplaçant pas les identifiants métier actionnables.",
+    "regression": "Liste→fiche→devis et candidature→approbation→invitation→activation sur les mêmes identifiants.",
+    "limitations": "Démo désactivée dans les sondes navigateur ; défaut source en développement/staging, pas activation en production alléguée. Le diff staged candidatures ne modifie que son type de territoire."
+  },
+  {
+    "id": "UX-01",
+    "domain": "Design",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + observation navigateur",
+    "title": "L'inscription fournisseur impose la classification avant de continuer",
+    "sources": [
+      [
+        "apps/web/app/[locale]/(public)/fournisseur/provider-taxonomy-selector.tsx",
+        82
+      ],
+      [
+        "apps/web/app/[locale]/(public)/fournisseur/provider-taxonomy-selector.tsx",
+        312
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md",
+      "evidence/screenshots/fr-fournisseur-360.png"
+    ],
+    "reproduce": "Renseigner seulement la description d'activité, sans sélectionner de service ni ouvrir le champ non répertorié.",
+    "observed": "hasIntent ignore activity ; le lien de continuation reste aria-disabled et hors Tab.",
+    "impact": "Entrée annoncée guidée, mais catalogue/classification imposés à un fournisseur qui sait seulement décrire son activité.",
+    "remediation": "Autoriser la poursuite d'une description suffisante et faire qualifier la classification ensuite.",
+    "regression": "Description libre seule, services suggérés facultatifs et reprise sans perte du texte.",
+    "limitations": "Le choix explicite d'un service peut rester un raccourci, pas une condition imposée."
+  },
+  {
+    "id": "UX-02",
+    "domain": "Design",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Construction des liens sur source",
+    "title": "Changer de langue abandonne le détail et la version d'une offre",
+    "sources": [
+      [
+        "apps/web/app/[locale]/client/demandes/[requestId]/offres/[quoteId]/page.tsx",
+        52
+      ],
+      [
+        "apps/web/modules/client/ui/client-app-shell.tsx",
+        22
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Construire le shell de détail sans languagePath et suivre son lien de langue.",
+    "observed": "Le fallback reconstruit la liste requests, sans identifiants demande/offre/version.",
+    "impact": "Perte de contexte dans une décision commerciale.",
+    "remediation": "Transmettre chemin complet et paramètres sûrs.",
+    "regression": "FR→AR→FR avec organisation, demande, offre et version conservées.",
+    "limitations": "Pas de session Client navigateur disponible pour un clic authentifié réel."
+  },
+  {
+    "id": "A11Y-01",
+    "domain": "Accessibilité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + calcul de contraste",
+    "title": "Le CTA financier blanc sur corail est sous AA",
+    "sources": [
+      [
+        "apps/web/modules/client/ui/client-experience.css",
+        2518
+      ],
+      [
+        "apps/web/modules/client/screens/spaces/boards.tsx",
+        653
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Calculer blanc sur #f86b71 utilisé par la déclaration du CTA Paiements.",
+    "observed": "Rapport 2,864:1 : sous 4,5:1 pour texte normal et sous 3:1 pour grand texte.",
+    "impact": "Lecture difficile du libellé.",
+    "remediation": "Utiliser une paire de tokens AA pour tous les états.",
+    "regression": "Contrastes normal/hover/focus sur le rendu connecté.",
+    "limitations": "Calcul source, rendu connecté effectif non capturé ; les 56 scans publics ne couvrent pas ce composant."
+  },
+  {
+    "id": "A11Y-02",
+    "domain": "Accessibilité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Source + calcul de contraste",
+    "title": "Le suivi mission combine un texte très clair et un champ blanc",
+    "sources": [
+      [
+        "apps/web/app/[locale]/client/missions/[missionId]/page.tsx",
+        47
+      ],
+      [
+        "apps/web/modules/client/ui/client-experience.css",
+        3232
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Suivre le thème follow et les variables de texte du champ de recherche.",
+    "observed": "#f6f4fb sur blanc : 1,091:1 dans la combinaison de styles inspectée ; thème sombre imposé au suivi.",
+    "impact": "Texte saisi presque illisible et incohérence de surfaces.",
+    "remediation": "Associer explicitement couleur de texte et surface conformément aux tokens Version A.",
+    "regression": "Recherche et composants du suivi en FR/AR, focus et saisie longue.",
+    "limitations": "Constat de déclaration CSS ; vérifier la cascade calculée dans une session mission avant sign-off."
+  },
+  {
+    "id": "A11Y-03",
+    "domain": "Accessibilité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Analyse de cascade CSS",
+    "title": "Les recherches connectées suppriment leur indicateur de focus",
+    "sources": [
+      [
+        "apps/web/modules/client/ui/client-experience.css",
+        2007
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Comparer .client-shell-search input et le focus global.",
+    "observed": "outline:none plus spécifique que la règle globale ; aucun remplacement local identifié.",
+    "impact": "Position clavier non signalée sur les shells réutilisant ce style.",
+    "remediation": "Indicateur focus-visible ou focus-within explicite, sans supprimer la visibilité.",
+    "regression": "Tab/Shift+Tab dans Client, Provider et Franchise FR/AR.",
+    "limitations": "Contrôle clavier des recherches authentifiées non réalisé."
+  },
+  {
+    "id": "A11Y-04",
+    "domain": "Accessibilité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Analyse du focus selector et du gestionnaire Tab",
+    "title": "Le menu multiespace exclut summary de sa navigation personnalisée",
+    "sources": [
+      [
+        "apps/web/modules/public/ui/site/public-navigation.tsx",
+        22
+      ],
+      [
+        "apps/web/modules/public/ui/site/public-navigation.tsx",
+        58
+      ],
+      [
+        "apps/web/modules/public/ui/site/public-navigation.tsx",
+        102
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Avec plusieurs espaces, ouvrir le menu mobile et examiner les cibles retenues pour chaque Tab.",
+    "observed": "Le sélecteur ne comprend que liens/boutons, pas summary ; les boutons des details fermés ne sont pas filtrés comme invisibles.",
+    "impact": "Changement d'espace inaccessible ou focus inefficace dans ce cas.",
+    "remediation": "Conserver l'ordre natif ou filtrer toutes les cibles visibles, incluant summary.",
+    "regression": "Compte multiespace, menu à 360px, Tab/Shift+Tab/Escape et retour du focus.",
+    "limitations": "Menu anonyme FR/AR fonctionne dans les sondes ; cela ne valide pas le cas multiespace."
+  },
+  {
+    "id": "I18N-01",
+    "domain": "Accessibilité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Source et contenu localisé inspectés",
+    "title": "Les services arabes du fournisseur portent lang=fr",
+    "sources": [
+      [
+        "apps/web/app/[locale]/(public)/fournisseur/provider-taxonomy-selector.tsx",
+        231
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Examiner listes et sélections arabes alimentées par les noms approuvés.",
+    "observed": "lang=fr imposé à plusieurs libellés alors que les textes peuvent être arabes.",
+    "impact": "Prononciation incorrecte par les technologies d'assistance.",
+    "remediation": "Déclarer la langue du texte effectif.",
+    "regression": "Résultats, sélection et tags arabes avec lecteur d'écran.",
+    "limitations": "Pas de session NVDA/VoiceOver ; les noms arabes du besoin dans la sonde de continuation, eux, portent bien lang=ar."
+  },
+  {
+    "id": "I18N-02",
+    "domain": "Design",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Non-conformité confirmée",
+    "proof": "Analyse des libellés de formulaires",
+    "title": "Des codes métier internes sont exposés sans traduction",
+    "sources": [
+      [
+        "apps/web/modules/client/screens/recompenses/value-forms.tsx",
+        10
+      ]
+    ],
+    "evidence": [
+      "reviewers/design.md"
+    ],
+    "reproduce": "Examiner options et actions des formulaires de récompenses.",
+    "observed": "CLIENT/PROVIDER, PROFILE_STARTED/VERIFIED/ACTIVE et codes de justificatifs sont utilisés comme libellés.",
+    "impact": "Compréhension réduite, particulièrement en arabe.",
+    "remediation": "Dissocier valeurs internes et libellés FR/AR adaptés au rôle.",
+    "regression": "Toutes les options et transitions affichées dans les deux langues.",
+    "limitations": "Exemple ciblé, pas décompte exhaustif de tous les textes non traduits."
+  },
+  {
+    "id": "UX-03",
+    "domain": "Design",
+    "severity": "Faible",
+    "priority": "P3",
+    "status": "Non-conformité confirmée",
+    "proof": "Navigateur réel, reproduction ciblée",
+    "title": "La navigation française déborde à 1024px",
+    "sources": [
+      [
+        "apps/web/modules/public/ui/site/public-navigation.tsx",
+        85
+      ]
+    ],
+    "evidence": [
+      "evidence/targeted-browser.json",
+      "evidence/screenshots/fr-home-1024-targeted.png"
+    ],
+    "reproduce": "Ouvrir /fr puis /fr/diagnostic à 1024px.",
+    "observed": "Largeur de contenu 1046 puis 1026 pour un viewport de 1024 ; navigation desktop et CTA dépassent.",
+    "impact": "Défilement horizontal et CTA en bord de fenêtre sur tablette/desktop étroit.",
+    "remediation": "Adapter le breakpoint de navigation ou son encombrement, sans masquer le contenu utile.",
+    "regression": "Aucun débordement à 360/390/768/1024/1440 en FR/AR.",
+    "limitations": "Pas de débordement documenté à 360 dans les pages publiques contrôlées ; les éléments décoratifs hors cadre ne sont pas tous des défauts."
+  },
+  {
+    "id": "DEP-01",
+    "domain": "Sécurité",
+    "severity": "Moyenne",
+    "priority": "P2",
+    "status": "Risque conditionnel",
+    "proof": "Audit npm + avis primaires vérifiés",
+    "title": "Next.js 16.4.1 est inclus dans deux plages d'avis de sécurité",
+    "sources": [
+      [
+        "package.json",
+        64
+      ],
+      [
+        "apps/web/package.json",
+        35
+      ]
+    ],
+    "evidence": [
+      "evidence/dependencies.log",
+      "evidence/inventory.json"
+    ],
+    "reproduce": "Exécuter pnpm audit et vérifier les deux advisories officiels.",
+    "observed": "GHSA-mfr8-8qww-v76h et GHSA-vc7v-qv4w-wrv8, gravité modérée, correctif annoncé 16.4.5.",
+    "impact": "Dette de sécurité de dépendance ; préconditions d'exploitation à contrôler.",
+    "remediation": "Planifier une mise à jour compatible et ses tests ; ne pas modifier les versions pendant cet audit.",
+    "regression": "Build, caches, isolation par locale/tenant et régression applicative après mise à jour.",
+    "limitations": "Aucun cacheComponents/use cache/unstable_cache applicatif trouvé dans le périmètre inspecté ; exploitation non démontrée."
+  }
+]

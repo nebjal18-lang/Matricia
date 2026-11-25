@@ -76,3 +76,26 @@ export const IT_FRANCHISE_ECONOMICS = Object.freeze({
   neoxaJalilShareBasisPoints: 5_000,
   asmaMatriciaShareBasisPoints: 0,
 });
+
+/** Core subscription + non-IT entry fees, after marketing/charges — distinct from franchise P&L. */
+export const PLATFORM_CORE_POT_ECONOMICS = Object.freeze({
+  distributionBasis: "DISTRIBUTABLE_PLATFORM_POT" as const,
+  neoxaJalilShareBasisPoints: 5_000,
+  asmaMatriciaShareBasisPoints: 5_000,
+  roundingBeneficiary: "ASMA_MATRICIA" as const,
+  revenueCategories: Object.freeze(["CORE_SUBSCRIPTION_REVENUE_ACQUIRED", "ENTRY_FEE_ACQUIRED"] as const),
+  deductionCategories: Object.freeze(["REFUND_CREDIT_NOTE", "MARKETING_COST", "OPERATING_CHARGE"] as const),
+});
+
+/** Exact bigint split for the platform pot remainder (Asma receives the rounding remainder). */
+export function allocatePlatformCorePotRemainder(distributableMinor: bigint): {
+  neoxaJalilMinor: bigint;
+  asmaMatriciaMinor: bigint;
+  roundingAdjustmentMinor: bigint;
+} {
+  if (distributableMinor < 0n) throw new RangeError("DISTRIBUTABLE_MUST_BE_NON_NEGATIVE");
+  const neoxa = (distributableMinor * BigInt(PLATFORM_CORE_POT_ECONOMICS.neoxaJalilShareBasisPoints)) / 10_000n;
+  const asmaBase = (distributableMinor * BigInt(PLATFORM_CORE_POT_ECONOMICS.asmaMatriciaShareBasisPoints)) / 10_000n;
+  const rem = distributableMinor - neoxa - asmaBase;
+  return { neoxaJalilMinor: neoxa, asmaMatriciaMinor: asmaBase + rem, roundingAdjustmentMinor: rem };
+}

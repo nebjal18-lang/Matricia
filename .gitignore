@@ -1,7 +1,6 @@
 
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
 
 # dependencies
 node_modules/
@@ -39,3 +38,5 @@ next-env.d.ts
 
 # Dependency links in isolated validation worktrees are local, too.
 **/node_modules
+
+.tmp/

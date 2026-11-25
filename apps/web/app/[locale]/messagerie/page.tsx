@@ -68,7 +68,7 @@ function ConversationPanel({
   }
   return (
     <div className="space-y-4">
-      <OpenThreadForm options={result.value.options} locale={locale} m={m} organizationId={organizationId} />
+      <OpenThreadForm options={result.value.options} locale={locale} m={m} {...(organizationId !== undefined && { organizationId })} />
       <p>{m.choose}</p>
     </div>
   );
@@ -77,7 +77,7 @@ function ConversationPanel({
 export default async function MessagingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ fil?: string; organizationId?: string; q?: string; page?:string;before?:string;beforeId?:string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
-  const space = await resolveConnectedSpace({ locale, organizationId: query.organizationId });
+  const space = await resolveConnectedSpace({ locale, ...(query.organizationId !== undefined && { organizationId: query.organizationId }) });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/messagerie` }));
   const repository=await createInternalMessagingRepository(),page=Math.min(100000,Math.max(1,Number.parseInt(query.page??"1",10)||1)),needle=(query.q??"").trim().slice(0,200);
   const cursor=parseMessageCursor(query);if(!cursor.valid)notFound();

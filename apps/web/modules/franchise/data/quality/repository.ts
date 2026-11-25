@@ -31,10 +31,12 @@ async function readFranchiseCorrectivePlans(franchiseId?:string): Promise<Franch
   const { data: auth,error:authError } = await client.auth.getUser();
   if(authError)return{status:"error",reason:classifyAuthReadFailure(authError)==="UNAUTHENTICATED"?"UNAUTHENTICATED":"QUERY_FAILED"};
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
+  // Refuse unscoped bulk reads — franchise context is required for corrective plans.
+  if (!franchiseId) return { status: "error", reason: "INVALID_RESPONSE" };
   const result = await collectOperationPages((from,to)=>client
     .from("franchise_corrective_plan_versions")
     .select("id,franchise_id,plan_key,version,status,due_on")
-    .match(franchiseId?{franchise_id:franchiseId}:{})
+    .match({franchise_id:franchiseId})
     .order("due_on").order("id")
     .range(from,to));
   if (result.error) return { status: "error", reason: "QUERY_FAILED" };

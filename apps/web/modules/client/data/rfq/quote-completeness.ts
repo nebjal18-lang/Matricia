@@ -46,6 +46,33 @@ export function quoteCompleteness(input: {
   };
 }
 
+const MISSING_LABELS = {
+  fr: {
+    solution: "solution",
+    deliverables: "livrables",
+    warranty: "garantie",
+    corrections: "corrections",
+    start: "date de début",
+    duration: "durée",
+    validity: "validité",
+    lines: "lignes tarifées",
+  },
+  ar: {
+    solution: "الحل",
+    deliverables: "التسليمات",
+    warranty: "الضمان",
+    corrections: "التصحيحات",
+    start: "تاريخ البدء",
+    duration: "المدة",
+    validity: "الصلاحية",
+    lines: "بنود السعر",
+  },
+} as const;
+
+export function missingCompletenessLabels(checks: QuoteCompletenessCheck[], locale: "fr" | "ar"): string[] {
+  return checks.filter((check) => !check.present).map((check) => MISSING_LABELS[locale][check.key]);
+}
+
 export function formatCompletenessBasisPoints(basisPoints: number, locale: "fr" | "ar"): string {
   const whole = Math.trunc(Math.max(0, Math.min(10_000, basisPoints)) / 100);
   return locale === "ar" ? `${whole}٪` : `${whole} %`;

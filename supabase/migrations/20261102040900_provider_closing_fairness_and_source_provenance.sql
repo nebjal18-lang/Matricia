@@ -6,7 +6,7 @@ revoke all on private.provider_billing_execution_attempts_v1 from public,anon,au
 do $migration$
 declare definition text;needle text;
 begin
- definition:=pg_get_functiondef('private.ingest_provider_dispute_payables_v1(integer)'::regprocedure);
+ definition:=pg_get_functiondef('private.ingest_provider_dispute_payables_v1(integer)'::regprocedure);definition:=replace(definition,chr(13),'');
  if strpos(definition,'m.contract_version_id')=0 then raise exception'DISPUTE_SOURCE_VERSION_PATCH_MISSING';end if;
  definition:=replace(definition,'m.contract_version_id','dc.contract_version_id');
  needle:='  category:=case when';
@@ -19,7 +19,7 @@ begin
   end if;
 $patch$||needle);
  execute definition;
- definition:=pg_get_functiondef('public.run_provider_billing_scheduler_v1(integer)'::regprocedure);
+ definition:=pg_get_functiondef('public.run_provider_billing_scheduler_v1(integer)'::regprocedure);definition:=replace(definition,chr(13),'');
  needle:='order by p.provider_organization_id,p.currency limit p_limit loop';
  if strpos(definition,needle)=0 then raise exception'CLOSING_FAIRNESS_ORDER_PATCH_MISSING';end if;
  definition:=replace(definition,needle,'order by coalesce((select a.last_attempt_at from private.provider_billing_execution_attempts_v1 a where a.provider_organization_id=p.provider_organization_id and a.currency=p.currency),''-infinity''::timestamptz),p.provider_organization_id,p.currency limit p_limit loop');
@@ -30,7 +30,7 @@ $patch$||needle);
 $patch$||needle);execute definition;
  -- A historical admission is a reviewed client receipt, not permission to turn
  -- an unclassified penalty or third-party liability into Matricia revenue.
- definition:=pg_get_functiondef('public.admit_provider_payable_v1(uuid,text)'::regprocedure);
+ definition:=pg_get_functiondef('public.admit_provider_payable_v1(uuid,text)'::regprocedure);definition:=replace(definition,chr(13),'');
  needle:=' if length(btrim(coalesce(p_reason';
  if strpos(definition,needle)=0 then raise exception'LEGACY_RECEIPT_TYPE_PATCH_MISSING';end if;
  execute replace(definition,needle,' if e.event_type is distinct from''CLIENT_RECEIPT_CONFIRMED''then raise exception''LEGACY_RECEIPT_ADMISSION_ONLY''using errcode=''55000'';end if;'||needle);

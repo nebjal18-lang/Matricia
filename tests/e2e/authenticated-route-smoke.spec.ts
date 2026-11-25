@@ -6,7 +6,7 @@ type Locale = "fr" | "ar";
 type Role = "client" | "provider" | "franchise" | "admin";
 type Surface = {
   route: string;
-  heading: Record<Locale, string>;
+  heading: Record<Locale, string | RegExp>;
 };
 
 const surfaces: Record<Role, readonly Surface[]> = {
@@ -18,6 +18,7 @@ const surfaces: Record<Role, readonly Surface[]> = {
     { route: "client/finances", heading: { fr: "Mes finances", ar: "أموالي" } },
     { route: "client/credits", heading: { fr: "Crédits, Boxes et avantages", ar: "الأرصدة والصناديق والمزايا" } },
     { route: "notifications", heading: { fr: "Centre de notifications", ar: "مركز الإشعارات" } },
+    { route: "tableau-de-bord?workspace=client", heading: { fr: /^Bonjour[,.]/u, ar: /^مرحباً[,.]/u } },
   ],
   provider: [
     { route: "sous-traitant/qualification", heading: { fr: "Votre qualification", ar: "تأهيلكم" } },
@@ -25,16 +26,18 @@ const surfaces: Record<Role, readonly Surface[]> = {
     { route: "sous-traitant/missions", heading: { fr: "Missions & livrables", ar: "المهام والتسليمات" } },
     { route: "sous-traitant/facturation", heading: { fr: "Facturation", ar: "الفوترة" } },
     { route: "sous-traitant/marketing", heading: { fr: "Marketing", ar: "التسويق" } },
+    { route: "tableau-de-bord?workspace=provider", heading: { fr: "Votre activité, en toute clarté", ar: "نشاطكم، بكل وضوح" } },
   ],
   franchise: [
     { route: "franchise/performance", heading: { fr: "Performance de votre bibliothèque", ar: "أداء مكتبتكم" } },
     { route: "franchise/relances", heading: { fr: "Relances et pipeline", ar: "المتابعات والمسار" } },
     { route: "franchise/questionnaires", heading: { fr: "Questions & questionnaires", ar: "الأسئلة والاستبيانات" } },
-    { route: "franchise/digest", heading: { fr: "Pilotez votre bibliothèque", ar: "قودوا مكتبتكم" } },
+    { route: "franchise/digest", heading: { fr: "Résumé quotidien", ar: "الملخص اليومي" } },
     { route: "franchise/marketing", heading: { fr: "Marketing", ar: "التسويق" } },
+    { route: "franchise/accueil", heading: { fr: "Pilotez votre bibliothèque", ar: "قودوا مكتبتكم" } },
   ],
   admin: [
-    { route: "administration/command-center", heading: { fr: "Administration Matricia", ar: "إدارة ماتريسيا" } },
+    { route: "administration/command-center", heading: { fr: "Centre de pilotage", ar: "مركز القيادة" } },
     { route: "administration/parcours", heading: { fr: "Parcours & dossiers", ar: "المسارات والملفات" } },
     { route: "administration/entreprises", heading: { fr: "Organisations", ar: "المؤسسات" } },
   ],
@@ -85,22 +88,33 @@ async function createSession(browser: Browser, role: Role, locale: Locale, mobil
   return { context, page: await context.newPage() };
 }
 
-async function assertHealthyDocument(page: Page, locale: Locale, surface: Surface) {
+async function assertHealthyDocument(page: Page, locale: Locale, surface: Surface, role: Role) {
   const pageErrors: string[] = [];
   const recordPageError = (error: Error) => pageErrors.push(error.message);
   page.on("pageerror", recordPageError);
   try {
-    const response = await page.goto(`/${locale}/${surface.route}`, { waitUntil: "domcontentloaded" });
+    const targetUrl = new URL(`/${locale}/${surface.route}`, baseURL);
+    if (role === "provider" || role === "franchise") {
+      const organizationId = process.env.E2E_ROLE_ORGANIZATION_ID;
+      if (!organizationId) throw new Error("E2E_ROLE_ORGANIZATION_ID_REQUIRED");
+      targetUrl.searchParams.set("organizationId", organizationId);
+    }
+    if (role === "franchise") {
+      const franchiseId = process.env.E2E_FRANCHISE_ID;
+      if (!franchiseId) throw new Error("E2E_FRANCHISE_ID_REQUIRED");
+      targetUrl.searchParams.set("franchiseId", franchiseId);
+    }
+    const response = await page.goto(targetUrl.href, { waitUntil: "domcontentloaded" });
     expect(response, `No document response for /${locale}/${surface.route}`).not.toBeNull();
     expect(response!.status(), `Unexpected HTTP status for /${locale}/${surface.route}`).toBeLessThan(500);
-    await expect(page).toHaveURL(new RegExp(`/${locale}/${surface.route}/?$`));
+    await expect(page).toHaveURL(url => url.pathname === targetUrl.pathname && [...targetUrl.searchParams].every(([key,value]) => url.searchParams.get(key) === value));
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
     await expect(page.locator("html")).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
     await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible();
     await expect(page.locator("body")).not.toContainText(/Application error|Internal Server Error|ChunkLoadError/u);
     expect((await page.locator("body").innerText()).trim().length).toBeGreaterThan(20);
     await expect(async () => {
-      await expect(page).toHaveURL(new RegExp(`/${locale}/${surface.route}/?$`), { timeout: 500 });
+      await expect(page).toHaveURL(url => url.pathname === targetUrl.pathname && [...targetUrl.searchParams].every(([key,value]) => url.searchParams.get(key) === value), { timeout: 500 });
       await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible({ timeout: 500 });
       const dimensions = await page.evaluate(() => ({
         viewport: document.documentElement.clientWidth,
@@ -108,15 +122,15 @@ async function assertHealthyDocument(page: Page, locale: Locale, surface: Surfac
       }));
       expect(dimensions.content, `Horizontal overflow on /${locale}/${surface.route}`).toBeLessThanOrEqual(dimensions.viewport);
     }).toPass({ timeout: 5_000, intervals: [100, 250, 500] });
-    expect(pageErrors, `Unhandled browser error on /${locale}/${surface.route}`).toEqual([]);
+    expect(pageErrors, `Unhandled browser error on /${locale}/${surface.route}: ${pageErrors.map(message=>message.split("\n")[0]?.slice(0,220)).join("; ")}`).toEqual([]);
   } finally {
     page.off("pageerror", recordPageError);
   }
 }
 
-async function assertAllowed(page: Page, locale: Locale, surface: Surface) {
-  await assertHealthyDocument(page, locale, surface);
-  const blocking = page.locator('[data-slot="alert"].text-destructive');
+async function assertAllowed(page: Page, locale: Locale, surface: Surface, role: Role) {
+  await assertHealthyDocument(page, locale, surface, role);
+  const blocking = page.locator('[data-slot="alert"].text-destructive, [data-workspace-failure], [data-error-reason]');
   if (await blocking.count()) {
     const code = await blocking.first().getAttribute("data-error-reason");
     const reason = (await blocking.first().innerText()).replace(/\s+/g, " ").slice(0, 180);
@@ -139,8 +153,9 @@ async function assertDenied(page: Page, locale: Locale, surface: Surface) {
       await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).not.toBeVisible({ timeout: 500 });
       return;
     }
-    await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible({ timeout: 500 });
-    await expect(page.locator('[data-slot="alert"].text-destructive, [data-error-reason="FORBIDDEN"]')).toBeVisible({ timeout: 500 });
+    const noMandate = locale === "fr" ? "Aucun mandat de bibliothèque actif accessible" : "لا يوجد تكليف نشط بمكتبة متاح لهذا الحساب";
+    const denied = page.locator('[data-workspace-failure="FORBIDDEN"], [data-error-reason="FORBIDDEN"], [data-error-reason="NO_PROVIDER_ORGANIZATION"]').or(page.getByText(noMandate, { exact: true }));
+    await expect(denied.first()).toBeVisible({ timeout: 500 });
   }).toPass({ timeout: 10_000, intervals: [100, 250, 500] });
   const foreignOrganization = process.env.E2E_FOREIGN_ORGANIZATION_NAME;
   if (foreignOrganization) await expect(page.locator("body")).not.toContainText(foreignOrganization);
@@ -170,12 +185,36 @@ async function attachSanitizedEvidence(
 for (const locale of ["fr", "ar"] as const) {
   for (const role of Object.keys(surfaces) as Role[]) {
     test(`${locale.toUpperCase()} ${role} authenticated route smoke is responsive and role-isolated`, async ({ browser }, testInfo) => {
-      test.setTimeout(120_000);
+      test.setTimeout(240_000);
       const mobile = testInfo.project.name.includes("mobile");
       const { context, page } = await createSession(browser, role, locale, mobile);
       try {
-        for (const surface of surfaces[role]) {
-          await test.step(`ALLOW ${surface.route}`, () => assertAllowed(page, locale, surface));
+        for (const [index, surface] of surfaces[role].entries()) {
+          await test.step(`ALLOW ${surface.route}`, () => assertAllowed(page, locale, surface, role));
+          if (index === 0) {
+            await test.step("responsive workspace navigation", async () => {
+              const toggle = page.getByRole("button", { name: locale === "ar" ? "القائمة" : "Navigation" });
+              const panel = page.locator(".workspace-nav-panel");
+              if (mobile && role === "franchise") {
+                await expect(page.locator(".franchise-mobile-dock")).toBeVisible();
+                await expect(toggle).toBeHidden();
+              } else if (mobile) {
+                await expect(toggle).toBeVisible();
+                await expect(toggle).toHaveAttribute("aria-expanded", "false");
+                await expect(panel).toBeHidden();
+                await toggle.click();
+                await expect(toggle).toHaveAttribute("aria-expanded", "true");
+                await expect(panel).toBeVisible();
+                await panel.locator("a[href]").first().focus();
+                await page.keyboard.press("Escape");
+                await expect(toggle).toHaveAttribute("aria-expanded", "false");
+                await expect(toggle).toBeFocused();
+              } else {
+                await expect(toggle).toBeHidden();
+                await expect(panel).toBeVisible();
+              }
+            });
+          }
         }
         for (const surface of deniedSurfaces[role]) {
           await test.step(`DENY ${surface.route}`, () => assertDenied(page, locale, surface));

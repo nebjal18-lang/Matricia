@@ -1,3 +1,4 @@
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 import {randomUUID} from "node:crypto";
 import {createPaymentGateway,PaymentGatewayError} from "@matricia/infrastructure";
 import {z} from "zod";
@@ -13,7 +14,7 @@ const preparedSchema=z.object({preparation_id:z.string().uuid(),amount_minor:z.s
 const respond=(body:unknown,status:number)=>Response.json(body,{status,headers:paymentResponseHeaders});
 export async function POST(request:Request){
  let config:ReturnType<typeof getServerEnvironment>;let gateway:ReturnType<typeof createPaymentGateway>;
- try{config=getServerEnvironment();gateway=createPaymentGateway(getPaymentRuntimeConfig());}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
+ try{config=getServerEnvironment();gateway=createPaymentGateway(getPaymentRuntimeConfig(await getPlatformRuntimeEnvironment(process.env, ["PAYPAL"])));}catch{return respond({error:"PAYMENT_CONFIGURATION_UNAVAILABLE"},503);}
  if(!paymentOriginAllowed(request,config.NEXT_PUBLIC_APP_URL))return respond({error:"REQUEST_ORIGIN_DENIED"},403);
  const body=await readPaymentJson(request,32768);if(!body.ok)return respond({error:body.status===413?"REQUEST_TOO_LARGE":"INVALID_REQUEST"},body.status);
  const input=inputSchema.safeParse(body.body);if(!input.success)return respond({error:"INVALID_REQUEST"},400);
@@ -35,7 +36,9 @@ export async function POST(request:Request){
   const intent=await gateway.createIntent(expected);
   if(intent.gateway!==gateway.code||intent.providerEnvironment!==gateway.providerEnvironment||intent.amountMinor!==p.amount_minor||intent.currency!==p.currency)return respond({error:"PAYMENT_PROVIDER_CONTEXT_MISMATCH"},502);
   const registered=await getSupabaseAdminClient({timeoutMs:5000}).rpc("register_credit_pack_payment_intent_v1",{p_preparation_id:p.preparation_id,p_provider_environment:gateway.providerEnvironment,p_provider_intent_id:intent.providerIntentId,p_amount_minor:intent.amountMinor,p_currency:intent.currency,p_correlation_id:randomUUID()});
-  const id=z.object({payment_intent_id:z.string().uuid()}).safeParse(registered.data);if(registered.error||!id.success)return respond({error:"CREDIT_PACK_REGISTRATION_UNAVAILABLE"},409);
+  const id=z.object({payment_intent_id:z.string().uuid()}).safeParse(registered.data);
+  // PSP already created the order: return providerIntentId for reconciliation — never invent capture success.
+  if(registered.error||!id.success)return respond({error:"PAYMENT_CREATION_RECONCILIATION_REQUIRED",preparationId:p.preparation_id,providerIntentId:intent.providerIntentId},409);
   return respond({paymentIntentId:id.data.payment_intent_id,providerIntentId:intent.providerIntentId,gateway:intent.gateway,status:intent.status,amountMinor:intent.amountMinor,currency:intent.currency,confirmation:intent.confirmation,purchaseKind:"CREDIT_PACK"},201);
  }catch(error){return respond({error:error instanceof PaymentGatewayError&&error.code==="PROVIDER_UNAVAILABLE"?"PAYMENT_PROVIDER_UNAVAILABLE":"CREDIT_PACK_INTENT_UNAVAILABLE"},error instanceof PaymentGatewayError&&error.code==="PROVIDER_UNAVAILABLE"?502:422);}
 }

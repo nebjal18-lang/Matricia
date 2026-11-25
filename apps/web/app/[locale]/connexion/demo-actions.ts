@@ -5,16 +5,14 @@ import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { demoPersonaEmail, isPublicDemoAccessEnabled } from "./demo-policy";
-import type { DemoPersona } from "./demo-personas";
+import { demoPersonaHome, demoPersonaWorkspace, type DemoPersona } from "./demo-personas";
+import { ensureDemoPersonaAuthorization } from "./demo-authorization";
+import { findDemoRegionalActor } from "./demo-regional-directory";
+import { ensureDemoRegionalActor } from "./demo-regional-ensure";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { postLoginDestination } from "./actions";
-
-const personaConfig = {
-  client: { destination: "tableau-de-bord" },
-  provider: { destination: "tableau-de-bord" },
-  franchise: { destination: "franchise/accueil" },
-  admin: { destination: "administration/command-center" },
-} as const satisfies Record<DemoPersona, { destination: string }>;
+import { elevateDemoSession } from "./demo-assurance";
+import { findDemoIdentity, isDemoIdentity } from "./demo-identity";
 
 function parsePersona(value: FormDataEntryValue | null): DemoPersona | null {
   return value === "client" || value === "provider" || value === "franchise" || value === "admin" ? value : null;
@@ -24,18 +22,91 @@ export async function connectDemoPersona(formData: FormData): Promise<void> {
   const localeInput = formData.get("locale");
   const locale = typeof localeInput === "string" && isLocale(localeInput) ? localeInput : "fr";
   const persona = parsePersona(formData.get("persona"));
-  const next = safeReturnPath(formData.get("next"), locale);
-  const failure = (reason: string) => `/${locale}/connexion?${new URLSearchParams({ demo: reason, ...(next ? { next } : {}) })}`;
+  const requestedNext = safeReturnPath(formData.get("next"), locale);
+  const failure = (reason: string) => `/${locale}/connexion?${new URLSearchParams({ demo: reason, ...(requestedNext ? { next: requestedNext } : {}) })}`;
   if (!persona || !isPublicDemoAccessEnabled()) redirect(failure("disabled"));
 
   const email = demoPersonaEmail(persona);
   const admin = getSupabaseAdminClient();
+  const identity = await findDemoIdentity(admin, email, persona);
+  if (!identity) redirect(failure("role-missing"));
+  const authorized = await ensureDemoPersonaAuthorization({ persona, userId: identity.id, admin });
+  if (!authorized) redirect(failure("role-missing"));
+  await connectValidatedDemo({ admin, email, userId: identity.id, persona, locale, failure });
+}
+
+/** Connexion démo ciblée : franchisé / ST / client d’une région. */
+export async function connectDemoRegionalActor(formData: FormData): Promise<void> {
+  const localeInput = formData.get("locale");
+  const locale = typeof localeInput === "string" && isLocale(localeInput) ? localeInput : "fr";
+  const kind = typeof formData.get("kind") === "string" ? String(formData.get("kind")) : "";
+  const territoryCode = typeof formData.get("territoryCode") === "string" ? String(formData.get("territoryCode")).trim().toUpperCase() : "";
+  const slot = typeof formData.get("slot") === "string" ? String(formData.get("slot")).trim() : "";
+  const failure = (reason: string) => `/${locale}/connexion?${new URLSearchParams({ demo: reason })}`;
+  if (!isPublicDemoAccessEnabled()) redirect(failure("disabled"));
+
+  const actor = findDemoRegionalActor({ kind, territoryCode, slot });
+  if (!actor) redirect(failure("unavailable"));
+
+  const admin = getSupabaseAdminClient();
+  const ensured = await ensureDemoRegionalActor({ admin, actor });
+  if (!ensured) redirect(failure("unavailable"));
+
+  const identity = await findDemoIdentity(admin, actor.email, actor.persona);
+  if (!identity || identity.id !== ensured.userId) redirect(failure("role-missing"));
+  await connectValidatedDemo({ admin, email: actor.email, userId: identity.id, persona: actor.persona, locale, failure, organizationId: ensured.organizationId });
+}
+
+async function connectValidatedDemo(input: {
+  admin: ReturnType<typeof getSupabaseAdminClient>;
+  email: string;
+  userId: string;
+  persona: DemoPersona;
+  locale: "fr" | "ar";
+  failure: (reason: string) => string;
+  organizationId?: string;
+}): Promise<void> {
+  const { admin, email, userId, persona, locale, failure } = input;
   const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
   const tokenHash = data?.properties?.hashed_token;
-  if (error || !tokenHash) redirect(failure("unavailable"));
+  if (error || !tokenHash || !data.user || data.user.id !== userId || !isDemoIdentity(data.user, email, persona)) {
+    redirect(failure("unavailable"));
+  }
 
   const supabase = await getSupabaseServerClient();
-  const { error: sessionError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-  if (sessionError) redirect(failure("unavailable"));
-  redirect(await postLoginDestination(locale, next ?? `/${locale}/${personaConfig[persona].destination}`));
+  let resolved: string | null = null;
+  let reason = "unavailable";
+  try {
+    const session = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+    const user = session.data?.user;
+    if (!session.error && user?.id === userId && isDemoIdentity(user, email, persona)) {
+      if (await elevateDemoSession({ email, userId, supabase, admin })) {
+        const destination = demoPersonaHome(persona, locale);
+        const workspace = demoPersonaWorkspace(persona);
+        const withOrg = input.organizationId
+          ? destination + (destination.includes("?") ? "&" : "?") + "organizationId=" + encodeURIComponent(input.organizationId)
+          : destination;
+        const candidate = await postLoginDestination(locale, withOrg, workspace);
+        const safeCandidate = safeReturnPath(candidate, locale);
+        const target = safeCandidate ? new URL(safeCandidate, "https://matricia.invalid") : null;
+        const expected = new URL(withOrg, "https://matricia.invalid");
+        // Only the requested workspace home completes login. Login, MFA and
+        // unavailable redirects are refusals even when they contain our next URL.
+        if (!target || target.pathname !== expected.pathname
+          || target.searchParams.get("workspace") !== expected.searchParams.get("workspace")
+          || target.searchParams.has("demo")
+          || target.searchParams.get("navigation") === "role-fallback") {
+          reason = "role-missing";
+        } else {
+          resolved = candidate;
+        }
+      }
+    }
+  } catch {
+    // Auth/service failures never leave a partially established demo session.
+    reason = "unavailable";
+  } finally {
+    if (!resolved) await supabase.auth.signOut({ scope: "local" });
+  }
+  redirect(resolved ?? failure(reason));
 }

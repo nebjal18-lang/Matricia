@@ -1,0 +1,6 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 no-placeholders C:\Projects\Matricia\Matricia
+> node --experimental-strip-types scripts/validate-no-placeholders.ts
+
+Aucun marqueur incomplet dans le périmètre applicatif.

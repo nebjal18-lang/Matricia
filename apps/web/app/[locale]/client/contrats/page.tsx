@@ -1,3 +1,4 @@
+import { SignaturePreparationLink } from "@/modules/shared/ui/signer-preparation/link";
 import{SelectedQuoteIdentity}from"@/modules/client/screens/missions/selected-quote-identity";
 import{SignatureReadinessNotice}from"@/modules/shared/ui/signature-readiness-notice";
 import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
@@ -38,6 +39,7 @@ export default async function ClientContractsPage({
     loadContractMissions(locale, space.selectedOrganizationId),
     loadClientAmendments(space.selectedOrganizationId),
   ]);
+  const contractAccessIssue = result.status === "error" && (result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" || result.reason === "FORBIDDEN_ORGANIZATION");
   const contracts = result.status === "success" ? result.dashboard.contracts : [];
   const missionsByContract = result.status === "success"
     ? Object.fromEntries(result.dashboard.missions.map((mission) => [mission.contractId, mission.id]))
@@ -48,17 +50,25 @@ export default async function ClientContractsPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="contracts"
       title={c.contractsTitle}
       lead={c.contractsLead}
       kicker={spaceC.kicker}
     >
       <main className="client-page space-y-5">
+        <SignaturePreparationLink locale={locale}/>
         {result.status === "error" ? (
           <Alert>
-            <AlertTitle>{messages.noOrg}</AlertTitle>
-            <AlertDescription>{messages.loadError}</AlertDescription>
+            <AlertTitle>{contractAccessIssue ? messages.noOrg : messages.loadError}</AlertTitle>
+            <AlertDescription>
+              {contractAccessIssue
+                ? messages.noOrg
+                : messages.loadError}
+              {result.status === "error" && !contractAccessIssue ? (
+                <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? `مرجع ${result.reason}` : `Réf. ${result.reason}`}</span>
+              ) : null}
+            </AlertDescription>
           </Alert>
         ) : contracts.length === 0 ? (
           <p>{c.contractsEmpty}</p>
@@ -84,7 +94,7 @@ export default async function ClientContractsPage({
                   {result.status === "success" && contract.status === "PENDING_SIGNATURE" ? (
                     <SignContractForm contract={contract} organizationId={result.dashboard.organizationId} locale={locale} messages={messages} />
                   ) : null}
-                  {contract.status!=="DRAFT"&&contract.status!=="PENDING_SIGNATURE"?<SignatureReadinessNotice locale={locale} readiness={contract.signatureReadiness}/>:null}
+                  {contract.status!=="DRAFT"&&contract.status!=="PENDING_SIGNATURE"?<SignatureReadinessNotice locale={locale} {...(contract.signatureReadiness === undefined ? {} : {readiness: contract.signatureReadiness})}/>:null}
                   {missionId ? (
                     <Link href={`/${locale}/client/missions/${missionId}${space.selectedQuery}`} className="client-text-link">
                       {c.contractsOpenMission}

@@ -540,7 +540,7 @@
   .script { justify-self: start; text-align: start; }
   .script::after { margin-inline-start: 0; }
   .board { grid-template-columns: 1fr; }
-  .side { order: -1; grid-template-columns: 1fr 1fr; }
+  .side { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 720px) {

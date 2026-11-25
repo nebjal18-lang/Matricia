@@ -36,9 +36,9 @@ export default async function AdminEnterpriseCreatePage({
       title={c.createTitle}
       lead={c.createLead}
     >
-      <main className="client-page">
+      <div className="client-page">
         <CreateOrganizationForm idempotencyKey={randomUUID()} resourceId={randomUUID()} locale={locale} query={space.selectedQuery} />
-      </main>
+      </div>
     </AdminAppShell>
   );
 }

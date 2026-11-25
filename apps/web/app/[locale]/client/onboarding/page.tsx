@@ -17,6 +17,7 @@ import { ClientQuestionResponseForm } from "@/modules/client/screens/onboarding/
 import { onboardingProgressIndex } from "@/modules/client/screens/onboarding/progress";
 import { resolveClientSpace } from "@/modules/client/data/spaces/context";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
+import { OrganizationIdentityBlock } from "@/modules/shared/ui/organization-identity";
 
 const editableStatuses = new Set<ComplianceStatus>([
   "PROFILE_IN_PROGRESS", "DOCUMENTS_REQUIRED", "QUESTION_REQUIRED", "REJECTED",
@@ -74,13 +75,47 @@ function OrganizationOnboarding({ organization, locale, messages }: {
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <section aria-labelledby={`passport-${organization.id}`} className="space-y-3">
-            <h2 id={`passport-${organization.id}`} className="text-lg font-semibold">{messages.passportTitle}</h2>
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div><dt className="text-muted-foreground">{messages.legalName}</dt><dd className="mt-1 break-words font-medium">{organization.legalName}</dd></div>
-              <div><dt className="text-muted-foreground">{messages.tradeName}</dt><dd className="mt-1 break-words font-medium">{organization.displayName}</dd></div>
-              <div><dt className="text-muted-foreground">{messages.organizationStatus}</dt><dd className="mt-1 font-medium">{messages.organizationStatuses[organization.organizationStatus]}</dd></div>
-              <div><dt className="text-muted-foreground">{messages.ice}</dt><dd className="mt-1 flex flex-wrap items-center gap-2 font-medium" dir="ltr"><span className="break-all">{organization.ice ?? messages.iceUnknown}</span>{organization.iceVerificationStatus ? <Badge variant="secondary">{messages.identifierStatuses[organization.iceVerificationStatus]}</Badge> : null}</dd></div>
-            </dl>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 id={`passport-${organization.id}`} className="text-lg font-semibold">{messages.passportTitle}</h2>
+              <div className="mat-status-row">
+                <span className="admin-status" data-tone="violet">{messages.organizationStatuses[organization.organizationStatus]}</span>
+                {organization.iceVerificationStatus ? (
+                  <span className="admin-status" data-tone={organization.iceVerificationStatus === "VERIFIED" ? "ok" : "warn"}>
+                    {messages.identifierStatuses[organization.iceVerificationStatus]}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            {organization.latestProfile?.data ? (
+              <OrganizationIdentityBlock
+                locale={locale}
+                idPrefix={`client-onboarding-${organization.id}`}
+                identity={{
+                  legalName: organization.legalName,
+                  displayName: organization.displayName,
+                  countryCode: organization.latestProfile.data.registered_address?.country_code ?? "MA",
+                  legalForm: organization.latestProfile.data.legal_form,
+                  incorporationDate: organization.latestProfile.data.incorporation_date,
+                  activity: organization.latestProfile.data.activity,
+                  sector: organization.latestProfile.data.sector,
+                  registeredCity: organization.latestProfile.data.registered_city,
+                  registeredAddress: organization.latestProfile.data.registered_address ? {...organization.latestProfile.data.registered_address, postal_code: organization.latestProfile.data.registered_address.postal_code ?? null} : null,
+                  identifiers: {
+                    ICE: organization.ice,
+                    IF: organization.latestProfile.data.if_number,
+                    RC: organization.latestProfile.data.rc_number,
+                  },
+                  representative: organization.latestProfile.data.representative,
+                }}
+              />
+            ) : (
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div><dt className="text-muted-foreground">{messages.legalName}</dt><dd className="mt-1 break-words font-medium">{organization.legalName}</dd></div>
+                <div><dt className="text-muted-foreground">{messages.tradeName}</dt><dd className="mt-1 break-words font-medium">{organization.displayName}</dd></div>
+                <div><dt className="text-muted-foreground">{messages.organizationStatus}</dt><dd className="mt-1 font-medium">{messages.organizationStatuses[organization.organizationStatus]}</dd></div>
+                <div><dt className="text-muted-foreground">{messages.ice}</dt><dd className="mt-1 flex flex-wrap items-center gap-2 font-medium" dir="ltr"><span className="break-all">{organization.ice ?? messages.iceUnknown}</span></dd></div>
+              </dl>
+            )}
           </section>
 
           <section aria-labelledby={`questions-${organization.id}`} className="space-y-4">
@@ -192,7 +227,7 @@ function OrganizationOnboarding({ organization, locale, messages }: {
               </dl>
             ) : <p className="text-sm text-muted-foreground">{messages.trialNotStarted}</p>}
             {organization.trial?.status === "TRIAL_EXPIRED" ? (
-              <Link href={`/${locale}/client/abonnement`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.reactivateGold}</Link>
+              <Link href={`/${locale}/client/abonnement?organizationId=${encodeURIComponent(organization.id)}`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.reactivateGold}</Link>
             ) : null}
             <p className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">{messages.noCard}</p>
           </section>
@@ -215,7 +250,7 @@ export default async function ClientOnboardingPage({ params, searchParams }: { p
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="company"
       title={messages.title}
       lead={messages.description}
@@ -225,9 +260,13 @@ export default async function ClientOnboardingPage({ params, searchParams }: { p
         <p className="rounded-lg border border-primary/20 bg-card p-3 text-sm text-muted-foreground">{messages.privacyNotice}</p>
         {result.status === "error" ? (
           <Alert variant="destructive"><AlertTitle>{messages.loadErrorTitle}</AlertTitle><AlertDescription><p>{messages.loadError}</p><Link href={`/${locale}/client/onboarding${space.selectedQuery}`} className={cn(buttonVariants({ variant: "outline" }), "mt-3 min-h-11")}>{messages.retry}</Link></AlertDescription></Alert>
-        ) : result.organizations.length === 0 ? (
-          <Card><CardHeader><CardTitle>{messages.emptyTitle}</CardTitle><CardDescription>{messages.emptyDescription}</CardDescription></CardHeader><CardContent><Link href={`/${locale}/organisation${space.selectedQuery}`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.organizationAction}</Link></CardContent></Card>
-        ) : <div className="space-y-10">{result.organizations.map((organization) => <OrganizationOnboarding key={organization.id} organization={organization} locale={locale} messages={messages} />)}</div>}
+        ) : (() => {
+          const scoped = result.organizations.filter((organization) => organization.id === space.selectedOrganizationId);
+          if (scoped.length === 0) {
+            return <Card><CardHeader><CardTitle>{messages.emptyTitle}</CardTitle><CardDescription>{messages.emptyDescription}</CardDescription></CardHeader><CardContent><Link href={`/${locale}/organisation${space.selectedQuery}`} className={cn(buttonVariants(), "min-h-11 w-full sm:w-auto")}>{messages.organizationAction}</Link></CardContent></Card>;
+          }
+          return <div className="space-y-10">{scoped.map((organization) => <OrganizationOnboarding key={organization.id} organization={organization} locale={locale} messages={messages} />)}</div>;
+        })()}
       </main>
     </ClientAppShell>
   );

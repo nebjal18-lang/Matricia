@@ -101,7 +101,7 @@ select ok((select qi.tax_rule_version_id='fa011000-0000-4000-8000-000000000005' 
 
 set local role authenticated;
 select is(public.create_quote_revision('fa018000-0000-4000-8000-000000000001',(select value from quote_tax_payload),'Test valide','quote-tax-valid','fa019000-0000-4000-8000-000000000007'),(select value from quote_tax_result),'successful command replays despite the browser base now being old');
-select throws_ok($$select public.create_quote_revision('fa018000-0000-4000-8000-000000000001',(select value from quote_tax_payload),'Concurrent edit','quote-cas-stale')$$,'40001','QUOTE_VERSION_CONFLICT','stale browser cannot replace a saved quote');
+select throws_ok($$select public.create_quote_revision('fa018000-0000-4000-8000-000000000001',(select value from quote_tax_payload),'Concurrent edit','quote-cas-stale')$$,'PT409','QUOTE_VERSION_CONFLICT','stale browser cannot replace a saved quote');
 reset role;
 select is((select count(*)from public.quote_versions where quote_id=(select(value->>'quote_id')::uuid from quote_tax_result)),1::bigint,'stale command creates no immutable version');
 set local role authenticated;

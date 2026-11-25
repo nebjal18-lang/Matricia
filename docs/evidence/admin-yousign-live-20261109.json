@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-09T19:31:36.744202+00:00",
+  "outcome": "PASS_SYNTHETIC_TECHNICAL_SCOPE",
+  "productionEnabled": false,
+  "providerCallsMade": 0,
+  "productionMutations": 0,
+  "externalProviderCertified": false,
+  "legalApprovalCreated": false,
+  "checks": {
+    "signaturePackage": {
+      "passed": 62,
+      "typecheck": "PASS"
+    },
+    "runtimeAndWebhook": {
+      "passed": 15,
+      "localPackageAliasRequired": "Isolated worktree uses shared node_modules; temporary Vitest config resolves modified package source."
+    },
+    "newSqlLifecycle": {
+      "passedAssertions": 24
+    },
+    "legacyTransportAcl": {
+      "passedAssertions": 21
+    },
+    "nativeLiveWorkflow": {
+      "passedAssertions": 66,
+      "rollback": true,
+      "database": "owned local validation clone",
+      "fixturesSynthetic": true,
+      "includesRotationAndDeactivationDenial": true
+    },
+    "adoptionLifecycle": {
+      "passedAssertions": 7,
+      "firstDraftAndRejectedDoNotAdopt": true,
+      "activationAndRetirementRetainAdoption": true
+    }
+  },
+  "independentReview": {
+    "reviewer": "delivery_independent_review",
+    "status": "NO_NEW_STATIC_P1_IN_REVIEWED_SCOPE",
+    "executedPackageSubset": {
+      "passed": 49,
+      "notSelected": 13
+    },
+    "rotationBoundaryReviewFollowup": "Active Admin credential revision must match immutable provider configuration; negative native assertions pass."
+  },
+  "sourceSha256": {
+    "packages/signature-v41/src/provider.ts": "93dffce7d662318a5fe65c423231ee47037ecf4f9b651df6beb3270f8ec82b08",
+    "packages/signature-v41/src/yousign-provider.ts": "77a463aaabe6a5349583659a9283da8d43cf11e66d3b00d973263770e0b5cac4",
+    "packages/signature-v41/src/yousign-provider.test.ts": "995559ab7d34669482cbfbbdc45354513d4878dd11575141e38d890736ab886c",
+    "apps/web/modules/shared/lib/signature-runtime/yousign.ts": "bc8fd78b20b4988d2f3079df5e53a13e19155e7f7ae85afefc8538ec9be3787c",
+    "apps/web/modules/shared/lib/signature-runtime/yousign.test.ts": "070f03c5ba452f6377dd37c61d27601a48cb24a55fa0a9e4c47235092497f591",
+    "apps/web/app/api/webhooks/yousign/route.ts": "4af7f312880a26b2e2a733cba723f5b66c614247913fdda0d78f92dd8d295aac",
+    "supabase/migrations/20261109111000_yousign_governed_live_transport.sql": "003482284ccaa54c7c1469b4c8e31174b6a2bdb1fd63f44f05f69f8927fac03c",
+    "supabase/tests/0390_yousign_sandbox_transport.test.sql": "4bd57ab1c635e3a9f30d413c5d2700b2113e110dadea59fdf4a680bdf245257c",
+    "supabase/tests/0392_yousign_governed_live_transport.test.sql": "16c365d5394cd6c82eb24715fe6f857d578fe80bec66c204f087e1de411d4431",
+    "scripts/release/yousign-live-acceptance.mjs": "c3fd2d2a28365a342b2ec314376a4150e522ef7da7867600977524cb36091a7f",
+    "supabase/migrations/20261109112000_yousign_configuration_adoption_guard.sql": "a54120f2fa50e39e6e2a661ae73837a00b4972c2df9bf9c11d75c4eacc16ef2f",
+    "supabase/tests/0393_yousign_configuration_adoption.test.sql": "325701171f4bdabf5d860c433a725740793460b43dd4fd16d7fde20ec615b695"
+  },
+  "remaining": [
+    "Real YouSign connection and native signature recipe with approved credentials",
+    "Independent owner-provisioned legal/provider attestation and four-eyes policy approval",
+    "SIMPLE only; no visual field-placement editor; remote unknown outcomes need reconciliation"
+  ]
+}

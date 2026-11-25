@@ -1,0 +1,144 @@
+{
+  "startedAt": "2026-11-19T13:25:50.102Z",
+  "finishedAt": "2026-11-19T13:25:50.395Z",
+  "baseURL": "http://127.0.0.1:5175",
+  "source": {
+    "snapshot": "C:\\Users\\jal18\\AppData\\Local\\Temp\\vscode-agent-codex-sandbox-59PsGz\\matricia-audit-b578c75c-h8qXI8",
+    "sha": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "startedAt": "2026-11-19T13:24:09.546Z",
+    "finishedAt": "2026-11-19T13:24:27.845Z",
+    "nodeVersion": "v22.23.5",
+    "installCommand": "corepack pnpm install --offline --frozen-lockfile",
+    "exitCode": 0,
+    "includesStagedLocalCorrections": false,
+    "applicationFilesModifiedByAuditor": false
+  },
+  "environment": "Node22 isolated checkout, development server, local API, demo disabled; no authenticated business mutations",
+  "limitations": [
+    "No authenticated journey proof",
+    "No screen-reader manual session",
+    "Viewport emulation, not real mobile hardware",
+    "No approved reference-image pixel comparison",
+    "Development timings cannot validate production Web Vitals"
+  ],
+  "pages": [
+    {
+      "locale": "fr",
+      "route": "",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/diagnostic",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/besoin",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/besoin\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/besoin\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/fournisseur",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/fournisseur\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/fournisseur\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/franchise\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/franchise\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/abonnements",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/abonnements\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/abonnements\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/entreprises",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/entreprises\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/entreprises\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/a-propos",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/a-propos\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/a-propos\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/contact",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/contact\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/contact\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/mentions-legales",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/mentions-legales\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/mentions-legales\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/confidentialite",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/confidentialite\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/confidentialite\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/conditions",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/conditions\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/conditions\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/cookies",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/cookies\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/cookies\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/connexion",
+      "status": "NAVIGATION_ERROR",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/connexion\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/connexion\", waiting until \"load\"\u001b[22m\n"
+    }
+  ],
+  "protectedRoutes": [
+    {
+      "locale": "fr",
+      "route": "/client/accueil",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/client/accueil\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/client/accueil\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/sous-traitant/identite",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/sous-traitant/identite\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/sous-traitant/identite\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise/accueil",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/franchise/accueil\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/franchise/accueil\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/administration/command-center",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/administration/command-center\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/administration/command-center\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/organisation",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/organisation\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/organisation\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "locale": "fr",
+      "route": "/securite/compte",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/securite/compte\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/securite/compte\", waiting until \"load\"\u001b[22m\n"
+    }
+  ],
+  "keyboard": [],
+  "blockedRequests": []
+}

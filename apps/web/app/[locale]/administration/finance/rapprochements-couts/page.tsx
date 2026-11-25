@@ -31,7 +31,7 @@ export default async function FinanceCostReconciliationPage({ params, searchPara
     selected.set("page", String(page));
     return `/${locale}/administration/${path}?${selected}`;
   };
-  return context.wrap(<main className="client-page space-y-5">
+  return context.wrap(<div className="client-page space-y-5">
     <Link href={`/${locale}/administration/finance`} className="inline-flex min-h-11 items-center underline">{c.backFinance}</Link>
     <form method="get" action={`/${locale}/administration/${path}`} role="search" className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
       <label htmlFor="finance-cost-target-search" className="grid min-w-0 flex-1 gap-2">{c.searchTargets}<input id="finance-cost-target-search" name="q" defaultValue={typeof query.q === "string" ? query.q : ""} maxLength={100} className="min-h-11 rounded border px-3"/></label>
@@ -46,5 +46,5 @@ export default async function FinanceCostReconciliationPage({ params, searchPara
       </nav>
       {result.value.hasMore && result.value.page >= 10000 ? <p role="status">{c.refineSearch}</p> : null}
     </>}
-  </main>);
+  </div>);
 }

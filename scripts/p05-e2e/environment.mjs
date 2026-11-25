@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { verifyLocalDockerConfiguration } from "./local-environment.mjs";
 
 const SAFE_ENVIRONMENTS = new Set(["development", "staging"]);
@@ -89,8 +91,26 @@ export async function loadSafeConfiguration(root) {
   if (env.E2E_LOCAL_ISOLATED === "1") {
     const source = await readFile(resolve(root, "supabase", "config.toml"), "utf8");
     const projectId = /^project_id\s*=\s*"([A-Za-z0-9_-]+)"/m.exec(source)?.[1];
+    if (env.E2E_LOCAL_AUTO_CONFIG === "1") {
+      if (env.APP_ENV !== "development" || env.E2E_LOCAL_PROJECT_ID !== projectId) throw new Error("Local E2E requires explicit matching non-production project identity");
+      let status;
+      try {
+        const { stdout } = await promisify(execFile)(process.execPath, [resolve(root, 'node_modules/supabase/dist/supabase.js'), 'status', '-o', 'env'], { cwd: root, windowsHide: true, timeout: 30_000, maxBuffer: 64_000 });
+        status = parseEnv(stdout);
+      } catch { throw new Error('Local E2E CLI configuration unavailable'); }
+      return verifyLocalDockerConfiguration(localStatusEnvironment(env, status), projectId);
+    }
     return verifyLocalDockerConfiguration(env, projectId);
   }
   const metadata = JSON.parse(await readFile(resolve(root, "supabase", "project-metadata.json"), "utf8"));
   return assertSafeEnvironment(env, metadata);
+}
+
+/** Explicit opt-in: credentials stay in memory and still pass Docker/GoTrue guards. */
+export function localStatusEnvironment(env, status) {
+  return { ...env, NEXT_PUBLIC_SUPABASE_URL: status.API_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: status.PUBLISHABLE_KEY || status.ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: status.SERVICE_ROLE_KEY,
+    DIRECT_URL: status.DB_URL, SUPABASE_DB_POOLER_URL: '',
+    NEXT_PUBLIC_APP_URL: env.E2E_BASE_URL || 'http://localhost:5173' };
 }

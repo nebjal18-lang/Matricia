@@ -104,6 +104,12 @@ export function FranchiseValidationsWorkbench({
             </label>
             <button type="submit" className="franchise-tool">{c.search}</button>
           </form>
+          {commandIdentity && (activeBucket === "approuves" || activeBucket === "publications") ? (
+            <div id="publish" className="scroll-mt-24 mb-4 space-y-2 rounded-xl border p-4">
+              <h3 className="font-semibold">{locale === "ar" ? "نشر الإصدار" : "Publier la release"}</h3>
+              <FranchisePublishReleaseForm locale={locale} workspace={workspace} commandIdentity={commandIdentity} organizationId={organizationId} />
+            </div>
+          ) : null}
           {rows.length === 0 ? <p>{c.emptyQueue}</p> : (
             <div tabIndex={0} className="client-table-wrap client-compare">
               <table className="client-space-table">
@@ -144,9 +150,6 @@ export function FranchiseValidationsWorkbench({
             </div>
           )}
           <CatalogServerPagination page={workspace.serverPage} locale={locale} query={`?${paginationQuery}`}/>
-          {commandIdentity && (activeBucket === "approuves" || activeBucket === "publications") ? (
-            <FranchisePublishReleaseForm locale={locale} workspace={workspace} commandIdentity={commandIdentity} organizationId={organizationId} />
-          ) : null}
           <p className="client-access-note">{c.clientsNote}</p>
         </article>
         <aside className="client-card franchise-review-panel">

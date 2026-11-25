@@ -44,6 +44,13 @@ export function getPurchaseMessages(locale: Locale) {
   return copy[locale];
 }
 
+function clientWorkspaceQuery(query: string) {
+  const params = new URLSearchParams(query.replace(/^\?/, ""));
+  params.set("workspace", "client");
+  const text = params.toString();
+  return text ? `?${text}` : "?workspace=client";
+}
+
 export function ProviderPurchasesBoard({
   locale,
   query,
@@ -71,19 +78,20 @@ export function ProviderPurchasesBoard({
   }
   const current = subscription?.subscription;
   const plan = current?.currentPlan;
+  const clientQuery = clientWorkspaceQuery(query);
   return (
     <main className="client-page provider-purchases">
       <section className="client-board client-board-compare">
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{m.subscription}</h2>
-            <Link href={`/${locale}/client/abonnement${query}`} className="client-text-link">{m.seeSubscription}</Link>
+            <Link href={`/${locale}/client/abonnement${clientQuery}`} className="client-text-link">{m.seeSubscription}</Link>
           </header>
           {current && plan ? (
             <dl className="client-fact-grid">
-              <div><small>{m.plan}</small><span>{plan.code} · v{plan.version}</span></div>
+              <div><small>{m.plan}</small><span>{plan.code} · {locale === "ar" ? `النسخة ${plan.version}` : `version ${plan.version}`}</span></div>
               <div><small>{m.status}</small><span>{workflowStatusLabel(current.status,locale)}</span></div>
-              <div><small>{m.period}</small><span dir="ltr">{current.currentPeriodEnd ?? "—"}</span></div>
+              <div><small>{m.period}</small><span dir="ltr">{current.currentPeriodEnd ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" }).format(new Date(current.currentPeriodEnd)) : "—"}</span></div>
               <div><small>{m.plan}</small><span dir="ltr">{formatMinor(plan.monthlyPriceMinor, plan.currency, locale)}</span></div>
             </dl>
           ) : (
@@ -93,7 +101,7 @@ export function ProviderPurchasesBoard({
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{m.reservations}</h2>
-            <Link href={`/${locale}/client/achats-groupes${query}`} className="client-text-link">{m.seeVolume}</Link>
+            <Link href={`/${locale}/client/achats-groupes${clientQuery}`} className="client-text-link">{m.seeVolume}</Link>
           </header>
           {!volume || volume.reservations.length === 0 ? <p>{m.emptyReservations}</p> : (
             <table className="client-space-table">

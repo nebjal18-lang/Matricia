@@ -29,7 +29,7 @@ export function summarizeBrowserReport(report) {
     failures: rows.filter(row => ['failed','timedOut','interrupted'].includes(status(row))).map(row => {
       const result = row.test.results.at(-1);
       const raw = result.errors?.[0]?.message ?? result.error?.message ?? '';
-      const lines = clean(raw).split(/\r?\n/u).map(line => line.trim()).filter(line => /^(Error:|Locator:|Expected(?: pattern)?:|Received(?: string)?:|TimeoutError:)/u.test(line));
+      const lines = clean(raw).split(/\r?\n/u).map(line => line.trim()).filter(line => /^(Error:|Locator:|Expected(?: pattern)?:|Received(?: string)?:|TimeoutError:|Test timeout of \d+ms exceeded\.?$)/u.test(line));
       return { title: clean(row.title).slice(0,200), project: clean(row.project).slice(0,80), error: (lines.length ? lines.slice(0,4).join(' | ') : 'Browser assertion failed').slice(0,600) };
     }),
   };

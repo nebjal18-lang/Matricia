@@ -36,7 +36,7 @@ describe("franchise editorial commands keep incidents distinct from authorizatio
     mocks.load.mockResolvedValue({status:"error",reason:"UNAUTHENTICATED"});
     expect(await saveFranchiseCompositionAction({status:"idle"},composition())).toEqual({status:"error",reason:"UNAUTHENTICATED"});
     mocks.load.mockResolvedValue({status:"error",reason:"NO_MANDATE"});
-    expect(await saveFranchiseRuleAction({status:"idle"},rule())).toEqual({status:"error",reason:"FORBIDDEN"});
+    expect(await saveFranchiseRuleAction({status:"idle"},rule())).toEqual({status:"error",reason:"NO_MANDATE"});
   });
   it.each([["08006","UNAVAILABLE"],["42501","FORBIDDEN"]])("question scope %s is %s without a write", async (code,reason) => {
     mocks.rpc.mockResolvedValueOnce({data:null,error:{code}});
@@ -81,8 +81,20 @@ describe("franchise editorial commands keep incidents distinct from authorizatio
     expect(await duplicateFranchiseQuestion({status:"idle"},f)).toEqual({status:"error",reason:"UNAVAILABLE"});
     expect(mocks.rpc).toHaveBeenCalledTimes(1);
   });
+  it("stores a score on every choice and refuses a choice that has none", async () => {
+    const scored = { answer_type: "SINGLE_CHOICE", weight: "1", maximum_score: "10", options: [{ value: "OPT_1", label_fr: "Oui", label_ar: "نعم", score: "10" }] };
+    mocks.rpc.mockResolvedValueOnce({ data: { id }, error: null }).mockResolvedValueOnce({ data: { version_id: id, identity_row_version: 2, version_row_version: 2, version_number: 2 }, error: null });
+    const saved = question(); saved.set("payload", JSON.stringify(scored));
+    expect(await saveFranchiseQuestion({ status: "idle" }, saved)).toMatchObject({ status: "success", versionId: id });
+    expect(mocks.rpc).toHaveBeenLastCalledWith("save_catalog_question_draft", expect.objectContaining({ p_payload: expect.objectContaining({ options: scored.options, weight: "1", maximum_score: "10" }) }));
+    mocks.rpc.mockClear();
+    mocks.rpc.mockResolvedValueOnce({ data: { id }, error: null });
+    const missing = question(); missing.set("payload", JSON.stringify({ ...scored, options: ["Oui"] }));
+    expect(await saveFranchiseQuestion({ status: "idle" }, missing)).toEqual({ status: "error", reason: "VALIDATION" });
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+  });
   it.each(["fr","ar"] as const)("provides distinct localized recovery messages in %s",locale=>{
-    const messages=["UNAUTHENTICATED","FORBIDDEN","UNAVAILABLE","CONFLICT","LOCKED","VALIDATION"].map(reason=>editorialFailureMessage(reason as Parameters<typeof editorialFailureMessage>[0],locale));
-    expect(new Set(messages).size).toBe(6);expect(messages.every(message=>message.length>20)).toBe(true);
+    const messages=["UNAUTHENTICATED","FORBIDDEN","NO_MANDATE","UNAVAILABLE","CONFLICT","LOCKED","VALIDATION"].map(reason=>editorialFailureMessage(reason as Parameters<typeof editorialFailureMessage>[0],locale));
+    expect(new Set(messages).size).toBe(7);expect(messages.every(message=>message.length>20)).toBe(true);
   });
 });

@@ -1,3 +1,5 @@
+import { demoRegionalIds } from "@/app/[locale]/connexion/demo-regional-ensure";
+import { listAllDemoRegionalActors } from "@/app/[locale]/connexion/demo-regional-directory";
 import { isDemoClientHomeEnabled } from "@/modules/client/data/home/demo-scenario";
 import type { AdminClientCase } from "@/modules/admin/data/clients/model";
 import type { AdminSpaceId } from "./admin-nav";
@@ -10,18 +12,19 @@ import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/module
 import type { SafeComplianceCase } from "@/modules/admin/screens/conformite-clients/actions";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { mapAdminOrgRows, type AdminOrgRow } from "./view-model";
+import { buildDemoOrganizationFiche, buildDemoSupervisionOrganizations } from "./demo-supervision";
 
 export function canApplyAdminDemo() {
-  void isDemoClientHomeEnabled;
-  return false;
+  return isDemoClientHomeEnabled();
 }
 
-export const demoSupervisionOrganizations: AdminSupervisionDashboard["organizations"] = [
-  { id: "11111111-1111-4111-8111-111111111111", role_codes: ["CLIENT"], display_name: "Studio Atlas", legal_name: "Studio Atlas SARL", status: "ACTIVE", created_at: "2026-09-01T10:00:00.000Z", member_count: 3, open_requests: 1, open_disputes: 0 },
-  { id: "22222222-2222-4222-8222-222222222222", role_codes: ["CLIENT"], display_name: "Client · Communication", legal_name: "Client Communication SARL", status: "PENDING", created_at: "2026-09-04T10:00:00.000Z", member_count: 2, open_requests: 2, open_disputes: 0 },
-  { id: "33333333-3333-4333-8333-333333333333", role_codes: ["FRANCHISE"], display_name: "Franchisé · Casablanca-Settat", legal_name: "Franchise Casablanca-Settat SARL", status: "ACTIVE", created_at: "2026-08-12T10:00:00.000Z", member_count: 4, open_requests: 0, open_disputes: 1 },
-  { id: "44444444-4444-4444-8444-444444444444", role_codes: ["PROVIDER"], display_name: "Conseil Anfa", legal_name: "Conseil Anfa SARL", status: "ACTIVE", created_at: "2026-07-20T10:00:00.000Z", member_count: 5, open_requests: 1, open_disputes: 0 },
-];
+/** Catalogue démo = 12 régions × (1 franchisé + 3 ST + 6 clients). */
+export function listDemoSupervisionOrganizations(): AdminSupervisionDashboard["organizations"] {
+  return buildDemoSupervisionOrganizations();
+}
+
+/** @deprecated Prefer listDemoSupervisionOrganizations(); kept for existing imports. */
+export const demoSupervisionOrganizations = buildDemoSupervisionOrganizations();
 
 const demoStatuses = ["UNDER_REVIEW", "ACTIVE", "PENDING", "COMPLETED"] as const;
 
@@ -36,7 +39,7 @@ function cellFor(column: string, org: AdminSupervisionDashboard["organizations"]
   if (/organisation|مؤسسة|prestataire|مقدم|client|عميل|franchis|امتياز/i.test(column)) return org.display_name;
   if (/état|statut|حالة|status/i.test(column)) return status;
   if (/type|نوع/i.test(column)) return inferOrgType(org.display_name, locale, org.role_codes);
-  if (/progression|تقدم/i.test(column)) return ["80 %", "45 %", "100 %", "30 %"][index] ?? "60 %";
+  if (/progression|score|resultat|نتيجة|تقدم/i.test(column)) return ["80 %", "45 %", "100 %", "30 %"][index] ?? "60 %";
   if (/priorit|أولوي/i.test(column)) return fr ? ["Élevée", "Moyenne", "Faible", "Élevée"][index] ?? "Moyenne" : ["مرتفعة", "متوسطة", "منخفضة", "مرتفعة"][index] ?? "متوسطة";
   if (/version|نسخة/i.test(column)) return `v${index + 1}`;
   if (/document|وثيق/i.test(column)) return String(2 + index);
@@ -50,9 +53,21 @@ function cellFor(column: string, org: AdminSupervisionDashboard["organizations"]
   return org.legal_name;
 }
 
+function orgsForSpace(space: AdminSpaceId) {
+  const orgs = listDemoSupervisionOrganizations();
+  if (/franchis|franchise/i.test(space)) return orgs.filter((org) => (org.role_codes ?? []).includes("FRANCHISE"));
+  if (/provider|prestataire|sous-trait|capacite|qualification/i.test(space)) {
+    return orgs.filter((org) => (org.role_codes ?? []).includes("PROVIDER"));
+  }
+  if (/client|conformit|diagnostic/i.test(space)) {
+    return orgs.filter((org) => (org.role_codes ?? []).includes("CLIENT"));
+  }
+  return orgs;
+}
+
 export function buildDemoSpaceRows(locale: Locale, space: AdminSpaceId, query: string): SpaceRow[] {
   const columns = spaceSpec(space).columns(locale);
-  return demoSupervisionOrganizations.map((org, index) => {
+  return orgsForSpace(space).map((org, index) => {
     const status = demoStatuses[index % demoStatuses.length]!;
     const id = itemId(space, index);
     return {
@@ -70,23 +85,35 @@ export function buildDemoSpaceRows(locale: Locale, space: AdminSpaceId, query: s
 
 export function demoAdminOrgRows(locale: Locale): AdminOrgRow[] {
   if (!canApplyAdminDemo()) return [];
-  return mapAdminOrgRows(demoSupervisionOrganizations, locale);
+  return mapAdminOrgRows(listDemoSupervisionOrganizations(), locale);
+}
+
+function rolesForOrg(org: AdminSupervisionDashboard["organizations"][number]) {
+  if ((org.role_codes ?? []).includes("FRANCHISE")) return ["FRANCHISE_OPERATOR"];
+  if ((org.role_codes ?? []).includes("PROVIDER")) return ["PROVIDER_ADMIN"];
+  return ["CLIENT_OWNER"];
 }
 
 export function demoActorUsers(): ActorUserRow[] {
-  return demoSupervisionOrganizations.map((org, index) => ({
-    userId: `a000000${index + 1}-0000-4000-8000-00000000000${index + 1}`,
-    membershipId: `b000000${index + 1}-0000-4000-8000-00000000000${index + 1}`,
-    organizationId: org.id,
-    organizationName: org.display_name,
-    roles: index === 1 ? ["CLIENT_ADMIN"] : index === 2 ? ["FRANCHISE_OPERATOR"] : index === 3 ? ["PROVIDER_ADMIN"] : ["CLIENT_OWNER"],
-    status: org.status,
-    updatedAt: org.created_at,
-  }));
+  return listDemoSupervisionOrganizations().map((org) => {
+    const actor = listAllDemoRegionalActors().find((item) => demoRegionalIds(item).organizationId === org.id);
+    const ids = actor ? demoRegionalIds(actor) : null;
+    return {
+      userId: ids?.userIdSeed ?? org.id,
+      membershipId: ids?.membershipId ?? org.id,
+      organizationId: org.id,
+      organizationName: org.display_name,
+      roles: rolesForOrg(org),
+      status: org.status,
+      updatedAt: org.created_at,
+    };
+  });
 }
 
 export function demoClientOrganizations(locale: Locale) {
-  return demoSupervisionOrganizations.filter((org) => inferOrgType(org.display_name, locale, org.role_codes) === (locale === "ar" ? "عميل" : "Client"));
+  return listDemoSupervisionOrganizations().filter(
+    (org) => inferOrgType(org.display_name, locale, org.role_codes) === (locale === "ar" ? "عميل" : "Client"),
+  );
 }
 
 export function demoClientCases(): AdminClientCase[] {
@@ -121,46 +148,21 @@ export function demoComplianceCases(): SafeComplianceCase[] {
 }
 
 export function demoOrganizationFiche(organizationId: string): AdminOrganizationFiche | null {
-  const org = demoSupervisionOrganizations.find((item) => item.id === organizationId);
-  if (!org) return null;
-  const user = demoActorUsers().find((item) => item.organizationId === organizationId);
-  return {
-    organization: {
-      id: org.id,
-      display_name: org.display_name,
-      legal_name: org.legal_name,
-      status: org.status,
-      country_code: "MA",
-      created_at: org.created_at,
-      updated_at: org.created_at,
-    },
-    memberships: [{
-      id: user?.membershipId ?? org.id,
-      user_id: user?.userId ?? org.id,
-      status: "ACTIVE",
-      roles: user?.roles ?? ["CLIENT_OWNER"],
-    }],
-    requests: org.open_requests > 0
-      ? [{ id: "f0000001-0000-4000-8000-000000000001", status: "OPEN", created_at: "2026-09-18T10:00:00.000Z", service_id: "f0000002-0000-4000-8000-000000000002" }]
-      : [],
-    missions: [],
-    disputes: org.open_disputes > 0
-      ? [{ id: "f0000003-0000-4000-8000-000000000003", status: "OPEN", urgency: "NORMAL", mission_id: "f0000004-0000-4000-8000-000000000004", response_due_at: "2026-09-25T10:00:00.000Z" }]
-      : [],
-    diagnostics: [],
-    subscriptions: [{ id: "f0000005-0000-4000-8000-000000000005", status: "TRIAL", plan_version_id: null, current_period_end: null }],
-    timeline: [{ at: "2026-09-18T10:00:00.000Z", kind: "REQUEST", label: "Demande ouverte", ref: "demo-request" }],
-  };
+  return buildDemoOrganizationFiche(organizationId);
 }
 
 export function demoDiagnostics(): AdminSupervisionDashboard["diagnostics"] {
-  return demoSupervisionOrganizations.slice(0, 2).map((org, index) => ({
+  return listDemoSupervisionOrganizations().filter((org) => (org.role_codes ?? []).includes("CLIENT")).slice(0, 2).map((org, index) => ({
     id: itemId("diagnostics", index),
     organization_id: org.id,
     organization_name: org.display_name,
     status: index === 0 ? "IN_PROGRESS" : "COMPLETED",
-    rating: index === 0 ? "B" : "A",
-    overall_score: index === 0 ? 72 : 91,
+    rating: index === 0 ? "ATTENTION" : "IMPORTANT",
+    overall_score: index === 0 ? 72 : 55,
     completed_at: index === 0 ? null : "2026-09-16T10:00:00.000Z",
+    questionnaire_version_id: `d0000000-0000-4000-8000-${String(900 + index + 1).padStart(12, "0")}`,
+    questionnaire_version: index === 0 ? 1 : 2,
+    questionnaire_title_fr: "Diagnostic entreprise",
+    questionnaire_title_ar: "تشخيص مؤسسي",
   }));
 }

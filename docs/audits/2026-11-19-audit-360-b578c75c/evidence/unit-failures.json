@@ -1,0 +1,10 @@
+{
+  "task": "unit-failures",
+  "command": "corepack pnpm --filter @matricia/web exec vitest run modules/franchise/screens/access-readiness.test.tsx modules/franchise/data/library/mandate-choices.test.tsx modules/franchise/data/network/provider-dossier.test.tsx modules/shared/lib/account-security/connected-space.test.ts",
+  "startedAt": "2026-11-19T13:21:26.903Z",
+  "finishedAt": "2026-11-19T13:21:36.919Z",
+  "durationMs": 10015,
+  "exitCode": 1,
+  "nodeVersion": "v22.23.5",
+  "scope": "Current working tree including the two preserved staged corrections; no application source corrections by audit"
+}

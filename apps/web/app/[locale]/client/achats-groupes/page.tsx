@@ -28,17 +28,17 @@ export default async function VolumePage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
-      active="finance"
-      title={messages.title}
-      lead={messages.description}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
+      active="volume"
+      {...(messages.title === undefined ? {} : {title:messages.title})}
+      {...(messages.description === undefined ? {} : {lead:messages.description})}
       kicker={spaceCopy(locale).kicker}
     >
       <main className="client-page">
         {result.status === "error" ? (
           <Alert variant={result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? "default" : "destructive"}>
             <AlertTitle>{result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertTitle>
-            <AlertDescription>{result.reason}</AlertDescription>
+            <AlertDescription>{result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : result.reason === "FORBIDDEN_ORGANIZATION" ? messages.forbidden : messages.loadError}</AlertDescription>
           </Alert>
         ) : (
           <VolumePanel dashboard={result.dashboard} locale={locale} m={messages} keys={[crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()]} />

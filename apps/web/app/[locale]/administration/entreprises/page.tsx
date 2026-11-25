@@ -9,7 +9,8 @@ import { OrganizationsBoard } from "@/modules/admin/screens/spaces/boards";
 import { AdminAppShell, AdminCrumb } from "@/modules/admin/ui/admin-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
-import { mapAdminOrgRows, mapAdminTreatQueue } from "@/modules/admin/data/spaces/view-model";
+import { loadOrganizationPlanCodes } from "@/modules/admin/data/spaces/organization-plans";
+import { applyOrganizationPlanCodes, mapAdminOrgRows, mapAdminTreatQueue } from "@/modules/admin/data/spaces/view-model";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 
 export default async function AdminEntreprisesPage({
@@ -17,30 +18,34 @@ export default async function AdminEntreprisesPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ organizationId?: string; q?: string; archives?: string; type?: string; status?: string; compliance?: string; plan?: string }>;
+  searchParams: Promise<{ organizationId?: string; q?: string; archives?: string; type?: string; status?: string; compliance?: string; plan?: string; fixtures?: string }>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const returnParams = new URLSearchParams();
-  for (const key of ["organizationId", "q", "archives", "type", "status", "compliance", "plan"] as const) {
+  for (const key of ["organizationId", "q", "archives", "type", "status", "compliance", "plan", "fixtures"] as const) {
     if (query[key]) returnParams.set(key, query[key]!);
   }
   const returnHref = `/${locale}/administration/entreprises${returnParams.size ? `?${returnParams}` : ""}`;
   const space = await resolveAdminSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: returnHref }));
   const [result, command] = await Promise.all([
-    loadAdminSupervisionDashboard(100),
+    loadAdminSupervisionDashboard(500),
     loadAdminCommandCenter().catch(error => { unstable_rethrow(error); return { status: "error", reason: "QUERY_FAILED" } as const; }),
   ]);
   const readError = result.status === "error" ? result.reason : null;
   if (readError === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: returnHref }));
   if (command.status === "error" && command.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: returnHref }));
   const uiParams=new URLSearchParams(space.selectedQuery);
-  for(const key of ["q","archives","type","status","compliance","plan"]as const){if(query[key])uiParams.set(key,query[key]!);}
+  for(const key of ["q","archives","type","status","compliance","plan","fixtures"]as const){if(query[key])uiParams.set(key,query[key]!);}
   const uiQuery=uiParams.size?`?${uiParams.toString()}`:"";
   const c = adminCopy(locale);
   const alternate = locale === "fr" ? "ar" : "fr";
-  const rows = result.status === "success" ? mapAdminOrgRows(result.value.organizations, locale) : [];
+  const baseRows = result.status === "success" ? mapAdminOrgRows(result.value.organizations, locale) : [];
+  const planCodes = result.status === "success"
+    ? await loadOrganizationPlanCodes(result.value.organizations.map((org) => org.id))
+    : new Map<string, string>();
+  const rows = applyOrganizationPlanCodes(baseRows, planCodes, locale);
   const treat = result.status === "success"
     ? mapAdminTreatQueue({
         locale,
@@ -79,9 +84,9 @@ export default async function AdminEntreprisesPage({
       }
     >
       {readError ? (
-        <main className="client-page">
+        <div className="client-page">
           <AdminReadError locale={locale} reason={readError} retryHref={`/${locale}/administration/entreprises${uiQuery}`} />
-        </main>
+        </div>
       ) : (
         <>
         {command.status === "error" ? <AdminReadError locale={locale}
@@ -94,6 +99,7 @@ export default async function AdminEntreprisesPage({
           treat={treat}
           search={query.q}
           archives={query.archives === "1"}
+          includeFixtures={query.fixtures === "1"}
           filters={{ type: query.type, status: query.status, compliance: query.compliance, plan: query.plan }}
         />
         </>

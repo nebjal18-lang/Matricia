@@ -1,3 +1,4 @@
+import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import {randomUUID} from "node:crypto";
 import {redirect} from "next/navigation";
 import type {Locale} from "@/modules/shared/lib/i18n/locale";
@@ -7,7 +8,7 @@ import {DsrDeliveryPanel} from "./panel";
 export async function DsrDeliveryScreen({locale, staff, page}: {locale: Locale; staff: boolean; page?: string}) {
   const client = await getSupabaseServerClient(), ar = locale === "ar";
   const {data: auth} = await client.auth.getUser();
-  if (!auth.user) redirect(`/${locale}/connexion`);
+  if (!auth.user) redirect(connexionHref(locale,{next:`/${locale}/administration/confidentialite/remise`}));
   const number = Number(page ?? "1");
   const result = await client.rpc("get_dsr_delivery_console_v1", {p_staff: staff, p_page: Number.isSafeInteger(number) && number > 0 ? number : 1});
   const parsed = dsrDeliveryConsoleSchema.safeParse(result.data);

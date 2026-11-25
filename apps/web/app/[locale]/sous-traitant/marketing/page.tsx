@@ -9,8 +9,10 @@ import { marketingActionKeys } from "@/modules/admin/screens/marketing-autopilot
 import { MarketingPanel } from "@/modules/admin/screens/marketing-autopilot/marketing-panel";
 import { getMarketingMessages } from "@/modules/admin/screens/marketing-autopilot/messages";
 import { resolveProviderSpace } from "@/modules/provider/data/spaces/context";
+import { providerContextReadState } from "@/modules/provider/data/spaces/organization-context";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import { ProviderAppShell } from "@/modules/provider/ui/provider-app-shell";
+import { ProviderReadState } from "@/modules/provider/ui/provider-read-state";
 
 export default async function ProviderMarketingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organizationId?: string }> }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
@@ -19,6 +21,14 @@ export default async function ProviderMarketingPage({ params, searchParams }: { 
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/marketing` }));
   const m = getMarketingMessages(locale);
   const c = providerCopy(locale);
+  const contextState = providerContextReadState(space, query.organizationId);
+  if (contextState) {
+    return (
+      <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="marketing" title={m.workspaceTitle} lead={m.workspaceLead} kicker={c.kicker}>
+        <ProviderReadState locale={locale} state={contextState} retryHref={`/${locale}/sous-traitant/marketing${space.selectedQuery}`} reason={space.readError ?? undefined} />
+      </ProviderAppShell>
+    );
+  }
   const result = await loadWorkspaceMarketingDashboard(space.selectedOrganizationId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/marketing` }));
   const brandDefaults = result.status === "success" && space.selectedOrganizationId ? await loadMarketingBrandDefaults(space.selectedOrganizationId, locale) : null;

@@ -1,0 +1,103 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 lint C:\Projects\Matricia\Matricia
+> pnpm -r lint
+
+.                                        |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+apps/web                                 |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+packages/domain                          |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+Scope: 16 of 17 workspace projects
+packages/application lint$ tsc --noEmit
+packages/config lint$ tsc --noEmit
+packages/contracts lint$ tsc --noEmit
+packages/domain lint$ tsc --noEmit
+packages/config lint: Done
+packages/forms lint$ tsc --noEmit
+packages/contracts lint: Done
+packages/infrastructure lint$ tsc --noEmit
+packages/application lint: Done
+packages/legal-v41 lint$ tsc --noEmit
+packages/domain lint: Done
+packages/observability lint$ tsc --noEmit
+packages/forms lint: Done
+packages/question-engine lint$ tsc --noEmit
+packages/legal-v41 lint: Done
+packages/resilience-v41 lint$ tsc --noEmit
+packages/observability lint: Done
+packages/signature-v41 lint$ tsc --noEmit
+packages/infrastructure lint: Done
+packages/testkit lint$ tsc --noEmit
+packages/resilience-v41 lint: Done
+packages/ui lint$ tsc --noEmit
+packages/testkit lint: Done
+packages/workflows lint$ tsc --noEmit
+packages/question-engine lint: Done
+packages/signature-v41 lint: Done
+packages/workflows lint: Done
+packages/ui lint: Done
+apps/web lint$ eslint . --ignore-pattern dist --ignore-pattern .next
+apps/worker lint$ tsc --noEmit
+apps/worker lint: Done
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\app\[locale]\administration\candidatures-franchise\page.tsx
+apps/web lint:   151:67  error  Error: Cannot call impure function during render
+apps/web lint: `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\app\[locale]\administration\candidatures-franchise\page.tsx:151:67
+apps/web lint:   149 |     !demoOn && organizationIds.length ? client.from("franchises").select("id,operator_organization_id,territory_code,status").in("operator_organization_id", organizationIds).in("status", ["CONTRACT_PENDING", "ENTRY_FEE_SETUP", "LIBRARY_ASSIGNED", "ACTIVE"]) : Promise.resolve({ data: [], error: null }),
+apps/web lint:   150 |     !demoOn && franchiseIds.length ? client.from("franchise_approval_requests").select("id,franchise_id,row_version,requested_by").in("franchise_id", franchiseIds).eq("status", "PENDING") : Promise.resolve({ data: [], error: null }),
+apps/web lint: > 151 |     demoOn ? Promise.resolve({ data: [], error: null, observedAt: Date.now() }) : loadInvitations(client, franchiseIds),
+apps/web lint:       |                                                                   ^^^^^^^^^^ Cannot call impure function
+apps/web lint:   152 |   ]);
+apps/web lint:   153 |   const organizations = new Map((organizationSchema.safeParse(organizationsResult.data).data ?? []).map((item) => [item.id, item.display_name]));
+apps/web lint:   154 |   if (demoOn) {  react-hooks/purity
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\data\providers\repository.ts
+apps/web lint:   45:23  warning  '_organizationId' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint:   49:30  warning  '_serviceId' is defined but never used       @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\data\spaces\demo-catalog-questions.ts
+apps/web lint:   66:3  warning  '_selectedVersionId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\data\spaces\demo-supervision.ts
+apps/web lint:   131:3  warning  '_value' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\screens\finance\box-wholesale-workshop.tsx
+apps/web lint:   68:9  warning  The 'offers' logical expression could make the dependencies of useMemo Hook (at line 75) change on every render. To fix this, wrap the initialization of 'offers' in its own useMemo() Hook  react-hooks/exhaustive-deps
+apps/web lint:   68:9  warning  The 'offers' logical expression could make the dependencies of useMemo Hook (at line 79) change on every render. To fix this, wrap the initialization of 'offers' in its own useMemo() Hook  react-hooks/exhaustive-deps
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\screens\finance\finance-sorties.tsx
+apps/web lint:   6:36  warning  '_locale' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\screens\spaces\actor-boards.tsx
+apps/web lint:   14:10  warning  'actorAccountSubtitle' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\ui\admin-side-group.tsx
+apps/web lint:   19:17  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+apps/web lint: Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+apps/web lint: * Update external systems with the latest state from React.
+apps/web lint: * Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+apps/web lint: Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\admin\ui\admin-side-group.tsx:19:17
+apps/web lint:   17 |   const [open, setOpen] = useState(active);
+apps/web lint:   18 |   useEffect(() => {
+apps/web lint: > 19 |     if (active) setOpen(true);
+apps/web lint:      |                 ^^^^^^^ Avoid calling setState() directly within an effect
+apps/web lint:   20 |   }, [active]);
+apps/web lint:   21 |
+apps/web lint:   22 |   return (  react-hooks/set-state-in-effect
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\client\screens\missions\amendment-panel.tsx
+apps/web lint:   6:233  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\client\screens\spaces\boards.tsx
+apps/web lint:   3:50  warning  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint:   3:87  warning  'Plus' is defined but never used    @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\client\screens\spaces\disputes-board.tsx
+apps/web lint:   230:3  warning  'query' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\franchise\screens\relances\messages.ts
+apps/web lint:   4:107  warning  'V' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\franchise\screens\spaces\boards.tsx
+apps/web lint:   3:30  warning  'moroccoRegions' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\franchise\ui\franchise-access-state.tsx
+apps/web lint:    84:18  error  React Hook "useRouter" is called conditionally. React Hooks must be called in the exact same order in every component render      react-hooks/rules-of-hooks
+apps/web lint:    85:38  error  React Hook "useTransition" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+apps/web lint:   136:18  error  React Hook "useRouter" is called conditionally. React Hooks must be called in the exact same order in every component render      react-hooks/rules-of-hooks
+apps/web lint:   137:38  error  React Hook "useTransition" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+apps/web lint: C:\Projects\Matricia\Matricia\apps\web\modules\provider\screens\spaces\workbenches.tsx
+apps/web lint:   549:3  warning  'invoiceId' is defined but never used  @typescript-eslint/no-unused-vars
+apps/web lint: ✖ 21 problems (6 errors, 15 warnings)
+apps/web lint: Failed
+C:\Projects\Matricia\Matricia\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @matricia/web@0.1.0 lint: `eslint . --ignore-pattern dist --ignore-pattern .next`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.

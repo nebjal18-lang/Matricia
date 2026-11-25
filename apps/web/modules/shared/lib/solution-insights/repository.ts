@@ -20,7 +20,7 @@ const decisionResponse = z.object({ outcome: z.enum(["SOLUTION_ACCEPTED", "SOLUT
 function failure(error: QueryError | null): SolutionFailure {
   const message = error?.message ?? "";
   if (error?.code === "42501" || message.includes("SOLUTION_DECISION_DENIED")) return "FORBIDDEN";
-  if (error?.code === "40001" || message.includes("IDEMPOTENCY_")) return "CONFLICT";
+  if ((error?.code === "40001" || error?.code === "PT409") || message.includes("IDEMPOTENCY_")) return "CONFLICT";
   if (error?.code === "22023" || message.includes("INVALID_SOLUTION_DECISION")) return "INVALID_INPUT";
   return "UNAVAILABLE";
 }

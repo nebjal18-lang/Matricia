@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { isIP } from "node:net";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 
 export type NotificationDeliveryJob = {
   deliveryId: string;
@@ -37,17 +38,18 @@ function demoMessageId(job: NotificationDeliveryJob) {
 }
 
 function nonGlobalAddress(rawAddress: string) {
-  const address = rawAddress.toLowerCase().split("%")[0];
+  const address = rawAddress.toLowerCase().split("%")[0] ?? "";
   if (address.startsWith("::ffff:")) {
     const mapped = address.slice(7);
     if (isIP(mapped) === 4) return nonGlobalAddress(mapped);
     const hexadecimal = mapped.match(/^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
-    if (!hexadecimal) return true;
-    const high = Number.parseInt(hexadecimal[1]!,16),low = Number.parseInt(hexadecimal[2]!,16);
+    if (!hexadecimal?.[1] || !hexadecimal[2]) return true;
+    const high = Number.parseInt(hexadecimal[1],16),low = Number.parseInt(hexadecimal[2],16);
     return nonGlobalAddress(`${high >>> 8}.${high & 255}.${low >>> 8}.${low & 255}`);
   }
   if (isIP(address) === 4) {
     const [a,b,c] = address.split(".").map(Number);
+    if (a === undefined || b === undefined || c === undefined) return true;
     return a === 0 || a === 10 || a === 127 || a >= 224
       || (a === 100 && b >= 64 && b <= 127)
       || (a === 169 && b === 254)
@@ -134,6 +136,15 @@ async function providerMessageId(response: Response, adapter: EmailProviderReque
 export async function deliverNotification(job: NotificationDeliveryJob, dependencies: Dependencies): Promise<NotificationDeliveryResult> {
   if (job.channel === "IN_APP") return { outcome: "DELIVERED", providerMessageId: `in-app-${job.deliveryId}`, evidence: { adapter: "IN_APP" } };
   if (!job.recipientEmail || !job.providerIdempotencyKey) return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_RECIPIENT_INVALID", evidence: { adapter: "EMAIL" } };
+  if (dependencies.env.EMAIL_DELIVERY_MODE === "DEMO" && !dependencies.env.SUPABASE_SERVICE_ROLE_KEY && !dependencies.env.APP_ENCRYPTION_KEY
+    && (dependencies.env.NODE_ENV === "production" || dependencies.env.APP_ENV?.trim().toLowerCase() === "production")) {
+    return { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_DEMO_FORBIDDEN", evidence: { adapter: "EMAIL" } };
+  }
+  try {
+    dependencies = { ...dependencies, env: await getPlatformRuntimeEnvironment(dependencies.env, ["RESEND"]) };
+  } catch {
+    return { outcome: "RETRYABLE_FAILURE", errorCode: "EMAIL_CONFIGURATION_UNAVAILABLE", evidence: { adapter: "EMAIL" } };
+  }
   const mode = dependencies.env.EMAIL_DELIVERY_MODE;
   if (mode === "DEMO") return (dependencies.env.NODE_ENV === "production" || dependencies.env.APP_ENV?.trim().toLowerCase() === "production")
     ? { outcome: "PERMANENT_FAILURE", errorCode: "EMAIL_DEMO_FORBIDDEN", evidence: { adapter: "EMAIL" } }

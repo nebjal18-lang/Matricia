@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createInvitation, type InvitationActionState } from "@/app/[locale]/invitations/actions";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { StableIdempotencyField } from "@/modules/shared/ui/stable-idempotency-field";
 
 const idle: InvitationActionState = { status: "idle" };
 
@@ -21,7 +22,7 @@ export function MemberInviteForm({
       <input type="hidden" name="locale" value={locale} />
       {organizationId ? <input type="hidden" name="organizationId" value={organizationId} /> : null}
       <input type="hidden" name="expiryDays" value="7" />
-      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+      <StableIdempotencyField rotateToken={state.status === "success" ? state.status : undefined} />
       <label className="client-field">
         <span>{c.inviteEmail}</span>
         <input id="invite-email" name="invitedEmail" type="email" required autoComplete="email" />

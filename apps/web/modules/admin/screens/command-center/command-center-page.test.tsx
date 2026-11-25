@@ -1,0 +1,42 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import type { ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/modules/admin/data/spaces/context", () => ({
+  resolveAdminSpace: async () => ({ status: "success", selectedQuery: "", selectedOrganizationId: null, userEmail: "admin@example.invalid" }),
+}));
+vi.mock("@/modules/admin/data/command-center/repository", () => ({
+  loadAdminCommandCenter: async () => ({ status: "success", dashboard: { workItems: [], actions: [] } }),
+}));
+vi.mock("@/modules/admin/data/supervision/repository", () => ({
+  loadAdminSupervisionDashboard: async () => ({ status: "success", value: { work_enrichment: {} } }),
+}));
+vi.mock("@/modules/admin/ui/admin-app-shell", () => ({
+  AdminAppShell: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+vi.mock("@/modules/admin/screens/command-center/command-center-panel", () => ({
+  CommandCenterPanel: () => (
+    <section id="command-today">
+      <article id="command-work-items">
+        <article id="work-test">Task</article>
+      </article>
+    </section>
+  ),
+}));
+vi.mock("@/modules/admin/screens/spaces/boards", () => ({
+  AdminDirectoryBoard: () => <div id="admin-directory-board">Directory</div>,
+}));
+import AdminCommandCenterPage from "@/app/[locale]/administration/command-center/page";
+
+describe("command center task visibility", () => {
+  it.each(["fr", "ar"] as const)("shows the task queue first, then the administration directory in %s", async (locale) => {
+    const html = renderToStaticMarkup(await AdminCommandCenterPage({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }));
+    expect(html).toContain('id="command-today"');
+    expect(html).toContain("admin-command-home");
+    expect(html).not.toContain("admin-command-deck");
+    expect(html).not.toContain("admin-launch-strip");
+    expect(html.indexOf('id="command-today"')).toBeLessThan(html.indexOf('id="admin-directory"'));
+    expect(html.match(/id="command-today"/g)).toHaveLength(1);
+    expect(html).toContain('id="work-test"');
+  });
+});

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ from: vi.fn(), rpc: vi.fn(), getUser: vi.fn() }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ auth: { getUser: mocks.getUser }, from: mocks.from, rpc: mocks.rpc }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({
+  getSupabaseServerClient: async () => ({ auth: { getUser: mocks.getUser }, from: mocks.from, rpc: mocks.rpc }),
+  getServerAuthUser: async () => mocks.getUser(),
+}));
 import { loadUserActionCenter } from "./repository";
 
 function query(result: { data: unknown; error: { code: string } | null }) {

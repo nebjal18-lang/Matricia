@@ -1,45 +1,29 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { dirname, relative, resolve, sep } from 'node:path';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { execFileSync, spawn } from 'node:child_process';
+import { resolveSafeDatabaseTarget, verifyDatabaseClone, sqlInventory } from './db-test-support-safety.mjs';
 import { randomUUID } from 'node:crypto';
-import postgres from 'postgres';
-import { prepareSqlTest } from './db-test-support.mjs';
+import { pathToFileURL } from 'node:url';
+let postgres;
+import { prepareSqlTest, prepareSqlTestBatches } from './db-test-support.mjs';
+let activeTestFile = 'preflight';
+let activeBatch = 0;
 
-function parseEnv(source) {
-  return Object.fromEntries(source.split(/\r?\n/).flatMap((line) => {
-    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
-    if (!match) return [];
-    return [[match[1], match[2].replace(/^(['"])(.*)\1$/, '$2')]];
-  }));
-}
-
-async function resolveDatabaseUrl(env, root) {
-  const configured = env.SUPABASE_DB_POOLER_URL || env.DIRECT_URL;
-  if (!configured?.startsWith('postgres')) throw new Error('A PostgreSQL DIRECT_URL is required');
-  const direct = new URL(configured);
-  if (!direct.hostname.startsWith('db.') || !direct.hostname.endsWith('.supabase.co')) return configured;
-
-  const projectRef = new URL(env.NEXT_PUBLIC_SUPABASE_URL).hostname.split('.')[0];
-  let region = env.SUPABASE_REGION;
-  try {
-    const metadata = JSON.parse(await readFile(resolve(root, 'supabase', 'project-metadata.json'), 'utf8'));
-    if (metadata.project_ref === projectRef && metadata.environment !== 'production') region ||= metadata.region;
-  } catch (error) {
-    if (error?.code !== 'ENOENT') throw error;
-  }
-  if (!region && env.SUPABASE_ACCESS_TOKEN) {
-    const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}`, {
-      headers: { Authorization: `Bearer ${env.SUPABASE_ACCESS_TOKEN}` },
-    });
-    if (!response.ok) throw new Error(`Supabase project metadata failed (${response.status})`);
-    region = (await response.json()).region;
-  }
-  if (!region) throw new Error('SUPABASE_REGION is required when the direct host is IPv6-only');
-
-  direct.hostname = `aws-0-${region}.pooler.supabase.com`;
-  direct.port = '5432';
-  direct.username = `postgres.${projectRef}`;
-  direct.searchParams.set('sslmode', 'require');
-  return direct.toString();
+async function diagnoseSqlLine(file) {
+  if (!/^[A-Za-z0-9_.-]+\.test\.sql$/.test(file)) return 'none';
+  const target = resolveSafeDatabaseTarget(process.env);
+  const script = prepareSqlTest(await readFile(resolve(import.meta.dirname, '..', 'supabase', 'tests', file), 'utf8'));
+  const container = `matricia-test-${target.cloneId}`;
+  return new Promise((done) => {
+    const child = spawn('docker', ['exec', '-i', container, 'psql', '-X', '-h', '/tmp', '-U', 'postgres', '-d', target.database,
+      '-v', 'ON_ERROR_STOP=1', '-f', '-'], { stdio: ['pipe', 'ignore', 'pipe'], windowsHide: true, timeout: 60_000 });
+    let stderr = '';
+    child.stderr.on('data', chunk => { if (stderr.length < 1024 * 1024) stderr += chunk.toString(); });
+    child.stdin.on('error', () => {});
+    child.on('error', () => done('none'));
+    child.on('close', () => done(/:(\d+): ERROR:/.exec(stderr)?.[1] ?? 'none'));
+    child.stdin.end(script);
+  });
 }
 
 function tapLines(value, target = []) {
@@ -135,9 +119,9 @@ async function verifyOutboxConcurrency(databaseUrl, admin) {
   });
 
   try {
-    queueGuard = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-    workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-    workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
+    queueGuard = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+    workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+    workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
     guardTransaction = queueGuard.begin(async (transaction) => {
       try {
         await transaction.unsafe('set local role service_role');
@@ -264,9 +248,9 @@ async function verifyOutboxConcurrency(databaseUrl, admin) {
   if (errors.length > 1) throw new AggregateError(errors, 'outbox concurrency test and lifecycle failed');
 }
 
-async function cleanupFinancialConcurrencyFixture(admin, organizationId, actorId, membershipId) {
+async function cleanupFinancialConcurrencyFixture(admin, organizationId, actorId, membershipId, reviewerIds = []) {
   await admin.begin(async (transaction) => {
-    await transaction.unsafe('lock table public.event_outbox, public.audit_events, public.financial_entries, public.financial_journals, public.financial_accounts, public.credit_lots, public.credit_ledger_entries, public.credit_wallets in access exclusive mode');
+    await transaction.unsafe('lock table public.event_outbox, public.audit_events, public.financial_entries, public.financial_journals, public.financial_accounts, public.credit_lots, public.credit_ledger_entries, public.credit_wallets, public.manual_credit_grant_executions_v1, public.manual_credit_grant_reviews_v1, public.manual_credit_grant_requests_v1 in access exclusive mode');
     await transaction.unsafe('alter table public.event_outbox disable trigger event_outbox_no_delete');
     await transaction.unsafe('alter table public.audit_events disable trigger audit_events_immutable');
     await transaction.unsafe('alter table public.financial_entries disable trigger financial_entries_immutable');
@@ -276,19 +260,34 @@ async function cleanupFinancialConcurrencyFixture(admin, organizationId, actorId
     await transaction.unsafe('alter table public.credit_lots disable trigger credit_lots_immutable');
     await transaction.unsafe('alter table public.credit_ledger_entries disable trigger credit_ledger_entries_immutable');
     await transaction.unsafe('alter table public.credit_wallets disable trigger credit_wallets_immutable');
+    await transaction.unsafe('alter table public.manual_credit_grant_executions_v1 disable trigger manual_credit_executions_immutable');
+    await transaction.unsafe('alter table public.manual_credit_grant_reviews_v1 disable trigger manual_credit_reviews_immutable');
+    await transaction.unsafe('alter table public.manual_credit_grant_requests_v1 disable trigger manual_credit_requests_immutable');
     await transaction`delete from public.event_outbox where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.audit_events where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.idempotency_keys where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.financial_entries where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.financial_journals where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.financial_accounts where organization_id=${organizationId}::uuid`;
+    await transaction`delete from public.manual_credit_grant_executions_v1 e using public.manual_credit_grant_requests_v1 r where e.request_id=r.id and r.organization_id=${organizationId}::uuid`;
+    await transaction`delete from public.manual_credit_grant_reviews_v1 review using public.manual_credit_grant_requests_v1 r where review.request_id=r.id and r.organization_id=${organizationId}::uuid`;
+    await transaction`delete from public.manual_credit_grant_requests_v1 where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.credit_lots where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.credit_ledger_entries where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.credit_wallets where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.organization_member_roles where membership_id=${membershipId}::uuid`;
     await transaction`delete from public.organization_memberships where id=${membershipId}::uuid`;
+    await transaction`delete from private.client_subscription_quota_serializers_v1 where organization_id=${organizationId}::uuid`;
     await transaction`delete from public.organizations where id=${organizationId}::uuid`;
-    await transaction`delete from auth.users where id=${actorId}::uuid`;
+    await transaction`delete from public.platform_user_roles where user_id=any(${[actorId, ...reviewerIds]}::uuid[])`;
+    await transaction`delete from auth.users where id=any(${[actorId, ...reviewerIds]}::uuid[])`;
+    // Resolve deferred FK checks before ALTER TABLE restores the immutable
+    // triggers. Even a delete with no referencing pack rows can queue these
+    // checks on credit_lots; flushing them enforces constraints, not a bypass.
+    await transaction.unsafe('set constraints all immediate');
+    await transaction.unsafe('alter table public.manual_credit_grant_executions_v1 enable trigger manual_credit_executions_immutable');
+    await transaction.unsafe('alter table public.manual_credit_grant_reviews_v1 enable trigger manual_credit_reviews_immutable');
+    await transaction.unsafe('alter table public.manual_credit_grant_requests_v1 enable trigger manual_credit_requests_immutable');
     await transaction.unsafe('alter table public.credit_wallets enable trigger credit_wallets_immutable');
     await transaction.unsafe('alter table public.credit_ledger_entries enable trigger credit_ledger_entries_immutable');
     await transaction.unsafe('alter table public.credit_lots enable trigger credit_lots_immutable');
@@ -303,7 +302,8 @@ async function cleanupFinancialConcurrencyFixture(admin, organizationId, actorId
 
 async function cleanupStaleFinancialConcurrencyFixtures(admin) {
   const stale = await admin`
-    select organization.id as organization_id,organization.created_by as actor_id,membership.id as membership_id
+    select organization.id as organization_id,organization.created_by as actor_id,membership.id as membership_id,
+      array(select reviewer.id from auth.users reviewer where reviewer.email='p03-reviewer-'||organization.created_by::text||'@example.invalid') as reviewer_ids
     from public.organizations organization
     join public.organization_memberships membership
       on membership.organization_id=organization.id and membership.user_id=organization.created_by
@@ -312,7 +312,7 @@ async function cleanupStaleFinancialConcurrencyFixtures(admin) {
   `;
   for (const fixture of stale) {
     await cleanupFinancialConcurrencyFixture(
-      admin, fixture.organization_id, fixture.actor_id, fixture.membership_id,
+      admin, fixture.organization_id, fixture.actor_id, fixture.membership_id, fixture.reviewer_ids,
     );
   }
 }
@@ -321,6 +321,10 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
   await cleanupStaleFinancialConcurrencyFixtures(admin);
   const fixture = {
     actorId: randomUUID(),
+    reviewerId: randomUUID(),
+    manualRequestId: null,
+    manualContentHash: null,
+    manualReviewProofHash: null,
     organizationId: randomUUID(),
     membershipId: randomUUID(),
     debitAccountId: randomUUID(),
@@ -334,13 +338,13 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
     creditKey: `p03-credit-${randomUUID()}`,
     effectiveAt: '2026-09-11T12:00:00.000Z',
   };
-  const workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-  const workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
+  const workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+  const workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
 
-  async function authenticated(transaction) {
+  async function authenticated(transaction, actorId = fixture.actorId) {
     await transaction.unsafe('set local role authenticated');
-    await transaction`select set_config('request.jwt.claim.sub',${fixture.actorId},true)`;
-    await transaction`select set_config('request.jwt.claims',${JSON.stringify({ sub: fixture.actorId, role: 'authenticated', aal: 'aal2' })},true)`;
+    await transaction`select set_config('request.jwt.claim.sub',${actorId},true)`;
+    await transaction`select set_config('request.jwt.claims',${JSON.stringify({ sub: actorId, role: 'authenticated', aal: 'aal2' })},true)`;
   }
 
   async function invokeJournal(transaction) {
@@ -360,10 +364,9 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
   async function invokeCredit(transaction) {
     await authenticated(transaction);
     return transaction`
-      select (public.issue_credits(
-        ${fixture.organizationId}::uuid,${fixture.walletId}::uuid,'ADMIN_GRANT',17,
-        '2027-09-11T12:00:00.000Z'::timestamptz,null,'two-connection-credit',0,
-        'P03_TEST','P03_CONCURRENCY',${fixture.creditKey},${fixture.creditCorrelationId}::uuid
+      select (public.execute_manual_credit_grant_v1(
+        ${fixture.manualRequestId}::uuid,${fixture.manualContentHash},
+        ${fixture.manualReviewProofHash},${fixture.creditKey}
       )->>'entry_id')::bigint as id
     `;
   }
@@ -456,6 +459,15 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
         )
       `;
       await transaction`
+        insert into auth.users (
+          id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,
+          raw_app_meta_data,raw_user_meta_data,created_at,updated_at
+        ) values (
+          ${fixture.reviewerId}::uuid,'00000000-0000-0000-0000-000000000000',
+          'authenticated','authenticated',${`p03-reviewer-${fixture.actorId}@example.invalid`},'',now(),'{}','{}',now(),now()
+        )
+      `;
+      await transaction`
         insert into public.organizations (id,legal_name,display_name,status,created_by)
         values (${fixture.organizationId}::uuid,'P03 Concurrency SARL','P03 Concurrency','ACTIVE',${fixture.actorId}::uuid)
       `;
@@ -469,7 +481,7 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
       `;
       await transaction`
         insert into public.platform_user_roles (user_id,role_code)
-        values (${fixture.actorId}::uuid,'SUPER_ADMIN')
+        values (${fixture.actorId}::uuid,'SUPER_ADMIN'),(${fixture.reviewerId}::uuid,'FINANCE_MANAGER')
       `;
       await transaction`
         insert into public.financial_accounts (id,organization_id,code,name,account_type,currency) values
@@ -495,16 +507,54 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
       throw new Error('journal duplicate invocation produced duplicate or incomplete durable effects');
     }
 
+    // The concurrent operation is the public, independently reviewed manual
+    // grant execution, not a direct issuer or a fabricated funding source.
+    const requested = await admin.begin(async (transaction) => {
+      await authenticated(transaction);
+      return transaction`
+        select public.request_manual_credit_grant_v1(
+          ${fixture.organizationId}::uuid,${fixture.walletId}::uuid,'ADMIN_GRANT',17,
+          clock_timestamp()+interval '1 year',null,'P03_CONCURRENCY',
+          'Synthetic two-connection grant with independent Finance review',
+          ${`${fixture.creditKey}-request`}
+        ) as result
+      `;
+    });
+    fixture.manualRequestId = requested[0].result.request_id;
+    fixture.manualContentHash = requested[0].result.content_hash;
+    const reviewed = await admin.begin(async (transaction) => {
+      await authenticated(transaction, fixture.reviewerId);
+      return transaction`
+        select public.review_manual_credit_grant_v1(
+          ${fixture.manualRequestId}::uuid,${fixture.manualContentHash},true,true,
+          'P03_CONCURRENCY_INDEPENDENT_FINANCE_REVIEW',
+          'Independent review of the exact synthetic 17-credit grant'
+        ) as result
+      `;
+    });
+    fixture.manualReviewProofHash = reviewed[0].result.review_proof_hash;
+    const beforeExecution = await admin`
+      select count(*)::integer as lots from public.credit_lots
+      where organization_id=${fixture.organizationId}::uuid
+    `;
+    if (beforeExecution[0].lots !== 0) throw new Error('manual credit approval issued a lot before execution');
+
     const creditEntryId = await runDuplicateRace(invokeCredit, 'credit duplicate invocation');
     const creditEvidence = await admin`
       select
         (select count(*)::integer from public.credit_ledger_entries where organization_id=${fixture.organizationId}::uuid and id=${creditEntryId}::bigint) as entries,
         (select balance from public.credit_wallet_balances where organization_id=${fixture.organizationId}::uuid and wallet_id=${fixture.walletId}::uuid) as balance,
         (select count(*)::integer from public.audit_events where organization_id=${fixture.organizationId}::uuid and action='credits.issued') as audits,
-        (select count(*)::integer from public.event_outbox where organization_id=${fixture.organizationId}::uuid and event_type='CreditsGrantedV1') as outbox
+        (select count(*)::integer from public.event_outbox where organization_id=${fixture.organizationId}::uuid and event_type='CreditsGrantedV1') as outbox,
+        (select count(*)::integer from public.manual_credit_grant_executions_v1 where request_id=${fixture.manualRequestId}::uuid) as executions,
+        (select count(*)::integer from public.manual_credit_grant_reviews_v1 review join public.manual_credit_grant_requests_v1 request on request.id=review.request_id where request.id=${fixture.manualRequestId}::uuid and request.created_by=${fixture.actorId}::uuid and review.decided_by=${fixture.reviewerId}::uuid and review.decided_by<>request.created_by and review.decision='APPROVED') as independent_reviews,
+        (select count(*)::integer from public.event_outbox where organization_id=${fixture.organizationId}::uuid and event_type='ManualCreditGrantExecutedV1') as governed_outbox,
+        (select count(*)::integer from public.credit_lots where organization_id=${fixture.organizationId}::uuid and source_type='ADMIN_GRANT' and quantity=17 and revenue_value_minor=0) as zero_revenue_lots
     `;
     if (creditEvidence[0].entries !== 1 || String(creditEvidence[0].balance) !== '17'
-      || creditEvidence[0].audits !== 1 || creditEvidence[0].outbox !== 1) {
+      || creditEvidence[0].audits !== 1 || creditEvidence[0].outbox !== 1
+      || creditEvidence[0].executions !== 1 || creditEvidence[0].independent_reviews !== 1
+      || creditEvidence[0].governed_outbox !== 1 || creditEvidence[0].zero_revenue_lots !== 1) {
       throw new Error('credit duplicate invocation produced duplicate or incomplete durable effects');
     }
 
@@ -526,77 +576,125 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
   } finally {
     await Promise.allSettled([workerA.end(), workerB.end()]);
     await cleanupFinancialConcurrencyFixture(
-      admin, fixture.organizationId, fixture.actorId, fixture.membershipId,
+      admin, fixture.organizationId, fixture.actorId, fixture.membershipId, [fixture.reviewerId],
     );
   }
 }
 
-const root = resolve(import.meta.dirname, '..');
-let fileEnv = {};
-try {
-  fileEnv = parseEnv(await readFile(resolve(root, '.env.local'), 'utf8'));
-} catch (error) {
-  if (error?.code !== 'ENOENT') throw error;
+/** Reuse the native races only after the same reserved-clone identity checks. */
+export async function runReservedCloneConcurrency(env) {
+  const target = resolveSafeDatabaseTarget(env);
+  ({ default: postgres } = await import('postgres'));
+  const sql = postgres(target.url, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+  try {
+    await verifyDatabaseClone(sql, target);
+    await verifyOutboxConcurrency(target.url, sql);
+    await verifyFinancialConcurrency(target.url, sql);
+    return { passed: true, scenarios: ['outbox_claim', 'journal_idempotency', 'credit_idempotency', 'audit_chain'], nodeVersion: process.version };
+  } finally { await sql.end({ timeout: 2 }); }
 }
-const env = { ...fileEnv, ...process.env };
-if (!['development', 'staging'].includes(env.APP_ENV)) throw new Error('DB tests are restricted to development/staging');
 
-const databaseUrl = await resolveDatabaseUrl(env, root);
-const sql = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-const testDirectory = resolve(root, 'supabase', 'tests');
-const testPattern = process.env.DB_TEST_PATTERN
-  ? new RegExp(process.env.DB_TEST_PATTERN)
-  : null;
-const files = (await readdir(testDirectory))
-  .filter((file) => file.endsWith('.test.sql'))
-  .filter((file) => !testPattern || testPattern.test(file))
-  .sort();
-if (files.length === 0) throw new Error('DB_TEST_PATTERN matched no SQL test files');
-let assertions = 0;
-let evidence = null;
+async function main() {
+  const root = resolve(import.meta.dirname, '..');
+  const env = process.env;
+  const target = resolveSafeDatabaseTarget(env);
+  ({ default: postgres } = await import('postgres'));
+  const databaseUrl = target.url;
+  const inventory = await sqlInventory(root);
+  const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  const sql = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+  const testDirectory = resolve(root, 'supabase', 'tests');
+  const testPattern = process.env.DB_TEST_PATTERN
+    ? new RegExp(process.env.DB_TEST_PATTERN)
+    : null;
+  const files = (await readdir(testDirectory))
+    .filter((file) => file.endsWith('.test.sql'))
+    .filter((file) => !testPattern || testPattern.test(file))
+    .sort();
+  if (files.length === 0) throw new Error('DB_TEST_PATTERN matched no SQL test files');
+  let assertions = 0;
+  let evidence = null;
 
-const evidencePath = process.env.DB_TEST_EVIDENCE_PATH
-  ? resolve(root, process.env.DB_TEST_EVIDENCE_PATH)
-  : null;
-if (evidencePath) {
-  const allowedDirectory = resolve(root, 'docs', 'evidence');
-  const evidenceRelativePath = relative(allowedDirectory, evidencePath);
-  if (evidenceRelativePath.startsWith(`..${sep}`) || evidenceRelativePath === '..') {
-    throw new Error('DB_TEST_EVIDENCE_PATH must stay inside docs/evidence');
+  const evidencePath = process.env.DB_TEST_EVIDENCE_PATH
+    ? resolve(root, process.env.DB_TEST_EVIDENCE_PATH)
+    : null;
+  if (evidencePath) {
+    const allowedDirectory = resolve(root, 'docs', 'evidence');
+    const evidenceRelativePath = relative(allowedDirectory, evidencePath);
+    if (evidenceRelativePath.startsWith(`..${sep}`) || evidenceRelativePath === '..' || isAbsolute(evidenceRelativePath)) {
+      throw new Error('DB_TEST_EVIDENCE_PATH must stay inside docs/evidence');
+    }
   }
-}
 
-try {
-  await cleanupStaleFinancialConcurrencyFixtures(sql);
-  for (const file of files) {
-    const source = await readFile(resolve(testDirectory, file), 'utf8');
-    const result = await sql.unsafe(prepareSqlTest(source), [], { simple: true });
-    const lines = tapLines(result);
-    assertions += validateTap(file, lines);
-    console.log(`PASS ${file}`);
+  try {
+    await verifyDatabaseClone(sql, target);
+    await cleanupStaleFinancialConcurrencyFixtures(sql);
+    const databaseEnvironment = env.APP_ENV === 'staging' ? 'STAGING' : 'DEVELOPMENT';
+    await sql`
+      update private.admin_execution_environment_v1
+      set environment = ${databaseEnvironment},
+          configured_at = clock_timestamp(),
+          configuration_reference = 'SQL_TEST_RUNNER'
+      where singleton and environment is null
+    `;
+    for (const file of files) {
+      activeTestFile = file;
+      activeBatch = 0;
+      const source = await readFile(resolve(testDirectory, file), 'utf8');
+      const results = [];
+      // Keep BEGIN/ROLLBACK and role-local state on the same max:1 connection,
+      // while explicit request boundaries get their own statement timestamp.
+      for (const batch of prepareSqlTestBatches(source)) {
+        activeBatch += 1;
+        results.push(await sql.unsafe(batch, [], { simple: true }));
+      }
+      const lines = tapLines(results);
+      assertions += validateTap(file, lines);
+      console.log(`PASS ${file}`);
+    }
+    await verifyOutboxConcurrency(databaseUrl, sql);
+    console.log('PASS outbox_concurrency (2 connections)');
+    await verifyFinancialConcurrency(databaseUrl, sql);
+    console.log('PASS journal_idempotency_concurrency (2 connections)');
+    console.log('PASS credit_idempotency_concurrency (2 connections)');
+    console.log('PASS audit_chain_concurrency (2 connections)');
+    console.log(`DB tests ${testPattern ? 'PARTIAL' : 'passed'}: ${files.length} files, ${assertions} assertions, 4 concurrency scenarios`);
+    evidence = {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      environment: env.APP_ENV,
+      outcome: testPattern ? 'PARTIAL' : 'PASS',
+      scope: testPattern ? 'PARTIAL' : 'FULL',
+      filter: env.DB_TEST_PATTERN || null,
+      targetMode: env.DB_TEST_TARGET_MODE,
+      commit,
+      runId: env.DB_TEST_RUN_ID || null,
+      inventorySha256: inventory.sha256,
+      files,
+      assertions,
+      concurrencyScenarios: 4,
+    };
+  } finally {
+    await sql.end({ timeout: 2 });
   }
-  await verifyOutboxConcurrency(databaseUrl, sql);
-  console.log('PASS outbox_concurrency (2 connections)');
-  await verifyFinancialConcurrency(databaseUrl, sql);
-  console.log('PASS journal_idempotency_concurrency (2 connections)');
-  console.log('PASS credit_idempotency_concurrency (2 connections)');
-  console.log('PASS audit_chain_concurrency (2 connections)');
-  console.log(`DB tests passed: ${files.length} files, ${assertions} assertions, 4 concurrency scenarios`);
-  evidence = {
-    schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
-    environment: env.APP_ENV,
-    outcome: 'PASS',
-    files,
-    assertions,
-    concurrencyScenarios: 4,
-  };
-} finally {
-  await sql.end({ timeout: 2 });
-}
 
-if (evidencePath && evidence) {
-  await mkdir(dirname(evidencePath), { recursive: true });
-  await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, 'utf8');
-  console.log(`Evidence written: ${relative(root, evidencePath)}`);
+  if (evidencePath && evidence) {
+    await mkdir(dirname(evidencePath), { recursive: true });
+    await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, 'utf8');
+    console.log(`Evidence written: ${relative(root, evidencePath)}`);
+  }
+
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch(async error => {
+    const sqlstate = /^[0-9A-Z]{5}$/.test(error?.code ?? '') ? error.code : 'NON_SQL';
+    const assertion = /not ok (\d+)\b/.exec(error?.message ?? '')?.[1] ?? 'none';
+    const position = /^\d+$/.test(String(error?.position ?? '')) ? error.position : 'none';
+    const functionMatch = /PL\/pgSQL function (?:[a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)\([^)]*\) line (\d+)/i.exec(error?.where ?? '');
+    const functionName = functionMatch?.[1] ?? 'none';
+    const functionLine = functionMatch?.[2] ?? 'none';
+    const scriptLine = sqlstate === '42501' ? await diagnoseSqlLine(activeTestFile).catch(() => 'none') : 'none';
+    console.error(`DB_TEST_FAILED: file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion} position=${position} function=${functionName} function-line=${functionLine} script-line=${scriptLine}; raw diagnostics withheld`);
+    process.exitCode = 1;
+  });
 }

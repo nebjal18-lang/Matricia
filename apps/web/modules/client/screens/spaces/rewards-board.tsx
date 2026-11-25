@@ -5,6 +5,8 @@ import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import type { RewardsDashboard } from "@/modules/shared/lib/rewards-referrals-roi/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { conversionStageLabel } from "@/modules/client/screens/recompenses/value-display-labels";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 function formatBps(value: string) {
   const amount = BigInt(value);
@@ -30,8 +32,20 @@ export function RewardsBoard({
   const conversions = dashboard.conversions;
   const link = dashboard.links.find((item) => item.status === "ACTIVE" && item.audience_type === "CLIENT");
   const snapshot = dashboard.roiSnapshots[0];
-  const stageLabels = locale === "ar" ? {REGISTERED:"مسجّل",PROFILE_STARTED:"الملف قيد الإعداد",VERIFIED:"تم التحقق",ACTIVE:"مفعّل",REJECTED:"مرفوض",CANCELLED:"ملغى"} : {REGISTERED:"Inscrit",PROFILE_STARTED:"Dossier en préparation",VERIFIED:"Vérifié",ACTIVE:"Activé",REJECTED:"Refusé",CANCELLED:"Annulé"};
-  const stageLabel = (value:string) => stageLabels[value as keyof typeof stageLabels] ?? (locale === "ar" ? "حالة غير معروفة" : "État non reconnu");
+  const stageLabel = (value: string) => conversionStageLabel(locale, value);
+  const referralRewardStateLabel = (state: NonNullable<RewardsDashboard["referralRewardStatuses"]>[number]["state"]) => {
+    if (state === "GRANTED") return locale === "ar" ? "تم إصدار الرصيد" : "Crédits émis";
+    if (state === "APPROVED_PENDING_EXECUTION") return locale === "ar" ? "موافقة بانتظار الإصدار" : "Approuvée, émission en attente";
+    return locale === "ar" ? "مكافأة مرفوضة" : "Récompense refusée";
+  };
+  const conversionRewardStatus = (stage: RewardsDashboard["conversions"][number]["conversion_stage"]) => {
+    if (stage !== "ACTIVE") return locale === "ar" ? "مكافأة غير متاحة بعد" : "Récompense pas encore disponible";
+    const rows = dashboard.referralRewardStatuses ?? [];
+    if (rows.some((item) => item.state === "GRANTED")) return referralRewardStateLabel("GRANTED");
+    if (rows.some((item) => item.state === "APPROVED_PENDING_EXECUTION")) return referralRewardStateLabel("APPROVED_PENDING_EXECUTION");
+    if (rows.some((item) => item.state === "REJECTED")) return referralRewardStateLabel("REJECTED");
+    return locale === "ar" ? "بانتظار قرار المكافأة" : "En attente de décision";
+  };
   const inviteHref = `/${locale}/client/recompenses${query}#regles`;
   const ambassador = conversions.some((item) => item.conversion_stage === "ACTIVE");
   const engaged = dashboard.grants.length > 0;
@@ -43,7 +57,7 @@ export function RewardsBoard({
         <article className="client-card" id="badges">
           <header className="client-priority-head">
             <h2>{c.badgesTitle}</h2>
-            <a href="#badges" className="client-text-link" aria-current="page">{c.seeBadges}</a>
+            <HashAwareLink href="#badges" className="client-text-link" aria-current="page">{c.seeBadges}</HashAwareLink>
           </header>
           <ul className="client-brief-kpis">
             <li className="client-kpi-card"><span className="client-feed-icon" data-tone="mint"><Award className="size-4" aria-hidden /></span><strong>{c.ambassador}</strong><small>{ambassador ? c.obtained : c.inProgressBadge}</small></li>
@@ -55,7 +69,7 @@ export function RewardsBoard({
         <article className="client-card">
           <header className="client-priority-head">
             <h2>{c.inviteNetwork}</h2>
-            <a href="#regles" className="client-text-link">{c.howItWorks}</a>
+            <HashAwareLink href="#regles" className="client-text-link">{c.howItWorks}</HashAwareLink>
           </header>
           <p>{c.inviteNetworkLead}</p>
           <ol className="client-journey">
@@ -72,7 +86,7 @@ export function RewardsBoard({
               {locale === "ar" ? "شاركوا رابط الدعوة أعلاه مع جهة الاتصال." : "Partagez le lien d’invitation ci-dessus avec votre contact."}
             </p>
           ) : (
-            <Link href={inviteHref} className="client-cta"><Share2 className="size-4" aria-hidden />{c.inviteContact}</Link>
+            <HashAwareLink href={inviteHref} className="client-cta"><Share2 className="size-4" aria-hidden />{c.inviteContact}</HashAwareLink>
           )}
         </article>
       </section>
@@ -80,18 +94,17 @@ export function RewardsBoard({
         <article className="client-card" id="parrainages">
           <header className="client-priority-head">
             <h2>{c.referralStatus}</h2>
-            <span className="client-text-link" aria-hidden>{c.seeHistory}</span>
+            <HashAwareLink href="#parrainages" className="client-text-link">{c.seeHistory}</HashAwareLink>
           </header>
           {conversions.length === 0 ? <p>{locale === "ar" ? "لا إحالات ظاهرة بعد." : "Aucun parrainage visible pour le moment."}</p> : (
             <div className="client-table-wrap">
               <table className="client-space-table">
-                <thead><tr><th>{locale === "ar" ? "المرحلة" : "Étape"}</th><th>{c.status}</th><th /></tr></thead>
+                <thead><tr><th>{locale === "ar" ? "المرحلة" : "Étape"}</th><th>{c.status}</th></tr></thead>
                 <tbody>
                   {conversions.slice(0, 6).map((item) => (
                     <tr key={item.id}>
                       <td>{stageLabel(item.conversion_stage)}</td>
-                      <td><span className="client-status-chip" data-tone="mint">{stageLabel(item.conversion_stage)}</span></td>
-                      <td><span className="client-access-note" dir="ltr">{item.id.slice(0, 8)}</span></td>
+                      <td><span className="client-status-chip" data-tone="mint">{conversionRewardStatus(item.conversion_stage)}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -104,12 +117,12 @@ export function RewardsBoard({
           {snapshot ? (
             <dl className="client-fact-grid">
               <div><small>{c.savingsRoi}</small><span dir="ltr">{formatMinor(snapshot.net_value_minor, snapshot.currency, locale)}</span></div>
-              <div><small>ROI</small><span dir="ltr">{formatBps(snapshot.roi_basis_points)} %</span></div>
-              <div><small>{c.calcMethod}</small><span dir="ltr">{snapshot.formula_version}</span></div>
+              <div><small>{locale === "ar" ? "العائد" : "Rendement"}</small><span dir="ltr">{formatBps(snapshot.roi_basis_points)} %</span></div>
+              <div><small>{c.calcMethod}</small><span>{locale === "ar" ? `منهج ${snapshot.formula_version}` : `Méthode ${snapshot.formula_version}`}</span></div>
             </dl>
           ) : <p>{locale === "ar" ? "يُحتسب العائد بعد اعتماد قاعدة قياس." : "Le ROI s’affiche après validation d’une base de mesure."}</p>}
           <p className="client-access-note">{c.dataSources}</p>
-          <a href="#roi" className="client-ghost-link">{c.calcMethod}</a>
+          <HashAwareLink href="#roi" className="client-ghost-link">{c.calcMethod}</HashAwareLink>
         </article>
       </section>
       <article className="client-quote-banner">

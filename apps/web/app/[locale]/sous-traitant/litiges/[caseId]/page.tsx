@@ -50,7 +50,7 @@ export default async function ProviderDisputePage({
         cases={list.status === "success" ? list.value.cases : [d]}
         selected={d}
         messages={m}
-        canOpen={false}
+        canOpen
         hrefPrefix={`/${locale}/sous-traitant/litiges`}
       >
         <ActionPanel locale={locale} d={d} m={m} keys={keys} />

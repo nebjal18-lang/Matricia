@@ -2,6 +2,7 @@ import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { pinnedProviderRequest, publicIp } from "../marketing-autopilot/provider-orchestrator";
+import { getPlatformRuntimeEnvironment } from "@/modules/shared/lib/platform-configuration/runtime";
 
 type ScanVerdict={result:"CLEAN"|"INFECTED"|"ERROR";engineCode:string;engineVersion:string;retryable?:boolean;retryCode?:"SCANNER_UNAVAILABLE"|"SCANNER_INVALID_RESPONSE"};
 type Dependencies={resolveAddresses?:(host:string)=>Promise<readonly string[]>;sendPinned?:typeof pinnedProviderRequest;request?:typeof fetch;now?:()=>number;nonce?:()=>string};
@@ -16,9 +17,16 @@ async function boundedResponse(response:Response){
 }
 export async function scanDocumentBytes(bytes:Buffer,sha256:string,mediaType:unknown,dependencies:Dependencies={}):Promise<ScanVerdict>{
  if(bytes.length<1||bytes.length>MAX_SCAN_BYTES||sha256!==createHash("sha256").update(bytes).digest("hex"))return failure();
- if(process.env.DELIVERY_PROOF_SCANNER_MODE==="SANDBOX"&&process.env.NODE_ENV!=="production"&&process.env.APP_ENV?.trim().toLowerCase()!=="production")return sandboxInspect(bytes,mediaType);
- const endpoint=process.env.MALWARE_SCANNER_URL??"",token=process.env.MALWARE_SCANNER_TOKEN??"";
- const allowed=(process.env.MALWARE_SCANNER_ALLOWED_HOSTS??"").split(",").map(value=>value.trim().toLowerCase()).filter(Boolean);
+ let environment:Record<string, string | undefined>;try{environment=await getPlatformRuntimeEnvironment(process.env, ["SCANNER"]);}catch{return failure("SCANNER_UNAVAILABLE");}
+ return scanDocumentBytesWithEnvironment(bytes,sha256,mediaType,environment,dependencies);
+}
+/** Draft probes use the same pinned, signed protocol as operational scans.
+ * The caller must supply the independently restricted endpoint/host policy. */
+export async function scanDocumentBytesWithEnvironment(bytes:Buffer,sha256:string,mediaType:unknown,environment:Record<string, string | undefined>,dependencies:Dependencies={}):Promise<ScanVerdict>{
+ if(bytes.length<1||bytes.length>MAX_SCAN_BYTES||sha256!==createHash("sha256").update(bytes).digest("hex"))return failure();
+ if(environment.DELIVERY_PROOF_SCANNER_MODE==="SANDBOX"&&environment.NODE_ENV!=="production"&&environment.APP_ENV?.trim().toLowerCase()!=="production")return sandboxInspect(bytes,mediaType);
+ const endpoint=environment.MALWARE_SCANNER_URL??"",token=environment.MALWARE_SCANNER_TOKEN??"";
+ const allowed=(environment.MALWARE_SCANNER_ALLOWED_HOSTS??"").split(",").map(value=>value.trim().toLowerCase()).filter(Boolean);
  let url:URL;try{url=new URL(endpoint);}catch{return failure("SCANNER_UNAVAILABLE");}
  const host=url.hostname.toLowerCase().replace(/^\[|\]$/gu,"");
  if(url.protocol!=="https:"||url.username||url.password||url.hash||(url.port&&url.port!=="443")||!allowed.includes(host)||token.length<32||(isIP(host)?!publicIp(host):!host.includes(".")||!/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/u.test(host)||/(?:\.local|\.internal|\.invalid|\.test|\.localhost)$/u.test(host)))return failure("SCANNER_UNAVAILABLE");

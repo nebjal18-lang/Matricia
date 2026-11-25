@@ -157,7 +157,7 @@ const fr = {
     saveOtherOrg: "Choisir une autre organisation",
     saveIn: "Enregistrer dans",
     saveOnceTitle: "Une fois enregistré",
-    saveOnceItems: ["Retrouver votre orientation dans Bilan & besoins", "Passer au questionnaire versionné", "Préparer une demande structurée"],
+    saveOnceItems: ["Retrouver votre orientation dans Bilans", "Passer au questionnaire versionné", "Préparer une demande structurée"],
     saveQuote: "Les bonnes questions d’aujourd’hui construisent les grandes opportunités de demain.",
     priorities: {
       organization: ["Mieux structurer le suivi des priorités", "Le suivi des priorités déclaré est partiel ou absent.", "Permet de gagner en clarté, d’aligner les équipes et d’avancer plus efficacement.", "Mettre en place un tableau de suivi simple et partagé, avec des priorités claires et des responsables.", "Clarifier et formaliser", "Mettre en place le suivi", "Ajuster et pérenniser"],

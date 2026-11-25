@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "suite": "linked-commercial",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:40:02.187Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:38:54.456Z",
+    "finishedAt": "2026-11-23T22:40:00.188Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "registrationConsentReceipts": 2,
+    "otpLength": 6,
+    "identityAndConsentVerified": true,
+    "sameUiRegisteredIdentitiesActivated": true,
+    "realPrivatePdfObjects": 6,
+    "realCanonicalIdentityReviews": 2,
+    "realVerifiedCases": 2,
+    "realTrialActivations": 2,
+    "distinctAal2Reviewers": true,
+    "authenticatedAal1ReviewDenied": true,
+    "selfApprovalDenied": true,
+    "correlatedCommandEvidenceVerified": true,
+    "externalRegistryQueried": false,
+    "malwareEngineExternal": false,
+    "locales": [
+      "fr",
+      "ar"
+    ],
+    "realSdkIntakes": 2,
+    "realSdkNeedConversions": 2,
+    "submittedQuestionnaires": 2,
+    "realUiDiagnostics": 2,
+    "realUiRequests": 2,
+    "publishedEvaluationScore": "50.00",
+    "publishedEvaluationAndRulesVerified": true,
+    "realUiOpportunityConversions": 2,
+    "exactBudgetMinor": "125050",
+    "idempotenceAndOptimisticLockVerified": true,
+    "foreignSessionDenied": true,
+    "nativeBoundStorageApiDeleteDenied": true,
+    "nativeBoundStorageApiBytesPreserved": true,
+    "revokedProviderProofHidden": true,
+    "revokedProviderPrivateDownloadDenied": true,
+    "remainingClientPrivateDownloadPreserved": true,
+    "membershipRevocationIsPrivilegedFixtureRestriction": true,
+    "linkedCommercialChains": 2,
+    "sameRequestToAcceptedDeliveryVerified": true,
+    "activeContractWithSubmittedDeliveryVerified": false,
+    "governedDevelopmentMockSignatures": 2,
+    "contractualSignatureValidated": false,
+    "providerQualificationIsHistoricalPrecondition": true,
+    "taxReferenceIsSyntheticHistoricalPrecondition": true,
+    "realCanonicalContractPolicyReviews": true,
+    "realReviewedFiscalServiceMapping": true,
+    "realCanonicalPdfPairs": 2,
+    "canonicalPdfCacheAndForeignDenialVerified": true,
+    "realPublishedChecklists": true,
+    "realPrivateDeliveryFiles": 2,
+    "receptionBeforeScanDenied": true,
+    "foreignDeliveryAccessDenied": true,
+    "stageHashes": {
+      "fr": {
+        "chainHash": "395e1b29ce96963a8d270b4cfd0fc9a9b499914f0552e9a566a5d9619d593b40",
+        "contractHash": "01672cd66f21411020f2f8c01a1a9f885034ac48074386a199a67cd369ca48ca",
+        "signatureFinalHash": "fa290c60a746f25fd53d268385acf1c31f9dd6fe0fb50cbe9fcc8ea5a160375d",
+        "deliverySha256": "8568eadf5ce4343d25506968bb14e962ead5e76d6293f608a887a78c215b3e9c",
+        "sourcePdfFrSha256": "23fae5dc103681faa6d2fe1a6e639d9ed7cda0a5e99c6b256b720a3038eb3ab3",
+        "sourcePdfArSha256": "eab6f87359892621140d3ae8bb922f04375e8d6b49b668a6ec16bf50cfc69fe8"
+      },
+      "ar": {
+        "chainHash": "9f744b3a9a1518fa2122a0f7eb9a8e8c843cf6d862cf508b5cd866f716b22442",
+        "contractHash": "948ab3e39ba617f0cae93367ae7fe21a13a177671484b5883c24ae20f443e6e5",
+        "signatureFinalHash": "ddbc957650a2d5876c276c7a82d57fdbcd186905ea023fa130a18746dbaf43ef",
+        "deliverySha256": "bf7f0d87befd9c71174b607d131911037a72b7422d7e6cab835a058748487dab",
+        "sourcePdfFrSha256": "81b3eacfef7cdf0139d666690f6e515dd85a3058eed14f2d11f43a532ce15861",
+        "sourcePdfArSha256": "e9bd9a20aafa16a3b12c8addc9861878250cc5be12280c9fd1d06ce049439a21"
+      }
+    },
+    "stage": "commercial-native-storage-retention-and-revoked-member",
+    "commandStage": "disable_signature_policy_v1",
+    "activationStage": "DECIDE_CLIENT_COMPLIANCE",
+    "lastThreeActivationStepsOk": [
+      "EVALUATE_CLIENT_COMPLIANCE",
+      "SUBMIT_CLIENT_COMPLIANCE",
+      "DECIDE_CLIENT_COMPLIANCE"
+    ],
+    "failureLocations": [],
+    "assertionResponseCode": null,
+    "assertionResponseReason": null,
+    "assertionResponseStatus": null,
+    "commandDiagnostic": null,
+    "lastThreeCommercialStepsOk": [
+      "decide_mission_milestone",
+      "decide_mission_milestone",
+      "disable_signature_policy_v1"
+    ],
+    "completedCommercialFacts": [
+      {
+        "locale": "fr",
+        "stage": "CANONICAL_BILINGUAL_PDF_PAIR",
+        "sourceHash": "01672cd66f21411020f2f8c01a1a9f885034ac48074386a199a67cd369ca48ca",
+        "frPdfSha256": "23fae5dc103681faa6d2fe1a6e639d9ed7cda0a5e99c6b256b720a3038eb3ab3",
+        "arPdfSha256": "eab6f87359892621140d3ae8bb922f04375e8d6b49b668a6ec16bf50cfc69fe8",
+        "cacheAndForeignDenialVerified": true
+      },
+      {
+        "locale": "fr",
+        "stage": "GOVERNED_NON_CONTRACTUAL_DEV_SIGNATURE",
+        "sourceHash": "01672cd66f21411020f2f8c01a1a9f885034ac48074386a199a67cd369ca48ca",
+        "pdfSha256": "23fae5dc103681faa6d2fe1a6e639d9ed7cda0a5e99c6b256b720a3038eb3ab3",
+        "finalHash": "fa290c60a746f25fd53d268385acf1c31f9dd6fe0fb50cbe9fcc8ea5a160375d",
+        "nativeSignatureFacts": 2,
+        "contractActiveVerified": true,
+        "contractualSignatureValidated": false
+      },
+      {
+        "locale": "ar",
+        "stage": "CANONICAL_BILINGUAL_PDF_PAIR",
+        "sourceHash": "948ab3e39ba617f0cae93367ae7fe21a13a177671484b5883c24ae20f443e6e5",
+        "frPdfSha256": "81b3eacfef7cdf0139d666690f6e515dd85a3058eed14f2d11f43a532ce15861",
+        "arPdfSha256": "e9bd9a20aafa16a3b12c8addc9861878250cc5be12280c9fd1d06ce049439a21",
+        "cacheAndForeignDenialVerified": true
+      },
+      {
+        "locale": "ar",
+        "stage": "GOVERNED_NON_CONTRACTUAL_DEV_SIGNATURE",
+        "sourceHash": "948ab3e39ba617f0cae93367ae7fe21a13a177671484b5883c24ae20f443e6e5",
+        "pdfSha256": "e9bd9a20aafa16a3b12c8addc9861878250cc5be12280c9fd1d06ce049439a21",
+        "finalHash": "ddbc957650a2d5876c276c7a82d57fdbcd186905ea023fa130a18746dbaf43ef",
+        "nativeSignatureFacts": 2,
+        "contractActiveVerified": true,
+        "contractualSignatureValidated": false
+      }
+    ],
+    "httpDiagnostic": null,
+    "storageDiagnostic": {
+      "operation": "BOUND_STORAGE_DELETE",
+      "status": 409,
+      "code": "ResourceReferenced",
+      "foreignKeyMentioned": true,
+      "completed": true
+    },
+    "retainedPrivateSyntheticCanonicalPdfs": 4,
+    "retainedPrivateSyntheticBoundDeliveryFiles": 2,
+    "mode": "REAL_UI_SIGNUP_TO_NATIVE_ACCEPTED_DELIVERY_WITH_DEV_MOCK",
+    "activeOrganizationsAreHistoricalPreconditions": false,
+    "publishedCatalogueAndQuestionnaireAreHistoricalPreconditions": true
+  }
+}

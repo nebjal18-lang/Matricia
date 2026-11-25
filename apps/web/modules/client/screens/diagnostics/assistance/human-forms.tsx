@@ -18,7 +18,7 @@ export function HumanAssistanceForm({ locale, organizationId, request, documents
   const [body, setBody] = useState(request?.body ?? "");
   const [selectedDocuments, setSelectedDocuments] = useState(request?.document_ids ?? []);
   const [consent, setConsent] = useState(false);
-  const availableDocuments = [...documents, ...selectedDocuments.filter(id => !documents.some(document => document.id === id)).map(id => ({ id, fileName: `${fr ? "Pièce à vérifier dans le coffre" : "مستند للتحقق في الخزنة"} · ${id.slice(0,8)}` }))];
+  const availableDocuments = [...documents, ...selectedDocuments.filter(id => !documents.some(document => document.id === id)).map(id => ({ id, fileName: fr ? "Pièce à vérifier dans le coffre" : "مستند للتحقق في الخزنة" }))];
   return <form action={action} className="grid gap-4">
     <input type="hidden" name="locale" value={locale}/><input type="hidden" name="organizationId" value={organizationId}/><input type="hidden" name="requestId" value={request?.id ?? ""}/><input type="hidden" name="version" value={request?.row_version ?? 0}/><input type="hidden" name="key" value={key}/>
     <label className="grid gap-2">{fr ? "Objet de votre demande" : "موضوع الطلب"}<input className="min-h-11 rounded-md border p-3" name="subject" required minLength={3} maxLength={200} value={subject} onChange={event => setSubject(event.target.value)}/></label>

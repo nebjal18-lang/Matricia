@@ -1,7 +1,12 @@
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import type { AdminWorkItem } from "./model";
 
 export type AdminWorkSummary = {
   ordered: AdminWorkItem[];
+  /** Overdue or CRITICAL/HIGH — treat first. */
+  priorityNow: AdminWorkItem[];
+  /** Remaining ordered items after priorityNow. */
+  remaining: AdminWorkItem[];
   critical: number;
   overdue: number;
   dueToday: number;
@@ -15,17 +20,39 @@ function dayInMorocco(value: string | Date) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Casablanca", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
 }
 
+export function isWorkOverdue(dueAt: string, currentTime: string) {
+  return new Date(dueAt).getTime() < new Date(currentTime).getTime();
+}
+
+export function workItemDueTone(dueAt: string, currentTime: string, priority: AdminWorkItem["priority"]): "critical" | "high" | "ok" | "default" {
+  if (isWorkOverdue(dueAt, currentTime)) return priority === "CRITICAL" ? "critical" : "high";
+  if (dayInMorocco(dueAt) === dayInMorocco(currentTime)) return "high";
+  return "default";
+}
+
+function isPriorityNow(item: AdminWorkItem, now: number) {
+  const overdue = new Date(item.dueAt).getTime() < now;
+  return overdue || item.priority === "CRITICAL" || item.priority === "HIGH";
+}
+
 export function summarizeAdminWork(items: AdminWorkItem[], currentTime: string): AdminWorkSummary {
   const now = new Date(currentTime).getTime();
   const today = dayInMorocco(currentTime);
-  const ordered = [...items].sort(
-    (left, right) =>
-      Number(dayInMorocco(left.dueAt) !== today) - Number(dayInMorocco(right.dueAt) !== today) ||
+  const ordered = [...items].sort((left, right) => {
+    const leftOverdue = new Date(left.dueAt).getTime() < now ? 0 : 1;
+    const rightOverdue = new Date(right.dueAt).getTime() < now ? 0 : 1;
+    return (
+      leftOverdue - rightOverdue ||
       priorityRank[left.priority] - priorityRank[right.priority] ||
-      new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime(),
-  );
+      new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime()
+    );
+  });
+  const priorityNow = ordered.filter((item) => isPriorityNow(item, now));
+  const remaining = ordered.filter((item) => !isPriorityNow(item, now));
   return {
     ordered,
+    priorityNow,
+    remaining,
     critical: items.filter((item) => item.priority === "CRITICAL").length,
     overdue: items.filter((item) => new Date(item.dueAt).getTime() < now).length,
     dueToday: items.filter((item) => dayInMorocco(item.dueAt) === today).length,
@@ -76,6 +103,32 @@ export function workItemNextAction(item: AdminWorkItem, locale: "fr" | "ar") {
   return map[item.status] ?? (locale === "ar" ? "مراجعة الملف" : "Examiner le dossier");
 }
 
+/** Prefer enrichment, then a title segment after · / —, never a vague “Plateforme”. */
+export function workItemOrganizationLabel(
+  item: AdminWorkItem,
+  locale: "fr" | "ar",
+  enrichmentName?: string | null,
+) {
+  const named = enrichmentName?.trim();
+  if (named) return named;
+  const title = (locale === "ar" ? item.titleAr : item.titleFr).trim();
+  const parts = title.split(/\s*[·|—–-]\s*/u).map((part) => part.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const tail = parts[parts.length - 1]!;
+    if (tail.length > 2) return tail;
+  }
+  return locale === "ar" ? "منظمة غير مبيّنة" : "Organisation à préciser";
+}
+
+/** Soften seed/demo reasons into an actionable ops label. */
+export function humanizeActionReason(reason: string, locale: "fr" | "ar") {
+  const text = reason.trim();
+  if (/d[eé]mo|parcours admin|اختبار|تجريب/iu.test(text)) {
+    return locale === "ar" ? "طلب إسناد للتحقق" : "Demande d’attribution à valider";
+  }
+  return text;
+}
+
 export const RESOLUTION_CODES = [
   { code: "COMPLETED", fr: "Traité et clos", ar: "تمت المعالجة والإغلاق" },
   { code: "INFO_REQUESTED", fr: "Complément demandé", ar: "طلب تكملة" },
@@ -84,31 +137,118 @@ export const RESOLUTION_CODES = [
   { code: "FALSE_POSITIVE", fr: "Fausse alerte", ar: "إنذار كاذب" },
 ] as const;
 
-export function dossierHref(locale: "fr" | "ar", item: AdminWorkItem) {
-  const type = item.resourceType.toLowerCase();
-  const id = item.resourceId;
-  if (type === "franchise_governance_signal_review") return `/${locale}/administration/gouvernance-franchise/signalements/${id}`;
-  if (type === "franchise_control_plan_owner") return `/${locale}/administration/gouvernance-franchise/plans/${id}/responsable`;
-  if (type === "notification_template_review") return `/${locale}/administration/messagerie/preferences`;
-  if (type === "membership_capability_review") return `/${locale}/administration/revues-capacites`;
-  if (type === "privacy_retention_action") return `/${locale}/administration/confidentialite`;
-  if (type === "client_assistance_request") return `/${locale}/administration/assistance/${id}`;
-  if (type.includes("dispute") || item.sourceKind === "DISPUTE") return `/${locale}/administration/litiges/${id}`;
-  if (type.includes("compliance")) return `/${locale}/administration/conformite-clients`;
-  if (type.includes("provider") || type.includes("qualification")) return `/${locale}/administration/providers`;
-  if (type.includes("document")) return `/${locale}/administration/documents/${id}`;
-  if (type.includes("mission") || type.includes("deliverable") || type.includes("milestone")) {
-    return `/${locale}/administration/missions/${id}`;
-  }
-  if (type.includes("contract") || type.includes("amendment")) return `/${locale}/administration/contrats/${id}`;
-  if (type.includes("quote") || type.includes("rfq") || type.includes("request") || type.includes("matching")) {
-    return `/${locale}/administration/demandes/${id}`;
-  }
-  if (type.includes("diagnostic")) return `/${locale}/administration/diagnostics/${id}`;
-  if (type.includes("payment") || type.includes("finance") || type.includes("invoice") || item.sourceKind === "FINANCE") {
-    return `/${locale}/administration/finance`;
-  }
-  if (type.includes("pool") || item.sourceKind === "POOL") return `/${locale}/administration/achats-groupes`;
-  if (item.organizationId) return `/${locale}/administration/entreprises/${item.organizationId}`;
-  return `/${locale}/administration/command-center`;
+// A resource ID is not its parent's ID. Only routes backed by a projection
+// keyed by this exact resource type may receive it as a detail segment.
+const detailSpaces: Record<string, string> = {
+  dispute: "litiges", dispute_case: "litiges", mission_dispute: "litiges",
+  service_request: "demandes",
+  quote: "devis", matching_run: "matching",
+  milestone: "jalons", mission_milestone: "jalons",
+  amendment: "avenants", contract_amendment: "avenants",
+  mission: "missions", contract: "contrats",
+  diagnostic: "diagnostics", diagnostic_run: "diagnostics",
+  provider_document_version: "documents", client_compliance_document: "documents",
+};
+const queueSpaces: Record<string, string> = {
+  rfq: "matching", rfq_provider: "matching",
+  deliverable: "missions", mission_deliverable: "missions",
+  quote_version: "devis", contract_version: "contrats",
+  provider_document: "documents", document: "documents",
+};
+
+const resourceTypeFr: Record<string, string> = {
+  organization: "Entreprise",
+  provider: "Sous-traitant",
+  client: "Client",
+  case: "Dossier",
+  user: "Utilisateur",
+  membership: "Adhésion",
+  release: "Publication",
+  configuration: "Configuration",
+  franchise: "Franchise",
+  mission: "Mission",
+  contract: "Contrat",
+  quote: "Devis",
+  dispute: "Litige",
+  diagnostic: "Diagnostic",
+};
+
+const resourceTypeAr: Record<string, string> = {
+  organization: "مؤسسة",
+  provider: "مقدم خدمة",
+  client: "عميل",
+  case: "ملف",
+  user: "مستخدم",
+  membership: "عضوية",
+  release: "نشر",
+  configuration: "إعداد",
+  franchise: "امتياز",
+  mission: "مهمة",
+  contract: "عقد",
+  quote: "عرض سعر",
+  dispute: "نزاع",
+  diagnostic: "تشخيص",
+};
+
+export function actionResourceLabel(resourceType: string, locale: "fr" | "ar") {
+  const key = resourceType.trim().toLowerCase();
+  const map = locale === "ar" ? resourceTypeAr : resourceTypeFr;
+  return map[key] ?? (locale === "ar" ? "مورد" : "Ressource");
+}
+
+export function shortReference(value: string, keep = 8) {
+  const clean = value.trim();
+  if (clean.length <= keep * 2 + 1) return clean;
+  return `${clean.slice(0, keep)}…${clean.slice(-4)}`;
+}
+
+/** Machine datetime for <time dateTime> without leaking raw high-precision payloads. */
+export function compactDateTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 19);
+  return date.toISOString().replace(/\.\d{3}Z$/u, "Z");
+}
+
+export function formatAdminDateTime(value: string, locale: "fr" | "ar") {
+  return formatDateTimeCasablanca(value, locale);
+}
+
+export function actionStatusTone(status: string): "critical" | "high" | "ok" | "default" {
+  if (status === "FAILED" || status === "REJECTED") return "critical";
+  if (status === "PENDING_APPROVAL" || status === "AUTHORIZED" || status === "REQUEST_TRACKED") return "high";
+  if (status === "EXECUTED") return "ok";
+  return "default";
+}
+
+export function actionEnvironmentTone(environment: string): "critical" | "high" | "default" {
+  if (environment === "PRODUCTION") return "critical";
+  if (environment === "STAGING") return "high";
+  return "default";
+}
+
+export function dossierHref(locale: "fr" | "ar", item: AdminWorkItem, query = "") {
+  const type = item.resourceType.trim().toLowerCase();
+  const id = encodeURIComponent(item.resourceId);
+  const base = `/${locale}/administration`;
+  let path: string;
+  if (["", ".", ".."].includes(item.resourceId)) path = `${base}/command-center`;
+  else if (type === "franchise_governance_signal_review") path = `${base}/gouvernance-franchise/signalements/${id}`;
+  else if (type === "franchise_control_plan_owner") path = `${base}/gouvernance-franchise/plans/${id}/responsable`;
+  else if (type === "notification_template_review") path = `${base}/messagerie/preferences`;
+  else if (type === "membership_capability_review") path = `${base}/revues-capacites`;
+  else if (type === "privacy_retention_action") path = `${base}/confidentialite`;
+  else if (type === "client_assistance_request") path = `${base}/assistance/${id}`;
+  else if (Object.hasOwn(detailSpaces, type)) path = `${base}/${detailSpaces[type]}/${id}`;
+  else if (Object.hasOwn(queueSpaces, type)) path = `${base}/${queueSpaces[type]}`;
+  else if (type.includes("compliance")) path = `${base}/conformite-clients`;
+  else if (type.includes("provider") || type.includes("qualification")) path = `${base}/providers`;
+  else if (type.includes("document")) path = `${base}/documents`;
+  else if (type.includes("payment") || type.includes("finance") || type.includes("invoice") || item.sourceKind === "FINANCE") path = `${base}/finance`;
+  else if (type.includes("pool") || item.sourceKind === "POOL") path = `${base}/achats-groupes`;
+  else if (item.organizationId) path = `${base}/entreprises/${encodeURIComponent(item.organizationId)}`;
+  else path = `${base}/command-center`;
+  // Search and approval pagination belong to the command center. Only the
+  // organization context follows a link into another business module.
+  const organizationId = new URLSearchParams(query).get("organizationId");
+  return organizationId ? `${path}?${new URLSearchParams({ organizationId })}` : path;
 }

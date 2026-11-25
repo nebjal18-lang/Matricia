@@ -26,8 +26,9 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
   const c = spaceCopy(locale);
   const [result, amendments, vault] = await Promise.all([loadContractMissions(locale, space.selectedOrganizationId), loadClientAmendments(space.selectedOrganizationId), loadClientDocumentVault(space.selectedOrganizationId)]);
   const expired = vault.status === "success" ? expiredDocuments(vault.value.documents) : [];
+  const missionAccessIssue = result.status === "error" && (result.reason === "NO_CLIENT_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" || result.reason === "FORBIDDEN_ORGANIZATION");
   return (
-    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} active="missions" title={c.misTitle} lead={c.misLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/client/demandes${space.selectedQuery}`} label={c.openFolder} />}>
+    <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="missions" title={c.misTitle} lead={c.misLead} kicker={c.kicker} actions={<SpaceActions href={`/${locale}/client/demandes${space.selectedQuery}`} label={c.openFolder} />}>
       {expired.length > 0 ? (
         <Alert>
           <AlertTitle>{messages.expiredDocumentTitle}</AlertTitle>
@@ -57,7 +58,7 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
         decision: result.dashboard.missions.flatMap((mission) => mission.milestones.filter((item) => item.status === "SUBMITTED" || item.status === "IN_REVIEW")).map((item) => ({
           title: item.title,
           context: workflowStatusLabel(item.status,locale),
-          impact: item.dueAt ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(item.dueAt)) : messages.empty,
+          impact: item.dueAt ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(item.dueAt)) : messages.empty ?? "?",
           href: `/${locale}/client/missions${space.selectedQuery}`,
         }))[0] ?? null,
         files: result.dashboard.missions.flatMap((mission) => mission.deliverables.map((item) => ({
@@ -70,7 +71,19 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
       <details className="client-ops">
         <summary>{c.opsMissions}</summary>
         {result.status === "error" ? (
-          <Alert><AlertTitle>{messages.noOrg}</AlertTitle><AlertDescription>{result.reason}</AlertDescription></Alert>
+          <Alert>
+            <AlertTitle>{missionAccessIssue ? messages.noOrg : messages.loadError}</AlertTitle>
+            <AlertDescription>
+              {missionAccessIssue
+                ? messages.noOrg
+                : locale === "fr"
+                  ? "La lecture des contrats ou missions a échoué. Réessayez ou conservez la référence support ci-dessous."
+                  : "تعذر قراءة العقود أو المهام. أعيدوا المحاولة أو احتفظوا بمرجع الدعم أدناه."}
+              {result.status === "error" && !missionAccessIssue ? (
+                <span className="mt-2 block font-mono text-xs" dir="ltr">{locale === "ar" ? `مرجع ${result.reason}` : `Réf. ${result.reason}`}</span>
+              ) : null}
+            </AlertDescription>
+          </Alert>
         ) : (
           <div className="space-y-6">
             <MissionPanel d={result.dashboard} locale={locale} m={messages} />

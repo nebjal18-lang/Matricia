@@ -38,7 +38,7 @@ export default async function OrganizationRolesPage({
     return (
       <ConnectedAppShell
         locale={locale}
-        organizationId={query.organizationId}
+        {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
         title={messages.title}
         lead={messages.description}
         kicker={messages.eyebrow}
@@ -63,7 +63,7 @@ export default async function OrganizationRolesPage({
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
       title={messages.title}
       lead={messages.description}
       kicker={messages.eyebrow}
@@ -84,7 +84,7 @@ export default async function OrganizationRolesPage({
             </header>
             <RoleRequestForm locale={locale} organizations={result.organizations} idempotencyKey={randomUUID()} messages={messages} />
           </article>
-          <article className="client-card">
+          <article className="client-card" id="roles">
             <header><h2>{messages.membershipsTitle}</h2></header>
             {result.memberships.length === 0 ? <p className="client-access-note">{messages.membershipsEmpty}</p> : (
               <ul className="client-feed">

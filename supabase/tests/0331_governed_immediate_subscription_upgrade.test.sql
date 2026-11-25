@@ -87,6 +87,8 @@ insert into p245 values('prep',public.prepare_subscription_payment_intent_v2('b2
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p245 values('intent',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p245 where k='prep'),'DEMO','SYNTHETIC-CLONE-DEMO-ORDER-245',12345,'EUR'));
 insert into p245 values('paid',public.process_verified_subscription_payment_v2('DEMO','DEMO','SYNTHETIC-DEMO-EVENT-245','SYNTHETIC-CLONE-DEMO-ORDER-245','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-DEMO-CAPTURE-245',repeat('d',64),repeat('e',64)));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2450000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 
 -- The only payment actor is the existing explicit DEV/SANDBOX trusted SQL port;
@@ -106,10 +108,14 @@ insert into u331 values('policy',public.propose_subscription_upgrade_policy_v1('
 select throws_ok($$select public.decide_subscription_upgrade_policy_v1((select(v->>'policy_id')::uuid from u331 where k='policy'),(select v->>'content_hash'from u331 where k='policy'),true,'TEST ONLY self review forbidden')$$,'42501','UPGRADE_POLICY_INDEPENDENT_REVIEW_REQUIRED','policy author cannot activate their own commercial rule');
 select set_config('request.jwt.claim.sub','a2450000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
 select public.decide_subscription_upgrade_policy_v1((select(v->>'policy_id')::uuid from u331 where k='policy'),(select v->>'content_hash'from u331 where k='policy'),true,'TEST ONLY independently approved restart');
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select set_config('request.jwt.claim.sub','a2450000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
 select throws_ok($$select public.create_client_subscription_upgrade_quote_v1('b2450000-0000-4000-8000-000000000001',(select(v->>'policy_id')::uuid from u331 where k='policy'),'upgrade331-aal1')$$,'42501','UPGRADE_QUOTE_DENIED','AAL1 cannot create a payable upgrade');
 select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into u331 values('quote',public.create_client_subscription_upgrade_quote_v1('b2450000-0000-4000-8000-000000000001',(select(v->>'policy_id')::uuid from u331 where k='policy'),'upgrade331-quote'));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select is((select v->>'amount_minor'from u331 where k='quote'),'24690','server quotes exact full target price without a guessed proration');
 select is((select v#>>'{snapshot,paid_credits_treatment}'from u331 where k='quote'),'PRESERVE_ORIGINAL_SCHEDULES_AND_EXPIRIES','paid old credits keep their acquired schedule and expiry');
 select ok(not public.subscription_has_entitlement('b2450000-0000-4000-8000-000000000001','UPGRADE_TARGET_FEATURE'),'quote does not grant unpaid target rights');
@@ -127,12 +133,16 @@ select lives_ok($$select public.prepare_subscription_payment_capture_v2((select(
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into u331 values('time',jsonb_build_object('paid_at',clock_timestamp()));
 insert into u331 values('paid',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-UPGRADE-EVENT-0331','SYNTHETIC-UPGRADE-ORDER-0331','PAYMENT_SUCCEEDED',24690,'EUR',(select(v->>'paid_at')::timestamptz from u331 where k='time'),'SYNTHETIC-UPGRADE-CAPTURE-0331',repeat('3',64),repeat('4',64)));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select is((select v->>'outcome'from u331 where k='paid'),'SUBSCRIPTION_ACTIVATED','only verified paid source activates the new period');
 select is((select count(*)::integer from public.subscription_cycles where organization_id='b2450000-0000-4000-8000-000000000001'),2,'new upgrade appends a cycle without rewriting the paid source cycle');
 select is((select count(*)::integer from private.subscription_upgrade_applications_v1 where organization_id='b2450000-0000-4000-8000-000000000001'),1,'source cycle, target cycle, policy and journal have one immutable application proof');
 select is((select amount_minor from public.subscription_cycles where organization_id='b2450000-0000-4000-8000-000000000001'and cycle_number=1),12345::bigint,'original paid amount remains immutable');
 select ok(private.subscription_payment_cycle_v1((select id from public.subscription_payment_events where provider_event_id='SYNTHETIC-UPGRADE-EVENT-0331'))is not null,'upgraded payment is still canonically funded by exact target price, intent, journal and cycle');
 insert into u331 values('replay',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-UPGRADE-EVENT-0331','SYNTHETIC-UPGRADE-ORDER-0331','PAYMENT_SUCCEEDED',24690,'EUR',(select(v->>'paid_at')::timestamptz from u331 where k='time'),'SYNTHETIC-UPGRADE-CAPTURE-0331',repeat('3',64),repeat('4',64)));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select is((select v->>'replayed'from u331 where k='replay'),'true','verified event replay is acknowledged without a second debit or cycle');
 select is((select count(*)::integer from public.subscription_cycles where organization_id='b2450000-0000-4000-8000-000000000001'),2,'replayed upgrade creates no extra paid cycle');
 select set_config('request.jwt.claim.sub','a2450000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2450000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);

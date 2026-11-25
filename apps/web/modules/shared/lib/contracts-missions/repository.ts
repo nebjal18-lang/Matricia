@@ -6,7 +6,7 @@ import {missionPreparationSchema,type MissionPreparation}from"./preparation";
 import { signatureReadinessSchema } from "./signature-readiness";
 import { readContractPages, readContractRelations } from "./read-pages";
 import { resolveClientOrganizationContext } from "@/modules/shared/client-organization-context";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import type { ContractItemType, ContractMissionDashboard } from "./model";
 
 const id = z.string().uuid();
@@ -20,7 +20,7 @@ const itemType = z.enum(["DELIVERABLE", "EXCLUSION", "ACCEPTANCE_CRITERION", "PA
 const itemRow = z.object({ id, contract_version_id: id, item_key: z.string(), item_type: itemType, label_fr: z.string().min(1), label_ar: z.string().min(1), sort_order: z.number().int().positive() });
 const missionRow = z.object({ id, contract_id: id, contract_version_id: id, scope_reconciliation_required:z.boolean(), status: z.string(), started_at: z.string().nullable(), completed_at: z.string().nullable() });
 const milestoneRow = z.object({ id, mission_id: id, milestone_key: z.string(), title_fr: z.string(), title_ar: z.string(), status: z.string(), due_at: z.string().nullable(), row_version: z.number().int().positive() });
-const deliverableRow = z.object({ id, mission_id: id, deliverable_key: z.string(), contractual_key:z.string().nullable(), source_contract_version_id:id.nullable(), scope_generation:z.number().int().positive(), label_fr: z.string(), label_ar: z.string(), status: z.string(), current_version: z.number().int().nonnegative() });
+const deliverableRow = z.object({ id, mission_id: id, milestone_id: id.nullable(), deliverable_key: z.string(), contractual_key:z.string().nullable(), source_contract_version_id:id.nullable(), scope_generation:z.number().int().positive(), label_fr: z.string(), label_ar: z.string(), status: z.string(), current_version: z.number().int().nonnegative() });
 const criterionRow = z.object({ deliverable_id: id, delivery_version: z.number().int().nonnegative(), label_fr:z.string().nullable(), label_ar:z.string().nullable(), criterion_key: z.string(), status: z.string() });
 const deliveryVersionRow = z.object({ id, deliverable_id: id, version: z.number().int().positive() });
 const deliveryProofRow = z.object({ delivery_version_id: id, scan_status: z.enum(["PENDING","CLEAN","INFECTED","ERROR"]) });
@@ -31,13 +31,12 @@ function rows<T>(schema: z.ZodType<T>, value: unknown) {
 }
 
 export async function loadContractMissions(locale: "fr" | "ar", requestedOrganizationId?: string): Promise<LoadResult> {
-  const client = await getSupabaseServerClient();
-  const authResult = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
   const authFailure = classifyAuthReadFailure(authResult.error);
   if (authFailure) return {status:"error",reason:authFailure === "UNAVAILABLE" ? "QUERY_FAILED" : "UNAUTHENTICATED"};
   const auth = authResult.data;
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };
-  const membershipResult = await readContractPages((from,to)=>client.from("organization_memberships").select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["CLIENT_OWNER", "CLIENT_ADMIN"]).order("id").range(from,to));
+  const membershipResult = await readContractPages((from,to)=>client.from("organization_memberships").select("organization_id,organizations!inner(display_name),organization_member_roles!inner(role_code,revoked_at)").eq("user_id", auth.user.id).eq("status", "ACTIVE").is("organization_member_roles.revoked_at", null).in("organization_member_roles.role_code", ["CLIENT_OWNER", "CLIENT_ADMIN", "CLIENT_BUYER"]).order("id").range(from,to));
   if (membershipResult.error) return { status: "error", reason: membershipResult.error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE" : "QUERY_FAILED" };
   const memberships = z.array(member).safeParse(membershipResult.data);
   if (!memberships.success) return { status: "error", reason: "INVALID_RESPONSE" };
@@ -67,9 +66,19 @@ export async function loadContractMissions(locale: "fr" | "ar", requestedOrganiz
   // A signature subsystem outage does not erase the healthy contractual history.
   for(let offset=0;offset<contractIds.length;offset+=100){try{const ids=contractIds.slice(offset,offset+100),result=await client.rpc("list_contract_signature_readiness_v1",{p_contract_ids:ids}),parsed=z.array(signatureReadinessSchema.extend({contract_id:id})).max(100).safeParse(result.data);if(!result.error&&parsed.success&&parsed.data.every(row=>ids.includes(row.contract_id)))for(const row of parsed.data)readinessById.set(row.contract_id,row);}catch{ /* Explicitly unavailable on the corresponding contract. */ }}
   const preparationById=new Map<string,MissionPreparation>();
-  for(const contract of contracts.data.filter(row=>["ACTIVE","AMENDED"].includes(row.status)&&!missions.data.some(mission=>mission.contract_id===row.id))){
+  const prepTargets=contracts.data.filter(row=>["ACTIVE","AMENDED"].includes(row.status)&&!missions.data.some(mission=>mission.contract_id===row.id)).map(contract=>{
     const current=versions.data.find(version=>version.contract_id===contract.id&&version.version===contract.current_version);
-    if(current){try{const result=await client.rpc("get_client_mission_preparation_v1",{p_contract_id:contract.id,p_contract_version_id:current.id});const parsed=missionPreparationSchema.safeParse(result.data);if(!result.error&&parsed.success&&parsed.data.contract_id===contract.id&&parsed.data.contract_version_id===current.id)preparationById.set(contract.id,parsed.data);}catch{ /* The preparation state is explicitly unavailable; contractual history remains readable. */ }}
+    return current?{contract,current}:null;
+  }).filter((row):row is{contract:(typeof contracts.data)[number];current:(typeof versions.data)[number]}=>row!==null);
+  for(let offset=0;offset<prepTargets.length;offset+=8){
+    const chunk=prepTargets.slice(offset,offset+8);
+    await Promise.all(chunk.map(async({contract,current})=>{
+      try{
+        const result=await client.rpc("get_client_mission_preparation_v1",{p_contract_id:contract.id,p_contract_version_id:current.id});
+        const parsed=missionPreparationSchema.safeParse(result.data);
+        if(!result.error&&parsed.success&&parsed.data.contract_id===contract.id&&parsed.data.contract_version_id===current.id)preparationById.set(contract.id,parsed.data);
+      }catch{ /* The preparation state is explicitly unavailable; contractual history remains readable. */ }
+    }));
   }
   const versionIds = versions.data.map((version) => version.id);
   const missionIds = missions.data.map((mission) => mission.id);
@@ -78,7 +87,7 @@ export async function loadContractMissions(locale: "fr" | "ar", requestedOrganiz
   const [itemsResult, milestonesResult, deliverablesResult,retirementResult,milestoneRetirementResult] = await Promise.all([
     readContractRelations(versionIds,(ids,from,to)=>client.from("contract_items").select("id,contract_version_id,item_key,item_type,label_fr,label_ar,sort_order").in("contract_version_id", ids).order("sort_order").order("id").range(from,to)),
     missionIds.length ? readContractRelations(missionIds,(ids,from,to)=>client.from("mission_milestones").select("id,mission_id,milestone_key,title_fr,title_ar,status,due_at,row_version").in("mission_id", ids).order("sort_order").order("id").range(from,to)) : Promise.resolve({ data: [], error: null }),
-    missionIds.length ? readContractRelations(missionIds,(ids,from,to)=>client.from("deliverables").select("id,mission_id,deliverable_key,contractual_key,source_contract_version_id,scope_generation,label_fr,label_ar,status,current_version").in("mission_id", ids).order("id").range(from,to)) : Promise.resolve({ data: [], error: null }),
+    missionIds.length ? readContractRelations(missionIds,(ids,from,to)=>client.from("deliverables").select("id,mission_id,milestone_id,deliverable_key,contractual_key,source_contract_version_id,scope_generation,label_fr,label_ar,status,current_version").in("mission_id", ids).order("id").range(from,to)) : Promise.resolve({ data: [], error: null }),
     missionIds.length?readContractRelations(missionIds,(ids,from,to)=>client.from("mission_obligation_retirements_v1").select(retirementColumns).in("mission_id",ids).order("deliverable_id").range(from,to)):Promise.resolve({data:[],error:null}),
     missionIds.length?readContractRelations(missionIds,(ids,from,to)=>client.from("mission_milestone_retirements_v1").select(milestoneRetirementColumns).in("mission_id",ids).order("milestone_id").range(from,to)):Promise.resolve({data:[],error:null}),
   ]);
@@ -171,7 +180,7 @@ export async function loadContractMissions(locale: "fr" | "ar", requestedOrganiz
         startedAt: mission.started_at,
         completedAt: mission.completed_at,
         milestones: milestones.data.filter((milestone) => milestone.mission_id === mission.id).map((milestone) => ({ retired:retiredMilestones.data.some(retired=>retired.milestone_id===milestone.id),id: milestone.id, key: milestone.milestone_key, title: locale === "ar" ? milestone.title_ar : milestone.title_fr, status: milestone.status, dueAt: milestone.due_at, rowVersion: milestone.row_version })),
-        deliverables: deliverables.data.filter((deliverable) => deliverable.mission_id === mission.id).map((deliverable) => {const current=deliveryVersions.data.find((version)=>version.deliverable_id===deliverable.id&&version.version===deliverable.current_version);const proofs=current?deliveryProofs.data.filter((proof)=>proof.delivery_version_id===current.id):[];const proofScanStatus=proofs.length===0?"NONE":proofs.every((proof)=>proof.scan_status==="CLEAN")?"CLEAN":proofs.some((proof)=>proof.scan_status==="INFECTED")?"INFECTED":proofs.some((proof)=>proof.scan_status==="ERROR")?"ERROR":"PENDING";return { retirement:projectRetirement(retirements.data.find(retired=>retired.deliverable_id===deliverable.id)),contractualKey:deliverable.contractual_key??deliverable.deliverable_key,sourceContractVersionId:deliverable.source_contract_version_id,scopeGeneration:deliverable.scope_generation,id: deliverable.id, key: deliverable.deliverable_key, label: locale === "ar" ? deliverable.label_ar : deliverable.label_fr, status: deliverable.status, currentVersion: deliverable.current_version, proofScanStatus, criteria: criteria.data.filter((criterion) => criterion.deliverable_id === deliverable.id && criterion.delivery_version === deliverable.current_version).map((criterion) => ({ key: criterion.criterion_key,label:(locale==="ar"?criterion.label_ar:criterion.label_fr)??(locale==="ar"?checklistLabels.data.find(item=>item.mission_id===mission.id&&item.item_key===criterion.criterion_key)?.label_ar:checklistLabels.data.find(item=>item.mission_id===mission.id&&item.item_key===criterion.criterion_key)?.label_fr)??criterion.criterion_key, status: criterion.status })) };}),
+        deliverables: deliverables.data.filter((deliverable) => deliverable.mission_id === mission.id).map((deliverable) => {const current=deliveryVersions.data.find((version)=>version.deliverable_id===deliverable.id&&version.version===deliverable.current_version);const proofs=current?deliveryProofs.data.filter((proof)=>proof.delivery_version_id===current.id):[];const proofScanStatus=proofs.length===0?"NONE":proofs.every((proof)=>proof.scan_status==="CLEAN")?"CLEAN":proofs.some((proof)=>proof.scan_status==="INFECTED")?"INFECTED":proofs.some((proof)=>proof.scan_status==="ERROR")?"ERROR":"PENDING";return { retirement:projectRetirement(retirements.data.find(retired=>retired.deliverable_id===deliverable.id)),contractualKey:deliverable.contractual_key??deliverable.deliverable_key,sourceContractVersionId:deliverable.source_contract_version_id,scopeGeneration:deliverable.scope_generation,id: deliverable.id, milestoneId: deliverable.milestone_id, key: deliverable.deliverable_key, label: locale === "ar" ? deliverable.label_ar : deliverable.label_fr, status: deliverable.status, currentVersion: deliverable.current_version, proofScanStatus, criteria: criteria.data.filter((criterion) => criterion.deliverable_id === deliverable.id && criterion.delivery_version === deliverable.current_version).map((criterion) => ({ key: criterion.criterion_key,label:(locale==="ar"?criterion.label_ar:criterion.label_fr)??(locale==="ar"?checklistLabels.data.find(item=>item.mission_id===mission.id&&item.item_key===criterion.criterion_key)?.label_ar:checklistLabels.data.find(item=>item.mission_id===mission.id&&item.item_key===criterion.criterion_key)?.label_fr)??criterion.criterion_key, status: criterion.status })) };}),
       }];
     }),
   } };

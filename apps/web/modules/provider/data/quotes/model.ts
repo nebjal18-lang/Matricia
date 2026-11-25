@@ -131,7 +131,7 @@ export type ProviderQuoteDashboard = {
   organizationName: string;
   canManage: boolean;
   taxRules: ProviderTaxRule[];
-  counts?: {consultationsDue:number;quotesInProgress:number};
-  pagination?: {page:number;pageSize:number;total:number};
+  counts?: {consultationsDue:number;quotesInProgress:number}|undefined;
+  pagination?: {page:number;pageSize:number;total:number}|undefined;
   invitations: ProviderQuoteInvitation[];
 };

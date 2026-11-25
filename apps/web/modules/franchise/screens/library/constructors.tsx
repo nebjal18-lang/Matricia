@@ -8,8 +8,8 @@ import {
   FileText,
   Send,
 } from "lucide-react";
-import { QuestionnaireBuilder } from "@/modules/admin/screens/catalogue/questionnaire-builder";
-import { getBuilderMessages } from "@/modules/admin/screens/catalogue/messages";
+import { getBuilderMessages } from "@/modules/shared/catalogue-builders/messages";
+import { QuestionnaireBuilder } from "@/modules/shared/catalogue-builders/questionnaire-builder";
 import { libraryCopy } from "@/modules/franchise/data/library/copy";
 import type { FranchiseCatalogRow, FranchiseLibraryWorkspace } from "@/modules/franchise/data/library/workspace-model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";

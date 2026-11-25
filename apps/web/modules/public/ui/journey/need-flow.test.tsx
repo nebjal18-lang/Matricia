@@ -68,7 +68,7 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
   });
 
   it("marks the recap as the fifth stage and preserves the original input", () => {
-    const html = renderToStaticMarkup(<NeedResult locale={locale} draft={draft(4)} authenticated={false} organizations={[]} storageAvailable storageNotice={null} invalidSelection={false} erase={() => undefined} edit={() => undefined} confirm={() => undefined} updateClassification={() => undefined} />);
+    const html = renderToStaticMarkup(<NeedResult locale={locale} draft={draft(4)} authenticated={false} organizations={[]} storageAvailable storageNotice={null} invalidSelection={false} erase={() => undefined} edit={() => undefined} confirm={() => undefined} updateClassification={() => undefined} updateOrganizationId={() => undefined} />);
     expect(html).toContain('aria-valuenow="5"');
     expect(html).toContain('aria-valuemax="5"');
     expect(html).toContain("Rénover mon chantier — نصي الأصلي");
@@ -82,6 +82,17 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
     expect(html).toContain(`<h2 id="need-step-title">${step + 1}. ${stage.title}</h2>`);
     expect(html).toContain(`aria-valuenow="${step + 1}"`);
     expect(html.match(/aria-current="step"/g)).toHaveLength(1);
+    expect(html.match(/<h2 id="need-step-title">/g)).toHaveLength(1);
+  });
+
+  it("keeps PUB-NEED-001 numbering and wording on the understand step", () => {
+    const html = renderToStaticMarkup(<NeedComposer locale={locale} draft={draft(1)} setDraft={() => undefined} storageNotice={null} storageAvailable invalidSelection={false} authenticated={false} goRecap={() => undefined} />);
+    expect(html).toContain(`<h2 id="need-step-title">2. ${getNeedStages(locale)[1]!.title}</h2>`);
+    expect(html).not.toContain("<h2>3.");
+    if (locale === "fr") {
+      expect(html).toContain("vous pourrez");
+      expect(html).not.toContain("nous pourrez");
+    }
   });
 
   it("preserves user free text, answers and canonical codes when restoring in another language", () => {
@@ -93,6 +104,6 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
     expect(restored.classification?.serviceCode).toBe("BTP-RENOV");
     expect(restored.classification?.libraryCode).toBe("BTP");
     expect(restored.step).toBe(3);
-    if (locale === "ar") expect(restored.classification?.serviceName).toContain("الاسم العربي غير متاح");
+    if (locale === "ar") expect(restored.classification?.serviceName).toBe("تجديد مبنى أو محل");
   });
 });

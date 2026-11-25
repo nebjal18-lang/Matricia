@@ -25,7 +25,7 @@ for (const locale of ["fr", "ar"] as const) {
     await expect(page).toHaveURL(new RegExp(`/${locale}/abonnements$`));
     await page.goto(`/${locale}/contact`);
     await expect(page.getByRole("heading", { level:1 })).toBeVisible();
-    await expect(page.getByRole("button", { name: locale === "fr" ? "Enregistrer ma demande" : "تسجيل طلبي" })).toBeVisible();
+    await expect(page.getByRole("button", { name: locale === "fr" ? "Envoyer la demande" : "إرسال الطلب" })).toBeVisible();
   });
 }
 

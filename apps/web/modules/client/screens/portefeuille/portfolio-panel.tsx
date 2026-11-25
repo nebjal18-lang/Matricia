@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { casablancaIsoToLocal } from "@/modules/shared/lib/geo/casablanca-time";
 import { portfolioCalendarTitle } from "./calendar-title";
 import { Badge } from "@/modules/shared/ui/badge";
 import { Button } from "@/modules/shared/ui/button";
@@ -16,6 +17,7 @@ import {
   progressBarPercent,
   type Portfolio,
 } from "@/modules/client/data/portfolio/model";
+import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import {
   createCostCenter,
   createProject,
@@ -156,8 +158,8 @@ function OrganizationPortfolio({ locale, data, m, keys, organizationId }: Props 
         {contracts.length === 0 ? <p>{m.empty}</p> : contracts.map((contract) => (
           <div key={contract.id} className="client-portfolio-item">
             <div className="client-portfolio-item-head">
-              <strong>{m.contract} <span dir="ltr">{contract.id.slice(0, 8)}</span></strong>
-              <Badge variant="outline">{contract.status}</Badge>
+              <strong>{m.contract} v{contract.version}</strong>
+              <Badge variant="outline">{workflowStatusLabel(contract.status, locale)}</Badge>
             </div>
             <p>{m.version} {contract.version} · {contract.projectId ? projectCode(contract.projectId) : m.unlinked}</p>
           </div>
@@ -229,7 +231,7 @@ function OrganizationPortfolio({ locale, data, m, keys, organizationId }: Props 
         <div className="client-portfolio-forms">
           <BudgetForm locale={locale} orgId={org.id} projects={projects} sites={sites} data={data} m={m} keyValue={keys.budget} />
           <CenterForm locale={locale} orgId={org.id} m={m} keyValue={keys.center} />
-          <AllocationForm locale={locale} orgId={org.id} projects={projects} tasks={orgTasks} contracts={contracts} targets={(data.allocationTargets ?? []).filter(item => item.organizationId === org.id)} targetsStatus={data.allocationTargetsStatus ?? "success"} targetsTruncated={data.allocationTargetsTruncated ?? false} invoiceError={data.allocationInvoiceError} budgets={budgets.filter((item) => item.status === "APPROVED")} centers={centers.filter((item) => item.status === "ACTIVE")} m={m} keyValue={keys.allocation} />
+          <AllocationForm locale={locale} orgId={org.id} projects={projects} sites={sites} libraries={data.libraries} tasks={orgTasks} contracts={contracts} targets={(data.allocationTargets ?? []).filter(item => item.organizationId === org.id)} targetsStatus={data.allocationTargetsStatus ?? "success"} targetsTruncated={data.allocationTargetsTruncated ?? false} invoiceError={data.allocationInvoiceError} budgets={budgets.filter((item) => item.status === "APPROVED")} centers={centers.filter((item) => item.status === "ACTIVE")} m={m} keyValue={keys.allocation} />
         </div>
       ) : null}
 
@@ -340,7 +342,7 @@ function TaskForm({ locale, projects, m, keyValue, task, members }: { locale: "f
           <Field label={m.code}><Input name="taskKey" defaultValue={task?.key??""} readOnly={!!task} pattern="[A-Z][A-Z0-9_-]+" required /></Field>
           <Select name="taskType" label={m.taskType} defaultValue={task?.type}><option value="TASK">{locale === "ar" ? "مهمة" : "Tâche"}</option><option value="MILESTONE">{locale === "ar" ? "مرحلة" : "Jalon"}</option></Select>
           <Select name="status" label={m.status} defaultValue={task?.status}>{taskStatuses.map((item) => <option key={item} value={item}>{label(m.taskStatuses, item)}</option>)}</Select>
-          <Field label={m.due}><Input name="dueAt" type="datetime-local" defaultValue={task?.dueAt ? new Date(task.dueAt).toISOString().slice(0,16) : ""} /></Field>
+          <Field label={`${m.due} · ${locale === "fr" ? "heure du Maroc" : "توقيت المغرب"}`}><Input name="dueAt" type="datetime-local" defaultValue={task?.dueAt ? casablancaIsoToLocal(task.dueAt) ?? "" : ""} /></Field>
           <Field label={m.nameFr}><Input name="titleFr" defaultValue={task?.titleFr??""} required /></Field>
           <Field label={m.nameAr}><Input name="titleAr" defaultValue={task?.titleAr??""} dir="rtl" required /></Field>
           <Field label={m.descriptionFr}><Textarea name="descriptionFr" defaultValue={task?.descriptionFr??""} /></Field>
@@ -365,7 +367,7 @@ function ContractForm({ locale, projects, contracts, m, keyValue }: { locale: "f
         <form action={action} className="grid gap-3">
           <Hidden locale={locale} keyValue={keyValue} />
           <Select name="projectId" label={m.project}>{projects.map((item) => <option key={item.id} value={item.id}>{item.code} · {nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
-          <Select name="contractId" label={m.contract}>{contracts.map((item) => <option key={item.id} value={item.id}>{item.id.slice(0, 8)} · {item.status}</option>)}</Select>
+          <Select name="contractId" label={m.contract}>{contracts.map((item) => <option key={item.id} value={item.id}>{m.contract} v{item.version} · {workflowStatusLabel(item.status, locale)}</option>)}</Select>
           <Button disabled={pending || projects.length === 0 || contracts.length === 0}>{m.link}</Button>
           <Feedback state={state} m={m} />
         </form>
@@ -386,7 +388,7 @@ function BudgetForm({ locale, orgId, projects, sites, data, m, keyValue }: { loc
           <Field label={m.currency}><Input name="currency" value="MAD" readOnly /></Field>
           <Select name="libraryId" label={m.library} required={false}><option value="">{m.none}</option>{data.libraries.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
           <Select name="siteId" label={m.site} required={false}><option value="">{m.none}</option>{sites.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)}</option>)}</Select>
-          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
+          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
           <Field label={m.amount}><Input name="amount" inputMode="decimal" dir="ltr" required /></Field>
           <Field label={m.rationale}><Textarea name="rationale" required /></Field>
           <input type="hidden" name="approve" value="no" />
@@ -419,25 +421,35 @@ function CenterForm({ locale, orgId, m, keyValue }: { locale: "fr" | "ar"; orgId
   );
 }
 
-function AllocationForm({ locale, orgId, projects, tasks, contracts, targets, targetsStatus, targetsTruncated, invoiceError, budgets, centers, m, keyValue }: { locale: "fr" | "ar"; orgId: string; projects: Portfolio["projects"]; tasks: Portfolio["tasks"]; contracts: Portfolio["contracts"]; targets: NonNullable<Portfolio["allocationTargets"]>; targetsStatus: "success" | "partial" | "unavailable"; targetsTruncated: boolean; invoiceError?: "FORBIDDEN" | "UNAVAILABLE" | "INVALID_RESPONSE"; budgets: Portfolio["budgets"]; centers: Portfolio["costCenters"]; m: Messages; keyValue: string }) {
+function AllocationForm({ locale, orgId, projects, sites, libraries, tasks, contracts, targets, targetsStatus, targetsTruncated, invoiceError, budgets, centers, m, keyValue }: { locale: "fr" | "ar"; orgId: string; projects: Portfolio["projects"]; sites: Portfolio["sites"]; libraries: Portfolio["libraries"]; tasks: Portfolio["tasks"]; contracts: Portfolio["contracts"]; targets: NonNullable<Portfolio["allocationTargets"]>; targetsStatus: "success" | "partial" | "unavailable"; targetsTruncated: boolean; invoiceError?: "FORBIDDEN" | "UNAVAILABLE" | "INVALID_RESPONSE"; budgets: Portfolio["budgets"]; centers: Portfolio["costCenters"]; m: Messages; keyValue: string }) {
   const [state, action, pending] = useActionState(recordAllocation, idle);
+  const budgetLabel = (budget: Portfolio["budgets"][number]) => {
+    const project = projects.find(item => item.id === budget.projectId);
+    const site = sites.find(item => item.id === budget.siteId);
+    const library = libraries.find(item => item.id === budget.libraryId);
+    return [String(budget.fiscalYear), exactMoney(budget.amountMinor, budget.currency),
+      project ? `${project.code} · ${nameOf(locale, project.nameFr, project.nameAr)}` : null,
+      site ? `${site.code} · ${nameOf(locale, site.nameFr, site.nameAr)}` : null,
+      library ? nameOf(locale, library.nameFr, library.nameAr) : null].filter(Boolean).join(" · ");
+  };
   return (
     <Card>
       <CardHeader><CardTitle>{m.newAllocation}</CardTitle><CardDescription>{m.referenceHelp}</CardDescription></CardHeader>
       <CardContent>
         <form action={action} className="grid gap-3">
           <Hidden locale={locale} orgId={orgId} keyValue={keyValue} />
-          <Select name="budgetId" label={m.budgets}>{budgets.map((item) => <option key={item.id} value={item.id}>{item.fiscalYear} · {exactMoney(item.amountMinor, item.currency)}</option>)}</Select>
-          <Select name="costCenterId" label={m.center}>{centers.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
-          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
+          <Select name="budgetId" label={m.budgets}>{budgets.map((item) => <option key={item.id} value={item.id}>{budgetLabel(item)}</option>)}</Select>
+          <Select name="costCenterId" label={m.center}>{centers.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
+          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
           <Select name="allocationType" label={m.allocationType}><option value="COMMITMENT">{locale === "ar" ? "التزام" : "Engagement"}</option><option value="ACTUAL">{locale === "ar" ? "نفقة فعلية" : "Dépense réalisée"}</option><option value="RELEASE">{locale === "ar" ? "تحرير الالتزام" : "Libération d’engagement"}</option></Select>
           {targetsStatus === "unavailable" ? <p role="alert">{locale === "ar" ? "تعذر تحميل الملفات المتاحة للتخصيص. أعيدوا تحميل الصفحة." : "Les dossiers disponibles pour l’allocation n’ont pas pu être chargés. Rechargez la page."}</p> : null}
+          {targetsStatus === "success" && targets.length === 0 && projects.length === 0 && tasks.length === 0 && contracts.length === 0 ? <p role="status">{locale === "ar" ? "لا ملفات مرتبطة متاحة للتخصيص بعد." : "Aucun dossier lié disponible pour l’allocation pour le moment."}</p> : null}
           {targetsTruncated ? <p role="status">{locale === "ar" ? "تظهر الملفات الأولى أدناه. استخدموا البحث للوصول إلى الملفات الأخرى." : "Les premiers dossiers sont proposés ci-dessous. Utilisez la recherche pour accéder aux autres dossiers."}</p> : null}
           {invoiceError ? <p role="alert">{invoiceError === "FORBIDDEN" ? (locale === "ar" ? "لا تتيح صلاحياتكم اختيار الفواتير في هذا السياق." : "Vos habilitations ne permettent pas de sélectionner des factures dans ce contexte.") : (locale === "ar" ? "اختيار الفواتير غير متاح مؤقتاً. تبقى الملفات الأخرى متاحة؛ أعيدوا التحميل للمحاولة مجدداً." : "La sélection des factures est momentanément indisponible. Les autres dossiers restent utilisables ; rechargez pour réessayer.")}</p> : null}
           <AllocationTargetSearch organizationId={orgId} locale={locale} initial={targets} label={m.referenceType}>
             <optgroup label={m.projects}>{projects.map(item => <option key={item.id} value={`PROJECT:${item.id}`}>{item.code} · {nameOf(locale, item.nameFr, item.nameAr)}</option>)}</optgroup>
             <optgroup label={m.tasks}>{tasks.map(item => <option key={item.id} value={`PROJECT_TASK:${item.id}`}>{item.key} · {nameOf(locale, item.titleFr, item.titleAr)}</option>)}</optgroup>
-            <optgroup label={m.contracts}>{contracts.map(item => <option key={item.id} value={`CONTRACT:${item.id}`}>{m.contracts} · {item.id.slice(0, 8)} · v{item.version}</option>)}</optgroup>
+            <optgroup label={m.contracts}>{contracts.map(item => <option key={item.id} value={`CONTRACT:${item.id}`}>{m.contracts} · v{item.version} · {workflowStatusLabel(item.status, locale)}</option>)}</optgroup>
           </AllocationTargetSearch>
           <Field label={m.amount}><Input name="amount" inputMode="decimal" dir="ltr" required /></Field>
           <Field label={m.evidence}><Input name="evidenceFile" type="file" accept="application/pdf,image/png,image/jpeg" required /></Field>
@@ -457,12 +469,12 @@ function EventForm({ locale, orgId, projects, m, keyValue }: { locale: "fr" | "a
       <CardContent>
         <form action={action} className="grid gap-3 md:grid-cols-2">
           <Hidden locale={locale} orgId={orgId} keyValue={keyValue} />
-          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</Select>
+          <Select name="projectId" label={m.project} required={false}><option value="">{m.none}</option>{projects.map((item) => <option key={item.id} value={item.id}>{nameOf(locale, item.nameFr, item.nameAr)} · {item.code}</option>)}</Select>
           <Select name="eventType" label={m.eventType}>{["CUSTOM", "PROJECT_DEADLINE", "APPROVAL", "DOCUMENT", "INVOICE", "MISSION", "RFQ"].map((item) => <option key={item} value={item}>{portfolioEventLabels[locale][item] ?? item}</option>)}</Select>
           <Field label={m.nameFr}><Input name="titleFr" required /></Field>
           <Field label={m.nameAr}><Input name="titleAr" dir="rtl" required /></Field>
-          <Field label={m.start}><Input name="startsAt" type="datetime-local" required /></Field>
-          <Field label={m.ends}><Input name="endsAt" type="datetime-local" /></Field>
+          <Field label={`${m.start} · ${locale === "fr" ? "heure du Maroc" : "توقيت المغرب"}`}><Input name="startsAt" type="datetime-local" required /></Field>
+          <Field label={`${m.ends} · ${locale === "fr" ? "heure du Maroc" : "توقيت المغرب"}`}><Input name="endsAt" type="datetime-local" /></Field>
           <Button disabled={pending} className="md:col-span-2">{m.save}</Button>
           <Feedback state={state} m={m} />
         </form>

@@ -43,7 +43,7 @@ create function pg_temp.approve_checkout_box_fixture(
  p_audit_org uuid,p_plan_version uuid,p_maker uuid,p_reviewer uuid,p_code text,
  p_currency text,p_credit_budget bigint,p_rollover_months integer
 )returns jsonb language plpgsql as $$
-declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;begin
+declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;admission_context jsonb;admission_policy jsonb;begin
  if p_maker=p_reviewer then raise exception'TEST_REQUIRES_INDEPENDENT_FINANCE';end if;
  perform set_config('request.jwt.claim.sub',p_maker::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_maker,'role','authenticated','aal','aal2')::text,true);
@@ -52,13 +52,17 @@ declare benefit jsonb;box jsonb;rule jsonb;context jsonb;approval jsonb;begin
  box:=public.create_box_version(p_audit_org,p_code,'FIXED','Box synthétique de recette','صندوق اصطناعي للاختبار',p_credit_budget,p_rollover_months,'{}',0,0,0,p_currency,clock_timestamp()-interval'1 minute',jsonb_build_array(jsonb_build_object('slot_code','CORE','slot_kind','MANDATORY','minimum_selections',1,'maximum_selections',1,'allowed_benefit_version_ids',jsonb_build_array(benefit->>'benefit_version_id'))),p_code||'-create');
  perform public.activate_box_version(p_audit_org,(box->>'box_version_id')::uuid,null,p_code||'-activate');
  rule:=public.link_plan_box_rule(p_audit_org,p_plan_version,(box->>'box_version_id')::uuid,'{"schema_version":1,"period_unit":"SUBSCRIPTION_CYCLE","budget_rule":"EXACT"}',clock_timestamp()-interval'1 minute',p_code||'-link');
- context:=public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
+ -- Explicit synthetic internal execution policy, independently reviewed before Box approval.
+ admission_context:=public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+ admission_policy:=public.propose_benefit_admission_policy_v1((benefit->>'benefit_version_id')::uuid,admission_context->>'source_hash',(admission_context->>'head_id')::uuid,'NONE',null,null,'{}','{}',now()-interval '1 minute',null,'TEST ONLY explicit internal benefit execution policy','TEST_ONLY_CHECKOUT_POLICY','HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
  perform set_config('request.jwt.claim.sub',p_reviewer::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_reviewer,'role','authenticated','aal','aal2')::text,true);
+ perform public.decide_benefit_admission_policy_v1((admission_policy->>'policy_id')::uuid,admission_policy->>'content_hash',true,'TEST_ONLY_CHECKOUT_POLICY_REVIEW','TEST ONLY independent approval of internal benefit execution policy');
+ context:=public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
  approval:=public.approve_box_configuration_v1((rule->>'plan_box_rule_id')::uuid,context->>'source_hash','Approbation indépendante exclusivement synthétique de recette',p_code||'-approve');
  perform set_config('request.jwt.claim.sub',p_maker::text,true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',p_maker,'role','authenticated','aal','aal2')::text,true);
- return jsonb_build_object('box',box,'rule',rule,'approval',approval);
+ return jsonb_build_object('box',box,'rule',rule,'approval',approval,'admission_policy',admission_policy);
 end$$;
 
 -- Real public domain commands with synthetic SANDBOX provider attestations.
@@ -66,15 +70,17 @@ end$$;
 insert into p267 values('offer',pg_temp.approve_checkout_box_fixture('b2670000-0000-4000-8000-000000000001','d2670000-0000-4000-8000-000000000002','a2670000-0000-4000-8000-000000000001','a2670000-0000-4000-8000-000000000002','TEST_CREDIT_ADVERSE267','EUR',10,3));
 insert into p267 values('benefit-context',public.get_admin_benefit_admission_context_v1((select source_snapshot#>>'{slots,0,benefits,0,id}'from public.box_configuration_approvals_v1 where id=(select(v#>>'{approval,approval_id}')::uuid from p267 where k='offer'))::uuid));
 select set_config('test.benefit267',(select v->>'benefit_version_id'from p267 where k='benefit-context'),true);
-insert into p267 values('benefit-policy',public.propose_benefit_admission_policy_v1(current_setting('test.benefit267')::uuid,(select v->>'source_hash'from p267 where k='benefit-context'),(select(v->>'head_id')::uuid from p267 where k='benefit-context'),'NONE',null,null,'{}','{}',clock_timestamp()-interval'1 minute',null,'TEST ONLY politique native de réservation pour contrôle SC','TEST_ONLY_ADVERSE267','HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid()));
-select set_config('request.jwt.claim.sub','a2670000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"a2670000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
-select public.decide_benefit_admission_policy_v1((select(v->>'policy_id')::uuid from p267 where k='benefit-policy'),(select v->>'content_hash'from p267 where k='benefit-policy'),true,'TEST_ONLY_267','TEST ONLY revue indépendante de la politique de réservation');
+-- Reuse the independently reviewed checkout policy for native reservation; changing
+-- it after immutable Box approval would invalidate the advertised promise.
+insert into p267 values('benefit-policy',(select v->'admission_policy' from p267 where k='offer'));
 select set_config('request.jwt.claim.sub','a2670000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2670000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p267 values('wallet1',public.ensure_client_credit_wallet('b2670000-0000-4000-8000-000000000001','adverse267-wallet1')),('wallet2',public.ensure_client_credit_wallet('b2670000-0000-4000-8000-000000000002','adverse267-wallet2'));
 insert into p267 values('prep1',public.prepare_subscription_payment_intent_v2('b2670000-0000-4000-8000-000000000001','d2670000-0000-4000-8000-000000000002','MONTHLY','PAYPAL','SANDBOX','adverse267-prepare1'));
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p267 values('intent1',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p267 where k='prep1'),'SANDBOX','SYNTHETIC-SANDBOX-ORDER-267-1',12345,'EUR'));
 insert into p267 values('paid1',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-SANDBOX-EVENT-267-1','SYNTHETIC-SANDBOX-ORDER-267-1','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-SANDBOX-CAPTURE-267-1',repeat('1',64),repeat('2',64)));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select set_config('test.payment267',(select id::text from public.subscription_payment_events where provider_event_id='SYNTHETIC-SANDBOX-EVENT-267-1'),true);
 select set_config('request.jwt.claim.sub','a2670000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"a2670000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 insert into p267 values('terms1',public.get_subscription_credit_grant_context_v1('b2670000-0000-4000-8000-000000000001',current_setting('test.payment267')::bigint,1));
@@ -105,6 +111,8 @@ insert into p267 values('prep2',public.prepare_subscription_payment_intent_v2('b
 select set_config('request.jwt.claim.sub','',true);select set_config('request.jwt.claims','{"role":"service_role"}',true);
 insert into p267 values('intent2',public.register_subscription_payment_intent_v2((select(v->>'preparation_id')::uuid from p267 where k='prep2'),'SANDBOX','SYNTHETIC-SANDBOX-ORDER-267-2',12345,'EUR'));
 insert into p267 values('paid2',public.process_verified_subscription_payment_v2('PAYPAL','SANDBOX','SYNTHETIC-SANDBOX-EVENT-267-2','SYNTHETIC-SANDBOX-ORDER-267-2','PAYMENT_SUCCEEDED',12345,'EUR',clock_timestamp(),'SYNTHETIC-SANDBOX-CAPTURE-267-2',repeat('7',64),repeat('8',64)));
+-- The following operation is a later native application request.
+-- matricia:test-request-boundary
 select set_config('test.payment2_267',(select id::text from public.subscription_payment_events where provider_event_id='SYNTHETIC-SANDBOX-EVENT-267-2'),true);
 select public.process_verified_subscription_adjustment_v2('SANDBOX','SYNTHETIC-PARTIAL-REFUND-267','SYNTHETIC-SANDBOX-CAPTURE-267-2','SYNTHETIC-REFUND-267','REFUND_SUCCEEDED',1,'EUR',clock_timestamp(),repeat('9',64),repeat('a',64));
 select is((select count(*)from public.subscription_payment_adjustments where payment_event_id=current_setting('test.payment2_267')::bigint and event_type='REFUND_SUCCEEDED'),1::bigint,'native partial refund is durable without fabricating an inbox event');

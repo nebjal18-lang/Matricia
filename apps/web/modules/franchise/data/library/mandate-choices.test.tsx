@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { mandateChoicesSchema,mandateChoiceOptions } from "./mandate-choices";
 import { FranchiseMandateSelector } from "@/modules/franchise/ui/franchise-access-state";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 const org="22222222-2222-4222-8222-222222222222",lib="44444444-4444-4444-8444-444444444444";
 const value={complete:true,items:["33333333-3333-4333-8333-333333333333","33333333-3333-4333-8333-333333333334"].map((id,index)=>({id,organization_id:org,library_id:lib,territory_code:index===0?"TEST_NORD":"TEST_SUD",territory_fr:index===0?"Territoire Nord":"Territoire Sud",territory_ar:index===0?"النطاق الشمالي":"النطاق الجنوبي",library_code:"CATALOGUE_TEST",library_fr:"Catalogue TEST",library_ar:"كتالوج اختبار",roles:[{code:"FRANCHISE_OWNER",label_fr:"Propriétaire franchisé",label_ar:"مالك الامتياز"}]}))};
 describe("mandate choices from exact approved descriptors",()=>{

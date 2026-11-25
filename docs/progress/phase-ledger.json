@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "authority": "Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md",
-  "updated_at": "2026-09-12T08:54:48Z",
+  "updated_at": "2026-11-09T20:10:30.698855+00:00",
   "phases": [
     {"id":"P00","name":"Reconnaissance et extraction","status":"GREEN","gate":"inventory_architecture_ownership_matrices","evidence":["pnpm verify:phase00 (green 2026-09-11)", "pnpm release:validate (green 2026-09-11)", "docs/inventory/PHASE00_INVENTORY.md baseline d9e28f7", "PLANS.md", ".codex/agents (63 TOML)", "scripts/context-pack.ts", "independent audit PASS commit 32cfd89"],"signoff":"APPROVED:requirements_traceability_auditor:phase00_signoff_32cfd89"},
     {"id":"P01","name":"Spécifications atomiques","status":"IN_PROGRESS","gate":"spec_validate","evidence":["pnpm spec:validate (green 2026-09-11)","docs/specs/context-index.json","docs/specs/registries","docs/specs/sections/identity-rbac.md","docs/specs/sections/marketing-autopilot.md"],"signoff":"PENDING_FULL_ATOMIC_COVERAGE"},
@@ -24,5 +24,6 @@
     {"id":"P18","name":"Contenu, seeds et Marketing Autopilot","status":"QUEUED","gate":"catalog_marketing_i18n_no_placeholders","evidence":[]},
     {"id":"P19","name":"Hardening et release staging","status":"QUEUED","gate":"final_definition_of_done","evidence":[]}
   ],
+  "technical_deliveries": [{"id": "ADMIN-DELIVERY-20261109", "name": "Configuration Admin et préparation signataire", "status": "GREEN", "scope": "Technical code and isolated native acceptance only", "validated_code_commit": "3d04c50a9523d903bbb97a89a8d0277060441117", "evidence": ["docs/evidence/admin-configuration-delivery-20261109.json", "docs/release/ADMIN_CONFIGURATION_HANDOVER_2026-11-09.md"], "independent_technical_review": "PASS_NO_OPEN_FINDINGS_IN_REVIEWED_SCOPE", "external_activation": "PENDING", "production_certified": false}],
   "production_authorized": false
 }

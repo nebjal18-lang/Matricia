@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/modules/shared/ui/button";
 import { Label } from "@/modules/shared/ui/label";
 import { Textarea } from "@/modules/shared/ui/textarea";
+import { StableIdempotencyField } from "@/modules/shared/ui/stable-idempotency-field";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ContractMissionDashboard } from "@/modules/shared/lib/contracts-missions/model";
 import { decideMilestone, type MissionActionState } from "./actions";
@@ -22,7 +23,7 @@ export function MilestoneDecisionForm({ milestone, locale, messages }: {
     <input type="hidden" name="locale" value={locale}/>
     <input type="hidden" name="milestoneId" value={milestone.id}/>
     <input type="hidden" name="expectedRowVersion" value={milestone.rowVersion}/>
-    <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()}/>
+    <StableIdempotencyField rotateToken={state.status === "success" ? state.status : undefined}/>
     <Label htmlFor={`${milestone.id}-reason`}>{locale === "ar" ? "سبب القرار" : "Motif de la décision"}</Label>
     <Textarea id={`${milestone.id}-reason`} name="reason" required minLength={3} maxLength={1000}/>
     <div className="grid gap-2 sm:grid-cols-2">

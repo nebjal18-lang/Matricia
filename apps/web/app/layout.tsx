@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { directionFor, normalizeLocale } from "@/modules/shared/lib/i18n/locale";
-import { getPublicSiteUrl, publicStructuredData } from "@/modules/shared/lib/seo/metadata";
+import { getPublicSiteUrl } from "@/modules/shared/lib/seo/metadata";
+import { DOCUMENT_LOCALE_BOOTSTRAP } from "@/modules/shared/ui/document-locale-bootstrap";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: getPublicSiteUrl(),
-  title: { default: "Matricia", template: "%s | Matricia" },
+  // Default only — locale layout owns the "%s | Matricia" template.
+  title: "Matricia",
   description: "Plateforme numérique Matricia pour les services professionnels au Maroc.",
   applicationName: "Matricia",
   robots: { index: false, follow: false, noarchive: true },
@@ -18,20 +18,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const requestHeaders = await headers();
-  const locale = normalizeLocale(requestHeaders.get("x-matricia-locale"));
-  const structuredData = publicStructuredData(locale);
+  // Default FR attributes stay static (no headers()/cookies()). A blocking bootstrap
+  // aligns lang/dir to /ar|/fr before paint; DocumentLocaleSync covers client navigations.
   return (
-    <html lang={locale} dir={directionFor(locale)}>
-      <body className="antialiased">
-        {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
-      </body>
+    <html lang="fr" dir="ltr" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: DOCUMENT_LOCALE_BOOTSTRAP }} />
+      </head>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

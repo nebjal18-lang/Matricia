@@ -36,8 +36,8 @@ export function WorkspaceAccountMenu({
   if (currentWorkspace) securityQuery.set("workspace", currentWorkspace);
   const initial = (userEmail?.slice(0, 1) || fallbackInitial).toUpperCase();
   return (
-    <details className={className}>
-      <summary aria-label={label}>
+    <details className={className} suppressHydrationWarning>
+      <summary aria-label={label} suppressHydrationWarning>
         {displayName ? (
           <>
             <span className="client-account-avatar" aria-hidden>
@@ -55,7 +55,7 @@ export function WorkspaceAccountMenu({
         <Link href={`/${locale}/securite/sessions?${securityQuery}`}>{m.sessionsCta}</Link>
         <form action={signOutOfWorkspace}>
           <input type="hidden" name="locale" value={locale} />
-          <input type="hidden" name="returnTo" value={returnTo} />
+          <input type="hidden" name="returnTo" value={next} />
           <Button type="submit" className="client-ghost-btn">
             {m.signOut}
           </Button>

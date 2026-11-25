@@ -78,6 +78,7 @@ export async function refreshSupabaseSession(request: NextRequest) {
     "administration",
     "catalogue",
     "notifications",
+    "signatures",
   ];
   const isProtected = protectedPrefixes.some((prefix) =>
     request.nextUrl.pathname === `/${locale}/${prefix}`

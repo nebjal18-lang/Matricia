@@ -101,6 +101,17 @@ describe("marketing publication worker", () => {
     expect(mocks.rpc).toHaveBeenCalledTimes(2);
   });
 
+  it("clôture le lease META si begin_social_media_execution_v1 échoue", async () => {
+    process.env.MARKETING_PUBLISH_MODE = "live";
+    const claimed = { ...job("5"), provider: "META", channel: "INSTAGRAM" };
+    sequence({ data: claimed, error: null }, { data: null, error: { code: "55000" } }, { data: { outcome: "RETRYABLE_FAILURE" }, error: null });
+    const response = await POST(request("?limit=1"));
+    expect(await response.json()).toMatchObject({ processed: 1, failed: 1, retried: 1 });
+    expect(mocks.rpc).toHaveBeenCalledWith("begin_social_media_execution_v1", { p_job_id: claimed.job_id, p_lease_token: claimed.lease_token });
+    expect(mocks.rpc).toHaveBeenCalledWith("record_social_publication_worker_result_v42", expect.objectContaining({ p_job_id: claimed.job_id, p_lease_token: claimed.lease_token, p_outcome: "RETRYABLE_FAILURE", p_error_code: "META_EXECUTION_BEGIN_FAILED" }));
+    expect(mocks.publish).not.toHaveBeenCalled();
+  });
+
   it("compte une publication sandbox comme preuve traitée, jamais comme skip", async () => {
     const claimed = job("5");
     sequence({ data: claimed, error: null }, { data: { outcome: "SANDBOXED" }, error: null });

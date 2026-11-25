@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { mkdir, readFile, readdir, rm, statfs, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, realpath, rm, statfs, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { prepareSqlTest } from './db-test-support.mjs';
+import { validateMigrationIdentities } from './migration-identities.mjs';
 
 // This tool never connects to the configured application database. Its only
 // target is a newly created, labelled Docker container without a network.
 const args = process.argv.slice(2);
-if (process.env.APP_ENV !== 'development' || args.some(arg => arg !== '--with-sql' && !/^--test=[a-zA-Z0-9_-]+\.test\.sql$/.test(arg))) {
+if (process.env.APP_ENV !== 'development' || args.some(arg => !['--with-sql', '--with-concurrency'].includes(arg) && !/^--test=[a-zA-Z0-9_-]+\.test\.sql$/.test(arg))) {
   throw new Error('LOCAL_REPLAY_REQUIRES_DEVELOPMENT_AND_SAFE_SQL_ARGUMENTS');
 }
 process.umask(0o077);
@@ -17,14 +18,17 @@ const token = randomUUID();
 const name = `matricia_replay_${token.replaceAll('-', '')}`;
 const label = `matricia.isolated-replay=${token}`;
 const directory = resolve(root, 'work', 'isolated-replay', token);
+const withConcurrency = args.includes('--with-concurrency');
 await mkdir(directory, { recursive: true, mode: 0o700 });
 const images = {
-  database: 'ghcr.io/supabase/postgres:17.6.1.167',
-  auth: 'ghcr.io/supabase/gotrue:v2.196.0',
-  storage: 'ghcr.io/supabase/storage-api:v1.72.1',
+  database: 'public.ecr.aws/supabase/postgres:17.6.1.166',
+  auth: 'public.ecr.aws/supabase/gotrue:v2.196.0',
+  storage: 'public.ecr.aws/supabase/storage-api:v1.73.1',
+  ...(withConcurrency ? { node: 'node:22.23.0-alpine' } : {}),
 };
-const dockerEnvironment = { ...process.env, DOCKER_HOST: 'unix:///var/run/docker.sock' };
-for (const key of ['DOCKER_CONTEXT', 'DOCKER_TLS', 'DOCKER_TLS_VERIFY', 'DOCKER_CERT_PATH']) delete dockerEnvironment[key];
+// Respect the platform's local Docker context (Windows named pipe or Linux socket).
+// Every mutating operation below targets only this run's UUID-labelled container.
+const dockerEnvironment = { ...process.env };
 const summary = {
   environment: 'development-local-isolated', network: 'none', publicPorts: 0,
   images, startedAt: new Date().toISOString(), status: 'failed', migrations: [], sql: [],
@@ -38,8 +42,11 @@ function docker(parameters, options = {}) {
     maxBuffer: 8 * 1024 * 1024, stdio: ['pipe', 'pipe', 'pipe'], ...options,
   });
 }
-function sql(source) {
-  return docker(['exec', '-i', name, 'psql', '-X', '-U', 'supabase_admin', '-d', 'postgres', '-Atq', '-v', 'ON_ERROR_STOP=1'], { input: source });
+function sql(source, database = 'postgres') {
+  // Match Linux/CLI migration input even when Git checks SQL out with CRLF.
+  // Function-definition patches compare LF-delimited text stored by PostgreSQL.
+  const normalized = String(source).replaceAll('\r\n', '\n');
+  return docker(['exec', '-i', name, 'psql', '-X', '-U', 'supabase_admin', '-d', database, '-Atq', '-v', 'ON_ERROR_STOP=1'], { input: normalized });
 }
 function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 async function snapshot(relativeDirectory) {
@@ -65,6 +72,7 @@ try {
   if (space.bavail * space.bsize < 8n * 1024n ** 3n) throw new Error('LOCAL_REPLAY_NEEDS_8_GIB_FREE');
   for (const image of Object.values(images)) docker(['image', 'inspect', image, '--format', '{{.Id}}']);
   const migrations = await snapshot('supabase/migrations');
+  if (!validateMigrationIdentities(migrations.map(migration => migration.file)).passed) throw new Error('LOCAL_REPLAY_MIGRATION_IDENTITIES_INVALID');
   const requestedTests = args.filter(arg => arg.startsWith('--test=')).map(arg => arg.slice(7));
   if (requestedTests.length && args.includes('--with-sql')) throw new Error('LOCAL_REPLAY_AMBIGUOUS_SQL_SCOPE');
   const availableTests = args.includes('--with-sql') || requestedTests.length ? await snapshot('supabase/tests') : [];
@@ -97,6 +105,10 @@ try {
     await new Promise(done => setTimeout(done, 1_000));
   }
   if (!ready) throw new Error('LOCAL_REPLAY_POSTGRES_UNAVAILABLE');
+  // Mark only this run's newly created, network-isolated database. Tests can
+  // verify the reserved identity without hardcoding a developer clone name.
+  sql(`alter database postgres set matricia.test_clone_id='${token.replaceAll('-', '')}';
+alter database postgres set matricia.test_environment='reserved-local-clone';`);
   sql(`alter role supabase_auth_admin password '${secret}'; alter role supabase_storage_admin password '${secret}';`);
   await commandLog('auth-bootstrap.log', () => docker(['run', '--rm', '--pull=never', '--label', label,
     '--network', `container:${name}`, '--env-file', environmentFile, images.auth, 'auth', 'migrate'], { timeout: 300_000 }));
@@ -105,7 +117,7 @@ try {
     images.storage, 'dist/scripts/migrate-call.js'], { timeout: 300_000 }));
   for (const migration of migrations) {
     await commandLog(`migration-${migration.file}.log`, () => sql(migration.bytes));
-    summary.migrations.push({ file: migration.file, sha256: migration.sha256, passed: true });
+    summary.migrations.push({ file: migration.file, sha256: migration.sha256, executedSqlSha256: digest(Buffer.from(migration.bytes.toString('utf8').replaceAll('\r\n', '\n'))), passed: true });
   }
   sql("update private.admin_execution_environment_v1 set environment='DEVELOPMENT',configured_at=clock_timestamp(),configuration_reference='ISOLATED_LOCAL_REPLAY' where singleton and environment is null;");
   for (const test of tests) {
@@ -138,6 +150,52 @@ try {
   if (summary.runtimeSecurity.publicTables < 1 || summary.runtimeSecurity.tablesWithoutRls !== 0
       || summary.runtimeSecurity.pgtapApiExecutable !== false) throw new Error('LOCAL_REPLAY_RUNTIME_SECURITY_FAILED');
   if (summary.sql.some(test => !test.passed)) throw new Error('LOCAL_REPLAY_SQL_TESTS_FAILED');
+  if (withConcurrency) {
+    // A Node child shares only the network-less PostgreSQL namespace. No host
+    // port, Docker socket, project .env, or external route is made available.
+    const cloneId = token.replaceAll('-', '');
+    const database = `matricia_test_${cloneId}`;
+    // Quiesce only this disposable source; pg_cron's background connection
+    // would otherwise prevent PostgreSQL from copying the template database.
+    await commandLog('concurrency-clone.log', () => sql(`alter database postgres allow_connections false;
+select pg_terminate_backend(pid) from pg_stat_activity where datname='postgres';
+create database ${database} template postgres allow_connections true;
+alter database ${database} set matricia.test_clone_id='${cloneId}';
+alter database ${database} set matricia.test_environment='reserved-local-clone';
+alter role supabase_admin password '${secret}';`, 'template1'));
+    const clientDirectory = resolve(directory, 'concurrency-client');
+    await mkdir(resolve(clientDirectory, 'scripts'), { recursive: true });
+    await mkdir(resolve(clientDirectory, 'node_modules'), { recursive: true });
+    const recipe = [];
+    for (const file of ['run-db-tests.mjs', 'db-test-support.mjs', 'db-test-support-safety.mjs']) {
+      const bytes = await readFile(resolve(root, 'scripts', file));
+      await writeFile(resolve(clientDirectory, 'scripts', file), bytes);
+      recipe.push({ file, sha256: digest(bytes) });
+    }
+    await cp(await realpath(resolve(root, 'node_modules/postgres')), resolve(clientDirectory, 'node_modules/postgres'), { recursive: true });
+    const concurrencyEnv = resolve(directory, 'concurrency.env');
+    await writeFile(concurrencyEnv, [
+      'APP_ENV=development', 'DB_TEST_TARGET_MODE=reserved-local-clone',
+      `DB_TEST_CLONE_ID=${cloneId}`, 'SUPABASE_DB_POOLER_URL=',
+      `DIRECT_URL=postgresql://supabase_admin:${secret}@127.0.0.1:5432/${database}`, '',
+    ].join('\n'), { mode: 0o600 });
+    let result;
+    await commandLog('concurrency.log', () => {
+      result = docker(['run', '--rm', '--pull=never', '--label', label,
+        '--network', `container:${name}`, '--env-file', concurrencyEnv,
+        '--mount', `type=bind,source=${clientDirectory},target=/workspace,readonly`,
+        '--workdir', '/workspace', images.node, 'node', '--input-type=module', '-e',
+        "import {runReservedCloneConcurrency} from './scripts/run-db-tests.mjs'; try {console.log(JSON.stringify(await runReservedCloneConcurrency(process.env)))} catch {console.error('LOCAL_REPLAY_CONCURRENCY_FAILED');process.exitCode=1}"], { timeout: 180_000 });
+      return result;
+    });
+    const concurrency = JSON.parse(result.trim());
+    if (concurrency.passed !== true || !/^v22\./.test(concurrency.nodeVersion)
+        || JSON.stringify(concurrency.scenarios) !== JSON.stringify(['outbox_claim', 'journal_idempotency', 'credit_idempotency', 'audit_chain'])) {
+      throw new Error('LOCAL_REPLAY_CONCURRENCY_EVIDENCE_INVALID');
+    }
+    summary.concurrency = { ...concurrency, recipe };
+    summary.concurrencyIncluded = true;
+  }
   summary.status = 'passed';
 } catch (error) {
   summary.failure = /^LOCAL_REPLAY_[A-Z0-9_]+(?::[a-zA-Z0-9_.-]+)?$/.test(error.message) ? error.message : 'LOCAL_REPLAY_FAILED';
@@ -151,11 +209,12 @@ try {
   } catch { summary.cleanup = 'failed'; process.exitCode = 1; }
   if (created && summary.cleanup !== 'passed') summary.status = 'failed';
   await rm(resolve(directory, 'bootstrap.env'), { force: true });
+  await rm(resolve(directory, 'concurrency.env'), { force: true });
   summary.finishedAt = new Date().toISOString();
   await writeFile(resolve(directory, 'summary.json'), JSON.stringify(summary, null, 2) + '\n', { mode: 0o600 });
   console.log(JSON.stringify({ status: summary.status, migrations: summary.migrations.length,
     sqlFiles: summary.sql.length, assertions: summary.sql.reduce((total, test) => total + test.assertions, 0),
-    concurrencyIncluded: false, cleanup: summary.cleanup, evidence: `work/isolated-replay/${token}/summary.json`,
+    concurrencyIncluded: summary.concurrencyIncluded, cleanup: summary.cleanup, evidence: `work/isolated-replay/${token}/summary.json`,
     ...(summary.failure ? { failure: summary.failure } : {}),
   }));
 }

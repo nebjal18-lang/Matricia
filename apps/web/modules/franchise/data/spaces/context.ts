@@ -11,7 +11,7 @@ const membershipSchema = z.object({
   organization_member_roles: z.array(z.object({ role_code: z.string(), revoked_at: z.string().nullable() })),
 });
 
-export async function resolveFranchiseSpace(input: { locale: Locale; organizationId?: string; franchiseId?: string }) {
+export async function resolveFranchiseSpace(input: { locale: Locale; organizationId?: string | undefined; franchiseId?: string | undefined }) {
   const client = await getSupabaseServerClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   const authFailure = classifyAuthReadFailure(authError);

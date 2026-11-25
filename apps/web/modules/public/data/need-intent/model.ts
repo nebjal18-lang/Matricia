@@ -1,6 +1,7 @@
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import servicesSource from "@/modules/public/data/catalogue/services.json";
 import { getStaticPublicCatalogue } from "@/modules/public/data/catalogue/static-projection";
+import { approvedServiceNameAr } from "@/modules/public/data/catalogue/approved-ar";
 import { publicCatalogueLabel } from "@/modules/public/data/catalogue/localized-label";
 
 export const PUBLIC_NEED_INTENT_SOURCE = "PUBLIC_SERVICE_PROJECTION" as const;
@@ -50,7 +51,7 @@ export function canonicalizePublicNeedClassification(
   if (typeof input.serviceCode !== "string") return null;
   const service = serviceByCode.get(input.serviceCode.trim().toUpperCase());
   if (!service || service.libraryCode !== libraryCode) return null;
-  return { source: PUBLIC_NEED_INTENT_SOURCE, libraryCode, libraryName, serviceCode: service.serviceCode, serviceName: publicCatalogueLabel(service.serviceName, locale) };
+  return { source: PUBLIC_NEED_INTENT_SOURCE, libraryCode, libraryName, serviceCode: service.serviceCode, serviceName: publicCatalogueLabel(service.serviceName, locale, approvedServiceNameAr(service.serviceCode)) };
 }
 
 export function resolvePublicNeedQuery(query: NeedQuery, locale: Locale): {
@@ -66,7 +67,7 @@ export function resolvePublicNeedQuery(query: NeedQuery, locale: Locale): {
   let service = requestedCode ? serviceByCode.get(requestedCode) : undefined;
   if (!service && !requestedCode && requestedService) {
     const candidates = services.filter((candidate) => normalize(candidate.serviceName) === normalize(requestedService)
-      || normalize(publicCatalogueLabel(candidate.serviceName, locale)) === normalize(requestedService));
+      || normalize(publicCatalogueLabel(candidate.serviceName, locale, approvedServiceNameAr(candidate.serviceCode))) === normalize(requestedService));
     if (candidates.length === 1) service = candidates[0];
   }
   if (requestedCode && !service) return { initialNeed: q, classification: null, invalidSelection: true };
@@ -80,7 +81,7 @@ export function resolvePublicNeedQuery(query: NeedQuery, locale: Locale): {
     ? canonicalizePublicNeedClassification({ libraryCode, serviceCode: service?.serviceCode ?? null }, locale)
     : null;
   return {
-    initialNeed: q || (service ? publicCatalogueLabel(service.serviceName, locale) : ""),
+    initialNeed: q || (service ? publicCatalogueLabel(service.serviceName, locale, approvedServiceNameAr(service.serviceCode)) : ""),
     classification,
     invalidSelection: false,
   };
@@ -102,9 +103,17 @@ export function serviceCodeFromNeedSnapshot(text: string): string | null {
   return match?.[1] ?? null;
 }
 
-export function publicNeedRequestHref(locale: Locale, intakeId: string, serviceCode?: string | null): string {
+export function publicNeedRequestHref(
+  locale: Locale,
+  intakeId: string,
+  serviceCode?: string | null,
+  organizationId?: string | null,
+): string {
   const params = new URLSearchParams({ intakeId });
   if (serviceCode && /^[A-Z][A-Z0-9_-]{1,79}$/u.test(serviceCode)) params.set("serviceCode", serviceCode);
+  if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(organizationId)) {
+    params.set("organizationId", organizationId);
+  }
   return `/${locale}/client/demandes/nouvelle?${params.toString()}`;
 }
 
@@ -172,10 +181,11 @@ export function rankPublicNeedServices(need: string, locale: Locale, limit = 5):
     .map((service) => ({
       libraryCode: service.libraryCode,
       serviceCode: service.serviceCode,
-      serviceName: publicCatalogueLabel(service.serviceName, locale),
+      serviceName: publicCatalogueLabel(service.serviceName, locale, approvedServiceNameAr(service.serviceCode)),
       libraryName: names.get(service.libraryCode) ?? service.libraryCode,
       scoreBasisPoints: Math.max(
         overlapBasisPoints(text, `${service.serviceName} ${service.serviceCode}`),
+        overlapBasisPoints(text, approvedServiceNameAr(service.serviceCode) ?? ""),
         overlapBasisPoints(text, namesFr.get(service.libraryCode) ?? ""),
         overlapBasisPoints(text, namesAr.get(service.libraryCode) ?? ""),
       ),

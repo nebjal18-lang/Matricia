@@ -29,3 +29,12 @@ export function prepareSqlTest(source) {
   }
   return source.slice(0, match[0].length) + frameworkGrants + source.slice(match[0].length);
 }
+
+// Some behavioral tests model separate HTTP/RPC requests inside one rollback
+// transaction. PostgreSQL freezes statement_timestamp() across one simple-query
+// packet, so an explicit boundary must send the following request separately.
+export function prepareSqlTestBatches(source) {
+  return prepareSqlTest(source)
+    .split(/^-- matricia:test-request-boundary\s*$/m)
+    .filter(batch => batch.trim());
+}

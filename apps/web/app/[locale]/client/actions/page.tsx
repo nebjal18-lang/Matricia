@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
-import { loadUserActionCenterWithinBudget } from "@/modules/shared/lib/action-center/repository";
+import { loadUserActionCenter } from "@/modules/shared/lib/action-center/repository";
 import { filterDashboardActions } from "@/modules/shared/lib/action-center/dashboard-summary";
 import { filterClientFacingActions } from "@/modules/client/data/home/view-model";
 import { clientDashboardCopy } from "@/modules/client/data/home/copy";
@@ -27,7 +27,7 @@ export default async function ClientActionsPage({
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/actions` }));
   const now = new Date().toISOString();
   const [result, approvals, policies, policyAccess] = await Promise.all([
-    loadUserActionCenterWithinBudget(locale, now, space.selectedOrganizationId),
+    loadUserActionCenter(locale, now, space.selectedOrganizationId),
     loadClientApprovals(space.selectedOrganizationId, Number(query.approvalPage ?? "1")),
     loadClientApprovalPolicies(space.selectedOrganizationId),
     loadApprovalPolicyAccess(space.selectedOrganizationId),
@@ -42,7 +42,10 @@ export default async function ClientActionsPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail}
+      organizationName={space.organizationName}
+      organizations={space.organizations}
+      languagePath={`/${locale}/client/actions${space.selectedQuery}`}
       active="actions"
       title={c.actionsTitle}
       lead={c.actionsLead}

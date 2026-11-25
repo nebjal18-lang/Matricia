@@ -1,0 +1,20 @@
+{
+  "requirementId": "MAT-FUNC-023",
+  "date": "2026-11-09",
+  "result": "PASS",
+  "proofLevel": "ui-guidance-smoke+sql",
+  "command": "pnpm.cmd exec playwright test --project=chromium-desktop tests/e2e/mat-func-023-delivery-proof-scan-smoke.spec.ts",
+  "env": {
+    "E2E_EXTERNAL_SERVER": "1",
+    "E2E_BASE_URL": "http://localhost:5173",
+    "E2E_PROVIDER_STORAGE_STATE": ".tmp/e2e-states/provider.json"
+  },
+  "summary": "FR+AR mission surfaces expose delivery-proof guidance; trusted scan contract covered by SQL 0125.",
+  "tests": 2,
+  "passed": 2,
+  "failed": 0,
+  "companionSql": [
+    "supabase/tests/0045_p08_contracts_missions_core.test.sql",
+    "supabase/tests/0125_delivery_proof_trusted_scan.test.sql"
+  ]
+}

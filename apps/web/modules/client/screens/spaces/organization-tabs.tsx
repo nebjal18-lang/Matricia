@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 
 export function OrganizationTabs({
   locale,
@@ -14,12 +14,12 @@ export function OrganizationTabs({
   const c = spaceCopy(locale);
   return (
     <nav className="client-tabs" aria-label={c.orgTitle}>
-      <Link href={`/${locale}/organisation${query}`} aria-current={active === "profile" ? "page" : undefined}>{c.orgProfile}</Link>
-      <Link href={`/${locale}/organisation${query}#sites`}>{c.sitesLocations}</Link>
-      <Link href={`/${locale}/organisation/roles${query}`} aria-current={active === "people" ? "page" : undefined}>{c.people}</Link>
-      <Link href={`/${locale}/organisation/roles${query}#invitations`}>{c.invitations}</Link>
-      <Link href={`/${locale}/securite/compte${query}`} aria-current={active === "security" ? "page" : undefined}>{c.security}</Link>
-      <Link href={`/${locale}/securite/sessions`}>{c.sessions}</Link>
+      <HashAwareLink href={`/${locale}/organisation${query}`} aria-current={active === "profile" ? "page" : undefined}>{c.orgProfile}</HashAwareLink>
+      <HashAwareLink href={`/${locale}/organisation${query}#sites`}>{c.sitesLocations}</HashAwareLink>
+      <HashAwareLink href={`/${locale}/organisation/roles${query}`} aria-current={active === "people" ? "page" : undefined}>{c.people}</HashAwareLink>
+      <HashAwareLink href={`/${locale}/organisation/roles${query}#invitations`}>{c.invitations}</HashAwareLink>
+      <HashAwareLink href={`/${locale}/securite/compte${query}`} aria-current={active === "security" ? "page" : undefined}>{c.security}</HashAwareLink>
+      <HashAwareLink href={`/${locale}/securite/sessions${query}`}>{c.sessions}</HashAwareLink>
     </nav>
   );
 }

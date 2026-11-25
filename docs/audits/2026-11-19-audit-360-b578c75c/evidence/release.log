@@ -1,0 +1,10 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 release:structure C:\Projects\Matricia\Matricia
+> node --experimental-strip-types scripts/validate-release.ts --structure-only
+
+Catalogue valide: 10 bibliothèques, 200 services, 6000 questions.
+Bootstrap PHASE 00 cohérent: 7 registres initialisés, 68 fonctions, 8 exigences marketing et 63 agents. P01 reste ouverte jusqu’aux contrats atomiques exhaustifs.
+Traçabilité cohérente pour 76 exigences V1; 5/76 sont VERIFIED avec preuves contrôlées.
+Aucun marqueur incomplet dans le périmètre applicatif.
+Gates structurels validés ; aucune autorisation de livraison.

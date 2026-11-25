@@ -1,7 +1,7 @@
 import {readAllPages} from "@/modules/shared/lib/data/read-pages";
 import { selectProviderMembership } from "@/modules/provider/data/spaces/organization-context";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
+import { getServerAuthUser, getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { classifyAuthReadFailure } from "@/modules/shared/lib/auth/read-failure";
 import { consultationPackFromQuoteData, formatDeclaredBytes, type ConsultationPackDocument, type ProviderQuoteDashboard } from "./model";
 
@@ -61,8 +61,8 @@ export async function loadConsultationSharedDocuments(invitationId: string): Pro
 }
 
 export async function loadProviderQuotes(requestedOrganizationId?: string, options: { page?: number; invitationId?: string; quoteId?: string; rfqId?:string; query?:string; mode?:"quotes"|"consultations"; tab?:string } = {}): Promise<{ status: "success"; dashboard: ProviderQuoteDashboard } | Failure> {
-  const client = await getSupabaseServerClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
+  const [client, authResult] = await Promise.all([getSupabaseServerClient(), getServerAuthUser()]);
+  const { data: auth, error: authError } = authResult;
   const authFailure = classifyAuthReadFailure(authError);
   if (authFailure) return { status: "error", reason: authFailure === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "AUTH_QUERY_FAILED" };
   if (!auth.user) return { status: "error", reason: "UNAUTHENTICATED" };

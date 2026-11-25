@@ -1,0 +1,395 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\jal18\\AppData\\Local\\pnpm-cache\\dlx\\c2434e21c1dd06ad249a7c3d6dcdd3a00ac3ae5bd4b6ebbe6e57b471548365df\\1a1f3f5f69c-18d8\\node_modules\\.pnpm\\node@22.23.5\\node_modules\\node\\bin\\node.exe",
+      "C:\\Projects\\Matricia\\Matricia\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/public/diagnostic-need-integrity.spec.ts",
+      "--workers=2",
+      "--reporter=json",
+      "--output",
+      "docs/audits/2026-11-19-audit-360-b578c75c/evidence/e2e-integrity-artifacts"
+    ],
+    "configFile": "C:\\Projects\\Matricia\\Matricia\\playwright.config.ts",
+    "rootDir": "C:/Projects/Matricia/Matricia/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Projects/Matricia/Matricia/docs/audits/2026-11-19-audit-360-b578c75c/evidence/e2e-integrity-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium-mobile-360",
+        "name": "chromium-mobile-360",
+        "testDir": "C:/Projects/Matricia/Matricia/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Projects/Matricia/Matricia/docs/audits/2026-11-19-audit-360-b578c75c/evidence/e2e-integrity-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium-desktop",
+        "name": "chromium-desktop",
+        "testDir": "C:/Projects/Matricia/Matricia/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 2,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "public\\diagnostic-need-integrity.spec.ts",
+      "file": "public/diagnostic-need-integrity.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "M12/M13/M14/M23/M24: diagnostic réel et besoin conservé fr, sans soumission",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-mobile-360",
+              "projectName": "chromium-mobile-360",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 222,
+                  "error": {
+                    "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n",
+                    "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16",
+                    "location": {
+                      "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                      "column": 16,
+                      "line": 21
+                    },
+                    "snippet": "  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n\n\n  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T13:25:53.148Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-ab0a2-conservé-fr-sans-soumission-chromium-mobile-360\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-ab0a2-conservé-fr-sans-soumission-chromium-mobile-360\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-ab0a2-conservé-fr-sans-soumission-chromium-mobile-360\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                    "column": 16,
+                    "line": 21
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3c1810924c11e5fcca3e-b49962f2422eb25c025e",
+          "file": "public/diagnostic-need-integrity.spec.ts",
+          "line": 13,
+          "column": 3
+        },
+        {
+          "title": "M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-mobile-360",
+              "projectName": "chromium-mobile-360",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "failed",
+                  "duration": 223,
+                  "error": {
+                    "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/ar/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/ar/diagnostic\", waiting until \"load\"\u001b[22m\n",
+                    "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/ar/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/ar/diagnostic\", waiting until \"load\"\u001b[22m\n\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16",
+                    "location": {
+                      "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                      "column": 16,
+                      "line": 21
+                    },
+                    "snippet": "  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/ar/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/ar/diagnostic\", waiting until \"load\"\u001b[22m\n\n\n  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T13:25:53.148Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-mobile-360\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                    "column": 16,
+                    "line": 21
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3c1810924c11e5fcca3e-7c982c1049d0e898778d",
+          "file": "public/diagnostic-need-integrity.spec.ts",
+          "line": 13,
+          "column": 3
+        },
+        {
+          "title": "M12/M13/M14/M23/M24: diagnostic réel et besoin conservé fr, sans soumission",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 231,
+                  "error": {
+                    "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n",
+                    "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16",
+                    "location": {
+                      "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                      "column": 16,
+                      "line": 21
+                    },
+                    "snippet": "  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/fr/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/fr/diagnostic\", waiting until \"load\"\u001b[22m\n\n\n  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T13:25:53.863Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-ab0a2-conservé-fr-sans-soumission-chromium-desktop\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-ab0a2-conservé-fr-sans-soumission-chromium-desktop\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-ab0a2-conservé-fr-sans-soumission-chromium-desktop\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                    "column": 16,
+                    "line": 21
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3c1810924c11e5fcca3e-dfdbc3d66adc53b29184",
+          "file": "public/diagnostic-need-integrity.spec.ts",
+          "line": 13,
+          "column": 3
+        },
+        {
+          "title": "M12/M13/M14/M23/M24: diagnostic réel et besoin conservé ar, sans soumission",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 1,
+                  "status": "failed",
+                  "duration": 232,
+                  "error": {
+                    "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/ar/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/ar/diagnostic\", waiting until \"load\"\u001b[22m\n",
+                    "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/ar/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/ar/diagnostic\", waiting until \"load\"\u001b[22m\n\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16",
+                    "location": {
+                      "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                      "column": 16,
+                      "line": 21
+                    },
+                    "snippet": "  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5175/ar/diagnostic\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5175/ar/diagnostic\", waiting until \"load\"\u001b[22m\n\n\n  19 |     });\n  20 |\n> 21 |     await page.goto(`/${locale}/diagnostic`);\n     |                ^\n  22 |     await page.evaluate(() => {\n  23 |       localStorage.removeItem(\"matricia.public-diagnostic.v2\");\n  24 |       localStorage.removeItem(\"matricia.public-need\");\n    at C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T13:25:53.863Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Projects\\Matricia\\Matricia\\docs\\audits\\2026-11-19-audit-360-b578c75c\\evidence\\e2e-integrity-artifacts\\public-diagnostic-need-int-b7d8a-conservé-ar-sans-soumission-chromium-desktop\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Projects\\Matricia\\Matricia\\tests\\e2e\\public\\diagnostic-need-integrity.spec.ts",
+                    "column": 16,
+                    "line": 21
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3c1810924c11e5fcca3e-7df69281feefb7019c69",
+          "file": "public/diagnostic-need-integrity.spec.ts",
+          "line": 13,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T13:25:52.633Z",
+    "duration": 1662.458,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

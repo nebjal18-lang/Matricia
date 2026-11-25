@@ -4,6 +4,7 @@ import type { SpaceRow } from "./space-data";
 const buckets: Partial<Record<AdminSpaceId, readonly (readonly string[])[]>> = {
   qualification: [["DRAFT", "UNQUALIFIED", "PENDING", "INCOMPLETE"], ["SUBMITTED", "UNDER_REVIEW", "IN_REVIEW"], ["INFORMATION_REQUIRED"], ["CONDITIONAL"], ["APPROVED"], ["REJECTED"]],
   franchises: [["APPLIED", "PENDING", "PROPOSED"], ["ACTIVE"], ["SUSPENDED"], ["ARCHIVED", "RETIRED"]],
+  territoires: [["PROPOSED", "PENDING"], ["ACTIVE"], ["SUSPENDED"], ["ARCHIVED", "RETIRED"]],
   gouvernance: [["PENDING", "PENDING_APPROVAL"], ["SECOND_APPROVAL_REQUIRED"], ["INFORMATION_REQUIRED"], ["APPROVED", "AUTHORIZED"], ["REJECTED"]],
   diagnostics: [["DRAFT"], ["IN_PROGRESS", "STARTED"], ["COMPLETED", "SUBMITTED"], ["IN_REVIEW", "STALE"], ["ARCHIVED"]],
   demandes: [[], ["DRAFT"], ["INCOMPLETE", "INFORMATION_REQUIRED"], ["READY", "MATCHED"], ["RFQ_OPEN", "OPEN"], ["QUOTES_RECEIVED"], ["AWARDED", "ASSIGNED"], ["CLOSED"], ["ARCHIVED"]],

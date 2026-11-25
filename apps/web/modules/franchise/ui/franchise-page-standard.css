@@ -1,0 +1,141 @@
+/* Standard pages Franchise — Design Authority Version A */
+
+.franchise-workspace .franchise-page-standard {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.franchise-workspace .franchise-page-standard > .client-page,
+.franchise-workspace .franchise-page-standard > .client-stack,
+.franchise-workspace .franchise-page-standard > .space-y-6,
+.franchise-workspace .franchise-page-standard > .space-y-8 {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.franchise-workspace .rounded-xl.border.bg-card,
+.franchise-workspace .rounded-2xl.border.bg-card,
+.franchise-workspace article.rounded-xl.border,
+.franchise-workspace article.rounded-2xl.border,
+.franchise-workspace form.rounded-xl.border.bg-card,
+.franchise-workspace form.rounded-2xl.border.bg-card,
+.franchise-workspace [data-slot="card"] {
+  border-color: var(--client-line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.franchise-workspace .rounded-xl.border.bg-card:nth-child(6n + 1),
+.franchise-workspace .rounded-2xl.border.bg-card:nth-child(6n + 1),
+.franchise-workspace form.rounded-xl.border.bg-card:nth-child(6n + 1),
+.franchise-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 1) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.franchise-workspace .rounded-xl.border.bg-card:nth-child(6n + 2),
+.franchise-workspace .rounded-2xl.border.bg-card:nth-child(6n + 2),
+.franchise-workspace form.rounded-xl.border.bg-card:nth-child(6n + 2),
+.franchise-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 2) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.franchise-workspace .rounded-xl.border.bg-card:nth-child(6n + 3),
+.franchise-workspace .rounded-2xl.border.bg-card:nth-child(6n + 3),
+.franchise-workspace form.rounded-xl.border.bg-card:nth-child(6n + 3),
+.franchise-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 3) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.franchise-workspace .rounded-xl.border.bg-card:nth-child(6n + 4),
+.franchise-workspace .rounded-2xl.border.bg-card:nth-child(6n + 4),
+.franchise-workspace form.rounded-xl.border.bg-card:nth-child(6n + 4),
+.franchise-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 4) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 60%, white) 100%);
+}
+
+.franchise-workspace .rounded-xl.border.bg-card:nth-child(6n + 5),
+.franchise-workspace .rounded-2xl.border.bg-card:nth-child(6n + 5),
+.franchise-workspace form.rounded-xl.border.bg-card:nth-child(6n + 5),
+.franchise-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 5) {
+  background: linear-gradient(180deg, #fff 0%, #fff6ea 100%);
+  border-color: #f0d7b5;
+}
+
+.franchise-workspace .rounded-xl.border.bg-card:nth-child(6n + 6),
+.franchise-workspace .rounded-2xl.border.bg-card:nth-child(6n + 6),
+.franchise-workspace form.rounded-xl.border.bg-card:nth-child(6n + 6),
+.franchise-workspace form.rounded-2xl.border.bg-card:nth-child(6n + 6) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-rose-soft) 55%, white) 100%);
+  border-color: var(--mat-rose-tint);
+}
+
+.franchise-workspace .client-card:not([data-tone]) {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 42%, white) 100%);
+  border-color: var(--client-line);
+  box-shadow: 0 14px 36px rgb(18 29 88 / 7%);
+}
+
+.franchise-workspace .client-card[data-tone="violet"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-violet-soft) 50%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-violet-line) 60%, white);
+}
+
+.franchise-workspace .client-card[data-tone="mint"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-mint-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-mint) 22%, white);
+}
+
+.franchise-workspace .client-card[data-tone="coral"],
+.franchise-workspace .client-card[data-tone="peach"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-coral-soft) 55%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-coral) 22%, white);
+}
+
+.franchise-workspace .client-card[data-tone="sky"] {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--mat-navy-tint) 58%, white) 100%);
+  border-color: color-mix(in srgb, var(--mat-navy-soft) 16%, white);
+}
+
+.franchise-workspace .client-tabs a {
+  min-height: 2.75rem;
+}
+
+.franchise-workspace .client-tabs a[aria-current="page"] {
+  background: var(--mat-violet-soft);
+  color: var(--mat-violet-strong);
+}
+
+.franchise-workspace .client-mast {
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--mat-violet-soft) 40%, white) 0%, color-mix(in srgb, var(--client-cream) 94%, transparent) 100%);
+  border: 1px solid color-mix(in srgb, var(--mat-violet-line) 45%, white);
+  padding: 1rem 1.1rem 0.85rem;
+  box-shadow: 0 12px 28px rgb(18 29 88 / 5%);
+}
+
+.franchise-workspace main.client-page,
+.franchise-workspace .client-page {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.franchise-workspace [id].scroll-mt-24 {
+  scroll-margin-top: 6rem;
+}
+
+@media (min-width: 860px) {
+  .franchise-workspace .client-mast {
+    padding: 1rem 1.35rem 0.95rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .franchise-workspace .franchise-page-standard {
+    gap: 0.95rem;
+  }
+}

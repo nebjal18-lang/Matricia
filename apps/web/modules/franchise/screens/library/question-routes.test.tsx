@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+vi.mock("next/navigation", async (original) => ({ ...await original<typeof import("next/navigation")>(), useRouter: () => ({ replace: vi.fn() }) }));
 import type { ReactNode } from "react";
 import Bank from "@/app/[locale]/franchise/questions/page";
 import Detail from "@/app/[locale]/franchise/questions/[questionId]/page";

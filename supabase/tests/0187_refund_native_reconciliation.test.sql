@@ -13,7 +13,7 @@ declare
   prior_sub text := current_setting('request.jwt.claim.sub', true);
   prior_claims text := current_setting('request.jwt.claims', true);
   plan public.subscription_plan_versions%rowtype;
-  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb;
+  benefit jsonb; box jsonb; rule jsonb; approval_context jsonb; admission_context jsonb; admission_policy jsonb;
   fixture_key text := 'checkout-fixture-' || p_plan_version_id::text;
 begin
   select * into strict plan from public.subscription_plan_versions where id = p_plan_version_id;
@@ -35,9 +35,20 @@ begin
   perform public.activate_box_version(p_organization_id,(box->>'box_version_id')::uuid,null,fixture_key||'-box-active');
   rule := public.link_plan_box_rule(p_organization_id,p_plan_version_id,(box->>'box_version_id')::uuid,
     '{"schema_version":1,"period_unit":"SUBSCRIPTION_CYCLE","budget_rule":"AT_MOST"}',clock_timestamp()-interval '1 minute',fixture_key||'-rule');
-  approval_context := public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
+  -- The advertised internal benefit must have its own current execution policy
+  -- before the independent reviewer approves the complete checkout promise.
+  admission_context := public.get_admin_benefit_admission_context_v1((benefit->>'benefit_version_id')::uuid);
+  admission_policy := public.propose_benefit_admission_policy_v1(
+    (benefit->>'benefit_version_id')::uuid,admission_context->>'source_hash',(admission_context->>'head_id')::uuid,
+    'NONE',null,null,'{}',array[(box->>'box_version_id')::uuid],now()-interval '1 minute',null,
+    'TEST ONLY explicit internal benefit execution policy','TEST_ONLY_CHECKOUT_POLICY',
+    'HUMAN_OPERATOR_REPORT_AND_INDEPENDENT_CLIENT_RECEIPT_V1',extensions.gen_random_uuid());
   perform set_config('request.jwt.claim.sub',reviewer_id::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',reviewer_id,'role','authenticated','aal','aal2')::text,true);
+  perform public.decide_benefit_admission_policy_v1((admission_policy->>'policy_id')::uuid,
+    admission_policy->>'content_hash',true,'TEST_ONLY_CHECKOUT_POLICY_REVIEW',
+    'TEST ONLY independent approval of internal benefit execution policy');
+  approval_context := public.get_box_configuration_approval_context_v1((rule->>'plan_box_rule_id')::uuid);
   perform public.approve_box_configuration_v1((rule->>'plan_box_rule_id')::uuid,approval_context->>'source_hash',
     'TEST ONLY independent approval of synthetic checkout terms',fixture_key||'-approve');
   perform set_config('request.jwt.claim.sub',coalesce(prior_sub,''),true);

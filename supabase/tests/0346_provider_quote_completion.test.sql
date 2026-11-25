@@ -169,6 +169,8 @@ do $$declare requested jsonb; started jsonb; submitted jsonb; reviewed jsonb;beg
  perform set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
  perform public.declare_provider_capacity('fd110000-0000-4000-8000-000000000002','fd300000-0000-4000-8000-000000000007','AVAILABLE',5,2,'TEST provider capacity declaration','TEST-0104-capacity');
 end$$;
+-- The RFQ is a later request: newly reviewed qualification/capacity is effective.
+-- matricia:test-request-boundary
 insert into public.matching_runs(id,request_id,request_version_id,policy_version,status,target_panel_size,started_by,completed_at)
 values('fd170000-0000-4000-8000-000000000001','fd140000-0000-4000-8000-000000000001','fd160000-0000-4000-8000-000000000001','MATCH-V1','COMPLETED',1,'fd100000-0000-4000-8000-000000000001',clock_timestamp());
 insert into public.matching_candidates(id,matching_run_id,provider_organization_id,eligible,score_basis_points,score_explanation,rotation_component)
@@ -217,6 +219,8 @@ do $$declare requested jsonb; started jsonb; submitted jsonb; reviewed jsonb;beg
  perform set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000006","role":"authenticated","aal":"aal2"}',true);
  perform public.declare_provider_capacity('fd110000-0000-4000-8000-000000000006','fd300000-0000-4000-8000-000000000007','AVAILABLE',5,2,'TEST provider capacity declaration','TEST-0339-capacity-B');
 end$$;
+-- Provider B's qualification/capacity is effective in its subsequent RFQ request.
+-- matricia:test-request-boundary
 insert into public.matching_candidates(id,matching_run_id,provider_organization_id,eligible,score_basis_points,score_explanation,rotation_component)values('fd171000-0000-4000-8000-000000000006','fd170000-0000-4000-8000-000000000001','fd110000-0000-4000-8000-000000000006',true,8500,'{}',30);
 insert into public.rfq_providers(id,rfq_id,provider_organization_id,matching_candidate_id,status,responded_at)values('fd190000-0000-4000-8000-000000000006','fd150000-0000-4000-8000-000000000001','fd110000-0000-4000-8000-000000000006','fd171000-0000-4000-8000-000000000006','ACCEPTED',clock_timestamp());
 -- Exact test-only dated tax classification, approved independently for the
@@ -271,7 +275,7 @@ select is((select count(*)::integer from public.quote_attachments),0,'a competin
 select throws_ok($$select public.authorize_quote_attachment_download_v1((select(v->>'id')::uuid from provider346 where k='attachment'))$$,'42501','QUOTE_ATTACHMENT_SCOPE_DENIED','a foreign or guessed attachment is refused before privileged Storage access');
 select throws_ok($$select public.list_provider_quote_invitation_page_v1('fd110000-0000-4000-8000-000000000002',1,'','quotes','all')$$,'42501','QUOTE_PROVIDER_SCOPE_DENIED','paging cannot cross Provider organizations');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
-select throws_ok($$select public.create_quote_revision('fd190000-0000-4000-8000-000000000001',pg_temp.payload346(null),'Révision obsolète de recette','quote346-stale')$$,'40001','QUOTE_VERSION_CONFLICT','voluntary revision retains optimistic concurrency');
+select throws_ok($$select public.create_quote_revision('fd190000-0000-4000-8000-000000000001',pg_temp.payload346(null),'Révision obsolète de recette','quote346-stale')$$,'PT409','QUOTE_VERSION_CONFLICT','voluntary revision retains optimistic concurrency');
 insert into provider346 values('revision',public.create_quote_revision('fd190000-0000-4000-8000-000000000001',pg_temp.payload346((select(v->>'quote_version_id')::uuid from provider346 where k='quote')),'Révision volontaire motivée avant la sélection','quote346-voluntary'));
 select is((select(v->>'version_number')::integer from provider346 where k='revision'),2,'a submitted quote can produce a new motivated draft before selection');
 select is((select lifecycle_status from public.quote_versions where id=(select(v->>'quote_version_id')::uuid from provider346 where k='quote')),'SUBMITTED','the original submitted version stays unchanged');
@@ -283,13 +287,13 @@ select is((select count(*)::integer from public.quote_items),1,'Client cannot re
 select is((select last_published_version_id::text from public.quotes),(select v->>'quote_version_id'from provider346 where k='quote'),'published pointer stays on V1 during a new draft');
 select is((select count(*)::integer from public.quote_attachments),1,'V1 explicitly shared original remains available during revision');
 select ok((select public.authorize_quote_attachment_download_v1(id)->>'sha256'=source_sha256 from public.quote_attachments),'old published attachment remains authorized during revision');
-select throws_ok($$select public.select_quote_and_notify((select(v->>'quote_id')::uuid from provider346 where k='quote'),(select(v->>'quote_version_id')::uuid from provider346 where k='quote'),'Tentative de sélection pendant une révision',(select(v->>'comparison_snapshot_id')::uuid from provider346 where k='comparison'),'quote346-stale-selection')$$,'40001','STALE_QUOTE_VERSION','historical V1 cannot be selected while a new draft is being prepared');
+select throws_ok($$select public.select_quote_and_notify((select(v->>'quote_id')::uuid from provider346 where k='quote'),(select(v->>'quote_version_id')::uuid from provider346 where k='quote'),'Tentative de sélection pendant une révision',(select(v->>'comparison_snapshot_id')::uuid from provider346 where k='comparison'),'quote346-stale-selection')$$,'PT409','STALE_QUOTE_VERSION','historical V1 cannot be selected while a new draft is being prepared');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
 select public.submit_provider_quote_with_identity_v1((select(v->>'quote_id')::uuid from provider346 where k='revision'),(select(v->>'quote_version_id')::uuid from provider346 where k='revision'),public.get_my_provider_identity_status_v1('fd110000-0000-4000-8000-000000000002')->>'identity_hash','TEST Provider A registered address','quote346-publish-v2');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000001',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 select is((select count(*)::integer from public.quote_versions),2,'Client history exposes both actual published versions after republication');
 select is((select last_published_version_id::text from public.quotes),(select v->>'quote_version_id'from provider346 where k='revision'),'publication atomically advances the pointer to V2');
-select throws_ok($$select public.select_quote_and_notify((select(v->>'quote_id')::uuid from provider346 where k='quote'),(select(v->>'quote_version_id')::uuid from provider346 where k='quote'),'Tentative de sélection ancienne après republication',(select(v->>'comparison_snapshot_id')::uuid from provider346 where k='comparison'),'quote346-old-selection-after')$$,'40001','STALE_QUOTE_VERSION','old comparison and V1 cannot authorize selection after V2 publication');
+select throws_ok($$select public.select_quote_and_notify((select(v->>'quote_id')::uuid from provider346 where k='quote'),(select(v->>'quote_version_id')::uuid from provider346 where k='quote'),'Tentative de sélection ancienne après republication',(select(v->>'comparison_snapshot_id')::uuid from provider346 where k='comparison'),'quote346-old-selection-after')$$,'PT409','STALE_QUOTE_VERSION','old comparison and V1 cannot authorize selection after V2 publication');
 select set_config('request.jwt.claim.sub','fd100000-0000-4000-8000-000000000002',true);select set_config('request.jwt.claims','{"sub":"fd100000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
 
 reset role;

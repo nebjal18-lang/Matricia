@@ -49,7 +49,7 @@ export async function neutralizeFixture(database, fixture) {
     if (fixture.userIds.length > 0) {
       stage = "platform roles";
       await transaction`delete from public.platform_user_roles
-        where user_id=any(${fixture.userIds}::uuid[]) and role_code='COMPLIANCE_MANAGER'`;
+        where user_id=any(${fixture.userIds}::uuid[]) and role_code in ('COMPLIANCE_MANAGER','MATRICIA_ADMIN')`;
     }
     stage = "retained evidence";
     const retained = fixture.organizationIds.length === 0 ? [{ count: 0 }] : await transaction`select

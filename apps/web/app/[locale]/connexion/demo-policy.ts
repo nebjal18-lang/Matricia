@@ -1,4 +1,5 @@
 import type { DemoPersona } from "./demo-personas";
+import { isDemoAccessEnabled } from "@/modules/shared/lib/demo-access";
 
 type DemoAccessEnv = {
   VERCEL_ENV?: string;
@@ -8,12 +9,9 @@ type DemoAccessEnv = {
   [key: string]: string | undefined;
 };
 
+/** Production demo access requires a second, explicit environment flag. */
 export function isPublicDemoAccessEnabled(env: DemoAccessEnv = process.env): boolean {
-  if (env.VERCEL_ENV === "preview") return true;
-  if (env.VERCEL_ENV === "production" || env.APP_ENV === "production") {
-    return env.MATRICIA_DEMO_ACCESS_ENABLED === "true" && env.MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED === "true";
-  }
-  return env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
+  return isDemoAccessEnabled(env);
 }
 
 const defaultEmails = {

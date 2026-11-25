@@ -40,6 +40,7 @@ export function RoleRequestForm({
     );
   }
   const selected = organizations.find((organization) => organization.id === organizationId) ?? organizations[0];
+  if (!selected) return <p className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">{messages.noOrganization}</p>;
   const availableRoles = allRoles.filter((role) => !selected.currentRoles.includes(role));
   const error = state.status === "error"
     ? state.reason === "VALIDATION" ? messages.requestErrors.validation

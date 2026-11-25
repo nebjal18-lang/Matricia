@@ -1,0 +1,15 @@
+{
+  "task": "root-tooling-tests",
+  "command": [
+    "pnpm",
+    "exec",
+    "node",
+    "--test",
+    "scripts/release/vercel-web-output.test.mjs",
+    "scripts/release/migration-identities.test.mjs"
+  ],
+  "startedAt": "2026-11-19T14:05:21.844Z",
+  "finishedAt": "2026-11-19T14:05:22.674Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

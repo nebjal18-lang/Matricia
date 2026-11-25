@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { ArrowRight, CheckCircle2, Pencil, Plus, ShieldCheck } from "lucide-react";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
@@ -23,6 +23,7 @@ type Draft = {
   categoryCode: string;
   confirmed: boolean;
   answers: Record<string, string>;
+  organizationId: string;
   expiresAt: number;
 };
 type Organization = { id: string; name: string };
@@ -38,7 +39,7 @@ const tagCatalog = {
   ar: ["استراتيجية", "تدبير", "تحول رقمي", "امتثال", "تكوين", "المغرب"],
 } as const;
 
-const blank = (initialNeed = "", classification: PublicNeedClassification | null = null): Draft => ({
+const blank = (initialNeed = "", classification: PublicNeedClassification | null = null, organizationId = ""): Draft => ({
   version: 3,
   step: 0,
   need: initialNeed,
@@ -51,6 +52,7 @@ const blank = (initialNeed = "", classification: PublicNeedClassification | null
   categoryCode: "",
   confirmed: false,
   answers: {},
+  organizationId,
   expiresAt: Date.now() + retentionMs,
 });
 const unavailable = async (): Promise<SaveNeedState> => ({ status: "error", reason: "UNAVAILABLE" });
@@ -140,6 +142,7 @@ export function parseNeedDraft(
         categoryCode: typeof value.categoryCode === "string" ? value.categoryCode.slice(0, 40) : "",
         confirmed: classificationChanged ? false : value.confirmed === true,
         answers: asAnswers(value.answers),
+        organizationId: typeof value.organizationId === "string" ? value.organizationId.slice(0, 80) : "",
         expiresAt: value.expiresAt,
       },
     };
@@ -152,6 +155,7 @@ export function NeedFlow({
   locale,
   initialNeed = "",
   initialClassification = null,
+  initialOrganizationId = "",
   invalidSelection = false,
   authenticated = false,
   organizations = [],
@@ -161,6 +165,7 @@ export function NeedFlow({
   locale: Locale;
   initialNeed?: string;
   initialClassification?: PublicNeedClassification | null;
+  initialOrganizationId?: string;
   invalidSelection?: boolean;
   authenticated?: boolean;
   organizations?: Organization[];
@@ -168,7 +173,7 @@ export function NeedFlow({
   discoverAction?: DiscoverAction;
 }) {
   const copy = getPublicJourneyCopy(locale).need;
-  const [draft, setDraft] = useState<Draft>(() => blank(initialNeed, initialClassification));
+  const [draft, setDraft] = useState<Draft>(() => blank(initialNeed, initialClassification, initialOrganizationId));
   const [loaded, setLoaded] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
   const [storageNotice, setStorageNotice] = useState<"expired" | "invalid" | null>(null);
@@ -188,14 +193,14 @@ export function NeedFlow({
           }
         }
         setStorageNotice(parsed.status === "expired" || parsed.status === "invalid" ? parsed.status : null);
-        setDraft(parsed.draft ?? blank(initialNeed, initialClassification));
+        setDraft(parsed.draft ?? blank(initialNeed, initialClassification, initialOrganizationId));
       } catch {
         setStorageAvailable(false);
       }
       setLoaded(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialClassification, initialNeed, locale]);
+  }, [initialClassification, initialNeed, initialOrganizationId, locale]);
 
   useEffect(() => {
     if (!loaded || !storageAvailable) return;
@@ -250,6 +255,9 @@ export function NeedFlow({
         updateClassification={(classification) =>
           setDraft((current) => ({ ...current, classification, confirmed: false, expiresAt: Date.now() + retentionMs }))
         }
+        updateOrganizationId={(organizationId) =>
+          setDraft((current) => ({ ...current, organizationId, expiresAt: Date.now() + retentionMs }))
+        }
       />
     );
   }
@@ -296,8 +304,11 @@ export function NeedComposer({
   const copy = getPublicJourneyCopy(locale).need;
   const taxonomy = useMemo(() => getPublicProviderTaxonomy(locale), [locale]);
   const [customTag, setCustomTag] = useState("");
-  const [selectedOrganizationId, setOrganizationId] = useState("");
-  const organizationId = organizations.some((item) => item.id === selectedOrganizationId) ? selectedOrganizationId : organizations[0]?.id ?? "";
+  const organizationId = organizations.some((item) => item.id === draft.organizationId) ? draft.organizationId : organizations[0]?.id ?? "";
+  useEffect(() => {
+    if (!organizationId || draft.organizationId === organizationId) return;
+    setDraft((current) => ({ ...current, organizationId }));
+  }, [draft.organizationId, organizationId, setDraft]);
   const discoveryText = draft.need.trim();
   const discoveryKey = JSON.stringify([locale, organizationId, discoveryText]);
   const canDiscover = authenticated && Boolean(discoverAction) && Boolean(organizationId) && discoveryText.length >= 10;
@@ -483,7 +494,7 @@ export function NeedComposer({
           {authenticated && organizations.length > 1 ? (
             <label>
               {locale === "fr" ? "Entreprise concernée" : "المؤسسة المعنية"}
-              <select value={organizationId} onChange={(event) => setOrganizationId(event.target.value)}>
+              <select value={organizationId} onChange={(event) => patch({ organizationId: event.target.value })}>
                 {organizations.map((org) => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
@@ -691,6 +702,7 @@ export function NeedResult({
   back = edit,
   confirm,
   updateClassification,
+  updateOrganizationId,
 }: {
   locale: Locale;
   draft: Draft;
@@ -705,13 +717,21 @@ export function NeedResult({
   back?: () => void;
   confirm: () => void;
   updateClassification: (classification: PublicNeedClassification | null) => void;
+  updateOrganizationId: (organizationId: string) => void;
 }) {
+  const organizationId = organizations.some((item) => item.id === draft.organizationId) ? draft.organizationId : organizations[0]?.id ?? "";
   const copy = getPublicJourneyCopy(locale).need;
   const stages = getNeedStages(locale);
   const [state, action, pending] = useActionState(saveAction ?? unavailable, { status: "idle" } as SaveNeedState);
+  const autoAttachStarted = useRef(false);
   useEffect(() => {
-    if (state.status === "success") erase();
-  }, [state.status, erase]);
+    if (state.status !== "success") return;
+    erase();
+    // Lot 3: after durable attach, open the prefilled demande when a published service is known.
+    if (draft.classification?.serviceCode) {
+      window.location.assign(publicNeedRequestHref(locale, state.intakeId, draft.classification.serviceCode, organizationId || null));
+    }
+  }, [draft.classification?.serviceCode, erase, locale, organizationId, state]);
   const next = `/${locale}/besoin?resume=1`;
   const taxonomy = useMemo(() => getPublicProviderTaxonomy(locale), [locale]);
   const libraryCode = draft.classification?.libraryCode ?? "";
@@ -731,6 +751,28 @@ export function NeedResult({
     .filter(Boolean)
     .join("\n")
     .slice(0, 1200);
+
+  // Lot 3: after OTP, a confirmed local draft is attached once via the same idempotent RPC as the manual save.
+  useEffect(() => {
+    if (autoAttachStarted.current || !authenticated || !draft.confirmed || !saveAction || !organizationId || organizations.length === 0) return;
+    if (state.status !== "idle" || pending) return;
+    autoAttachStarted.current = true;
+    const data = new FormData();
+    data.set("locale", locale);
+    data.set("organizationId", organizationId);
+    data.set("payload", JSON.stringify({
+      need: draft.need,
+      location: draft.location,
+      timing: draft.timing,
+      constraints: extraConstraints,
+      classification: draft.classification
+        ? { libraryCode: draft.classification.libraryCode, serviceCode: draft.classification.serviceCode }
+        : null,
+    }));
+    startTransition(() => {
+      action(data);
+    });
+  }, [action, authenticated, draft.classification, draft.confirmed, draft.location, draft.need, draft.timing, extraConstraints, locale, organizationId, organizations.length, pending, saveAction, state.status]);
 
   function setLibrary(code: string) {
     if (!code) {
@@ -877,7 +919,13 @@ export function NeedResult({
             ) : (
               <label className="grid gap-2">
                 <strong>{locale === "fr" ? "Entreprise concernée" : "المؤسسة المعنية"}</strong>
-                <select name="organizationId" required className="min-h-11 rounded-md border bg-white px-3">
+                <select
+                  name="organizationId"
+                  required
+                  className="min-h-11 rounded-md border bg-white px-3"
+                  value={organizationId}
+                  onChange={(event) => updateOrganizationId(event.target.value)}
+                >
                   {organizations.map((org) => (
                     <option key={org.id} value={org.id}>{org.name}</option>
                   ))}
@@ -895,9 +943,9 @@ export function NeedResult({
               <p role="status" className="mt-3">
                 <CheckCircle2 className="inline" size={18} aria-hidden="true" /> {copy.accountSaved}{" "}
                 {draft.classification?.serviceCode ? (
-                  <Link className="font-semibold underline" href={publicNeedRequestHref(locale, state.intakeId, draft.classification.serviceCode)}>{copy.createRequest}</Link>
+                  <Link className="font-semibold underline" href={publicNeedRequestHref(locale, state.intakeId, draft.classification.serviceCode, organizationId || null)}>{copy.createRequest}</Link>
                 ) : (
-                  <Link className="font-semibold underline" href={`/${locale}/client/demandes`}>{copy.seeRequests}</Link>
+                  <Link className="font-semibold underline" href={`/${locale}/client/demandes${organizationId ? `?organizationId=${organizationId}` : ""}`}>{copy.seeRequests}</Link>
                 )}
               </p>
             ) : (

@@ -1,0 +1,19 @@
+▲ Next.js 16.4.1 (Turbopack)
+⚠ Warning: Next.js ignored pnpm-workspace.yaml in C:\Projects\Matricia because it is outside the current Git repository (C:\Projects\Matricia\Matricia).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 640ms
+Warning: Custom Cache-Control headers detected for the following routes:
+  - /_next/static/:path*
+
+Setting a custom Cache-Control header can break Next.js development behavior.
+- Experiments (use with caution):
+  · optimizePackageImports
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 14.7s
+  Running TypeScript ...
+modules/franchise/data/digest/repository.ts(35,44): error TS2589: Type instantiation is excessively deep and possibly infinite.
+Failed to type check.
+

@@ -40,7 +40,12 @@ export class CmiPaymentGateway implements PaymentGateway, PaymentWebhookVerifier
     ) {
       throw new PaymentGatewayError("CONFIGURATION_INVALID");
     }
-    this.providerEnvironment=config.environment !== "live" && url.hostname === "testpayment.cmi.co.ma" ? "SANDBOX" : "UNVERIFIED";
+    // CMI has no native live-host attestation yet: merchant/payment hostnames stay UNVERIFIED.
+    // A live flag on the sandbox host is a configuration error, never a LIVE attestation.
+    if (config.environment === "live" && url.hostname === "testpayment.cmi.co.ma") {
+      throw new PaymentGatewayError("CONFIGURATION_INVALID");
+    }
+    this.providerEnvironment = config.environment !== "live" && url.hostname === "testpayment.cmi.co.ma" ? "SANDBOX" : "UNVERIFIED";
     this.gatewayUrl = url.toString();
   }
 

@@ -22,6 +22,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { dashboardHomeCopy } from "@/modules/shared/module-hub-copy";
 import type { DashboardActionSummary } from "@/modules/shared/lib/action-center/dashboard-summary";
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
+import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { clientDashboardCopy } from "@/modules/client/data/home/copy";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
@@ -34,6 +35,7 @@ import {
   type ClientPrioritySituation,
 } from "@/modules/client/data/home/view-model";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
+import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 
 type FeaturedSteps = NonNullable<Extract<ClientHomeSnapshot, { status: "success" }>["featuredProject"]>["steps"];
 
@@ -164,9 +166,11 @@ export function ClientDashboardHome({
   const progressMax = progressRows.reduce((max, row) => Math.max(max, row.value), 1);
   const notifCount = summary.total > 0 ? Math.min(summary.total, 9) : 0;
 
-  const helloName = organizationName?.trim() || space.space;
+  const helloName = organizationName?.trim()
+    ? organizationDisplayLabel(organizationName, locale)
+    : space.space;
   const messagesUnread = insights.messagesToHandle !== null && insights.messagesToHandle > 0;
-  const accountInitial = (organizationName?.trim()?.slice(0, 2) || userEmail?.slice(0, 1) || "M").toUpperCase();
+  const accountInitial = (helloName.slice(0, 2) || userEmail?.slice(0, 1) || "M").toUpperCase();
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace">
@@ -180,7 +184,7 @@ export function ClientDashboardHome({
         </Link>
         <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active="home" />
         <figure className="client-side-art">
-          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} />
+          <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
         </figure>
       </aside>
@@ -224,20 +228,26 @@ export function ClientDashboardHome({
           </div>
         </div>
 
-        <header className="client-mast client-home-mast">
-          <div>
-            <h1>{c.helloBonjour}, {helloName}.</h1>
-            <p>{c.helloLead}</p>
-          </div>
-          <div className="client-home-mast-actions">
-            <Link href={`/${locale}/besoin${selectedQuery}`} className="client-need-cta">
-              {c.primaryNeed}
-              <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
-            </Link>
-            <p className="client-ambition-script">{c.ambitionScript}</p>
-          </div>
-        </header>
+        <div className="client-scene-mast">
+          <SpaceSceneHero
+            className="client-home-scene-hero"
+            sceneSrc="/scenes/arch-city.png"
+            title={helloName ? `${c.helloBonjour}, ${helloName}.` : `${c.helloBonjour}.`}
+            meta={c.helloLead}
+            actions={
+              <div className="client-home-mast-actions">
+                <Link href={`/${locale}/besoin${selectedQuery}`} className="client-need-cta">
+                  {c.primaryNeed}
+                  <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
+                </Link>
+                <p className="client-ambition-script">{c.ambitionScript}</p>
+              </div>
+            }
+            priority
+          />
+        </div>
 
+        <div className="client-page-standard">
         <main className="client-page">
           {showSignoutError ? <Alert variant="destructive"><AlertDescription>{m.signOutError}</AlertDescription></Alert> : null}
           {contextRejected ? <Alert variant="destructive"><AlertDescription>{m.contextRejected}</AlertDescription></Alert> : null}
@@ -348,7 +358,7 @@ export function ClientDashboardHome({
                     {progressRows.map((row, index) => {
                       const height = Math.round((row.value / progressMax) * 80);
                       const color = index === 0 ? "#1d4ed8" : index === 1 ? "#9a3412" : "#166534";
-                      return <g key={row.label}><title>{row.label}: {row.value}</title><rect x={24 + index * 100} y={100 - height} height={height} width={64} fill={color} rx={4} /></g>;
+                      return <g key={row.label}><title>{`${row.label}: ${row.value}`}</title><rect x={24 + index * 100} y={100 - height} height={height} width={64} fill={color} rx={4} /></g>;
                     })}
                   </svg>
                   <ul className="client-home-progress">
@@ -369,12 +379,25 @@ export function ClientDashboardHome({
                     const maxDeliverables = Math.max(...comparison.columns.map((item) => item.deliverablesCount), 1);
                     const durations = comparison.columns.map((item) => item.durationDays).filter((value) => value > 0);
                     const minDays = durations.length > 0 ? Math.min(...durations) : 0;
-                    const prices = comparison.columns.map((item) => Number(item.totalMinor) || 0).filter((value) => value > 0);
-                    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+                    const prices = comparison.columns
+                      .map((item) => {
+                        try {
+                          return BigInt(item.totalMinor);
+                        } catch {
+                          return 0n;
+                        }
+                      })
+                      .filter((value) => value > 0n);
+                    const minPrice = prices.length > 0 ? prices.reduce((left, right) => (left < right ? left : right)) : 0n;
                     const scopePct = Math.round((column.deliverablesCount / maxDeliverables) * 100);
                     const delayPct = column.durationDays > 0 && minDays > 0 ? Math.round((minDays / column.durationDays) * 100) : 0;
-                    const price = Number(column.totalMinor) || 0;
-                    const termsPct = price > 0 && minPrice > 0 ? Math.round((minPrice / price) * 100) : 0;
+                    let price = 0n;
+                    try {
+                      price = BigInt(column.totalMinor);
+                    } catch {
+                      price = 0n;
+                    }
+                    const termsPct = price > 0n && minPrice > 0n ? Number((minPrice * 100n) / price) : 0;
                     return (
                       <div key={column.quoteId} className="client-home-criteria-offer">
                         <strong>{column.label || (index === 0 ? c.offerA : c.offerB)}</strong>
@@ -456,6 +479,7 @@ export function ClientDashboardHome({
 
           {snapshot.status === "error" ? <p role="alert" className="admin-notice">{snapshot.reason === "FORBIDDEN" ? c.snapshotForbidden : c.snapshotError}</p> : snapshot.partialSources?.length ? <div role="status" className="admin-notice">{snapshot.partialSources.map((item) => <p key={item.source}>{item.source === "missions" ? c.kpiMissions : c.kpiRequests} : {item.reason === "FORBIDDEN" ? c.snapshotForbidden : c.snapshotError}</p>)}</div> : null}
         </main>
+        </div>
       </div>
     </div>
   );

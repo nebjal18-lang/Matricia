@@ -1,6 +1,11 @@
 begin;
 set local search_path = public, extensions;
 select plan(18);
+-- Inspect the actual guarded delegate, not only the public review adapter.
+create temporary view tested_qualification_command_source as
+ select case when pg_get_functiondef('public.decide_provider_qualification(uuid,text,uuid,integer,jsonb,jsonb,text,text,timestamptz,integer,text,uuid)'::regprocedure) like '%public.decide_provider_qualification_pre_review_0384(%'
+ then pg_get_functiondef('public.decide_provider_qualification(uuid,text,uuid,integer,jsonb,jsonb,text,text,timestamptz,integer,text,uuid)'::regprocedure)||pg_get_functiondef('public.decide_provider_qualification_pre_review_0384(uuid,text,uuid,integer,jsonb,jsonb,text,text,timestamptz,integer,text,uuid)'::regprocedure) else '' end as source;
+
 
 select has_table('public', 'anomaly_definitions', 'anomaly definition identities exist');
 select has_table('public', 'risk_definitions', 'risk definition identities exist');
@@ -15,10 +20,8 @@ select has_function('public', 'propose_franchise_volume_purchase', 'franchise vo
 
 select ok(
   (
-    select p.prosrc like '%can_decide_franchise_service_qualification%'
-      from pg_proc p
-      join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname = 'public' and p.proname = 'decide_provider_qualification'
+    select p.source like '%can_decide_franchise_service_qualification%'
+      from tested_qualification_command_source p
   ),
   'service qualification may be decided by the mandated-library franchisee'
 );
@@ -95,12 +98,10 @@ select ok(
       and cmd = 'SELECT'
   )
   and exists (
-    select 1
-    from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'private'
-      and p.proname = 'dispute_case_access'
-      and pg_get_functiondef(p.oid) like '%franchise_supervises_dispute%'
+    select 1 from pg_policies
+    where schemaname='public' and tablename='dispute_cases'
+      and policyname='dispute_cases_franchise_library_read' and cmd='SELECT'
+      and qual like '%franchise_supervises_dispute%'
   ),
   'franchisees can read mandated-library definitions, proposals, qualification decisions and incident dossiers'
 );

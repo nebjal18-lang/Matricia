@@ -4,7 +4,7 @@ import { PublicFooter } from "@/modules/public/ui/site/public-footer";
 import { PublicNavigation } from "@/modules/public/ui/site/public-navigation";
 import { PublicPathArt } from "@/modules/public/ui/site/public-art";
 import { isLocale, type Locale } from "@/modules/shared/lib/i18n/locale";
-import "./(public)/experience.css";
+import "./not-found.css";
 
 export default function LocaleNotFound() {
   return <NotFoundScreen locale="fr" />;
@@ -14,7 +14,7 @@ export function NotFoundScreen({ locale }: { locale: Locale }) {
   const safe = isLocale(locale) ? locale : "fr";
   const fr = safe === "fr";
   return (
-    <div dir={fr ? "ltr" : "rtl"} className="public-root flex min-h-dvh flex-col text-[var(--mat-navy)]">
+    <div dir={fr ? "ltr" : "rtl"} className="public-root not-found-root flex min-h-dvh flex-col text-[var(--mat-navy)]">
       <PublicNavigation locale={safe} />
       <main id="contenu-principal" className="public-page flex-1 pb-16">
         <section className="public-wrap public-error-hero">

@@ -1,0 +1,17 @@
+
+> @matricia/worker@0.1.0 test C:\Projects\Matricia\Matricia\apps\worker
+> vitest run
+
+
+ RUN  v5.0.3 C:/Projects/Matricia/Matricia/apps/worker
+
+
+ Test Files  17 passed (17)
+      Tests  183 passed (183)
+   Start at  09:19:16
+   Duration  1.23s (transform 42%, tests 27%, import 27%, worker 4%)
+
+  Transform  transforming modules took 2.26s · 42% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+

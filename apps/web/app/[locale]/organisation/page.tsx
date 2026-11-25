@@ -60,7 +60,7 @@ export default async function OrganizationPage({ params, searchParams }: { param
       </main>
     );
   }
-  const space = await resolveConnectedSpace({ locale, organizationId: query.organizationId });
+  const space = await resolveConnectedSpace({ locale, ...(query.organizationId !== undefined && { organizationId: query.organizationId }) });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: selfHref }));
   const c = spaceCopy(locale);
   const roles = await listOrganizationRoles();
@@ -82,16 +82,19 @@ export default async function OrganizationPage({ params, searchParams }: { param
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
+      currentPath={selfHref}
       title={c.orgTitle}
       lead={c.orgLead}
       kicker={c.kicker}
       clientActive="company"
       providerActive="company"
       franchiseActive="governance"
+      sceneHero
       actions={<SpaceActions href="#modifier" label={c.editInfo} />}
     >
       <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/organisation/rattachements${space.selectedQuery}`}>{locale==="fr"?"Rejoindre une entreprise et traiter les demandes":"الانضمام إلى مؤسسة ومعالجة الطلبات"}</Link>
+      {roles.status === "error" ? <WorkspaceFailure locale={locale} reason={roles.reason === "UNAUTHENTICATED" ? "UNAUTHENTICATED" : "QUERY_FAILED"} returnPath={selfHref} supportReference="ORGANIZATION_ROLES" /> : null}
       <CompanyBoard locale={locale} query={space.selectedQuery} organizationName={space.organizationName} alternate={alternate} people={people} />
       <details id="modifier" className="client-ops" open={returnTo ? true : undefined}>
         <summary>{c.opsOrg}</summary>

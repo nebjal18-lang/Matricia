@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { EmailOtpLength } from "@/modules/shared/lib/auth/otp-config";
 import { useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "@/modules/shared/lib/supabase/client";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getDictionary } from "@/modules/shared/lib/i18n/dictionaries";
 import { applyOtpDigits, normalizeEmail, normalizeOtp } from "@/modules/shared/lib/auth/otp";
@@ -11,7 +10,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
 import { legalConsent } from "@/modules/shared/lib/auth/legal-consent";
-import { requestOtp, confirmRegistrationConsent, postLoginDestination } from "./actions";
+import { requestOtp, completeEmailLogin, completePasswordLogin } from "./actions";
 import { getLoginMessages } from "./messages";
 
 export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = false, otpLength = 6 }: { locale: Locale; nextPath?: string; intent?: "login" | "registration"; consentAccepted?: boolean; otpLength?: EmailOtpLength }) {
@@ -52,10 +51,19 @@ export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = 
     if (!normalizedToken) { setMessage(messages.invalidCode); return; }
     setStatus("pending"); setMessage("");
     try {
-      const { error } = await getSupabaseBrowserClient().auth.verifyOtp({ email, token: normalizedToken, type: "email" });
-      if (error) { setStatus("error"); setMessage(error.code === "otp_expired" ? messages.rejectedCode : messages.genericError); return; }
-      if (intent === "registration" && !await confirmRegistrationConsent()) { setStatus("error"); setMessage(locale === "fr" ? "Votre acceptation doit être confirmée. Reprenez l’inscription." : "يجب تأكيد قبولكم. يرجى إعادة التسجيل."); return; }
-      router.replace(await postLoginDestination(locale, nextPath));
+      const result = await completeEmailLogin(email, normalizedToken, locale, nextPath, intent, otpLength);
+      if (!result.ok) {
+        setStatus("error");
+        setMessage(
+          result.reason === "RATE_LIMITED" ? messages.rateLimited
+            : result.reason === "EXPIRED" ? messages.rejectedCode
+            : result.reason === "CONSENT"
+              ? (locale === "fr" ? "Votre acceptation doit être confirmée. Reprenez l’inscription." : "يجب تأكيد قبولكم. يرجى إعادة التسجيل.")
+              : messages.genericError,
+        );
+        return;
+      }
+      router.replace(result.destination);
       router.refresh();
     } catch { setStatus("error"); setMessage(messages.genericError); }
   }
@@ -81,13 +89,12 @@ export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = 
     if (!normalizedEmail) { setMessage(messages.invalidEmail); return; }
     if (password.length < 12 || password.length > 72) { setMessage(messages.invalidPassword); return; }
     setStatus("pending"); setMessage("");
-    const { error } = await getSupabaseBrowserClient().auth.signInWithPassword({
-      email: normalizedEmail,
-      password,
-    });
-    if (error) { setStatus("error"); setMessage(messages.genericError); return; }
-    router.replace(await postLoginDestination(locale, nextPath));
-    router.refresh();
+    try {
+      const result = await completePasswordLogin(normalizedEmail, password, locale, nextPath);
+      if (!result.ok) { setStatus("error"); setMessage(result.reason === "RATE_LIMITED" ? messages.rateLimited : messages.genericError); return; }
+      router.replace(result.destination);
+      router.refresh();
+    } catch { setStatus("error"); setMessage(messages.genericError); }
   }
 
   function selectMethod(nextMethod: "otp" | "password") {

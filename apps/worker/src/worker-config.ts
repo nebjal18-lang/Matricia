@@ -7,6 +7,7 @@ export type WorkerRuntimeConfig = Readonly<{
   supabaseProjectRef: string;
   dispatchUrl: URL;
   webhookSecret: string;
+  scannerToken: string;
   port: number;
 }>;
 
@@ -67,8 +68,12 @@ export function readWorkerRuntimeConfig(env: NodeJS.ProcessEnv): WorkerRuntimeCo
 
   const serviceKey = required(env, "SUPABASE_SERVICE_ROLE_KEY");
   const webhookSecret = required(env, "INTERNAL_WEBHOOK_SECRET");
+  const scannerToken = required(env, "MALWARE_SCANNER_TOKEN");
   if (serviceKey.length < 32) throw new Error("WORKER_CONFIG_SUPABASE_SERVICE_ROLE_KEY_INVALID");
   if (webhookSecret.length < 32) throw new Error("WORKER_CONFIG_INTERNAL_WEBHOOK_SECRET_INVALID");
+  if (scannerToken !== env.MALWARE_SCANNER_TOKEN || scannerToken.length < 32 || scannerToken.length > 4_096 || /\s/u.test(scannerToken)) {
+    throw new Error("WORKER_CONFIG_MALWARE_SCANNER_TOKEN_INVALID");
+  }
 
   return Object.freeze({
     environment: environment as WorkerEnvironment,
@@ -77,6 +82,7 @@ export function readWorkerRuntimeConfig(env: NodeJS.ProcessEnv): WorkerRuntimeCo
     supabaseProjectRef: projectRef,
     dispatchUrl,
     webhookSecret,
+    scannerToken,
     port: strictInteger(env.PORT ?? "8080", "PORT", 1, 65_535),
   });
 }

@@ -1,4 +1,5 @@
-import{filterAdminOrgRows,localizeStatus}from"@/modules/admin/data/spaces/view-model";
+import { adminFixturesHiddenLabel } from "@/modules/admin/data/spaces/actor-presentation";
+import { filterAdminOrgRows, localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import Link from "next/link";
 import {
   Archive,
@@ -6,7 +7,6 @@ import {
   BookOpen,
   Check,
   ChevronRight,
-  CircleDot,
   Download,
   Eye,
   FileText,
@@ -31,11 +31,22 @@ import {
   adminDirectoryGroup,
   adminDirectoryGroups,
   inferOrgType,
+  ORG_TYPE_NONE,
+  orgTypeFilterCodes,
+  orgTypeOptionLabel,
   type AdminDirectoryGroup,
 } from "@/modules/admin/data/spaces/directory";
+import type { HubMetrics } from "@/modules/admin/data/spaces/hub-metrics";
 import { organizationJourney, type AdminOrgRow, type AdminTreatItem } from "@/modules/admin/data/spaces/view-model";
 import type { AdminOrganizationFiche } from "@/modules/admin/data/supervision/types";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
+import { DirectoryLink } from "./directory-link";
+import { FicheMembresPanel } from "./fiche-membres-panel";
+import { FichePanels } from "./fiche-panels";
+import { FicheTabNav } from "./fiche-tab-nav";
+import { HubKpiStrip } from "./hub-charts";
+import { OrganizationFicheHero } from "./organization-fiche-hero";
 
 function Cta({ href, children }: { href: string; children: ReactNode }) {
   return <Link href={href} className="client-ghost-link">{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>;
@@ -61,13 +72,7 @@ function DirectoryCard({ group }: { group: AdminDirectoryGroup }) {
       <ul>
         {group.links.map((link) => (
           <li key={`${group.id}-${link.label}`}>
-            <Link href={link.href}>
-              <span className="admin-dir-link-label">
-                <CircleDot className="size-3.5 admin-dir-link-glyph" aria-hidden />
-                {link.label}
-              </span>
-              <ChevronRight className="size-4 rtl:rotate-180" aria-hidden />
-            </Link>
+            <DirectoryLink href={link.href} label={link.label} summary={link.summary} />
           </li>
         ))}
       </ul>
@@ -75,24 +80,30 @@ function DirectoryCard({ group }: { group: AdminDirectoryGroup }) {
   );
 }
 
-export function AdminDirectoryBoard({ locale, query }: { locale: Locale; query: string }) {
+function HubToolbar({
+  locale,
+  query,
+  showOrgActions = false,
+}: {
+  locale: Locale;
+  query: string;
+  showOrgActions?: boolean;
+}) {
   const c = adminCopy(locale);
-  const groups = adminDirectoryGroups(locale, query);
-  const actions = [
-    { href: `/${locale}/administration/entreprises/nouvelle${query}`, label: c.create, tone: "violet" as const, icon: Plus },
-    { href: `/${locale}/administration/entreprises${query}`, label: c.edit, tone: "peach" as const, icon: Pencil },
-    { href: `/${locale}/administration/operations${query}#archives`, label: c.archiveRestore, tone: "mint" as const, icon: Archive },
-    { href: `/${locale}/administration/entreprises/export${query}`, label: c.export, tone: "sky" as const, icon: Download },
-  ];
-  const sensitive = [c.s1, c.s2, c.s3, c.s4, c.s5];
+  const items = showOrgActions
+    ? [
+        { href: `/${locale}/administration/entreprises/nouvelle${query}`, label: c.create, tone: "violet" as const, icon: Plus },
+        { href: `/${locale}/administration/entreprises${query}`, label: c.edit, tone: "peach" as const, icon: Pencil },
+        { href: `/${locale}/administration/operations${query}#archives`, label: c.archiveRestore, tone: "mint" as const, icon: Archive },
+        { href: `/${locale}/administration/entreprises/export${query}`, label: c.export, tone: "sky" as const, icon: Download },
+      ]
+    : [];
   return (
-    <main className="client-page admin-home-page">
-      <h2 className="admin-home-title">{c.homeTitle}</h2>
-      <section className="admin-home-toolbar">
+    <section className="admin-home-toolbar">
+      {items.length ? (
         <div className="admin-dir-actions">
-          {actions.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
-            const className = "admin-dir-action";
             const content = (
               <>
                 <Icon className="size-4" aria-hidden />
@@ -101,24 +112,59 @@ export function AdminDirectoryBoard({ locale, query }: { locale: Locale; query: 
               </>
             );
             return item.href.includes("/export")
-              ? <a key={item.label} href={item.href} className={className} data-tone={item.tone}>{content}</a>
-              : <Link key={item.label} href={item.href} className={className} data-tone={item.tone}>{content}</Link>;
+              ? <a key={item.label} href={item.href} className="admin-dir-action" data-tone={item.tone}>{content}</a>
+              : <Link key={item.label} href={item.href} className="admin-dir-action" data-tone={item.tone}>{content}</Link>;
           })}
         </div>
-        <article className="admin-sensitive">
-          <h3><Shield className="size-4" aria-hidden /> {c.sensitive}</h3>
-          <ul>
-            {sensitive.map((item) => (
-              <li key={item}><Check className="size-3.5 admin-sensitive-check" aria-hidden />{item}</li>
-            ))}
-          </ul>
-        </article>
-      </section>
+      ) : null}
+      <article className="admin-sensitive">
+        <h3><Shield className="size-4" aria-hidden /> {c.sensitive}</h3>
+        <ul>
+          {[c.s1, c.s2, c.s3, c.s4, c.s5].map((item) => (
+            <li key={item}><Check className="size-3.5 admin-sensitive-check" aria-hidden />{item}</li>
+          ))}
+        </ul>
+      </article>
+    </section>
+  );
+}
+
+function HubVisualBlock({ locale, metrics }: { locale: Locale; metrics?: HubMetrics }) {
+  if (!metrics?.kpis.length) return null;
+  return (
+    <div className="admin-hub-visual">
+      <HubKpiStrip kpis={metrics.kpis} label={locale === "ar" ? "مؤشرات" : "Indicateurs"} />
+    </div>
+  );
+}
+
+export function AdminDirectoryBoard({
+  locale,
+  query,
+  metrics,
+  embedded = false,
+  compact = false,
+}: {
+  locale: Locale;
+  query: string;
+  metrics?: HubMetrics;
+  embedded?: boolean;
+  /** Hide org CRUD strip and duplicate KPI block (command-center home). */
+  compact?: boolean;
+}) {
+  const c = adminCopy(locale);
+  const groups = adminDirectoryGroups(locale, query);
+  const Frame = embedded ? "div" : "main";
+  return (
+    <Frame className={embedded ? "admin-home-page admin-home-page--embedded" : "client-page admin-home-page"}>
+      <h2 className="admin-home-title">{c.homeTitle}</h2>
+      {compact ? null : <HubToolbar locale={locale} query={query} showOrgActions />}
+      {compact ? null : <HubVisualBlock locale={locale} metrics={metrics} />}
       <section className="admin-dir-grid" aria-label={c.homeTitle}>
         {groups.map((group) => <DirectoryCard key={group.id} group={group} />)}
       </section>
-      <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>
-    </main>
+      {compact ? null : <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>}
+    </Frame>
   );
 }
 
@@ -126,29 +172,28 @@ export function AdminHubBoard({
   locale,
   query,
   groupId,
+  metrics,
+  title,
 }: {
   locale: Locale;
   query: string;
   groupId: AdminDirectoryGroup["id"];
+  metrics?: HubMetrics;
+  title?: string;
 }) {
   const c = adminCopy(locale);
   const group = adminDirectoryGroup(locale, query, groupId);
   if (!group) return null;
   return (
-    <main className="client-page">
-      <section className="admin-hub-layout">
+    <div className="client-page admin-home-page" data-hub={groupId}>
+      <h1 className="admin-home-title">{title ?? group.title}</h1>
+      <HubToolbar locale={locale} query={query} showOrgActions={groupId === "actors"} />
+      <HubVisualBlock locale={locale} metrics={metrics} />
+      <section className="admin-dir-grid" aria-label={title ?? group.title} data-count="1">
         <DirectoryCard group={group} />
-        <article className="admin-sensitive">
-          <h3><Shield className="size-4" aria-hidden /> {c.sensitive}</h3>
-          <ul>
-            {[c.s1, c.s2, c.s3, c.s4, c.s5].map((item) => (
-              <li key={item}><Check className="size-3.5 admin-sensitive-check" aria-hidden />{item}</li>
-            ))}
-          </ul>
-        </article>
       </section>
       <p className="admin-foot-note"><Info className="size-4 shrink-0" aria-hidden />{c.foot}</p>
-    </main>
+    </div>
   );
 }
 
@@ -166,7 +211,7 @@ export function AdminHubStrip({
   return (
     <nav className="admin-hub-strip" aria-label={group.title} data-tone={group.tone}>
       {group.links.map((link) => (
-        <Link key={link.href} href={link.href}>{link.label}</Link>
+        <HashAwareLink key={link.href} href={link.href} title={link.summary}>{link.label}</HashAwareLink>
       ))}
     </nav>
   );
@@ -180,6 +225,7 @@ export function OrganizationsBoard({
   search,
   archives,
   filters,
+  includeFixtures = false,
 }: {
   locale: Locale;
   query: string;
@@ -188,64 +234,109 @@ export function OrganizationsBoard({
   search?: string;
   archives?: boolean;
   filters?: { type?: string; status?: string; compliance?: string; plan?: string };
+  includeFixtures?: boolean;
 }) {
   const c = adminCopy(locale);
-  const types = [...new Set(rows.flatMap(row=>row.typeCodes?.length?row.typeCodes:[row.type]).filter(Boolean))].sort();
-  const statuses = [...new Set(rows.map(row=>row.statusCode??row.status).filter(Boolean))].sort();
-  const compliances = [...new Set(rows.map(row=>row.complianceCode??row.compliance).filter(Boolean))].sort();
-  const plans = [...new Set(rows.map(row=>row.planCode??row.plan).filter(Boolean))].sort();
-  const filtered = filterAdminOrgRows(rows,filters??{},search,archives);
+  const showFixtures = includeFixtures || Boolean(search?.trim());
+  const directory = showFixtures ? rows : rows.filter((row) => !row.fixture);
+  const hiddenFixtures = rows.length - directory.length;
+  const types = [...new Set(directory.flatMap((row) => orgTypeFilterCodes(row.typeCodes ?? [])))].sort();
+  const statuses = [...new Set(directory.map((row) => row.statusCode ?? row.status).filter(Boolean))].sort();
+  const compliances = [...new Set(directory.map((row) => row.complianceCode ?? row.compliance).filter(Boolean))].sort();
+  const plans = [...new Set(directory.map((row) => row.planCode).filter((code): code is string => Boolean(code)))].sort();
+  const filtered = filterAdminOrgRows(directory, filters ?? {}, search, archives);
   const orgParams = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
   const organizationId = orgParams.get("organizationId");
+  const activeFilters = Boolean(
+    (filters?.type && filters.type !== "all")
+    || (filters?.status && filters.status !== "all")
+    || (filters?.compliance && filters.compliance !== "all")
+    || (filters?.plan && filters.plan !== "all")
+    || archives
+    || search?.trim(),
+  );
+  const resetHref = `/${locale}/administration/entreprises${organizationId ? `?organizationId=${organizationId}` : ""}`;
+  const fixturesHref = (() => {
+    const params = new URLSearchParams(organizationId ? { organizationId } : undefined);
+    params.set("fixtures", "1");
+    if (search?.trim()) params.set("q", search.trim());
+    return `/${locale}/administration/entreprises?${params.toString()}`;
+  })();
   return (
-    <main className="client-page">
+    <div className="client-page">
       <section className="admin-org-layout">
         <article className="client-card">
-          <form className="admin-filters" method="get" action={`/${locale}/administration/entreprises`}>
+          <form
+            key={`org-filters:${filters?.type ?? "all"}:${filters?.status ?? "all"}:${filters?.compliance ?? "all"}:${filters?.plan ?? "all"}:${search ?? ""}:${archives ? "1" : "0"}:${includeFixtures ? "1" : "0"}`}
+            className="admin-filters"
+            data-layout="orgs"
+            data-active={activeFilters ? "true" : undefined}
+            method="get"
+            action={`/${locale}/administration/entreprises`}
+          >
             {organizationId ? <input type="hidden" name="organizationId" value={organizationId} /> : null}
-            {archives ? <input type="hidden" name="archives" value="1" /> : null}
-            <label>{c.type}
-              <select name="type" defaultValue={filters?.type ?? "all"}>
-                <option value="all">{c.all}</option>
-                {types.map((type) => <option key={type} value={type}>{["CLIENT","PROVIDER","FRANCHISE","INTERNAL"].includes(type)?inferOrgType("",locale,[type]):type}</option>)}
-              </select>
-            </label>
-            <label>{c.state}
-              <select name="status" defaultValue={filters?.status ?? "all"}>
-                <option value="all">{c.all}</option>
-                {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status,locale)}</option>)}
-              </select>
-            </label>
-            <label>{c.compliance}
-              <select name="compliance" defaultValue={filters?.compliance ?? "all"}>
-                <option value="all">{c.all}</option>
-                {compliances.map((compliance) => <option key={compliance} value={compliance}>{compliance==="CURRENT"?c.complianceOk:compliance==="REVIEW"?c.complianceReview:locale==="ar"?"غير متحقق":"Non vérifié"}</option>)}
-              </select>
-            </label>
-            <label>{c.plan}
-              <select name="plan" defaultValue={filters?.plan ?? "all"}>
-                <option value="all">{c.all}</option>
-                {plans.map((plan) => <option key={plan} value={plan}>{plan==="UNKNOWN"?c.unknownPlan:plan}</option>)}
-              </select>
-            </label>
-            <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={archives} />{c.includeArchived}</label>
-            <label className="client-top-search">
-              <Search className="size-4" aria-hidden />
-              <span className="sr-only">{c.searchList}</span>
-              <input name="q" defaultValue={search} placeholder={c.searchList} />
-            </label>
-            <button type="submit" className="admin-soft-cta">{locale === "ar" ? "تصفية" : "Filtrer"}</button>
-            <Link href={`/${locale}/administration/entreprises${organizationId ? `?organizationId=${organizationId}` : ""}`} className="client-ghost-link">{c.reset}</Link>
+            {includeFixtures ? <input type="hidden" name="fixtures" value="1" /> : null}
+            <div className="admin-filters-grid">
+              <label>{c.type}
+                <select name="type" defaultValue={filters?.type === "Non renseigné" || filters?.type === "غير محدد" ? ORG_TYPE_NONE : (filters?.type ?? "all")}>
+                  <option value="all">{c.all}</option>
+                  {types.map((type) => <option key={type} value={type}>{orgTypeOptionLabel(type, locale)}</option>)}
+                </select>
+              </label>
+              <label>{c.state}
+                <select name="status" defaultValue={filters?.status ?? "all"}>
+                  <option value="all">{c.all}</option>
+                  {statuses.map((status) => <option key={status} value={status}>{localizeStatus(status, locale)}</option>)}
+                </select>
+              </label>
+              <label>{c.compliance}
+                <select name="compliance" defaultValue={filters?.compliance ?? "all"}>
+                  <option value="all">{c.all}</option>
+                  {compliances.map((compliance) => <option key={compliance} value={compliance}>{compliance === "CURRENT" ? c.complianceOk : compliance === "REVIEW" ? c.complianceReview : locale === "ar" ? "غير متحقق" : "Non vérifié"}</option>)}
+                </select>
+              </label>
+              <label>{c.plan}
+                <select name="plan" defaultValue={filters?.plan ?? "all"}>
+                  <option value="all">{c.all}</option>
+                  {plans.map((plan) => <option key={plan} value={plan}>{plan}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="admin-filters-tools">
+              <label className="admin-check"><input type="checkbox" name="archives" value="1" defaultChecked={Boolean(archives)} />{c.includeArchived}</label>
+              <Link href={`/${locale}/administration/operations${organizationId ? `?organizationId=${organizationId}` : ""}#archives`} className="client-ghost-link">{c.seeArchives}</Link>
+              <label className="client-top-search admin-filter-search">
+                <Search className="size-4" aria-hidden />
+                <input name="q" defaultValue={search} placeholder={c.searchList} aria-label={c.searchList} />
+              </label>
+              <button type="submit" className="admin-soft-cta">{locale === "ar" ? "تصفية" : "Filtrer"}</button>
+              <Link href={resetHref} className="client-ghost-link">{c.reset}</Link>
+            </div>
           </form>
+          {hiddenFixtures > 0 && !showFixtures ? (
+            <p role="status" className="client-access-note">
+              {adminFixturesHiddenLabel(hiddenFixtures, locale)}
+              {" "}
+              <Link className="client-text-link" href={fixturesHref}>
+                {locale === "ar" ? "إظهار بيانات العرض" : "Afficher les données de démo"}
+              </Link>
+            </p>
+          ) : null}
           <div className="admin-table-tools">
             <div>
               <h2>{c.allOrgs}</h2>
               <p>{c.allOrgsLead}</p>
             </div>
+            {filtered.length > 0 ? (
+              <p className="admin-result-count" role="status">
+                {locale === "ar" ? `${filtered.length} نتيجة` : `${filtered.length} résultat${filtered.length > 1 ? "s" : ""}`}
+                {activeFilters ? (locale === "ar" ? " · مصفّاة" : " · filtrés") : null}
+              </p>
+            ) : null}
           </div>
           {filtered.length === 0 ? null : (
             <div className="client-table-wrap" tabIndex={0} role="region" aria-label={c.allOrgs}>
-              <table className="client-space-table">
+              <table className="client-space-table admin-org-table">
                 <thead>
                   <tr>
                     <th>{c.orgs}</th>
@@ -263,17 +354,20 @@ export function OrganizationsBoard({
                       <td>
                         <span className="client-doc-cell">
                           <span className="client-avatar" data-tone={row.statusTone}>{row.name.slice(0, 1)}</span>
-                          {row.name}
+                          <span>
+                            <strong>{row.name}</strong>
+                            {row.legalName && row.legalName !== row.name ? <small>{row.legalName}</small> : null}
+                          </span>
                         </span>
                       </td>
-                      <td>{row.type}</td>
+                      <td><span className="client-status-chip" data-tone={row.typeTone ?? "violet"}>{row.type}</span></td>
                       <td><span className="client-status-chip" data-tone={row.statusTone}>{row.status}</span></td>
                       <td><span className="client-status-chip" data-tone={row.complianceTone}>{row.compliance}</span></td>
                       <td><span className="client-status-chip" data-tone="violet">{row.plan}</span></td>
                       <td>{row.lastAction}</td>
                       <td>
-                        <details className="admin-row-menu">
-                          <summary aria-label={c.actions}><MoreHorizontal className="size-4" /></summary>
+                        <details className="admin-row-menu" suppressHydrationWarning>
+                          <summary aria-label={c.actions} suppressHydrationWarning><MoreHorizontal className="size-4" aria-hidden /></summary>
                           <div>
                             <Link href={`/${locale}/administration/entreprises/${row.id}${query}`}><Eye className="size-3.5" aria-hidden />{c.consult}</Link>
                             <Link href={`/${locale}/administration/entreprises/${row.id}/modifier${query}`}><Pencil className="size-3.5" aria-hidden />{c.edit}</Link>
@@ -294,20 +388,20 @@ export function OrganizationsBoard({
               <h3>{c.emptyOrgs}</h3>
               <p>{c.emptyOrgsLead}</p>
               <div className="admin-empty-actions">
-                <Link href={`/${locale}/administration/entreprises`} className="client-ghost-link">{c.reset}</Link>
+                <Link href={resetHref} className="client-ghost-link">{c.reset}</Link>
                 <Link href={`/${locale}/administration/entreprises/nouvelle${query}`} className="admin-primary-cta">{c.createOrg}</Link>
               </div>
             </div>
           ) : null}
           {archives ? (
-            <p className="client-access-note">{c.archivesNote} {c.noArchives}</p>
+            <p className="client-access-note">{c.archivesNote}</p>
           ) : null}
         </article>
         <aside className="client-card admin-treat-rail">
           <h2>{c.toTreat}</h2>
           <p>{c.toTreatLead}</p>
           <ul className="client-feed">
-            {treat.length === 0 ? <li><span>{c.emptyOrgsLead}</span></li> : treat.map((item) => (
+            {treat.length === 0 ? <li><span>{c.emptyTreatLead}</span></li> : treat.map((item) => (
               <li key={item.id}>
                 <span className="client-feed-icon" data-tone={item.tone}><FileText className="size-4" aria-hidden /></span>
                 <span><strong>{item.title}</strong><small>{item.detail}</small></span>
@@ -319,7 +413,7 @@ export function OrganizationsBoard({
           <p className="client-access-note">{c.controlNote}</p>
         </aside>
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -336,37 +430,80 @@ export function OrganizationFicheBoard({
   const org = fiche.organization;
   const base = `/${locale}/administration/entreprises/${org.id}`;
   const journey = organizationJourney(fiche, locale);
+  const memberQuery = new URLSearchParams({ organizationId: org.id, org: org.id });
+  const membersHref = `/${locale}/administration/utilisateurs?${memberQuery}`;
+  const complianceCaseId = org.client_compliance_snapshot?.case_id;
+  const complianceHref = complianceCaseId
+    ? `/${locale}/administration/conformite-clients/${complianceCaseId}${query}`
+    : `/${locale}/administration/conformite-clients${query}`;
+  const profileComplete = Boolean(
+    org.client_legal_profile?.legal_form
+    && org.client_legal_profile?.if_number
+    && org.client_legal_profile?.rc_number
+    && org.client_legal_profile?.registered_city
+    && org.client_legal_profile?.representative_name,
+  );
+  const complianceDone = journey.find((step) => step.id === "compliance")?.state === "done";
+  const rolesAssigned = fiche.memberships.some((item) => item.roles.length > 0);
+  const folderStarted = fiche.requests.length + fiche.missions.length + fiche.diagnostics.length > 0;
   const required = [
-    { href: `${base}/modifier${query}`, title: c.completeInfo, detail: c.completeInfoLead, tone: "peach" as const },
-    { href: `/${locale}/administration/conformite-clients${query}`, title: c.finishCompliance, detail: c.finishComplianceLead, tone: "peach" as const },
-    { href: `/${locale}/administration/parcours${query}`, title: c.completeFolder, detail: c.completeFolderLead, tone: "sky" as const },
-    { href: `${base}/modifier${query}`, title: c.assignRoles, detail: c.assignRolesLead, tone: "peach" as const },
+    ...(!profileComplete
+      ? [{ href: `${base}/modifier${query}`, title: c.completeInfo, detail: c.completeInfoLead, tone: "peach" as const }]
+      : []),
+    ...(!complianceDone
+      ? [{ href: complianceHref, title: c.finishCompliance, detail: c.finishComplianceLead, tone: "peach" as const }]
+      : []),
+    ...(!folderStarted
+      ? [{ href: `/${locale}/administration/parcours${query}`, title: c.completeFolder, detail: c.completeFolderLead, tone: "sky" as const }]
+      : []),
+    ...(!rolesAssigned
+      ? [{ href: membersHref, title: c.assignRoles, detail: c.assignRolesLead, tone: "peach" as const }]
+      : []),
   ];
   const history = fiche.timeline.slice(0, 4);
+  const unknown = locale === "ar" ? "— للتعبئة" : "— à compléter";
+  const activeMembers = fiche.memberships.filter((item) => item.status === "ACTIVE").length;
+  const invitedMembers = fiche.memberships.filter((item) => item.status === "INVITED").length;
+  const withoutRole = fiche.memberships.filter((item) => item.roles.length === 0).length;
+  const inviteHref = `/${locale}/administration/utilisateurs/inviter?organizationId=${encodeURIComponent(org.id)}`;
   return (
-    <main className="client-page">
-      <nav className="client-tabs" aria-label={c.overview}>
-        <a href={`${base}${query}`} aria-current="page">{c.overview}</a>
-        <a href={`${base}${query}#membres`}>{c.members}</a>
-        <a href={`/${locale}/administration/conformite-clients${query}`}>{c.compliance}</a>
-        <a href={`/${locale}/administration/parcours${query}`}>{c.dossiers}</a>
-        <a href={`${base}${query}#boxes`}>{c.boxes}</a>
-        <a href={`/${locale}/administration/finance${query}`}>{c.navFinance}</a>
-        <a href={`/${locale}/administration/operations${query}`}>{c.audit}</a>
-      </nav>
+    <div className="client-page">
+      <OrganizationFicheHero locale={locale} query={query} fiche={fiche} />
+      <FicheTabNav
+        label={c.overview}
+        tabs={[
+          { id: "overview", href: `${base}${query}`, label: c.overview, currentWhen: "overview" },
+          { id: "membres", href: `${base}${query}#membres`, label: c.members, currentWhen: "hash" },
+          { id: "compliance", href: complianceHref, label: c.compliance },
+          { id: "dossiers", href: `/${locale}/administration/parcours${query}`, label: c.dossiers },
+          { id: "boxes", href: `/${locale}/administration/finance/offres?organizationId=${encodeURIComponent(org.id)}`, label: c.boxes },
+          { id: "finance", href: `/${locale}/administration/finance${query}`, label: c.navFinance },
+          { id: "audit", href: `/${locale}/administration/operations${query}`, label: c.audit },
+        ]}
+      />
+      <FichePanels
+        overview={(
+          <>
       <section className="admin-fiche-grid">
-        <article className="client-card">
-          <header><h2>{c.info}</h2></header>
+        <details className="client-card p-4" data-tone="violet">
+          <summary className="min-h-11 cursor-pointer font-semibold">{c.info}</summary>
           <dl className="admin-dl">
             <div><dt>{c.legal}</dt><dd>{org.legal_name}</dd></div>
+            <div><dt>{locale === "ar" ? "الاسم التجاري" : "Nom commercial"}</dt><dd>{org.display_name || unknown}</dd></div>
             <div><dt>{c.type}</dt><dd>{inferOrgType(`${org.display_name} ${org.legal_name}`, locale, org.role_codes)}</dd></div>
-            <div><dt>{c.activity}</dt><dd>{org.display_name}</dd></div>
-            <div><dt>{c.ids}</dt><dd dir="ltr">{org.country_code}</dd></div>
-            <div><dt>{locale === "ar" ? "المعرّف" : "Réf."}</dt><dd dir="ltr">{org.id.slice(0, 8)}…</dd></div>
+            <div><dt>{locale === "ar" ? "الشكل القانوني" : "Forme juridique"}</dt><dd>{org.client_legal_profile?.legal_form ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "تاريخ التأسيس" : "Date de création"}</dt><dd>{org.client_legal_profile?.incorporation_date ?? unknown}</dd></div>
+            <div><dt>{c.activity}</dt><dd>{org.client_legal_profile?.activity ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "القطاع" : "Secteur"}</dt><dd>{org.client_legal_profile?.sector ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "مدينة السجل" : "Ville du RC"}</dt><dd>{org.client_legal_profile?.registered_city ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "البلد" : "Pays"}</dt><dd dir="ltr">{org.country_code}</dd></div>
+            <div><dt>{locale === "ar" ? "المعرّف الضريبي (IF)" : "Identifiant fiscal (IF)"}</dt><dd dir="ltr">{org.client_legal_profile?.if_number ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "السجل التجاري (RC)" : "Registre de commerce (RC)"}</dt><dd dir="ltr">{org.client_legal_profile?.rc_number ?? unknown}</dd></div>
+            <div><dt>{locale === "ar" ? "الممثل" : "Représentant"}</dt><dd>{org.client_legal_profile?.representative_name ?? unknown}</dd></div>
           </dl>
-        </article>
-        <article className="client-card">
-          <header><h2>{c.journey}</h2></header>
+        </details>
+        <details className="client-card p-4" data-tone="sky">
+          <summary className="min-h-11 cursor-pointer font-semibold">{c.journey}</summary>
           <ol className="admin-journey">
             {journey.map((step) => (
               <li key={step.id} data-state={step.state}>
@@ -375,52 +512,63 @@ export function OrganizationFicheBoard({
               </li>
             ))}
           </ol>
-        </article>
-        <article className="client-card">
-          <header className="client-priority-head"><h2>{c.required}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
-          <ul className="admin-req-list">
-            {required.map((item) => (
-              <li key={item.title}>
-                <span><strong>{item.title}</strong><small>{item.detail}</small></span>
-                <Link href={item.href} className="admin-soft-cta">{c.open}</Link>
-              </li>
-            ))}
-          </ul>
+        </details>
+        <article className="client-card" data-tone="peach">
+          <header className="client-priority-head"><h2>{locale === "ar" ? "إجراءات الملف" : "Actions sur le dossier"}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
+          {required.length === 0 ? (
+            <p className="client-access-note">{locale === "ar" ? "لا توجد إجراءات عاجلة: الملف متسق مع حالة المسار." : "Aucune action urgente : le dossier est aligné avec l’état du parcours."}</p>
+          ) : (
+            <ul className="admin-req-list">
+              {required.map((item) => (
+                <li key={item.title}>
+                  <span><strong>{item.title}</strong><small>{item.detail}</small></span>
+                  <Link href={item.href} className="admin-soft-cta">{c.open}</Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </article>
       </section>
-      <section className="admin-fiche-lower">
-        <article className="client-card" id="membres">
-          <header className="client-priority-head"><h2>{c.members}</h2></header>
+      <details className="client-card p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{locale === "ar" ? "أعضاء وصناديق وملفات" : "Membres, boxes et dossiers"}</summary>
+      <section className="admin-fiche-lower mt-4">
+        <article className="client-card" data-tone="sky">
+          <header className="client-priority-head"><h2>{c.members}</h2><Cta href={`${base}${query}#membres`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
             <li><Users className="size-4" aria-hidden /><span><strong>{c.membersCount}</strong><small dir="ltr">{fiche.memberships.length}</small></span></li>
-            <li><span><strong>{c.roles}</strong><small>{fiche.memberships[0]?.roles.join(", ") || "—"}</small></span></li>
-            <li><span><strong>{c.access}</strong><small>{fiche.memberships.filter((item) => item.status === "ACTIVE").length}</small></span></li>
-            <li><span><strong>{c.invites}</strong><small>{fiche.memberships.filter((item) => item.status !== "ACTIVE").length}</small></span></li>
+            <li><span><strong>{c.access}</strong><small dir="ltr">{activeMembers}</small></span></li>
+            <li><span><strong>{c.invites}</strong><small dir="ltr">{invitedMembers}</small></span></li>
+            <li><span><strong>{c.membersWithoutRole}</strong><small dir="ltr">{withoutRole}</small></span></li>
           </ul>
-          <p className="client-access-note">{locale === "ar" ? "إدارة الأدوار تتم من تعديل المؤسسة." : "La gestion des rôles se fait depuis la modification de l’entreprise."}</p>
-          <Link href={`${base}/modifier${query}`} className="admin-soft-cta">{c.manageMembers}</Link>
+          <HashAwareLink href={`${base}${query}#membres`} className="admin-soft-cta">{c.members}</HashAwareLink>
         </article>
-        <article className="client-card" id="boxes">
+        <article className="client-card" id="boxes" data-tone="mint">
           <header className="client-priority-head"><h2>{c.boxes}</h2></header>
           <ul className="client-feed">
-            <li><span><strong>{c.plan}</strong><small>{fiche.subscriptions[0]?.status ?? "—"}</small></span></li>
-            <li><span><strong>{c.boxesActive}</strong><small>{fiche.subscriptions.length}</small></span></li>
-            <li><span><strong>{c.credits}</strong><small>—</small></span></li>
-            <li><span><strong>{c.nextBill}</strong><small dir="ltr">{fiche.subscriptions[0]?.current_period_end ?? "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "حالات الاشتراكات" : "États des abonnements"}</strong><small>{[...new Set(fiche.subscriptions.map((item) => localizeStatus(item.status, locale)))].join(", ") || "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "اشتراكات مرئية" : "Abonnements visibles"}</strong><small dir="ltr">{fiche.subscriptions.length}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "نهايات فترات الاشتراك" : "Fins de période des abonnements"}</strong><small dir="ltr">{fiche.subscriptions.map((item) => item.current_period_end).filter(Boolean).join(", ") || "—"}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "إعداد العرض" : "Configuration de l’offre"}</strong><small>{locale === "ar" ? "الصناديق والمزايا في المالية" : "Boxes et avantages dans Finance"}</small></span></li>
           </ul>
-          <Link href={`/${locale}/administration/finance${query}`} className="admin-dir-action" data-tone="mint">{c.seeFinance}</Link>
+          <Link
+            href={`/${locale}/administration/finance/offres?organizationId=${encodeURIComponent(org.id)}`}
+            className="admin-dir-action"
+            data-tone="mint"
+          >
+            {c.seeFinance}
+          </Link>
         </article>
-        <article className="client-card">
+        <article className="client-card" data-tone="coral">
           <header className="client-priority-head"><h2>{c.dossiers}</h2><Cta href={`/${locale}/administration/parcours${query}`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
-            <li><span><strong>{c.inProgress}</strong><small>{fiche.requests.length}</small></span></li>
-            <li><span><strong>{c.waiting}</strong><small>{fiche.disputes.length}</small></span></li>
-            <li><span><strong>{c.toComplete}</strong><small>{fiche.diagnostics.length}</small></span></li>
-            <li><span><strong>{c.recently}</strong><small>{fiche.missions.length}</small></span></li>
+            <li><span><strong>{c.requests}</strong><small>{fiche.requests.length}</small></span></li>
+            <li><span><strong>{locale === "ar" ? "النزاعات" : "Litiges"}</strong><small>{fiche.disputes.length}</small></span></li>
+            <li><span><strong>{c.diag}</strong><small>{fiche.diagnostics.length}</small></span></li>
+            <li><span><strong>{c.missions}</strong><small>{fiche.missions.length}</small></span></li>
           </ul>
-          <Link href={`/${locale}/administration/conformite-clients${query}`} className="admin-dir-action" data-tone="peach">{c.openCompliance}</Link>
+          <Link href={complianceHref} className="admin-dir-action" data-tone="peach">{c.openCompliance}</Link>
         </article>
-        <article className="client-card">
+        <article className="client-card" data-tone="violet">
           <header className="client-priority-head"><h2>{c.lastChange}</h2><Cta href={`/${locale}/administration/operations${query}`}>{c.seeAll}</Cta></header>
           <ul className="client-feed">
             {history.length === 0 ? (
@@ -432,6 +580,20 @@ export function OrganizationFicheBoard({
           <Link href={`/${locale}/administration/operations${query}`} className="admin-dir-action" data-tone="violet">{c.seeAudit}</Link>
         </article>
       </section>
-    </main>
+      </details>
+          </>
+        )}
+        membres={(
+          <FicheMembresPanel
+            locale={locale}
+            query={query}
+            fiche={fiche}
+            base={base}
+            membersHref={membersHref}
+            inviteHref={inviteHref}
+          />
+        )}
+      />
+    </div>
   );
 }

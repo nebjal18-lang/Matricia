@@ -1,3 +1,586 @@
+## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
+
+## 2026-11-23 — Vérification globale du candidat d5e3cf2c
+
+[Bilan consolidé](../../artifacts/test-results/final-verification-20261123/summary.json). Node 22.23.5, aucun changement applicatif pendant la recette.
+
+| Contrôle | Résultat exécuté |
+| --- | --- |
+| Lint, TypeScript, phase00, absence de placeholders, structure release | PASS |
+| Unitaires | 4 753 PASS + 1 test de stockage privé local exécuté séparément PASS ; ce dernier était ignoré par défaut |
+| Intégration / outillage | 3 / 123 PASS |
+| Composant financier navigateur | 6 PASS, action serveur simulée |
+| Recette E2E locale complète | 404/404 PASS, 32 séquences, zéro échec/ignoré, nettoyages validés |
+| Pages publiques | 58/58 PASS, zéro échec/ignoré/instable |
+| SQL complet | 629 migrations, 400 fichiers, 9 793 assertions PASS ; concurrence et nettoyage PASS |
+| Build | PASS après configuration locale de NEXT_PUBLIC_APP_URL=https://matricia.invalid |
+
+La première commande globale a échoué au build car l'URL HTTP locale ne satisfait pas la règle HTTPS de production. Seul le build a été relancé avec l'URL fictive ci-dessus ; aucun déploiement ni assouplissement de garde. Le test Storage séparé vérifie les vrais octets PDF FR/AR sur le Supabase local et supprime ses propres fichiers.
+
+Les **462 exécutions E2E réussies** comprennent des prérequis répétés : ce nombre ne mesure pas une couverture fonctionnelle de 100 %. La recette complète est désormais exécutée sur un même candidat, au lieu de seulement additionner les 406 exécutions historiques de segments distincts. [Manifeste archivé et reçus des 32 séquences](../../artifacts/test-results/local-acceptance/history/final-20261123-manifest-41811a7c6d99c5826c50b9643db2e91bb6f858f751560f13a9d3ec2ba833a093.json). [Preuve SQL](../../artifacts/test-results/final-verification-20261123/sql.json). [Preuve publique](../../artifacts/test-results/final-verification-20261123/public-browser.json).
+
+Les statuts contractuels restent **57 PARTIAL_EXECUTED / 11 REVIEW_REQUIRED**. Les parcours encore incomplets et les preuves externes (paiement bancaire/PSP, signature contractuelle, emails, antivirus, restauration hébergée, déploiement et audit indépendant) empêchent un visa global. Prochaine étape : combler ces preuves ; pas de nouvelle relance globale sans changement. Le push est bloqué par la reconnexion GitHub requise.
+
+## 2026-11-23 — Expiration des certifications : preuve SQL native
+
+**15/15 assertions PASS**, 629 migrations sur clone isolé neuf, nettoyage PASS. Onze assertions comportementales ajoutées aux quatre contrôles statiques de [0370_provider_review_credential_reminders.test.sql](../../supabase/tests/0370_provider_review_credential_reminders.test.sql). Les commandes natives déposent et font vérifier les documents, puis le worker génère six rappels J-60/J-30/J-7 pour deux destinataires FR/AR. Pagination, refus utilisateur, absence de rappel hors échéance, rejeu sans doublon et lectures RLS par destinataire sont vérifiés. [Reçu final](../../work/isolated-replay/5b741104-8870-4228-ab2b-7397c4b5b638/summary.json).
+
+MAT-FUNC-029 reste REVIEW_REQUIRED : suspension ciblée et parcours navigateur restent à prouver ; métadonnées Storage et résultat antivirus synthétiques, aucun email externe certifié. Le total E2E reste inchangé. Une erreur de résolution de pgTAP sous le rôle authenticated a été corrigée dans le test en collectant les lectures sous ce rôle avant les assertions ; aucun droit applicatif ajouté.
+
+## 2026-11-23 — Rapprochement : refus serveur et reprise navigateur
+
+Treize nouveaux tests de l'action serveur couvrent la confirmation obligatoire, les locales autorisées, la transmission exacte des montants et identifiants, les refus et l'absence de rafraîchissement après échec. Résultat ciblé avec le repository : **21/21 PASS**. Deux nouveaux tests de composant navigateur FR/AR vérifient le bouton désactivé pendant l'envoi, le conflit visible, la reprise avec la même identité de requête et le montant exact `9007199254740993`. Suite composant : **6/6 PASS** en 5,4 secondes, compilation et navigateur partagés. Sources : [action serveur](../../apps/web/modules/admin/screens/finance/actions.test.ts), [composant navigateur](../../tests/remediation/finance-reconciliation-browser.test.mjs).
+
+Les limites sont inchangées : action simulée dans le navigateur, repository simulé dans les tests d'action ; aucune nouvelle preuve E2E native ni hausse du total 406. Prochaine étape : continuité navigateur-vers-base du rapprochement.
+
+### 2026-11-23 — Validation financière native ciblée
+
+Dernière extension : **82/82 assertions PASS** sur clone neuf (629 migrations, nettoyage PASS). Deux factures natives et deux paiements approuvés ; répartition d'un paiement entre les deux factures, soldes nuls, comptabilité équilibrée, immutabilité et rejeux vérifiés. Les chiffres 74/78 ci-dessous sont historiques, non cumulatifs. Prochaine preuve : continuité navigateur-vers-base ; aucun mouvement bancaire externe certifié.
+
+Extension exécutée : **78/78 assertions PASS**, 629 migrations, nettoyage confirmé. Deux paiements indépendamment approuvés règlent exactement une facture, avec journaux équilibrés et absence de doublons. Le cas multi-factures et la continuité navigateur native restent ouverts. Aucun test E2E ajouté au compteur par cette preuve SQL.
+
+629 migrations rejouées sur clone neuf ; 74/74 assertions du scénario clôture-facture-paiement-rapprochement passent, nettoyage confirmé. Écritures natives équilibrées, revue indépendante, rejouabilité et refus MFA/inter-organisations vérifiés. [Résultat et limites](../audits/E2E_COVERAGE_2026-11-22.md). Reste : continuité navigateur native et cas multi-factures/multi-paiements, sans confondre ces preuves avec un règlement bancaire externe.
+
+### 2026-11-23 — Continuité, dates et rapprochement financier
+
+Contrôle interactif du rapprochement ajouté : 4/4 tests Chromium FR/AR 360/1280 passent ; composant réel, données et action synthétiques explicitement déclarées. Couverture des changements de sélection, montants et confirmations. Exécution isolée en 7,1 secondes et intégration à la validation applicative. La recette financière native reste ouverte.
+
+Quatre corrections : conservation de l'organisation du besoin, report d'opportunité en heure Casablanca avec validation des dates, transport exact des montants des recommandations, sélection de factures compatible avec le paiement dans l'Admin. Validation ciblée : 62 tests PASS, TypeScript/lint sans erreur ; 10/10 E2E FR/AR desktop/360 du besoin passent avec nettoyage. [Détails et limites](../audits/E2E_COVERAGE_2026-11-22.md).
+
+Prochaine étape : recette navigateur native du rapprochement modifié, puis fermeture des lacunes des 11 exigences encore à examiner. La validation complète des 68 exigences, les intégrations externes et les audits indépendants restent ouverts. Aucun pourcentage de couverture complète revendiqué.
+
+## 2026-11-23 - Historique des diagnostics
+
+10/10 E2E passent : comparaison de scores 50 vers 0, conservation des anciens instantanes, explications client et techniques, refus inter-organisations, rejeu et audit. FR/AR ordinateur et 360 px. Le debordement mobile qui rendait le lien historique inaccessible est corrige. [Preuve](../../artifacts/test-results/local-acceptance/history/diagnostic-history-bfe25e1e52ab7412949e5d63dcbd56956de4381eb793a319afb5bf6576790733.json).
+
+406 executions sur 32 segments avec prerequis repetes ; 57/68 exigences partiellement prouvees, 11 a examiner. Ce total ne constitue pas un pourcentage de couverture complete.
+
+
+## 2026-11-23 — Simulation accessible au franchisé mandaté
+
+**4/4 E2E passent** : huit simulations réelles couvrent les deux branches (0 et 5 000 points de base), avec quatre rejets de saisies invalides. FR/AR, ordinateur/360 px, accessibilité, déterminisme et refus hors bibliothèque passent. Aucun questionnaire réel n’est créé ; le snapshot publié et sa version restent inchangés. [Preuve](../../artifacts/test-results/local-acceptance/history/questionnaire-simulation-ebb64f5b983ed9b85be6756a341ec570c3fb2ead85aa377b6c9cc0e42440070b.json).
+
+Deux défauts corrigés : le questionnaire client disparaissait de la vue éditoriale après publication ; le moteur exigeait en plus un rôle central et refusait le franchisé pourtant mandaté. Les permissions de bibliothèque, la double authentification du moteur et les refus après révocation restent effectifs. Neuf assertions d’accès passent après 628 migrations sur base neuve ; huit assertions supplémentaires du moteur passent avec la correction en transaction annulée. La suite SQL globale du candidat incluant les deux corrections passe : **629 migrations, 400 fichiers, 9 774 assertions et quatre scénarios de concurrence**, avec nettoyage réussi. [Preuve](../../work/isolated-replay/2369ca5a-82e8-4f9b-ac70-828d504d5c60/summary.json).
+
+Consolidation : **396 exécutions sur 31 segments**, avec prérequis répétés ; **55/68 exigences partiellement prouvées**, 13 à examiner. Les opérateurs complexes et la revue indépendante ne sont pas certifiés par ces quatre parcours.
+
+
+## 2026-11-23 — Qualité des questions et décisions humaines
+
+**10/10 E2E passent**, sans échec, test ignoré ni instabilité. Quatre analyses réelles détectent ambiguïtés, données déjà connues et similarités ; quatre décisions humaines sont persistées. Le rejeu des analyses et décisions, les refus inter-organisations, les événements corrélés et l’accessibilité FR/AR ordinateur/360 px passent. Les questions publiées restent inchangées après ces décisions. [Preuve](../../artifacts/test-results/local-acceptance/history/question-quality-310071763618624f1e804f3581e7e5d6da712d7e41a1eee063c4600f0649544f.json).
+
+Le modèle testé est heuristique et versionné, sans fournisseur IA externe. Cette preuve couvre partiellement MAT-FUNC-041 et 042 ; elle ne certifie pas la qualité sémantique générale ni tous les doublons entre domaines.
+
+Consolidation : **392 exécutions sur 30 segments**, avec prérequis répétés ; **54/68 exigences partiellement prouvées**, 14 à examiner. Aucun pourcentage de couverture complète n’est déduit de ce total.
+
+
+## 2026-11-23 — Ensembles multi-bibliothèques utilisables
+
+**10/10 E2E passent**, sans échec ni test ignoré : quatre publications réelles réunissent deux bibliothèques ; trois lignes sources deviennent deux prestations sans double facturation, pour **150 049 unités mineures**. Les propositions sont affichées dans l’espace client et permettent de préparer un besoin en conservant titre, description et organisation. Aucune demande n’est créée automatiquement. Rejeu, refus inter-organisations, audit/Outbox et accessibilité FR/AR ordinateur/360 px passent. [Preuve](../../artifacts/test-results/local-acceptance/history/solution-bundles-93f2f93b0ead91b3164cdfd87c77dff433eff8025cf9ea18e99742470738682b.json).
+
+Défauts corrigés : propositions chargées mais absentes de la page ; message vide contradictoire ; publication bloquée par les majuscules du code dans la portée d’idempotence. La portée utilise désormais une empreinte stable et bornée. **12 assertions SQL passent après 627 migrations sur base neuve**, y compris code de 120 caractères et rejeu à charge modifiée refusé. [Preuve SQL](../../work/isolated-replay/155eebb0-8261-42c2-bd01-6845eb799a4a/summary.json). Le contrôle SQL global passe : **627 migrations, 398 fichiers, 9 757 assertions, quatre scénarios de concurrence et nettoyage réussi**. [Preuve globale](../../work/isolated-replay/f78e7b7e-ba8d-4d9d-b091-c5c0f035c0d3/summary.json). Le test Storage séparé et le build de **354 pages** passent après les corrections d’affichage.
+
+La progression des projets (MAT-FUNC-056) est également reliée à une preuve existante : 0 % avant réception, 100 % après acceptation, confirmés dans l’interface et en base. Cette correction de traçabilité n’ajoute aucune exécution.
+
+Consolidation : **382 exécutions sur 29 segments**, avec prérequis répétés ; **52/68 exigences partiellement prouvées**, 16 à examiner. Ce total n’est pas une couverture fonctionnelle complète ; la revue indépendante reste ouverte.
+
+
+## 2026-11-23 — Solutions multiples et décisions client
+
+**10/10 E2E passent** : diagnostics issus des questionnaires, quatre ensembles Essential/Standard/Advanced et douze décisions réelles d’acceptation/refus/report, en FR/AR ordinateur/360 px. Les décisions persistées, rejeux, refus inter-organisations, audit/Outbox et fin de journée Casablanca sont vérifiés. [Preuve](../../artifacts/test-results/local-acceptance/history/solution-decisions-37c78a142cb9f47a9247162818699185b49d77fd86cd6dee663e14804a4d465e.json).
+
+Deux défauts corrigés : dates de report impossibles et décalage UTC ; contraste du lien dégradé hérité du style général des liens. Trois tests de régression échouaient avant correction ; **12 tests ciblés, TypeScript et lint passent**. La suite globale passe avec **4 339 tests Web, 183 Worker et les packages** ; le test Storage conditionnel et un nouveau build restent à exécuter après les prochaines modifications.
+
+Consolidation : **372 exécutions sur 28 segments**, avec prérequis répétés ; **50/68 exigences partiellement prouvées**, 18 à examiner. Référentiel publié de recette explicite ; revue indépendante et couverture complète restent ouvertes.
+
+
+## 2026-11-23 — Parrainage jusqu’à émission financière
+
+**14/14 E2E passent**, sans échec ni test ignoré : inscription et activation des clients, transitions de parrainage contrôlées par deux intervenants, approbation dans l’interface, consultation de l’attente, émission Finance et consultation des crédits en FR/AR ordinateur/360 px. L’approbation laisse le solde inchangé ; chaque émission crée exactement **17 crédits BONUS**, un lot et une écriture uniques, avec revenu nul. Rejeux, refus sans habilitation Finance, isolation, audit/Outbox et accessibilité passent. [Preuve](../../artifacts/test-results/local-acceptance/history/referral-rewards-7e6dadf6e76d32a6164634bbbb087616a27bedcd5645390c19ffe2d8d28e4997.json).
+
+Correction : le rejeu d’une transition de parrainage retrouve sa réponse avant le contrôle de l’état courant, après les contrôles d’autorisation et de séparation des intervenants. **19 assertions passent après 626 migrations sur un clone neuf**. [Preuve SQL ciblée](../../work/isolated-replay/488e1e60-ea27-42ff-9bc2-03819dfab6c1/summary.json). Le rejeu global est validé : **626 migrations, 397 fichiers, 9 745 assertions et quatre scénarios de concurrence**, nettoyage réussi. [Preuve SQL globale](../../work/isolated-replay/d5d5a390-7d40-4009-9b9d-4d474c53bf3b/summary.json).
+
+Consolidation : **362 exécutions sur 27 segments**, avec prérequis répétés ; **49/68 exigences partiellement prouvées**, 19 à examiner. Les preuves du parrainage fournisseur et la revue indépendante restent à compléter ; aucun 100 % fonctionnel n’est déclaré.
+
+
+## 2026-11-23 — Parrainage client consenti
+
+Validation globale après les corrections des récompenses et du parrainage : **4 336 tests Web et 183 tests Worker passent**, ainsi que les packages. Le test Storage conditionnel passe séparément ; build **354 pages**, TypeScript et lint ciblé passent également. [Journal des tests](../../work/local-validation/unit-rewards-referrals.log).
+
+**4/4 E2E passent** : quatre liens créés par l’interface puis quatre rattachements consentis depuis les invitations existantes, en FR/AR ordinateur/360 px. Expiration Casablanca, origine conservée, point de contact unique, rejeu, consentement obligatoire, refus d’auto-parrainage, quota d’une conversion, isolation et audit/Outbox passent. Aucun dossier n’est automatiquement vérifié ou activé, aucun bonus n’est émis. [Preuve](../../artifacts/test-results/local-acceptance/history/client-referrals-fd6a9c39dd26b50112eec19535fa4c1af087b5770e27aca8cd6acf8ac4a3b62b.json).
+
+Correction : expiration interprétée en Casablanca au lieu du fuseau hôte ; dates impossibles, heures inexistantes et heures ambiguës refusées. **17 tests ciblés passent**, dont quatre régressions reproduites avant correction. TypeScript et lint ciblé passent. La conversion complète jusqu’à activation/récompense et le parrainage fournisseur restent à prouver.
+
+Consolidation : **348 exécutions sur 26 segments**, avec prérequis répétés ; **49/68 exigences partiellement prouvées**, 19 à examiner. Aucun 100 % fonctionnel n’est déclaré.
+
+
+## 2026-11-23 — Règles de récompense exactes
+
+**4/4 E2E passent** : huit versions de règles créées par l’interface et affichées avec leurs quantités exactes, en FR/AR ordinateur/360 px. Les valeurs supérieures à la précision entière JavaScript sont conservées ; le plafond PostgreSQL est accepté, les dépassements et fractions sont rejetés. Rejeu, refus de charge modifiée, refus hors rôle, anciennes versions, audit/Outbox et absence d’émission de crédit passent. [Preuve](../../artifacts/test-results/local-acceptance/history/reward-rules-05e41f43a37c8691c4bb5a5a5e64ef5896de929ff49f62ace9f2a913d432f34c.json).
+
+Correction : saisie des crédits et plafonds comme chaînes entières bornées, lecture PostgREST en texte. **23 tests ciblés et TypeScript passent**. L’organisation d’audit du compte central est un prérequis créé par la commande native. Ce segment ne certifie pas encore l’attribution d’un bonus après parrainage.
+
+Consolidation : **344 exécutions sur 25 segments**, avec prérequis répétés ; **48/68 exigences partiellement prouvées**, 20 à examiner. La couverture fonctionnelle complète reste à établir.
+
+
+## 2026-11-23 — Activation des avenants et exécution en mission
+
+**20/20 E2E passent** : les propositions sont suivies de deux activations après signatures des deux parties dans le simulateur DEV gouverné. Les PDF canoniques FR/AR sont archivés ; les anciennes versions restent intactes et les prix augmentent exactement de 5 001 unités mineures. Deux confirmations client dans l’interface ajoutent les nouveaux livrables à la mission ; huit consultations client/sous-traitant passent en FR/AR ordinateur/360 px. Les livrables commencent en attente avec leurs deux critères, sans réception héritée. Rejeu, refus inter-organisations, dates Casablanca et audit/Outbox passent. [Preuve complète](../../artifacts/test-results/local-acceptance/history/amendment-activation-0222c22dfc831c797944ffae604236b2bb55045e0b64d3b034bbefbe6a36b82d.json).
+
+Défaut d’environnement corrigé : PostgreSQL local utilisait tzdata 2025b face à Node 2026e. Les zones IANA Casablanca/El_Aaiun ont été alignées et cinq dates de contrôle passent. Le contrôle préalable détecte toute régression ; la procédure de maintenance est documentée dans la recette locale. Les images des clones SQL restent distinctes. Aucune signature contractuelle externe ni revue indépendante n’est certifiée.
+
+Consolidation : **340 exécutions sur 24 segments**, avec prérequis répétés ; **47/68 exigences partiellement prouvées**, 21 à examiner. Ce total n’est pas un pourcentage de couverture fonctionnelle.
+
+
+## 2026-11-23 — Propositions d’avenants
+
+**16/16 E2E passent**, dont huit prérequis commerciaux rejoués : quatre demandes client et quatre propositions sous-traitant, FR/AR ordinateur/360 px. Les propositions conservent exactement 5 001 unités mineures et sept jours ; les quatre propositions fournisseur ajoutent un livrable et deux critères. Rejeu sans doublon, audit/Outbox, isolation et accessibilité passent. [Preuve complète](../../artifacts/test-results/local-acceptance/history/contract-amendments-ca1b1ca443bab790d4145dc452141a169bc83765d507d57ec7e4c1aa88d5ba9e.json).
+
+Le contrat signé et sa version restent inchangés. Le fournisseur ne peut pas soumettre à la signature ; le client reste bloqué sans les prérequis de signature. Les contrats de cette recette restent actifs avec des livraisons soumises, non réceptionnées. L’activation des avenants et leurs effets opérationnels ne sont pas encore certifiés par ce segment.
+
+Consolidation : **320 exécutions sur 23 segments**, avec prérequis répétés ; **47/68 exigences partiellement prouvées**, 21 à examiner. La couverture fonctionnelle complète reste à établir.
+
+
+## 2026-11-23 — Réputation et badges
+
+Validation globale après les corrections de réputation : **4 326 tests Web et 183 tests Worker passent**, ainsi que les packages. Le test Storage conditionnel passe séparément ; build **354 pages**, TypeScript et lint ciblé passent également. [Journal des tests](../../work/local-validation/unit-reputation.log).
+
+**20/20 E2E passent**, dont huit prérequis commerciaux rejoués : deux retours sur missions terminées, quatre calculs depuis les événements couvrant six dimensions, aucune publication automatique, quatre décisions humaines et quatre consultations sous-traitant, FR/AR ordinateur/360 px. Les décisions étrangères sont refusées et les événements sensibles corrélés à l’audit. [Preuve complète](../../artifacts/test-results/local-acceptance/history/provider-reputation-ca562e40014838ebf06b162808df8de092ec7c6274a250ba761018dec61f78f4.json). La qualification fournisseur reste un prérequis historique déclaré et la signature un mode de développement gouverné.
+
+Corrections : dates de politiques en Africa/Casablanca, rejet des dates impossibles, listes admin paginées et noms fournisseurs obtenus via la projection administrative autorisée sans élargir la lecture des organisations. 17 tests ciblés, TypeScript, lint, build et Storage passent.
+
+Consolidation : **304 exécutions sur 22 segments**, avec prérequis répétés ; **45/68 exigences partiellement prouvées**, 23 à examiner. La couverture fonctionnelle complète reste à établir.
+
+
+## 2026-11-23 — Résumé administrateur
+
+**4/4 E2E passent** avec huit dossiers réels : priorités, compteurs, sélection du formulaire correspondant, clavier, reflow et axe en FR/AR ordinateur/360 px. La sélection ne prend aucune décision et ne modifie pas l’affectation. L’organisation étrangère ne lit aucun dossier. [Preuve complète](../../artifacts/test-results/local-acceptance/history/admin-summary-25cc29edd7fafa90a8e68ad4f2e932162381065d2825f75b11bf9ce14debb093.json).
+
+Consolidation : **284 exécutions sur 21 segments**, avec prérequis répétés ; **43/68 exigences partiellement prouvées**, 25 à examiner. La couverture fonctionnelle complète reste à établir.
+
+
+## 2026-11-23 — File universelle des quatre rôles
+
+**16/16 E2E passent** sur la file universelle pour des acteurs Client, Sous-traitant, Franchisé et Administrateur, FR/AR desktop/360. Douze notifications créées par la commande native sont lues via l'interface puis disparaissent des actions ; quatre liens ouvrent les dossiers admin. Clavier, reflow, axe, isolation entre organisations, rejeu des lectures et historiques sont vérifiés. [Preuve complète](../../artifacts/test-results/local-acceptance/history/universal-actions-6317ec21d00d335a4c2eeff42ee9ef38bbe793c64cd4b83386ae5406898e9bef.json). Ce segment ne remplace pas les parcours propres à chaque tableau de bord.
+
+Défaut corrigé : la page universelle omettait les tâches admin. Elle les demande désormais après vérification serveur du rôle et du MFA ; une vérification d'accès défaillante ne devient pas une file vide. Cinq tests ciblés, TypeScript et lint passent. Les préparations de test utilisent des dossiers distincts pour respecter le refus natif des doublons ouverts.
+
+Consolidation : **280 exécutions sur 20 segments**, avec prérequis répétés ; **42/68 exigences partiellement prouvées**, 26 à examiner. Aucun visa global ni couverture fonctionnelle de 100 % n'est déclaré.
+
+
+## 2026-11-23 — Relances et revue centrale
+
+**12/12 E2E passent** : quatre règles proposées puis approuvées par un autre acteur, huit préférences enregistrées et quatre consentements retirés, FR/AR desktop/360. Le moteur planifie huit relances sans doublon ; quatre demandes d'envoi sont mises en file, les quatre contacts ayant retiré leur consentement restent exclus. Les historiques, audit/outbox, refus inter-organisations, rejeu des décisions et pipeline inchangé sont vérifiés. Aucun courriel externe n'est envoyé. [Preuve complète](../../artifacts/test-results/local-acceptance/history/franchise-followups-283effbb13eda70dbe98ff5aabb5d679a82d484b5023181ba2486bb81b5ac931.json).
+
+Corrections : écran de revue centrale relié à la gouvernance, contrôles de rôle/MFA et séparation des acteurs ; rejeu des décisions avant la vérification de l'état courant ; saisies des dates interprétées dans Africa/Casablanca. Quinze tests ciblés, TypeScript et lint passent. La [migration 625](../../work/isolated-replay/4156eeb0-3fcd-49d9-b5a3-f3866074cf0b/summary.json) passe six assertions SQL ciblées après reproduction de trois échecs avant correction. Le [rejeu global](../../work/isolated-replay/4b878f86-bb0c-4d57-9830-31dc8108de57/summary.json) passe : **625 migrations, 396 fichiers SQL, 9 726 assertions et quatre scénarios de concurrence**, nettoyage confirmé. Les unitaires globaux passent : Web 4 316, Worker 183 et packages ; le contrôle Storage conditionnel passe séparément. Le build de 354 pages passe après les relances, avant la correction suivante de la file universelle.
+
+Consolidation : **264 exécutions sur 19 segments**, avec prérequis répétés ; **41/68 exigences partiellement prouvées**, 27 à examiner. Aucun visa global ni couverture fonctionnelle de 100 % n'est déclaré.
+
+
+## 2026-11-23 — CRM et pipeline franchisé
+
+**8/8 E2E passent** : FR/AR desktop/360, contacts Client et Sous-traitant. Huit invitations en attente d'envoi, huit tentatives dédoublonnées, seize notes successives et huit transitions manuelles SENT → OPENED sont vérifiées en base après les actions UI. Rejeu exact, refus inter-organisations, audit/outbox corrélés et absence de création de rôle, adhésion ou essai sont contrôlés. [Preuve](../../artifacts/test-results/local-acceptance/history/franchise-crm-f9a20140232a3aae96ee23ed63e36ac7e5d3d5a6d86e66ad4f1ee684e123a33a.json). Aucun courriel externe n'est envoyé ; les autres étapes de conversion restent à couvrir.
+
+Corrections : lecture des invitations en attente avec mode de livraison nul ; rejeu du pipeline traité avant la validation de son état courant, avec compatibilité des anciens reçus. Le [rejeu complet](../../work/isolated-replay/789853f1-bad9-452c-be75-ad4fe3115200/summary.json) passe : **624 migrations, 395 fichiers, 9 720 assertions et quatre scénarios de concurrence**, nettoyage confirmé. Les tests ciblés CRM et TypeScript passent.
+
+Consolidation : **252 exécutions sur 18 segments**, avec prérequis répétés ; **40/68 exigences partiellement prouvées**, 28 à examiner. Ceci ne constitue pas une couverture fonctionnelle de 100 % ni un visa global.
+
+
+## 2026-11-23 — Préremplissage et aide contextuelle
+
+**14/14 E2E passent** : six prérequis et huit parcours FR/AR desktop/360. Quatre confirmations de faits récents, quatre exclusions après leur expiration réelle, huit consultations d'aide/exemple/explication. Les valeurs soumises, les deux faits immuables, les refus inter-organisations et le rejeu exact sont vérifiés en base. [Preuve complète](../../artifacts/test-results/local-acceptance/history/questionnaire-assistance-c14a5b86c77af5f9adc4683624f4fe3178d9aa49724cb41e4fd7379db7832333.json).
+
+Défaut corrigé : le même appel de préremplissage créait plusieurs versions et acceptait un autre contenu avec la même clé. Le [rejeu global](../../work/isolated-replay/b3fe3d04-64ca-4ff4-9df7-74f1744d063c/summary.json) passe : **623 migrations, 394 fichiers, 9 709 assertions et quatre scénarios de concurrence**, nettoyage confirmé. Les 13 assertions du préremplissage couvrent aussi les reçus historiques et le refus des anciens doublons ambigus. L'interface distingue désormais une donnée préremplie à confirmer d'une réponse expirée ; six tests de composant, TypeScript et le lint ciblé passent. Le build de 352 pages et le contrôle Storage privé repassent après cette correction.
+
+Consolidation : **244 exécutions sur 17 segments**, avec prérequis répétés ; **38/68 exigences partiellement prouvées**, 30 à examiner. Aucun pourcentage de couverture fonctionnelle de 100 % ni visa global n'est déclaré. Les 123 tests d'outillage passent. Suite : parcours CRM du franchisé.
+
+
+## 2026-11-23 — Réponses expirées et confirmation légère
+
+**10/10 E2E passent** : six parcours préparatoires et quatre confirmations FR/AR desktop/360. La validité de 60 secondes expire réellement côté serveur ; la soumission est refusée avant confirmation. L'interface confirme la même valeur puis soumet une nouvelle révision, sans modifier l'ancienne. Le contrôle natif vérifie les dates, les valeurs, l'audit/outbox et les refus après soumission ou depuis une autre organisation. [Preuve complète](../../artifacts/test-results/local-acceptance/history/questionnaire-revalidation-c5a081b484c9663aab682f18e8e51f6a31a9df881e86dbd9aca3ac3314f008e6.json).
+
+Consolidation : **230 exécutions sur 16 segments**, avec prérequis répétés ; **36/68 exigences partiellement prouvées**, 32 à examiner. Ce compteur n'est pas une couverture fonctionnelle de 100 %. Les contrôles de structure et les trois tests d'intégration passent. Prochaine étape : préremplissage et aide contextuelle.
+
+
+## 2026-11-23 — Favoris et éligibilité courante
+
+**16/16 E2E passent**, dont huit parcours préparatoires réels et huit parcours favoris FR/AR desktop/360. Deux favoris persistés, quatre cycles retrait/restauration et 24 revalidations par l'interface sont vérifiés. La pause du fournisseur le rend inéligible ; le rejeu reste identique et l'autre organisation est refusée. [Preuve navigateur et native](../../artifacts/test-results/local-acceptance/history/provider-favorites-8507a4e02c66d34e1caea498df95b272799f9399bfad0f53822e44e23d170943.json).
+
+Corrections : fournisseur sélectionnable malgré son nom masqué par RLS ; pagination complète des favoris et relations ; clé renouvelée après chaque revalidation ; calcul d'éligibilité canonique ; hash idempotent indépendant de l'heure, avec compatibilité des reçus historiques. **622 migrations, 393 fichiers SQL, 9 696 assertions et quatre scénarios de concurrence passent**, nettoyage confirmé. [Rejeu complet](../../work/isolated-replay/951eb9a8-a603-4f20-abc2-999ae41a006e/summary.json).
+
+Consolidation : **220 exécutions réussies sur 15 segments**, avec réutilisation explicite de certains prérequis ; ce nombre n'est ni un nombre de tests uniques ni un pourcentage de couverture fonctionnelle. **35/68 exigences partiellement prouvées**, 33 restant à examiner ; aucun visa global ni 100 % déclaré. Après ces corrections, les unitaires globaux passent (Web 4 304, Worker 183 et packages), ainsi que TypeScript et le lint sans avertissement. Le build de 352 pages passe après les favoris, ainsi que le contrôle Storage privé explicite.
+
+
+## 2026-11-23 — Conflits métier et modèles bilingues
+
+Les refus métier explicites utilisent maintenant HTTP 409 (PT409), sans modifier les véritables conflits de sérialisation PostgreSQL. 230 fonctions supplémentaires et 286 refus sont corrigés ; les lecteurs et interfaces conservent la compatibilité 40001. La preuve DSR est versionnée sans réécrire son registre immuable : toute autre dérive de fonction reste refusée. **620 migrations, 392 fichiers, 9 682 assertions et quatre courses natives passent**, nettoyage confirmé. [Rejeu complet](../../work/isolated-replay/b3eb77c9-05a7-4d0c-a024-78ae3d23479a/summary.json). Les 20 contrôles fonctionnels repassent, dont le conflit de préférence HTTP 409 en moins de cinq secondes.
+
+**4/4 E2E modèles de communication** : prévisualisation, proposition et approbation par un autre administrateur, FR/AR desktop/360. Correction d'un défaut réel : la prévisualisation réinitialisait les textes du formulaire avant leur proposition. Les tests vérifient maintenant les quatre champs conservés et les textes exacts enregistrés. L'activation partage sa corrélation avec l'audit ; rejeu et double revue contrôlés par **29 assertions SQL après 621 migrations**. [Preuve SQL ciblée](../../work/isolated-replay/8c941220-c6f7-46dd-95fb-a38b4c16c572/summary.json) ; [preuve navigateur et native](../../artifacts/test-results/local-acceptance/history/notification-templates-0017cd43c6c9244702c6c1c7b79ab0ef09802bf9286d22fb2b21d209dee800e3.json). Cette passe ciblée complète le rejeu global de 620 migrations. Aucun message externe n'est envoyé.
+
+Unitaires globaux : Web 4 301 réussis, Worker 183 réussis et packages réussis ; le test Storage conditionnel est exécuté séparément avec succès. TypeScript global et lint global passent ; **zéro erreur et zéro avertissement lint** après le correctif de formulaire. Le [build local de 352 pages](../../artifacts/test-results/local-acceptance/web-build-20261123.json) repasse après ce correctif, avant les changements suivants sur les favoris. Consolidation : **204 exécutions sur 14 segments distincts**, 34 exigences partiellement prouvées et 34 à examiner. Aucun visa global des 68 ni couverture fonctionnelle de 100 % n'est déclaré. Suite : favoris avec revalidation de l'éligibilité, puis autres parcours manquants.
+
+
+## 2026-11-23 - Decisions administrateur et conflits HTTP
+
+**4/4 E2E admin-decisions** avec 8 ouvertures natives, 8 prises en charge et 8 resolutions humaines FR/AR desktop/360. Historiques, audit/outbox, rejeu apres resolution, refus inter-tenant et absence de sanction automatique verifies. Un conflit de version produisait HTTP 504 apres 60 secondes : les trois commandes claim/resolve/decide utilisent maintenant PT409 au lieu du code de serialization 40001, en conservant les controles de version, permissions et idempotence. Le test HTTP impose 409 en moins de cinq secondes. **130 tests unitaires admin passent.**
+
+Migration `20261123010000_admin_stale_conflict_http.sql` : **618 migrations et 10 assertions SQL ciblees passent sur clone neuf**, nettoyage confirme ; cette passe ciblee ne remplace pas le rejeu global precedent de 389 fichiers. [Preuve SQL](../../work/isolated-replay/21d6ec37-46ed-4846-93bc-fc9fc2c75c06/summary.json). [Preuve E2E](../../artifacts/test-results/local-acceptance/history/admin-decisions-ecc7893381a15bb13c7ab3bea96f75af7b18ada92a4e7ea5ecb0a7484bfb2d8c.json).
+
+Consolidation : **200 executions reussies sur 13 segments distincts**, avec des parcours communs ; **33 exigences partiellement prouvees, 35 a examiner**. Aucun visa global des 68. Prochaine etape : inventorier les autres refus metier qui utilisent 40001 puis poursuivre les parcours manquants. Cause technique documentee par [Supabase](https://supabase.com/kb/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).
+
+
+## 2026-11-23 - Clonage et prestations recurrentes
+
+Segment `recurring-requests` : **10/10 E2E**, sans echec, ignore ni instabilite, source figee et nettoyage verifies. Inscription/activation reelles puis FR/AR desktop/360 px : 4 clones, 12 plans mensuels/trimestriels/annuels, 24 brouillons aux dates controlees, 36 transitions pause/reprise/fin. Montants exacts, historique, audit/outbox, rejeu apres arret et refus des nouvelles generations/inter-tenant verifies. Corrections : identite de commande incluant le bouton soumis, nouvelle cle pour une nouvelle action, conservation de l entreprise selectionnee dans les liens. **25 tests unitaires cibles et TypeScript Web passent.**
+
+[Preuve archivee](../../artifacts/test-results/local-acceptance/history/recurring-requests-950cfcdebd956fa95407af9998d06c3bffaed1704e799d80694464fea4d79ef0.json). Consolidation : **196 executions reussies, 12 segments distincts** ; ce nombre inclut des parcours communs et ne mesure pas la couverture fonctionnelle. Matrice : **31 exigences partiellement prouvees, 37 a examiner** ; aucun visa global des 68. Prochaine etape : commandes admin, signaux de risque et decisions humaines.
+
+
+- Dernier segment enrichi : **20/20 E2E**, avec quatre modifications réelles du profil suivies d'une réévaluation terminée (MAT-FUNC-004), FR/AR desktop/360 px. **68 paires audit/outbox et 57 refus de lecture inter-tenant**. Le formulaire attend son initialisation avant d'autoriser la saisie : une course au chargement ajoutait l'ancienne activité au nouveau texte. Régression navigateur conservée, 25 tests ciblés, TypeScript Web et lint ciblé réussis. [Preuve actuelle](../../artifacts/test-results/local-acceptance/functional-controls-proof.json).
+- Consolidation actualisée : **186 exécutions réussies sur 11 segments distinctement validés**. Matrice : 29 exigences avec preuve partielle exécutée, 39 encore à examiner ; aucune certification globale des 68.
+- Passe commune finale : **617 migrations, 389/389 fichiers SQL, 9 663 assertions et quatre courses natives réussies**, Node 22, clone neuf sans réseau ni port exposé, nettoyage confirmé. Les 681 tables publiques contrôlées ont RLS active ; pgTAP n'est pas exécutable par les rôles API. [Preuve](../../work/isolated-replay/69291653-2763-4ae9-9ebe-965f5edeb2f7/summary.json). Le build Web optimisé repasse après la correction du profil ; les 123 tests d'outillage passent aussi.
+
+- Matrice explicite des [68 contrats et 26 scénarios minimum](../traceability/V1_RUNTIME_COVERAGE.md), avec [source machine](../traceability/V1_RUNTIME_COVERAGE.json). Les références statiques, preuves partielles exécutées et visas historiques restent distincts. Aucun visa global renouvelé.
+- Segment `functional-controls` enrichi : **16/16 E2E**, FR/AR, desktop/360 px, zéro échec/ignoré/instable. Créations de sites, projets, jalons avec critères et centres de coûts ; budgets approuvés exacts reliés au site et au projet ; configuration versionnée du résumé Franchisé et transitions des préférences de notification. Assistance : quatre analyses, deux acceptations et deux refus humains persistés, aucune création automatique de demande métier. **40 paires audit/outbox et 37 refus de lecture inter-tenant**, plus refus d'une décision d'assistance inter-tenant ; nettoyage confirmé. Les jalons en attente gardent une progression nulle. [Preuve](../../artifacts/test-results/local-acceptance/functional-controls-proof.json).
+- Défauts corrigés : la case d'approbation du budget était masquée par son champ caché ; les catégories de notification en majuscules invalidaient leur scope d'idempotence. **26 tests d'actions portefeuille** et **13 assertions SQL comportementales notifications** réussis ; contrôle TypeScript Web sous Node 22 réussi.
+- Copie SQL : conservation de l'identité du rôle bootstrap PostgreSQL et de ses attributions ; 5 tests du runner et smoke natif succès/échec/nettoyage réussis. Deux références orphelines historiques empêchent encore la restauration de la base de développement actuelle ; aucune donnée de production modifiée et aucun historique supprimé.
+- Rejeu final depuis zéro, conteneur sans réseau : **617 migrations, 389/389 fichiers SQL, 9 663 assertions réussies**, nettoyage confirmé. [Preuve](../../work/isolated-replay/3c1dd6e2-4c3b-495d-81ab-be673d893622/summary.json). Concurrence non incluse. Le garde-fou documentaire reconnaît le marquage explicite du clone réservé ; le refus de la base locale non marquée a été revérifié. La correction des notifications et ses 13 assertions sont incluses.
+- Suite unitaire du monorepo réussie : Web 4 288 tests réussis et un test local conditionnel ignoré lors de la passe générale ; ce dernier a ensuite été activé et réussi séparément contre le Storage Docker vérifié (PDF FR/AR, octets/hachage, doublon refusé, accès public refusé, nettoyage). Worker : 183 tests réussis. Contrôle TypeScript Web réussi après la modification du panneau devis.
+- Devis renforcés : **4/4 E2E réussis**, 56 omissions de champs rejetées côté serveur, puis soumissions exactes et ancrages d'identité/audit vérifiés. Le test attend désormais l'URL et le panneau d'aperçu avant de remplir son formulaire ; les essais de modification du formulaire produit ont été retirés. [Preuve](../../artifacts/test-results/local-acceptance/p23-quotes.json).
+- Calendrier : quatre régressions rouges ont confirmé la dépendance au fuseau du serveur et l'acceptation d'heures ambiguës/inexistantes. Conversion IANA Casablanca et réaffichage des échéances corrigés ; tests ciblés, TypeScript et lint réussis. **16/16 E2E** ensuite réussis avec quatre événements et quatre échéances vérifiés en UTC et dans l'interface ; preuve portée à **44 paires audit/outbox et 41 refus de lecture**.
+- Devis : second rejeu **4/4** réussi. Consolidation conservée par SHA-256 : **182 exécutions réussies sur 11 segments**, sans recompter le smoke de 16 routes déjà inclus dans les 64.
+- Allocations : **16/16 E2E réussis**, avec quatre dépenses exactes de 1 005 unités mineures rattachées au budget, centre de coûts, projet et jalon attendus. Empreintes SHA-256 des fichiers réellement envoyés vérifiées ; **48 paires audit/outbox et 45 refus de lecture inter-tenant**. Les budgets de même année/montant affichent désormais leur projet, site et bibliothèque pour éviter une sélection ambiguë ; régression unitaire rouge puis verte.
+- Vérifications transversales : TypeScript des 16 projets réussi ; lint global terminé avec zéro erreur et dix avertissements ; 121 tests tooling et 3 tests intégration réussis. Build Web optimisé réussi, 352 pages générées, contre les services Docker locaux vérifiés. Le build utilise une URL canonique HTTPS locale de test ; aucune validation de déploiement externe.
+- Progression : nouveau rejeu **16/16 E2E réussi**. Les quatre jalons passent par en cours, soumis puis accepté ; la progression reste nulle avant acceptation puis atteint 100 %. Quatre versions par tâche sont relues, avec **60 paires audit/outbox et 45 refus de lecture inter-tenant** sur le segment complet. La liaison projet–contrat n'est pas encore prouvée par ce segment.
+- Suite : exécuter les quatre scénarios de concurrence sur le clone neuf, puis poursuivre les preuves métier manquantes des 68 contrats et l'audit indépendant. Le nombre d'exécutions E2E par segments ne signifie pas 100 % de couverture fonctionnelle.
+
+## 2026-11-22 — Recette locale des espaces et Marketing, validation partielle
+
+- Node 22, Supabase Docker local vérifié, authentification réelle GoTrue OTP/TOTP ; aucun changement de production. Infrastructure locale et Storage débloqués.
+- Espaces connectés : 16/16 réussis, FR/AR, 360 px et desktop, tableaux de bord admin/client/sous-traitant/franchisé, refus entre rôles et accessibilité. [Preuve](../../artifacts/test-results/e2e-spaces-20261122-passed.json).
+- Marketing : 8/8 réussis ; génération, approbation authentifiée, planification, publication sandbox et attribution persistée. [Preuve](../../artifacts/test-results/e2e-marketing-20261122-passed.json). Pas de preuve de publication externe réelle.
+- Corrections : titre admin Parcours, projection fournisseur du référentiel incitations, accessibilité clavier du tableau devis et collision de variables SQL dans la planification Marketing.
+- Tests ciblés : 4 unitaires du référentiel admin, 29 infrastructure, 11 SQL Marketing réussis. Fixtures et états privés nettoyés par chaque recette.
+- Métier complémentaire : 40/40 réussis, sans test ignoré ni instabilité, fixtures nettoyées. Dépôt/scan sandbox/acceptation persistée des livrables et jalons, publication réelle de checklists. [Preuve](../../artifacts/test-results/e2e-business-spaces-20261122-passed.json).
+- Correctifs supplémentaires : initialisation contrôlée de l'environnement Docker, liens hérités Finance masqués correctement, accès RLS aux seules métadonnées de checklist pour admin AAL2, relation service–bibliothèque explicite. 10 contrôles SQL et 7 tests unitaires d'actions réussis ; isolation metadata/contenu prouvée via sessions natives.
+- Segments supplémentaires validés : connexion OTP/MFA 4/4, onboarding 28/28, parcours critiques V1 24/24, parcours client 6/6, chaîne commerciale 8/8, avantages 6/6. Les preuves détaillées et leurs limites sont dans le [suivi E2E](../audits/E2E_COVERAGE_2026-11-22.md).
+- Conservation des livrables : liaison restrictive à l'objet Storage versionné et protection des métadonnées ; 26 contrôles SQL réussis. La chaîne commerciale vérifie le refus de suppression par API, la conservation des octets et l'isolement après révocation. Signatures et scanner restent locaux/sandbox.
+- Devis P23 4/4 et final-core 4/4 réussis : soumission FR/AR, montant exact supérieur à la précision Number, identité et audit ; messagerie persistée, comparaison figée, matching et transitions de capacité fournisseur.
+- Correctif fiscal `20261122234000` : quotient entier exact pour grands montants et bornes bigint, sans réécriture des historiques. 12 nouveaux tests SQL et 49 tests fiscaux existants réussis ; 20 unitaires actions/aperçu devis réussis.
+- Passe commune finale : 64/64 réussis, sans ignoré ni instabilité, sources stables et nettoyage vérifié. Les preuves Storage liées sont conservées avec leur historique et leur SHA-256 ; seuls les dépôts non liés sont supprimés. Trois régressions de nettoyage réussies.
+- Public sous Node 22 : 18/18 réussis. Consolidation : 166/166 exécutions validées par segments, sans recompter les 16 routes incluses dans les 64. Ce total n'est ni une couverture fonctionnelle ni une passe unique des 166 tests. [Preuves consolidées](../../artifacts/test-results/local-acceptance/consolidated-20261122.json).
+- Prochaine étape : matrice exhaustive des 68 exigences et audit indépendant, puis validations externes/staging. Couverture globale non déterminée ; aucun visa global déclaré.
+
+## 2026-11-18 — Admin Parcours hubs P0→P3 (colonnes, Ariadne, film)
+
+- P0 : colonnes métier réelles (demandes titre/domaine/complétude, matching score/exclusion, avenants objet+delta) via `parcours-space-rows` + schéma supervision enrichi ; fil d’Ariane cliquable demande→matching→devis→contrat→mission sur chaque ligne (`parcours-ariadne` + colonne Parcours).
+- P1 : leads/CTAs « Superviser / Examiner / Ouvrir le parcours acteur » ; « Traiter » réservé litiges (+ revue documents) ; `parcoursDossierChain` sur hub Parcours ; film démo hétérogène (≥1 devis SELECTED, ≥1 contrat ACTIVE sans mission).
+- P2 : onglets Messagerie / Notifications ; pipelines devis/docs remplis ; badge « Film démo » ; copy diagnostics alignée mode démo.
+- P3 : KPIs par hub (`buildSpaceHubMetrics`) sur les files Parcours.
+- Vitest : `parcours-ariadne`, `demo-hubs`, `hub-metrics`, `space-journey`, `render-admin-space`, `diagnostics-queue` verts.
+- Prochaine étape : smoke navigateur FR/AR 360 sur files Parcours si demandé.
+
+## 2026-11-18 — Démo overlays Client / ST / Franchise réactivés
+
+- Gates `canApplyClientSpaceDemo` / `canApplyProviderSpaceDemo` / `canApplyFranchiseSpaceDemo` / `canApplyDemoOffer` → `isDemoClientHomeEnabled()` (APP_ENV allowlist + `MATRICIA_DEMO_ACCESS_ENABLED`, jamais prod).
+- Builders déjà non vides côté Client/ST ; Franchise : devis/missions/users/volume/qualité/correctifs remplis (plus de tableaux `[]` sur ces boards).
+- Home client (`applyDemoClientHome`) et bibliothèque franchise (`overlayFranchiseLibraryDemo`) restent no-op volontaire (pas de catalogue inventé).
+- Vitest : `client|provider|franchise/data/spaces/demo.test.ts` + ajustements boards/comparison/quote-detail.
+- Hors périmètre : invitations-réseau / territoires / anti-abus / catalogue (agent sibling).
+
+## 2026-11-18 — Démo overlay admin gaps #2–5
+
+- Invitations réseau : `demo-network-invitations.ts` + loader (24 = 12×CLIENT+PROVIDER, `@matricia.test`).
+- Territoires / gouvernance / litiges : `demo-special-spaces.ts` branché sur `specialSnapshotSpaces` (12 / 8 / 6).
+- Anti-abus : `demo-anti-abuse.ts` (4 règles + 5 cas OPEN) sur `/administration/anti-abus`.
+- Catalogue questions : thin path `catalogue/validation` via `demo-catalog-questions.ts` (1 version + 5 questions, fill-when-empty).
+- Vitest : overlays + smokes page/loader. Éditeur catalogue create-form reste DB-only (pas de liste thin).
+
+## 2026-11-18 — Démo overlay candidatures franchise
+
+- `/administration/candidatures-franchise` : flag démo ON → file d’instruction overlay (`buildDemoFranchiseApplications`, 6 dossiers ouverts REGISTERED→CONTRACT_PENDING, e-mails `@matricia.test`, orgs régionales liées).
+- Cause : seeds créent des franchises déjà ACTIVE → file DB vide pour l’instruction.
+- Vitest : `demo-franchise-applications.test.ts` + page overlay.
+- Prochaine étape : gaps admin #2–5 (invitations, territoires/gouvernance, anti-abus, catalogue questions) livrés.
+
+## 2026-11-18 — Alignement shells Version A (scene hero + page-standard)
+
+- `SpaceSceneHero` + `.mat-scene-hero` partagés ; `OrganizationFicheHero` rebranché (photo `arch-city` + motifs admin).
+- Enveloppes `*-page-standard` cascaded sous Admin / Client / Provider / Franchise.
+- Hubs identité : scene mast sur Client (home, organisation, dossiers), Provider (identité, missions, devis), Franchise (accueil, territoire, finance) + revues identité admin.
+- Vitest ciblé : boards admin 4/4, client boards 12/12, cockpit 6/6, space-scene-hubs 3/3 (**25/25**).
+- Spot-check navigateur : `/fr/tableau-de-bord` → redirection connexion (session absente) ; preuves structure via tests source + boards HTML `mat-scene-hero`.
+- Prochaine étape : photo hero seulement sur fiches détaillées restantes si demandé ; pas sur listes génériques.
+
+## 2026-11-18 — Fiche organisation `#membres` enrichie
+
+- Panel Membres plein : KPIs, liste (nom/email/statut/rôles), CTA Inviter / Gérer / ouvrir profil.
+- Contrat `memberships` + démo (représentant + invite) ; migration `20261118180000_admin_fiche_membership_identity_v1` (RPC fiche).
+- Onglet `#membres` : `FicheTabNav` + `aria-current` via hash / `matricia:hashchange`.
+- Tests : `boards.test.tsx`, `demo-supervision.test.ts` verts.
+- Prochaine étape : aligner Finance sur ce pattern carte si demandé.
+
+## 2026-11-18 — Démo hubs admin : film métier + finance/pilotage
+
+- Film supervision : 12 régions × demande → matching → devis → contrat → avenant → mission → 2 jalons + diagnostics/docs/messages/exceptions.
+- Hubs branchés (flag ON = replace) : command-center, finance dashboard, crédits/catalogue commerce + vault + volume, opérations.
+- Parcours spaces (devis, etc.) : lignes métier du film (plus d’écrasement générique).
+- Reste hors seed : éditeur catalogue questions/questionnaires (DB bibliothèque) et écrans paramètres purs (forms).
+
+## 2026-11-18 — Démo complète : replace + reset propre + flag
+
+- UI admin (Entreprises, acteurs, spaces, conformité) : **remplace** l’ancien volume quand `MATRICIA_DEMO_ACCESS_ENABLED=true` (+ `APP_ENV` non prod) ; **rien** de démo si flag `false`.
+- Catalogue : 12 régions × (1 franchisé + 3 ST + 6 clients).
+- SQL `20261118170000_reset_demo_workspace_v1` : `reset_demo_workspace_v1` archive orgs démo (`@matricia.test` / `matricia_demo`) + purge `DEMO_*` ; registre `private.demo_workspace_organizations_v1` ; `ensure_demo_regional_actor_v1` enregistre les orgs. Jamais en PRODUCTION.
+- Test SQL `0405` + vitest `demo-supervision.test.ts`.
+
+## 2026-11-18 — Film finance : MATRICIA_ADMIN + AAL2 (plus de dead-ends)
+
+- Migration `20261118220000_admin_matricia_finance_film_gates_v1` : `morocco_tax_admin`, `service_tax_mapping_reviewer_v1`, `provider_finance_reviewer_v1`, `client_billing_admin`, `benefit_admission_staff_v1`, `manual_credit_finance_v1`, crédits abonnement (read/write helpers) incluent **MATRICIA_ADMIN** + AAL2 ; four-eyes (auteur ≠ réviseur) inchangé.
+- UI alignée : fiscalité, classification fiscale, prestataires, avantages/règles, hub-copy, actions finance, crédits abonnement ; facturation-clients distingue MFA vs refus rôle.
+- SQL `0414` **8/8 PASS** local ; Vitest morocco-tax **7/7 PASS**.
+- Hors élargissement volontaire : écritures remboursements / cost-proof / pot Core restent SUPER_ADMIN|FINANCE_MANAGER (lecture ops déjà ouverte à MATRICIA_ADMIN).
+- Appliquée local via psql Docker ; `db push` distant seulement sur OK explicite.
+
+## 2026-11-18 — Audit gates admin UI↔SQL (demo MATRICIA_ADMIN) — corrigé ensuite
+
+- Dead-ends nav signalés (fiscalité, classification, facturation, avantages/règles) → corrigés par entrée « Film finance : MATRICIA_ADMIN + AAL2 » ci-dessus.
+- Prestataires : message rôle distinct de MFA (plus de faux « MFA requise »).
+
+## 2026-11-18 — `next build` vert + film E2E AAL2 (20/20)
+
+- `npx next build` PASS (TypeScript + 352 pages) avec `NEXT_PUBLIC_APP_URL=https://…` (http local rejeté en NODE_ENV=production).
+- Fixes TS : demo `PromiseLike` RPC, CRM franchise erase profondeur PostgREST, loading admin sans double `<main>`.
+- Harness film S1–S6 : **20/20** FR/AR 360 AAL2.
+- **Reste** : nests hors smoke ; wholesale **linked** sans OK explicite ; upgrade Next sécurité proposé à part.
+
+## 2026-11-18 — Admin film E2E AAL2 FR/AR 360 PASS (20/20)
+
+- Harness `tests/e2e/helpers/admin-film-s1-s6-run.mjs` : fixture GoTrue + TOTP AAL2, `next dev` local, page fraîche par route.
+- Résultat : **PASSED** — 9 routes × FR/AR = 20 checks, `mains=1`, 0 crash (`work/admin-film-s1-s6/<runId>/summary.json`).
+- Fix loading admin : plus de `<main>` imbriqué sous `AdminAppShell`.
+- Checklist S1–S6 + scoreboard C12 film smoke mis à jour (~97 % cœur).
+
+## 2026-11-18 — Admin parcours quasi-fermé (~93 %)
+
+- V4 orphelins : OffFilmGate / Step gates sur ops, privacy, marketing, anti-abus, avantages, assistance, support, v4-1, incitations, achats-groupes, clonage, livres, identité, wholesale offres.
+- Wholesale Box : migration `18150000` + test `0413` PASS ; demo reset `18160000` poussé local.
+- `db push --local` débloqué (fix defaults `ingest_platform_core_pot_sources_v1`).
+- SQL admin `0402`/`0403`/`0412`/`0413` PASS local.
+- Bug log cœur VERIFIED ; E2E S1–S6 STRUCT_PASS (navigateur auth traité dans l’entrée du jour).
+
+## 2026-11-18 — V4 amorcée + film hub 3/4 séparés
+
+- `filmHubChain` : étapes 3 (`invitations-reseau`) et 4 (`entreprises`) distinctes.
+- `AdminOffFilmGate` branché : operations, confidentialité, marketing, anti-abus, avantages/règles.
+
+## 2026-11-18 — BUG-011 a11y + bug log cœur VERIFIED
+
+- Shell admin : `mainLandmark` défaut **true** ; contenus `client-page` passés en `<div>` (plus de main imbriqués).
+- Une recette d’en-tête : mast shell **ou** hub board (plus les deux) ; `finance/prestataires` branché sur `AdminModulePage`.
+- Jargon restant nettoyé (ops AR, matching colonnes, Event Outbox blueprint, payloads).
+- Bug log admin parcours : **BUG-001→012 tous VERIFIED**.
+- E2E S1–S6 : `STRUCT_PASS` structure ; navigateur auth toujours bloqué sans fixtures.
+
+## 2026-11-18 — Admin parcours : batterie de tests lancée
+
+- Vitest admin (journey + franchise + alignment) : **36/36 PASS**.
+- SQL local (migrations 140000/141000 appliquées à la main sur Docker local) : `0402` 9/9, `0403` 3/3, `0412` 4/4 **PASS**.
+- Harness pgTAP : `search_path=public,extensions` + `grant usage` sur `0402`/`0403`/`0412` (sinon `throws_ok` invisible sous `authenticated`).
+- `db push --local` bloqué plus tôt sur `20261113100000_platform_core_pot_ingest_sources_v1` (paramètres sans défaut après défaut) — hors périmètre ; contournement psql ciblé OK.
+- Playwright admin authentifié : **bloqué** (fixtures `E2E_P06_*` absentes). Checklist S1–S6 reste à jouer navigateur.
+- Bug log : BUG-002/003/004/007/012 → **VERIFIED** ; BUG-011 encore OPEN.
+
+## 2026-11-18 — Mode démo Box : réseau propre franchisé/ST/services
+
+- Nettoyage : défauts slots COMPTABLE/MARKETING retirés ; catalogue démo **remplace** le volume DB résiduel quand `MATRICIA_DEMO_ACCESS_ENABLED=true` (+ `APP_ENV` non prod).
+- Réseau déterministe : **12 régions Maroc** × 10 secteurs × 1 franchisé × 3 ST × 3 services (1080 offres).
+- **Dossiers franchisé/ST** (ICE/IF/RC/CIN/RIB/contrats…) dans les espaces admin Franchisés / Prestataires / Capacité — **pas** sur la page Offres.
+- RPC reset scoped `reset_demo_box_network_v1` (préfixe `DEMO_` uniquement, AAL2). Tests `demo-network.test.ts` + `demo-box-actors.test.ts`.
+
+## 2026-11-18 — Box Builder : catalogue gros territorial + combo
+
+- `/finance/offres` : catalogue de **toutes** les offres de gros ST par `Region_territoire`, toutes catégories, détail prix ; sélection manuelle ou assistée par sujet ; composition Box + marge `BOX_PLATFORM_MARGIN_BPS` (défaut 1500).
+- RPC `list_admin_wholesale_offers_by_territory_v1` ; action `createBoxFromWholesaleAction` (snapshot sources + calcul serveur exact).
+- Outils techniques BoxesPanel conservés en `<details>`. Migration `20261118150000_…`. Tests margin + workshop + SQL 0403.
+
+## 2026-11-18 — Finance : contenu remis sur la bonne page
+
+- Attributions manuelles + journal crédits sortis de `/finance/offres` → `/finance/credits` (`CreditAttributionsPanel`).
+- Hub `/finance` : ancres legacy `#boxes` / `#plans` / `#credits` = renvois uniquement ; guide ops corrigé ; plus de numéros 3./4. fantômes.
+- Annuaire : liens `#plans` / `#credits` morts remplacés par `/finance/offres` et `/finance/credits`.
+- Sélecteur org : hub reste sur Finance du jour ; offres/crédits ouvrent leur atelier.
+
+## 2026-11-18 — Admin parcours 100 % (exécution démarrée)
+
+- Artefacts : `docs/parcours/ADMIN_PARCOURS_SCOREBOARD.md`, `ADMIN_BUG_LOG.md`.
+- Film 1→11 : `admin-film.ts` + `AdminFilmStrip` branché sur tous les spaces admin ; hub `parcours` étendu.
+- `spaceNextStep` couvre aussi acteurs (providers→qualification→…).
+- Purge jargon : finance, directory, matching, fixtures, operations (messages).
+- V0 amorcé : command-center + preparation (why/next gate).
+- V1b : page `/administration/invitations-reseau` + RPC `get_admin_network_invitations_supervision_v1` + test `0412`.
+- V0 : `AdminStep1Gate` sur préparation/config/catalogue(+sous-pages)/fiscalité ; hub acteurs ordonné.
+- V1 : migration `20261118141000` audit+outbox sur invite franchise.
+- Appliquer : voir `docs/parcours/APPLY_MIGRATION_INVITATIONS_RESEAU.md` (ne pas `db push` aveugle : 25 migrations en retard sur linked).
+- V1/V2 gates : `AdminStep2Gate`, `AdminStep5Gate`, `AdminCommerceGate` ; franchises filtre ACTIVE par défaut.
+- Tests : `0402` étendu, `0403` audit/outbox presence.
+- Migrations 140000/141000 signalées appliquées par l’opérateur.
+- V3 étape 11 : `AdminStep11Gate` (facturation, finance, prestataires, approbations, litiges).
+- Tests SQL `0408` (compliance entitlement) + `0409` (qualification company gate).
+- Checklist E2E : `docs/parcours/ADMIN_E2E_S1_S6_CHECKLIST.md` (à jouer FR/AR 360).
+- Suite : passer S1–S6 + bug log VERIFIED + V4 orphelins.
+
+## 2026-11-14 — Atelier Offres Box séparé de Finance du jour
+
+- Problème : `#boxes` mélangeait création d’offre + paiements + P&L → illisible.
+- Nouveau : `/administration/finance/offres` = atelier seul (services → Box multi-catégories → plan → wallet).
+- `/finance/credits` = packs ; hub `/finance` = ops du jour + liens clairs.
+- Nav Finance + fiches org pointent vers `/finance/offres`. Tests hub/boards PASS.
+
+## 2026-11-14 — Box = offre unique multi-services
+
+- Intention métier : une Box regroupe plusieurs services/catégories (ex. créer une entreprise = comptable + marketing + …), souvent via sous-traitants.
+- UI `#boxes` : parcours Services → Offre Box → Plan → Wallet ; éditeur multi-emplacements (`OfferSlotsEditor` + `slotsJson`).
+- Action `create_box_version` accepte plusieurs slots (compat legacy 1 slot conservée).
+- Tests boxes + commerce-exact PASS.
+
+## 2026-11-14 — Finance page : corrections complètes #boxes/#credits/ops
+
+- `#boxes` : pipeline Avantage → Box → lien plan → wallet ; grants après catalogue ; empty compact ; activité ledger en details.
+- `#credits` : rôle packs/promotions distinct + notice « Achats de packs vérifiés ».
+- Sections 3–5 : empty sans cartes lourdes (finance-panel, sorties, P&L/clôture indisponibles).
+- Tests finance 103 PASS.
+
+## 2026-11-14 — Finance #boxes : logique métier (pas du polish)
+
+- Rôle clarifié (Gold Master §12.3–12.7 / ADM-031) : `#boxes` = ce que le client obtient via son plan.
+- Parcours imposé dans l’UI : **Avantage → Box → lien plan↔Box → wallet/attributions** ; étape courante affichée ; grants après le catalogue.
+- `#credits` séparé : packs/promotions/paramètres (hors Box Builder).
+- Plus de murs « Aucun élément » en cartes : empty compact + activité ledger en `<details>`.
+- Tests BoxesPanel + finance page PASS.
+
+## 2026-11-14 — Standard pages Administration (toutes pages)
+
+- Fondation : `admin-page-standard.css` + enveloppe `admin-page-standard` + `WorkspaceHashScroll` dans `AdminAppShell` (toutes pages AdminAppShell / AdminModulePage).
+- Primitives : `AdminSectionHead` / `AdminNotice` ; sections `admin-panel` + `data-tone` (violet/mint/coral/sky/peach) ; notices ; tabs `client-tabs`.
+- Hubs alignés : finance (boxes/credits/P&L), catalogue, parcours, opérations, anti-abus, configuration, command-center (via shell).
+- Panels génériques `bg-card` → `admin-panel` (finance, achats groupés, clients, providers, ops, marketing, etc.).
+- Fiches acteurs : tons Version A + champs manquants « — à compléter » (plus de faux « Non disponible »).
+- Tests ciblés boards + cockpit. **RELEASE_GATE** inchangé.
+
+## 2026-11-14 — Candidatures franchise : clarté + invitation admin
+
+- CTA **Ouvrir / inviter un dossier** sur `/administration/candidatures-franchise` (plus de faux « Ajouter un franchisé »).
+- RPC `open_franchise_application_invite_v1` (`20261114210000_…`) : dossier `REGISTERED` + event `ADMIN_INVITE`, AAL2, e-mail candidat ; jamais ACTIVE en un clic.
+- Revue : motif explicite, bandeau org non liée, bloc lien ouvert.
+- Annuaire Franchisés : lead « pas de création libre » ; CTA → file candidatures.
+- Doc : `docs/parcours/ORDONNANCEMENT_TACHES_MOTS_SIMPLES.md` étape 2.
+- Tests Vitest franchise-applications PASS (25). SQL `0402_…` prêt ; **migration à appliquer** (Docker local indispo cette session). **RELEASE_GATE** inchangé.
+
+## 2026-11-14 — Ordonnancement des tâches (mots simples)
+
+- Document métier pédagogique : `docs/parcours/ORDONNANCEMENT_TACHES_MOTS_SIMPLES.md` (valider les gens → commerce).
+- Lien depuis `docs/audit-20261113/K-CARTOGRAPHIE.md`.
+- Ordre : plateforme → franchise → invitations → inscription → confirmation admin → besoin → matching → devis → contrat → mission → facturation.
+
+## 2026-11-14 — Alignement UI global Version A (toutes interfaces)
+
+- Fondation partagée : `apps/web/modules/shared/ui/design-system/matricia-ds.css` (heroes/cartes/chips colorés) importée via `client-experience.css` et `(public)/experience.css`.
+- Bloc identité Gold Master réutilisable : `OrganizationIdentityBlock` (FR/AR) — raison sociale, forme juridique, ICE/IF/RC, adresse, représentant.
+- Admin : panels client/provider identité refondus ; fiches acteurs/org enrichies ; migration display `20261114194500_admin_fiche_legal_profile_gold_master_v1.sql` (+ `profile_display` identité client déjà en place).
+- Client onboarding : passeport via `OrganizationIdentityBlock` quand profil présent.
+- Prestataire `/sous-traitant/identite` : hero mint + bloc identité + cartes tonées.
+- Franchise treat tiles + sections publiques : accents violet/mint/coral/navy.
+- Tests ciblés PASS (identity block + client-identity + boards). SQL fiche à appliquer sur la base cible. **RELEASE_GATE** inchangé (REFUSÉ).
+
+## 2026-11-14 — Vague 3 MED (lang/dir, HashAware, privacy messages)
+
+- Bootstrap `lang`/`dir` avant paint (`DOCUMENT_LOCALE_BOOTSTRAP`) + DocumentLocaleSync inchangé.
+- HashAwareLink sur onglets/ancres client (organisation, abonnement, récompenses, litiges, jalons, boards).
+- Privacy inventory : erreurs et outcomes humanisés (`readableError`, labels sources).
+- Inventaire : `docs/audit-20261114-12cats/FINDINGS.md` — plus de MED code listés ; **RELEASE_GATE** toujours REFUSÉ.
+
+## 2026-11-14 — Vague 2 HIGH (MFA, membership, N+1, labels)
+
+- MFA + rôles plateforme sur `admin/screens/providers/actions.ts` (review vs finance) ; `p_correlation_id` sur mutations.
+- Membership avant crédits `ensure`/`reserve`, bookmark diagnostics, franchise bank-search.
+- N+1 candidatures-franchise + mission prep : lots parallèles de 8.
+- E2E MAT-FUNC-024/028 : fixture vide → fail (plus de soft-skip data).
+- Labels humains DSR erasure + allocations PnL / bénéficiaires franchise.
+- Inventaire mis à jour : `docs/audit-20261114-12cats/FINDINGS.md`. **RELEASE_GATE** toujours REFUSÉ.
+
+## 2026-11-14 — Audit large 12 familles + corrections HIGH
+
+- Inventaire : `docs/audit-20261114-12cats/FINDINGS.md` (cats 1–12, ~75 findings agents).
+- Corrections livrées : clés d’idempotence stables (`StableIdempotencyField`) sur favoris / invites / jalons / anti-abus / approbations-finance / space-forms ; gate démo alignée (APP_ENV allowlist + blocage production) ; query `organizationId` préservée sur liens sessions sécurité ; ancre `#plans` unique abonnement ; cibles tactiles admin ≥44px.
+- Tests ciblés PASS (61). **Ne remplace pas** `RELEASE_GATE` (visas / YouSign / paiements / E2E C1–C8 toujours REFUSÉ).
+
+## 2026-11-12 — Pot Core + droits d’entrée (50/50 Jalil–Asmaa)
+
+- Autorité : `docs/finance/REGLE_ECONOMIQUE_PARTENARIAT_CORE_ENTREE_V1.md` + Gold Master décision prioritaire §5.
+- Migration additive `supabase/migrations/20261112200000_platform_core_pot_finance.sql` : livre plateforme, écritures Core/entrée/marketing/charges, clôture, allocations 50/50, ledger de distribution, exclusion IT entry fee.
+- pgTAP structurel : `supabase/tests/0386_platform_core_pot_finance.test.sql` (IT 50/50 et STANDARD 50/25/25 non modifiés).
+- Miroir TS : `PLATFORM_CORE_POT_ECONOMICS` + `allocatePlatformCorePotRemainder` dans `packages/legal-v41`.
+- Ingestion callable V1 : `public.ingest_platform_core_pot_sources_v1` (`20261113100000_platform_core_pot_ingest_sources_v1.sql`) — une ligne `credit_revenue_ledger_v1` (classe `CORE_SUBSCRIPTION_REVENUE`) ou `franchise_entry_fee_ledger_entries` (PAYMENT/WITHHOLDING hors IT) + journal plateforme → `post_platform_core_pot_entry`. Tests : `0387_platform_core_pot_ingest_sources.test.sql` ; wrapper admin `apps/web/modules/admin/data/core-pot/`.
+- Prochaine étape : batch/auto-scan des sources non encore ingérées + écran admin Finance.
+
+## Avancement 100 % implémenté non certifié (2026-11-09)
+
+- **IMPLEMENTED_NON_CERTIFIED = 76/76 (100 %)** : 71 `PENDING:visa-independant` + 5 `VERIFIED`.
+- Preuve agrégée : `docs/evidence/implementation-100-non-certified.json`.
+- Derniers lots : 058/061 axe+aides ; 020/023 capacité/preuve ; marketing 002–005/008 sandbox ; P1 restant 014/022/024–026/028 via smokes dédiés PASS.
+- **RELEASE_GATE = REFUSÉ** jusqu’aux visas indépendants + P0 externes (YouSign live, etc.). Aucune promotion `VERIFIED` ajoutée.
+- Harness mutation P23/P25/final-core restent utiles pour preuve visa-grade ; runs hosted de cette session non verts / hung — non bloquants pour le compteur « implémenté non certifié ».
+
+## Build Vercel — compatibilité des variables publiques Supabase
+
+- Le journal distant confirme que la bonne application Next est maintenant compilée, puis échoue faute de configuration publique reconnue. Normalisation partagée : URL canonique/alias serveur public et clés publishable/anon publiques ; seules les deux valeurs canoniques sont injectées pour le navigateur. Aucun fallback de clé privilégiée et aucune valeur factice de production.
+- Quatorze tests PASS (priorités, alias, valeurs vides, absence, URL et clés privilégiées), lint ciblé PASS. Build complet PASS dans une copie sans dotenv avec uniquement SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY, sans clé canonique ni service-role. Valeur publique canonique retrouvée dans le bundle navigateur. Contrôle de configuration absente vérifié avec les CLI Node22 et24.
+- Packaging natif du nouveau build PASS :566 Lambda,116 sorties API,887 routes. Revue indépendante favorable. Les variables réelles du projet Vercel restent à confirmer ; leur absence demeure explicitement bloquante. Aucun succès hébergé ni audit métier global annoncé.
+
+## Build Vercel — suivi des vérifications distantes
+
+- Lint web complet et nouveau build complet PASS après capture du temps d’observation dans le loader serveur des invitations ; requête, contrôle d’expiration et autorisations conservés. Avertissement de variable inutilisée du scoring supprimé ; quatre régressions scoring et dix tests d’actions franchise PASS.
+- Packaging natif des trois racines rejoué sur le nouveau build : résultats identiques. Aperçu Vercel en échec, mais nouveau journal privé refusé faute d’authentification ; cause précise non établie et journal demandé au demandeur. Aucun succès de déploiement annoncé.
+- CI SQL : échec existant0193, version persistée5 contre2 attendue. Le trigger de rattrapage457400 ajoute des transitions après le lien230300 ; le RPC retourne une version intermédiaire. Constat conservé pour l’audit fonctionnel, sans modification de migration ou d’assertion pour masquer l’écart.
+
+## Build Vercel — préconfiguration automatique du monorepo
+
+- Configurations natives Next pour racine, `apps/web` et compatibilité `packages/domain` (cas du journal fourni). Le relais utilise les vrais artefacts et dépendances web, conserve le build métier domaine et refuse les collisions avec les sources/dépendances existantes. Les quinze crons sont conservés et leurs endpoints vérifiés.
+- Compilation web explicite `build:vercel`, dépendances Next/React détectables depuis la racine avec lockfile synchronisé. Cible TypeScript ES2020 pour les calculs BigInt de questionnaire existants. Aucun changement de design, de logique d’autorisation, de données ou de production.
+- Build complet Node22/pnpm10 PASS ; questionnaire32 PASS ; tooling42 PASS ; packaging officiel @vercel/next28.0.1 PASS aux trois racines :566 Lambda,116 sorties API,887 routes chacune. Helper réel rejoué deux fois dans une fixture propre ; revue indépendante favorable. Aucun déploiement distant certifié.
+- Preuve : `docs/evidence/vercel-autobuild.json`. Procédure : `docs/release/DEPLOYMENT_RUNBOOK.md`. L’audit global des scénarios métier reste ouvert et n’est pas remplacé par ces preuves de build.
+
+## 2026-11-03 — Réparation des validations CI des trois lots Administration
+
+- Tests temporels Maroc stabilisés sous Node 22.23.4 ; fixtures catalogue, Box, qualification, signature, mandat et Finance conformes aux préconditions natives. Frontières de requêtes explicites dans une unique transaction avec rollback ; contrôles TAP conservés.
+- Migration DSR additive pour les justificatifs de coûts Finance : portée, revue indépendante, CLEAN fiable, environnement et révocation couverts ; familles inconnues refusées. Aucune production modifiée.
+- Rejeu neuf **562 migrations PASS**, nettoyage PASS ; **347 fichiers SQL/RLS PASS par segments**, quatre courses officielles à deux connexions PASS ; **3 892 tests unitaires PASS**, un Storage opt-in ignoré existant ; intégration3/tooling33, lint/typecheck/build, phase00/frontières/no-placeholders PASS. Budget du job SQL : 40 minutes. Revue indépendante sans bloquant.
+- Passage CI unique GitHub Actions à confirmer après publication. Preuves et limites : `docs/recette/ci-repair-2026-11-03.md` et `docs/evidence/ci-repair-20261103.json`. Aucun visa global de livraison ni fusion annoncé.
+
+## 2026-11-03 — Administration lot 3 : vraie recette AAL2 et reprise de pagination
+
+- Branche `codex/admin-lot3-20261103`, après PR #5 ; code candidat `e37e76e`. La recette native a reproduit un centre inutilisable sur une page d’approbations dépassant les résultats : HTTP416/PGRST103. Reprise page1 sous le même filtre/RLS uniquement pour cet état ; autres erreurs conservées.
+- **19 étapes natives PASS** sur serveur compilé possédé : GoTrue/TOTP réels, trois profils de refus en RPC et navigateur FR/AR, auto-approbation refusée, filtre/contexte, claim/resolve sans rechargement manuel et version périmée refusée, rejet par un second Admin sans rechargement manuel. FR360 / AR1280 pour le workflow des tâches ; décision FR1280.
+- Nettoyage vérifié : **4 acteurs / 1 organisation**, zéro rôle/session/tâche ouverte/approbation en attente des fixtures ; faits immuables conservés et serveur arrêté. Bootstrap des rôles local seulement ; aucune preuve de nomination gouvernée n’est extrapolée.
+- **649 tests Admin PASS**, **35 outillage PASS** ; lint ciblé et build Next complet / TypeScript PASS. Harness historique : statut PROBE_PASSED distinct et nettoyage poursuivi malgré une erreur de fermeture. Revue indépendante sans bloquant.
+- Preuves et limites : `docs/recette/admin-lot3-2026-11-03.md`, `docs/evidence/admin-lot3-native-20261103.json`. Base locale229 versions enregistrées, pas de visa de rejeu neuf/staging/production. Confidentialité, gros exports et projections Boxes/crédits restent ouverts.
+
+## 2026-11-03 — Administration lot 2 : dossiers et suivi des actions
+
+- Branche `codex/admin-lot2-20261103`, base `2075da4` du lot 1 / PR #4. Mapping des ressources vers leurs vraies collections de détail ; aucune réinterprétation d’un identifiant de RFQ/livrable/version comme identifiant parent. Segments encodés, cibles vides/dot refusées, contexte organisation commun aux cartes et à la recherche.
+- Le filtre d’approbations préserve organisation et recherche, réinitialise la page. Les cinq commandes du centre rafraîchissent la file une seule fois après reçu RPC valide ; refus, conflits et réponses invalides restent des erreurs.
+- **645/645 tests Admin PASS dans 95 fichiers**, dont111 régressions ciblées ; lint ciblé PASS ; compilation Next complète / TypeScript PASS avec configuration locale synthétique. **4 scénarios Chromium synthétiques PASS**, FR/AR à360/1440 px, sur le composant réel rendu statiquement. Revue indépendante sans bloquant résiduel.
+- Périmètre, preuve navigateur et limites : `docs/recette/admin-lot2-2026-11-03.md`. Aucune modification SQL/RLS ou de production ; prochaine étape : recette authentifiée Admin AAL2 et vérification RPC sur base dédiée. Les exécuteurs de confidentialité et gros exports restent ouverts.
+
+## 2026-11-03 — Corrections administration : faits, urgences et navigation
+
+- Branche `codex/admin-corrections-20261103`, base GitHub `nebjal18-lang/Matricia` `d481bb6`. Conformité de la fiche fondée sur les preuves Client/Provider et l’identité canonique courantes ; retrait des validations déduites de l’absence de litige ou de la simple présence d’un brouillon.
+- Tri gravité puis échéance ; file ouverte avant l’annuaire et raccourcis vers la tâche exacte. Gestion des membres filtrée sur l’organisation du dossier ; invitations limitées à INVITED ; activité/IF/RC réels, compteurs correctement nommés et indisponibilité explicite des Boxes/crédits sans projection.
+- Suite Admin **567/567 PASS dans 94 fichiers**, sans test ignoré ; TypeScript web et lint web PASS ; validateur Server Actions PASS (1 951 sources) ; **8/8 contrôles Chromium synthétiques** du menu compte FR/AR à 375/390/768/1440 px PASS. Revue indépendante effectuée, deux remarques de navigation corrigées et revues.
+- Compilation Next complète PASS, incluant TypeScript et génération des pages, avec une configuration HTTPS/Supabase locale synthétique. Aucun changement SQL/RLS, financier ou de production. La recette Admin AAL2 native et les RPC sur base de test ne sont pas certifiés par ces preuves.
+- Périmètre et limites : `docs/recette/admin-corrections-2026-11-03.md`. Suite : recette authentifiée intégrée, puis traitements de confidentialité et exports volumineux déjà recensés. Aucun visa global de livraison n’est annoncé.
+
 ## 2026-11-02 — Corrections de l’audit complet M01–M30
 
 - Audit complet reçu après l’instantané ci-dessous : les trente identifiants sont maintenant traités dans le code et documentés dans `docs/audit-20261102/REPORT.md`. Branche dédiée `codex/audit-m01-m30-20261102`, base `39552d7` préservée, consolidation/fusion amont `1ebf3ea`. Le déploiement audité précède cette fusion selon le demandeur ; son SHA exact reste inconnu et son URL est refusée CONNECT403. Aucun projet distant substitué.
@@ -1274,3 +1857,77 @@ compte externe empêche la preuve CI tant qu'elle n'est pas levée; elle ne vaut
 - Même PDF privé repris après alignement Origin du runtime : UPLOADED,816octets/hash vérifiés,1upload,0rapprochement ; scannerERROR et refus55000 de coût nul maintiennent la sécurité faute de moteur réel.
 - Focus12cas FR/AR375/390 PASS enDEV, clavier réel et0axe/0JS. Pas de nouvelle campagne optimisée192 ni de déploiementprod.
 - AdminCalendrier560 exploitable FR/AR ; dates sérialisées serveur contre divergenceTZdata ;56testsWeb et28SQL PASS, revue indépendante favorable. Reçus finaux dans docs/franchise-completion/evidence/browser.
+
+
+## 2026-11-09 — Clôture V1 : corrections et recette locale, release non certifiée
+
+- Synchronisation `version-2` avec le head GitHub `10c4fc3`, sans écrasement des changements entrants ; code candidat local `888bcaf`.
+- Corrections : champ de report optionnel pour accepter/refuser une solution, conservation stricte du tenant client, récupération FR/AR des références franchise sans mandat, origine CMI HTTPS explicitement autorisée par CSP, dépendance `server-only` et contexte de tests serveur explicites.
+- Préparation des recettes : inventaire filesystem, gardes de manifest org/franchise/bibliothèque, données manquantes signalées. Les cinq templates de recette sans IDs restent ouverts. Le scan ne certifie plus une 404, un refus inattendu, une redirection de connexion ou un contexte de tenant modifié. Les deux refus fiscaux attendus sont distingués des parcours métier réussis.
+- Preuves locales vertes : 4 076 tests unitaires réussis, un test Storage opt-in existant non exécuté ; 63 tests d’outillage ; intégration 3/3 ; Chromium public 18/18, FR/AR, 360/ordinateur, axe et quatre captures ; CMI intercepté 2/2 sans PSP réel ; build Next/Turbopack Node22 avec TypeScript ; lint 0 erreur et 4 avertissements existants.
+- SQL : environnement neuf séparé, 575 migrations + seed verts. Correctif additif de version finale CRM et assertion 0193 renforcée. Suite SQL globale complète : 360 fichiers, 9 301 assertions et quatre scénarios de concurrence verts sur la base isolée ; reçu `docs/evidence/v1-closure-sql-full-20261109.json`.
+- Revue technique indépendante conservée ; preuve principale : `docs/evidence/v1-closure-20261109.json`. Plan, lots et limites : `docs/release/V1_CLOSURE_2026-11-09.md`.
+- Aucun changement de production, aucun dossier IT existant réutilisé, aucun secret copié. Yousign sandbox retenu par le demandeur, sans activation EXTERNAL ni validation juridique déduite de ce choix.
+- Gate V1 : **REFUSÉ**, 73 conditions restantes sur worktree figé, toujours **5/76 VERIFIED**, aucune promotion. Staging/bindings, KYC, politiques four-eyes, signature réelle, CNDP/fiscalité, données de recette et parcours natifs C1–C8 restent à prouver.
+- Prochaine étape unique : confirmer la cible de staging et ses bindings autorisés pour alimenter les acteurs de recette puis exécuter les parcours natifs du plan.
+
+- Complément CI : correctif `60e6b1c` après le timeout du test navigateur devis dans le premier run. La CI installe désormais Chromium avec Playwright et le test ne dépend plus d’un chemin système implicite. 10 tests ciblés verts avec le navigateur Playwright et 10 avec l’override local, sans retry ni hausse de délai. **Run GitHub 42644570334 : quality, browser-public et database tous verts** sur le code courant. Le gate métier reste refusé indépendamment de cette validation technique.
+
+## 2026-11-09 — Réparation du staging et transport YouSign
+
+Statut : **code validé, activation externe et production non certifiées**. Source contrôlée : `c0578a098ba51806af245342a0e3e4dd6dd1b49f` (application identique à `d8c3a75`, décision Vercel de construire à chaque push ajoutée).
+
+- Staging distinct créé sans données de production : `matricia-staging.vercel.app`, Supabase `vuwvkpfprixzysjfpgkw`, branche Git `codex/staging-repair-20261109` et 30 bindings Preview propres.
+- Reconstruction canonique après divergence du schéma initial ; 577 migrations réellement appliquées, 686 tables publiques et 149 privées, 12 buckets et 29 politiques Storage. Références JWT et trois empreintes de fonctions vérifiées ; base de confiance `STAGING`.
+- OTP à 8 chiffres et URLs Auth alignés ; garde de build contre les backends partagés avec Production ; Node 22 et build Vercel automatique.
+- Worker : scanner authentifié, requêtes bornées, preuves de readiness expirantes et heartbeats coalescés ; image non privilégiée reconstruite et démarrage sans réseau vérifié.
+- YouSign : transport SIMPLE sandbox, webhook HMAC, claims durables et preuve PDF/consentement/audit vérifiée ; aucune attestation juridique ni activation réelle inventée.
+- Vérification : **4 183 tests unitaires PASS**, un test Storage natif optionnel existant ignoré ; **103 tests d’outillage PASS**, **58 assertions SQL positives** et **21 contrôles SQL de droits** ; build Next.js/TypeScript, phase00, frontières et ESLint des fichiers d’intégration PASS. Deux contrôles globaux standalone TSC/lint ont été interrompus pour ressources ; TypeScript a ensuite terminé dans le build et les fichiers modifiés ont passé ESLint.
+- Revue indépendante sans P1 statique ouvert dans le périmètre revu. Les statuts d’exigences restent **5/76 VERIFIED** ; aucune certification externe ajoutée.
+
+Restants : credentials et recette Resend/SMTP, PayPal et YouSign ; hébergement worker/ClamAV et scan natif ; réseau du navigateur d’audit ; comptes et contenu de recette ; deux administrateurs AAL2 distincts ; validations métier/juridique/CNDP/fiscales, restauration/pentest, visas indépendants et décision de production. Voir `docs/release/STAGING_REPAIR_2026-11-09.md` et `docs/evidence/staging-repair-20261109.json`.
+
+Complément confidentialité et validation finale : la première CI a détecté le défaut réel 0243 lié aux nouveaux fichiers YouSign. La migration additive `20261109101000` raccorde les fichiers et sept familles de métadonnées au sujet exact, en conservant `UNTRUSTED` et les revues indépendantes. **108 assertions natives RGPD passent**. La campagne locale interrompue par le redémarrage a été terminée sur les 110 fichiers restants après les 251 premiers, sans omission. Le job GitHub `database` du run `42673774172`, sur `1a99fcda15862932b331f29c0e3051899568d674`, confirme indépendamment **361 fichiers SQL, 9 323 assertions et quatre scénarios de concurrence PASS** après reconstruction des 577 migrations. Reçu : `docs/evidence/staging-repair-sql-final-20261109.json`.
+
+Les jobs qualité et navigateur ont réussi dans le run `42666211494` sur `1d0eb0b94a0734407ffc8fe72fe37ae25a1e7fcc` : lint global, types, unités, intégration, outillage et build. Les arbres `apps`, `packages`, le manifeste racine, le lockfile et le workflow sont identiques sur le candidat SQL final ; Vercel y réussit également. Le run final demeure globalement rouge : GitHub affiche une erreur interne de planification (`7c94913a-4819-40d3-a3bd-a8c7bb9af940`) et n’a pas démarré les jobs qualité/navigateur. Aucun contrôle n’est désactivé pour masquer ce problème externe. L’activation des fournisseurs et la production restent non certifiées.
+
+
+## 2026-11-09 — Configuration Admin autonome : recette technique verte
+
+- Code contrôlé `3d04c50a9523d903bbb97a89a8d0277060441117`, PR nº17. Le candidat conserve la fusion GitHub `13e4086`. Aucune fusion ni modification de production par cet agent.
+- Nouvel espace `/fr/administration/configuration` et `/ar/administration/configuration` : entreprise, Resend, PayPal, YouSign et antivirus ; révisions persistantes, coffre AES-GCM privé, tests de connexion datés, activation réelle par un autre administrateur AAL2 et désactivation sans résurrection des anciennes clés. Les modules métier restent liés et gouvernés.
+- Finance utilisable sur une base neuve : sélection d’une organisation par son nom, création guidée si aucune ; aucun client ou portefeuille choisi implicitement. Signature : préparation propre depuis l’interface, aperçu du PDF exact et privé, bornes contrôlées sur le vrai document, relecture après sauvegarde et gel après dispatch. YouSign live reste conditionné aux environnements concordants et aux attestations/politiques indépendantes.
+- Staging réellement migré à581 sans données de production. Les30bindings de branche et le domaine existants sont conservés. Dernier inventaire : zéro utilisateur et zéro configuration active hébergés ; les personnes du client ne sont pas inventées.
+- **CI complète du code verte**, run42688036269 : lint/types/intégration/outillage/build et navigateur public PASS ; **4 331 tests unitaires PASS**, un test Storage opt-in existant ignoré ; **365 fichiers SQL, 9 429 assertions et quatre scénarios de concurrence PASS**. Rejeu ciblé final235tests et outillage103PASS.
+- Recette Admin GoTrue/REST réelle isolée :12contrôles fonctionnels, deux administrateurs TOTP indépendants, refus AAL1/ordinaire/auto-approbation, persistance, confidentialité DOM/RSC, erreurs de saisie et désactivation. Quatre pages FR/AR360/1440 :0violation axe, clavier et absence de débordement ; contrastes incomplets conservés sans certification WCAG globale. Quatre acteurs nettoyés.
+- Recette signataire native sans interception : PDF canonique25 597octets archivé et relu avec même SHA dans un Storage dédié ; navigateur FR1440 avec aperçu200, vraie saisie/PUT200 et rechargement persistant, refus403 de modification de l’autre partie,0erreur JS/CSP/console/débordement. Quatre acteurs GoTrue OTP/TOTP nettoyés ; gouvernance synthétique locale uniquement, aucun fournisseur externe appelé. Origine locale canonique Nextlocalhost, protection CSRF conservée.
+- Revue technique indépendante sans finding ouvert. Preuve principale : `docs/evidence/admin-configuration-delivery-20261109.json`. Guide : `docs/release/ADMIN_CONFIGURATION_HANDOVER_2026-11-09.md`. Les changements documentaires suivants ne changent pas les arbres de code contrôlés.
+- **Remise des accès et exploitation commerciale encore conditionnées** : deux identités Admin réelles/MFA, SMTP Auth initial, clés et recettes fournisseurs, hébergement worker/ClamAV, contenu et validations métier/juridique/CNDP/fiscales, attestation indépendante et autorisation de production séparée. Le registre reste5/76VERIFIED ; aucune certification globale n’est déduite de cette recette technique.
+## 2026-11-19 — Remédiation audit 360 : gates TypeScript, tests et build
+
+- TypeScript froid, lint, tests workspace, tooling, build synthétique et phase00 validés ; 610 migrations sans collision, 352 pages générées.
+- `strict: true` reste actif ; `exactOptionalPropertyTypes` et `noUncheckedIndexedAccess` ont été retirés car ils produisaient 370 erreurs existantes.
+- La recette SQL native complète exige encore un clone Supabase réservé ; aucun accès distant ni production modifié.
+
+## 2026-11-19 — Remédiation audit 360 : replay SQL local vert
+
+- Reset Supabase local Docker complet réussi : toutes les migrations et le seed rejoués.
+- Correction de compatibilité CRLF dans les patches dynamiques de définitions PostgreSQL des migrations `20261031263000`, `20261031266120`, `20261031268010` et `20261102040900`.
+- Test SQL `0410_audit_core_finance_integrity.test.sql` : 41/41 assertions passées.
+- Test SQL `0411_audit_volume_replay.test.sql` : 10/10 assertions passées.
+- Les tests couvrent l’idempotence, les contraintes financières, les refus d’accès RLS, les preuves de paiement et le replay allocation/consommation.
+- Prochaine étape : conserver la preuve locale et exécuter les validations distantes autorisées séparément ; aucune modification de production n’a été effectuée.
+## 2026-11-22 — Correction scheduler franchise follow-up
+
+- Cause confirmée de l’erreur distante `column "value" does not exist` : `unnest(...) with ordinality` n’aliasait pas ses colonnes dans `schedule_franchise_followups`.
+- Ajout de la migration forward-only `20261122100000_fix_franchise_followup_scheduler_unnest_alias.sql` avec les alias `delay_minutes` et `ordinality` explicites.
+- Reset Supabase local complet réussi après application de la nouvelle migration.
+- Smoke test local du RPC avec `service_role` réussi : 0 job retourné, aucune erreur SQL.
+- Aucun changement appliqué à la base distante.
+## 2026-11-22 — Validation Supabase distante des contrôles finance
+
+- Projet distant Matricia actif vérifié : `nbqtuybebrhkqmtonhsd`.
+- La migration Platform Core Finance et la migration d’audit ont été appliquées manuellement sur la base distante.
+- Test distant `0410_audit_core_finance_integrity.test.sql` : plan complet `1..41` atteint sans échec signalé.
+- Test distant `0411_audit_volume_replay.test.sql` : plan complet `1..10` atteint sans échec signalé.
+- La correction du RPC `schedule_franchise_followups` élimine l’erreur `column "value" does not exist`.

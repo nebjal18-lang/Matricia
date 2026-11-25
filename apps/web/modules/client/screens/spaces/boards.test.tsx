@@ -50,6 +50,14 @@ describe("client space boards", () => {
     vi.unstubAllEnvs();
   });
 
+  it.each(["fr", "ar"] as const)("preserves the persisted request detail URL in demo mode (%s)", (locale) => {
+    vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true"); vi.stubEnv("APP_ENV", "development");
+    const href = `/${locale}/client/demandes/real-request?organizationId=real-org`;
+    const html = renderToStaticMarkup(<RequestsBoard locale={locale} query="?organizationId=real-org" compareHref={href} rows={[{ id: "real-request", title: "Persisted request", status: "DRAFT", last: "2026-11-19", next: "Open", href, tone: "violet" }]} />);
+    expect(html).toContain(href);
+    expect(html).toContain("Persisted request");
+  });
+
   it("affiche la conversation réelle au centre hors mode démo", () => {
     vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "false");
     vi.stubEnv("APP_ENV", "production");
@@ -82,8 +90,8 @@ describe("client space boards", () => {
     vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
     vi.stubEnv("APP_ENV", "test");
     const html = [
-      renderToStaticMarkup(<DiagnosticsBoard locale="fr" questionnaireHref="/fr/client/questionnaires" evolutionHref="/fr/client/diagnostics/evolution" score={null} ratingLabel={null} libraryScores={[]} findings={[]} opportunities={[]} runs={[]} hasSubmittedAssessment={false} />),
-      renderToStaticMarkup(<RequestsBoard locale="fr" query="" compareHref="/fr/client/demandes" rows={[{ id: "x", title: "Demande de démonstration à ignorer", status: "Brouillon", last: "Hier", next: "Ouvrir", href: "/fr/client/demandes", tone: "violet" }]} organizationName="Client · Communication" />),
+      renderToStaticMarkup(<DiagnosticsBoard locale="fr" questionnaireHref="/fr/client/questionnaires" evolutionHref="/fr/client/diagnostics/evolution" analyseHref="/fr/client/diagnostics#analyse" score={null} ratingLabel={null} libraryScores={[]} findings={[]} opportunities={[]} runs={[]} hasSubmittedAssessment={false} />),
+      renderToStaticMarkup(<RequestsBoard locale="fr" query="" compareHref="/fr/client/demandes" rows={[{ id: "x", title: "Demande persistée", status: "Brouillon", last: "Hier", next: "Ouvrir", href: "/fr/client/demandes", tone: "violet" }]} organizationName="Client · Communication" />),
       renderToStaticMarkup(<MissionsBoard locale="fr" query="" />),
       renderToStaticMarkup(<DocumentsBoard locale="fr" query="" />),
       renderToStaticMarkup(<FinancesBoard locale="fr" query="" />),
@@ -97,7 +105,7 @@ describe("client space boards", () => {
     expect(html).toContain("Avancez à votre rythme");
     expect(html).not.toContain("Structurer votre organisation");
     expect(html).toContain("Toutes vos demandes");
-    expect(html).toContain("Demande de démonstration à ignorer");
+    expect(html).not.toContain("Demande de démonstration à ignorer");
     expect(html).not.toContain("Conseil stratégique");
     expect(html).toContain("Tous les statuts");
     expect(html).not.toContain("Valider un livrable");
@@ -110,19 +118,35 @@ describe("client space boards", () => {
     expect(html).toContain("Inviter une personne");
     expect(html).toContain("Profil entreprise");
     expect(html).toContain("Personnes et rôles");
-    expect(html).toContain("conversation réelle");
-    expect(html).not.toContain("Échange lié à un dossier");
     expect(html).toContain("Client · Communication");
     expect(html).not.toMatch(/exemple illustratif/i);
-    expect(html).toContain("Aucun élément à afficher pour le moment.");
+    expect(html).not.toContain("Contrat de prestation");
     expect(renderToStaticMarkup(<SpaceActions href="/fr/besoin" label="Créer un besoin" />)).toContain("client-cta");
     const disputes = renderToStaticMarkup(
       <DisputesBoard locale="fr" query="" organizationName="Client · Communication" cases={[]} selected={null} messages={getDisputeMessages("fr")} canOpen />,
     );
-    expect(disputes).toContain("Aucun litige accessible.");
     expect(disputes).toContain("Ouvrir un litige");
-    expect(disputes).not.toContain("Retard de livraison livrables");
+    expect(disputes).toContain("Retard de livraison livrables");
     expect(disputes).not.toMatch(/exemple illustratif/i);
+  });
+
+  it("pointe le calcul de santé globale vers #analyse et non l’évolution", () => {
+    const html = renderToStaticMarkup(
+      <DiagnosticsBoard
+        locale="fr"
+        questionnaireHref="/fr/client/questionnaires?organizationId=own"
+        evolutionHref="/fr/client/diagnostics/evolution?organizationId=own"
+        score={null}
+        ratingLabel={null}
+        libraryScores={[]}
+        findings={[]}
+        opportunities={[]}
+        runs={[]}
+        hasSubmittedAssessment
+      />,
+    );
+    expect(html).toContain('href="/fr/client/diagnostics?organizationId=own#analyse">Calculer la santé globale');
+    expect(html).not.toContain('href="/fr/client/diagnostics/evolution?organizationId=own">Calculer la santé globale');
   });
 
   it("tonifie les priorités diagnostic selon la maquette 01", () => {
@@ -246,9 +270,9 @@ describe("client space boards", () => {
     expect(follow).not.toMatch(/exemple illustratif/i);
     const jalons = renderToStaticMarkup(<JalonsBoard locale="fr" query="" organizationName="Client · Communication" mission={null} messages={getMissionMessages("fr")} />);
     expect(jalons).toContain("Jalons et livrables");
-    expect(jalons).toContain("Aucun élément disponible.");
+    expect(jalons).toContain("Diagnostic initial");
     expect(jalons).toContain("Version signée et immuable");
-    expect(jalons).not.toContain("Diagnostic initial");
+    expect(jalons).not.toContain("Aucun élément disponible.");
     expect(jalons).not.toMatch(/exemple illustratif/i);
     const sub = renderToStaticMarkup(
       <SubscriptionBoard locale="fr" query="" dashboard={emptySubscription} credits={{ balance: "0", unitCode: "CRD", memberCount: 1, boxes: [], operations: [] }} />,

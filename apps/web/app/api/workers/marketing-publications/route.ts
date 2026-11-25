@@ -59,7 +59,20 @@ async function runCycle(request: Request) {
     const job = parsed.data;
     if(job.provider === "META" && ["INSTAGRAM","REEL"].includes(job.channel) && process.env.MARKETING_PUBLISH_MODE === "live") {
       const persisted = await client.rpc("begin_social_media_execution_v1", {p_job_id:job.job_id,p_lease_token:job.lease_token});
-      if(persisted.error)summary.failed++; else summary.processed++;
+      summary.processed++;
+      if(!persisted.error) continue;
+      // Fail closed: never leave a META lease open after begin_social_media_execution_v1 fails.
+      const record = await client.rpc("record_social_publication_worker_result_v42", {
+        p_job_id: job.job_id,
+        p_lease_token: job.lease_token,
+        p_outcome: "RETRYABLE_FAILURE",
+        p_provider_publication_id: null,
+        p_error_code: "META_EXECUTION_BEGIN_FAILED",
+        p_idempotency_key: `worker-result:${job.job_id}:${job.attempt}`,
+        p_correlation_id: randomUUID(),
+      });
+      if (record.error) { summary.failed++; summary.reconciliationRequired++; }
+      else { summary.failed++; summary.retried++; }
       continue;
     }
     let result: PublicationResult;

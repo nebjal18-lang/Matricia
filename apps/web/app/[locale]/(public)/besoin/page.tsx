@@ -50,28 +50,59 @@ export default async function NeedPage({
     const result = organizationIds.length ? await client.from("organizations").select("id,display_name").in("id", organizationIds).order("display_name") : { data: [] };
     organizations = (result.data ?? []).map((item) => ({ id: item.id, name: item.display_name }));
   }
+  if (!auth.data.user || organizations.length === 0) {
+    return (
+      <NeedFlow
+        locale={locale}
+        initialNeed={intent.initialNeed}
+        initialClassification={intent.classification}
+        invalidSelection={intent.invalidSelection}
+        authenticated={Boolean(auth.data.user)}
+        organizations={organizations}
+        saveAction={savePublicNeedIntake}
+        discoverAction={discoverPublicNeedScope}
+      />
+    );
+  }
+  const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
+  if (space.status === "unauthenticated") {
+    return (
+      <NeedFlow
+        locale={locale}
+        initialNeed={intent.initialNeed}
+        initialClassification={intent.classification}
+        invalidSelection={intent.invalidSelection}
+        authenticated
+        organizations={organizations}
+        saveAction={savePublicNeedIntake}
+        discoverAction={discoverPublicNeedScope}
+      />
+    );
+  }
+  const selectedOrganizationId = space.selectedOrganizationId
+    && organizations.some((item) => item.id === space.selectedOrganizationId)
+    ? space.selectedOrganizationId
+    : organizations[0]?.id ?? "";
   const flow = (
     <NeedFlow
       locale={locale}
       initialNeed={intent.initialNeed}
       initialClassification={intent.classification}
+      initialOrganizationId={selectedOrganizationId}
       invalidSelection={intent.invalidSelection}
-      authenticated={Boolean(auth.data.user)}
+      authenticated
       organizations={organizations}
       saveAction={savePublicNeedIntake}
       discoverAction={discoverPublicNeedScope}
     />
   );
-  if (!auth.data.user || organizations.length === 0) return flow;
-  const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
-  if (space.status === "unauthenticated") return flow;
   const c = spaceCopy(locale);
   return (
     <ClientAppShell
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="requests"
       title={c.newRequestTitle}
       lead={c.newRequestLead}

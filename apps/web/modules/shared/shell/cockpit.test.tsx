@@ -68,6 +68,22 @@ describe("cockpit SIP primitives", () => {
     expect(providers).toContain("renderAdminSpacePage");
     expect(finance).toContain("AdminModulePage");
     expect(finance).toContain("FinanceSorties");
+    expect(finance).toContain("FinancePanel");
+    expect(finance).toContain("admin-section-head");
+    expect(finance).toContain('id="boxes"');
+    const shell = await readFile(new URL("../../admin/ui/admin-app-shell.tsx", import.meta.url), "utf8");
+    expect(shell).toContain("admin-page-standard.css");
+    expect(shell).toContain("admin-page-standard");
+    expect(shell).toContain("WorkspaceHashScroll");
+    const clientShell = await readFile(new URL("../../client/ui/client-app-shell.tsx", import.meta.url), "utf8");
+    expect(clientShell).toContain("client-page-standard.css");
+    expect(clientShell).toContain("client-page-standard");
+    const providerShell = await readFile(new URL("../../provider/ui/provider-app-shell.tsx", import.meta.url), "utf8");
+    expect(providerShell).toContain("provider-page-standard.css");
+    expect(providerShell).toContain("provider-page-standard");
+    const franchiseShell = await readFile(new URL("../../franchise/ui/franchise-app-shell.tsx", import.meta.url), "utf8");
+    expect(franchiseShell).toContain("franchise-page-standard.css");
+    expect(franchiseShell).toContain("franchise-page-standard");
   });
 
   it("expose une file vide sans inventer de ligne", () => {

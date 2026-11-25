@@ -178,6 +178,7 @@ it("uses authenticated GET for native refund lookup and verifies capture/invoice
 
 it("requires an explicitly enabled live gateway in production and permits staging sandbox", () => {
   const original = process.env.APP_ENV;
+  const originalVercel = process.env.VERCEL_ENV;
   const { publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   const paypal = { environment: "sandbox" as const, clientId: "client-test", clientSecret: "secret-test", webhookId: "WEBHOOK123", certificateUrl: "https://api-m.sandbox.paypal.com/v1/notifications/certs/CERT-test", certificatePem: publicKey.export({ type: "spki", format: "pem" }).toString(), allowedCurrencies: new Set(["EUR"]) };
   const cmi = { environment: "demo" as const, gatewayUrl: "https://testpayment.cmi.co.ma/fim/est3Dgate", allowedGatewayHosts: new Set(["testpayment.cmi.co.ma"]), merchantId: "merchant-test", storeKey: "store-key-long-enough" };
@@ -187,8 +188,12 @@ it("requires an explicitly enabled live gateway in production and permits stagin
     expect(() => createPaymentGateway({ provider: "CMI", allowedProviders: new Set(["CMI"]), liveEnabled: true, cmi })).toThrow(PaymentGatewayError);
     expect(() => createPaymentGateway({ provider: "PAYPAL", allowedProviders: new Set(["PAYPAL"]), liveEnabled: false, paypal: { ...paypal, environment: "live" } })).toThrow(PaymentGatewayError);
     process.env.APP_ENV = "staging";
+    process.env.VERCEL_ENV = "production";
+    expect(() => createPaymentGateway({ provider: "PAYPAL", allowedProviders: new Set(["PAYPAL"]), liveEnabled: false, paypal })).toThrow(PaymentGatewayError);
+    expect(() => createPaymentGateway({ provider: "CMI", allowedProviders: new Set(["CMI"]), liveEnabled: false, cmi })).toThrow(PaymentGatewayError);
+    delete process.env.VERCEL_ENV;
     expect(createPaymentGateway({ provider: "PAYPAL", allowedProviders: new Set(["PAYPAL"]), liveEnabled: false, paypal })).toBeInstanceOf(PayPalPaymentGateway);
-  } finally { if (original === undefined) delete process.env.APP_ENV; else process.env.APP_ENV = original; }
+  } finally { if (original === undefined) delete process.env.APP_ENV; else process.env.APP_ENV = original; if (originalVercel === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = originalVercel; }
 });
 
 it.each([['live','https://api-m.sandbox.paypal.com/v1/notifications/certs/CERT-test'],['sandbox','https://api-m.paypal.com/v1/notifications/certs/CERT-test']] as const)("refuses %s API configuration with a certificate from another native environment",(environment,certificateUrl)=>{
@@ -199,4 +204,9 @@ it.each([['live','https://api-m.sandbox.paypal.com/v1/notifications/certs/CERT-t
 it("does not invent a LIVE environment attestation for a CMI merchant hostname",async()=>{
  const gateway=new CmiPaymentGateway({environment:"live",gatewayUrl:"https://merchant.cmi.co.ma/fim/est3Dgate",allowedGatewayHosts:new Set(["merchant.cmi.co.ma"]),merchantId:"merchant-test",storeKey:"store-key-long-enough"});
  expect(gateway.providerEnvironment).toBe("UNVERIFIED");expect((await gateway.createIntent(request)).providerEnvironment).toBe("UNVERIFIED");
+});
+it("does not invent LIVE for payment.cmi.co.ma and rejects live+sandbox host mismatch",async()=>{
+ expect(()=>new CmiPaymentGateway({environment:"live",gatewayUrl:"https://testpayment.cmi.co.ma/fim/est3Dgate",allowedGatewayHosts:new Set(["testpayment.cmi.co.ma"]),merchantId:"merchant-test",storeKey:"store-key-long-enough"})).toThrow(PaymentGatewayError);
+ const gateway=new CmiPaymentGateway({environment:"live",gatewayUrl:"https://payment.cmi.co.ma/fim/est3Dgate",allowedGatewayHosts:new Set(["payment.cmi.co.ma"]),merchantId:"merchant-test",storeKey:"store-key-long-enough"});
+ expect(gateway.providerEnvironment).toBe("UNVERIFIED");
 });

@@ -32,7 +32,7 @@ export default async function FavoritesPage({
       locale={locale}
       selectedQuery={space.selectedQuery}
       selectedOrganizationId={space.selectedOrganizationId}
-      userEmail={space.userEmail} organizationName={space.organizationName}
+      userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="favorites"
       title={messages.title}
       lead={messages.description}
@@ -42,7 +42,7 @@ export default async function FavoritesPage({
         {result.status === "error" ? (
           <Alert variant={result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? "default" : "destructive"}>
             <AlertTitle>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : messages.loadError}</AlertTitle>
-            <AlertDescription>{result.reason}</AlertDescription>
+            <AlertDescription>{result.reason === "NO_ORGANIZATION" || result.reason === "ORGANIZATION_SELECTION_REQUIRED" ? messages.noOrg : result.reason === "FORBIDDEN_ORGANIZATION" ? messages.forbidden : messages.loadError}</AlertDescription>
           </Alert>
         ) : (
           <FavoritesPanel dashboard={result.dashboard} providerOptions={providerOptions} locale={locale} m={messages} />

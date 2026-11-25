@@ -1,24 +1,25 @@
+import { isDemoClientHomeEnabled } from "@/modules/client/data/home/demo-scenario";
 import type { FranchiseSupervisionMetrics } from "./metrics";
 import type { ProviderDossier } from "../network/provider-dossier";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
 export function canApplyFranchiseSpaceDemo() {
-  return false;
+  return isDemoClientHomeEnabled();
 }
 
 export type Tone = "mint" | "peach" | "violet" | "sky";
 export type FolderActivity = { id: string; type: string; occurredAt: string; summary: string; evidence: string[] };
 export type FolderEvent = { id: string; from: string | null; to: string; reasonCode: string; occurredAt: string; evidence: string[] };
 export type MatchingRow = { id: string; name: string; status: string; href: string; tone: Tone };
-export type PersonRow = { id: string; linkedOrganizationId?:string|null;createdAt?:string;dossier?:ProviderDossier; name: string; services: string; status: string; next: string; tone: Tone; stage: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[] };
+export type PersonRow = { id: string; linkedOrganizationId?:string|null|undefined;createdAt?:string|undefined;dossier?:ProviderDossier|undefined; name: string; services: string; status: string; next: string; tone: Tone; stage: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[] };
 export type RequestRow = { id: string; title: string; stage: string; owner: string; flag: string; tone: Tone; stageCode?: string; email?: string; source?: string; rowVersion?: number; nextFollowupAt?: string | null; activities?: FolderActivity[]; pipelineEvents?: FolderEvent[]; matching?: MatchingRow[] };
-export type DocumentRow = { id: string; title: string; owner: string; status: string; href: string; kind: "evidence" | "renewal"; due?: string };
+export type DocumentRow = { id: string; title: string; owner: string; status: string; href: string; kind: "evidence" | "renewal"; due?: string | undefined };
 export type MessageRow = { id: string; title: string; meta: string; href: string; tone: Tone };
 export type NoticeRow = { id: string; title: string; meta: string; href: string };
-export type SupervisionRow = { id: string; title: string; status: string; meta?: string; href: string; tone?: Tone; rowVersion?: number };
+export type SupervisionRow = { id: string; title: string; status: string; meta?: string; href: string; tone?: Tone; rowVersion?: number | undefined };
 export type QualityRow = { evidence?:string[]; severity?:string; id: string; title: string; type: string; status: string; next: string; tone: Tone; href?: string };
 export type FinanceKind = "statement" | "entryFee" | "payout" | "preStatement";
-export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string; kind?: FinanceKind;href?:string;executionNotice?:string };
+export type FinanceRow = { id: string; title: string; object: string; status: string; auth: string; tone: Tone; amount?: string | undefined; kind?: FinanceKind;href?:string;executionNotice?:string };
 
 export function demoFranchiseSpaces(locale: Locale, query: string) {
   const fr = locale === "fr";
@@ -153,17 +154,53 @@ export function demoFranchiseSpaces(locale: Locale, query: string) {
       { id: "f2", title: fr ? "Digital Maarif" : "رقمي المعاريف", due: fr ? "Sous 2 jours" : "خلال يومين", action: fr ? "Relance pièces" : "متابعة الوثائق", tone: "violet" as const, href: `/${locale}/franchise/fournisseurs/pr3${q}` },
       { id: "f3", title: fr ? "Formation Casa" : "تكوين الدار البيضاء", due: fr ? "Cette semaine" : "هذا الأسبوع", action: fr ? "Disponibilité" : "التوفر", tone: "sky" as const, href: `/${locale}/franchise/fournisseurs/pr4${q}` },
     ],
-    quotes: [] as SupervisionRow[],
-    missions: [] as SupervisionRow[],
-    users: [] as SupervisionRow[],
-    volume: [] as SupervisionRow[],
-    anomalies: [] as SupervisionRow[],
-    recommendations: [] as SupervisionRow[],
-    opportunities: [] as SupervisionRow[],
-    qualifications: [] as SupervisionRow[],
-    definitions: [] as SupervisionRow[],
-    risks: [] as SupervisionRow[],
-    incidents: [] as SupervisionRow[],
+    quotes: [
+      { id: "qt1", title: fr ? "Devis — identité de marque" : "عرض — هوية العلامة", status: fr ? "Soumis" : "مُرسل", meta: fr ? "Studio Atlas" : "ستوديو أطلس", href: `/${locale}/franchise/demandes/devis${q}`, tone: "sky" as const },
+      { id: "qt2", title: fr ? "Devis — organisation" : "عرض — تنظيم", status: fr ? "En révision" : "قيد المراجعة", meta: fr ? "Conseil Anfa" : "استشارة أنفا", href: `/${locale}/franchise/demandes/devis${q}`, tone: "peach" as const },
+      { id: "qt3", title: fr ? "Devis — support lancement" : "عرض — دعم الإطلاق", status: fr ? "Retenu" : "محتفَظ به", meta: fr ? "Digital Maarif" : "رقمي المعاريف", href: `/${locale}/franchise/demandes/devis${q}`, tone: "mint" as const },
+    ] as SupervisionRow[],
+    missions: [
+      { id: "ms1", title: fr ? "Mission — déploiement marque" : "مهمة — إطلاق العلامة", status: fr ? "En cours" : "جارٍ", meta: fr ? "Studio Atlas" : "ستوديو أطلس", href: `/${locale}/franchise/demandes/missions${q}`, tone: "violet" as const },
+      { id: "ms2", title: fr ? "Mission — cadrage process" : "مهمة — تأطير المساطر", status: fr ? "Livrable transmis" : "تسليم مُرسل", meta: fr ? "Conseil Anfa" : "استشارة أنفا", href: `/${locale}/franchise/demandes/missions${q}`, tone: "sky" as const },
+      { id: "ms3", title: fr ? "Mission — formation équipe" : "مهمة — تكوين الفريق", status: fr ? "À démarrer" : "للبدء", meta: fr ? "Formation Casa" : "تكوين الدار البيضاء", href: `/${locale}/franchise/demandes/missions${q}`, tone: "peach" as const },
+    ] as SupervisionRow[],
+    users: [
+      { id: "u1", title: fr ? "Responsable territoire" : "مسؤول النطاق", status: fr ? "Actif" : "نشط", meta: fr ? "Administrateur" : "مدير", href: `/${locale}/franchise/perimetre/utilisateurs${q}`, tone: "mint" as const },
+      { id: "u2", title: fr ? "Référent qualité" : "مرجع الجودة", status: fr ? "Actif" : "نشط", meta: fr ? "Instructeur" : "مدرّس", href: `/${locale}/franchise/perimetre/utilisateurs${q}`, tone: "sky" as const },
+      { id: "u3", title: fr ? "Suivi réseau" : "متابعة الشبكة", status: fr ? "Invité" : "مدعو", meta: fr ? "Lecteur" : "قارئ", href: `/${locale}/franchise/perimetre/utilisateurs${q}`, tone: "peach" as const },
+    ] as SupervisionRow[],
+    volume: [
+      { id: "vol1", title: fr ? "Lot — supports print" : "دفعة — دعائم مطبوعة", status: "ACTIVE", meta: fr ? "Engagement ouvert" : "التزام مفتوح", href: `/${locale}/franchise/finance/volume${q}`, tone: "mint" as const },
+      { id: "vol2", title: fr ? "Lot — licences outils" : "دفعة — تراخيص الأدوات", status: fr ? "En revue" : "قيد المراجعة", meta: fr ? "Proposition locale" : "اقتراح محلي", href: `/${locale}/franchise/finance/volume${q}`, tone: "violet" as const },
+    ] as SupervisionRow[],
+    anomalies: [
+      { id: "an1", title: fr ? "Écart de délai — Studio Atlas" : "انحراف أجل — ستوديو أطلس", status: fr ? "Ouverte" : "مفتوحة", meta: fr ? "Mission en cours" : "مهمة جارية", href: `/${locale}/franchise/qualite/anomalies${q}`, tone: "peach" as const },
+      { id: "an2", title: fr ? "Pièce expirée — Conseil Anfa" : "وثيقة منتهية — استشارة أنفا", status: fr ? "En revue" : "قيد المراجعة", meta: fr ? "Qualification" : "تأهيل", href: `/${locale}/franchise/qualite/anomalies${q}`, tone: "violet" as const },
+    ] as SupervisionRow[],
+    recommendations: [
+      { id: "rc1", title: fr ? "Renforcer le suivi qualité Anfa" : "تعزيز متابعة جودة أنفا", status: fr ? "À instruire" : "للدراسة", meta: fr ? "Réseau" : "الشبكة", href: `/${locale}/franchise/qualite/recommandations${q}`, tone: "sky" as const },
+      { id: "rc2", title: fr ? "Prioriser les dossiers incomplets" : "إعطاء أولوية للملفات الناقصة", status: fr ? "Proposées" : "مقترحة", meta: fr ? "Demandes" : "الطلبات", href: `/${locale}/franchise/qualite/recommandations${q}`, tone: "mint" as const },
+    ] as SupervisionRow[],
+    opportunities: [
+      { id: "op1", title: fr ? "Besoin digital — Maarif" : "احتياج رقمي — المعاريف", status: fr ? "Détectée" : "مكتشفة", meta: fr ? "Diagnostic" : "تشخيص", href: `/${locale}/franchise/qualite/opportunites${q}`, tone: "violet" as const },
+      { id: "op2", title: fr ? "Formation équipe — Casa" : "تكوين الفريق — الدار البيضاء", status: fr ? "Prête pour devis" : "جاهزة للعرض", meta: fr ? "Réseau" : "الشبكة", href: `/${locale}/franchise/qualite/opportunites${q}`, tone: "sky" as const },
+    ] as SupervisionRow[],
+    qualifications: [
+      { id: "qf1", title: fr ? "Studio Atlas — Identité" : "ستوديو أطلس — هوية", status: "APPROVED", meta: fr ? "Service communication" : "خدمة التواصل", href: `/${locale}/franchise/fournisseurs/pr1${q}`, tone: "mint" as const },
+      { id: "qf2", title: fr ? "Digital Maarif — Parcours" : "رقمي المعاريف — مسارات", status: "PENDING", meta: fr ? "Complément demandé" : "تكملة مطلوبة", href: `/${locale}/franchise/fournisseurs/pr3${q}`, tone: "peach" as const },
+    ] as SupervisionRow[],
+    definitions: [
+      { id: "df1", title: fr ? "Référentiel contrôle livrables" : "مرجع رقابة التسليمات", status: fr ? "Publié" : "منشور", meta: fr ? "Bibliothèque mandatée" : "المكتبة المفوضة", href: `/${locale}/franchise/qualite/definitions${q}`, tone: "mint" as const },
+      { id: "df2", title: fr ? "Grille délai d’instruction" : "شبكة أجل الدراسة", status: fr ? "En revue" : "قيد المراجعة", meta: fr ? "Qualité locale" : "جودة محلية", href: `/${locale}/franchise/qualite/definitions${q}`, tone: "sky" as const },
+    ] as SupervisionRow[],
+    risks: [
+      { id: "rk1", title: fr ? "Couverture réseau insuffisante" : "تغطية شبكة غير كافية", status: fr ? "Sous vigilance" : "تحت اليقظة", meta: fr ? "Casablanca-Settat" : "الدار البيضاء-سطات", href: `/${locale}/franchise/qualite/risques${q}`, tone: "peach" as const },
+      { id: "rk2", title: fr ? "Concentration sur un prestataire" : "تركّز على مقدم خدمة واحد", status: fr ? "Suivi" : "متابعة", meta: fr ? "Studio Atlas" : "ستوديو أطلس", href: `/${locale}/franchise/qualite/risques${q}`, tone: "violet" as const },
+    ] as SupervisionRow[],
+    incidents: [
+      { id: "inc1", title: fr ? "Incident signalé — Anfa" : "حادثة مبلغ عنها — أنفا", status: fr ? "En instruction" : "قيد الدراسة", meta: fr ? "Qualité" : "جودة", href: `/${locale}/franchise/qualite/incidents${q}`, tone: "peach" as const },
+      { id: "inc2", title: fr ? "Retard critique — Maarif" : "تأخر حرج — المعاريف", status: fr ? "Décision communiquée" : "قرار مبلَّغ", meta: fr ? "Mission" : "مهمة", href: `/${locale}/franchise/qualite/incidents${q}`, tone: "mint" as const },
+    ] as SupervisionRow[],
     decisions: [
       { id: "g1", title: fr ? "Extension de couverture locale" : "توسيع التغطية المحلية", type: fr ? "Stratégie" : "استراتيجية", status: fr ? "À préparer" : "للتحضير" },
       { id: "g2", title: fr ? "Organisation des relances" : "تنظيم المتابعات", type: fr ? "Organisation" : "تنظيم", status: fr ? "À préparer" : "للتحضير" },
@@ -182,7 +219,10 @@ export function demoFranchiseSpaces(locale: Locale, query: string) {
       { id: "gh2", title: fr ? "Validation du mandat 2026" : "المصادقة على تفويض 2026", actor: fr ? "Gouvernance" : "الحوكمة" },
       { id: "gh3", title: fr ? "Communication aux professionnels" : "تبليغ المهنيين", actor: fr ? "Réseau" : "الشبكة" },
     ],
-    corrective: [] as Array<{ id: string; title: string; status: string; due: string }>,
+    corrective: [
+      { id: "cp1", title: fr ? "Plan correctif — pièces Anfa" : "خطة تصحيحية — وثائق أنفا", status: "IN_PROGRESS", due: "2026-10-15" },
+      { id: "cp2", title: fr ? "Plan correctif — délai Atlas" : "خطة تصحيحية — أجل أطلس", status: "OPEN", due: "2026-11-01" },
+    ] as Array<{ id: string; title: string; status: string; due: string }>,
     financeBindingStatus:"UNAVAILABLE" as "READY"|"REVIEW_REQUIRED"|"UNAVAILABLE",
     finance: [
       { id: "fi1", title: fr ? "Relevé de répartition" : "كشف التوزيع", object: fr ? "Période septembre 2026" : "فترة سبتمبر 2026", status: fr ? "À examiner" : "للمراجعة", auth: fr ? "Oui" : "نعم", tone: "peach" as const, amount: undefined },

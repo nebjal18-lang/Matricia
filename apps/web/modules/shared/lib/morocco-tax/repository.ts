@@ -13,7 +13,7 @@ export async function loadMoroccoTaxDashboard(): Promise<{ status: "success"; da
   try {
   const access = await loadMyPlatformAccess();
   if (access.status === "error") return { status: "error", reason: access.reason };
-  if (!hasPlatformRole(access.roles, ["SUPER_ADMIN", "FINANCE_MANAGER"])) return { status: "error", reason: "FORBIDDEN" };
+  if (!hasPlatformRole(access.roles, ["SUPER_ADMIN", "MATRICIA_ADMIN", "FINANCE_MANAGER"])) return { status: "error", reason: "FORBIDDEN" };
   if (!access.requirementSatisfied) return { status: "error", reason: "AAL2_REQUIRED" };
   const client = access.client;
   const contextResult=await client.rpc("get_morocco_tax_context_v1");

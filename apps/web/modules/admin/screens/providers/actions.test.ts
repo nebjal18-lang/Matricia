@@ -1,30 +1,64 @@
 vi.mock("next/cache",()=>({revalidatePath:vi.fn()}));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ getUser: vi.fn(), rpc: vi.fn(), maybeSingle: vi.fn(), upload: vi.fn(), remove: vi.fn() }));
-vi.mock("@/modules/shared/lib/supabase/server", () => ({
-  getSupabaseServerClient: async () => ({
-    auth: { getUser: mocks.getUser },
-    rpc: mocks.rpc,
-    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: mocks.maybeSingle }) }) }),
-    storage: { from: () => ({ upload: mocks.upload, remove: mocks.remove }) },
-  }),
+const mocks = vi.hoisted(() => {
+  const getUser = vi.fn(), rpc = vi.fn(), adminRpc = vi.fn(), maybeSingle = vi.fn(), upload = vi.fn(), remove = vi.fn(), access = vi.fn();
+  const client = {
+    auth: { getUser: (...args: unknown[]) => getUser(...args) },
+    rpc: (...args: unknown[]) => rpc(...args),
+    from: () => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }),
+    storage: { from: () => ({ upload, remove }) },
+  };
+  return { getUser, rpc, adminRpc, maybeSingle, upload, remove, access, client };
+});
+vi.mock("@/modules/shared/lib/supabase/admin", () => ({ getSupabaseAdminClient: () => ({ rpc: mocks.adminRpc }) }));
+vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => mocks.client }));
+vi.mock("@/modules/shared/lib/account-security/platform-access", () => ({
+  loadMyPlatformAccess: () => mocks.access(),
+  hasPlatformRole: (roles: Set<string>, allowed: readonly string[]) => allowed.some((role) => roles.has(role)),
 }));
 vi.mock("@/modules/admin/data/providers/model", async () => await import("@/modules/admin/data/providers/model"));
 vi.mock("@/modules/provider/data/billing/model", async () => await import("@/modules/provider/data/billing/model"));
-import { issueAdminCreditNote, reconcileAdminPayment, recordAdminPayment, resumeAdminBillingIntent, type AdminProviderActionState } from "./actions";
+import { decideCompany, issueAdminCreditNote, reconcileAdminPayment, recordAdminPayment, resumeAdminBillingIntent, type AdminProviderActionState } from "./actions";
 
 const idle: AdminProviderActionState = { status: "idle" };
 const id = "11111111-1111-4111-8111-111111111111";
 function base() { const form = new FormData(); form.set("idempotencyKey", id); return form; }
 beforeEach(() => {
   mocks.getUser.mockReset().mockResolvedValue({ data: { user: { id } } });
+  mocks.access.mockReset().mockResolvedValue({ status: "ok", client: mocks.client, userId: id, email: null, roles: new Set(["FINANCE_MANAGER"]), requirementSatisfied: true });
   mocks.rpc.mockReset().mockImplementation(async (name: string) => name === "begin_provider_payment_proof_upload"
     ? { data: { outcome: "PROVIDER_PAYMENT_PROOF_UPLOAD_RESERVED", upload_id: id, storage_bucket: "provider-qualification", storage_object_path: `payments/${id}/${id}/${id}.pdf` }, error: null }
     : name === "save_my_provider_billing_intent" ? {data:{intent_id:id},error:null} : name === "finalize_my_provider_billing_intent" ? {data:{outcome:"PROVIDER_FINANCIAL_DECLARATION_SUBMITTED"},error:null} : { data: { outcome: "RECORDED" }, error: null });
   mocks.maybeSingle.mockReset().mockResolvedValue({ data: { currency: "MAD",provider_organization_id:id }, error: null });
   mocks.upload.mockReset().mockResolvedValue({ data: { path: "stored" }, error: null });
   mocks.remove.mockReset().mockResolvedValue({ data: [], error: null });
+});
+
+describe("admin provider company review", () => {
+  function companyForm() {
+    const form = base();
+    Object.entries({ organizationId: id, companyStatus: "VERIFIED", partnerContractStatus: "SIGNED", partnerContractExpiresAt: "", reason: "Pièces conformes", ruleVersion: "PROVIDER_REVIEW_V1", expectedRowVersion: "1" }).forEach(([key, value]) => form.set(key, value));
+    return form;
+  }
+  it("queues the provider review e-mail as soon as the decision is recorded", async () => {
+    mocks.adminRpc.mockReset().mockResolvedValue({ data: { queued: 1 }, error: null });
+    expect(await decideCompany(idle, companyForm())).toEqual({ status: "success", outcome: "RECORDED" });
+    expect(mocks.rpc).toHaveBeenCalledWith("decide_provider_company", expect.objectContaining({ p_company_status: "VERIFIED", p_correlation_id: expect.any(String) }));
+    expect(mocks.adminRpc).toHaveBeenCalledWith("enqueue_provider_review_notifications_v1", { p_limit: 20 });
+  });
+  it("does not queue an e-mail when the decision is refused", async () => {
+    mocks.adminRpc.mockReset();
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "42501", message: "DENIED" } });
+    expect((await decideCompany(idle, companyForm())).status).toBe("error");
+    expect(mocks.adminRpc).not.toHaveBeenCalled();
+  });
+  it("refuse sans MFA pour une mutation finance", async () => {
+    mocks.access.mockResolvedValueOnce({ status: "ok", client: mocks.client, userId: id, email: null, roles: new Set(["FINANCE_MANAGER"]), requirementSatisfied: false });
+    const form = base(); form.set("paymentId", id); form.set("invoiceId", id); form.set("amount", "10,00");
+    expect(await reconcileAdminPayment(idle, form)).toEqual({ status: "error", reason: "MFA_REQUIRED" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
 });
 
 describe("admin provider finance actions", () => {
@@ -85,7 +119,7 @@ describe("admin provider finance actions", () => {
   it("dérive la devise du règlement avant le rapprochement", async () => {
     const form = base(); form.set("paymentId", id); form.set("invoiceId", id); form.set("amount", "99,95");
     expect(await reconcileAdminPayment(idle, form)).toEqual({ status: "success", outcome: "RECORDED" });
-    expect(mocks.rpc).toHaveBeenCalledWith("reconcile_provider_payment", expect.objectContaining({ p_allocations: [{ invoice_id: id, amount_minor: "9995" }] }));
+    expect(mocks.rpc).toHaveBeenCalledWith("reconcile_provider_payment", expect.objectContaining({ p_allocations: [{ invoice_id: id, amount_minor: "9995" }], p_correlation_id: expect.any(String) }));
   });
 
   it("émet un avoir sans réécrire la facture", async () => {
@@ -93,6 +127,6 @@ describe("admin provider finance actions", () => {
     form.set("invoiceId", id); form.set("creditNumber", "AV-2026-01"); form.set("issuedOn", "2026-09-21");
     form.set("subtotal", "1 000,00"); form.set("reason", "Avoir partiel documenté");
     expect(await issueAdminCreditNote(idle, form)).toEqual({ status: "success", outcome: "RECORDED" });
-    expect(mocks.rpc).toHaveBeenCalledWith("issue_provider_credit_note", expect.objectContaining({ p_invoice_id: id, p_subtotal_minor: "100000", p_tax_minor: "0" }));
+    expect(mocks.rpc).toHaveBeenCalledWith("issue_provider_credit_note", expect.objectContaining({ p_invoice_id: id, p_subtotal_minor: "100000", p_tax_minor: "0", p_correlation_id: expect.any(String) }));
   });
 });

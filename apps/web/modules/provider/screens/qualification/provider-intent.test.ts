@@ -1,10 +1,11 @@
 import { describe,expect,it,vi } from "vitest";
-import { clearProviderIntent,readProviderIntent,readStructuredProviderIntent } from "./provider-intent";
+import { activitySummaryFromProviderStorage,clearProviderIntent,readProviderIntent,readStructuredProviderIntent } from "./provider-intent";
 
 describe("provider public intent handoff",()=>{
   it("prefers the stable key and bounds its size",()=>{const storage={getItem:vi.fn((key:string)=>key==="matricia.provider-intent"?"x".repeat(2100):"legacy")};expect(readProviderIntent(storage,"fr")).toHaveLength(2000)});
   it("supports the localized legacy key",()=>{const storage={getItem:vi.fn((key:string)=>key.endsWith(".ar")?"خدمات محاسبية":null)};expect(readProviderIntent(storage,"ar")).toBe("خدمات محاسبية")});
   it("reads the bounded structured selection without converting it into a qualification",()=>{const now=new Date(),payload=JSON.stringify({schemaVersion:2,updatedAt:now.toISOString(),expiresAt:new Date(now.getTime()+60_000).toISOString(),serviceCodes:["IT-AUDIT-SI"],otherService:""});expect(readStructuredProviderIntent({getItem:key=>key==="matricia.provider-intent.v2"?payload:null})).toEqual({serviceCodes:["IT-AUDIT-SI"],otherService:""})});
+  it("prefills activity from structured v2 intent when legacy free-text is absent",()=>{const now=new Date(),payload=JSON.stringify({schemaVersion:2,updatedAt:now.toISOString(),expiresAt:new Date(now.getTime()+60_000).toISOString(),serviceCodes:["IT-AUDIT-SI"],otherService:"Menuiserie sur mesure"});expect(activitySummaryFromProviderStorage({getItem:key=>key==="matricia.provider-intent.v2"?payload:null},"fr")).toMatch(/Services sélectionnés/);expect(activitySummaryFromProviderStorage({getItem:key=>key==="matricia.provider-intent.v2"?payload:null},"fr")).toContain("Menuiserie sur mesure");expect(activitySummaryFromProviderStorage({getItem:key=>key==="matricia.provider-intent"?"Texte legacy":key==="matricia.provider-intent.v2"?payload:null},"fr")).toBe("Texte legacy")});
   it("clears all current and legacy keys only when explicitly called after server confirmation",()=>{const removeItem=vi.fn();expect(clearProviderIntent({removeItem},"fr")).toBe(true);expect(removeItem.mock.calls.map(([key])=>key)).toEqual(["matricia.provider-intent.v2","matricia.provider-intent","matricia.provider-intent.fr"])});
   it("fails safely when browser storage is blocked",()=>{expect(readProviderIntent({getItem(){throw new Error("blocked")}},"fr")).toBe("");expect(clearProviderIntent({removeItem(){throw new Error("blocked")}},"fr")).toBe(false)});
 });
