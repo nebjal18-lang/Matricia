@@ -50,6 +50,11 @@ for (const name of checks) {
   const report = { schemaVersion: 1, databaseEvidence, commit, check: name, command: `corepack pnpm ${definitions[name].join(' ')}`, startedAt, finishedAt: new Date().toISOString(), status: passed ? 'passed' : 'failed', exitCode, assertions, skipped, flaky, expectedFailures, outputSha256: createHash('sha256').update(output).digest('hex') };
   // Do not persist raw command output: providers or fixtures may emit credentials.
   await writeFile(resolve(directory, `${name}-summary.json`), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
-  console.log(`${name}: ${report.status}; observations/assertions=${assertions}; skipped=${skipped}`);
+  // Only the name of the last completed repository SQL test crosses the CI log
+  // boundary. SQL diagnostics and fixture values remain withheld.
+  const lastSqlPass = name === 'database' && !passed
+    ? [...text.matchAll(/^PASS ([A-Za-z0-9_.-]+\.test\.sql)$/gm)].at(-1)?.[1] ?? 'none'
+    : null;
+  console.log(`${name}: ${report.status}; observations/assertions=${assertions}; skipped=${skipped}${lastSqlPass === null ? '' : `; last-sql-pass=${lastSqlPass}`}`);
   if (!passed) process.exit(exitCode || 1);
 }

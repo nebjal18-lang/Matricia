@@ -14,7 +14,15 @@ export function execute(command, args, { input, env = process.env, signal, cwd, 
     child.stderr.on('data', () => {});
     child.stdin.on('error', () => {});
     child.on('error', () => reject(new Error('ISOLATED_DB_COMMAND_FAILED')));
-    child.on('close', code => code === 0 && !failed ? done(Buffer.concat(chunks)) : reject(new Error('ISOLATED_DB_COMMAND_FAILED')));
+    child.on('close', code => {
+      if (code === 0 && !failed) return done(Buffer.concat(chunks));
+      const error = new Error('ISOLATED_DB_COMMAND_FAILED');
+      if (command === process.execPath && !failed) {
+        const output = Buffer.concat(chunks).toString('utf8');
+        error.safeSummary = output.match(/^database: failed; observations\/assertions=\d+; skipped=\d+; last-sql-pass=(?:none|[A-Za-z0-9_.-]+\.test\.sql)$/m)?.[0];
+      }
+      reject(error);
+    });
     child.stdin.end(input);
   });
 }
@@ -130,5 +138,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   let phase = 'preflight';
   runIsolatedDatabase({ signal: controller.signal, onPhase: value => { phase = value; } }).then(result => {
     console.log(`ISOLATED_DB_${result.outcome}: clone removed and absence verified`);
-  }).catch(() => { console.error(`ISOLATED_DB_FAILED at ${phase}: raw diagnostics withheld`); process.exitCode = 1; });
+  }).catch(error => {
+    console.error(`ISOLATED_DB_FAILED at ${phase}: raw diagnostics withheld`);
+    if (error.cause?.safeSummary) console.error(error.cause.safeSummary);
+    process.exitCode = 1;
+  });
 }
