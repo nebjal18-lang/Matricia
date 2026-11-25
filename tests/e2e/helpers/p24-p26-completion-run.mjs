@@ -173,7 +173,7 @@ async function provisionVisualDynamicBusinessRecords(fixture, roleFixture) {
   if (fixture.config.runtimeMode !== "isolated-local-docker" || !fixture.config.localDockerVerified) {
     throw new Error("Visual business records require a verified isolated local Docker fixture");
   }
-  const ids = Object.fromEntries(["request", "requestVersion", "matchingRun", "candidate", "rfq", "invitation", "quote", "quoteVersion", "dispute", "thread", "clientParticipant", "providerParticipant", "message", "questionnaire", "questionnaireVersion", "questionnaireSession", "diagnostic", "question", "questionVersion", "providerDocumentFamily", "providerDocumentVersion", "franchiseInvitation", "providerService", "providerCompanyDecision", "providerScanJob"].map((name) => [name, randomUUID()]));
+  const ids = Object.fromEntries(["request", "requestVersion", "matchingRun", "candidate", "rfq", "invitation", "quote", "quoteVersion", "dispute", "thread", "clientParticipant", "providerParticipant", "message", "questionnaire", "questionnaireVersion", "questionnaireSession", "diagnostic", "question", "questionVersion", "providerDocumentFamily", "providerDocumentVersion", "franchiseInvitation", "providerService", "providerCompanyDecision", "providerScanJob", "subscriptionPlan", "subscriptionPlanVersion", "subscription", "subscriptionCycle", "providerPayable", "providerStatement", "providerInvoice", "providerJournal", "providerReceivableAccount", "providerRevenueAccount", "franchiseRule", "franchiseBook", "franchiseClosure", "franchiseAllocation", "signatureConfig", "signatureEnvelope", "signatureDocument", "signatureSigner", "signatureSource"].map((name) => [name, randomUUID()]));
   const clientOrganizationId = fixture.manifest.fixtures.organizationA.id;
   const clientUserId = fixture.resources.userIds[0];
   const providerOrganizationId = roleFixture.organizationId;
@@ -186,6 +186,10 @@ async function provisionVisualDynamicBusinessRecords(fixture, roleFixture) {
   const [existingTaxRule] = await database`select id,rate_basis_points from public.tax_rule_versions where jurisdiction_code='MA' and status='ACTIVE' and professional_validation_status='VALIDATED' and effective_from<=current_date and (effective_to is null or effective_to>=current_date) order by priority desc,id limit 1`;
   const localTaxCategory = existingTaxRule ? null : `E2E_VISUAL_${runToken.replaceAll("-", "").slice(0, 16).toUpperCase()}`;
   const taxRule = existingTaxRule ?? { id: randomUUID(), rate_basis_points: 0 };
+  const [existingPlan] = await database`select p.id as plan_id,v.id as version_id from public.subscription_plans p left join lateral(select id from public.subscription_plan_versions where plan_id=p.id order by version desc limit 1)v on true where p.code='PREMIUM'`;
+  const planId = existingPlan?.plan_id ?? ids.subscriptionPlan;
+  const planVersionId = existingPlan?.version_id ?? ids.subscriptionPlanVersion;
+  roleFixture.visualSubscription = {subscription:ids.subscription,cycle:ids.subscriptionCycle,createdPlan:existingPlan ? null : planId,createdVersion:existingPlan?.version_id ? null : planVersionId};
   roleFixture.visualBusiness = ids;
   roleFixture.visualTaxCategory = localTaxCategory;
   const subtotalMinor = 100000n;
@@ -204,6 +208,10 @@ async function provisionVisualDynamicBusinessRecords(fixture, roleFixture) {
       await tx`insert into public.tax_categories(code,name_fr,name_ar,description_fr,description_ar,category_kind,status) values(${localTaxCategory},'Exemption de recette locale','إعفاء اختبار محلي','Fixture visuelle sans valeur fiscale','بيانات اختبار بصري غير ضريبية','SERVICE','ACTIVE')`;
       await tx`insert into public.tax_rule_versions(id,jurisdiction_code,category_code,version,rate_basis_points,effective_from,status,professional_validation_status,rule_type,priority,conditions,legal_reference,rounding_strategy,approved_by,approved_at,validation_reference,content_hash,change_reason) values(${taxRule.id}::uuid,'MA',${localTaxCategory},1,0,current_date,'ACTIVE','VALIDATED','EXEMPT',100,'{}'::jsonb,'NON_PRODUCTION_VISUAL_FIXTURE_ONLY','HALF_AWAY_FROM_ZERO_TO_MINOR_UNIT',${clientUserId}::uuid,clock_timestamp(),'LOCAL_VISUAL_ONLY',${hash(`${runToken}:visual-tax-rule`)},'Exemption synthétique réservée à la recette visuelle locale')`;
     }
+    if (!existingPlan) await tx`insert into public.subscription_plans(id,code,status,created_by) values(${planId}::uuid,'PREMIUM','RETIRED',${clientUserId}::uuid)`;
+    if (!existingPlan?.version_id) await tx`insert into public.subscription_plan_versions(id,plan_id,version,status,currency,monthly_price_minor,annual_price_minor,monthly_credit_grant,core_allocation_basis_points,benefit_pool_allocation_basis_points,limits_snapshot,valid_from,content_hash,created_by) values(${planVersionId}::uuid,${planId}::uuid,1,'RETIRED','MAD',0,0,0,10000,0,'{"visualOnly":true,"noPayment":true}'::jsonb,current_date-interval'1 year',${hash(`${runToken}:visual-plan`)},${clientUserId}::uuid)`;
+    await tx`insert into public.subscriptions(id,organization_id,status) values(${ids.subscription}::uuid,${clientOrganizationId}::uuid,'CANCELLED')`;
+    await tx`insert into public.subscription_cycles(id,subscription_id,organization_id,plan_version_id,cycle_number,period_start,period_end,currency,amount_minor,payment_reference,payment_proof_hash,correlation_id) values(${ids.subscriptionCycle}::uuid,${ids.subscription}::uuid,${clientOrganizationId}::uuid,${planVersionId}::uuid,1,clock_timestamp()-interval'2 months',clock_timestamp()-interval'1 month','MAD',0,${`VISUAL_ONLY_NO_PAYMENT_${runToken}`},${hash(`${runToken}:no-payment-evidence`)},${randomUUID()}::uuid)`;
     await tx`insert into public.provider_profiles(provider_organization_id,activity_summary,team_size,years_experience,created_by) values(${providerOrganizationId}::uuid,'Profil fournisseur synthétique de recette visuelle',2,1,${providerUserId}::uuid) on conflict(provider_organization_id) do nothing`;
     await tx`insert into public.provider_services(id,provider_organization_id,service_id,request_status,requested_by) values(${ids.providerService}::uuid,${providerOrganizationId}::uuid,${roleFixture.marketing.serviceId}::uuid,'DRAFT',${providerUserId}::uuid)`;
     await tx`insert into public.provider_company_decisions(id,provider_organization_id,decision_version,company_status,partner_contract_status,reason,rule_version,decided_by,correlation_id) values(${ids.providerCompanyDecision}::uuid,${providerOrganizationId}::uuid,1,'UNDER_REVIEW','PENDING','Décision historique synthétique de recette visuelle','E2E_VISUAL_1',${centralIdentity.data.user.id}::uuid,${randomUUID()}::uuid)`;
@@ -240,6 +248,75 @@ async function provisionVisualDynamicBusinessRecords(fixture, roleFixture) {
     await tx`update public.question_bank_questions set current_draft_version_id=${ids.questionVersion}::uuid where id=${ids.question}::uuid`;
     await tx`insert into public.questionnaire_sessions(id,organization_id,actor_user_id,library_id,catalog_release_id,questionnaire_version_id,audience,locale,status,submitted_at,answer_manifest,answer_manifest_hash) values(${ids.questionnaireSession}::uuid,${clientOrganizationId}::uuid,${clientUserId}::uuid,${roleFixture.marketing.libraryId}::uuid,${catalogReleaseId}::uuid,${ids.questionnaireVersion}::uuid,'CLIENT','fr-MA','SUBMITTED',clock_timestamp(),'{}'::jsonb,${hash(`${runToken}:visual-answers`)})`;
     await tx`insert into public.diagnostic_runs(id,organization_id,questionnaire_session_id,library_id,status,input_manifest_hash,scoring_policy_snapshot,overall_score,rating,explanation,completed_by,correlation_id) values(${ids.diagnostic}::uuid,${clientOrganizationId}::uuid,${ids.questionnaireSession}::uuid,${roleFixture.marketing.libraryId}::uuid,'COMPLETED',${hash(`${runToken}:visual-answers`)},${tx.json({version:"DIAGNOSTIC-VISUAL-ONLY",content_hash:hash(`${runToken}:visual-scoring-policy`),thresholds:{good:80,attention:60,important:40}})},55.00,'IMPORTANT','{}'::jsonb,${clientUserId}::uuid,${randomUUID()}::uuid)`;
+  });
+  // A balanced, isolated historical invoice fixture. Commission accrual is not
+  // a client receipt, payment, PSP callback, or proof of real settlement.
+  let visualFinanceStage = "accounts";
+  try { await database.begin(async tx => {
+    await tx`insert into public.financial_accounts(id,organization_id,code,name,account_type,currency) values
+      (${ids.providerReceivableAccount}::uuid,${providerOrganizationId}::uuid,'VISUAL_RECEIVABLE','Visual receivable','ASSET','MAD'),
+      (${ids.providerRevenueAccount}::uuid,${providerOrganizationId}::uuid,'VISUAL_COMMISSION','Visual commission','REVENUE','MAD')`;
+    visualFinanceStage = "journal";
+    await tx`insert into public.financial_journals(id,organization_id,journal_type,currency,idempotency_scope,idempotency_key,correlation_id,effective_at,description,created_by)
+      values(${ids.providerJournal}::uuid,${providerOrganizationId}::uuid,'VISUAL_ONLY','MAD','visual-invoice',${runToken},${randomUUID()}::uuid,clock_timestamp(),'Écriture équilibrée de recette locale sans paiement',${providerUserId}::uuid)`;
+    visualFinanceStage = "entries";
+    await tx`insert into public.financial_entries(organization_id,journal_id,account_id,direction,amount_minor,currency) values
+      (${providerOrganizationId}::uuid,${ids.providerJournal}::uuid,${ids.providerReceivableAccount}::uuid,'DEBIT',1000,'MAD'),
+      (${providerOrganizationId}::uuid,${ids.providerJournal}::uuid,${ids.providerRevenueAccount}::uuid,'CREDIT',1000,'MAD')`;
+    await tx.unsafe("set constraints all immediate");
+    visualFinanceStage = "payable";
+    await tx`insert into public.provider_payable_events(id,provider_organization_id,client_organization_id,mission_id,contract_version_id,event_type,occurred_on,currency,gross_amount_minor,commission_basis_points,commission_amount_minor,tax_rule_version_id,tax_rate_basis_points,tax_amount_minor,commission_rule_snapshot,client_receipt_reference,proof_hash,correlation_id,created_by)
+      values(${ids.providerPayable}::uuid,${providerOrganizationId}::uuid,${clientOrganizationId}::uuid,${roleFixture.workflows[0].missionId}::uuid,${roleFixture.workflows[0].contractVersionId}::uuid,'COMMISSION_ACCRUAL',current_date-interval'1 month','MAD',10000,1000,1000,${taxRule.id}::uuid,0,0,'{"visualOnly":true,"noClientReceipt":true}'::jsonb,${`VISUAL_NO_RECEIPT_${runToken}`},${hash(`${runToken}:visual-no-receipt`)},${randomUUID()}::uuid,${providerUserId}::uuid)`;
+    // Historical display precondition only: the issuer guard belongs to the
+    // time-gated financial workflow, which this visual fixture does not prove.
+    await tx.unsafe("set local session_replication_role='replica'");
+    visualFinanceStage = "statement";
+    await tx`insert into public.provider_statements(id,provider_organization_id,statement_number,period_start,period_end,currency,subtotal_minor,tax_minor,total_minor,document_hash,correlation_id,created_by)
+      values(${ids.providerStatement}::uuid,${providerOrganizationId}::uuid,${`VISUAL-${runToken.slice(0,8)}`},current_date-interval'1 month',current_date-interval'1 month','MAD',1000,0,1000,${hash(`${runToken}:visual-statement`)},${randomUUID()}::uuid,${providerUserId}::uuid)`;
+    visualFinanceStage = "statement-lines";
+    await tx`insert into public.provider_statement_lines(provider_organization_id,statement_id,payable_event_id,subtotal_minor,tax_minor,total_minor)
+      values(${providerOrganizationId}::uuid,${ids.providerStatement}::uuid,${ids.providerPayable}::uuid,1000,0,1000)`;
+    visualFinanceStage = "invoice";
+    await tx`insert into public.provider_invoices(id,provider_organization_id,statement_id,invoice_number,currency,subtotal_minor,tax_minor,total_minor,issued_on,due_on,tax_rule_snapshot,document_hash,journal_id,correlation_id,created_by)
+      values(${ids.providerInvoice}::uuid,${providerOrganizationId}::uuid,${ids.providerStatement}::uuid,${`VISUAL-${runToken.slice(0,8)}`},'MAD',1000,0,1000,current_date-interval'1 month',current_date+interval'1 month','[]'::jsonb,${hash(`${runToken}:visual-invoice`)},${ids.providerJournal}::uuid,${randomUUID()}::uuid,${providerUserId}::uuid)`;
+  }); } catch (error) { const failure = new Error("Visual finance fixture failed"); failure.code = `VISUAL_FINANCE_${visualFinanceStage}_${error?.code ?? "UNKNOWN"}`.toUpperCase().replaceAll("-", "_"); throw failure; }
+  // A zero-activity historical statement exercises access and presentation only.
+  // It represents no collected revenue, payout, or contractual close.
+  const [existingFranchiseRule] = await database`select id,franchisee_share_bps,neoxa_share_bps,asma_matricia_share_bps,formula_snapshot from public.franchise_finance_rule_versions where franchise_type='STANDARD' and status='ACTIVE' order by version desc limit 1`;
+  const franchiseRuleId = existingFranchiseRule?.id ?? ids.franchiseRule;
+  roleFixture.visualFranchiseRuleId = existingFranchiseRule ? null : franchiseRuleId;
+  await database.begin(async tx => {
+    await tx.unsafe("set local session_replication_role='replica'");
+    if (!existingFranchiseRule) await tx`insert into public.franchise_finance_rule_versions(id,franchise_type,version,operator_code,entry_fee_required,franchisee_share_bps,neoxa_share_bps,asma_matricia_share_bps,distribution_basis,formula_snapshot,content_hash,effective_from,status,approval_reason,approved_by) values(${franchiseRuleId}::uuid,'STANDARD',(select coalesce(max(version),0)+1 from public.franchise_finance_rule_versions where franchise_type='STANDARD'),'FRANCHISEE',false,5000,2500,2500,'DISTRIBUTABLE_PROFIT','{"revenue_categories":[],"deduction_categories":[],"vat_treatment":"EXCLUDED_FROM_REVENUE_AND_PROFIT","shared_central_cost_policy":"VISUAL_ONLY","rounding_policy":"LAST_BENEFICIARY_REMAINDER"}'::jsonb,${hash(`${runToken}:visual-franchise-rule`)},current_date,'ACTIVE','Isolated visual fixture, no financial authorization',${providerUserId}::uuid)`;
+    await tx`insert into public.franchise_pnl_books(id,library_id,franchise_organization_id,franchise_type,operator_code,currency,opened_under_rule_version_id,status,created_by) values(${ids.franchiseBook}::uuid,${roleFixture.marketing.libraryId}::uuid,${providerOrganizationId}::uuid,'STANDARD','FRANCHISEE','MAD',${franchiseRuleId}::uuid,'CLOSED',${providerUserId}::uuid)`;
+    await tx`insert into public.franchise_profit_closure_versions(id,book_id,period_start,period_end,version,rule_version_id,rule_snapshot,formula_snapshot,entry_cutoff_at,gross_revenue_ex_tax_minor,costs_and_refunds_minor,distributable_profit_minor,content_hash,closed_by) values(${ids.franchiseClosure}::uuid,${ids.franchiseBook}::uuid,current_date-interval'2 months',current_date-interval'1 month',1,${franchiseRuleId}::uuid,${tx.json({fixture:"VISUAL_ONLY_ZERO_ACTIVITY",noRevenue:true,noPayout:true})},${tx.json(existingFranchiseRule?.formula_snapshot ?? {revenue_categories:[],deduction_categories:[],vat_treatment:"EXCLUDED_FROM_REVENUE_AND_PROFIT",shared_central_cost_policy:"VISUAL_ONLY",rounding_policy:"LAST_BENEFICIARY_REMAINDER"})},clock_timestamp(),0,0,0,${hash(`${runToken}:visual-zero-closure`)},${providerUserId}::uuid)`;
+    await tx`insert into public.franchise_profit_allocations(id,closure_version_id,beneficiary_code,share_bps,amount_minor,currency,rights_snapshot) values(${ids.franchiseAllocation}::uuid,${ids.franchiseClosure}::uuid,'FRANCHISEE',${existingFranchiseRule?.franchisee_share_bps ?? 5000},0,'MAD',${tx.json({fixture:"VISUAL_ONLY_ZERO_ACTIVITY",noPayout:true})})`;
+  });
+  // Exact PDF bytes and private storage metadata are needed by the preparation RPC.
+  // The DRAFT envelope never goes to Yousign and is never a legal signature.
+  const signaturePdf = localFixturePdf(["SYNTHETIC LOCAL SIGNATURE PREPARATION", "NOT A SIGNED CONTRACT"]);
+  const signatureHash = createHash("sha256").update(signaturePdf).digest("hex");
+  const signaturePath = `test-only/${clientOrganizationId}/visual-${ids.signatureDocument}.pdf`;
+  const signatureUpload = await fixture.resources.admin.storage.from("signature-source-documents").upload(signaturePath,signaturePdf,{contentType:"application/pdf",upsert:false});
+  if (signatureUpload.error) throw new Error("VISUAL_SIGNATURE_PDF_UPLOAD_FAILED");
+  roleFixture.visualSignatureStoragePaths = [signaturePath];
+  const [signatureObject] = await database`select id from storage.objects where bucket_id='signature-source-documents' and name=${signaturePath}`;
+  const [clientIdentity] = await database`select email from auth.users where id=${clientUserId}::uuid`;
+  if (!signatureObject?.id || !clientIdentity?.email) throw new Error("VISUAL_SIGNATURE_SOURCE_MISSING");
+  const signatureWorkflow = roleFixture.workflows[0];
+  const [signatureContract] = await database`select content_hash from public.contract_versions where id=${signatureWorkflow.contractVersionId}::uuid`;
+  const [existingSignatureConfig] = await database`select id from public.signature_provider_configs where provider_code='YOUSIGN' and environment='DEVELOPMENT' order by version desc limit 1`;
+  const signatureConfigId = existingSignatureConfig?.id ?? ids.signatureConfig;
+  roleFixture.visualSignatureConfigId = existingSignatureConfig ? null : signatureConfigId;
+  await database.begin(async tx => {
+    await tx.unsafe("set local session_replication_role='replica'");
+    if (!existingSignatureConfig) await tx`insert into public.signature_provider_configs(id,provider_code,environment,version,status,supported_levels,endpoint_base_url,config_metadata,created_by) values(${signatureConfigId}::uuid,'YOUSIGN','DEVELOPMENT',(select coalesce(max(version),0)+1 from public.signature_provider_configs where provider_code='YOUSIGN' and environment='DEVELOPMENT'),'DRAFT',array['SIMPLE']::text[],'https://example.invalid/visual-only','{"fixture":"VISUAL_ONLY_NO_PROVIDER"}'::jsonb,${clientUserId}::uuid)`;
+    await tx`insert into public.contract_parties(contract_version_id,organization_id,party_role,legal_snapshot) values(${signatureWorkflow.contractVersionId}::uuid,${clientOrganizationId}::uuid,'CLIENT','{"fixture":"VISUAL_ONLY"}'::jsonb),(${signatureWorkflow.contractVersionId}::uuid,${providerOrganizationId}::uuid,'PROVIDER','{"fixture":"VISUAL_ONLY"}'::jsonb)`;
+    const [parties] = await tx`select private.contract_signature_parties_hash_v1(${signatureWorkflow.contractVersionId}::uuid) as hash`;
+    await tx`insert into private.contract_signature_source_artifacts_v1(id,source_kind,source_id,contract_version_id,source_hash,parties_hash,pdf_sha256,storage_object_id,storage_path,verified_at,verification_reference,locale,render_version,size_bytes) values(${ids.signatureSource}::uuid,'CONTRACT',${signatureWorkflow.contractVersionId}::uuid,${signatureWorkflow.contractVersionId}::uuid,${signatureContract.content_hash},${parties.hash},${signatureHash},${signatureObject.id}::uuid,${signaturePath},clock_timestamp(),'HTTP_READBACK_SHA256_V1','fr','SIGNATURE_SOURCE_PDF_V1',${signaturePdf.length})`;
+    await tx`insert into public.signature_envelopes(id,client_organization_id,contract_id,contract_version_id,provider_config_id,provider_code,envelope_version,requested_level,status,document_set_hash,idempotency_key,request_hash,correlation_id,created_by) values(${ids.signatureEnvelope}::uuid,${clientOrganizationId}::uuid,${signatureWorkflow.contractId}::uuid,${signatureWorkflow.contractVersionId}::uuid,${signatureConfigId}::uuid,'YOUSIGN',1,'SIMPLE','DRAFT',${hash(`${runToken}:visual-signature-documents`)},${`visual-signature-${runToken}`},${hash(`${runToken}:visual-signature-request`)},${randomUUID()}::uuid,${clientUserId}::uuid)`;
+    await tx`insert into public.signature_documents(id,envelope_id,contract_version_id,document_type,exact_version,file_name,storage_path,sha256,sort_order) values(${ids.signatureDocument}::uuid,${ids.signatureEnvelope}::uuid,${signatureWorkflow.contractVersionId}::uuid,'CONTRACT',1,'contrat-recette-visuelle.pdf',${signaturePath},${signatureHash},1)`;
+    await tx`insert into public.signature_signers(id,envelope_id,organization_id,signer_user_id,signer_role,email_hash,signing_order,status,identity_verification_level,idempotency_key) values(${ids.signatureSigner}::uuid,${ids.signatureEnvelope}::uuid,${clientOrganizationId}::uuid,${clientUserId}::uuid,'CLIENT_SIGNER',${hash(clientIdentity.email.trim().toLowerCase())},1,'PENDING','PENDING',${`visual-signer-${runToken}`})`;
   });
   const scan = await fixture.resources.admin.rpc("record_provider_document_scan_result", {
     p_upload_id: ids.providerScanJob,
@@ -278,6 +355,49 @@ async function provisionVisualDynamicBusinessRecords(fixture, roleFixture) {
   });
   if (review.error || !review.data?.requestId) throw new Error("VISUAL_GOVERNANCE_REVIEW_REQUEST_FAILED");
   roleFixture.visualGovernanceRequestId = review.data.requestId;
+  const [queue] = await database`select id from public.admin_queue_versions where queue_key='EXCEPTIONS' and status='ACTIVE'`;
+  if (!queue) throw new Error("VISUAL_SUPPORT_QUEUE_MISSING");
+  const supportWorkId = randomUUID();
+  await database`insert into public.admin_work_items(id,queue_version_id,organization_id,source_kind,resource_type,resource_id,title_fr,title_ar,priority,due_at,created_by)
+    values(${supportWorkId}::uuid,${queue.id}::uuid,${clientOrganizationId}::uuid,'MANUAL_REVIEW','ORGANIZATION',${clientOrganizationId},'Dossier de support de recette','ملف دعم اختباري','LOW',clock_timestamp()+interval'1 hour',${centralIdentity.data.user.id}::uuid)`;
+  const reviewers = [];
+  for (const ordinal of [1, 2]) {
+    const email = `visual-review-${ordinal}-${runToken}@example.invalid`;
+    const created = await fixture.resources.admin.auth.admin.createUser({email,email_confirm:true,app_metadata:{p05_e2e_fixture:true},user_metadata:{full_name:`Visual reviewer ${ordinal}`}});
+    if (created.error || !created.data.user) throw new Error("VISUAL_SUPPORT_REVIEW_IDENTITY_FAILED");
+    fixture.resources.userIds.push(created.data.user.id);
+    await database`insert into public.platform_user_roles(user_id,role_code,granted_by) values(${created.data.user.id}::uuid,'MATRICIA_ADMIN',${centralIdentity.data.user.id}::uuid)`;
+    const client = createClient(fixture.config.supabaseUrl, fixture.config.publishableKey, {auth:{autoRefreshToken:false,persistSession:true,detectSessionInUrl:false}});
+    const link = await fixture.resources.admin.auth.admin.generateLink({type:"magiclink",email});
+    const token = link.data?.properties?.hashed_token;
+    if (link.error || !token) throw new Error("VISUAL_SUPPORT_REVIEW_LOGIN_FAILED");
+    const signedIn = await client.auth.verifyOtp({token_hash:token,type:"magiclink"});
+    if (signedIn.error || !signedIn.data.session) throw new Error("VISUAL_SUPPORT_REVIEW_SESSION_FAILED");
+    await elevateToAal2({client});
+    reviewers.push(client);
+  }
+  const supportAction = await fixture.sessions.central.client.rpc("request_admin_operational_action", {
+    p_work_item_id:supportWorkId,p_organization_id:clientOrganizationId,p_action_type:"GRANT_SUPPORT_ACCESS",p_target_environment:"DEVELOPMENT",
+    p_resource_type:"ORGANIZATION",p_resource_id:clientOrganizationId,p_request_payload_hash:hash(`${runToken}:visual-support`),
+    p_redacted_summary:{fixture:"local-visual-only"},p_reason:"Accès temporaire au dossier synthétique pour vérifier la page de support.",
+    p_production_authorization_reference:null,p_support_user_id:centralIdentity.data.user.id,p_support_access_mode:"CASE_SCOPED",
+    p_support_expires_at:new Date(Date.now()+30*60_000).toISOString(),p_idempotency_key:`visual-support-request-${runToken}`,
+  });
+  const actionId = supportAction.data?.action_request_id;
+  if (supportAction.error || !actionId) throw new Error("VISUAL_SUPPORT_REQUEST_FAILED");
+  for (const [index, reviewer] of reviewers.entries()) {
+    const decision = await reviewer.rpc("decide_admin_operational_action", {
+      p_action_request_id:actionId,p_decision:"APPROVE",p_reason:"Revue indépendante du seul dossier local de test.",
+      p_expected_row_version:index+1,p_idempotency_key:`visual-support-approval-${index+1}-${runToken}`,
+    });
+    if (decision.error) throw new Error("VISUAL_SUPPORT_INDEPENDENT_APPROVAL_FAILED");
+  }
+  const executed = await fixture.resources.admin.rpc("execute_admin_operational_action_v1", {p_action_request_id:actionId});
+  if (executed.error || executed.data?.outcome !== "ADMIN_ACTION_EXECUTED") throw new Error("VISUAL_SUPPORT_EXECUTION_FAILED");
+  const [grant] = await database`select id from public.admin_support_access_grants where action_request_id=${actionId}::uuid`;
+  if (!grant) throw new Error("VISUAL_SUPPORT_GRANT_MISSING");
+  roleFixture.visualSupportGrantId = grant.id;
+  roleFixture.visualSupportWorkId = supportWorkId;
 }
 
 async function proveRoleIsolation(fixture, roleFixture) {
@@ -322,13 +442,34 @@ export async function retainBoundDeliveryObjects(database,admin,objects){
   if(disposable.length){const result=await admin.storage.from('delivery-proofs').remove(disposable);if(result.error)throw new Error('UNBOUND_DELIVERY_CLEANUP_FAILED');}
 }
 
-async function neutralizeRoleFixture(database,roleFixture,admin){
+async function neutralizeRoleFixture(database,roleFixture,admin,centralClient){
+  if (roleFixture.visualSubscription) {
+    const s = roleFixture.visualSubscription;
+    await database.begin(async tx => {
+      await tx.unsafe("set local session_replication_role='replica'");
+      await tx`delete from public.subscription_cycles where id=${s.cycle}::uuid and payment_reference like 'VISUAL_ONLY_NO_PAYMENT_%'`;
+      await tx`delete from public.subscriptions where id=${s.subscription}::uuid and status='CANCELLED'`;
+      if (s.createdVersion) await tx`delete from public.subscription_plan_versions where id=${s.createdVersion}::uuid and status='RETIRED'`;
+      if (s.createdPlan) await tx`delete from public.subscription_plans where id=${s.createdPlan}::uuid and status='RETIRED'`;
+    });
+  }
+  if (roleFixture.visualSupportGrantId) {
+    const revoked = await centralClient.rpc("revoke_admin_support_access_v1", {p_grant_id:roleFixture.visualSupportGrantId,p_reason:"Recette visuelle locale terminée"});
+    if (revoked.error) throw new Error("VISUAL_SUPPORT_GRANT_CLEANUP_FAILED");
+  }
   if (roleFixture.visualBusiness?.franchiseInvitation) {
     await database`update public.franchise_invitations set status='REVOKED',row_version=row_version+1 where id=${roleFixture.visualBusiness.franchiseInvitation}::uuid and status='SENT'`;
   }
   if (roleFixture.visualProviderStoragePaths?.length) {
     const removal = await admin.storage.from("provider-qualification").remove(roleFixture.visualProviderStoragePaths);
     if (removal.error) throw new Error("VISUAL_PROVIDER_DOCUMENT_CLEANUP_FAILED");
+  }
+  if (roleFixture.visualFranchiseRuleId || roleFixture.visualSignatureConfigId) {
+    await database.begin(async tx => {
+      await tx.unsafe("set local session_replication_role='replica'");
+      if (roleFixture.visualFranchiseRuleId) await tx`update public.franchise_finance_rule_versions set status='RETIRED',effective_to=current_date where id=${roleFixture.visualFranchiseRuleId}::uuid and status='ACTIVE'`;
+      if (roleFixture.visualSignatureConfigId) await tx`update public.signature_provider_configs set status='RETIRED' where id=${roleFixture.visualSignatureConfigId}::uuid and status='DRAFT'`;
+    });
   }
   if (roleFixture.visualTaxCategory) {
     await database.begin(async (tx) => {
@@ -425,8 +566,9 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
     const visual = roleFixture.visualBusiness;
     return {
       public: ["invitation/E2EVISUAL01", ...(serviceCode ? [`services/${encodeURIComponent(serviceCode)}`] : [])],
-      shared: catalog ? [`catalogue/e2e-local-${catalog.library.replaceAll("-", "").slice(0, 16)}/local-service?release=${catalog.release}`] : [],
+      shared: catalog ? [`catalogue/e2e-local-${catalog.library.replaceAll("-", "").slice(0, 16)}/local-service?release=${catalog.release}`, ...(visual ? [`signatures/${visual.signatureEnvelope}/preparation`] : [])] : [],
       client: visual ? [
+        `client/abonnement/cycles/${visual.subscriptionCycle}?organizationId=${clientOrganizationId}`,
         `client/demandes/${visual.request}`,
         `client/demandes/${visual.request}/comparaison?rfq=${visual.rfq}&organizationId=${clientOrganizationId}`,
         `client/demandes/${visual.request}/offres?rfq=${visual.rfq}&organizationId=${clientOrganizationId}`,
@@ -435,6 +577,7 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
         `client/diagnostics/${visual.diagnostic}?organizationId=${clientOrganizationId}`,
       ] : [],
       provider: visual ? [
+        `sous-traitant/facturation/${visual.providerInvoice}?organizationId=${providerOrganizationId}`,
         `sous-traitant/consultations/${visual.invitation}?organizationId=${providerOrganizationId}`,
         `sous-traitant/devis/${visual.quote}?organizationId=${providerOrganizationId}`,
         `sous-traitant/devis/${visual.quote}/apercu?organizationId=${providerOrganizationId}`,
@@ -444,6 +587,7 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
         `sous-traitant/documents/${visual.providerDocumentVersion}?organizationId=${providerOrganizationId}`,
       ] : [],
       franchise: visual ? [
+        `franchise/finance/releves/${visual.franchiseClosure}?organizationId=${providerOrganizationId}&franchiseId=${roleFixture.franchiseId}`,
         `franchise/documents/${visual.providerDocumentVersion}?organizationId=${providerOrganizationId}&franchiseId=${roleFixture.franchiseId}`,
         `franchise/invitations/${visual.franchiseInvitation}?organizationId=${providerOrganizationId}&franchiseId=${roleFixture.franchiseId}`,
         `franchise/fournisseurs/contrats/${visual.providerCompanyDecision}?organizationId=${providerOrganizationId}&franchiseId=${roleFixture.franchiseId}`,
@@ -453,6 +597,7 @@ async function runPlaywright(config, fixture, roleFixture, statePaths) {
       ] : [],
       admin: [
         ...(roleFixture.visualAssistanceId ? [`administration/assistance/${roleFixture.visualAssistanceId}`] : []),
+        ...(roleFixture.visualSupportWorkId ? [`administration/support/${roleFixture.visualSupportWorkId}`] : []),
         ...(roleFixture.visualControlPlanId ? [`administration/gouvernance-franchise/plans/${roleFixture.visualControlPlanId}/responsable`] : []),
         ...(roleFixture.visualGovernanceRequestId ? [`administration/gouvernance-franchise/signalements/${roleFixture.visualGovernanceRequestId}`] : []),
         `administration/clients/${clientOrganizationId}`,
@@ -673,7 +818,7 @@ async function main() {
     }
     if (fixture && roleFixture) {
       try {
-        await neutralizeRoleFixture(fixture.resources.database, roleFixture, fixture.resources.admin);
+        await neutralizeRoleFixture(fixture.resources.database, roleFixture, fixture.resources.admin, fixture.sessions.central.client);
         roleCleanupPassed = true;
       } catch (error) {
         failure = combineFailure(failure, error, "P24-P26 run and role-fixture neutralization failed");
