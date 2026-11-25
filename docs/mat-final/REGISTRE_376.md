@@ -113,19 +113,19 @@ Source : tickets GitHub #24–#29 relevés le 2026-11-25. Chaque ligne ci-dessou
 | D03 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Profil initial adaptatif |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D04 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Orientation courte |  | EN COURS — lot 02 | [Scénario à huit réponses FR/AR](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; couverture des 200 services ouverte. |
 | D05 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sélection des axes |  | EN COURS — lot 02 | [Priorité choisie et reprise testées](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; choix local uniquement. |
-| D06 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Questions conditionnelles |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D07 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Aide et exemples |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D08 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sauvegarde |  | EN COURS — lot 02 | [Brouillon local et actualisation testés](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; persistance authentifiée non testée. |
+| D06 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Questions conditionnelles |  | EN COURS — lot 03 | [Deux questions métier conditionnelles testées](./LOT03_BTP_PRECISIONS_2026-11-25.md) ; moteur général ouvert. |
+| D07 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Aide et exemples |  | EN COURS — lot 03 | [Aide FR/AR sur devis et coûts chantier](./LOT03_BTP_PRECISIONS_2026-11-25.md) ; 200 services non audités. |
+| D08 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Sauvegarde |  | EN COURS — lots 02–03 | [Reprise locale et indicateurs conservés](./LOT03_BTP_PRECISIONS_2026-11-25.md) ; persistance authentifiée non testée. |
 | D09 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Recommandation |  | EN COURS — lot 02 | [Rentabilité chantier signalée comme non mesurée](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; règles des 200 services ouvertes. |
 | D10 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Explication |  | EN COURS — lot 02 | [Réponses déclarées conservées](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; justification des services ouverte. |
 | D11 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Options |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D12 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Multibibliothèque |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D13 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Décision client |  | EN COURS — lot 02 | [Sélection client testée](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; validation du service et envoi distincts. |
-| D14 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Passage au besoin |  | EN COURS — lot 02 | [Transfert du texte et du contexte testé](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; flux connecté non prouvé. |
+| D14 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Passage au besoin |  | EN COURS — lots 02–03 | [Précisions conservées sans service préchoisi](./LOT03_BTP_PRECISIONS_2026-11-25.md) ; flux connecté non prouvé. |
 | D15 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Fiches service |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D16 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Gouvernance |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | D17 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Lacunes |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
-| D18 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Tests |  | EN COURS — lot 02 | [53 unitaires et 10 E2E locaux](./LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) ; matrice intégrale non exécutée. |
+| D18 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Tests |  | EN COURS — lots 02–03 | [56 unitaires et 10 E2E locaux](./LOT03_BTP_PRECISIONS_2026-11-25.md) ; matrice intégrale non exécutée. |
 | IT-01 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Audit SI et feuille de route |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | IT-02 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Architecture SI |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |
 | IT-03 | [#27](https://github.com/nebjal18-lang/Matricia/issues/27) | Réseau LAN/Wi-Fi |  | NON EXAMINÉ | Localiser l’existant, tester puis décider ; aucune clôture. |

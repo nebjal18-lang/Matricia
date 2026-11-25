@@ -51,6 +51,20 @@ for (const locale of ["fr", "ar"] as const) {
     await need.fill(`${action} Devis de rénovation et coûts par chantier.`);
     await page.reload();
     await expect(need).toHaveValue(/Devis de rénovation et coûts par chantier/u);
+    await page.getByRole("button", { name: copy.need.continue, exact: true }).first().click();
+    await page.getByRole("button", { name: copy.need.continue, exact: true }).first().click();
+    await expect(page.locator("#need-diagnostic-quote-followup")).toBeVisible();
+    await expect(page.locator("#need-diagnostic-chantier-costs")).toBeVisible();
+    await expect(page.locator("#need-location")).toBeVisible();
+    await page.locator("#need-diagnostic-quote-followup").fill("Quatre devis en attente chaque mois");
+    await page.locator("#need-diagnostic-chantier-costs").fill("Chantier A, coûts à vérifier au trimestre");
+    await page.reload();
+    await expect(page.locator("#need-diagnostic-quote-followup")).toHaveValue("Quatre devis en attente chaque mois");
+    await expect(page.locator("#need-diagnostic-chantier-costs")).toHaveValue("Chantier A, coûts à vérifier au trimestre");
+    await page.getByRole("button", { name: copy.need.continue, exact: true }).first().click();
+    await page.getByRole("button", { name: locale === "fr" ? "Voir le récapitulatif" : "عرض الملخص", exact: true }).first().click();
+    await expect(page.getByText("Quatre devis en attente chaque mois", { exact: true })).toBeVisible();
+    await expect(page.getByText("Chantier A, coûts à vérifier au trimestre", { exact: true })).toBeVisible();
   });
 }
 

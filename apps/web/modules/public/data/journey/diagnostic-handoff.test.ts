@@ -24,6 +24,7 @@ describe("diagnostic to need handoff", () => {
     expect(result?.constraints).toContain(locale === "fr" ? "Développer mes ventes" : "تطوير المبيعات");
     expect(result?.constraints).toContain(locale === "fr" ? "Tableaux manuels" : "جداول يدوية");
     expect(result?.constraints).toContain(locale === "fr" ? "Rentabilité par chantier à mesurer" : "ربحية كل ورش يجب قياسها");
+    expect(result?.questions).toEqual({ chantierCosts: true, quoteFollowup: true });
   });
 
   it("distinguishes sector from service and leaves profitability unverified", () => {
@@ -55,5 +56,6 @@ describe("diagnostic to need handoff", () => {
     expect(salesInCommerce?.constraints).toContain("Commerce & distribution");
     expect(salesInBtp?.priority).toBe(salesInCommerce?.priority);
     expect(salesInCommerce?.constraints).not.toContain("Rentabilité par chantier à mesurer");
+    expect(salesInCommerce?.questions).toEqual({ chantierCosts: false, quoteFollowup: true });
   });
 });

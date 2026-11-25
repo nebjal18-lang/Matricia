@@ -54,6 +54,21 @@ describe("NeedFlow continuity", () => {
     expect(result.draft?.answers).toEqual({ "site.count": "3" });
     expect(result.draft?.classification).toBeNull();
   });
+
+  it("asks for quote follow-up and job costs even before a service is selected", () => {
+    const draft = parseNeedDraft(JSON.stringify({
+      version: 3, step: 2, need: "Suivre mes devis de chantier", location: "", timing: "", constraints: "",
+      diagnosticPriority: "sales", diagnosticQuestions: { chantierCosts: true, quoteFollowup: true },
+      expiresAt: Date.now() + 100_000,
+    }), "fr").draft;
+    if (!draft) throw new Error("Expected a valid diagnostic need draft");
+    const html = renderToStaticMarkup(<NeedComposer locale="fr" draft={draft} setDraft={() => undefined} storageNotice={null} storageAvailable invalidSelection={false} authenticated={false} goRecap={() => undefined} />);
+    expect(html).toContain('id="need-diagnostic-quote-followup"');
+    expect(html).toContain('id="need-diagnostic-chantier-costs"');
+    expect(html).toContain('id="need-location"');
+    expect(html).toContain('id="need-constraints"');
+    expect(html).not.toContain('id="need-service"');
+  });
 });
 
 describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
@@ -74,6 +89,15 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
     expect(html).toContain("Rénover mon chantier — نصي الأصلي");
     expect(html).toContain("Casablanca");
     expect(html).toContain("Trois mois");
+  });
+
+  it("shows diagnostic follow-up answers with localized labels in the recap", () => {
+    const saved = { ...draft(4), answers: { "diagnostic.quote_followup": "Quatre devis par mois", "diagnostic.chantier_costs": "Coûts du chantier A à confirmer" } };
+    const html = renderToStaticMarkup(<NeedResult locale={locale} draft={saved} authenticated={false} organizations={[]} storageAvailable storageNotice={null} invalidSelection={false} erase={() => undefined} edit={() => undefined} confirm={() => undefined} updateClassification={() => undefined} updateOrganizationId={() => undefined} />);
+    expect(html).toContain(locale === "fr" ? "Devis en attente et relances" : "عروض الأسعار المعلقة والمتابعة");
+    expect(html).toContain(locale === "fr" ? "Coûts et marges par chantier" : "تكاليف وهوامش كل ورش");
+    expect(html).toContain("Quatre devis par mois");
+    expect(html).toContain("Coûts du chantier A à confirmer");
   });
 
   it.each([0, 1, 2, 3])("uses the same definition for the rail, heading and progress at step %s", (step) => {

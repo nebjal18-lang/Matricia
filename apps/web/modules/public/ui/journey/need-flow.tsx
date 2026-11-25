@@ -27,6 +27,7 @@ type Draft = {
   answers: Record<string, string>;
   organizationId: string;
   diagnosticPriority?: PriorityKey;
+  diagnosticQuestions?: { chantierCosts: boolean; quoteFollowup: boolean };
   expiresAt: number;
 };
 type Organization = { id: string; name: string };
@@ -37,6 +38,14 @@ type DiscoverAction = (input: { locale: "fr" | "ar"; organizationId: string; inp
 const storageKey = "matricia.public-need";
 const legacyKeys = ["matricia.public-need.fr", "matricia.public-need.ar"];
 const retentionMs = 7 * 86_400_000;
+const diagnosticAnswerLabels = {
+  fr: { "diagnostic.chantier_costs": "Coûts et marges par chantier", "diagnostic.quote_followup": "Devis en attente et relances" },
+  ar: { "diagnostic.chantier_costs": "تكاليف وهوامش كل ورش", "diagnostic.quote_followup": "عروض الأسعار المعلقة والمتابعة" },
+} as const;
+
+function answerLabel(locale: Locale, key: string): string {
+  return diagnosticAnswerLabels[locale][key as keyof typeof diagnosticAnswerLabels.fr] ?? key;
+}
 const tagCatalog = {
   fr: ["Stratégie", "Management", "Transformation digitale", "Conformité", "Formation", "Maroc"],
   ar: ["استراتيجية", "تدبير", "تحول رقمي", "امتثال", "تكوين", "المغرب"],
@@ -147,6 +156,12 @@ export function parseNeedDraft(
         answers: asAnswers(value.answers),
         organizationId: typeof value.organizationId === "string" ? value.organizationId.slice(0, 80) : "",
         ...(value.diagnosticPriority === "organization" || value.diagnosticPriority === "sales" || value.diagnosticPriority === "security" || value.diagnosticPriority === "verify" ? { diagnosticPriority: value.diagnosticPriority } : {}),
+        ...(value.diagnosticQuestions && typeof value.diagnosticQuestions === "object" && !Array.isArray(value.diagnosticQuestions) ? {
+          diagnosticQuestions: {
+            chantierCosts: (value.diagnosticQuestions as Record<string, unknown>).chantierCosts === true,
+            quoteFollowup: (value.diagnosticQuestions as Record<string, unknown>).quoteFollowup === true,
+          },
+        } : {}),
         expiresAt: value.expiresAt,
       },
     };
@@ -208,9 +223,13 @@ export function NeedFlow({
           setPendingHandoff(handoff);
         } else {
           setPendingHandoff(null);
-          setDraft(parsed.draft ?? (handoff
-            ? { ...blank(handoff.need, initialClassification, initialOrganizationId), constraints: handoff.constraints, diagnosticPriority }
-            : blank(initialNeed, initialClassification, initialOrganizationId)));
+          setDraft(parsed.draft
+            ? handoff && parsed.draft.diagnosticPriority === diagnosticPriority && !parsed.draft.diagnosticQuestions
+              ? { ...parsed.draft, diagnosticQuestions: handoff.questions }
+              : parsed.draft
+            : handoff
+              ? { ...blank(handoff.need, initialClassification, initialOrganizationId), constraints: handoff.constraints, diagnosticPriority, diagnosticQuestions: handoff.questions }
+              : blank(initialNeed, initialClassification, initialOrganizationId));
         }
       } catch {
         setStorageAvailable(false);
@@ -267,7 +286,7 @@ export function NeedFlow({
               setPendingHandoff(null);
             }}>{locale === "ar" ? "متابعة مسودتي" : "Reprendre mon brouillon"}</button>
             <button type="button" className="journey-primary" onClick={() => {
-              setDraft({ ...blank(pendingHandoff.need, initialClassification, initialOrganizationId), constraints: pendingHandoff.constraints, diagnosticPriority: pendingHandoff.priority });
+              setDraft({ ...blank(pendingHandoff.need, initialClassification, initialOrganizationId), constraints: pendingHandoff.constraints, diagnosticPriority: pendingHandoff.priority, diagnosticQuestions: pendingHandoff.questions });
               setPendingHandoff(null);
             }}>{locale === "ar" ? "البدء من التشخيص" : "Commencer depuis le diagnostic"}</button>
           </div>
@@ -610,9 +629,8 @@ export function NeedComposer({
           <>
           <p className="public-muted">{copy.questionsLead}</p>
           {!draft.classification && !draft.unlisted ? <p className="journey-field-help">{copy.questionsWait}</p> : null}
-          {draft.classification || draft.unlisted ? (
-            <div className="journey-need-questions">
-              {missingQuestions.map((question) => {
+          <div className="journey-need-questions">
+              {(draft.classification || draft.unlisted ? missingQuestions : []).map((question) => {
                 const value = draft.answers[question.dataKey] ?? "";
                 const fileType = ["FILE", "MULTI_FILE", "IMAGE", "TABLE", "REPEATER"].includes(question.answerType);
                 const fieldId = `need-q-${question.questionVersionId}`;
@@ -644,11 +662,24 @@ export function NeedComposer({
                   </label>
                 );
               })}
+              {draft.diagnosticQuestions?.quoteFollowup ? (
+                <label htmlFor="need-diagnostic-quote-followup">
+                  {locale === "ar" ? "كم عرض سعر ينتظر رداً أو متابعة كل شهر؟" : "Combien de devis attendent une réponse ou une relance chaque mois ?"}
+                  <em className="journey-field-help">{locale === "ar" ? "اذكروا فترة المتابعة أو اكتبوا لا أعرف إن لم تتوفر أرقام." : "Indiquez la période de suivi, ou « je ne sais pas » si le nombre est inconnu."}</em>
+                  <input id="need-diagnostic-quote-followup" value={draft.answers["diagnostic.quote_followup"] ?? ""} maxLength={500} onChange={(event) => setAnswer("diagnostic.quote_followup", event.target.value)} />
+                </label>
+              ) : null}
+              {draft.diagnosticQuestions?.chantierCosts ? (
+                <label htmlFor="need-diagnostic-chantier-costs">
+                  {locale === "ar" ? "لأي ورش وفترة تريدون قياس التكاليف والهامش؟" : "Pour quel chantier et quelle période souhaitez-vous mesurer les coûts et la marge ?"}
+                  <em className="journey-field-help">{locale === "ar" ? "اذكروا التكاليف المعروفة أو اكتبوا لا أعرف؛ لن نحسب هامشاً دون بيانات." : "Précisez les coûts connus, ou « je ne sais pas » ; aucune marge ne sera calculée sans données."}</em>
+                  <input id="need-diagnostic-chantier-costs" value={draft.answers["diagnostic.chantier_costs"] ?? ""} maxLength={500} onChange={(event) => setAnswer("diagnostic.chantier_costs", event.target.value)} />
+                </label>
+              ) : null}
               <label htmlFor="need-location">{copy.location}<input id="need-location" value={draft.location} maxLength={1200} onChange={(event) => patch({ location: event.target.value.slice(0, 1200) })} />{discovery?.locationPrefill && draft.location === discovery.locationPrefill ? <span className="journey-need-prefill">{copy.knownPrefill}</span> : null}</label>
               <label htmlFor="need-timing">{copy.timing}<input id="need-timing" value={draft.timing} maxLength={1200} onChange={(event) => patch({ timing: event.target.value.slice(0, 1200) })} /></label>
               <label htmlFor="need-constraints">{copy.constraints}<textarea id="need-constraints" value={draft.constraints} rows={3} maxLength={1200} onChange={(event) => patch({ constraints: event.target.value.slice(0, 1200) })} /></label>
-            </div>
-          ) : null}
+          </div>
           </>
           ) : null}
 
@@ -785,7 +816,7 @@ export function NeedResult({
     draft.constraints,
     draft.tags.join(", "),
     draft.unlisted ? (locale === "fr" ? "Service non répertorié" : "خدمة غير مدرجة") : "",
-    ...Object.entries(draft.answers).filter(([, value]) => value.trim()).map(([key, value]) => `${key}: ${value}`),
+    ...Object.entries(draft.answers).filter(([, value]) => value.trim()).map(([key, value]) => `${answerLabel(locale, key)}: ${value}`),
   ]
     .filter(Boolean)
     .join("\n")
@@ -885,7 +916,7 @@ export function NeedResult({
             .filter(([, value]) => value.trim())
             .map(([key, value]) => (
               <div key={key}>
-                <dt className="font-semibold">{key}</dt>
+                <dt className="font-semibold">{answerLabel(locale, key)}</dt>
                 <dd>{value}</dd>
               </div>
             ))}

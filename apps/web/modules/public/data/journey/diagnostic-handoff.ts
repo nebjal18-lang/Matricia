@@ -19,7 +19,7 @@ function declaredAnswer(locale: Locale, answers: DiagnosticAnswers, id: Diagnost
   return translated.length ? translated.join(locale === "ar" ? "، " : ", ") : null;
 }
 
-export function diagnosticNeedHandoff(raw: string | null, priority: unknown, locale: Locale, now = Date.now()): { need: string; constraints: string; priority: PriorityKey } | null {
+export function diagnosticNeedHandoff(raw: string | null, priority: unknown, locale: Locale, now = Date.now()): { need: string; constraints: string; priority: PriorityKey; questions: { chantierCosts: boolean; quoteFollowup: boolean } } | null {
   if (!isDiagnosticPriority(priority)) return null;
   const stored = parseStoredDiagnostic(raw, now);
   if (!stored || stored.step !== diagnosticQuestionIds.length || !computePriorities(stored.answers).includes(priority)) return null;
@@ -32,8 +32,11 @@ export function diagnosticNeedHandoff(raw: string | null, priority: unknown, loc
       const value = declaredAnswer(locale, stored.answers, id);
       return value ? `${copy.questionLabels[id]} : ${value}` : null;
     }).filter((line): line is string => Boolean(line));
-  if (stored.answers.sector === "construction" && Array.isArray(stored.answers.goals) && stored.answers.goals.includes("control_costs")) {
+  const goals = Array.isArray(stored.answers.goals) ? stored.answers.goals : [];
+  const chantierCosts = stored.answers.sector === "construction" && goals.includes("control_costs");
+  const quoteFollowup = goals.includes("grow_sales") && (stored.answers.sales_tracking === "manual" || stored.answers.sales_tracking === "ad_hoc");
+  if (chantierCosts) {
     fields.push(locale === "ar" ? "ربحية كل ورش يجب قياسها؛ التكاليف والهوامش غير معروفة بعد." : "Rentabilité par chantier à mesurer : coûts et marges non renseignés.");
   }
-  return { need, constraints: fields.join("\n").slice(0, 1200), priority };
+  return { need, constraints: fields.join("\n").slice(0, 1200), priority, questions: { chantierCosts, quoteFollowup } };
 }
