@@ -2629,6 +2629,41 @@ button.client-cta {
   }
 }
 
+.client-compare-matrix {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--client-line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.client-compare-matrix table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.client-compare-matrix th,
+.client-compare-matrix td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--client-line);
+  text-align: start;
+  vertical-align: top;
+}
+
+.client-compare-matrix thead th {
+  background: color-mix(in srgb, var(--client-soft) 70%, white);
+  font-weight: 700;
+}
+
+.client-compare-matrix tbody th {
+  min-width: 7rem;
+  color: var(--client-muted);
+  font-weight: 650;
+}
+
 .client-compare-grid {
   display: grid;
   gap: 0.85rem;
@@ -2637,6 +2672,10 @@ button.client-cta {
 @media (min-width: 900px) {
   .client-compare-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .client-compare-matrix {
+    display: none;
   }
 }
 

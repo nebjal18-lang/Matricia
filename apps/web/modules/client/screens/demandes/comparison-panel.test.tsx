@@ -34,6 +34,8 @@ describe("ComparisonPanel", () => {
     expect(html).toContain("Générer la comparaison");
     expect(html).toContain("Cadrage, identité et supports de lancement");
     expect(html).toContain("Accompagnement complet, organisation et technique");
+    expect(html).toContain("client-compare-matrix");
+    expect(html).toContain("Critère");
     expect(html).toContain("Ces colonnes illustrent une comparaison");
     expect(html).not.toContain('name="selectionReason"');
     expect(html).not.toContain("Choisir cette offre");
