@@ -13,6 +13,7 @@ import { buildClientNav } from "@/modules/client/ui/client-nav";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
 import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import "./client-experience.css";
 import "./client-page-standard.css";
@@ -103,6 +104,14 @@ export function ClientAppShell({
           <div className="client-scene-pattern" />
         </div>
         <div className="client-topbar client-shell-topbar">
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "قائمة المساحة" : "Menu de l’espace"}
+            description={locale === "ar" ? "التنقل في مساحة العميل" : "Navigation de l’espace client"}
+            triggerLabel={locale === "ar" ? "فتح القائمة" : "Ouvrir le menu"}
+          >
+            <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
+          </WorkspaceMobileNav>
           <form className="client-top-search client-shell-search" method="get" action={searchPath} role="search" aria-label={c.searchLabel}>
             {selectedOrganizationId ? <input type="hidden" name="organizationId" value={selectedOrganizationId} /> : null}
             <Search aria-hidden className="size-4" />

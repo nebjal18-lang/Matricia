@@ -8,6 +8,7 @@ import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { buildFranchiseNav, type FranchiseNavKey } from "@/modules/franchise/ui/franchise-nav";
 import { HashAwareLink, WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { FranchiseMandateSelector } from "./franchise-access-state";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -177,13 +178,31 @@ export function FranchiseAppShell({
               </Link>
             );
           })}
-          <Link
-            href={`/${locale}/franchise/gouvernance${selectedQuery}`}
-            data-active={active === "governance" || active === "quality" || active === "performance" || active === "followups" || active === "documents" || active === "messages" || active === "perimeter" || active === "finance" ? "true" : undefined}
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "كل الأقسام" : "Tous les menus"}
+            description={c.space}
+            triggerLabel={locale === "ar" ? "المزيد" : "Plus"}
+            triggerClassName="franchise-dock-more"
+            triggerContent={
+              <>
+                <span aria-hidden>⋯</span>
+                <span>{locale === "ar" ? "المزيد" : "Plus"}</span>
+              </>
+            }
           >
-            <span aria-hidden>⋯</span>
-            <span>{locale === "ar" ? "المزيد" : "Plus"}</span>
-          </Link>
+            <nav className="client-side-nav" aria-label={c.space}>
+              {nav.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.key} href={item.href} data-active={item.key === active ? "true" : undefined}>
+                    <Icon aria-hidden className="size-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </WorkspaceMobileNav>
         </nav>
         {title && sceneHero ? (
           <div className="client-scene-mast">

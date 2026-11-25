@@ -7,24 +7,26 @@
   --client-ink: var(--mat-navy);
   --client-muted: var(--mat-slate);
   --client-line: rgb(17 26 54 / 11%);
-  --client-cta: var(--mat-violet);
+  /* Action principale = corail (Design Authority A) ; violet = accent de marque / sélection */
+  --client-cta: var(--mat-coral-ink, #b8373e);
   --client-cta-ink: #fff;
-  --client-soft: var(--mat-violet-soft);
+  --client-soft: var(--mat-coral-soft, #feeeef);
+  --client-brand-accent: var(--mat-violet);
   --home-coral: var(--mat-coral);
   --home-magenta: var(--mat-purple);
   --home-action: var(--mat-gradient);
-  --primary: var(--mat-violet);
+  --primary: var(--mat-coral-ink, #b8373e);
   --primary-foreground: #ffffff;
-  --ring: var(--mat-violet);
+  --ring: var(--mat-coral-ink, #b8373e);
   --background: var(--mat-canvas);
   --foreground: var(--mat-navy);
   --card: #ffffff;
   --card-foreground: var(--mat-navy);
   --muted-foreground: var(--mat-slate);
   --border: rgb(17 26 54 / 11%);
-  --color-primary: var(--mat-violet);
+  --color-primary: var(--mat-coral-ink, #b8373e);
   --color-primary-foreground: #ffffff;
-  --color-ring: var(--mat-violet);
+  --color-ring: var(--mat-coral-ink, #b8373e);
   --color-background: var(--mat-canvas);
   --color-foreground: var(--mat-navy);
   --color-card: #ffffff;
@@ -1222,37 +1224,83 @@ button.client-cta {
   }
 }
 
+.workspace-mobile-nav-trigger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--client-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--client-ink);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.workspace-mobile-nav-sheet {
+  gap: 0;
+  padding-block-end: 1rem;
+}
+
+.workspace-mobile-nav-body {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0 1rem 1rem;
+  overflow-y: auto;
+}
+
+.workspace-mobile-nav-body .client-side-nav {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.workspace-mobile-nav-body .client-side-nav a,
+.workspace-mobile-nav-body a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  color: var(--client-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.workspace-mobile-nav-body .client-side-nav a[data-active="true"],
+.workspace-mobile-nav-body a[data-active="true"] {
+  background: var(--client-soft);
+  color: var(--client-cta);
+}
+
+.workspace-mobile-nav-body .client-side-nav-label {
+  margin: 0.65rem 0 0.15rem;
+  color: var(--client-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 959px) {
-  .client-side-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    overflow: visible;
-  }
-
-  .client-side-nav-label {
-    display: none;
-  }
-
   .client-workspace {
     display: block;
   }
 
-  .client-side {
-    display: block;
-    border-inline-end: 0;
-    border-bottom: 1px solid var(--client-line);
-    padding-bottom: 0.9rem;
+  /* Sidebar desktop only — mobile uses WorkspaceMobileNav (closed by default). */
+  .client-workspace:not(.franchise-workspace) > .client-side {
+    display: none;
+  }
+
+  .workspace-mobile-nav-trigger {
+    display: inline-flex;
   }
 
   .client-side-foot {
     display: none;
-  }
-
-  .client-side-nav a {
-    flex: 1 1 auto;
-    min-width: 0;
-    white-space: normal;
   }
 }
 
