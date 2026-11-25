@@ -241,7 +241,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: right bottom;
-  opacity: 0.22;
+  opacity: 0.12;
   pointer-events: none;
 }
 
@@ -267,7 +267,7 @@
   .client-scene-arch,
   .client-scene-palms,
   .client-scene-pattern {
-    opacity: 0.28;
+    opacity: 0.14;
   }
 }
 
