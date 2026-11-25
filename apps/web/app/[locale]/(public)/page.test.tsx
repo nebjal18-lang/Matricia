@@ -14,15 +14,16 @@ import PublicHomePage from "./page";
 describe("PublicHomePage", () => {
   it("présente les trois intentions, sept étapes et l’aperçu en français", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
-    for (const label of ["Comprendre", "Structurer", "Matcher", "Comparer", "Contractualiser", "Exécuter", "Suivre"]) expect(html).toContain(label);
-    expect(html).toContain("Découvrez ce qui freine votre entreprise.");
-    expect(html).toContain("Passez aux bonnes solutions.");
+    for (const label of ["Comprendre", "Structurer", "Mettre en relation", "Comparer", "Contractualiser", "Exécuter", "Suivre"]) expect(html).toContain(label);
+    expect(html).toContain("Identifiez une priorité,");
+    expect(html).toContain("Décrire un besoin précis");
     expect(html).toContain('href="/fr/diagnostic"');
     expect(html).toContain('href="/fr/fournisseur"');
     expect(html).toContain('href="/fr/besoin"');
-    expect(html).toContain("Un cycle complet");
+    expect(html).toContain("Un cycle clair");
+    expect(html).toContain("Exemple compact");
     expect(html).not.toContain("/home-v2/hero-plate.png");
-    expect(html).toContain("Des priorités claires");
+    expect(html).toContain("Une priorité formulée");
     expect(html).toContain("/home-v2/hero-collaboration.png");
     expect(html).not.toContain("200 services");
     expect((html.match(/<section/g) ?? []).length).toBeGreaterThanOrEqual(5);
@@ -32,11 +33,12 @@ describe("PublicHomePage", () => {
 
   it("présente le même parcours et les routes localisées en arabe RTL", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "ar" }) }));
-    for (const label of ["الفهم", "الهيكلة", "المطابقة", "المقارنة", "التعاقد", "التنفيذ", "المتابعة"]) expect(html).toContain(label);
+    for (const label of ["الفهم", "الهيكلة", "الربط", "المقارنة", "التعاقد", "التنفيذ", "المتابعة"]) expect(html).toContain(label);
     expect(html).toContain('href="/ar/diagnostic"');
     expect(html).toContain('dir="rtl"');
-    expect(html).toContain("اكتشف ما يعيق تطور مؤسستك.");
-    expect(html).toContain("دورة كاملة");
+    expect(html).toContain("حدّدوا أولوية،");
+    expect(html).toContain("دورة واضحة");
+    expect(html).toContain("مثال مختصر");
     expect(html).toContain("/home-v2/hero-collaboration.png");
     expect(html).toContain("الأسئلة الشائعة");
   });
