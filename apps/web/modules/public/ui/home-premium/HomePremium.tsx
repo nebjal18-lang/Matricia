@@ -22,9 +22,11 @@ import {
 } from "lucide-react";
 import { getHomePremiumCopy, type HomeLocale } from "./home-premium.copy";
 import styles from "./home-premium.module.css";
+import type { ReactNode } from "react";
 
 type HomePremiumProps = {
   locale: HomeLocale;
+  demoAccess?: ReactNode;
 };
 
 const trustIcons = [Lock, Compass, Users] as const;
@@ -33,12 +35,13 @@ const cycleIcons = [Search, FileText, Users, Scale, FileSignature, Settings, Bar
 const outcomeIcons = [Lightbulb, Target, Clock, Leaf] as const;
 const networkIcons = [ShieldCheck, Users, Gem] as const;
 
-export function HomePremium({ locale }: HomePremiumProps) {
+export function HomePremium({ locale, demoAccess }: HomePremiumProps) {
   const copy = getHomePremiumCopy(locale);
   const href = (path: string) => `/${locale}${path}`;
 
   return (
     <main id="contenu-principal" className={`${styles.page} home-premium-page`} dir={locale === "ar" ? "rtl" : "ltr"}>
+      {demoAccess}
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.heroMedia} aria-hidden="true">
           <Image

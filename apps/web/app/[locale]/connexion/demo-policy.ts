@@ -4,13 +4,16 @@ type DemoAccessEnv = {
   VERCEL_ENV?: string;
   APP_ENV?: string;
   MATRICIA_DEMO_ACCESS_ENABLED?: string;
+  MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED?: string;
   [key: string]: string | undefined;
 };
 
 export function isPublicDemoAccessEnabled(env: DemoAccessEnv = process.env): boolean {
-  if (env.VERCEL_ENV === "production") return false;
   if (env.VERCEL_ENV === "preview") return true;
-  return env.MATRICIA_DEMO_ACCESS_ENABLED === "true" && env.APP_ENV !== "production";
+  if (env.VERCEL_ENV === "production" || env.APP_ENV === "production") {
+    return env.MATRICIA_DEMO_ACCESS_ENABLED === "true" && env.MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED === "true";
+  }
+  return env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
 }
 
 const defaultEmails = {
