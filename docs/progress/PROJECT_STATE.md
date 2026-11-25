@@ -1,3 +1,7 @@
+## 2026-11-25 — MAT-FINAL lot 04, conservation des précisions du besoin
+
+Le [reçu du lot 04](../mat-final/LOT04_SAUVEGARDE_SANS_TRONCATURE_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) consignent D08, D14 et D18 **EN COURS**. Le besoin long reste visible dans le brouillon ; l'UI bloque la confirmation et l'enregistrement et l'action serveur refuse le dépassement, y compris après ajout de la classification. Preuves locales : sélection Vitest 102 fichiers/838 tests PASS, TypeScript PASS, lint PASS, `git diff --check` PASS ; Node 24.11.0, pas de preuve Node 22 ou de sauvegarde distante. Aucun déploiement ni visa.
+
 ## 2026-11-25 — MAT-FINAL lot 03, questions BTP et commerciales
 
 Le [reçu du lot 03](../mat-final/LOT03_BTP_PRECISIONS_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) sont actualisés pour D06, D07, D08, D14 et D18, tous **EN COURS**. Les champs de contexte restent disponibles avant choix d'un service ; les questions complémentaires sur devis et coûts chantier n'apparaissent qu'avec les réponses déclarées correspondantes. Validation locale : 56/56 tests ciblés, 10/10 E2E FR/AR ordinateur/360 px, TypeScript, lint et build synthétique PASS. La CI Node 22 du commit précédent a `quality` et `browser-public` PASS mais `database` FAIL au test SQL 0043, ligne 111, SQLSTATE 42501. Aucun déploiement ou visa.

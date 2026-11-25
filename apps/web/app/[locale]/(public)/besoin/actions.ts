@@ -110,7 +110,8 @@ export async function savePublicNeedIntake(_: SaveNeedState, data: FormData): Pr
     : null;
   if (payload.data.classification && !classification) return { status: "error", reason: "VALIDATION" };
   const snapshot = classification ? classificationSnapshot(classification, input.data.locale) : "";
-  const constraints = [payload.data.constraints.trim(), snapshot].filter(Boolean).join("\n").slice(0, 1200);
+  const constraints = [payload.data.constraints.trim(), snapshot].filter(Boolean).join("\n");
+  if (constraints.length > 1200) return { status: "error", reason: "VALIDATION" };
   const canonicalPayload = { need: payload.data.need, location: payload.data.location, timing: payload.data.timing, constraints };
   const idempotencyKey = createHash("sha256").update(`${input.data.organizationId}:${JSON.stringify({ ...canonicalPayload, classification })}`).digest("hex");
   const client = await getSupabaseServerClient();

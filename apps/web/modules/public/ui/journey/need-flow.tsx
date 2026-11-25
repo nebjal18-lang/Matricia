@@ -5,7 +5,7 @@ import { startTransition, useActionState, useCallback, useEffect, useMemo, useRe
 import { ArrowRight, CheckCircle2, Pencil, Plus, ShieldCheck } from "lucide-react";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
-import { canonicalizePublicNeedClassification, formatNeedScoreBasisPoints, publicNeedRequestHref, rankPublicNeedServices, type NeedDiscovery, type PublicNeedClassification } from "@/modules/public/data/need-intent/model";
+import { canonicalizePublicNeedClassification, classificationSnapshot, formatNeedScoreBasisPoints, publicNeedRequestHref, rankPublicNeedServices, type NeedDiscovery, type PublicNeedClassification } from "@/modules/public/data/need-intent/model";
 import { getPublicProviderTaxonomy } from "@/modules/public/data/provider-intent/model";
 import { publicCatalogueTranslationNotice } from "@/modules/public/data/catalogue/localized-label";
 import { getNeedStages, needRecapStep, needStageForStep, needStageIds } from "@/modules/public/data/journey/need-stages";
@@ -819,12 +819,13 @@ export function NeedResult({
     ...Object.entries(draft.answers).filter(([, value]) => value.trim()).map(([key, value]) => `${answerLabel(locale, key)}: ${value}`),
   ]
     .filter(Boolean)
-    .join("\n")
-    .slice(0, 1200);
+    .join("\n");
+  const snapshot = draft.classification ? classificationSnapshot(draft.classification, locale) : "";
+  const constraintsTooLong = [extraConstraints.trim(), snapshot].filter(Boolean).join("\n").length > 1200;
 
   // Lot 3: after OTP, a confirmed local draft is attached once via the same idempotent RPC as the manual save.
   useEffect(() => {
-    if (autoAttachStarted.current || !authenticated || !draft.confirmed || !saveAction || !organizationId || organizations.length === 0) return;
+    if (autoAttachStarted.current || constraintsTooLong || !authenticated || !draft.confirmed || !saveAction || !organizationId || organizations.length === 0) return;
     if (state.status !== "idle" || pending) return;
     autoAttachStarted.current = true;
     const data = new FormData();
@@ -842,7 +843,7 @@ export function NeedResult({
     startTransition(() => {
       action(data);
     });
-  }, [action, authenticated, draft.classification, draft.confirmed, draft.location, draft.need, draft.timing, extraConstraints, locale, organizationId, organizations.length, pending, saveAction, state.status]);
+  }, [action, authenticated, constraintsTooLong, draft.classification, draft.confirmed, draft.location, draft.need, draft.timing, extraConstraints, locale, organizationId, organizations.length, pending, saveAction, state.status]);
 
   function setLibrary(code: string) {
     if (!code) {
@@ -929,6 +930,13 @@ export function NeedResult({
               </div>
             ))}
         </dl>
+        {constraintsTooLong ? (
+          <p role="alert" className="journey-login-note text-red-700">
+            {locale === "fr"
+              ? "Les pr\u00e9cisions d\u00e9passent 1 200 caract\u00e8res au total. Modifiez-les avant de valider ; votre brouillon reste conserv\u00e9."
+              : "تتجاوز التفاصيل ١٢٠٠ حرف إجمالاً. عدّلها قبل التأكيد؛ ستبقى مسودتك محفوظة."}
+          </p>
+        ) : null}
         {invalidSelection ? (
           <p role="status" className="journey-login-note">
             {locale === "fr"
@@ -952,7 +960,7 @@ export function NeedResult({
           <div className="journey-actions">
             <button className="journey-secondary" type="button" onClick={back}>{copy.back}</button>
             <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
-            <button className="journey-primary" type="button" onClick={confirm}>
+            <button className="journey-primary" type="button" onClick={confirm} disabled={constraintsTooLong}>
               {locale === "fr" ? "Valider" : "تأكيد"}
               <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
             </button>
@@ -962,10 +970,12 @@ export function NeedResult({
             <p className="journey-login-note">{copy.localOnly}</p>
             <div className="journey-actions">
               <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
-              <Link className="journey-primary" href={`/${locale}/connexion?next=${encodeURIComponent(next)}`}>
-                {copy.login}
-                <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
-              </Link>
+              {constraintsTooLong ? null : (
+                <Link className="journey-primary" href={`/${locale}/connexion?next=${encodeURIComponent(next)}`}>
+                  {copy.login}
+                  <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
+                </Link>
+              )}
             </div>
           </>
         ) : organizations.length && saveAction ? (
@@ -1021,7 +1031,7 @@ export function NeedResult({
             ) : (
               <div className="journey-actions mt-4">
                 <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
-                <button type="submit" className="journey-primary" disabled={pending}>
+                <button type="submit" className="journey-primary" disabled={pending || constraintsTooLong}>
                   {pending ? (locale === "fr" ? "Enregistrement…" : "جارٍ الحفظ…") : locale === "fr" ? "Enregistrer ce besoin" : "حفظ هذا الاحتياج"}
                 </button>
               </div>

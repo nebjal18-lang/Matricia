@@ -100,6 +100,15 @@ describe.each(["fr", "ar"] as const)("need stages in %s", (locale) => {
     expect(html).toContain("Coûts du chantier A à confirmer");
   });
 
+  it("preserves an overlong answer in the draft and blocks confirmation without cutting it", () => {
+    const answer = `Chantier A : ${"coût inconnu ".repeat(100)}FIN`;
+    const saved = { ...draft(4), answers: { "diagnostic.chantier_costs": answer } };
+    const html = renderToStaticMarkup(<NeedResult locale={locale} draft={saved} authenticated={false} organizations={[]} storageAvailable storageNotice={null} invalidSelection={false} erase={() => undefined} edit={() => undefined} confirm={() => undefined} updateClassification={() => undefined} updateOrganizationId={() => undefined} />);
+    expect(html).toContain("FIN");
+    expect(html).toContain('role="alert"');
+    expect(html).toMatch(/<button[^>]*disabled=""[^>]*>[^<]*(?:Valider|تأكيد)/u);
+  });
+
   it.each([0, 1, 2, 3])("uses the same definition for the rail, heading and progress at step %s", (step) => {
     const stage = getNeedStages(locale)[step]!;
     const html = renderToStaticMarkup(<NeedComposer locale={locale} draft={draft(step)} setDraft={() => undefined} storageNotice={null} storageAvailable invalidSelection={false} authenticated={false} goRecap={() => undefined} />);
