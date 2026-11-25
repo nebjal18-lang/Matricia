@@ -57,7 +57,7 @@ for (const name of checks) {
     : null;
   console.log(`${name}: ${report.status}; observations/assertions=${assertions}; skipped=${skipped}${lastSqlPass === null ? '' : `; last-sql-pass=${lastSqlPass}`}`);
   if (name === 'database' && !passed) {
-    const safeFailure = text.match(/^DB_TEST_FAILED file=(?:preflight|[A-Za-z0-9_.-]+\.test\.sql) batch=\d+ sqlstate=(?:NON_SQL|[0-9A-Z]{5}) assertion=(?:none|\d+): raw diagnostics withheld$/m)?.[0];
+    const safeFailure = text.match(/^DB_TEST_FAILED: file=(?:preflight|[A-Za-z0-9_.-]+\.test\.sql) batch=\d+ sqlstate=(?:NON_SQL|[0-9A-Z]{5}) assertion=(?:none|\d+) position=(?:none|\d+) function=(?:none|[A-Za-z_][A-Za-z0-9_]*) function-line=(?:none|\d+); raw diagnostics withheld$/m)?.[0];
     if (safeFailure) console.log(safeFailure);
   }
   if (!passed) process.exit(exitCode || 1);

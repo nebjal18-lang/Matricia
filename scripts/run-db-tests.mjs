@@ -672,7 +672,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   main().catch(error => {
     const sqlstate = /^[0-9A-Z]{5}$/.test(error?.code ?? '') ? error.code : 'NON_SQL';
     const assertion = /not ok (\d+)\b/.exec(error?.message ?? '')?.[1] ?? 'none';
-    console.error(`DB_TEST_FAILED file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion}: raw diagnostics withheld`);
+    const position = /^\d+$/.test(String(error?.position ?? '')) ? error.position : 'none';
+    const functionMatch = /PL\/pgSQL function (?:[a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)\([^)]*\) line (\d+)/i.exec(error?.where ?? '');
+    const functionName = functionMatch?.[1] ?? 'none';
+    const functionLine = functionMatch?.[2] ?? 'none';
+    console.error(`DB_TEST_FAILED: file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion} position=${position} function=${functionName} function-line=${functionLine}; raw diagnostics withheld`);
     process.exitCode = 1;
   });
 }
