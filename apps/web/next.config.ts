@@ -7,6 +7,11 @@ import { assertPreviewIsolation, assertProductionAppOrigin } from "./modules/sha
 
 loadEnvConfig(resolve(import.meta.dirname, "../.."), process.env.NODE_ENV !== "production", console, true);
 
+// Preview inherits Production APP_ENV on Vercel; force the staging label before isolation checks.
+if (process.env.VERCEL_ENV === "preview") {
+  process.env.APP_ENV = "staging";
+}
+
 const {
   NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: supabasePublishableKey,

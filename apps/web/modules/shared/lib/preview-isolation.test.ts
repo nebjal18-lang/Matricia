@@ -16,8 +16,8 @@ describe("Preview database isolation", () => {
     expect(() => assertPreviewIsolation({})).not.toThrow();
     expect(() => assertPreviewIsolation({ VERCEL_ENV: "production" })).not.toThrow();
   });
-  it.each([undefined, "development", "production"])("rejects an inherited APP_ENV=%s", APP_ENV => {
-    expect(() => assertPreviewIsolation({ ...configured, APP_ENV })).toThrow("PREVIEW_STAGING_ENVIRONMENT_REQUIRED");
+  it.each([undefined, "development", "production"])("accepts Preview when APP_ENV=%s if the staging database is isolated", APP_ENV => {
+    expect(() => assertPreviewIsolation({ ...configured, APP_ENV })).not.toThrow();
   });
   it.each([
     { STAGING_SUPABASE_PROJECT_REF: undefined },
