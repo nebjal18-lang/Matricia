@@ -24,3 +24,14 @@ export function assertPreviewIsolation(environment: PreviewEnvironment): void {
     throw new Error("PREVIEW_STAGING_DATABASE_REQUIRED");
   }
 }
+
+/** Reject an insecure public callback origin before a live deployment builds. */
+export function assertProductionAppOrigin(environment: { VERCEL_ENV?: string | undefined; APP_ENV?: string | undefined; NEXT_PUBLIC_APP_URL?: string | undefined }): void {
+  if (environment.VERCEL_ENV !== "production" && environment.APP_ENV?.trim().toLowerCase() !== "production") return;
+  let url: URL;
+  try { url = new URL(environment.NEXT_PUBLIC_APP_URL ?? ""); }
+  catch { throw new Error("PRODUCTION_HTTPS_APP_ORIGIN_REQUIRED"); }
+  if (url.protocol !== "https:" || url.username || url.password || url.port || url.pathname !== "/" || url.search || url.hash) {
+    throw new Error("PRODUCTION_HTTPS_APP_ORIGIN_REQUIRED");
+  }
+}

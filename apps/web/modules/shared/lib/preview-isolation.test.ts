@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertPreviewIsolation } from "./preview-isolation";
+import { assertPreviewIsolation, assertProductionAppOrigin } from "./preview-isolation";
 
 const staging = "a".repeat(20), production = "b".repeat(20);
 const configured = {
@@ -34,5 +34,15 @@ describe("Preview database isolation", () => {
     `https://${staging}.supabase.co?token=value`, "invalid",
   ])("rejects a wrong or unsafe endpoint without logging it", NEXT_PUBLIC_SUPABASE_URL => {
     expect(() => assertPreviewIsolation({ ...configured, NEXT_PUBLIC_SUPABASE_URL })).toThrow("PREVIEW_STAGING_DATABASE_REQUIRED");
+  });
+});
+
+describe("Production public origin", () => {
+  it("accepts an HTTPS origin for a live deployment and leaves local builds alone", () => {
+    expect(() => assertProductionAppOrigin({ VERCEL_ENV: "production", NEXT_PUBLIC_APP_URL: "https://matricia.example" })).not.toThrow();
+    expect(() => assertProductionAppOrigin({ NEXT_PUBLIC_APP_URL: "http://localhost:5173" })).not.toThrow();
+  });
+  it.each([undefined, "", "http://matricia.example", "https://user:pass@matricia.example", "https://matricia.example/path", "https://matricia.example?key=1", "https://matricia.example:8443"])("rejects a noncanonical or insecure live origin", NEXT_PUBLIC_APP_URL => {
+    expect(() => assertProductionAppOrigin({ APP_ENV: "production", NEXT_PUBLIC_APP_URL })).toThrow("PRODUCTION_HTTPS_APP_ORIGIN_REQUIRED");
   });
 });

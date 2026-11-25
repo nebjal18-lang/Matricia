@@ -12,6 +12,16 @@ const THEMES = {
 } as const
 
 const INITIAL_DIMENSION = { width: 320, height: 200 } as const
+const SAFE_CSS_IDENTIFIER = /^[a-zA-Z_][a-zA-Z0-9_-]*$/u
+const SAFE_CHART_COLOR = /^#[0-9a-fA-F]{3,8}$/u
+
+function safeCssIdentifier(value: string): string | null {
+  return SAFE_CSS_IDENTIFIER.test(value) ? value : null
+}
+
+function safeChartColor(value: string | undefined): string | null {
+  return value && SAFE_CHART_COLOR.test(value) ? value : null
+}
 type TooltipNameType = number | string
 
 export type ChartConfig = Record<
@@ -59,7 +69,7 @@ function ChartContainer({
   }
 }) {
   const uniqueId = React.useId()
-  const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`
+  const chartId = `chart-${safeCssIdentifier(id ?? "") ?? uniqueId.replace(/:/g, "")}`
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -85,7 +95,7 @@ function ChartContainer({
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme ?? config.color
+    ([key, item]) => safeCssIdentifier(key) && Object.values(item.theme ?? { light: item.color }).some((color) => safeChartColor(color))
   )
 
   if (!colorConfig.length) {
@@ -104,7 +114,7 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    return safeChartColor(color) ? `  --color-${key}: ${color};` : null
   })
   .join("\n")}
 }

@@ -35,6 +35,8 @@ jobs:
       - run: pnpm test:integration
       - run: pnpm test:tooling
       - run: pnpm no-placeholders
+      - run: pnpm security:public-assets
+      - run: pnpm audit --audit-level high
       - run: pnpm build
         env:
           # Hermetic build bindings belong only to the build. Unit tests inject

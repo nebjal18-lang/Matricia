@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+afterEach(() => vi.unstubAllEnvs());
 
 vi.mock("next/navigation", () => ({ notFound: vi.fn(() => { throw new Error("NOT_FOUND"); }) }));
 vi.mock("next/image", () => ({
@@ -12,6 +14,19 @@ vi.mock("next/image", () => ({
 import PublicHomePage from "./page";
 
 describe("PublicHomePage", () => {
+  it("affiche les quatre accès aux tableaux de bord quand la démo production est activée", async () => {
+    vi.stubEnv("APP_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true");
+    vi.stubEnv("MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED", "true");
+    const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
+    expect(html).toContain("Explorer les tableaux de bord démo");
+    for (const persona of ["client", "provider", "franchise", "admin"]) {
+      expect(html).toContain(`name="persona" value="${persona}"`);
+    }
+    expect(html).toContain('name="next" value="/fr/administration/command-center"');
+  });
+
   it("présente les trois intentions, sept étapes et l’aperçu en français", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
     for (const label of ["Comprendre", "Structurer", "Matcher", "Comparer", "Contractualiser", "Exécuter", "Suivre"]) expect(html).toContain(label);

@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 import { demoPersonaEmail, isPublicDemoAccessEnabled } from "./demo-policy";
 
 describe("public demo access", () => {
-  it("refuse toujours la démo en production (APP_ENV ou Vercel)", () => {
+  it("exige deux indicateurs explicites pour la production", () => {
     expect(isPublicDemoAccessEnabled({ VERCEL_ENV: "production", MATRICIA_DEMO_ACCESS_ENABLED: "true", APP_ENV: "production" })).toBe(false);
     expect(isPublicDemoAccessEnabled({ VERCEL_ENV: "production", MATRICIA_DEMO_ACCESS_ENABLED: "true", APP_ENV: "development" })).toBe(false);
     expect(isPublicDemoAccessEnabled({ MATRICIA_DEMO_ACCESS_ENABLED: "true", APP_ENV: "production" })).toBe(false);
     expect(isPublicDemoAccessEnabled({ VERCEL_ENV: "production", APP_ENV: "production" })).toBe(false);
+    expect(isPublicDemoAccessEnabled({ VERCEL_ENV: "production", APP_ENV: "production", MATRICIA_DEMO_ACCESS_ENABLED: "true", MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED: "true" })).toBe(true);
+    expect(isPublicDemoAccessEnabled({ VERCEL_ENV: "production", APP_ENV: "development", MATRICIA_DEMO_ACCESS_ENABLED: "true", MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED: "true" })).toBe(true);
+    expect(isPublicDemoAccessEnabled({ APP_ENV: "production", MATRICIA_DEMO_ACCESS_ENABLED: "true", MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED: "true" })).toBe(true);
   });
 
   it("n’autorise preview/local que si le flag est actif et APP_ENV non-prod explicite", () => {

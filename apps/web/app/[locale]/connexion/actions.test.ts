@@ -194,6 +194,7 @@ describe("post login assurance routing", () => {
 describe("completeEmailLogin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
     mocks.getUser.mockResolvedValue({ data: { user: { id: "actor" } } });
     mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
     mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
@@ -207,6 +208,19 @@ describe("completeEmailLogin", () => {
       destination: "/fr/client/demandes",
     });
     expect(mocks.verifyOtp).toHaveBeenCalledWith({ email: "user@example.test", token: "123456", type: "email" });
+    expect(mocks.rpc).toHaveBeenCalledWith("reserve_otp_request", { p_identifier: "otp-verify:user@example.test", p_client_ip: "203.0.113.7" });
+  });
+
+  it("refuses OTP verification when the persistent attempt quota is exhausted", async () => {
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: false, retry_after_seconds: 60 }], error: null });
+    await expect(completeEmailLogin("user@example.test", "123456", "fr")).resolves.toEqual({ ok: false, reason: "RATE_LIMITED" });
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the OTP attempt quota is unavailable", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "503" } });
+    await expect(completeEmailLogin("user@example.test", "123456", "fr")).resolves.toEqual({ ok: false, reason: "UNAVAILABLE" });
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
   });
 
   it("maps an expired OTP without calling navigation", async () => {
@@ -225,6 +239,7 @@ describe("completeEmailLogin", () => {
 describe("completePasswordLogin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null });
     mocks.getUser.mockResolvedValue({ data: { user: { id: "actor" } } });
     mocks.assurance.mockResolvedValue({ data: { currentLevel: "aal2", nextLevel: "aal2" }, error: null });
     mocks.navigation.mockResolvedValue({ status: "ok", requirementSatisfied: true, navigation: { signedIn: true, landing: "client", options: [{ kind: "client", href: "/fr/tableau-de-bord" }] } });
@@ -237,6 +252,19 @@ describe("completePasswordLogin", () => {
       destination: "/ar/client/demandes",
     });
     expect(mocks.signInWithPassword).toHaveBeenCalledWith({ email: "user@example.test", password: "password-long-enough" });
+    expect(mocks.rpc).toHaveBeenCalledWith("reserve_otp_request", { p_identifier: "password-login:user@example.test", p_client_ip: "203.0.113.7" });
+  });
+
+  it("refuses a password attempt when the trusted quota is exhausted", async () => {
+    mocks.rpc.mockResolvedValue({ data: [{ allowed: false, retry_after_seconds: 60 }], error: null });
+    await expect(completePasswordLogin("user@example.test", "password-long-enough", "fr")).resolves.toEqual({ ok: false, reason: "RATE_LIMITED" });
+    expect(mocks.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the password quota cannot be read", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "503" } });
+    await expect(completePasswordLogin("user@example.test", "password-long-enough", "fr")).resolves.toEqual({ ok: false, reason: "UNAVAILABLE" });
+    expect(mocks.signInWithPassword).not.toHaveBeenCalled();
   });
 });
 

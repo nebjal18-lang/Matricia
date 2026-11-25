@@ -37,6 +37,7 @@
     "test:tooling": "node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/staging/*.test.mjs scripts/db-test-support.test.mjs",
     "release:prepare": "node scripts/prepare-release.mjs",
     "release:structure": "node --experimental-strip-types scripts/validate-release.ts --structure-only",
+    "security:public-assets": "node scripts/security/check-public-assets.mjs",
     "test:e2e:public": "node scripts/run-browser-acceptance.mjs public",
     "test:e2e:authenticated": "node scripts/run-browser-acceptance.mjs authenticated",
     "test:e2e:workflows": "node scripts/run-browser-acceptance.mjs workflows",

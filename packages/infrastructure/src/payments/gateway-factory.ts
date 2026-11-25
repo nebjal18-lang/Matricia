@@ -29,7 +29,7 @@ export type PaymentRuntimeConfig = {
 export function createPaymentGateway(config: PaymentRuntimeConfig) {
   assertProviderAllowed(config, config.provider);
   const appEnvironment = process.env.APP_ENV?.trim().toLowerCase();
-  const production = appEnvironment === "production" || (!appEnvironment && process.env.NODE_ENV === "production");
+  const production = process.env.VERCEL_ENV === "production" || appEnvironment === "production" || (!appEnvironment && process.env.NODE_ENV === "production");
   switch (config.provider) {
     case "DEMO":
       if (

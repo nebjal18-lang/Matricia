@@ -53,24 +53,7 @@ export function DemoAccess({ locale }: { locale: Locale; nextPath?: string }) {
       </h2>
       <p className="mt-1 text-sm text-blue-900/80">{messages.lead}</p>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {personas.map((persona) => (
-          <form action={connectDemoPersona} key={persona}>
-            <input type="hidden" name="locale" value={locale} />
-            <input type="hidden" name="persona" value={persona} />
-            <input type="hidden" name="next" value={demoPersonaHome(persona, locale)} />
-            <button type="submit" className={buttonClass}>
-              {persona === "client"
-                ? messages.globalClient
-                : persona === "provider"
-                  ? messages.globalProvider
-                  : persona === "franchise"
-                    ? messages.globalFranchise
-                    : messages.admin}
-            </button>
-          </form>
-        ))}
-      </div>
+      <DemoDashboardButtons locale={locale} />
 
       <div className="mt-5 space-y-2" aria-labelledby="demo-regions-title">
         <h3 id="demo-regions-title" className="text-sm font-semibold text-blue-950">
@@ -123,6 +106,30 @@ export function DemoAccess({ locale }: { locale: Locale; nextPath?: string }) {
         })}
       </div>
     </section>
+  );
+}
+
+export function DemoDashboardButtons({ locale }: { locale: Locale }) {
+  const messages = copy[locale];
+  return (
+    <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      {personas.map((persona) => (
+        <form action={connectDemoPersona} key={persona}>
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="persona" value={persona} />
+          <input type="hidden" name="next" value={demoPersonaHome(persona, locale)} />
+          <button type="submit" className={buttonClass}>
+            {persona === "client"
+              ? messages.globalClient
+              : persona === "provider"
+                ? messages.globalProvider
+                : persona === "franchise"
+                  ? messages.globalFranchise
+                  : messages.admin}
+          </button>
+        </form>
+      ))}
+    </div>
   );
 }
 
