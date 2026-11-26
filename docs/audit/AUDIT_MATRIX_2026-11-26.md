@@ -30,8 +30,25 @@ Classeur Excel: absent de l'environnement — démarrage depuis routes + constat
 
 Commande: `pnpm --filter @matricia/web exec vitest run modules/public/data/need-intent/model.test.ts`
 
+## ADM-02 — Fiches conformité « indisponibles »
+
+| Champ | Valeur |
+|---|---|
+| Constat audit | ~27 destinations affichaient « Le service est momentanément indisponible » |
+| Cause | `notFound()` sur dossier absent → page 404 publique dont une carte d’exemple contient exactement cette phrase. Ce n’était pas une panne RPC systématique. |
+| Correction | Fiche absente : rester dans le shell admin, message « dossier introuvable », lien retour liste (filtres conservés via `selectedQuery`). |
+| Fichiers | `conformite-clients/[caseId]/page.tsx`, `conformite-clients/messages.ts` |
+| Verdict | `Corrigé et retesté` (présentation) — ouverture métier d’un dossier réel encore à prouver en démo navigateur |
+
+## ADM-01 — « Organisation à préciser »
+
+| Cause | Enrichissement `work_enrichment` absent + titre sans séparateur · |
+| Correction | Si `organizationId` est connu, afficher `Organisation {ref}` au lieu du libellé mort. |
+| Fichiers | `command-center/view-model.ts` (+ test) |
+| Verdict | `Corrigé et retesté` (libellé) — A/B décision navigateur encore ouvert |
+
 ## Lots suivants
 
-- CAT: catalogue natif hors IT
-- ADM-01/02: A/B + fiches conformité
+- CAT: catalogue natif hors IT (constructeur exige library+service ; message indisponible si `loadWorkspace` échoue)
+- ADM-01 A/B preuve navigateur → base
 - FIN-01/02, CLI/ST/FRA, mobile/AR

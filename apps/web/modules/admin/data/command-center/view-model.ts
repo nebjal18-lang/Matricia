@@ -103,7 +103,7 @@ export function workItemNextAction(item: AdminWorkItem, locale: "fr" | "ar") {
   return map[item.status] ?? (locale === "ar" ? "مراجعة الملف" : "Examiner le dossier");
 }
 
-/** Prefer enrichment, then a title segment after · / —, never a vague “Plateforme”. */
+/** Prefer enrichment, then a title segment after · / —, then a stable org ref — never a vague “Plateforme”. */
 export function workItemOrganizationLabel(
   item: AdminWorkItem,
   locale: "fr" | "ar",
@@ -116,6 +116,11 @@ export function workItemOrganizationLabel(
   if (parts.length >= 2) {
     const tail = parts[parts.length - 1]!;
     if (tail.length > 2) return tail;
+  }
+  // Known tenant without enrichment: keep a reproducible dossier identity instead of a dead-end label.
+  if (item.organizationId) {
+    const ref = shortReference(item.organizationId, 6);
+    return locale === "ar" ? `منظمة ${ref}` : `Organisation ${ref}`;
   }
   return locale === "ar" ? "منظمة غير مبيّنة" : "Organisation à préciser";
 }

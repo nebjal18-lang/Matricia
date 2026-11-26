@@ -35,7 +35,7 @@ export default async function ClientComplianceDecisionPage({
   const messages = getComplianceMessages(locale);
   const alternate = locale === "ar" ? "fr" : "ar";
   const item = result.status === "success" ? result.cases.find((entry) => entry.id === caseId) : null;
-  if (result.status === "success" && !item) notFound();
+  const listHref = `/${locale}/administration/conformite-clients${space.selectedQuery}`;
 
   return (
     <AdminAppShell
@@ -48,7 +48,7 @@ export default async function ClientComplianceDecisionPage({
       searchAction={`/${locale}/administration/conformite-clients`}
       searchPlaceholder={messages.navigation}
       alternateHref={`/${alternate}/administration/conformite-clients/${caseId}${space.selectedQuery}`}
-      crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: `/${locale}/administration/conformite-clients${space.selectedQuery}`, label: a.complianceTitle }, { label: a.decisionTitle }]} />}
+      crumb={<AdminCrumb locale={locale} query={space.selectedQuery} items={[{ href: listHref, label: a.complianceTitle }, { label: a.decisionTitle }]} />}
       title={a.decisionTitle}
       lead={a.decisionPageLead}
       kicker={item ? messages.statuses[item.status] : a.inInstruction}
@@ -59,6 +59,7 @@ export default async function ClientComplianceDecisionPage({
             <AlertTitle>{result.reason === "FORBIDDEN" ? messages.forbiddenTitle : result.reason === "MFA_REQUIRED" ? messages.mfaTitle : messages.unavailableTitle}</AlertTitle>
             <AlertDescription>{result.reason}</AlertDescription>
           </Alert>
+          <Link className="admin-soft-cta" href={listHref}>{messages.backToList}</Link>
         </div>
       ) : item ? (
         <>
@@ -84,7 +85,15 @@ export default async function ClientComplianceDecisionPage({
             ))}
           </details>
         </>
-      ) : null}
+      ) : (
+        <div className="client-page">
+          <Alert>
+            <AlertTitle>{messages.missingCaseTitle}</AlertTitle>
+            <AlertDescription>{messages.missingCaseDescription}</AlertDescription>
+          </Alert>
+          <Link className="admin-soft-cta" href={listHref}>{messages.backToList}</Link>
+        </div>
+      )}
     </AdminAppShell>
   );
 }
