@@ -162,8 +162,8 @@ export function FranchiseFolderTimeline({
   events,
 }: {
   locale: Locale;
-  activities?: Array<{ id: string; type: string; occurredAt: string; summary: string; evidence: string[] }>;
-  events?: Array<{ id: string; from: string | null; to: string; reasonCode: string; occurredAt: string; evidence: string[] }>;
+  activities?: Array<{ id: string; type: string; occurredAt: string; summary: string; evidence: string[] }> | undefined;
+  events?: Array<{ id: string; from: string | null; to: string; reasonCode: string; occurredAt: string; evidence: string[] }> | undefined;
 }) {
   const c = franchiseCopy(locale);
   const stamp = (value: string) => formatDateTimeCasablanca(value, locale);

@@ -14,7 +14,7 @@ describe("current contract amendment",()=>{
   expect(await createAmendment(idle,proposal())).toEqual({status:"error",reason:"FAILED"});
  });
  it("returns a conflict when the reviewed contract changed",async()=>{
-  mocks.rpc.mockResolvedValue({data:null,error:{code:"40001"}});expect(await createAmendment(idle,proposal())).toEqual({status:"error",reason:"CONFLICT"});
+  mocks.rpc.mockResolvedValue({data:null,error:{code:"PT409"}});expect(await createAmendment(idle,proposal())).toEqual({status:"error",reason:"CONFLICT"});
  });
 });
 

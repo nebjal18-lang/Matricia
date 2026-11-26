@@ -66,7 +66,7 @@ select pg_temp.actor332(2);
 insert into p332 values('posting',public.create_credit_revenue_policy_v1('POSTING','CREDIT_PACK',(select(v->>'pack_version_id')::uuid from p332 where k='pack'),null,'EUR','DEVELOPMENT',1,current_date-1,null,'{"cash_account_code":"CREDIT332_CASH_EUR","cash_name_fr":"Trésorerie de recette","cash_name_ar":"خزينة الاختبار","suspense_account_code":"CREDIT332_PENDING_EUR","suspense_name_fr":"Encaissement en attente","suspense_name_ar":"تحصيل قيد المراجعة"}','Mapping synthétique exclusivement pour recette SQL','credit332-posting-policy'));
 select throws_ok($$select public.decide_credit_revenue_policy_v1((select(v->>'request_id')::uuid from p332 where k='posting'),true,(select v->>'request_hash'from p332 where k='posting'),'Tentative auto approbation interdite')$$,'42501','CREDIT_REVENUE_INDEPENDENT_REVIEW_REQUIRED','mapping maker cannot approve its own proposal');
 select pg_temp.actor332(3);
-select throws_ok($$select public.decide_credit_revenue_policy_v1((select(v->>'request_id')::uuid from p332 where k='posting'),true,repeat('f',64),'Revue avec empreinte périmée interdite')$$,'40001','STALE_CREDIT_REVENUE_POLICY_REQUEST','review pins the exact policy request hash');
+select throws_ok($$select public.decide_credit_revenue_policy_v1((select(v->>'request_id')::uuid from p332 where k='posting'),true,repeat('f',64),'Revue avec empreinte périmée interdite')$$,'PT409','STALE_CREDIT_REVENUE_POLICY_REQUEST','review pins the exact policy request hash');
 insert into p332 values('posting-approved',public.decide_credit_revenue_policy_v1((select(v->>'request_id')::uuid from p332 where k='posting'),true,(select v->>'request_hash'from p332 where k='posting'),'Approbation indépendante de recette SQL'));
 select pg_temp.actor332(1);
 insert into p332 values('prep',public.prepare_credit_pack_payment_intent_v1('b3320000-0000-4000-8000-000000000001',(select(v->>'pack_version_id')::uuid from p332 where k='pack'),'DEMO','DEMO','credit332-checkout'));
@@ -252,7 +252,7 @@ select throws_ok($$select public.decide_benefit_refund_v1((select(v->>'request_i
 select pg_temp.actor332(3,'aal1');
 select throws_ok($$select public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),(select v->>'content_hash'from p332 where k='refund-request'),true,'TEST weak Finance cannot execute credits','refund332-weak')$$,'42501','BENEFIT_REFUND_FINANCE_REVIEW_REQUIRED','execution requires current independent Finance MFA');
 select pg_temp.actor332(3);
-select throws_ok($$select public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),repeat('0',64),true,'TEST changed request hash is refused','refund332-stale')$$,'40001','STALE_BENEFIT_REFUND_SOURCE','approval binds exact immutable request and consumed sources');
+select throws_ok($$select public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),repeat('0',64),true,'TEST changed request hash is refused','refund332-stale')$$,'PT409','STALE_BENEFIT_REFUND_SOURCE','approval binds exact immutable request and consumed sources');
 reset role;
 -- Inject a transactional outbox failure, preserving all original enforcement.
 -- This verifies failure rollback and retry, rather than pretending a command ran.
@@ -269,7 +269,7 @@ drop trigger test0332_refund_outage on public.event_outbox;
 set local role authenticated;select pg_temp.actor332(3);
 insert into p332 values('refund-execute',public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),(select v->>'content_hash'from p332 where k='refund-request'),true,'TEST independently verified exact refund and economic reversal','refund332-execute'));
 select is(public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),(select v->>'content_hash'from p332 where k='refund-request'),true,'TEST independently verified exact refund and economic reversal','refund332-execute'),(select v from p332 where k='refund-execute'),'lost execution response replays exact credit and economic reversal once');
-select throws_ok($$select public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),(select v->>'content_hash'from p332 where k='refund-request'),true,'TEST another key cannot double credit','refund332-double')$$,'40001','STALE_BENEFIT_REFUND_SOURCE','another key cannot refund an already refunded consumption');
+select throws_ok($$select public.decide_benefit_refund_v1((select(v->>'request_id')::uuid from p332 where k='refund-request'),(select v->>'content_hash'from p332 where k='refund-request'),true,'TEST another key cannot double credit','refund332-double')$$,'PT409','STALE_BENEFIT_REFUND_SOURCE','another key cannot refund an already refunded consumption');
 reset role;
 select is((select count(*)from private.benefit_refund_write_capabilities_v1),0::bigint,'completed refund removes its transient authority');
 select is((select status from public.benefit_redemptions where id=pg_temp.refund_id()),'REFUNDED','approved independent Finance command effects CONSUMED to REFUNDED');

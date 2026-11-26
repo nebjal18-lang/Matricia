@@ -1,0 +1,16 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 test:integration C:\Projects\Matricia\Matricia
+> node --experimental-strip-types --test tests/integration/*.test.mjs
+
+✔ outbox HTTP integration preserves envelope, authorization and correlation before acknowledgement (31.6655ms)
+✔ HTTP rejection records failure without publication; explicit retry keeps the same event identity (10.3376ms)
+✔ HTTP 202 without the required consumer acknowledgement never publishes the event (4.3647ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 236.6057

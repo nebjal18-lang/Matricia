@@ -1,0 +1,17 @@
+{
+  "name": "core-pot",
+  "startedAt": "2026-11-19T13:34:39.807Z",
+  "target": "matricia_audit_20261119_b578c75c",
+  "nodeVersion": "v22.23.5",
+  "permission": "Synthetic rollback-only fixtures on isolated audit database; no application source changes",
+  "results": [],
+  "notices": [],
+  "executed": false,
+  "error": {
+    "code": "42501",
+    "message": "permission denied for function platform_core_pot_access",
+    "context": "SQL statement \"select greatest(distributable_remainder_minor,0)              from public.platform_core_pot_closure_versions where id=cid\"\nPL/pgSQL function private.assert_platform_core_pot_allocation_total() line 4 at SQL statement"
+  },
+  "afterOrganizations": 0,
+  "finishedAt": "2026-11-19T13:34:39.868Z"
+}

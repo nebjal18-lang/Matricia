@@ -85,7 +85,7 @@ describe("reviewClientIdentity", () => {
   });
 
   it("maps stale and document failures without claiming verification", async () => {
-    mocks.rpc.mockResolvedValueOnce({ error: { code: "40001" } });
+    mocks.rpc.mockResolvedValueOnce({ error: { code: "PT409" } });
     expect(await reviewClientIdentity({ status: "idle" }, form())).toEqual({
       status: "error",
       reason: "STALE",

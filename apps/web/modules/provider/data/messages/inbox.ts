@@ -2,7 +2,7 @@ import type { InternalMessagingRepository, MessagingFailure, MessagingResult } f
 import type { MessageCursor, ThreadPage } from "@/modules/shared/lib/internal-messaging/model";
 
 /** Organization selection narrows an already authorized session; it never grants access. */
-export async function loadProviderInbox(repository:InternalMessagingRepository,input:{organizationId:string|null;threadId?:string;search:string;page:number;cursor?:MessageCursor}) {
+export async function loadProviderInbox(repository:InternalMessagingRepository,input:{organizationId:string|null;threadId?:string|undefined;search:string;page:number;cursor?:MessageCursor|undefined}) {
  const denied={status:"error" as const,reason:"FORBIDDEN" as MessagingFailure};
  if(!input.organizationId)return{inbox:denied,options:denied,history:denied};
  const [inbox,options,loadedHistory]=await Promise.all([

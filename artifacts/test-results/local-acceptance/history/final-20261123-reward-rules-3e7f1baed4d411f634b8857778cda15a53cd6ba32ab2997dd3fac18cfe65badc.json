@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "suite": "reward-rules",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:04:01.980Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:03:33.633Z",
+    "finishedAt": "2026-11-23T22:04:01.049Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realUiRewardRuleVersions": 8,
+    "realUiExactCreditDisplays": 8,
+    "exactLargeBonusCredits": true,
+    "immutablePreviousRuleVersions": true,
+    "rewardRuleReplayVerified": true,
+    "changedReplayDenied": true,
+    "foreignRuleCreationDenied": true,
+    "correlatedRuleAuditOutbox": true,
+    "noCreditsIssuedByRuleCreation": true,
+    "frArDesktop360Accessibility": true,
+    "stage": "native-proof",
+    "responseCode": null,
+    "responseLabel": null,
+    "failureLocations": []
+  }
+}

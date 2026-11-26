@@ -1,0 +1,19 @@
+{
+  "task": "root-public-tests",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "vitest",
+    "run",
+    "modules/public/ui/journey/prediagnostic-phases.test.tsx",
+    "modules/public/data/provider-intent/model.test.ts",
+    "modules/franchise/screens/access-readiness.test.tsx",
+    "modules/franchise/data/operations/readers-integrity.test.ts"
+  ],
+  "startedAt": "2026-11-19T14:05:21.844Z",
+  "finishedAt": "2026-11-19T14:05:38.834Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

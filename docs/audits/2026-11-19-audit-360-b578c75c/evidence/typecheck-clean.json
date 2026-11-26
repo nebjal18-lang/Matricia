@@ -1,0 +1,10 @@
+{
+  "task": "typecheck-clean",
+  "command": "corepack pnpm --filter @matricia/web exec tsc --noEmit --incremental false",
+  "startedAt": "2026-11-19T13:39:11.067Z",
+  "finishedAt": "2026-11-19T13:40:39.988Z",
+  "durationMs": 88921,
+  "exitCode": 1,
+  "nodeVersion": "v22.23.5",
+  "scope": "Current working tree including the two preserved staged corrections; no application source corrections by audit"
+}

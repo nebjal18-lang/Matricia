@@ -31,7 +31,7 @@ export function QuotePreviewWorkbench({
   query: string;
   quoteId: string;
   invitation: ProviderQuoteDashboard["invitations"][number] | null;
-  prefill?: QuotePrefill;
+  prefill?: QuotePrefill | undefined;
   organizationName: string;
   submitPanel?: ReactNode;
 }) {
@@ -131,7 +131,7 @@ export function QuotePreviewWorkbench({
                   <div><dt>{w.quoteObject}</dt><dd>{prefill.solution}</dd></div>
                   <div><dt>{w.quoteValidityLabel}</dt><dd dir="ltr">{prefill.validUntil ? formatDay(locale, prefill.validUntil) : "—"}</dd></div>
                 </dl>
-                <div className="client-table-wrap">
+                <div className="client-table-wrap" role="region" aria-label={m.priceLines} tabIndex={0}>
                   <table className="client-space-table">
                     <thead>
                       <tr>

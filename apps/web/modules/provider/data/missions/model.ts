@@ -56,7 +56,7 @@ export type ProviderMissionDashboard = {
   countsReadState?:"SUCCESS"|"UNAVAILABLE";
   technicianOptions?:Array<{userId:string;displayName:string}>;
   missions: Array<{
-    signedScopePending?:boolean;scopeReconciliationRequired?:boolean;id: string; title?:string;canOperate?:boolean;contractId: string; status: string; startedAt: string | null; completedAt: string | null;
+    signedScopePending?:boolean;scopeReconciliationRequired?:boolean;id: string; title?:string|undefined;canOperate?:boolean;contractId: string; status: string; startedAt: string | null; completedAt: string | null;
     assignments?:Array<{userId:string;assignedAt:string}>;
     contract: { currentVersion: number; priceMinor: string; currency: string; contentHash: string } | null;
     milestones: Array<{ retired?:boolean;id: string; key: string; title: string; status: string; dueAt: string | null; dueAtLabel?:string|null;rowVersion: number;decisions?:Array<{decision:string;reason:string;decidedAt:string}>;corrections?:Array<{reason:string;submittedAt:string}> }>;

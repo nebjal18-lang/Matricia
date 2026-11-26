@@ -1,0 +1,38 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+apps/web                                 |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+packages/domain                          |  WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+Scope: all 17 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +588
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 588, reused 578, downloaded 0, added 5
+Progress: resolved 588, reused 581, downloaded 0, added 26
+Progress: resolved 588, reused 582, downloaded 0, added 69
+Progress: resolved 588, reused 582, downloaded 0, added 170
+Progress: resolved 588, reused 582, downloaded 0, added 238
+Progress: resolved 588, reused 582, downloaded 0, added 378
+Progress: resolved 588, reused 582, downloaded 0, added 498
+Progress: resolved 588, reused 582, downloaded 0, added 574
+Progress: resolved 588, reused 582, downloaded 0, added 582
+Progress: resolved 588, reused 582, downloaded 0, added 583
+Progress: resolved 588, reused 582, downloaded 0, added 584
+Progress: resolved 588, reused 582, downloaded 0, added 585
+Progress: resolved 588, reused 582, downloaded 0, added 587
+Progress: resolved 588, reused 582, downloaded 0, added 588
+Progress: resolved 588, reused 582, downloaded 0, added 588, done
+
+devDependencies:
++ @axe-core/playwright 4.13.0
++ @playwright/test 1.63.0
++ @types/node 22.19.19
++ next 16.4.1
++ postgres 3.4.7
++ react 19.2.6
++ react-dom 19.2.6
++ supabase 2.117.0
++ typescript 5.9.3
++ vite 8.1.6
++ vitest 5.0.3
+
+Done in 18.1s using pnpm v10.17.1

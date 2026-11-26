@@ -66,7 +66,7 @@ export async function reviewClientIdentity(
       reason:
         result.error.code === "42501"
           ? "FORBIDDEN"
-          : result.error.code === "40001"
+          : (result.error.code === "40001" || result.error.code === "PT409")
             ? "STALE"
             : result.error.code === "55000"
               ? "DOCUMENTS_REQUIRED"

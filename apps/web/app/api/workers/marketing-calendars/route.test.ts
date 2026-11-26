@@ -69,7 +69,7 @@ describe("POST /api/workers/marketing-calendars", () => {
       p_month_start: "2026-10-01",
       p_correlation_id: expect.any(String),
     });
-    const generationCorrelation = mocks.rpc.mock.calls[0][1].p_correlation_id;
+    const generationCorrelation = mocks.rpc.mock.calls[0]?.[1].p_correlation_id;
     expect(mocks.rpc).toHaveBeenNthCalledWith(2, "detect_marketing_calendar_shortages_v1", {
       p_month_start: "2026-10-01",
       p_correlation_id: generationCorrelation,

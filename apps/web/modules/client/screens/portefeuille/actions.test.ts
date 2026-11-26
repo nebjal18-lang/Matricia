@@ -6,7 +6,7 @@ vi.mock("@/modules/client/data/portfolio/server-repository", () => ({ portfolioR
 vi.mock("@/modules/client/data/portfolio/model", async () => import("@/modules/client/data/portfolio/model"));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
 vi.mock("@/modules/shared/lib/supabase/server",()=>({getSupabaseServerClient:async()=>({auth:{getUser:mocks.user},from:()=>{const query={select:()=>query,eq:(field:string,value:string)=>{mocks.budgetFilters.push([field,value]);return query;},maybeSingle:mocks.currency};return query;}})}));
-import { createProject, createSite, linkContract, recordAllocation, saveBudget, scheduleEvent } from "./actions";
+import { createProject, createSite, linkContract, recordAllocation, saveBudget, saveTask, scheduleEvent } from "./actions";
 
 const id = (n: number) => `${String(n).padStart(8, "0")}-0000-4000-8000-000000000000`;
 function form(values: Record<string, string>) { const result = new FormData(); for (const [key, value] of Object.entries(values)) result.set(key, value); return result; }
@@ -30,6 +30,13 @@ describe("client portfolio actions", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
+  it("honors the checked approval after the hidden unchecked fallback", async () => {
+    const submission = form({ ...base, organizationId: id(2), fiscalYear: "2026", currency: "MAD", libraryId: "", siteId: id(3), projectId: "", amount: "1250,05", rationale: "Budget annuel validé", approve: "no" });
+    submission.append("approve", "yes");
+    await expect(saveBudget(idle, submission)).resolves.toEqual({ status: "success" });
+    expect(mocks.rpc).toHaveBeenCalledWith("save_client_annual_budget", expect.objectContaining({ p_approve: true }));
+  });
+
   it("sends an exact minor-unit budget to the audited RPC", async () => {
     await expect(saveBudget(idle, form({ ...base, organizationId: id(2), fiscalYear: "2026", currency: "MAD", libraryId: "", siteId: id(3), projectId: "", amount: "1250,05", rationale: "Budget annuel validé", approve: "yes" }))).resolves.toEqual({ status: "success" });
     expect(mocks.rpc).toHaveBeenCalledWith("save_client_annual_budget", expect.objectContaining({ p_amount_minor: "125005", p_currency: "MAD", p_site_id: id(3), p_approve: true }));
@@ -50,6 +57,21 @@ describe("client portfolio actions", () => {
     await expect(createProject(idle, form({ ...base, organizationId: id(2), projectCode: "PROJET_1", siteId: "", nameFr: "Projet", nameAr: "مشروع", descriptionFr: "Description projet", descriptionAr: "وصف المشروع", startedOn: "2026-12-02", targetEndOn: "2026-12-01", changeReason: "Création initiale" }))).resolves.toEqual({ status: "error", reason: "VALIDATION" });
     await expect(scheduleEvent(idle, form({ ...base, organizationId: id(2), projectId: "", eventType: "CUSTOM", titleFr: "Échéance", titleAr: "موعد", startsAt: "2026-12-02T10:00", endsAt: "2026-12-02T09:00" }))).resolves.toEqual({ status: "error", reason: "VALIDATION" });
     expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("interprets calendar input as Casablanca time independently of the server timezone", async () => {
+    await expect(scheduleEvent(idle, form({ ...base, organizationId: id(2), projectId: "", eventType: "CUSTOM", titleFr: "Échéance", titleAr: "موعد", startsAt: "2024-11-01T10:00", endsAt: "2024-11-01T11:00" }))).resolves.toEqual({ status: "success" });
+    expect(mocks.rpc).toHaveBeenCalledWith("schedule_client_calendar_event", expect.objectContaining({ p_starts_at: "2024-11-01T09:00:00.000Z", p_ends_at: "2024-11-01T10:00:00.000Z" }));
+  });
+
+  it.each(["2024-04-14T02:30", "2024-03-10T02:30"])("refuses nonexistent or ambiguous Moroccan calendar time %s", async startsAt => {
+    await expect(scheduleEvent(idle, form({ ...base, organizationId: id(2), projectId: "", eventType: "CUSTOM", titleFr: "Échéance", titleAr: "موعد", startsAt, endsAt: "" }))).resolves.toEqual({ status: "error", reason: "VALIDATION" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("sends a project milestone deadline as an explicit Casablanca instant", async () => {
+    await expect(saveTask(idle, form({ ...base, projectId: id(2), taskKey: "JALON_1", taskType: "MILESTONE", status: "PENDING", dueAt: "2024-11-01T10:00", titleFr: "Jalon", titleAr: "مرحلة", descriptionFr: "", descriptionAr: "", changeReason: "Planification" }))).resolves.toEqual({ status: "success" });
+    expect(mocks.rpc).toHaveBeenCalledWith("save_client_project_task", expect.objectContaining({ p_due_at: "2024-11-01T09:00:00.000Z" }));
   });
 
   it("requires a positive allocation and a SHA-256 evidence binding", async () => {

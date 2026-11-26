@@ -61,7 +61,7 @@ export default async function Result({ params, searchParams }: { params: Promise
           assistanceHref={assistanceHref}
           evolutionHref={evolutionHref}
           listHref={listHref}
-          anomalyId={query.anomalyId}
+          {...(query.anomalyId === undefined ? {} : {anomalyId:query.anomalyId})}
           scopeName={scopeName}
           decisionKeys={Array.from({ length: 4 }, () => randomUUID())}
         />

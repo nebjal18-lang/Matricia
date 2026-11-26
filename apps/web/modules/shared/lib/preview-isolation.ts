@@ -1,9 +1,9 @@
 type PreviewEnvironment = {
-  VERCEL_ENV?: string;
-  APP_ENV?: string;
-  NEXT_PUBLIC_SUPABASE_URL?: string;
-  STAGING_SUPABASE_PROJECT_REF?: string;
-  PRODUCTION_SUPABASE_PROJECT_REF?: string;
+  VERCEL_ENV?: string | undefined;
+  APP_ENV?: string | undefined;
+  NEXT_PUBLIC_SUPABASE_URL?: string | undefined;
+  STAGING_SUPABASE_PROJECT_REF?: string | undefined;
+  PRODUCTION_SUPABASE_PROJECT_REF?: string | undefined;
 };
 
 /** Documented public staging project (docs/release/STAGING_REPAIR_2026-11-09.md). */
@@ -63,5 +63,16 @@ export function assertPreviewIsolation(environment: PreviewEnvironment): void {
   catch { throw new Error("PREVIEW_STAGING_DATABASE_REQUIRED"); }
   if (url.protocol !== "https:" || url.hostname !== `${staging}.supabase.co` || url.username || url.password || url.port || url.search || url.hash || url.pathname !== "/") {
     throw new Error("PREVIEW_STAGING_DATABASE_REQUIRED");
+  }
+}
+
+/** Reject an insecure public callback origin before a live deployment builds. */
+export function assertProductionAppOrigin(environment: { VERCEL_ENV?: string | undefined; APP_ENV?: string | undefined; NEXT_PUBLIC_APP_URL?: string | undefined }): void {
+  if (environment.VERCEL_ENV !== "production" && environment.APP_ENV?.trim().toLowerCase() !== "production") return;
+  let url: URL;
+  try { url = new URL(environment.NEXT_PUBLIC_APP_URL ?? ""); }
+  catch { throw new Error("PRODUCTION_HTTPS_APP_ORIGIN_REQUIRED"); }
+  if (url.protocol !== "https:" || url.username || url.password || url.port || url.pathname !== "/" || url.search || url.hash) {
+    throw new Error("PRODUCTION_HTTPS_APP_ORIGIN_REQUIRED");
   }
 }

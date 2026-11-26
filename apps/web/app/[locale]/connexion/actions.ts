@@ -1,5 +1,7 @@
 "use server";
 import { ensureCurrentConsentDocuments } from "@/modules/shared/lib/auth/consent/current-documents";
+import { randomUUID } from "node:crypto";
+import { createJsonLogger } from "@matricia/observability";
 
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
@@ -17,7 +19,14 @@ import { getSupabaseAdminClient } from "@/modules/shared/lib/supabase/admin";
 export type OtpRequestResult = { accepted: true } | { accepted: false; reason: "INVALID_EMAIL" | "RATE_LIMITED" | "CONSENT_REQUIRED" | "UNAVAILABLE" };
 export type CompleteLoginResult =
   | { ok: true; destination: string }
-  | { ok: false; reason: "INVALID" | "EXPIRED" | "CONSENT" | "UNAVAILABLE" };
+  | { ok: false; reason: "INVALID" | "EXPIRED" | "CONSENT" | "RATE_LIMITED" | "UNAVAILABLE" };
+
+const logSecurity = createJsonLogger();
+
+function recordLoginFailure(errorCode: "AUTH_PASSWORD_INVALID" | "AUTH_PASSWORD_RATE_LIMITED" | "AUTH_PASSWORD_LIMIT_UNAVAILABLE" | "AUTH_OTP_INVALID" | "AUTH_OTP_EXPIRED" | "AUTH_OTP_RATE_LIMITED" | "AUTH_OTP_LIMIT_UNAVAILABLE") {
+  const requestId = randomUUID();
+  logSecurity("warn", { requestId, correlationId: requestId, event: "auth.login", outcome: "failure", errorCode });
+}
 
 function clientIp(headerStore: Headers): string | null {
   const candidate = headerStore.get("cf-connecting-ip") ?? headerStore.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -105,10 +114,31 @@ export async function completeEmailLogin(
   const token = normalizeOtp(tokenInput, otpLength);
   const locale = isLocale(localeInput) ? localeInput : "fr";
   if (!email || !token) return { ok: false, reason: "INVALID" };
+  let quota: { data: unknown; error: unknown };
+  try {
+    quota = await getSupabaseAdminClient().rpc("reserve_otp_request", {
+      p_identifier: `otp-verify:${email}`,
+      p_client_ip: clientIp(await headers()),
+    });
+  } catch {
+    recordLoginFailure("AUTH_OTP_LIMIT_UNAVAILABLE");
+    return { ok: false, reason: "UNAVAILABLE" };
+  }
+  if (quota.error) {
+    recordLoginFailure("AUTH_OTP_LIMIT_UNAVAILABLE");
+    return { ok: false, reason: "UNAVAILABLE" };
+  }
+  const limit = Array.isArray(quota.data) ? quota.data[0] : quota.data;
+  if (!limit || typeof limit !== "object" || !("allowed" in limit) || limit.allowed !== true) {
+    recordLoginFailure("AUTH_OTP_RATE_LIMITED");
+    return { ok: false, reason: "RATE_LIMITED" };
+  }
   const client = await getSupabaseServerClient();
   const { error } = await client.auth.verifyOtp({ email, token, type: "email" });
   if (error) {
-    return { ok: false, reason: error.code === "otp_expired" ? "EXPIRED" : "INVALID" };
+    const expired = error.code === "otp_expired";
+    recordLoginFailure(expired ? "AUTH_OTP_EXPIRED" : "AUTH_OTP_INVALID");
+    return { ok: false, reason: expired ? "EXPIRED" : "INVALID" };
   }
   if (intentInput === "registration") {
     if (!(await confirmRegistrationConsent())) {
@@ -129,9 +159,34 @@ export async function completePasswordLogin(
   const email = normalizeEmail(emailInput);
   const locale = isLocale(localeInput) ? localeInput : "fr";
   if (!email || passwordInput.length < 12 || passwordInput.length > 72) return { ok: false, reason: "INVALID" };
+  // The trusted, database-backed quota is shared with OTP by IP; a distinct
+  // identifier prefix keeps password attempts from consuming an email's OTP quota.
+  // No password or email is written to application logs.
+  let quota: { data: unknown; error: unknown };
+  try {
+    quota = await getSupabaseAdminClient().rpc("reserve_otp_request", {
+      p_identifier: `password-login:${email}`,
+      p_client_ip: clientIp(await headers()),
+    });
+  } catch {
+    recordLoginFailure("AUTH_PASSWORD_LIMIT_UNAVAILABLE");
+    return { ok: false, reason: "UNAVAILABLE" };
+  }
+  if (quota.error) {
+    recordLoginFailure("AUTH_PASSWORD_LIMIT_UNAVAILABLE");
+    return { ok: false, reason: "UNAVAILABLE" };
+  }
+  const limit = Array.isArray(quota.data) ? quota.data[0] : quota.data;
+  if (!limit || typeof limit !== "object" || !("allowed" in limit) || limit.allowed !== true) {
+    recordLoginFailure("AUTH_PASSWORD_RATE_LIMITED");
+    return { ok: false, reason: "RATE_LIMITED" };
+  }
   const client = await getSupabaseServerClient();
   const { error } = await client.auth.signInWithPassword({ email, password: passwordInput });
-  if (error) return { ok: false, reason: "INVALID" };
+  if (error) {
+    recordLoginFailure(error.status === 429 ? "AUTH_PASSWORD_RATE_LIMITED" : "AUTH_PASSWORD_INVALID");
+    return { ok: false, reason: error.status === 429 ? "RATE_LIMITED" : "INVALID" };
+  }
   return { ok: true, destination: await postLoginDestination(locale, nextPathInput) };
 }
 

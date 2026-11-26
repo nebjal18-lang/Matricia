@@ -1,0 +1,16 @@
+
+> @matricia/web@0.1.0 test C:\Projects\Matricia\Matricia\apps\web
+> vitest run
+
+
+ RUN  v5.0.3 C:/Projects/Matricia/Matricia/apps/web
+
+
+ Test Files  695 passed | 1 skipped (696)
+      Tests  4262 passed | 1 skipped (4263)
+   Start at  09:21:17
+   Duration  53.98s (import 70%, transform 20%, tests 5%, setup 4%, worker 1%)
+
+    Isolate  696 workers spawned · ~604ms startup each (spawn + environment, per file)
+             at least ~14.97s faster with isolate: false — reuses workers across files instead of one per file
+

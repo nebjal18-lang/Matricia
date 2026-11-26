@@ -55,7 +55,8 @@ export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = 
       if (!result.ok) {
         setStatus("error");
         setMessage(
-          result.reason === "EXPIRED" ? messages.rejectedCode
+          result.reason === "RATE_LIMITED" ? messages.rateLimited
+            : result.reason === "EXPIRED" ? messages.rejectedCode
             : result.reason === "CONSENT"
               ? (locale === "fr" ? "Votre acceptation doit être confirmée. Reprenez l’inscription." : "يجب تأكيد قبولكم. يرجى إعادة التسجيل.")
               : messages.genericError,
@@ -90,7 +91,7 @@ export function OtpForm({ locale, nextPath, intent = "login", consentAccepted = 
     setStatus("pending"); setMessage("");
     try {
       const result = await completePasswordLogin(normalizedEmail, password, locale, nextPath);
-      if (!result.ok) { setStatus("error"); setMessage(messages.genericError); return; }
+      if (!result.ok) { setStatus("error"); setMessage(result.reason === "RATE_LIMITED" ? messages.rateLimited : messages.genericError); return; }
       router.replace(result.destination);
       router.refresh();
     } catch { setStatus("error"); setMessage(messages.genericError); }

@@ -58,7 +58,7 @@ export default async function ClientMissionsPage({ params, searchParams }: { par
         decision: result.dashboard.missions.flatMap((mission) => mission.milestones.filter((item) => item.status === "SUBMITTED" || item.status === "IN_REVIEW")).map((item) => ({
           title: item.title,
           context: workflowStatusLabel(item.status,locale),
-          impact: item.dueAt ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(item.dueAt)) : messages.empty,
+          impact: item.dueAt ? new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium" }).format(new Date(item.dueAt)) : messages.empty ?? "?",
           href: `/${locale}/client/missions${space.selectedQuery}`,
         }))[0] ?? null,
         files: result.dashboard.missions.flatMap((mission) => mission.deliverables.map((item) => ({

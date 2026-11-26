@@ -68,7 +68,7 @@ insert into entry_observed values('work-scope',public.declare_provider_work_scop
 ('work-scope-replay',public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',80,'Synthetic small and medium missions',0,'Initial declared work scope','d3450000-0000-4000-8000-000000000030'));
 select is((select v from entry_observed where k='work-scope'),(select v from entry_observed where k='work-scope-replay'),'work scope exact replay does not create a duplicate version');
 select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic small and medium missions',0,'Initial declared work scope','d3450000-0000-4000-8000-000000000030')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','changed work facts cannot reuse operation key');
-select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic new mission scope',0,'Stale concurrent scope edit','d3450000-0000-4000-8000-000000000031')$$,'40001','STALE_PROVIDER_WORK_SCOPE','concurrent work scope preserves current version');
+select throws_ok($$select public.declare_provider_work_scope_v1('d0610000-0000-0000-0000-000000000001',90,'Synthetic new mission scope',0,'Stale concurrent scope edit','d3450000-0000-4000-8000-000000000031')$$,'PT409','STALE_PROVIDER_WORK_SCOPE','concurrent work scope preserves current version');
 insert into entry_observed values('capacity',public.declare_provider_capacity('d0610000-0000-0000-0000-000000000001',null,'AVAILABLE',7,9,'Synthetic global capacity','entry-capacity-0345'));
 -- Read the versioned result in the next logical RPC request.
 -- matricia:test-request-boundary

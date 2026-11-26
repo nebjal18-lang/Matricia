@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { settleVisualState } from "./helpers/settled-visual-state";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
@@ -6,12 +7,13 @@ type Locale = "fr" | "ar";
 type Surface = { name: string; route: string; stateVariable: "E2E_ADMIN_STORAGE_STATE" | "E2E_CLIENT_STORAGE_STATE"; heading: Record<Locale,string>; navigation?: Record<Locale,string> };
 
 const surfaces: Surface[] = [
-  { name: "command center", route: "administration/command-center", stateVariable: "E2E_ADMIN_STORAGE_STATE", heading: { fr: "Administration Matricia", ar: "إدارة ماتريسيا" }, navigation: { fr: "Navigation du command center", ar: "التنقل في مركز القيادة" } },
+  { name: "command center", route: "administration/command-center", stateVariable: "E2E_ADMIN_STORAGE_STATE", heading: { fr: "Centre de pilotage", ar: "مركز القيادة" }, navigation: { fr: "Navigation du command center", ar: "التنقل في مركز القيادة" } },
   { name: "marketing autopilot", route: "administration/marketing-autopilot", stateVariable: "E2E_ADMIN_STORAGE_STATE", heading: { fr: "Marketing Autopilot", ar: "التسويق الآلي" } },
   { name: "diagnostics", route: "client/diagnostics", stateVariable: "E2E_CLIENT_STORAGE_STATE", heading: { fr: "Mes diagnostics", ar: "تشخيصاتي" } },
 ];
 
 async function expectAccessible(page: Page) {
+  await settleVisualState(page);
   const size = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
   expect(size.content).toBeLessThanOrEqual(size.viewport);
   const audit = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
@@ -36,7 +38,9 @@ for (const surface of surfaces) {
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       await expect(page.locator("html")).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
       await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible();
+      await expect(page.locator('[data-slot="alert"].text-destructive, [data-workspace-failure], [data-error-reason]')).toHaveCount(0);
       if (surface.navigation) await expect(page.getByRole("navigation", { name: surface.navigation[locale] })).toBeVisible();
+      await page.getByRole("link").first().focus();
       await page.keyboard.press("Tab");
       await expect(page.locator(":focus")).toBeVisible();
       await expectAccessible(page);

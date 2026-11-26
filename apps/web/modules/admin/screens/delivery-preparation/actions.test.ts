@@ -39,7 +39,7 @@ describe("delivery preparation drafts", () => {
   });
 
   it("maps a stale draft to a conflict", async () => {
-    rpc.mockResolvedValue({ data: null, error: { code: "40001", message: "STALE_DELIVERY_PREPARATION" } });
+    rpc.mockResolvedValue({ data: null, error: { code: "PT409", message: "STALE_DELIVERY_PREPARATION" } });
     await expect(saveDeliveryPreparation(idle, form({ ...base, section: "RELEASE", itemKey: "CNDP", valueText: "Décision à consigner" }))).resolves.toEqual({ status: "error", reason: "CONFLICT" });
   });
 });

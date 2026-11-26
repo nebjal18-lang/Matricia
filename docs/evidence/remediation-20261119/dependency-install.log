@@ -1,0 +1,24 @@
+Scope: all 17 workspace projects
+Progress: resolved 1, reused 0, downloaded 0, added 0
+apps/web                                 |  WARN  deprecated eslint@9.39.4
+Progress: resolved 45, reused 42, downloaded 2, added 0
+Progress: resolved 194, reused 171, downloaded 2, added 0
+Progress: resolved 478, reused 387, downloaded 2, added 0
+Progress: resolved 569, reused 438, downloaded 3, added 0
+Progress: resolved 646, reused 504, downloaded 3, added 0
+Progress: resolved 708, reused 572, downloaded 3, added 0
+ WARN  2 deprecated subdependencies found: crypto-js@4.2.0, jpeg-exif@1.1.4
+Packages: +5 -5
++++++-----
+Progress: resolved 747, reused 587, downloaded 3, added 3
+Progress: resolved 747, reused 587, downloaded 4, added 3
+Progress: resolved 747, reused 587, downloaded 4, added 4
+Progress: resolved 747, reused 587, downloaded 5, added 4
+Progress: resolved 747, reused 587, downloaded 5, added 5
+Progress: resolved 747, reused 587, downloaded 5, added 5, done
+
+devDependencies:
+- next 16.4.1
++ next 16.4.5 (16.4.6 is available)
+
+Done in 2m 48.4s using pnpm v10.17.1

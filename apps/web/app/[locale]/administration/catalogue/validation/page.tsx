@@ -33,7 +33,7 @@ export default async function RuleValidationPage({
   const result = await repository.loadWorkspace(selectedVersionId);
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/catalogue/validation` }));
   const workspace = result.status === "success"
-    ? applyDemoCatalogQuestionsWorkspace(result.value, selectedVersionId)
+    ? applyDemoCatalogQuestionsWorkspace(result.value)
     : null;
 
   return (

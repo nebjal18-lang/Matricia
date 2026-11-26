@@ -45,7 +45,7 @@ export type FranchiseCatalogRow = {
   command?: FranchiseServiceCommand | null;
   reviewEvents?:Array<{id:string;versionId:string;status:string;requestedAt:string;reviewedAt:string|null;comment:string|null}>;
   rulePayload?: {condition_ast: Record<string,unknown>;actions: Array<Record<string,unknown>>;dependency_graph: Record<string,unknown>;priority:number;sensitive:boolean}|null;
-  ruleActions?: Array<{ type: string; target?: string }>;
+  ruleActions?: Array<{ type: string; target?: string | undefined }>;
 };
 
 export type FranchiseQuestionRow = {
@@ -54,8 +54,8 @@ export type FranchiseQuestionRow = {
   status: string;
   label: string;
   help: string;
-  labelFr?: string;
-  labelAr?: string;
+  labelFr?: string | undefined;
+  labelAr?: string | undefined;
   helpFr?: string;
   helpAr?: string;
   versionId?: string | null;
@@ -70,7 +70,7 @@ export type FranchiseHierarchyNode = {
   status?: string;
   draftVersionId?: string | null;
   identityRowVersion?: number;
-  versionRowVersion?: number;
+  versionRowVersion?: number | undefined;
 };
 
 export type FranchiseCategoryNode = FranchiseHierarchyNode & {

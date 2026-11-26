@@ -1,0 +1,17 @@
+begin;
+set local search_path=public,extensions;
+select plan(12);
+select is(private.calculate_tax_minor(112589990684262400,2000),22517998136852480::bigint,'large exact multiple has no extra minor unit');
+select is(private.calculate_tax_minor(-112589990684262400,2000),-22517998136852480::bigint,'large credit is symmetric');
+select is(private.calculate_tax_minor(101,2000),20::bigint,'fraction below half rounds down');
+select is(private.calculate_tax_minor(103,2000),21::bigint,'fraction above half rounds up');
+select is(private.calculate_tax_minor(1,5000),1::bigint,'positive half rounds away from zero');
+select is(private.calculate_tax_minor(-1,5000),-1::bigint,'negative half rounds away from zero');
+select is(private.calculate_tax_minor(9223372036854775807,10000),9223372036854775807::bigint,'maximum bigint at full rate');
+select is(private.calculate_tax_minor('-9223372036854775808'::bigint,10000),'-9223372036854775808'::bigint,'minimum bigint does not overflow before numeric conversion');
+select is(private.calculate_tax_minor(9223372036854775807,0),0::bigint,'zero rate remains exact');
+select is(private.calculate_tax_minor(0,10000),0::bigint,'zero net remains exact');
+select ok(not has_function_privilege('authenticated','private.calculate_tax_minor(bigint,integer)','execute'),'authenticated cannot execute private calculation');
+select ok(not has_function_privilege('anon','private.calculate_tax_minor(bigint,integer)','execute'),'anonymous cannot execute private calculation');
+select * from finish();
+rollback;

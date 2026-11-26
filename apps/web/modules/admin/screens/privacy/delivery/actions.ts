@@ -48,7 +48,7 @@ export async function manageDsrDelivery(_: DsrDeliveryState, form: FormData): Pr
   const {data: auth} = await client.auth.getUser();
   if (!auth.user) return {status: "error", reason: "UNAUTHENTICATED"};
   const result = await client.rpc(rpc, args);
-  if (result.error) return {status: "error", reason: result.error.code === "40001" ? "STALE" : result.error.code === "42501" ? "FORBIDDEN" : result.error.code === "55000" ? "REVIEW_REQUIRED" : "FAILED"};
+  if (result.error) return {status: "error", reason: (result.error.code === "40001" || result.error.code === "PT409") ? "STALE" : result.error.code === "42501" ? "FORBIDDEN" : result.error.code === "55000" ? "REVIEW_REQUIRED" : "FAILED"};
   if (expected.length ? !z.object({outcome: z.string().refine((value) => expected.includes(value))}).safeParse(result.data).success : !z.number().int().positive().safeParse(result.data).success) return {status: "error", reason: "FAILED"};
   revalidatePath(`/${locale.data}/confidentialite/demandes`);
   revalidatePath(`/${locale.data}/administration/confidentialite/remise`);

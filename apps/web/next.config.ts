@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 import { resolve } from "node:path";
 import { resolvePublicSupabaseEnvironment } from "./modules/shared/lib/public-supabase-environment";
 import { paymentFormActionPolicy } from "./modules/shared/lib/payment-form-policy";
-import { applyPreviewIsolationDefaults, assertPreviewIsolation } from "./modules/shared/lib/preview-isolation";
+import { applyPreviewIsolationDefaults, assertPreviewIsolation, assertProductionAppOrigin } from "./modules/shared/lib/preview-isolation";
 
 loadEnvConfig(resolve(import.meta.dirname, "../.."), process.env.NODE_ENV !== "production", console, true);
 
@@ -30,6 +30,11 @@ assertPreviewIsolation({
   STAGING_SUPABASE_PROJECT_REF: process.env.STAGING_SUPABASE_PROJECT_REF,
   PRODUCTION_SUPABASE_PROJECT_REF: process.env.PRODUCTION_SUPABASE_PROJECT_REF,
 });
+assertProductionAppOrigin({
+  VERCEL_ENV: process.env.VERCEL_ENV,
+  APP_ENV: process.env.APP_ENV,
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+});
 const isProduction = process.env.NODE_ENV === "production";
 const isVercelPreview = process.env.VERCEL_ENV === "preview";
 const vercelLive = "https://vercel.live";
@@ -52,6 +57,7 @@ const contentSecurityPolicy = [
 const securityHeaders = [
   { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "x-vercel-skip-toolbar", value: "1" },
   {
@@ -67,6 +73,7 @@ const longLivedAssetCache = [{ key: "Cache-Control", value: "public, max-age=315
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   // Preview comments patch static files after upload. Immutable assets reject that patch.
   supportsImmutableAssets: false,
   serverExternalPackages:["pdfmake","@fontsource/noto-sans-arabic"],

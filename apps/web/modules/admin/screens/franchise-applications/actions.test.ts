@@ -62,7 +62,7 @@ describe("franchise application mandate proposal", () => {
   });
 
   it("maps a stale dossier to a conflict", async () => {
-    rpc.mockResolvedValue({ data: null, error: { code: "40001", message: "STALE_FRANCHISE_APPLICATION" } });
+    rpc.mockResolvedValue({ data: null, error: { code: "PT409", message: "STALE_FRANCHISE_APPLICATION" } });
     await expect(proposeFranchiseFromApplication(idle, form(proposal))).resolves.toEqual({ status: "error", reason: "CONFLICT" });
     expect(deliverNotification).not.toHaveBeenCalled();
   });

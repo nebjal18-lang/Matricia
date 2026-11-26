@@ -1,14 +1,11 @@
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { ClientHomeSnapshot } from "./repository";
+import { isDemoAccessEnabled } from "@/modules/shared/lib/demo-access";
 
-const allowedDemoAppEnvs = new Set(["development", "staging", "test"]);
-
-/** Same gate as connexion demo: require allowlisted APP_ENV + flag; never production/Vercel prod. */
+/** Use the same demo gate as the login page. */
 export function isDemoClientHomeEnabled() {
-  if (process.env.APP_ENV === "production" || process.env.VERCEL_ENV === "production") return false;
-  if (!process.env.APP_ENV || !allowedDemoAppEnvs.has(process.env.APP_ENV)) return false;
-  return process.env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
+  return isDemoAccessEnabled();
 }
 
 export function isDemoClientOrganization(name: string | null) {

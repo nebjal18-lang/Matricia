@@ -22,7 +22,7 @@ export function mediaBytesValid(bytes:Uint8Array,mediaType:string) {
 }
 export function sha256(bytes:Uint8Array|string){return createHash("sha256").update(bytes).digest("hex");}
 async function nativeRequest(credential:MetaCredential,path:string,request:typeof fetch,body?:URLSearchParams):Promise<{data:unknown;hash:string}> {
- const response=await request(`https://graph.facebook.com/${credential.graphVersion}/${path}`,{method:body?"POST":"GET",headers:{authorization:`Bearer ${credential.accessToken}`,...(body?{"content-type":"application/x-www-form-urlencoded"}:{})},body:body?.toString(),redirect:"error",signal:AbortSignal.timeout(META_STEP_TIMEOUT_MS)});
+ const response=await request(`https://graph.facebook.com/${credential.graphVersion}/${path}`,{method:body?"POST":"GET",headers:{authorization:`Bearer ${credential.accessToken}`,...(body?{"content-type":"application/x-www-form-urlencoded"}:{})},...(body ? {body:body.toString()} : {}),redirect:"error",signal:AbortSignal.timeout(META_STEP_TIMEOUT_MS)});
  if(!response.ok)throw new MetaMediaError(body?"META_POST_RESULT_UNKNOWN":"META_NATIVE_LOOKUP_FAILED");
  const reader=response.body?.getReader();if(!reader)throw new MetaMediaError("META_NATIVE_RESPONSE_INVALID");
  const chunks:Uint8Array[]=[];let size=0;for(;;){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.length;if(size>256*1024){await reader.cancel();throw new MetaMediaError("META_NATIVE_RESPONSE_TOO_LARGE");}chunks.push(chunk.value);}

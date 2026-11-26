@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "suite": "admin-decisions",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:18:39.545Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:17:51.857Z",
+    "finishedAt": "2026-11-23T22:18:38.427Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realNativeWorkItems": 8,
+    "realUiClaims": 8,
+    "realUiHumanResolutions": 8,
+    "versionedWorkHistory": true,
+    "correlatedOpenAndResolveOutbox": true,
+    "claimReplayAfterResolution": true,
+    "staleClaimDenied": true,
+    "foreignReadAndWriteDenied": true,
+    "automaticSanctions": false,
+    "stage": "native-proof",
+    "assertionLabel": null,
+    "assertionActual": null,
+    "assertionExpected": null,
+    "failureLine": null,
+    "responseCode": null,
+    "responseLabel": null
+  }
+}

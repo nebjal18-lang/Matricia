@@ -1,8 +1,8 @@
 export type EmailOtpLength = 6 | 7 | 8;
 
 type OtpLengthEnv = {
-  AUTH_EMAIL_OTP_LENGTH?: string;
-  VERCEL_ENV?: string;
+  AUTH_EMAIL_OTP_LENGTH?: string | undefined;
+  VERCEL_ENV?: string | undefined;
 };
 
 /** Server-owned configuration, aligned with the Auth provider. */

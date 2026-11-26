@@ -1,0 +1,8 @@
+{
+  "command": "corepack pnpm exec playwright test tests/e2e/public/diagnostic-need-integrity.spec.ts --workers=2 --reporter=json --output docs/audits/2026-11-19-audit-360-b578c75c/evidence/e2e-integrity-artifacts",
+  "startedAt": "2026-11-19T13:26:42.347Z",
+  "finishedAt": "2026-11-19T13:27:18.166Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 1,
+  "scope": "Anonymous FR/AR desktop+360 on isolated Node22 source checkout; integrity suite explicitly asserts no mutation requests"
+}

@@ -1,0 +1,12 @@
+{
+  "task": "dependency-install",
+  "command": [
+    "pnpm",
+    "install",
+    "--no-frozen-lockfile"
+  ],
+  "startedAt": "2026-11-19T14:00:06.023Z",
+  "finishedAt": "2026-11-19T14:02:54.710Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

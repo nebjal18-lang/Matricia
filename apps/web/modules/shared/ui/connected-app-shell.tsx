@@ -67,14 +67,15 @@ export async function ConnectedAppShell({
   }
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: returnPath }));
   const alternateHref = translateLocalPath(returnPath, locale, locale === "fr" ? "ar" : "fr");
+  const resolvedKicker = kicker ?? (space.organizationName ? organizationDisplayLabel(space.organizationName, locale) : undefined);
   const shared = {
     locale,
     selectedQuery: space.selectedQuery,
     selectedOrganizationId: space.selectedOrganizationId,
     userEmail: space.userEmail,
     title,
-    lead,
-    kicker: kicker ?? (space.organizationName ? organizationDisplayLabel(space.organizationName, locale) : undefined),
+    ...(lead === undefined ? {} : { lead }),
+    ...(resolvedKicker === undefined ? {} : { kicker: resolvedKicker }),
     actions,
     alternateHref,
     languagePath: returnPath,
@@ -88,5 +89,5 @@ export async function ConnectedAppShell({
   if (kind === "franchise") {
     return <FranchiseAppShell {...shared} active={franchiseActive} />;
   }
-  return <ClientAppShell {...shared} organizationName={space.organizationName} active={clientActive} />;
+  return <ClientAppShell {...shared} organizationName={space.organizationName} {...(clientActive === undefined ? {} : { active: clientActive })} />;
 }

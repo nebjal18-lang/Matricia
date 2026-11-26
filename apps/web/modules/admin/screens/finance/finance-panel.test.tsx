@@ -79,6 +79,20 @@ const dashboard: AdminFinanceDashboard = {
 };
 
 describe("FinancePanel mockup board", () => {
+  it("only offers invoices matching the payment organization and currency", () => {
+    const reference = dashboard.provider_invoices[0];
+    if (!reference) throw new Error("INVOICE_FIXTURE_REQUIRED");
+    const value = { ...dashboard, provider_invoices: [
+      { ...reference, id: "66666666-6666-4666-8666-666666666666", organization_id: id, invoice_number: "FOREIGN-ORG" },
+      { ...reference, id: "77777777-7777-4777-8777-777777777777", currency: "EUR", invoice_number: "FOREIGN-CURRENCY" },
+      reference,
+    ] };
+    const html = renderToStaticMarkup(createElement(FinancePanel, { locale: "fr", dashboard: value, m: getAdminFinanceMessages("fr"), identity: { idempotencyKey: id, correlationId: id } }));
+    const select = html.match(/<select[^>]*name="invoiceId"[^>]*>([\s\S]*?)<\/select>/u)?.[1];
+    expect(select).toContain("INV-12");
+    expect(select).not.toContain("FOREIGN-ORG");
+    expect(select).not.toContain("FOREIGN-CURRENCY");
+  });
   it("montre KPI, file à traiter, rail rapprochement, sorties et historique", () => {
     const html = renderToStaticMarkup(
       createElement(FinancePanel, {

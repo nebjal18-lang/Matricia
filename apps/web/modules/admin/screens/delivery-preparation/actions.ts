@@ -8,7 +8,7 @@ export type PreparationState = { status: "idle" } | { status: "success" } | { st
 
 function reason(code: string, message: string): "VALIDATION" | "DENIED" | "CONFLICT" | "UNAVAILABLE" {
   if (code === "42501" || message.includes("DENIED")) return "DENIED";
-  if (code === "40001" || message.includes("STALE")) return "CONFLICT";
+  if ((code === "40001" || code === "PT409") || message.includes("STALE")) return "CONFLICT";
   if (code === "22023" || message.includes("INVALID")) return "VALIDATION";
   return "UNAVAILABLE";
 }

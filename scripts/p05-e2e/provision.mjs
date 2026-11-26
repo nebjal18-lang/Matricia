@@ -88,7 +88,7 @@ async function authenticate(config, email, password, admin) {
   return context;
 }
 
-async function elevateToAal2(context) {
+export async function elevateToAal2(context) {
   const enrollment = await context.client.auth.mfa.enroll({ factorType: "totp", friendlyName: `p05-e2e-${randomUUID()}` });
   const secret = enrollment.data?.totp?.secret;
   const factorId = enrollment.data?.id;
@@ -104,7 +104,7 @@ async function elevateToAal2(context) {
   return { factorId, secret, verifiedCounter };
 }
 
-function toPlaywrightState(cookies, baseUrl) {
+export function toPlaywrightState(cookies, baseUrl) {
   const origin = new URL(baseUrl);
   return { cookies: [...cookies.values()].map(({ name, value, options = {} }) => ({
     name, value, domain: origin.hostname, path: options.path || "/",

@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-11-19T13:33:31.332Z",
+  "nodeVersion": "v22.23.5",
+  "protocol": "Imports execute actual unmodified source functions; pagination uses synthetic in-memory transport, not measured network latency",
+  "money": {
+    "minorA": "9007199254740992",
+    "minorB": "9007199254740993",
+    "displayedA": "90.071.992.547.409,92 MAD",
+    "displayedB": "90.071.992.547.409,92 MAD",
+    "collapsedDistinctMinorAmounts": true
+  },
+  "civilTime": {
+    "instant": "2026-03-01T23:30:00Z",
+    "application": "2 mar. 2026, 00:30",
+    "intlAfricaCasablanca": "1 mar. 2026, 23:30",
+    "nodeTzdata": "2026e"
+  },
+  "pagination": {
+    "totalRows": 100000,
+    "calls": 201,
+    "pageSize": 500
+  },
+  "compilerOptions": [
+    {
+      "file": "tsconfig.json",
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "exactOptionalPropertyTypes": true,
+      "noImplicitOverride": true,
+      "noFallthroughCasesInSwitch": true
+    },
+    {
+      "file": "apps/web/tsconfig.json",
+      "strict": true,
+      "noUncheckedIndexedAccess": false,
+      "exactOptionalPropertyTypes": false,
+      "noImplicitOverride": false,
+      "noFallthroughCasesInSwitch": false
+    },
+    {
+      "file": "apps/worker/tsconfig.json",
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "exactOptionalPropertyTypes": true,
+      "noImplicitOverride": true,
+      "noFallthroughCasesInSwitch": true
+    }
+  ]
+}

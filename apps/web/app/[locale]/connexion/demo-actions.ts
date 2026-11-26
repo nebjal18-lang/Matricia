@@ -12,6 +12,7 @@ import { ensureDemoRegionalActor } from "./demo-regional-ensure";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { postLoginDestination } from "./actions";
 import { elevateDemoSession } from "./demo-assurance";
+import { findDemoIdentity, isDemoIdentity } from "./demo-identity";
 
 function parsePersona(value: FormDataEntryValue | null): DemoPersona | null {
   return value === "client" || value === "provider" || value === "franchise" || value === "admin" ? value : null;
@@ -27,26 +28,11 @@ export async function connectDemoPersona(formData: FormData): Promise<void> {
 
   const email = demoPersonaEmail(persona);
   const admin = getSupabaseAdminClient();
-  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
-  const tokenHash = data?.properties?.hashed_token;
-  if (error || !tokenHash) redirect(failure("unavailable"));
-
-  const supabase = await getSupabaseServerClient();
-  const { data: session, error: sessionError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-  const userId = session?.user?.id;
-  if (sessionError || !userId) redirect(failure("unavailable"));
-  const elevated = await elevateDemoSession({ email, userId, supabase, admin });
-  if (!elevated) redirect(failure("unavailable"));
-  const authorized = await ensureDemoPersonaAuthorization({ persona, userId, admin });
+  const identity = await findDemoIdentity(admin, email, persona);
+  if (!identity) redirect(failure("role-missing"));
+  const authorized = await ensureDemoPersonaAuthorization({ persona, userId: identity.id, admin });
   if (!authorized) redirect(failure("role-missing"));
-
-  const destination = demoPersonaHome(persona, locale);
-  const workspace = demoPersonaWorkspace(persona);
-  const resolved = await postLoginDestination(locale, destination, workspace);
-  if (resolved.includes("navigation=role-fallback") || (workspace === "administration" && !resolved.includes("/administration/"))) {
-    redirect(failure("role-missing"));
-  }
-  redirect(resolved);
+  await connectValidatedDemo({ admin, email, userId: identity.id, persona, locale, failure });
 }
 
 /** Connexion démo ciblée : franchisé / ST / client d’une région. */
@@ -66,21 +52,61 @@ export async function connectDemoRegionalActor(formData: FormData): Promise<void
   const ensured = await ensureDemoRegionalActor({ admin, actor });
   if (!ensured) redirect(failure("unavailable"));
 
-  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email: actor.email });
+  const identity = await findDemoIdentity(admin, actor.email, actor.persona);
+  if (!identity || identity.id !== ensured.userId) redirect(failure("role-missing"));
+  await connectValidatedDemo({ admin, email: actor.email, userId: identity.id, persona: actor.persona, locale, failure, organizationId: ensured.organizationId });
+}
+
+async function connectValidatedDemo(input: {
+  admin: ReturnType<typeof getSupabaseAdminClient>;
+  email: string;
+  userId: string;
+  persona: DemoPersona;
+  locale: "fr" | "ar";
+  failure: (reason: string) => string;
+  organizationId?: string;
+}): Promise<void> {
+  const { admin, email, userId, persona, locale, failure } = input;
+  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
   const tokenHash = data?.properties?.hashed_token;
-  if (error || !tokenHash) redirect(failure("unavailable"));
+  if (error || !tokenHash || !data.user || data.user.id !== userId || !isDemoIdentity(data.user, email, persona)) {
+    redirect(failure("unavailable"));
+  }
 
   const supabase = await getSupabaseServerClient();
-  const { data: session, error: sessionError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-  const userId = session?.user?.id;
-  if (sessionError || !userId) redirect(failure("unavailable"));
-  const elevated = await elevateDemoSession({ email: actor.email, userId, supabase, admin });
-  if (!elevated) redirect(failure("unavailable"));
-
-  const destination = demoPersonaHome(actor.persona, locale);
-  const workspace = demoPersonaWorkspace(actor.persona);
-  const withOrg = `${destination}${destination.includes("?") ? "&" : "?"}organizationId=${encodeURIComponent(ensured.organizationId)}`;
-  const resolved = await postLoginDestination(locale, withOrg, workspace);
-  if (resolved.includes("navigation=role-fallback")) redirect(failure("role-missing"));
-  redirect(resolved);
+  let resolved: string | null = null;
+  let reason = "unavailable";
+  try {
+    const session = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+    const user = session.data?.user;
+    if (!session.error && user?.id === userId && isDemoIdentity(user, email, persona)) {
+      if (await elevateDemoSession({ email, userId, supabase, admin })) {
+        const destination = demoPersonaHome(persona, locale);
+        const workspace = demoPersonaWorkspace(persona);
+        const withOrg = input.organizationId
+          ? destination + (destination.includes("?") ? "&" : "?") + "organizationId=" + encodeURIComponent(input.organizationId)
+          : destination;
+        const candidate = await postLoginDestination(locale, withOrg, workspace);
+        const safeCandidate = safeReturnPath(candidate, locale);
+        const target = safeCandidate ? new URL(safeCandidate, "https://matricia.invalid") : null;
+        const expected = new URL(withOrg, "https://matricia.invalid");
+        // Only the requested workspace home completes login. Login, MFA and
+        // unavailable redirects are refusals even when they contain our next URL.
+        if (!target || target.pathname !== expected.pathname
+          || target.searchParams.get("workspace") !== expected.searchParams.get("workspace")
+          || target.searchParams.has("demo")
+          || target.searchParams.get("navigation") === "role-fallback") {
+          reason = "role-missing";
+        } else {
+          resolved = candidate;
+        }
+      }
+    }
+  } catch {
+    // Auth/service failures never leave a partially established demo session.
+    reason = "unavailable";
+  } finally {
+    if (!resolved) await supabase.auth.signOut({ scope: "local" });
+  }
+  redirect(resolved ?? failure(reason));
 }

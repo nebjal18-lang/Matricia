@@ -79,10 +79,10 @@ export function FranchiseMandateSelector({
   returnPath: string;
 }) {
   const options = mandates?.filter((item) => item.organizationId === organizationId) ?? [];
-  if (options.length < 2) return null;
   const c = copy[locale];
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  if (options.length < 2) return null;
   const base = returnPath.split("?")[0] ?? returnPath;
   const landHash = franchiseContextLandHash(base);
 
@@ -98,7 +98,7 @@ export function FranchiseMandateSelector({
   }
 
   return (
-    <form dir={locale === "ar" ? "rtl" : "ltr"} onSubmit={onSubmit} className="client-card mx-4 flex flex-wrap items-end gap-3" aria-label={c.mandate}>
+    <form action={base} method="get" dir={locale === "ar" ? "rtl" : "ltr"} onSubmit={onSubmit} className="client-card mx-4 flex flex-wrap items-end gap-3" aria-label={c.mandate}>
       <input type="hidden" name="organizationId" value={organizationId ?? ""} />
       <div className="grid min-w-0 flex-1 gap-2">
         <Label htmlFor="franchise-mandate-context">{c.mandate}</Label>
@@ -131,10 +131,10 @@ export function FranchiseOrganizationSelector({
   selectedOrganizationId: string | null;
   returnPath: string;
 }) {
-  if (organizations.length < 2) return null;
   const c = copy[locale];
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  if (organizations.length < 2) return null;
   const base = returnPath.split("?")[0] ?? returnPath;
   const landHash = franchiseContextLandHash(base);
 
@@ -149,7 +149,7 @@ export function FranchiseOrganizationSelector({
   }
 
   return (
-    <form onSubmit={onSubmit} className="client-card mx-4 flex flex-wrap items-end gap-3" aria-label={c.organization}>
+    <form action={base} method="get" dir={locale === "ar" ? "rtl" : "ltr"} onSubmit={onSubmit} className="client-card mx-4 flex flex-wrap items-end gap-3" aria-label={c.organization}>
       <div className="grid min-w-0 flex-1 gap-2">
         <Label htmlFor="franchise-organization-context">{c.organization}</Label>
         <NativeSelect id="franchise-organization-context" name="organizationId" required defaultValue={selectedOrganizationId ?? ""}>

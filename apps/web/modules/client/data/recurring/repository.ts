@@ -33,7 +33,7 @@ function failure(error: Query["error"]): RecurringResult<never> {
   const known: Array<[string, RecurringFailure]> = [["SERVICE_NOT_RECURRING_ELIGIBLE", "NOT_ELIGIBLE"], ["RECURRING_PLAN_NOT_ACTIVE", "NOT_ACTIVE"], ["INVALID_RECURRING_TRANSITION", "INVALID_TRANSITION"], ["RECURRING_GENERATION_BOUNDS_EXCEEDED", "BOUNDS_EXCEEDED"], ["RECURRING_TOTAL_ITERATION_LIMIT_REACHED", "BOUNDS_EXCEEDED"], ["STALE_RECURRING_PLAN_VERSION", "CONFLICT"], ["IDEMPOTENCY_PAYLOAD_MISMATCH", "CONFLICT"], ["IDEMPOTENCY_IN_PROGRESS", "CONFLICT"]];
   const domain = known.find(([code]) => message.includes(code));
   if (domain) return { status: "error", reason: domain[1] };
-  return { status: "error", reason: error?.code === "42501" ? "FORBIDDEN" : error?.code === "40001" ? "CONFLICT" : error?.code === "22023" ? "INVALID_INPUT" : "UNAVAILABLE" };
+  return { status: "error", reason: error?.code === "42501" ? "FORBIDDEN" : (error?.code === "40001" || error?.code === "PT409") ? "CONFLICT" : error?.code === "22023" ? "INVALID_INPUT" : "UNAVAILABLE" };
 }
 
 function parseRows<T>(schema: z.ZodType<T>, query: Query, max: number): RecurringResult<T[]> {

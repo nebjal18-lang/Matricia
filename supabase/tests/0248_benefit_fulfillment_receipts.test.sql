@@ -45,7 +45,7 @@ select throws_ok($$select public.advance_benefit_fulfillment_v1(pg_temp.benefit_
 select pg_temp.benefit_actor(1,'aal1');
 select throws_ok($$select public.advance_benefit_fulfillment_v1(pg_temp.benefit_id(),pg_temp.benefit_version(),'START',null,'Weak operator is refused','benefit248-aal1-deny')$$,'42501','BENEFIT_OPERATIONS_MFA_REQUIRED','operational mutations require MFA');
 select pg_temp.benefit_actor(1);
-select throws_ok($$select public.advance_benefit_fulfillment_v1(pg_temp.benefit_id(),0,'SCHEDULE',clock_timestamp(),'Stale schedule refused','benefit248-stale')$$,'40001','STALE_BENEFIT_REDEMPTION','schedule binds the exact current version');
+select throws_ok($$select public.advance_benefit_fulfillment_v1(pg_temp.benefit_id(),0,'SCHEDULE',clock_timestamp(),'Stale schedule refused','benefit248-stale')$$,'PT409','STALE_BENEFIT_REDEMPTION','schedule binds the exact current version');
 select throws_ok($$select public.advance_benefit_fulfillment_v1(pg_temp.benefit_id(),pg_temp.benefit_version(),'START',null,'No schedule is not executable','benefit248-order')$$,'55000','BENEFIT_NOT_READY_TO_START','the start cannot skip scheduling');
 select throws_ok($$select public.advance_benefit_fulfillment_v1(pg_temp.benefit_id(),pg_temp.benefit_version(),'SCHEDULE',clock_timestamp()+interval'8 days','Beyond reserved duration','benefit248-deadline')$$,'55000','INVALID_BENEFIT_SCHEDULE','schedule cannot exceed the actual reservation');
 select public.advance_benefit_fulfillment_v1(pg_temp.benefit_id(),pg_temp.benefit_version(),'SCHEDULE',clock_timestamp()-interval'1 second','Execution scheduled during the test','benefit248-schedule');
@@ -63,7 +63,7 @@ select throws_ok($$select public.list_benefit_fulfillment_v1('b2480000-0000-4000
 select pg_temp.benefit_actor(3,'aal1');
 select throws_ok($$select public.decide_my_benefit_delivery_v1((select(v->>'proposal_id')::uuid from benefit248 where k='proposal'),(select v->>'source_hash'from benefit248 where k='proposal'),pg_temp.benefit_version(),true,'A fresh AAL1 client still needs MFA','benefit248-client-aal1')$$,'42501','BENEFIT_INDEPENDENT_CLIENT_RECEIPT_REQUIRED','receipt requires client MFA');
 select pg_temp.benefit_actor(3);
-select throws_ok($$select public.decide_my_benefit_delivery_v1((select(v->>'proposal_id')::uuid from benefit248 where k='proposal'),repeat('0',64),pg_temp.benefit_version(),true,'Changed report hash is not acceptable','benefit248-hash')$$,'40001','STALE_BENEFIT_DELIVERY_PROPOSAL','receipt binds the immutable report hash');
+select throws_ok($$select public.decide_my_benefit_delivery_v1((select(v->>'proposal_id')::uuid from benefit248 where k='proposal'),repeat('0',64),pg_temp.benefit_version(),true,'Changed report hash is not acceptable','benefit248-hash')$$,'PT409','STALE_BENEFIT_DELIVERY_PROPOSAL','receipt binds the immutable report hash');
 insert into benefit248 values('reject',public.decide_my_benefit_delivery_v1((select(v->>'proposal_id')::uuid from benefit248 where k='proposal'),(select v->>'source_hash'from benefit248 where k='proposal'),pg_temp.benefit_version(),false,'La prestation requiert encore un complément réel','benefit248-reject'));
 select is((select status from public.benefit_redemptions where id=pg_temp.benefit_id()),'IN_PROGRESS','rejection leaves the unfinished service in progress');
 select pg_temp.benefit_actor(2);

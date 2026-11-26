@@ -45,18 +45,18 @@ export function ProviderInboxBoard({
   threads: InboxThread[];
   conversation: ThreadConversation | null;
   options: ThreadOption[];
-  preferredRfqId?: string;
+  preferredRfqId?: string | undefined;
   notifications?: readonly ProviderInboxNotification[];
   organizationId?: string | null;
   search?: string;
   page?: number;
-  total?: number;
-  pageSize?: number;
-  inboxError?: MessagingFailure;
-  conversationError?: MessagingFailure;
+  total?: number | undefined;
+  pageSize?: number | undefined;
+  inboxError?: MessagingFailure | undefined;
+  conversationError?: MessagingFailure | undefined;
   optionsError?: boolean;
   notificationsUnavailable?: boolean;
-  history?: ThreadPage;
+  history?: ThreadPage | undefined;
 }) {
   const m = getMessagingMessages(locale);
   const n = getNotificationMessages(locale);

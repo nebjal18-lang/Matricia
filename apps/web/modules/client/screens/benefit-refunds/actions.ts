@@ -19,7 +19,7 @@ export async function manageBenefitRefund(_:RefundState,form:FormData):Promise<R
   name="decide_benefit_refund_v1";args={p_request_id:review.data.id,p_expected_hash:review.data.hash,p_approve:v.intent==="approve",p_reason:v.reason,p_idempotency_key:v.key};outcome=v.intent==="approve"?"BENEFIT_REFUNDED":"BENEFIT_REFUND_REJECTED";
  }
  const r=await c.rpc(name,args);
- if(r.error){const message=r.error.message??"";return{status:"error",reason:r.error.code==="42501"?"FORBIDDEN":r.error.code==="40001"?"STALE":/EXPIRED|ELAPSED/u.test(message)?"EXPIRED":/POLICY|ATTRIBUTION|BOOK_CLOSED|FUNDING/u.test(message)?"POLICY":"FAILED"};}
+ if(r.error){const message=r.error.message??"";return{status:"error",reason:r.error.code==="42501"?"FORBIDDEN":(r.error.code==="40001" || r.error.code === "PT409")?"STALE":/EXPIRED|ELAPSED/u.test(message)?"EXPIRED":/POLICY|ATTRIBUTION|BOOK_CLOSED|FUNDING/u.test(message)?"POLICY":"FAILED"};}
  if(!z.object({outcome:z.literal(outcome),redemption_id:z.literal(v.id)}).safeParse(r.data).success)return{status:"error",reason:"FAILED"};
  for(const path of[`/${v.locale}/client/avantages/remboursements`,`/${v.locale}/administration/avantages/remboursements`,`/${v.locale}/client/credits`,`/${v.locale}/client/boxes`,`/${v.locale}/client/avantages/livraisons`])revalidatePath(path);
  return{status:"success",outcome};

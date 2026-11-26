@@ -31,7 +31,7 @@ async function rpc(name: string, args: Record<string, unknown>) {
     if (/MFA_REQUIRED/.test(result.error.message ?? "")) return { status: "error" as const, reason: "MFA_REQUIRED" as const };
     if (result.error.code === "54000") return { status: "error" as const, reason: "RATE_LIMITED" as const };
     if (result.error.code === "42501") return { status: "error" as const, reason: "FORBIDDEN" as const };
-    if (["40001", "23505", "23514"].includes(result.error.code ?? "") || /STALE|IDEMPOTENCY|TRANSITION/i.test(result.error.message ?? "")) {
+    if (["40001", "PT409", "23505", "23514"].includes(result.error.code ?? "") || /STALE|IDEMPOTENCY|TRANSITION/i.test(result.error.message ?? "")) {
       return { status: "error" as const, reason: "CONFLICT" as const };
     }
     return { status: "error" as const, reason: "FAILED" as const };

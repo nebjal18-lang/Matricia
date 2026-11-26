@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-11-19T13:33:34.297Z",
+  "records": [
+    {
+      "locale": "fr",
+      "path": "",
+      "width": 1024,
+      "viewport": 1024,
+      "content": 1046,
+      "overflowing": [
+        {
+          "tag": "NAV",
+          "class": "hidden items-center gap-1 lg:flex",
+          "text": "Comment ça marcheEntreprisesProfessionnelsFranchiseAbonnementsÀ proposFR|ARSe connecterCréer un comp"
+        },
+        {
+          "tag": "A",
+          "class": "premium-nav-action",
+          "text": "Créer un compte"
+        },
+        {
+          "tag": "svg",
+          "class": "",
+          "text": ""
+        },
+        {
+          "tag": "path",
+          "class": "",
+          "text": ""
+        },
+        {
+          "tag": "IMG",
+          "class": "home-premium-shell-module__eETGcG__heroPhoto",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "path": "/diagnostic",
+      "width": 1024,
+      "viewport": 1024,
+      "content": 1026,
+      "overflowing": [
+        {
+          "tag": "NAV",
+          "class": "hidden items-center gap-1 lg:flex",
+          "text": "Comment ça marcheEntreprisesProfessionnelsFranchiseAbonnementsÀ proposFR|ARSe connecterCréer un comp"
+        },
+        {
+          "tag": "A",
+          "class": "premium-nav-action",
+          "text": "Créer un compte"
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "width": 360,
+      "afterSkipNextTab": {
+        "tag": "A",
+        "text": "Analyser mon entreprise",
+        "href": "/fr/diagnostic"
+      },
+      "menu": {
+        "expanded": "true",
+        "afterEscapeExpanded": "false",
+        "focusReturned": true
+      }
+    },
+    {
+      "locale": "ar",
+      "path": "",
+      "width": 1024,
+      "viewport": 1024,
+      "content": 1024,
+      "overflowing": [
+        {
+          "tag": "IMG",
+          "class": "home-premium-shell-module__eETGcG__heroPhoto",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "locale": "ar",
+      "path": "/diagnostic",
+      "width": 1024,
+      "viewport": 1024,
+      "content": 1024,
+      "overflowing": []
+    },
+    {
+      "locale": "ar",
+      "width": 360,
+      "afterSkipNextTab": {
+        "tag": "A",
+        "text": "تحليل مؤسستي",
+        "href": "/ar/diagnostic"
+      },
+      "menu": {
+        "expanded": "true",
+        "afterEscapeExpanded": "false",
+        "focusReturned": true
+      }
+    }
+  ]
+}

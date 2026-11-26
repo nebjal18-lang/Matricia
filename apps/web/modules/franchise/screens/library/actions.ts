@@ -15,7 +15,7 @@ export type FranchiseServiceActionState =
 
 export type FranchiseSimulationActionState =
   | { status: "idle" }
-  | { status: "success"; detail: string; evaluation?: {scoreBasisPoints:number;engineVersion:string;actions:Array<{type:string;target?:string;[key:string]:unknown}>} }
+  | { status: "success"; detail: string; evaluation?: {scoreBasisPoints:number;engineVersion:string;actions:Array<{type:string;target?:string|undefined;[key:string]:unknown}>} }
   | { status: "error"; reason: "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "UNAVAILABLE" | "CONFLICT" | "LOCKED" | "MANDATE_REQUIRED" };
 
 const createSchema = z.object({
@@ -224,12 +224,12 @@ function formValues(formData: FormData) {
 
 function mapRpcError(code: string | undefined, message: string | undefined): Extract<FranchiseServiceActionState, { status: "error" }>["reason"] {
   if (code === "42501") return "FORBIDDEN";
-  if (code === "40001" || code === "23P01" || /STALE|IDEMPOTENCY|SCHEDULE_CONFLICT/i.test(message ?? "")) return "CONFLICT";
+  if ((code === "40001" || code === "PT409") || code === "23P01" || /STALE|IDEMPOTENCY|SCHEDULE_CONFLICT/i.test(message ?? "")) return "CONFLICT";
   if (code === "55000" || code === "23514" || /INVALID_CATALOG_VERSION_STATE|NOT_CURRENT|INCOMPLETE_CATALOG_RELEASE|CATALOG_AR_REVIEW_REQUIRED|INVALID_CATALOG_RELEASE|CATALOG_SERVICE_ARCHIVE_BLOCKED|INVALID_QUESTIONNAIRE_CLONE/i.test(message ?? "")) return "LOCKED";
   return "UNAVAILABLE";
 }
 
-async function requireWorkspace(input: { locale: string; organizationId?: string; franchiseId?: string; libraryId: string;serviceId?:string;questionnaireId?:string;ruleId?:string }): Promise<
+async function requireWorkspace(input: { locale: string; organizationId?: string | undefined; franchiseId?: string | undefined; libraryId: string;serviceId?:string|undefined;questionnaireId?:string|undefined;ruleId?:string|undefined }): Promise<
   | { status: "ok"; workspace: FranchiseLibraryWorkspace }
   | { status: "error"; reason: Exclude<FranchiseServiceActionState, { status: "idle" | "success" }>["reason"] }
 > {

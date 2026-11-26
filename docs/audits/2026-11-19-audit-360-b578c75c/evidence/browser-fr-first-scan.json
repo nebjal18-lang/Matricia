@@ -1,0 +1,1936 @@
+{
+  "startedAt": "2026-11-19T13:26:42.643Z",
+  "finishedAt": "2026-11-19T13:27:53.449Z",
+  "baseURL": "http://127.0.0.1:5175",
+  "source": {
+    "snapshot": "C:\\Users\\jal18\\AppData\\Local\\Temp\\vscode-agent-codex-sandbox-59PsGz\\matricia-audit-b578c75c-h8qXI8",
+    "sha": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "startedAt": "2026-11-19T13:24:09.546Z",
+    "finishedAt": "2026-11-19T13:24:27.845Z",
+    "nodeVersion": "v22.23.5",
+    "installCommand": "corepack pnpm install --offline --frozen-lockfile",
+    "exitCode": 0,
+    "includesStagedLocalCorrections": false,
+    "applicationFilesModifiedByAuditor": false
+  },
+  "environment": "Node22 isolated checkout, development server, local API, demo disabled; no authenticated business mutations",
+  "limitations": [
+    "No authenticated journey proof",
+    "No screen-reader manual session",
+    "Viewport emulation, not real mobile hardware",
+    "No approved reference-image pixel comparison",
+    "Development timings cannot validate production Web Vitals"
+  ],
+  "pages": [
+    {
+      "locale": "fr",
+      "route": "",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr",
+      "navigationMs": 7450,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Transformez un besoin métier en prestation claire et pilotable. | Matricia",
+      "h1": [
+        "Découvrez ce qui freine votre entreprise. Passez aux bonnes solutions."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-home-360.png"
+    },
+    {
+      "locale": "fr",
+      "route": "",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr",
+      "navigationMs": 7450,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Transformez un besoin métier en prestation claire et pilotable. | Matricia",
+      "h1": [
+        "Découvrez ce qui freine votre entreprise. Passez aux bonnes solutions."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr",
+      "navigationMs": 7450,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Transformez un besoin métier en prestation claire et pilotable. | Matricia",
+      "h1": [
+        "Découvrez ce qui freine votre entreprise. Passez aux bonnes solutions."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr",
+      "navigationMs": 7450,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1046,
+      "title": "Transformez un besoin métier en prestation claire et pilotable. | Matricia",
+      "h1": [
+        "Découvrez ce qui freine votre entreprise. Passez aux bonnes solutions."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr",
+      "navigationMs": 7450,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Transformez un besoin métier en prestation claire et pilotable. | Matricia",
+      "h1": [
+        "Découvrez ce qui freine votre entreprise. Passez aux bonnes solutions."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-home-1440.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/diagnostic",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/diagnostic",
+      "navigationMs": 610,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Prédiagnostic entreprise | Matricia",
+      "h1": [
+        "Quelques réponses pour mieux orienter votre entreprise"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-diagnostic-360.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/diagnostic",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/diagnostic",
+      "navigationMs": 610,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Prédiagnostic entreprise | Matricia",
+      "h1": [
+        "Quelques réponses pour mieux orienter votre entreprise"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/diagnostic",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/diagnostic",
+      "navigationMs": 610,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Prédiagnostic entreprise | Matricia",
+      "h1": [
+        "Quelques réponses pour mieux orienter votre entreprise"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/diagnostic",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/diagnostic",
+      "navigationMs": 610,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1026,
+      "title": "Prédiagnostic entreprise | Matricia",
+      "h1": [
+        "Quelques réponses pour mieux orienter votre entreprise"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/diagnostic",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/diagnostic",
+      "navigationMs": 610,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Prédiagnostic entreprise | Matricia",
+      "h1": [
+        "Quelques réponses pour mieux orienter votre entreprise"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-diagnostic-1440.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/besoin",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/besoin",
+      "navigationMs": 2046,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Nouvelle demande | Matricia",
+      "h1": [
+        "Décrivez votre besoin"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 27,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-besoin-360.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/besoin",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/besoin",
+      "navigationMs": 2046,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Nouvelle demande | Matricia",
+      "h1": [
+        "Décrivez votre besoin"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/besoin",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/besoin",
+      "navigationMs": 2046,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Nouvelle demande | Matricia",
+      "h1": [
+        "Décrivez votre besoin"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/besoin",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/besoin",
+      "navigationMs": 2046,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Nouvelle demande | Matricia",
+      "h1": [
+        "Décrivez votre besoin"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/besoin",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/besoin",
+      "navigationMs": 2046,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Nouvelle demande | Matricia",
+      "h1": [
+        "Décrivez votre besoin"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 28,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-besoin-1440.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/fournisseur",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/fournisseur",
+      "navigationMs": 1666,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Développez votre activité avec des missions adaptées à votre expertise.",
+      "h1": [
+        "Développez votre activité avec des missions adaptées à votre expertise."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-fournisseur-360.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/fournisseur",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/fournisseur",
+      "navigationMs": 1666,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Développez votre activité avec des missions adaptées à votre expertise.",
+      "h1": [
+        "Développez votre activité avec des missions adaptées à votre expertise."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/fournisseur",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/fournisseur",
+      "navigationMs": 1666,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Développez votre activité avec des missions adaptées à votre expertise.",
+      "h1": [
+        "Développez votre activité avec des missions adaptées à votre expertise."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/fournisseur",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/fournisseur",
+      "navigationMs": 1666,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Développez votre activité avec des missions adaptées à votre expertise.",
+      "h1": [
+        "Développez votre activité avec des missions adaptées à votre expertise."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/fournisseur",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/fournisseur",
+      "navigationMs": 1666,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Développez votre activité avec des missions adaptées à votre expertise.",
+      "h1": [
+        "Développez votre activité avec des missions adaptées à votre expertise."
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-fournisseur-1440.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/franchise",
+      "navigationMs": 1298,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Devenez franchisé Matricia. Un modèle local, un impact national",
+      "h1": [
+        "Devenez franchisé Matricia. Un modèle local, un impact national"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-franchise-360.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/franchise",
+      "navigationMs": 1298,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Devenez franchisé Matricia. Un modèle local, un impact national",
+      "h1": [
+        "Devenez franchisé Matricia. Un modèle local, un impact national"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/franchise",
+      "navigationMs": 1298,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Devenez franchisé Matricia. Un modèle local, un impact national",
+      "h1": [
+        "Devenez franchisé Matricia. Un modèle local, un impact national"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/franchise",
+      "navigationMs": 1298,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Devenez franchisé Matricia. Un modèle local, un impact national",
+      "h1": [
+        "Devenez franchisé Matricia. Un modèle local, un impact national"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/franchise",
+      "navigationMs": 1298,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Devenez franchisé Matricia. Un modèle local, un impact national",
+      "h1": [
+        "Devenez franchisé Matricia. Un modèle local, un impact national"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-franchise-1440.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/abonnements",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/abonnements",
+      "navigationMs": 1615,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Abonnements Matricia",
+      "h1": [
+        "Des formules adaptées à vos besoins professionnels"
+      ],
+      "mainCount": 2,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/abonnements",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/abonnements",
+      "navigationMs": 1615,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Abonnements Matricia",
+      "h1": [
+        "Des formules adaptées à vos besoins professionnels"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/abonnements",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/abonnements",
+      "navigationMs": 1615,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Abonnements Matricia",
+      "h1": [
+        "Des formules adaptées à vos besoins professionnels"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/abonnements",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/abonnements",
+      "navigationMs": 1615,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Abonnements Matricia",
+      "h1": [
+        "Des formules adaptées à vos besoins professionnels"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/abonnements",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/abonnements",
+      "navigationMs": 1615,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Abonnements Matricia",
+      "h1": [
+        "Des formules adaptées à vos besoins professionnels"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 28,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/entreprises",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/entreprises",
+      "navigationMs": 1587,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Entreprises",
+      "h1": [
+        "Entreprises"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/entreprises",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/entreprises",
+      "navigationMs": 1587,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Entreprises",
+      "h1": [
+        "Entreprises"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/entreprises",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/entreprises",
+      "navigationMs": 1587,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Entreprises",
+      "h1": [
+        "Entreprises"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/entreprises",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/entreprises",
+      "navigationMs": 1587,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Entreprises",
+      "h1": [
+        "Entreprises"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/entreprises",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/entreprises",
+      "navigationMs": 1587,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Entreprises",
+      "h1": [
+        "Entreprises"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/a-propos",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/a-propos",
+      "navigationMs": 1107,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes",
+      "h1": [
+        "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/a-propos",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/a-propos",
+      "navigationMs": 1107,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes",
+      "h1": [
+        "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/a-propos",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/a-propos",
+      "navigationMs": 1107,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes",
+      "h1": [
+        "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/a-propos",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/a-propos",
+      "navigationMs": 1107,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes",
+      "h1": [
+        "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/a-propos",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/a-propos",
+      "navigationMs": 1107,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes",
+      "h1": [
+        "Notre mission : transformer les ambitions des entreprises marocaines en réussites concrètes"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/contact",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/contact",
+      "navigationMs": 1564,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Échangeons ensemble",
+      "h1": [
+        "Échangeons ensemble"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/contact",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/contact",
+      "navigationMs": 1564,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Échangeons ensemble",
+      "h1": [
+        "Échangeons ensemble"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/contact",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/contact",
+      "navigationMs": 1564,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Échangeons ensemble",
+      "h1": [
+        "Échangeons ensemble"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/contact",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/contact",
+      "navigationMs": 1564,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Échangeons ensemble",
+      "h1": [
+        "Échangeons ensemble"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/contact",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/contact",
+      "navigationMs": 1564,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Échangeons ensemble",
+      "h1": [
+        "Échangeons ensemble"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "INPUT",
+          "text": "",
+          "class": ""
+        }
+      ],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 30,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/mentions-legales",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/mentions-legales",
+      "navigationMs": 1120,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Mentions légales",
+      "h1": [
+        "Mentions légales"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/mentions-legales",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/mentions-legales",
+      "navigationMs": 1120,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Mentions légales",
+      "h1": [
+        "Mentions légales"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/mentions-legales",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/mentions-legales",
+      "navigationMs": 1120,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Mentions légales",
+      "h1": [
+        "Mentions légales"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/mentions-legales",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/mentions-legales",
+      "navigationMs": 1120,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Mentions légales",
+      "h1": [
+        "Mentions légales"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/mentions-legales",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/mentions-legales",
+      "navigationMs": 1120,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Mentions légales",
+      "h1": [
+        "Mentions légales"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/confidentialite",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/confidentialite",
+      "navigationMs": 996,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Confidentialité",
+      "h1": [
+        "Confidentialité"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "TABLE",
+          "text": "Catégorie de donnéesFinalité du traitementDurée de conservationVos droitsDonnées d’identif",
+          "class": "min-w-full text-sm"
+        }
+      ],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 27,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/confidentialite",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/confidentialite",
+      "navigationMs": 996,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Confidentialité",
+      "h1": [
+        "Confidentialité"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [
+        {
+          "tag": "TABLE",
+          "text": "Catégorie de donnéesFinalité du traitementDurée de conservationVos droitsDonnées d’identif",
+          "class": "min-w-full text-sm"
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/confidentialite",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/confidentialite",
+      "navigationMs": 996,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Confidentialité",
+      "h1": [
+        "Confidentialité"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/confidentialite",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/confidentialite",
+      "navigationMs": 996,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Confidentialité",
+      "h1": [
+        "Confidentialité"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/confidentialite",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/confidentialite",
+      "navigationMs": 996,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Confidentialité",
+      "h1": [
+        "Confidentialité"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 25,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/conditions",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/conditions",
+      "navigationMs": 976,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Conditions d’utilisation",
+      "h1": [
+        "Conditions d’utilisation"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/conditions",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/conditions",
+      "navigationMs": 976,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Conditions d’utilisation",
+      "h1": [
+        "Conditions d’utilisation"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/conditions",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/conditions",
+      "navigationMs": 976,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Conditions d’utilisation",
+      "h1": [
+        "Conditions d’utilisation"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/conditions",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/conditions",
+      "navigationMs": 976,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Conditions d’utilisation",
+      "h1": [
+        "Conditions d’utilisation"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/conditions",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/conditions",
+      "navigationMs": 976,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Conditions d’utilisation",
+      "h1": [
+        "Conditions d’utilisation"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/cookies",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/cookies",
+      "navigationMs": 1288,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Cookies",
+      "h1": [
+        "Cookies"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 24,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/cookies",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/cookies",
+      "navigationMs": 1288,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Cookies",
+      "h1": [
+        "Cookies"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/cookies",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/cookies",
+      "navigationMs": 1288,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Cookies",
+      "h1": [
+        "Cookies"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/cookies",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/cookies",
+      "navigationMs": 1288,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Cookies",
+      "h1": [
+        "Cookies"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/cookies",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/cookies",
+      "navigationMs": 1288,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Cookies",
+      "h1": [
+        "Cookies"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 23,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      }
+    },
+    {
+      "locale": "fr",
+      "route": "/connexion",
+      "width": 360,
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "navigationMs": 1198,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 360,
+      "contentWidth": 360,
+      "title": "Connexion sécurisée | Matricia",
+      "h1": [
+        "Connectez-vous à Matricia"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 27,
+        "incomplete": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-connexion-360.png"
+    },
+    {
+      "locale": "fr",
+      "route": "/connexion",
+      "width": 390,
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "navigationMs": 1198,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 390,
+      "contentWidth": 390,
+      "title": "Connexion sécurisée | Matricia",
+      "h1": [
+        "Connectez-vous à Matricia"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/connexion",
+      "width": 768,
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "navigationMs": 1198,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 768,
+      "contentWidth": 768,
+      "title": "Connexion sécurisée | Matricia",
+      "h1": [
+        "Connectez-vous à Matricia"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/connexion",
+      "width": 1024,
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "navigationMs": 1198,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1024,
+      "contentWidth": 1024,
+      "title": "Connexion sécurisée | Matricia",
+      "h1": [
+        "Connectez-vous à Matricia"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "fr",
+      "route": "/connexion",
+      "width": 1440,
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "navigationMs": 1198,
+      "lang": "fr",
+      "dir": "ltr",
+      "computedDirection": "ltr",
+      "viewport": 1440,
+      "contentWidth": 1440,
+      "title": "Connexion sécurisée | Matricia",
+      "h1": [
+        "Connectez-vous à Matricia"
+      ],
+      "mainCount": 1,
+      "brokenImages": [],
+      "overflowingElements": [],
+      "pageErrors": [],
+      "axe": {
+        "engine": {
+          "name": "axe-core",
+          "version": "4.13.0"
+        },
+        "passes": 29,
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      "screenshot": "screenshots/fr-connexion-1440.png"
+    }
+  ],
+  "protectedRoutes": [
+    {
+      "locale": "fr",
+      "route": "/client/accueil",
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "Connectez-vous à Matricia"
+      ]
+    },
+    {
+      "locale": "fr",
+      "route": "/sous-traitant/identite",
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "Connectez-vous à Matricia"
+      ]
+    },
+    {
+      "locale": "fr",
+      "route": "/franchise/accueil",
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "Connectez-vous à Matricia"
+      ]
+    },
+    {
+      "locale": "fr",
+      "route": "/administration/command-center",
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "Connectez-vous à Matricia"
+      ]
+    },
+    {
+      "locale": "fr",
+      "route": "/organisation",
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "Connectez-vous à Matricia"
+      ]
+    },
+    {
+      "locale": "fr",
+      "route": "/securite/compte",
+      "httpStatus": 200,
+      "finalPath": "/fr/connexion",
+      "loginRedirect": true,
+      "h1": [
+        "Connectez-vous à Matricia"
+      ]
+    }
+  ],
+  "keyboard": [],
+  "blockedRequests": []
+}

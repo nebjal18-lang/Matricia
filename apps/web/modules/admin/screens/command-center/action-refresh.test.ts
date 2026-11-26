@@ -24,7 +24,7 @@ for (const [name, action] of Object.entries({ claimAdminWork, resolveAdminWork, 
     });
     it.each([
       { error: { code: "42501" }, data: null },
-      { error: { code: "40001" }, data: null },
+      { error: { code: "PT409" }, data: null },
       { error: null, data: { unexpected: true } },
     ])("does not announce a refreshed success after rejection or an invalid receipt", async response => {
       mocks.rpc.mockResolvedValue(response);

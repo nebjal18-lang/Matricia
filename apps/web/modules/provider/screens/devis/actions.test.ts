@@ -15,6 +15,13 @@ function form(values:Record<string,string>){const result=new FormData();for(cons
 beforeEach(()=>{mocks.getUser.mockReset().mockResolvedValue({data:{user:{id:"provider"}}});mocks.rpc.mockReset().mockImplementation(async(name:string)=>({data:name==="list_provider_quote_service_tax_policies_v1"?[{invitation_id:ids.invitation,category_code:"APPROVED_SERVICE",blocked_reason:null}]:{outcome:"QUOTE_REVISION_CREATED",quote_id:ids.quote,quote_version_id:ids.quoteVersion,version_number:1},error:null}));mocks.from.mockReset().mockImplementation((table:string)=>table==="rfq_providers"?query({provider_organization_id:ids.organization,rfqs:{request_version_id:ids.requestVersion}}):table==="service_request_versions"?query({currency_code:"MAD",required_quote_data:{tax_category_code:"STANDARD_SERVICE"}}):query({id:ids.tax}));mocks.revalidatePath.mockReset();});
 
 describe("provider quote actions",()=>{
+  it("refreshes the consultation detail after its invitation is accepted",async()=>{
+    mocks.revalidatePath.mockClear();
+    mocks.rpc.mockResolvedValue({data:{outcome:"RFQ_INVITATION_ACCEPTED"},error:null});
+    await decideInvitation(idle,form({locale:"fr",invitationId:ids.invitation,decision:"ACCEPT",reason:"",rowVersion:"2",idempotencyKey:ids.idempotency,correlationId:ids.correlation}));
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/fr/sous-traitant/consultations/[consultationId]","page");
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/fr/sous-traitant/devis/nouveau");
+  });
   it("uses the approved snapshot policy instead of a divergent legacy category",async()=>{
     expect(await saveQuoteRevision(idle,validForm())).toEqual({status:"success",outcome:"QUOTE_REVISION_CREATED"});
     expect(mocks.rpc).toHaveBeenCalledWith("list_provider_quote_service_tax_policies_v1",{p_provider_organization_id:ids.organization,p_rfq_provider_ids:[ids.invitation]});

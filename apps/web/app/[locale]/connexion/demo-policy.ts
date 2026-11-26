@@ -1,27 +1,17 @@
 import type { DemoPersona } from "./demo-personas";
+import { isDemoAccessEnabled } from "@/modules/shared/lib/demo-access";
 
 type DemoAccessEnv = {
   VERCEL_ENV?: string;
   APP_ENV?: string;
   MATRICIA_DEMO_ACCESS_ENABLED?: string;
+  MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED?: string;
   [key: string]: string | undefined;
 };
 
-const allowedAppEnvs = new Set(["development", "staging", "test"]);
-
-/**
- * Demo personas never unlock production. Preview/local also require an explicit
- * non-production APP_ENV plus MATRICIA_DEMO_ACCESS_ENABLED=true — a lone flag
- * on Vercel preview is not enough.
- */
+/** Production demo access requires a second, explicit environment flag. */
 export function isPublicDemoAccessEnabled(env: DemoAccessEnv = process.env): boolean {
-  if (env.APP_ENV === "production" || env.VERCEL_ENV === "production") {
-    return false;
-  }
-  if (!env.APP_ENV || !allowedAppEnvs.has(env.APP_ENV)) {
-    return false;
-  }
-  return env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
+  return isDemoAccessEnabled(env);
 }
 
 const defaultEmails = {

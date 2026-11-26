@@ -99,7 +99,7 @@ function OrganizationOnboarding({ organization, locale, messages }: {
                   activity: organization.latestProfile.data.activity,
                   sector: organization.latestProfile.data.sector,
                   registeredCity: organization.latestProfile.data.registered_city,
-                  registeredAddress: organization.latestProfile.data.registered_address,
+                  registeredAddress: organization.latestProfile.data.registered_address ? {...organization.latestProfile.data.registered_address, postal_code: organization.latestProfile.data.registered_address.postal_code ?? null} : null,
                   identifiers: {
                     ICE: organization.ice,
                     IF: organization.latestProfile.data.if_number,

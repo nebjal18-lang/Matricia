@@ -92,7 +92,7 @@ describe("informations complémentaires pour les devis", () => {
 
   it("traduit les refus serveur", async () => {
     const base = { locale: "fr", requestId: uid(1), rowVersion: "3", regionCode: "", idempotencyKey: uid(5) };
-    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "42501" } }).mockResolvedValueOnce({ data: null, error: { code: "40001" } });
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "42501" } }).mockResolvedValueOnce({ data: null, error: { code: "PT409" } });
     await expect(completeRequestInformationAction({ status: "idle" }, form(base))).resolves.toEqual({ status: "error", reason: "FORBIDDEN" });
     await expect(completeRequestInformationAction({ status: "idle" }, form(base))).resolves.toEqual({ status: "error", reason: "CONFLICT" });
     mocks.getUser.mockResolvedValueOnce({ data: { user: null } });

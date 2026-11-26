@@ -9,7 +9,7 @@ import {checkConfigurationConnection,validateProviderEnvironment,validateProvide
 
 export class ConfigurationError extends Error {constructor(readonly code:string){super(code);}}
 const uuid=z.string().uuid(),hash=z.string().regex(/^[a-f0-9]{64}$/u);
-const rpcError=(error:{code?:string}|null|undefined)=>new ConfigurationError(error?.code==="42501"?"FORBIDDEN":error?.code==="40001"?"STALE":error?.code==="22023"||error?.code==="22000"?"VALIDATION":"CONFIGURATION_UNAVAILABLE");
+const rpcError=(error:{code?:string}|null|undefined)=>new ConfigurationError(error?.code==="42501"?"FORBIDDEN":(error?.code==="40001" || error?.code === "PT409")?"STALE":error?.code==="22023"||error?.code==="22000"?"VALIDATION":"CONFIGURATION_UNAVAILABLE");
 async function access(){
   const result=await loadMyPlatformAccess();
   if(result.status!=="ok")throw new ConfigurationError(result.reason==="UNAUTHENTICATED"?"UNAUTHENTICATED":"CONFIGURATION_UNAVAILABLE");

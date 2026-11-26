@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "suite": "admin-summary",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T21:48:10.368Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T21:47:58.677Z",
+    "finishedAt": "2026-11-23T21:48:09.457Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realNativePriorityItems": 8,
+    "realUiPriorityOrderings": 4,
+    "realUiContextualSelections": 4,
+    "countsMatchRenderedQueue": true,
+    "triageBeforeSecondaryTools": true,
+    "noDecisionOrAssignmentOnSelection": true,
+    "foreignTaskReadDenied": true,
+    "frArDesktop360Accessibility": true,
+    "stage": "native-proof",
+    "responseCode": null,
+    "responseLabel": null
+  }
+}

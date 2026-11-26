@@ -193,14 +193,14 @@ export function NeedFlow({
           }
         }
         setStorageNotice(parsed.status === "expired" || parsed.status === "invalid" ? parsed.status : null);
-        setDraft(parsed.draft ?? blank(initialNeed, initialClassification));
+        setDraft(parsed.draft ?? blank(initialNeed, initialClassification, initialOrganizationId));
       } catch {
         setStorageAvailable(false);
       }
       setLoaded(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialClassification, initialNeed, locale]);
+  }, [initialClassification, initialNeed, initialOrganizationId, locale]);
 
   useEffect(() => {
     if (!loaded || !storageAvailable) return;

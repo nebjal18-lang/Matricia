@@ -26,7 +26,7 @@ export async function manageEditorialReview(_: EditorialState, form: FormData): 
   const {data: auth} = await client.auth.getUser();
   if (!auth.user) return {status: "error", reason: "FORBIDDEN"};
   const result = await client.rpc(rpc, args);
-  if (result.error) return {status: "error", reason: result.error.code === "40001" || result.error.code === "55000" ? "STALE" : result.error.code === "42501" ? "FORBIDDEN" : "FAILED"};
+  if (result.error) return {status: "error", reason: (result.error.code === "40001" || result.error.code === "PT409") || result.error.code === "55000" ? "STALE" : result.error.code === "42501" ? "FORBIDDEN" : "FAILED"};
   const parsed = rpc === "schedule_reviewed_catalog_release" ? z.object({outcome: z.literal("CATALOG_RELEASE_SCHEDULED")}).safeParse(result.data) : z.object({outcome: z.enum(["CATALOG_CHANGE_APPROVED", "CATALOG_CHANGE_REJECTED"]), reviewProofHash: z.string().regex(/^[a-f0-9]{64}$/u)}).safeParse(result.data);
   if (!parsed.success) return {status: "error", reason: "FAILED"};
   revalidatePath(`/${common.data.locale}/administration/catalogue/revues`);

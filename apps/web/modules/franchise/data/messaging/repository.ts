@@ -2,7 +2,7 @@ import { z } from "zod";
 import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { inboxPayload,threadPagePayload,type MessageCursor } from "@/modules/shared/lib/internal-messaging/model";
 const targets=z.array(z.object({rfq_id:z.string().uuid(),organization_id:z.string().uuid(),kind:z.enum(["CLIENT","PROVIDER"])}));
-export async function loadFranchiseMessaging(input:{franchiseId:string;threadId?:string;search?:string;page?:number;cursor?:MessageCursor}){
+export async function loadFranchiseMessaging(input:{franchiseId:string;threadId?:string|undefined;search?:string|undefined;page?:number|undefined;cursor?:MessageCursor|undefined}){
  const client=await getSupabaseServerClient();
  const [inboxResult,targetsResult,conversationResult]=await Promise.all([
   client.rpc("search_franchise_message_inbox",{p_franchise_id:input.franchiseId,p_search:input.search??"",p_page:input.page??1}),

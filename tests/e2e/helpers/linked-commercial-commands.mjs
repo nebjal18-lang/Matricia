@@ -111,7 +111,7 @@ export async function publishLinkedLocalFiscalMapping(fixture,provider){
  return approved;
 }
 
-function actorCookieHeader(actor){
+export function actorCookieHeader(actor){
  assert.ok(actor.cookies instanceof Map);
  return[...actor.cookies.values()].map(({name,value})=>{assert.match(name,/^[A-Za-z0-9_.-]+$/u);assert.ok(typeof value==='string'&&!/[\r\n;]/u.test(value));return`${name}=${value}`;}).join('; ');
 }
@@ -157,7 +157,7 @@ export async function verifyLinkedLocalCanonicalPdfRetention(fixture){
  const ids=fixture.resources.organizationIds;
  const artifacts=await fixture.resources.database`select a.storage_path,a.pdf_sha256,a.size_bytes::text as size_bytes from private.contract_signature_source_artifacts_v1 a join public.contract_versions v on v.id=a.contract_version_id join public.contracts c on c.id=v.contract_id where c.client_organization_id=any(${ids}::uuid[])and a.locale in('fr','ar')`;
  for(const artifact of artifacts){
-  assert.ok(artifact.storage_path.startsWith('contract/'));
+  assert.match(artifact.storage_path,/^(contract|amendment)\//u);
   const read=await fixture.resources.admin.storage.from('signature-source-documents').download(artifact.storage_path);assert.equal(read.error,null);const bytes=Buffer.from(await read.data.arrayBuffer());assert.equal(hash(bytes),artifact.pdf_sha256);assert.equal(String(bytes.length),artifact.size_bytes);
  }
  fixture.resources.localCommercialRetainedCanonicalPdfFiles=artifacts.length;
@@ -191,15 +191,16 @@ export async function publishLinkedLocalChecklist(fixture){
  return{templateId:result.template_id,items};
 }
 
-export async function createLinkedLocalSignaturePolicy(fixture){
+export async function createLinkedLocalSignaturePolicy(fixture,sourceKind='CONTRACT'){
  isolated(fixture);
+ assert.ok(['CONTRACT','AMENDMENT'].includes(sourceKind));
  const reviewers=fixture.resources.localJourneyReviewers,issuer=fixture.resources.localJourneyActors?.fr;
  assert.ok(reviewers?.fr&&reviewers?.ar&&issuer);assert.notEqual(reviewers.fr.userId,reviewers.ar.userId);
- const [existing]=await fixture.resources.database`select count(*)::int as count from private.contract_signature_policy_versions_v1 p where p.environment='DEVELOPMENT'and p.source_kind='CONTRACT'and p.approved_at<=clock_timestamp()and(p.valid_until is null or p.valid_until>clock_timestamp())and not exists(select 1 from private.signature_policy_revocations_v1 r where r.policy_version_id=p.id)`;
+ const [existing]=await fixture.resources.database`select count(*)::int as count from private.contract_signature_policy_versions_v1 p where p.environment='DEVELOPMENT'and p.source_kind=${sourceKind} and p.approved_at<=clock_timestamp()and(p.valid_until is null or p.valid_until>clock_timestamp())and not exists(select 1 from private.signature_policy_revocations_v1 r where r.policy_version_id=p.id)`;
  assert.equal(existing.count,0,'LOCAL_COMMERCIAL_EXISTING_SIGNATURE_POLICY_CONFLICT');
  const [config]=await fixture.resources.database`select id from public.signature_provider_configs where provider_code='MATRICIA_DEV_MOCK'and environment='DEVELOPMENT'and status='ACTIVE'and valid_from<=clock_timestamp()and(valid_until is null or valid_until>clock_timestamp())order by version desc limit 1`;
  assert.ok(config,'LOCAL_COMMERCIAL_INSTALLED_DEV_MOCK_REQUIRED');
- const proposal=await command(fixture,reviewers.fr.client,'propose_signature_policy_v1',{p_issuer_organization_id:issuer.organizationId,p_source_kind:'CONTRACT',p_provider_config_id:config.id,p_minimum_level:'SIMPLE',p_require_certificate:false,p_require_trusted_timestamp:false,p_legal_approval_reference:'LOCAL-SYNTHETIC-NON-CONTRACTUAL-TEST',p_adapter_registration_reference:'LOCAL-INSTALLED-DEVELOPMENT-MOCK',p_valid_hours:1,p_reason:'Simulation locale synthétique non contractuelle, sans accord juridique ni fournisseur réel',p_idempotency_key:randomUUID()});
+ const proposal=await command(fixture,reviewers.fr.client,'propose_signature_policy_v1',{p_issuer_organization_id:issuer.organizationId,p_source_kind:sourceKind,p_provider_config_id:config.id,p_minimum_level:'SIMPLE',p_require_certificate:false,p_require_trusted_timestamp:false,p_legal_approval_reference:'LOCAL-SYNTHETIC-NON-CONTRACTUAL-TEST',p_adapter_registration_reference:'LOCAL-INSTALLED-DEVELOPMENT-MOCK',p_valid_hours:1,p_reason:'Simulation locale synthétique non contractuelle, sans accord juridique ni fournisseur réel',p_idempotency_key:randomUUID()});
  assert.equal(proposal.development_mock,true);assert.equal(proposal.environment,'DEVELOPMENT');
  fixture.resources.localCommercialSignatureProposals??=[];
  fixture.resources.localCommercialSignatureProposals.push(proposal.proposal_id);
@@ -293,17 +294,18 @@ export async function completeLinkedLocalMockSignature(fixture,{chain,provider,s
 }
 
 /** Native mission, authenticated private bytes, trusted known-fixture verdict and reception. */
-export async function completeLinkedLocalMission(fixture,{chain,provider,checklist}){
+export async function completeLinkedLocalMission(fixture,{chain,provider,checklist,leaveReceptionPending=false}){
  isolated(fixture);
  const actor=fixture.resources.localJourneyActors[chain.locale],foreign=fixture.resources.localJourneyActors[chain.locale==='fr'?'ar':'fr'];
  assert.equal(actor.organizationId,chain.clientOrganizationId);assert.equal(provider.organizationId,chain.providerOrganizationId);
  assert.equal(chain.signatureMode,'GOVERNED_NON_CONTRACTUAL_DEVELOPMENT_MOCK');
  const labelFr=`Rapport synthétique ${chain.sessionId.slice(0,8)}`,labelAr=`تقرير اصطناعي ${chain.sessionId.slice(0,8)}`;
- const input={p_contract_id:chain.contractId,p_contract_version_id:chain.contractVersionId,p_milestones:[{key:'DELIVERY',title_fr:'Livraison de recette',title_ar:'تسليم الاختبار',sort_order:1,due_at:new Date(Date.now()+7*86400_000).toISOString(),owner_organization_id:provider.organizationId,validation_required:true}],p_deliverables:[{key:'REPORT',milestone_key:'DELIVERY',label_fr:labelFr,label_ar:labelAr,proof_required:true}],p_acceptance_criteria:[{deliverable_key:'REPORT',criterion_key:'QUALITY'}],p_idempotency_key:randomUUID(),p_correlation_id:randomUUID()};
+ const signedDeliverable=await one(actor.client,'contract_items','item_key',{contract_version_id:chain.contractVersionId,item_type:'DELIVERABLE'});
+ const input={p_contract_id:chain.contractId,p_contract_version_id:chain.contractVersionId,p_milestones:[{key:'DELIVERY',title_fr:'Livraison de recette',title_ar:'تسليم الاختبار',sort_order:1,due_at:new Date(Date.now()+7*86400_000).toISOString(),owner_organization_id:provider.organizationId,validation_required:true}],p_deliverables:[{key:signedDeliverable.item_key,milestone_key:'DELIVERY',label_fr:labelFr,label_ar:labelAr,proof_required:true}],p_acceptance_criteria:[{deliverable_key:signedDeliverable.item_key,criterion_key:'QUALITY'}],p_idempotency_key:randomUUID(),p_correlation_id:randomUUID()};
  const mission=await command(fixture,actor.client,'create_mission',input);assert.equal(mission.outcome,'MISSION_CREATED');assert.equal(mission.checklist_template_id,checklist.templateId);
  assert.deepEqual(await command(fixture,actor.client,'create_mission',input),mission);
  const milestone=await one(provider.client,'mission_milestones','id,row_version',{mission_id:mission.mission_id,milestone_key:'DELIVERY'});
- const deliverable=await one(provider.client,'deliverables','id,milestone_id',{mission_id:mission.mission_id,deliverable_key:'REPORT'});
+ const deliverable=await one(provider.client,'deliverables','id,milestone_id',{mission_id:mission.mission_id,deliverable_key:signedDeliverable.item_key});
  assert.equal(deliverable.milestone_id,milestone.id,'LOCAL_COMMERCIAL_MILESTONE_LINK_REQUIRED');
  const checklistItem=await one(provider.client,'mission_checklist_items','id,status',{mission_id:mission.mission_id,item_key:'QUALITY'});assert.equal(checklistItem.status,'PENDING');
  const bytes=localFixturePdf(['SYNTHETIC LOCAL DELIVERY - NOT A CLIENT DOCUMENT',`Contract ${chain.contractId}`,`Mission ${mission.mission_id}`,`Diagnostic session ${chain.sessionId}`]);
@@ -328,14 +330,15 @@ export async function completeLinkedLocalMission(fixture,{chain,provider,checkli
  const itemCompleted=await command(fixture,provider.client,'complete_mission_checklist_item',itemInput);assert.equal(itemCompleted.outcome,'MISSION_CHECKLIST_ITEM_COMPLETED');assert.deepEqual(await command(fixture,provider.client,'complete_mission_checklist_item',itemInput),itemCompleted);
  const milestoneInput={p_milestone_id:milestone.id,p_expected_row_version:milestone.row_version,p_idempotency_key:randomUUID(),p_correlation_id:randomUUID()};
  const milestoneSubmitted=await command(fixture,provider.client,'submit_mission_milestone',milestoneInput);assert.equal(milestoneSubmitted.outcome,'MILESTONE_SUBMITTED');assert.deepEqual(await command(fixture,provider.client,'submit_mission_milestone',milestoneInput),milestoneSubmitted);
- const acceptance=await command(fixture,actor.client,'accept_delivery',acceptInput);assert.equal(acceptance.outcome,'DELIVERY_ACCEPTED');assert.deepEqual(await command(fixture,actor.client,'accept_delivery',acceptInput),acceptance);
+ if(!leaveReceptionPending){const acceptance=await command(fixture,actor.client,'accept_delivery',acceptInput);assert.equal(acceptance.outcome,'DELIVERY_ACCEPTED');assert.deepEqual(await command(fixture,actor.client,'accept_delivery',acceptInput),acceptance);}
  const milestoneDecision={p_milestone_id:milestone.id,p_expected_row_version:milestoneSubmitted.row_version,p_decision:'ACCEPTED',p_reason:'Réception explicite du rapport synthétique de recette locale',p_idempotency_key:randomUUID(),p_correlation_id:randomUUID()};
- const decided=await command(fixture,actor.client,'decide_mission_milestone',milestoneDecision);assert.equal(decided.outcome,'MILESTONE_ACCEPTED');assert.deepEqual(await command(fixture,actor.client,'decide_mission_milestone',milestoneDecision),decided);
- const accepted=await one(actor.client,'deliverables','status',{id:deliverable.id});assert.equal(accepted.status,'ACCEPTED');
+ if(!leaveReceptionPending){const decided=await command(fixture,actor.client,'decide_mission_milestone',milestoneDecision);assert.equal(decided.outcome,'MILESTONE_ACCEPTED');assert.deepEqual(await command(fixture,actor.client,'decide_mission_milestone',milestoneDecision),decided);}
+ const accepted=await one(actor.client,'deliverables','status',{id:deliverable.id});assert.equal(accepted.status,leaveReceptionPending?'SUBMITTED':'ACCEPTED');
+ if(leaveReceptionPending){const active=await one(actor.client,'contracts','status',{id:chain.contractId});assert.equal(active.status,'ACTIVE');}
  const events=await fixture.resources.database`select a.action,e.event_type,a.metadata->>'outcome'as audit_outcome,e.payload->>'outcome'as event_outcome from public.audit_events a join public.event_outbox e on e.correlation_id=a.correlation_id where a.correlation_id=any(${[input.p_correlation_id,deliveryInput.p_correlation_id,itemInput.p_correlation_id,milestoneInput.p_correlation_id,acceptInput.p_correlation_id,milestoneDecision.p_correlation_id]}::uuid[])and a.event_hash<>repeat('0',64)group by a.action,e.event_type,a.metadata->>'outcome',e.payload->>'outcome'`;
  const expectedEvents=[['mission.created','MissionCreatedV1'],['delivery.submitted','DeliverySubmittedV1'],['mission.checklist_item.completed','MissionChecklistItemCompletedV1'],['mission.milestone.submitted','MissionMilestoneSubmittedV1'],['delivery.decided','DeliveryAcceptedV1'],['mission.milestone.decided','MissionMilestoneAcceptedV1']];
- for(const[action,eventType]of expectedEvents)assert.ok(events.some(event=>event.action===action&&event.event_type===eventType&&(action!=='delivery.decided'||event.audit_outcome==='DELIVERY_ACCEPTED'&&event.event_outcome==='DELIVERY_ACCEPTED')),`LOCAL_COMMERCIAL_MISSING_${action.toUpperCase().replaceAll('.','_')}`);
- return{...chain,missionId:mission.mission_id,milestoneId:milestone.id,deliverableId:deliverable.id,deliveryVersionId:submitted.delivery_version_id,proofId:proof.id,deliverySha256:expectedSha,deliveryLabel:chain.locale==='fr'?labelFr:labelAr,deliveryAccepted:true,milestoneAccepted:true,malwareEngineExternal:false,scope:'LOCAL_NATIVE_DIAGNOSTIC_TO_ACCEPTED_DELIVERY'};
+ for(const[action,eventType]of expectedEvents.filter(([action])=>!leaveReceptionPending||!['mission.milestone.decided','delivery.decided'].includes(action)))assert.ok(events.some(event=>event.action===action&&event.event_type===eventType&&(action!=='delivery.decided'||event.audit_outcome==='DELIVERY_ACCEPTED'&&event.event_outcome==='DELIVERY_ACCEPTED')),`LOCAL_COMMERCIAL_MISSING_${action.toUpperCase().replaceAll('.','_')}`);
+ return{...chain,missionId:mission.mission_id,milestoneId:milestone.id,deliverableId:deliverable.id,deliveryVersionId:submitted.delivery_version_id,proofId:proof.id,deliverySha256:expectedSha,deliveryLabel:chain.locale==='fr'?labelFr:labelAr,deliveryAccepted:!leaveReceptionPending,milestoneAccepted:!leaveReceptionPending,malwareEngineExternal:false,scope:leaveReceptionPending?'LOCAL_NATIVE_DIAGNOSTIC_TO_SUBMITTED_DELIVERY':'LOCAL_NATIVE_DIAGNOSTIC_TO_ACCEPTED_DELIVERY'};
 }
 
 export async function clearLinkedLocalDeliveryFiles(fixture){

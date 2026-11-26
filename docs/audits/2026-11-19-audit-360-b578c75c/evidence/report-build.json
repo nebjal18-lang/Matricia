@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-11-19T13:52:10.385Z",
+  "head": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+  "stagedDiffSha256": "d340e5095d00968fe619ac34753ae7df5d4d015a706a35db745d48a7078f8f40",
+  "findings": 36,
+  "severityCounts": {
+    "high": 10,
+    "medium": 25,
+    "low": 1
+  },
+  "conditional": [
+    "SEC-03",
+    "DEP-01"
+  ],
+  "runtimeVerified": "v22.23.5",
+  "unitRunner": "v22.23.5",
+  "sourceChangedByAudit": false
+}

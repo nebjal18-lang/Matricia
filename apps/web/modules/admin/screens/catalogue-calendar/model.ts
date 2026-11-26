@@ -16,7 +16,7 @@ export function calendarRpcFailure(error: {
         return "UNAUTHENTICATED";
     if (error.code === "42501")
         return error.message === "CENTRAL_MFA_REQUIRED" ? "MFA_REQUIRED" : error.message === "CATALOG_AUTH_REQUIRED" ? "UNAUTHENTICATED" : "FORBIDDEN";
-    if (["40001", "55000", "23505", "22000"].includes(error.code ?? ""))
+    if (["40001", "PT409", "55000", "23505", "22000"].includes(error.code ?? ""))
         return "CONFLICT";
     if (["PGRST202", "PGRST205", "42883", "42P01"].includes(error.code ?? ""))
         return "CONFIGURATION";

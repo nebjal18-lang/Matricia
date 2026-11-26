@@ -1,14 +1,11 @@
 import { createHash } from "node:crypto";
 import { applyMarginBps, DEFAULT_BOX_PLATFORM_MARGIN_BPS } from "./margin";
 import type { DemoActorProfile, DemoValidationDocument, WholesaleCatalog, WholesaleOffer } from "./model";
+import { isDemoAccessEnabled } from "@/modules/shared/lib/demo-access";
 
-const allowedDemoAppEnvs = new Set(["development", "staging", "test"]);
-
-/** Même garde-fou que le reste du mode démo : jamais en production. */
+/** Use the same demo gate as the login page. */
 export function isDemoWholesaleEnabled() {
-  if (process.env.APP_ENV === "production" || process.env.VERCEL_ENV === "production") return false;
-  if (!process.env.APP_ENV || !allowedDemoAppEnvs.has(process.env.APP_ENV)) return false;
-  return process.env.MATRICIA_DEMO_ACCESS_ENABLED === "true";
+  return isDemoAccessEnabled();
 }
 
 /** 12 régions administratives Maroc (même liste que franchise_applications). */

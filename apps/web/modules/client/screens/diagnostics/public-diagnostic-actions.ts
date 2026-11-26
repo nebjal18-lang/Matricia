@@ -13,7 +13,7 @@ const decisionSchema = z.object({ need_intake_id: uuid.nullable(), service_code:
 
 function reason(message: string): "VALIDATION" | "DENIED" | "CONFLICT" | "UNAVAILABLE" {
   if (message.includes("DENIED") || message.includes("42501")) return "DENIED";
-  if (message.includes("TRANSITION") || message.includes("STALE") || message.includes("55000") || message.includes("40001")) return "CONFLICT";
+  if (message.includes("TRANSITION") || message.includes("STALE") || message.includes("55000") || (message.includes("40001") || message.includes("PT409"))) return "CONFLICT";
   if (message.includes("INVALID") || message.includes("22023")) return "VALIDATION";
   return "UNAVAILABLE";
 }

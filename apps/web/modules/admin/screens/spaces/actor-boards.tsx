@@ -11,7 +11,7 @@ import { actorCopy } from "@/modules/admin/data/spaces/actors-copy";
 import { type ActorUserRow } from "@/modules/admin/data/spaces/actors-repository";
 import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { groupActorAccounts, matchesActorUser } from "@/modules/admin/data/spaces/actor-user-model";
-import { actorAccountSubtitle, actorAccountTitle, actorAvatarInitial, actorMembershipOrganizationsLabel, actorMembershipRolesLabel, actorOrganizationLabel, actorRolesLabel, actorScopeLabels, adminFixturesHiddenLabel, isAdminDirectoryFixture, isAdminOrgDirectoryFixture } from "@/modules/admin/data/spaces/actor-presentation";
+import { actorAccountTitle, actorAvatarInitial, actorMembershipOrganizationsLabel, actorMembershipRolesLabel, actorOrganizationLabel, actorRolesLabel, actorScopeLabels, adminFixturesHiddenLabel, isAdminDirectoryFixture, isAdminOrgDirectoryFixture } from "@/modules/admin/data/spaces/actor-presentation";
 import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import type { AdminOrganizationFiche, AdminSupervisionDashboard } from "@/modules/admin/data/supervision/types";

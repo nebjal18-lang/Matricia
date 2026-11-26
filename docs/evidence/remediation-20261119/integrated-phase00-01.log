@@ -1,0 +1,29 @@
+
+> matricia@0.1.0 verify:phase00 C:\Projects\Matricia\Matricia
+> pnpm migrations:validate && pnpm catalog:validate && pnpm spec:validate && pnpm traceability:validate && pnpm server-actions:validate
+
+
+> matricia@0.1.0 migrations:validate C:\Projects\Matricia\Matricia
+> node scripts/migration-identities.mjs
+
+{"passed":true,"migrationCount":609,"errors":[]}
+
+> matricia@0.1.0 catalog:validate C:\Projects\Matricia\Matricia
+> node --experimental-strip-types scripts/validate-catalog.ts
+
+Catalogue valide: 10 bibliothèques, 200 services, 6000 questions.
+
+> matricia@0.1.0 spec:validate C:\Projects\Matricia\Matricia
+> node --experimental-strip-types scripts/validate-spec.ts
+
+Bootstrap PHASE 00 cohérent: 7 registres initialisés, 68 fonctions, 8 exigences marketing et 63 agents. P01 reste ouverte jusqu’aux contrats atomiques exhaustifs.
+
+> matricia@0.1.0 traceability:validate C:\Projects\Matricia\Matricia
+> node --experimental-strip-types scripts/validate-traceability.ts
+
+Traçabilité cohérente pour 76 exigences V1; 5/76 sont VERIFIED avec preuves contrôlées.
+
+> matricia@0.1.0 server-actions:validate C:\Projects\Matricia\Matricia
+> node scripts/release/server-action-exports.mjs
+
+PASS server-action exports (2218 source files checked)

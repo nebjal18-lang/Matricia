@@ -1,0 +1,175 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v24.11.0","pnpm":"10.17.1"})
+
+> matricia@0.1.0 test:tooling C:\Projects\Matricia\Matricia
+> node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/staging/*.test.mjs scripts/db-test-support.test.mjs
+
+✔ the framework grant is inside the existing transaction and cannot grant application access (0.9483ms)
+✔ tests without a rollback transaction or with a commit cannot enable the framework grant (0.4964ms)
+✔ a function body and a leading block comment remain unchanged (0.9656ms)
+✔ explicit request boundaries preserve one rollback transaction and one framework grant (0.4563ms)
+✔ a boundary cannot authorize a commit or an unbounded test (0.3248ms)
+✔ read-only API plan is bounded and refuses mutation endpoints and production (1.4653ms)
+✔ p95 uses nearest-rank over nonempty real samples (0.3325ms)
+✔ performance plan requires exact staging identity, routes and real interactions (1.3385ms)
+✔ missing metrics or interactions cannot turn into a passing zero (0.3028ms)
+✔ extractProjectRef accepts only hosted HTTPS Supabase targets (2.0564ms)
+✔ configuration refuses production and requires exact target verification (1.2376ms)
+✔ configuration bounds page size and scenario sizes (0.3011ms)
+✔ scenario uses bounded keyset GET requests and emits metrics only (1.4664ms)
+✔ scenario fails closed when the keyset does not advance (0.5915ms)
+✔ gate is failed when the target row count is unavailable (1.7428ms)
+✔ RPC-only success is explicitly a probe and cannot certify the browser (0.9403ms)
+✔ missing denial, language, viewport or actual selection fails acceptance (0.2336ms)
+✔ browser-close and actor-cleanup failures do not skip other actors, verification, database close or evidence (1.9235ms)
+✔ a failed cleanup verification prevents an otherwise successful probe (0.2198ms)
+✔ failed browser runs retain executed counts and sanitized actionable diagnostics (2.7832ms)
+✔ filesystem inventory excludes groups, private folders and invented routes (34.105ms)
+✔ same-tenant seed generates four cases without pretending they passed (0.8657ms)
+✔ foreign organization cannot fill a missing seed (0.1691ms)
+✔ phantom templates cannot enter the inventory through manifests (0.1854ms)
+✔ franchise seed must belong to the assigned franchise (0.511ms)
+✔ catalogue ID from a foreign library cannot fill a franchise workspace (0.1401ms)
+✔ catch-all paths reject traversal and report missing data honestly (0.1865ms)
+✔ release registry preserves statuses without promoting evidence (0.4059ms)
+✔ enum route parameters remain valid while identifiers require UUIDs (0.337ms)
+✔ a static parent reference or exclusion never substitutes runtime evidence (2.3964ms)
+✔ local acceptance refuses stale, hosted, incomplete and uncleared results (4.329ms)
+✔ a local fixture cannot impersonate a hosted or production acceptance project (2.0587ms)
+✔ recognizes native Storage NoSuchBucket400 and missing-bucket404 (1.6889ms)
+✔ never treats an authorization, transport, server or successful lookup as proven absence (0.2464ms)
+✔ preparation never grants approval or invents passing evidence (1.8503ms)
+✔ current candidate with complete evidence shape passes; wrong SHA, stale results and unclosed issues fail (1.2353ms)
+✔ zero counts, skipped, flaky, expected failure and self-review cannot certify a release (1.2134ms)
+✖ evidence must match its bytes and stay inside the checkout, including symlink resolution (76.5085ms)
+✔ browser acceptance rejects empty, skipped, flaky and expected-failure reports (1.3315ms)
+✖ unfinished work in a business module fails the actual gate (110.8741ms)
+✔ test assertions may discuss markers while adjacent product code remains checked (262.1842ms)
+✔ SQL migrations stay covered and ordinary input hints are accepted (323.0027ms)
+✔ explicit unfinished sentinels and lowercase comment markers fail (325.367ms)
+✔ accepts every verified local origin supported by the fixture loader without starting a server (0.7357ms)
+✔ rejects remote origins, credentials and unexpected route/configuration before any start (5.9995ms)
+✔ Next server-action guard catches initial states, typed wrappers and local re-exports (17.1444ms)
+✔ successful business page requires HTTP200 and meaningful heading (2.0447ms)
+✔ 404 cannot be disguised as a covered access gate (0.2247ms)
+✔ unexpected tenant or MFA denial fails a business recipe (0.1771ms)
+✔ expected fiscal gate is separate from successful business coverage (0.1542ms)
+✔ server failures and page errors fail even when a denial was expected (0.2198ms)
+✔ expected fiscal refusal never certifies expired sessions or broken configuration (0.169ms)
+✔ a crash together with FORBIDDEN remains a failure (0.1933ms)
+✔ redirected login or changed selected tenant is never business coverage (0.2023ms)
+✔ destination comparison preserves origin, route and selected mandate (0.5797ms)
+✔ builds when the web app or the Vercel root changes (0.5753ms)
+✔ skips commits that do not affect the web deployment (0.093ms)
+✔ keeps static assets patchable for Vercel preview comments (4.0683ms)
+✔ all Vercel entrypoints retain the same scheduled application endpoints (10.2262ms)
+✖ exposes native Next output, assets and scoped runtime dependencies; preserves domain dependencies (26.027ms)
+✔ refuses public directory collisions before changing generated output (17.8447ms)
+✔ requires a completed Next build before creating aliases (13.3096ms)
+✔ refuses a conflicting installed dependency without replacing it (22.1158ms)
+✔ complete isolated sandbox configuration passes metadata check with masked sensitive bindings (3.411ms)
+✔ detects a provider-issued 8 digit OTP when absent UI setting falls back to 6 (0.609ms)
+✔ existing OTP binding with redacted value remains unverified rather than assumed correct (0.9352ms)
+✔ shared production backend and app origins fail isolation even with APP_ENV staging (0.3422ms)
+✔ Preview isolation requires the STAGING_SUPABASE_PROJECT_REF binding (0.3273ms)
+✔ Preview isolation requires the PRODUCTION_SUPABASE_PROJECT_REF binding (0.3216ms)
+✔ Preview references must be observed, exact lowercase 20-character values and distinct (1.3854ms)
+✔ Preview reference declarations must match both selected staging backend and observed production baseline (0.6195ms)
+✔ Preview-only reference bindings do not impose a build policy on the development target (0.3039ms)
+✔ missing production baseline cannot produce a passing staging verdict (0.3006ms)
+✔ a non-Supabase production URL cannot establish backend isolation (0.23ms)
+✔ branch preview overrides are resolved without changing production baseline (0.5694ms)
+✔ Auth project, callback origins, SMTP and TOTP must match staging configuration (0.3302ms)
+✔ cron and invitation keys need bindings while masked service roles count as present (0.2644ms)
+✔ external sandbox payments reject demo, live credentials and non-allowlisted providers (0.3654ms)
+✔ payment provider allowlist rejects unknown entries even when selected provider is present (0.1942ms)
+✔ CMI sandbox is supported with complete gateway allowlist configuration (0.2117ms)
+✔ scanner, email and signature cannot rely on demo modes or an unallowlisted target (0.5889ms)
+✔ generic HTTP email transport requires a literal global IP matching its runtime policy (5.7796ms)
+✔ unknown or missing migration metadata fails closed; every required version is compared (0.6577ms)
+✔ worker project and dispatch must match staging and worker inventory cannot be omitted (0.3064ms)
+✔ worker dispatch allowlist rejects wildcards and duplicates that prevent worker startup (0.6214ms)
+✔ worker startup requires the MALWARE_SCANNER_TOKEN binding (0.252ms)
+✔ worker startup requires the CLAMAV_HOST binding (0.1921ms)
+✔ worker startup requires the CLAMAV_ALLOWED_HOSTS binding (0.1716ms)
+✔ worker startup requires the CLAMAV_NETWORK_MODE binding (0.1703ms)
+✔ worker startup requires the CLAMAV_ENGINE_VERSION binding (0.1518ms)
+✔ worker scanner credentials remain presence-only and their masked values are never required (0.2186ms)
+✔ worker Node version must be observed and stay within Node22 (0.8322ms)
+✔ worker ClamAV nonsecret values must be observed even when their bindings are present (0.934ms)
+✔ ClamAV allowlist must be well formed, contain its host and not have duplicate entries (0.7148ms)
+✔ ClamAV host and network mode reject malformed targets and public native TCP endpoints (1.6387ms)
+✔ ClamAV DNS metadata must match its host and every resolved address must be private (0.8992ms)
+✔ LOCAL ClamAV accepts loopback and refuses nonloopback private addresses (0.8289ms)
+✔ ClamAV requires an exact engine version pin instead of a wildcard or stale attestation string (1.3891ms)
+✔ ClamAV optional settings use runtime bounds and unknown bound values remain unverified (7.781ms)
+✔ inventory adapter merges individual decrypted origins and never uses a masked sensitive value as absence (0.7979ms)
+✔ an inventory with environment reads from multiple Vercel projects is rejected (0.2679ms)
+✔ report never includes arbitrary env values, names, exception snippets or input paths (87.4847ms)
+✔ CLI emits configuration metadata verdict and correct exit status without any network calls (162.1876ms)
+ℹ tests 103
+ℹ suites 0
+ℹ pass 100
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1204.9663
+
+✖ failing tests:
+
+test at scripts\release\manifest.test.mjs:36:1
+✖ evidence must match its bytes and stay inside the checkout, including symlink resolution (76.5085ms)
+  Error: EPERM: operation not permitted, symlink 'C:\Users\jal18\AppData\Local\Temp\vscode-agent-codex-sandbox-59PsGz\matricia-release-y37Ut6\external.json' -> 'C:\Users\jal18\AppData\Local\Temp\vscode-agent-codex-sandbox-59PsGz\matricia-release-y37Ut6\checkout\escape.json'
+      at async symlink (node:internal/fs/promises:1009:10)
+      at async TestContext.<anonymous> (file:///C:/Projects/Matricia/Matricia/scripts/release/manifest.test.mjs:53:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'symlink',
+    path: 'C:\\Users\\jal18\\AppData\\Local\\Temp\\vscode-agent-codex-sandbox-59PsGz\\matricia-release-y37Ut6\\external.json',
+    dest: 'C:\\Users\\jal18\\AppData\\Local\\Temp\\vscode-agent-codex-sandbox-59PsGz\\matricia-release-y37Ut6\\checkout\\escape.json'
+  }
+
+test at scripts\release\no-placeholders.test.mjs:16:1
+✖ unfinished work in a business module fails the actual gate (110.8741ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /apps\/web\/modules\/payments\/action\.ts/. Input:
+  
+  'file:///C:/Projects/Matricia/Matricia/scripts/validate-no-placeholders.ts:22\r\n' +
+    'if (violations.length) throw new Error(`Marqueurs interdits: ${violations.join(", ")}`);\r\n' +
+    '                             ^\r\n' +
+    '\r\n' +
+    'Error: Marqueurs interdits: apps\\web\\modules\\payments\\action.ts\r\n' +
+    '    at file:///C:/Projects/Matricia/Matricia/scripts/validate-no-placeholders.ts:22:30\r\n' +
+    '    at ModuleJob.run (node:internal/modules/esm/module_job:377:25)\r\n' +
+    '    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:691:26)\r\n' +
+    '    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n' +
+    '\r\n' +
+    'Node.js v24.11.0\r\n'
+  
+      at TestContext.<anonymous> (file:///C:/Projects/Matricia/Matricia/scripts/release/no-placeholders.test.mjs:18:76)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'file:///C:/Projects/Matricia/Matricia/scripts/validate-no-placeholders.ts:22\r\nif (violations.length) throw new Error(`Marqueurs interdits: ${violations.join(", ")}`);\r\n                             ^\r\n\r\nError: Marqueurs interdits: apps\\web\\modules\\payments\\action.ts\r\n    at file:///C:/Projects/Matricia/Matricia/scripts/validate-no-placeholders.ts:22:30\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:377:25)\r\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:691:26)\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.11.0\r\n',
+    expected: /apps\/web\/modules\/payments\/action\.ts/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at scripts\release\vercel-web-output.test.mjs:41:1
+✖ exposes native Next output, assets and scoped runtime dependencies; preserves domain dependencies (26.027ms)
+  Error: EPERM: operation not permitted, symlink '..\..\apps\web\.next' -> 'C:\Users\jal18\AppData\Local\Temp\vscode-agent-codex-sandbox-59PsGz\matricia-vercel-IdUHjF\packages\domain\.next'
+      at async symlink (node:internal/fs/promises:1009:10)
+      at async prepareVercelWebOutput (file:///C:/Projects/Matricia/Matricia/scripts/prepare-vercel-web-output.mjs:49:5)
+      at async TestContext.<anonymous> (file:///C:/Projects/Matricia/Matricia/scripts/release/vercel-web-output.test.mjs:45:17)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'symlink',
+    path: '..\\..\\apps\\web\\.next',
+    dest: 'C:\\Users\\jal18\\AppData\\Local\\Temp\\vscode-agent-codex-sandbox-59PsGz\\matricia-vercel-IdUHjF\\packages\\domain\\.next'
+  }
+ ELIFECYCLE  Command failed with exit code 1.

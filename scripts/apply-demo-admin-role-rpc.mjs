@@ -24,7 +24,7 @@ if (!databaseUrl) {
 const sql = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 20 });
 try {
   const ddl = readFileSync(
-    resolve(root, "supabase/migrations/20261118160000_ensure_demo_admin_platform_role_v1.sql"),
+    resolve(root, "supabase/migrations/20261118160100_ensure_demo_admin_platform_role_v1.sql"),
     "utf8",
   );
   await sql.unsafe(ddl);

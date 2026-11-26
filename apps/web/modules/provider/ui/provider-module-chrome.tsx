@@ -51,7 +51,7 @@ export function ProviderModuleChrome({
             </div>
           </div>
         </header>
-        <AdminProcessStrip locale={locale} title={eyebrow} owner={owner} nextAction={nextAction} blocker={blocker} steps={steps} />
+        <AdminProcessStrip locale={locale} title={eyebrow} owner={owner} nextAction={nextAction} {...(blocker === undefined ? {} : {blocker})} steps={steps} />
         {children}
       </div>
     </main>

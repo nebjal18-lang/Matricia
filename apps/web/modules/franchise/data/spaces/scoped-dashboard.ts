@@ -6,7 +6,7 @@ import type { FranchiseCorrectivePlan } from "../quality/repository";
 
 /** A selection narrows authorized rows; it never changes the underlying permissions. */
 export function scopeFranchiseDashboards(input: {
-  organizationId?: string | null; libraryId?: string | null; franchiseId?: string | null;
+  organizationId?: string | null | undefined; libraryId?: string | null | undefined; franchiseId?: string | null | undefined;
   governance: FranchiseDashboard | null; crm: FranchiseCrmDashboard | null;
   followups: FollowupDashboard | null; digest: FranchiseDigestDashboard | null;
   plans: FranchiseCorrectivePlan[] | null;

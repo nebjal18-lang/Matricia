@@ -1,0 +1,17 @@
+{
+  "task": "integrated-types-01",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "tsc",
+    "--noEmit",
+    "--incremental",
+    "false"
+  ],
+  "startedAt": "2026-11-19T14:11:55.716Z",
+  "finishedAt": "2026-11-19T14:14:04.960Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 1
+}

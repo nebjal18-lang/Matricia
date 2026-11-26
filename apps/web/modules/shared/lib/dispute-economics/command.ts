@@ -21,7 +21,7 @@ async function execute(input: { caseId: string; outcome: string; reason: string;
     p_evidence_ids: input.evidenceIds, p_rule_snapshot: rule,
     p_idempotency_key: input.idempotencyKey, p_correlation_id: randomUUID(),
   });
-  if (result.error) return { status: "error", reason: result.error.code === "42501" ? "FORBIDDEN" : result.error.code === "40001" ? "STALE_STATE" : "UNAVAILABLE" };
+  if (result.error) return { status: "error", reason: result.error.code === "42501" ? "FORBIDDEN" : (result.error.code === "40001" || result.error.code === "PT409") ? "STALE_STATE" : "UNAVAILABLE" };
   const receipt = z.object({ dispute_case_id: z.literal(input.caseId), decision_id: z.string().uuid(), outcome: z.literal(input.outcome), decision_number: z.number().int().positive() }).safeParse(result.data);
   return receipt.success ? { status: "success" } : { status: "error", reason: "UNAVAILABLE" };
 }

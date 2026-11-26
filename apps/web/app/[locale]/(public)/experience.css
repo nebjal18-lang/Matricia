@@ -334,14 +334,14 @@
 .journey-links{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px}
 .journey-links a,.journey-links button{display:inline-flex;min-height:44px;align-items:center;gap:6px;border:0;background:transparent;color:var(--jp-blue);cursor:pointer;font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:4px}
 .premium-nav{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--mat-border);background:rgb(247 243 234 / .94);backdrop-filter:blur(16px)}
-.premium-nav-inner{display:flex;width:min(100% - 40px,1180px);min-height:72px;margin-inline:auto;align-items:center;justify-content:space-between;gap:16px}
+.premium-nav-inner{display:flex;width:min(100% - 40px,1440px);min-height:72px;margin-inline:auto;align-items:center;justify-content:space-between;gap:12px}
 .public-root:has(.home-premium-page){background:none}
 .premium-nav--on-home,.public-root:has(.home-premium-page) .premium-nav{
   border-bottom-color:transparent;
   background:linear-gradient(180deg,rgb(14 22 48 / .78) 0%,rgb(14 22 48 / .35) 72%,transparent);
   backdrop-filter:none;
 }
-.premium-nav--on-home .premium-nav-inner,.public-root:has(.home-premium-page) .premium-nav-inner{width:min(100% - 32px,1180px)}
+.premium-nav--on-home .premium-nav-inner,.public-root:has(.home-premium-page) .premium-nav-inner{width:min(100% - 32px,1440px)}
 .premium-nav--on-home .premium-nav-tagline,.public-root:has(.home-premium-page) .premium-nav-tagline{display:none}
 .premium-nav--on-home .premium-nav-brand,.public-root:has(.home-premium-page) .premium-nav-brand{color:#fff}
 .premium-nav--on-home .premium-nav-mark,.public-root:has(.home-premium-page) .premium-nav-mark{color:#f3c7b4}
@@ -376,7 +376,7 @@
 }
 .public-root:has(.diagnostic-premium-page) .public-footer{display:none}
 .premium-nav-link,.premium-mobile-nav-link{display:flex;min-height:44px;align-items:center;border-radius:8px;color:rgb(26 35 64 / .78);font-size:.875rem;font-weight:600;text-decoration:none}
-.premium-nav-link{padding:10px}
+.premium-nav-link{padding:8px;white-space:nowrap}
 .premium-mobile-nav-link{padding:8px 12px}
 .premium-nav-link:hover,.premium-mobile-nav-link:hover{background:var(--mat-violet-soft);color:var(--jp-ink)}
 .premium-nav-link[aria-current=page],.premium-mobile-nav-link[aria-current=page]{box-shadow:inset 0 -3px 0 var(--jp-blue);color:var(--jp-blue)}
@@ -387,8 +387,8 @@
 .premium-nav-action-mobile{width:100%;margin-top:4px}
 .premium-nav-account{display:none;width:44px;min-height:44px;place-items:center;border-radius:999px;color:var(--jp-navy)}
 .premium-nav-account:focus-visible{outline:2px solid var(--jp-blue);outline-offset:2px}
-/* Match the lg desktop navigation; keep the account entry visible on tablets. */
-@media(max-width:1023px){.premium-nav-account{display:grid}}
+/* Match the xl desktop navigation; keep the account entry visible on tablets. */
+@media(max-width:1279px){.premium-nav-account{display:grid}}
 .premium-lang{display:inline-flex;min-height:44px;align-items:center;gap:6px;padding:0 8px;color:rgb(26 35 64 / .7);font-size:.82rem;font-weight:700}
 /* Home overrides after base nav rules so light-on-dark wins the cascade. */
 .premium-nav.premium-nav--on-home,

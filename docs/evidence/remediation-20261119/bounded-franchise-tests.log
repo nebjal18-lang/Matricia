@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 C:/Projects/Matricia/Matricia/apps/web
+
+
+ Test Files  3 passed (3)
+      Tests  19 passed (19)
+   Start at  09:14:53
+   Duration  556ms (transform 44%, import 43%, tests 6%, setup 5%, worker 2%)
+

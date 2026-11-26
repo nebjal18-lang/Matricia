@@ -15,7 +15,7 @@ const proposal = common.extend({
   currency: z.string().regex(/^[A-Z]{3}$/u), threshold: z.string(), buyerLimit: z.string(),
   effectiveFrom: z.string().datetime({ offset: true }), reason: z.string().trim().min(10).max(1000),
 });
-function errorReason(code: string) { return code === "42501" ? "FORBIDDEN" as const : code === "40001" ? "CONFLICT" as const : code === "22023" ? "VALIDATION" as const : "FAILED" as const; }
+function errorReason(code: string) { return code === "42501" ? "FORBIDDEN" as const : (code === "40001" || code === "PT409") ? "CONFLICT" as const : code === "22023" ? "VALIDATION" as const : "FAILED" as const; }
 
 export async function proposeClientApprovalPolicy(_previous: PolicyActionState, form: FormData): Promise<PolicyActionState> {
   const locale = String(form.get("locale") ?? "");

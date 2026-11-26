@@ -13,14 +13,16 @@ const metric=z.object({id,metric_code:z.string(),version:z.number().int().positi
 const snapshot=z.object({id,franchise_id:id,period_start:z.string(),period_end:z.string(),model_version:z.string(),global_score_basis_points:z.number().int(),library_quality_score_basis_points:z.number().int(),axis_scores:z.record(z.string(),z.number().int()),health_suggestion:z.enum(["HEALTHY","ATTENTION","IMPROVEMENT_PLAN","UNDER_REVIEW"])});
 const alert=z.object({id,franchise_id:id,snapshot_id:id,alert_type:z.string(),severity:z.enum(["INFO","WARNING","CRITICAL"]),status:z.enum(["OPEN","ACKNOWLEDGED","RESOLVED"]),metric_code:z.string().nullable(),explanation_fr:z.string(),explanation_ar:z.string(),evidence_refs:z.array(z.unknown()),rule_version:z.string()});
 const objective=z.object({id,franchise_id:id,objective_code:z.string(),version:z.number().int().positive(),title_fr:z.string(),title_ar:z.string(),target_value:exact,current_value:exact,unit_code:z.string(),status:z.enum(["ACTIVE","ACHIEVED","CANCELLED"]),starts_on:z.string(),due_on:z.string(),rule_version:z.string()});
-const nativeInvitation=z.object({id,prospect_id:id,status:z.enum(["QUEUED","SENT","OPENED","REGISTERED","EXPIRED","REVOKED"]),delivery_mode:z.enum(["EXTERNAL","NON_CONTRACTUAL_DEMO"]),expires_at:z.string(),sent_at:z.string().nullable()});
+const nativeInvitation=z.object({id,prospect_id:id,status:z.enum(["QUEUED","SENT","OPENED","REGISTERED","EXPIRED","REVOKED"]),delivery_mode:z.enum(["EXTERNAL","NON_CONTRACTUAL_DEMO"]).nullable(),expires_at:z.string(),sent_at:z.string().nullable()});
 const membership=z.object({organization_id:id,organization_member_roles:z.array(z.object({role_code:z.string(),revoked_at:z.string().nullable()}))});
 
 export type FranchiseCrmLoadResult={status:"success";dashboard:FranchiseCrmDashboard}|{status:"error";reason:"UNAUTHENTICATED"|"FORBIDDEN"|"QUERY_FAILED"|"INVALID_RESPONSE"};
 
-function scopedFranchiseQuery<T extends { match:(v:Record<string,string>)=>T; in:(column:string,values:string[])=>T }>(query:T,franchiseId:string|undefined,scopeIds:string[]){
-  if(franchiseId)return query.match({franchise_id:franchiseId});
-  return query.in("franchise_id",scopeIds);
+type ScopedFranchiseQuery = { match: (values: Record<string, string>) => ScopedFranchiseQuery; in: (column: string, values: string[]) => ScopedFranchiseQuery };
+function scopedFranchiseQuery<T>(query:T,franchiseId:string|undefined,scopeIds:string[]):T{
+  const scoped = query as unknown as ScopedFranchiseQuery;
+  if(franchiseId)return scoped.match({franchise_id:franchiseId}) as unknown as T;
+  return scoped.in("franchise_id",scopeIds) as unknown as T;
 }
 
 async function readFranchiseCrm(franchiseId?: string):Promise<FranchiseCrmLoadResult>{

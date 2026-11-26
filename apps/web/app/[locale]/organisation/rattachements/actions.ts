@@ -4,7 +4,7 @@ import{z}from"zod";
 import{getSupabaseServerClient}from"@/modules/shared/lib/supabase/server";
 import{joinDecisionSchema,joinRequestSchema,type JoinState}from"./model";
 const localeSchema=z.enum(["fr","ar"]);
-function failure(code?:string):JoinState{return{status:"error",reason:code==="42501"?"FORBIDDEN":code==="54000"?"RATE_LIMIT":["40001","22000","55000"].includes(code??"")?"CONFLICT":"UNAVAILABLE"};}
+function failure(code?:string):JoinState{return{status:"error",reason:code==="42501"?"FORBIDDEN":code==="54000"?"RATE_LIMIT":["40001", "PT409","22000","55000"].includes(code??"")?"CONFLICT":"UNAVAILABLE"};}
 export async function requestJoin(_:JoinState,form:FormData):Promise<JoinState>{
  const locale=localeSchema.safeParse(form.get("locale")),p=joinRequestSchema.safeParse(Object.fromEntries(form));if(!locale.success||!p.success)return{status:"error",reason:"VALIDATION"};
  const client=await getSupabaseServerClient(),r=await client.rpc("request_organization_join_v1",{p_ice:p.data.ice,p_requested_role_code:p.data.role,p_message:p.data.message,p_idempotency_key:p.data.key});

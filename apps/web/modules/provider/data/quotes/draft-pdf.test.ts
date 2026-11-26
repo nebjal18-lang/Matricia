@@ -4,5 +4,5 @@ const source={organizationName:"Prestataire de recette اختبار",invitation:
 describe("stored quote working copy PDF",()=>{
  it.each(["fr","ar"]as const)("generates a real reproducible %s PDF with embedded fonts and the actual version",async locale=>{const a=await renderProviderQuoteDraftPdf(source,locale),b=await renderProviderQuoteDraftPdf(source,locale);expect(a.subarray(0,5).toString()).toBe("%PDF-");expect(a.toString("latin1")).toContain("/FontFile");expect(a.toString("latin1")).toContain("%%EOF");expect(a).toEqual(b);});
  it("rejects inconsistent stored totals rather than recalculating a fake success",async()=>{await expect(renderProviderQuoteDraftPdf({...source,invitation:{...source.invitation,quote:{...source.invitation.quote,totalMinor:"1"}}},"fr")).rejects.toThrow("QUOTE_DRAFT_AMOUNTS_INVALID");});
- it("requires an actual stored quote version and creation timestamp",async()=>{await expect(renderProviderQuoteDraftPdf({...source,invitation:{...source.invitation,quote:{...source.invitation.quote,createdAt:undefined}}},"fr")).rejects.toThrow("QUOTE_DRAFT_SOURCE_REQUIRED");});
+ it("requires an actual stored quote version and creation timestamp",async()=>{await expect(renderProviderQuoteDraftPdf({...source,invitation:{...source.invitation,quote:{...source.invitation.quote,createdAt:null}}},"fr")).rejects.toThrow("QUOTE_DRAFT_SOURCE_REQUIRED");});
 });

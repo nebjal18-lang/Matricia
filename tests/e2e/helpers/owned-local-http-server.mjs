@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {spawn} from 'node:child_process';
+import {spawn, execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {connect} from 'node:net';
 import {resolve} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -14,7 +15,7 @@ async function listening(host){
  });
 }
 /** Own exactly one Next CLI child; never reuse or kill a foreign process. */
-export function ownedLocalHttpServer(root,config){
+export function ownedLocalHttpServer(root,config,options={}){
  assert.equal(config.runtimeMode,'isolated-local-docker');assert.equal(config.localDockerVerified,true);
  const url=new URL(config.baseUrl);
  assert.ok(['localhost','127.0.0.1','[::1]'].includes(url.hostname));
@@ -26,20 +27,41 @@ export function ownedLocalHttpServer(root,config){
   async start(){
    assert.equal(await listening(host),false,'LOCAL_HTTP_PORT_ALREADY_IN_USE');
    const env={...buildChildEnvironment(process.env,{}),APP_ENV:'development',PAYMENT_PROVIDER:'DEMO',PAYMENT_PROVIDER_ALLOWLIST:'DEMO',PAYMENT_LIVE_ENABLED:'false',EMAIL_DELIVERY_MODE:'DEMO',EMAIL_LIVE_DELIVERY_ENABLED:'false',MARKETING_PUBLISH_MODE:'sandbox',MARKETING_LIVE_PUBLISHING_ENABLED:'false',MARKETING_CONTENT_PROVIDER_URL:'',MARKETING_CONTENT_PROVIDER_API_KEY:'',MARKETING_CONTENT_PROVIDER_ENDPOINT_ALLOWLIST:'',NEXT_TELEMETRY_DISABLED:'1'};
+   Object.assign(env, { NEXT_PUBLIC_SUPABASE_URL: config.supabaseUrl, SUPABASE_URL: config.supabaseUrl, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: config.publishableKey, SUPABASE_SERVICE_ROLE_KEY: config.serviceRoleKey, DIRECT_URL: config.databaseUrl, SUPABASE_DB_POOLER_URL: '', NEXT_PUBLIC_APP_URL: config.baseUrl });
+   env.DELIVERY_PROOF_SCANNER_MODE='SANDBOX';
+   if(options.applicationEncryptionKey) {
+    assert.match(options.applicationEncryptionKey, /^[a-f0-9]{64}$/u, 'LOCAL_APPLICATION_KEY_INVALID');
+    env.APP_ENCRYPTION_KEY=options.applicationEncryptionKey;
+   }
+   if(options.cronSecret) {
+    assert.match(options.cronSecret, /^[A-Za-z0-9_-]{32,256}$/u, 'LOCAL_CRON_SECRET_INVALID');
+    env.CRON_SECRET=options.cronSecret;
+   }
    child=spawn(process.execPath,[resolve(root,'apps/web/node_modules/next/dist/bin/next'),'dev','--port','5173','--hostname',host],{cwd:resolve(root,'apps/web'),env,shell:false,stdio:['ignore','pipe','pipe']});
    child.stdout.resume();child.stderr.resume();
    closed=new Promise(done=>{child.once('exit',()=>{exited=true;done();});child.once('error',()=>{exited=true;done();});});
    const end=Date.now()+120_000;
+   let lastStatus=null;
    while(Date.now()<end){
     assert.equal(exited,false,'LOCAL_HTTP_SERVER_EXITED');
-    try{const response=await fetch(`${config.baseUrl}/fr`,{redirect:'manual',signal:AbortSignal.timeout(2000)});await response.arrayBuffer();if(response.status<500)return;}catch{}
+    try{const response=await fetch(`${config.baseUrl}/fr`,{redirect:'manual',signal:AbortSignal.timeout(2000)});await response.arrayBuffer();lastStatus=response.status;if(response.status<500)return;}catch{}
     await delay(250);
    }
-   throw new Error('LOCAL_HTTP_SERVER_NOT_READY');
+   throw new Error(`LOCAL_HTTP_SERVER_NOT_READY_${lastStatus??'NO_RESPONSE'}`);
   },
   async stop(){
    if(!child)return;
-   if(!exited)child.kill('SIGTERM');
+   if(!exited && process.platform === 'win32') {
+    assert.ok(Number.isInteger(child.pid) && child.pid > 0, 'LOCAL_HTTP_CHILD_PID_MISSING');
+    try { await promisify(execFile)('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], {windowsHide:true}); }
+    catch (error) {
+     // Windows may report a descendant already gone before Node receives exit.
+     // Accept that race only after the owned child exits; the port check below
+     // still has to prove that the complete owned server has stopped.
+     await Promise.race([closed,delay(2000,undefined,{ref:false})]);
+     if (!exited) throw error;
+    }
+   } else if(!exited)child.kill('SIGTERM');
    await Promise.race([closed,delay(10_000,undefined,{ref:false})]);
    if(!exited){child.kill('SIGKILL');await Promise.race([closed,delay(5000,undefined,{ref:false})]);}
    assert.equal(exited,true,'LOCAL_HTTP_CHILD_NOT_CLOSED');

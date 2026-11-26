@@ -52,7 +52,7 @@ export function ProviderLedgerBoard({
   kind: LedgerKind;
   dashboard: BillingDashboard;
   receipts?: ProviderCommissionReceipt[];
-  planKey?: string;
+  planKey?: string | undefined;
 }) {
   const m = getBillingMessages(locale);
   const title = kind === "pre-releve" ? m.preReleve : kind === "factures" ? m.facturesMatricia : kind === "echeancier" ? m.echeancier : m.commissionsTitle;
@@ -110,7 +110,7 @@ function InvoicesTable({ locale, query, dashboard, m }: { locale: Locale; query:
   );
 }
 
-function ScheduleTables({ locale, query, dashboard, m, planKey }: { locale: Locale; query: string; dashboard: BillingDashboard; m: BillingMessages; planKey?: string }) {
+function ScheduleTables({ locale, query, dashboard, m, planKey }: { locale: Locale; query: string; dashboard: BillingDashboard; m: BillingMessages; planKey?: string | undefined }) {
   const open = dashboard.invoices.filter((row) => row.outstandingMinor !== "0").slice().sort((a, b) => a.dueOn.localeCompare(b.dueOn));
   return (
     <div className="client-stack">
