@@ -6,6 +6,7 @@ import {
   buildDemoCatalogQuestionWorkspace,
   canApplyAdminDemoCatalogQuestions,
   demoCatalogQuestionCounts,
+  resolveDemoCatalogQuestionsWorkspace,
 } from "./demo-catalog-questions";
 
 describe("demo catalogue questions (validation thin path)", () => {
@@ -51,6 +52,20 @@ describe("demo catalogue questions (validation thin path)", () => {
       fileURLToPath(new URL("../../../../app/[locale]/administration/catalogue/validation/page.tsx", import.meta.url)),
       "utf8",
     );
-    expect(page).toContain("applyDemoCatalogQuestionsWorkspace");
+    expect(page).toContain("resolveDemoCatalogQuestionsWorkspace");
+  });
+
+  it("retombe sur la démo quand le chargement natif est indisponible", () => {
+    process.env.APP_ENV = "development";
+    process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
+    const fallback = resolveDemoCatalogQuestionsWorkspace({ status: "error", reason: "UNAVAILABLE" });
+    expect(fallback?.demoFallback).toBe(true);
+    expect(fallback?.workspace.questions.length).toBe(5);
+
+    expect(resolveDemoCatalogQuestionsWorkspace({ status: "error", reason: "FORBIDDEN" })).toBeNull();
+    expect(resolveDemoCatalogQuestionsWorkspace({
+      status: "success",
+      value: { versions: [], selectedVersionId: null, questions: [] },
+    })?.demoFallback).toBe(false);
   });
 });

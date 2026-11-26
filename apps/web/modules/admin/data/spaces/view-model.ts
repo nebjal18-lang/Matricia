@@ -63,7 +63,9 @@ export function localizeStatus(status: string, locale: Locale) {
   if (key === "QUARANTINED") return ar ? "محجور" : "Quarantaine";
   if (key === "ACCEPTED") return ar ? "مقبول" : "Accepté";
   if (key === "RECEIVED") return ar ? "مستلم" : "Reçu";
-  if (key === "SIGNATURE" || key === "SIGNATURE_PENDING" || key === "PENDING_SIGNATURE") return ar ? "بانتظار التوقيع" : "Signature en attente";
+  if (key === "SIGNATURE" || key === "SIGNATURE_PENDING" || key === "PENDING_SIGNATURE" || key === "READY_FOR_SIGNATURE") return ar ? "بانتظار التوقيع" : "Prêt à signer";
+  if (key === "ORG_MEMBERS" || key === "ORG MEMBERS") return ar ? "أعضاء المؤسسة" : "Membres de l’organisation";
+  if (key === "RC_PRO") return ar ? "تأمين المسؤولية المهنية" : "Assurance RC Pro";
   if (key === "NONE") return ar ? "غير محدد" : "Non renseigné";
   if (key === "URGENT") return ar ? "عاجل" : "Urgent";
   if (key === "UNREAD") return ar ? "غير مقروء" : "Non lu";

@@ -106,7 +106,7 @@ describe("FinancePanel mockup board", () => {
     expect(html).toContain("Encaissements du jour");
     expect(html).toContain("Prestataires à payer");
     expect(html).toContain("Paiements à rapprocher");
-    expect(html).toContain("À traiter aujourd’hui");
+    expect(html).toContain("File financière ouverte");
     expect(html).toContain("Entrées");
     expect(html).toContain("Sorties");
     expect(html).toContain("admin-org-layout");

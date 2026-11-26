@@ -1,4 +1,5 @@
 import { AdminSearchResults } from "@/modules/admin/screens/command-center/search";
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
@@ -12,6 +13,13 @@ import { getCommandCenterMessages } from "@/modules/admin/screens/command-center
 import { AdminDirectoryBoard } from "@/modules/admin/screens/spaces/boards";
 import { AdminAppShell } from "@/modules/admin/ui/admin-app-shell";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return { title: "Matricia" };
+  const m = getCommandCenterMessages(locale);
+  return { title: m.title };
+}
 
 export default async function AdminCommandCenterPage({
   params,
@@ -52,8 +60,8 @@ export default async function AdminCommandCenterPage({
       userEmail={space.userEmail}
       active="home"
       alternateHref={`/${alternate}/administration/command-center${currentQuery}`}
-      title={fr ? "Centre de pilotage" : "مركز القيادة"}
-      lead={fr ? "Une file unifiée. Sélectionnez un dossier pour ouvrir son action." : "طابور موحّد. اختاروا ملفاً لفتح الإجراء الخاص به."}
+      title={m.title}
+      lead={fr ? "File unifiée et panneau de décision. La ligne sélectionnée contrôle l’action." : "طابور موحّد ولوحة قرار. السطر المحدد يتحكم في الإجراء."}
       kicker={c.kicker}
     >
       {query.q?.trim() ? (

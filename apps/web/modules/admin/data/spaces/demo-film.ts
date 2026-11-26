@@ -148,14 +148,15 @@ export function buildDemoFilmCollections(
           provider_organization_id: providerIds.organizationId,
           provider_name: provider.labelFr,
           eligible: false,
-          score_basis_points: 4200,
+          score_basis_points: 4200 + (variant % 3) * 350,
           exclusion_reasons: ["CAPACITY_INSUFFICIENT"],
         }]
         : [{
           provider_organization_id: providerIds.organizationId,
           provider_name: provider.labelFr,
           eligible: true,
-          score_basis_points: 8750,
+          // Varier les scores démo (éviter 87,5 % / 88 % identiques sur toutes les lignes).
+          score_basis_points: 6200 + (variant % 5) * 650 + (code.charCodeAt(0) % 7) * 40,
           exclusion_reasons: [],
         }],
     });

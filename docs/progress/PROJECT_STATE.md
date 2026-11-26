@@ -1,3 +1,57 @@
+## 2026-11-25 — Admin finalisation (branche `fix/admin-space-finalization-2026-11-25`)
+
+Commit de départ : `da7bcb6c` (`version-2`). Suivi unique ci-dessous (pas de second système documentaire).
+
+### Inventaire recalculé (code)
+
+| Couche | Nombre | Notes |
+| --- | ---: | --- |
+| Entrées répertoire (`directory` + acteurs + parcours) | ~80 | 14 acteurs + 11 parcours + ~55 liens explicites |
+| Ancres distinctes | 22 | `#domaines` … `#archives` |
+| Routes `page.tsx` administration | 73 | dont catch-all `[space]` |
+| Espaces file génériques | 17 | `ADMIN_SPACE_IDS` |
+
+Distinction : entrée menu ≠ chemin unique ≠ ancre ≠ fiche dynamique ≠ action.
+
+### Baseline tests avant lots métier
+
+| Contrôle | Résultat |
+| --- | --- |
+| `vitest run modules/admin` | **895 PASS** (144 fichiers) au démarrage Lot 0 |
+| Centre de pilotage ciblé (après Lot 1) | **133 PASS** |
+| Cible 2026-11-25 soir (catalogue démo + org + coûts) | **29 PASS** (fichiers touchés) |
+
+### Tableau de suivi par lot (honnête — reprise 2026-11-25 nuit)
+
+| Lot | Objet | Statut | Preuve / lacune |
+| --- | --- | --- | --- |
+| 0 | Inventaire code | Corrigé (code) | ~80 / 22 / 73 — inventaire navigateur encore partiel |
+| 1 | Centre de pilotage | Code PR ; **reproduit** local | Nav mobile + titre onglet. UI A/B + binding formulaire B OK. Persist : **FORBIDDEN** sur `demo.admin` (rôle). Menu ligne sélectionne désormais le dossier |
+| 2 | Catalogue | Partiel → avancé | Builder OK avec bibliothèque IT + service. Validation native **indisponible** sur demo → fallback démo questions en PR. Matrice multi-domaines = **1 lib visible (IT)** |
+| 3 | Acteurs / capacité / franchise | Avancé | Capacité `/capacite` données visibles + lien fiche prestataire. Colonnes Compte/Conformité/Offre clarifiées. Franchisés ↔ Candidatures déjà reliés |
+| 4 | Parcours commercial | Avancé | Chaîne **Hôtel Bayt Al Bahar** locale : diagnostic → demande → matching **62 %** → devis (Détroit Soft) → contrat → mission. Facturation clients : politique absente + « aucune source » clarifiée |
+| 5 | Finance | Partiel | Recherche coûts : portée collection clarifiée + reset page 1. MAT-FUNC-032 navigateur→DB = **À examiner** |
+| 6 | Pilotage / privacy | Avancé | Ancres ops `#archives` etc. présentes. ALL → « inventaire exhaustif » ; staff ≠ « votre personne » |
+| 7 | Design FR/AR mobile | Avancé | Nav mobile collapsée (CSS admin) : file visible à 390 px. Titre onglet CC. Captures 390 FR/AR RTL, 768, 1440 sur `:5180` |
+| 8 | PR #38 | Mergée dans `version-2` | https://github.com/nebjal18-lang/Matricia/pull/38 — **demo public ≠ branche** |
+
+### Inventaire navigateur (demo public, Admin)
+
+- Capacité & documents : **données visibles** (dossiers qualification multi-territoires)
+- Catalogue : context IT + service → formulaires Builder ouverts ; validation = message indisponible (corrigé en PR via overlay démo)
+- Ops `#archives` : section « Archives et restauration » présente
+- Franchisés : texte « Pas de création libre… Candidatures franchise » + CTA Candidatures
+
+### Bibliothèques (matrice — état observé)
+
+| Domaine | Couverture | Anomalies | Corrections | Décision métier |
+| --- | --- | --- | --- | --- |
+| IT (demo) | 1 bibliothèque, ≥1 service publié | Validation native indisponible | Fallback démo 5 questions | — |
+| Autres domaines (BTP, etc.) | **Non listés** pour le rôle demo | — | — | Seed / droits multi-bibliothèques |
+| Contenu FR/AR exhaustif | Non audité question par question | — | — | **Décision métier requise** |
+
+**Branche corrigée** ≠ **site demo déployé**.
+
 ## 2026-11-25 — MAT-FINAL lot 05, contexte des liens Client
 
 Le [reçu du lot 05](../mat-final/LOT05_CONTEXTE_CLIENT_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) consignent C01 et C03 **EN COURS**. Les liens d'action, messagerie et échéance gardent une seule organisation active et le dossier exact ; les liens externes ne reçoivent pas son identifiant. Preuves locales : 7 fichiers/102 tests ciblés PASS, TypeScript web PASS, ESLint ciblé PASS, `git diff --check` PASS. La classification des quatre états de C01 et le parcours connecté multi-organisations restent à faire. Node local 24.11.0, aucune production, aucun visa.

@@ -11,7 +11,7 @@ const row = {
   statusTone: "mint" as const,
   compliance: "À jour",
   complianceTone: "mint" as const,
-  plan: "Non affiché",
+  plan: "Offre non affichée",
   lastAction: "Demande ouverte",
 };
 

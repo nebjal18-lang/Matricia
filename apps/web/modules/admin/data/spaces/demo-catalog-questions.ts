@@ -102,6 +102,29 @@ export function applyDemoCatalogQuestionsWorkspace(
   return workspace;
 }
 
+/**
+ * Sur un environnement démo, un échec de chargement « service / données »
+ * (pas un refus de droit) expose le workspace de validation de démonstration
+ * au lieu d’un message bloquant sans contenu.
+ */
+export function resolveDemoCatalogQuestionsWorkspace(input: {
+  status: "success" | "error";
+  reason?: string;
+  value?: RuleValidationWorkspace;
+}): { workspace: RuleValidationWorkspace; demoFallback: boolean } | null {
+  if (input.status === "success" && input.value) {
+    return { workspace: applyDemoCatalogQuestionsWorkspace(input.value), demoFallback: false };
+  }
+  if (
+    canApplyAdminDemoCatalogQuestions()
+    && input.status === "error"
+    && (input.reason === "UNAVAILABLE" || input.reason === "INVALID_RESPONSE")
+  ) {
+    return { workspace: buildDemoCatalogQuestionWorkspace(), demoFallback: true };
+  }
+  return null;
+}
+
 export function demoCatalogQuestionCounts() {
   return {
     versions: 1,

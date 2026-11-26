@@ -379,8 +379,20 @@ function decisionHref(locale: Locale, space: AdminSpaceId, query: string, row: S
   return row.href;
 }
 
-export function SpaceHeaderActions({ locale, query, spec }: { locale: Locale; query: string; spec: SpaceSpec }) {
+export function SpaceHeaderActions({
+  locale,
+  query,
+  spec,
+  mode = "queue",
+}: {
+  locale: Locale;
+  query: string;
+  spec: SpaceSpec;
+  /** Sur une fiche, pas d’actions de liste (inviter / exporter). */
+  mode?: "queue" | "detail";
+}) {
   const createHref = spaceCreateHref(locale, spec, query);
+  const listActions = mode === "queue";
   return (
     <>
       {spec.id === "territoires" ? <Cta href={spaceHref(locale, "gouvernance", query)} tone="soft">{t(locale, "Validations", "المصادقات")}</Cta> : null}
@@ -392,14 +404,14 @@ export function SpaceHeaderActions({ locale, query, spec }: { locale: Locale; qu
       ) : null}
       {spec.id === "contrats" ? <Cta href={`/${locale}/administration/signatures${query}`} tone="soft">{t(locale, "Signatures", "التوقيعات")}</Cta> : null}
       {spec.id === "messagerie" ? <Cta href={spaceHref(locale, "messagerie", query, "preferences")} tone="soft">{t(locale, "Préférences", "التفضيلات")}</Cta> : null}
-      {createHref && spec.createLabel ? (
+      {listActions && createHref && spec.createLabel ? (
         <Cta href={createHref} tone="primary"><Plus className="size-4" aria-hidden />{spec.createLabel(locale)}</Cta>
       ) : null}
-      {spec.exportable ? (
+      {listActions && spec.exportable ? (
         <Cta href={`/${locale}/administration/export/${spec.id}${query}`} tone="white" download><Download className="size-4" aria-hidden />{t(locale, "Exporter les résultats filtrés", "تصدير النتائج المصفاة")}</Cta>
       ) : null}
-      {spec.id === "devis" ? <Cta href={spaceHref(locale, spec.id, query, "comparer")} tone="soft">{t(locale, "Comparer", "مقارنة")}</Cta> : null}
-      {spec.id === "diagnostics" ? <Cta href={`/${locale}/administration/operations${query}`} tone="soft">{t(locale, "Archiver / restaurer", "أرشفة / استعادة")}</Cta> : null}
+      {listActions && spec.id === "devis" ? <Cta href={spaceHref(locale, spec.id, query, "comparer")} tone="soft">{t(locale, "Comparer", "مقارنة")}</Cta> : null}
+      {listActions && spec.id === "diagnostics" ? <Cta href={`/${locale}/administration/operations${query}`} tone="soft">{t(locale, "Archiver / restaurer", "أرشفة / استعادة")}</Cta> : null}
     </>
   );
 }
@@ -429,21 +441,39 @@ export function SpaceDetailBoard({
   return (
     <div className="client-page" data-admin-layout="detail" data-admin-space={space} data-admin-family={family.detail}>
       {providerOrgId ? (
-        <section className="mb-4 rounded-xl border border-primary/20 bg-primary/5 p-4" aria-label={t(locale, "Prochaine étape prestataire", "الخطوة التالية لمقدم الخدمة")}>
-          <p className="text-sm text-muted-foreground">{t(locale, "Admin décide sur identité, qualification et capacité. Le prestataire dépose les preuves.", "تقرر الإدارة الهوية والتأهيل والقدرة. يودع مقدم الخدمة الأدلة.")}</p>
-          <p className="client-actions mt-2">
-            <Cta href={`/${locale}/administration/providers/${providerOrgId}/identite${query}`} tone="primary">{t(locale, "Revoir l’identité", "مراجعة الهوية")}</Cta>
-            <Cta href={`/${locale}/administration/qualification${query}`} tone="soft">{t(locale, "Qualification", "التأهيل")}</Cta>
-            <Cta href={`/${locale}/administration/capacite${query}`} tone="soft">{t(locale, "Capacité & documents", "القدرة والوثائق")}</Cta>
+        <section className="admin-dossier-next mb-4" aria-label={t(locale, "Prochaine étape prestataire", "الخطوة التالية لمقدم الخدمة")}>
+          <p className="admin-dossier-next__lead">
+            {t(
+              locale,
+              "Admin décide sur identité, qualification et capacité. Le prestataire dépose les preuves.",
+              "تقرر الإدارة الهوية والتأهيل والقدرة. يودع مقدم الخدمة الأدلة.",
+            )}
           </p>
+          <div className="admin-dossier-next__actions">
+            {next ? (
+              <Cta href={next.href} tone="primary">
+                <ArrowRight className="size-4" aria-hidden />
+                {next.label}
+              </Cta>
+            ) : (
+              <Cta href={`/${locale}/administration/qualification${query}`} tone="primary">
+                {t(locale, "Décider la qualification par service", "تقرير التأهيل حسب الخدمة")}
+              </Cta>
+            )}
+            <Cta href={`/${locale}/administration/providers/${providerOrgId}/identite${query}`} tone="ghost">
+              {t(locale, "Revoir l’identité", "مراجعة الهوية")}
+            </Cta>
+            <Cta href={`/${locale}/administration/capacite${query}`} tone="ghost">
+              {t(locale, "Capacité & documents", "القدرة والوثائق")}
+            </Cta>
+          </div>
         </section>
-      ) : null}
-      {next ? (
+      ) : next ? (
         <p className="mb-4 client-actions">
-          <Cta href={next.href} tone="soft"><ArrowRight className="size-4" aria-hidden />{next.label}</Cta>
+          <Cta href={next.href} tone="primary"><ArrowRight className="size-4" aria-hidden />{next.label}</Cta>
         </p>
       ) : null}
-      <nav className="admin-pills" aria-label={spec.title(locale)}>
+      <nav className="admin-detail-tabs" aria-label={spec.title(locale)}>
         {tabs.map((tab, index) => (
           <a key={`${tab}-${index}`} href={`#${tabTarget(index)}`} aria-current={index === 0 ? "page" : undefined}>{tab}</a>
         ))}
