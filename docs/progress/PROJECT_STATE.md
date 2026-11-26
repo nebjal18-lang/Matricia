@@ -1,3 +1,49 @@
+## 2026-11-25 — Admin finalisation (branche `fix/admin-space-finalization-2026-11-25`)
+
+Commit de départ : `da7bcb6c` (`version-2`). Suivi unique ci-dessous (pas de second système documentaire).
+
+### Inventaire recalculé (code)
+
+| Couche | Nombre | Notes |
+| --- | ---: | --- |
+| Entrées répertoire (`directory` + acteurs + parcours) | ~80 | 14 acteurs + 11 parcours + ~55 liens explicites |
+| Ancres distinctes | 22 | `#domaines` … `#archives` |
+| Routes `page.tsx` administration | 73 | dont catch-all `[space]` |
+| Espaces file génériques | 17 | `ADMIN_SPACE_IDS` |
+
+Distinction : entrée menu ≠ chemin unique ≠ ancre ≠ fiche dynamique ≠ action.
+
+### Baseline tests avant lots métier
+
+| Contrôle | Résultat |
+| --- | --- |
+| `vitest run modules/admin` | **895 PASS** (144 fichiers) au démarrage Lot 0 |
+| Centre de pilotage ciblé (après Lot 1) | **133 PASS** |
+
+### Tableau de suivi par lot
+
+| Lot | Objet | Statut | Preuve |
+| --- | --- | --- | --- |
+| 0 | Inventaire + branche + WIP fiche prestataire | Corrigé et vérifié | Commit `baa2d295` ; inventaire ci-dessus |
+| 1 | Centre de pilotage identité A/B, compteurs, libellés | Corrigé et vérifié | Commit `f7fb79e8` ; test A/B panel |
+| 2 | Catalogue messages + abandons libellé | Corrigé et vérifié | Messages Builder/règles/publications ; directory analytique |
+| 3 | Rôles, fusion, territoires sans double étape, capacité | Corrigé et vérifié | ROLE_LABELS ; Step2 hors territoires ; fusion archive |
+| 4 | Contrats/avenants/jalons/litiges film | Corrigé et vérifié | Enveloppe vs contrat ; litiges sans porte 11 |
+| 5 | Finance dates relatives, packs, ROI libellé | Corrigé et vérifié | `buildDemoFinanceDashboard(now)` ; packs nom commercial |
+| 6 | Marketing sections, anti-abus lecture seule | Corrigé et vérifié | `MarketingSectionFocus` ; heading règles |
+| 7 | Design fiche prestataire (déjà Lot 0) | Corrigé et vérifié | Film compact + CTA unique |
+| 8 | PR | À vérifier | Après push |
+
+### Bibliothèques (matrice minimale)
+
+| Domaine | Couverture | Anomalies | Corrections | Décision métier |
+| --- | --- | --- | --- | --- |
+| Accès Builder / règles / publications | Messages + MFA/AAL2 | Messages génériques | Cause + récupération explicitées | Contenu éditorial métier hors scope auto |
+| Analytique questionnaires | Page abandons | Libellé « Benchmarks » trompeur | Renommé « Abandons des questionnaires » | Benchmarks réponses = autre produit si requis |
+| Contenu FR/AR par domaine (BTP, …) | Non relu exhaustivement | — | — | Décision métier requise pour expertise secteur |
+
+Site demo public (`matricia-domain.vercel.app`) : **non mis à jour** tant que la PR n’est pas fusionnée/déployée.
+
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 
 ## 2026-11-23 — Vérification globale du candidat d5e3cf2c
