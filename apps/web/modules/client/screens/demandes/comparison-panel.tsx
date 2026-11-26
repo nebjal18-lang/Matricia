@@ -180,6 +180,51 @@ export function ComparisonPanel({
         <p className="client-card">{messages.noComparison}</p>
       ) : (
         <section className="client-compare-layout">
+          <div
+            className="client-compare-matrix"
+            role="region"
+            tabIndex={0}
+            aria-label={locale === "ar" ? "مقارنة المعايير بين العروض" : "Comparaison des critères entre offres"}
+          >
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">{locale === "ar" ? "المعيار" : "Critère"}</th>
+                  {columns.map((column) => (
+                    <th key={column.key} scope="col">
+                      {locale === "ar" ? `العرض ${column.letter}` : `Offre ${column.letter}`}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(
+                  [
+                    [c.priceMad, (column: CompareColumn) => <bdi>{column.price}</bdi>],
+                    [c.durationLabel, (column: CompareColumn) => column.duration],
+                    [c.taxBase, (column: CompareColumn) => column.taxBase],
+                    [
+                      c.exclusions,
+                      (column: CompareColumn) =>
+                        column.exclusions.length > 0 ? column.exclusions.slice(0, 2).join(" · ") : dash,
+                    ],
+                    [
+                      c.deliverablesIncl,
+                      (column: CompareColumn) =>
+                        column.deliverables.length > 0 ? column.deliverables.slice(0, 2).join(" · ") : dash,
+                    ],
+                  ] as const
+                ).map(([label, render]) => (
+                  <tr key={label}>
+                    <th scope="row">{label}</th>
+                    {columns.map((column) => (
+                      <td key={`${column.key}-${label}`}>{render(column)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="client-compare-grid" aria-live="polite">
             {columns.map((column, index) => (
               <QuoteColumn

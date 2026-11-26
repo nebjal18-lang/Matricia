@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { queryWithWorkspace, translateLocalPath, withDashboardWorkspaceHint } from "@/modules/shared/lib/auth/workspace-navigation";
@@ -10,7 +10,7 @@ import { ProviderOrganizationSelector } from "./provider-organization-selector";
 import { providerCopy } from "@/modules/provider/data/spaces/copy";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
-import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { buildProviderNav, type ProviderNavKey } from "@/modules/provider/ui/provider-nav";
 import "@/modules/client/ui/client-experience.css";
@@ -97,7 +97,6 @@ export function ProviderAppShell({
             <small className="provider-brand-space">{c.brandSpace}</small>
           </span>
         </Link>
-        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -109,7 +108,6 @@ export function ProviderAppShell({
             );
           })}
         </nav>
-        </WorkspaceMobileNavigation>
         <figure className="client-side-art">
           <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
@@ -122,6 +120,24 @@ export function ProviderAppShell({
           <div className="client-scene-pattern" />
         </div>
         <div className="client-topbar">
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "قائمة المهني" : "Menu professionnel"}
+            description={c.space}
+            triggerLabel={locale === "ar" ? "فتح القائمة" : "Ouvrir le menu"}
+          >
+            <nav className="client-side-nav" aria-label={c.space}>
+              {nav.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.key} href={item.href} data-active={item.key === active ? "true" : undefined}>
+                    <Icon aria-hidden className="size-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </WorkspaceMobileNav>
           <form
             className="client-top-search client-shell-search provider-shell-search"
             method="get"

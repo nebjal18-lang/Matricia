@@ -37,6 +37,7 @@ import {
 } from "@/modules/client/data/home/view-model";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 
 type FeaturedSteps = NonNullable<Extract<ClientHomeSnapshot, { status: "success" }>["featuredProject"]>["steps"];
 
@@ -170,10 +171,10 @@ export function ClientDashboardHome({
   });
   const progressRows = counts
     ? [
-        { label: c.kpiRequests, value: counts.openRequests },
-        { label: c.kpiQuotes, value: counts.quotesToReview },
-        { label: c.kpiMissions, value: counts.activeMissions },
-      ].flatMap((row) => row.value === null ? [] : [{label: row.label, value: row.value}])
+        { label: c.kpiRequests, value: counts.openRequests, href: `/${locale}/client/demandes${selectedQuery}` },
+        { label: c.kpiQuotes, value: counts.quotesToReview, href: `/${locale}/client/demandes${selectedQuery}` },
+        { label: c.kpiMissions, value: counts.activeMissions, href: `/${locale}/client/missions${selectedQuery}` },
+      ].flatMap((row) => (row.value === null ? [] : [{ label: row.label, value: row.value, href: row.href }]))
     : [];
   const progressMax = progressRows.reduce((max, row) => Math.max(max, row.value), 1);
   const notifCount = summary.total > 0 ? Math.min(summary.total, 9) : 0;
@@ -208,6 +209,14 @@ export function ClientDashboardHome({
           <div className="client-scene-pattern" />
         </div>
         <div className="client-topbar client-home-topbar">
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "قائمة المساحة" : "Menu de l’espace"}
+            description={locale === "ar" ? "التنقل في مساحة العميل" : "Navigation de l’espace client"}
+            triggerLabel={locale === "ar" ? "فتح القائمة" : "Ouvrir le menu"}
+          >
+            <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active="home" />
+          </WorkspaceMobileNav>
           <div className="client-top-org">{membershipSwitcher}</div>
           <form className="client-top-search client-shell-search" method="get" action={`/${locale}/client/recherche`} role="search" aria-label={c.searchLabel}>
             {selectedOrganizationId ? <input type="hidden" name="organizationId" value={selectedOrganizationId} /> : null}
@@ -253,6 +262,12 @@ export function ClientDashboardHome({
                   <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
                 </Link>
                 {!resumeDraft ? <p className="client-ambition-script">{c.ambitionScript}</p> : null}
+                {priorityRows[0] ? (
+                  <Link href={priorityRows[0].href} className="client-text-link client-home-next-action">
+                    {priorityRows[0].title}
+                    <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+                  </Link>
+                ) : null}
               </div>
             }
             priority
@@ -378,7 +393,15 @@ export function ClientDashboardHome({
                     })}
                   </svg>
                   <ul className="client-home-progress">
-                    {progressRows.map((row,index)=><li key={row.label}><span data-tone={["violet","peach","mint"][index]}/><span>{row.label}</span><strong dir="ltr">{row.value}</strong></li>)}
+                    {progressRows.map((row, index) => (
+                      <li key={row.label}>
+                        <Link href={row.href}>
+                          <span data-tone={["violet", "peach", "mint"][index]} />
+                          <span>{row.label}</span>
+                          <strong dir="ltr">{row.value}</strong>
+                        </Link>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}

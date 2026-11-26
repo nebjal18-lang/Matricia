@@ -187,12 +187,19 @@ export function featuredRequestSituation(status: string): ClientPrioritySituatio
   return "REQUEST";
 }
 
+function withOrganizationContext(href: string, organizationQuery: string): string {
+  if (!organizationQuery) return href;
+  const base = "https://matricia.invalid";
+  const url = new URL(href, base);
+  if (url.origin !== base) return href;
+  for (const [key, value] of new URLSearchParams(organizationQuery)) url.searchParams.set(key, value);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export function toClientPriorityRows(items: readonly UserActionItem[], locale: "fr" | "ar", organizationQuery: string): ClientPriorityRow[] {
   return items.map((item) => {
     const situation = inferClientSituation(item);
-    const href = organizationQuery
-      ? `${item.href}${item.href.includes("?") ? "&" : "?"}${organizationQuery.replace(/^\?/, "")}`
-      : item.href;
+    const href = withOrganizationContext(item.href, organizationQuery);
     return {
       id: item.id,
       situation,
@@ -251,7 +258,7 @@ export function toClientInboxRows(items: readonly UserActionItem[], situation: C
     .map((item) => ({
       id: item.id,
       title: item.title,
-      href: organizationQuery ? `${item.href}${item.href.includes("?") ? "&" : "?"}${organizationQuery.replace(/^\?/, "")}` : item.href,
+      href: withOrganizationContext(item.href, organizationQuery),
       dueAt: item.dueAt,
     }));
 }
@@ -270,7 +277,7 @@ export function toClientDeadlineRows(input: {
     .map((item) => ({
       id: item.id,
       title: item.title,
-      href: input.organizationQuery ? `${item.href}${item.href.includes("?") ? "&" : "?"}${input.organizationQuery.replace(/^\?/, "")}` : item.href,
+      href: withOrganizationContext(item.href, input.organizationQuery),
       dueAt: item.dueAt,
     }));
   const extra = input.milestone?.title && input.milestone.dueAt && !fromActions.some((row) => row.title === input.milestone?.title)

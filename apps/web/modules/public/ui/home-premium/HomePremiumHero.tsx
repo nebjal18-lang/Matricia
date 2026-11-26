@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { getHomePremiumCopy, type HomeLocale } from "./home-premium.copy";
 import styles from "./home-premium-shell.module.css";
 
-/** First viewport only — brand, one headline, one lead, one CTA group, one image. */
+/** First viewport — business promise, three distinct intents, one image. */
 export function HomePremiumHero({ locale }: { locale: HomeLocale }) {
   const copy = getHomePremiumCopy(locale);
   const href = (path: string) => `/${locale}${path}`;
@@ -26,7 +26,7 @@ export function HomePremiumHero({ locale }: { locale: HomeLocale }) {
       </div>
 
       <div className={styles.heroInner}>
-        <p className={styles.brand}>{copy.brand}</p>
+        <p className={styles.brandLead}>{copy.brandLead}</p>
         <h1 id="home-title">
           {copy.titleLead} <span>{copy.titleAccent}</span>
         </h1>
@@ -36,13 +36,13 @@ export function HomePremiumHero({ locale }: { locale: HomeLocale }) {
             {copy.primaryAction}
             <ArrowRight className={styles.actionArrow} size={18} aria-hidden="true" />
           </Link>
-          <Link className={styles.secondaryAction} href={href("/fournisseur")} prefetch>
-            {copy.providerAction}
+          <Link className={styles.needActionSolid} href={href("/besoin")} prefetch>
+            {copy.preciseNeedAction}
+            <ArrowRight className={styles.actionArrow} size={16} aria-hidden="true" />
           </Link>
         </div>
-        <Link className={styles.needAction} href={href("/besoin")} prefetch>
-          {copy.preciseNeedAction}
-          <ArrowRight className={styles.actionArrow} size={16} aria-hidden="true" />
+        <Link className={styles.providerLink} href={href("/fournisseur")} prefetch>
+          {copy.providerAction}
         </Link>
       </div>
     </section>

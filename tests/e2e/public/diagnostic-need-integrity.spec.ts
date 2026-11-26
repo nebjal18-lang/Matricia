@@ -77,7 +77,7 @@ for (const locale of ["fr", "ar"] as const) {
     if (locale === "ar") await page.goto("/ar/besoin");
     await expect(page.locator("#need-service")).toHaveValue("BTP-RENOV");
     if (locale === "ar") {
-      await expect(page.locator('#need-service option[value="BTP-RENOV"]')).toContainText("الاسم العربي غير متاح");
+      await expect(page.locator('#need-service option[value="BTP-RENOV"]')).toHaveText("تجديد مبنى أو محل");
       await expect(page.getByRole("note")).toContainText("أسماء عربية معتمدة");
     }
     await expect(page.getByText(originalNeed, { exact: true })).toBeVisible();

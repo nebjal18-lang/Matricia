@@ -37,8 +37,8 @@ describe("alignement maquettes pages publiques", () => {
     expect(html).not.toContain("Des idées en actions");
     expect(html).not.toContain("Expertise");
     expect(html).toContain("Proposer mes services");
-    expect(html).toContain("J’ai déjà un besoin précis");
-    expect(html).toContain("Un cycle complet");
+    expect(html).toContain("Décrire un besoin précis");
+    expect(html).toContain("Un cycle clair");
     expect(html).toContain("Questions fréquentes");
     expect(html).toContain("Prêt à faire avancer");
     expect(html).not.toContain("/home-v2/hero-plate.png");
@@ -48,9 +48,9 @@ describe("alignement maquettes pages publiques", () => {
   it("accueil AR : photo, cycle et FAQ dans le sens RTL", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "ar" }) }));
     expect(html).toContain("/home-v2/hero-collaboration.png");
-    expect(html).toContain("دورة كاملة");
+    expect(html).toContain("دورة واضحة");
     expect(html).toContain('dir="rtl"');
-    expect(html).toContain("اكتشف ما يعيق تطور مؤسستك.");
+    expect(html).toContain("حدّدوا أولوية،");
     expect(html).not.toContain("أفكار تتحول إلى أفعال");
     expect(html).toContain("الأسئلة الشائعة");
   });

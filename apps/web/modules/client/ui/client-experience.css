@@ -1,4 +1,4 @@
-@import "../../shared/ui/design-system/matricia-ds.css";
+﻿@import "../../shared/ui/design-system/matricia-ds.css";
 
 .client-workspace {
   --ad-forest: var(--mat-navy);
@@ -7,24 +7,26 @@
   --client-ink: var(--mat-navy);
   --client-muted: var(--mat-slate);
   --client-line: rgb(17 26 54 / 11%);
-  --client-cta: var(--mat-violet);
+  /* Action principale = corail (Design Authority A) ; violet = accent de marque / sélection */
+  --client-cta: var(--mat-coral-ink, #b8373e);
   --client-cta-ink: #fff;
-  --client-soft: var(--mat-violet-soft);
+  --client-soft: var(--mat-coral-soft, #feeeef);
+  --client-brand-accent: var(--mat-violet);
   --home-coral: var(--mat-coral);
   --home-magenta: var(--mat-purple);
   --home-action: var(--mat-gradient);
-  --primary: var(--mat-violet);
+  --primary: var(--mat-coral-ink, #b8373e);
   --primary-foreground: #ffffff;
-  --ring: var(--mat-violet);
+  --ring: var(--mat-coral-ink, #b8373e);
   --background: var(--mat-canvas);
   --foreground: var(--mat-navy);
   --card: #ffffff;
   --card-foreground: var(--mat-navy);
   --muted-foreground: var(--mat-slate);
   --border: rgb(17 26 54 / 11%);
-  --color-primary: var(--mat-violet);
+  --color-primary: var(--mat-coral-ink, #b8373e);
   --color-primary-foreground: #ffffff;
-  --color-ring: var(--mat-violet);
+  --color-ring: var(--mat-coral-ink, #b8373e);
   --color-background: var(--mat-canvas);
   --color-foreground: var(--mat-navy);
   --color-card: #ffffff;
@@ -108,17 +110,6 @@
 .client-side-nav {
   display: grid;
   gap: 0.2rem;
-}
-
-.workspace-nav-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  min-height: 0;
-}
-
-.workspace-nav-toggle {
-  display: none;
 }
 
 .client-side-nav-label {
@@ -250,7 +241,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: right bottom;
-  opacity: 0.22;
+  opacity: 0.12;
   pointer-events: none;
 }
 
@@ -276,7 +267,7 @@
   .client-scene-arch,
   .client-scene-palms,
   .client-scene-pattern {
-    opacity: 0.28;
+    opacity: 0.14;
   }
 }
 
@@ -1233,76 +1224,82 @@ button.client-cta {
   }
 }
 
+.workspace-mobile-nav-trigger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--client-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--client-ink);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.workspace-mobile-nav-sheet {
+  gap: 0;
+  padding-block-end: 1rem;
+}
+
+.workspace-mobile-nav-body {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0 1rem 1rem;
+  overflow-y: auto;
+}
+
+.workspace-mobile-nav-body .client-side-nav {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.workspace-mobile-nav-body .client-side-nav a,
+.workspace-mobile-nav-body a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  color: var(--client-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.workspace-mobile-nav-body .client-side-nav a[data-active="true"],
+.workspace-mobile-nav-body a[data-active="true"] {
+  background: var(--client-soft);
+  color: var(--client-cta);
+}
+
+.workspace-mobile-nav-body .client-side-nav-label {
+  margin: 0.65rem 0 0.15rem;
+  color: var(--client-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 959px) {
   .client-workspace {
     display: block;
   }
 
-  .client-side {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.5rem 0.75rem;
-    border-inline-end: 0;
-    border-bottom: 1px solid var(--client-line);
-    padding: 0.75rem 1rem;
+  /* Sidebar desktop only — mobile uses WorkspaceMobileNav (closed by default). */
+  .client-workspace:not(.franchise-workspace) > .client-side {
+    display: none;
   }
 
-  .workspace-nav-toggle {
+  .workspace-mobile-nav-trigger {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    min-height: 2.75rem;
-    border: 1px solid var(--client-line);
-    border-radius: var(--mat-radius-medium);
-    background: #fff;
-    padding: 0.4rem 0.7rem;
-    color: var(--client-ink);
-    font: inherit;
-    font-weight: 650;
-    cursor: pointer;
   }
 
-  .workspace-nav-toggle:hover,
-  .workspace-nav-toggle[aria-expanded="true"] {
-    border-color: var(--client-cta);
-    background: var(--client-soft);
-  }
-
-  .workspace-nav-toggle[aria-expanded="true"] .workspace-nav-chevron {
-    transform: rotate(180deg);
-  }
-
-  .workspace-nav-panel {
-    grid-column: 1 / -1;
-    display: block;
-    max-height: min(60dvh, 32rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
-  /* Explicit false state — required so closed nav does not push page content below the fold. */
-  .workspace-nav-panel[data-open="false"],
-  .client-workspace .workspace-nav-panel[data-open="false"] {
-    display: none !important;
-  }
-
-  .workspace-nav-panel .client-side-nav {
-    display: grid;
-    gap: 0.2rem;
-  }
-
-  .workspace-nav-panel .client-side-nav a {
-    min-height: 2.75rem;
-  }
-
-  .workspace-nav-panel .client-side-nav-label {
-    margin-top: 0.85rem;
-  }
-
-  .client-side-foot,
-  .client-side-art {
+  .client-side-foot {
     display: none;
   }
 }
@@ -2065,11 +2062,6 @@ button.client-cta {
   outline: none;
 }
 
-.client-shell-search:focus-within {
-  outline: 3px solid var(--mat-violet);
-  outline-offset: 3px;
-}
-
 @media (max-width: 719px) {
   .client-shell-search {
     flex: 1 1 auto;
@@ -2537,12 +2529,30 @@ button.client-cta {
 }
 
 .client-home-bar-row,
-.client-home-progress li {
+.client-home-progress li,
+.client-home-progress a {
   display: grid;
   grid-template-columns: minmax(4rem, 5.5rem) minmax(0, 1fr) auto;
   gap: 0.55rem;
   align-items: center;
   font-size: 0.82rem;
+}
+
+.client-home-progress a {
+  flex: 1;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.client-home-progress a:hover strong,
+.client-home-progress a:focus-visible strong {
+  color: var(--client-cta);
+}
+
+.client-home-next-action {
+  color: #fff;
+  text-underline-offset: 3px;
 }
 
 .client-home-bar-track {
@@ -2587,8 +2597,7 @@ button.client-cta {
 }
 
 .client-kpi-cta[data-tone="violet"] { background: var(--client-cta); }
-.client-kpi-cta[data-tone="peach"] { background: var(--client-cta); }
-.client-kpi-cta:focus-visible { outline: 3px solid var(--mat-navy); outline-offset: 3px; }
+.client-kpi-cta[data-tone="peach"] { background: var(--mat-coral); }
 .client-kpi-cta[data-tone="mint"] { background: var(--mat-mint-ink); }
 
 .client-compare-page {
@@ -2636,6 +2645,41 @@ button.client-cta {
   }
 }
 
+.client-compare-matrix {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--client-line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.client-compare-matrix table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.client-compare-matrix th,
+.client-compare-matrix td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--client-line);
+  text-align: start;
+  vertical-align: top;
+}
+
+.client-compare-matrix thead th {
+  background: color-mix(in srgb, var(--client-soft) 70%, white);
+  font-weight: 700;
+}
+
+.client-compare-matrix tbody th {
+  min-width: 7rem;
+  color: var(--client-muted);
+  font-weight: 650;
+}
+
 .client-compare-grid {
   display: grid;
   gap: 0.85rem;
@@ -2644,6 +2688,10 @@ button.client-cta {
 @media (min-width: 900px) {
   .client-compare-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .client-compare-matrix {
+    display: none;
   }
 }
 
@@ -3300,6 +3348,26 @@ button.client-cta {
 
 .client-wizard-aside {
   background: var(--mat-violet-soft);
+}
+
+.client-workspace[data-theme="follow"] {
+  --client-cream: #14151c;
+  --client-ink: #f6f4fb;
+  --client-muted: #b7b4c6;
+  --client-line: #2a2c38;
+  --client-soft: #172554;
+  background: #14151c;
+}
+
+.client-workspace[data-theme="follow"] .client-side,
+.client-workspace[data-theme="follow"] .client-card {
+  background: #1c1e28;
+  border-color: #2a2c38;
+}
+
+.client-workspace[data-theme="follow"] .client-cta,
+.client-workspace[data-theme="follow"] .client-need-cta {
+  background: var(--client-cta);
 }
 
 .client-portfolio {

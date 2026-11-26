@@ -111,7 +111,7 @@ describe("client space boards", () => {
     expect(html).not.toContain("Valider un livrable");
     expect(html).toContain("Aucune mission en cours");
     expect(html).toContain("Documents récents par dossier");
-    expect(html).toContain("Factures à examiner");
+    expect(html).toContain("Factures Matricia");
     expect(html).toContain("client-kpi-cta");
     expect(html).toContain("Voir tous les documents");
     expect(html).toContain("Inviter une personne");
@@ -313,7 +313,10 @@ describe("client space boards", () => {
     expect(documents).toContain("Documents récents par dossier");
     expect(documents).not.toContain("Contrat de prestation");
     const finances = renderToStaticMarkup(<FinancesBoard locale="fr" query="" organizationName="Acme" rows={[]} />);
-    expect(finances).toContain("Factures à examiner");
+    expect(finances).toContain("Factures Matricia");
+    expect(finances).toContain("Factures des prestataires");
+    expect(finances).toContain("Crédits et Boxes");
+    expect(finances).toContain("/fr/client/missions");
     expect(finances).not.toContain("Abonnement Matricia");
     expect(`${requests}${missions}${documents}${finances}`).not.toMatch(/exemple illustratif/i);
   });

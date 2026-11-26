@@ -45,9 +45,10 @@ describe.each(["fr", "ar"] as const)("diagnostic answer trace in %s", (locale) =
       ? ["BTP, immobilier & aménagement", "1 à 9 personnes", "Maîtriser mes coûts", "Non", "Tableaux manuels", "Non concerné", "Seulement pour certains sujets", answers.next_action]
       : ["بناء وعقار وتهيئة", "1 إلى 9 أشخاص", "ضبط التكاليف", "لا", "جداول يدوية", "غير معني", "لبعض المواضيع فقط", answers.next_action];
     for (const [index, id] of diagnosticQuestionIds.entries()) {
-      const row = html.split(`data-question="${id}"`)[1]!.split("</div>")[0]!;
+      const row = html.split(`data-question="${id}"`)[1]!.split(/data-question="/)[0]!;
       expect(row).toContain(copy.questionLabels[id]);
       expect(row).toContain(renderToStaticMarkup(<>{values[index]}</>));
+      expect(row).toContain(copy.editAnswer);
     }
   });
 
@@ -68,9 +69,15 @@ describe.each(["fr", "ar"] as const)("diagnostic answer trace in %s", (locale) =
 
   it("does not substitute an unrecognized backup answer with not applicable", () => {
     const html = renderToStaticMarkup(<RecapView locale={locale} answers={{ ...answers, backup_restore: "invalid-saved-value" }} onEdit={() => undefined} onBack={() => undefined} onAnalyze={() => undefined} />);
-    const row = html.split('data-question="backup_restore"')[1]!.split("</div>")[0]!;
+    const row = html.split('data-question="backup_restore"')[1]!.split(/data-question="/)[0]!;
     expect(row).toContain(getPublicJourneyCopy(locale).diagnostic.answerUnavailable);
     expect(row).not.toContain(locale === "fr" ? "Non concerné" : "غير معني");
+  });
+
+  it("states that construction profitability remains unverified when costs are a goal", () => {
+    const html = renderToStaticMarkup(<ResultView locale={locale} answers={{ ...answers, goals: ["control_costs", "grow_sales"] }} storageAvailable onEdit={() => undefined} onDetail={() => undefined} onSave={() => undefined} onErase={() => undefined} />);
+    expect(html).toContain(locale === "fr" ? "La rentabilité par chantier reste à mesurer" : "ربحية كل ورش ما زالت بحاجة إلى قياس");
+    expect(html).toContain(locale === "fr" ? "coûts et les marges" : "تكاليف الورش وهوامشها");
   });
 
   it.each(["sales", "security", "verify"] as const)("anchors the %s plan to matching answers and distinct deliverables", (priority) => {

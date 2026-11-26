@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Bell, BookOpen, Lock, Search } from "lucide-react";
@@ -8,7 +8,7 @@ import { franchiseCopy } from "@/modules/franchise/data/spaces/copy";
 import { buildFranchiseNav, type FranchiseNavKey } from "@/modules/franchise/ui/franchise-nav";
 import { HashAwareLink, WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
-import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import { FranchiseMandateSelector } from "./franchise-access-state";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -41,12 +41,12 @@ export function FranchiseAppShell({
   selectedOrganizationId: string | null;
   userEmail: string | null;
   active: FranchiseNavKey;
-  title?: string | undefined;
-  lead?: string | undefined;
-  kicker?: string | undefined;
+  title?: string;
+  lead?: string;
+  kicker?: string;
   actions?: ReactNode;
   mandateName?: string | null;
-  mandates?: Array<{id:string;organizationId:string;label:string}> | undefined;
+  mandates?: Array<{id:string;organizationId:string;label:string}>;
   /** Photo hero mast — identity hubs only (accueil / territoire / finance). */
   sceneHero?: boolean;
   /** When false, only surfaces that explain or regularize access stay in the menu. */
@@ -94,7 +94,6 @@ export function FranchiseAppShell({
             <small>{n.brandSpace}</small>
           </span>
         </Link>
-        <WorkspaceMobileNavigation locale={locale}>
         <nav className="client-side-nav">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -106,7 +105,6 @@ export function FranchiseAppShell({
             );
           })}
         </nav>
-        </WorkspaceMobileNavigation>
         <p className="client-side-foot"><span aria-hidden>◆</span>{n.sideFoot}</p>
       </aside>
       <div className="client-frame">
@@ -192,15 +190,31 @@ export function FranchiseAppShell({
               </Link>
             );
           })}
-          {mandateReady ? (
-            <Link
-              href={`/${locale}/franchise/gouvernance${selectedQuery}`}
-              data-active={active === "governance" || active === "quality" || active === "performance" || active === "followups" || active === "documents" || active === "messages" || active === "perimeter" || active === "finance" ? "true" : undefined}
-            >
-              <span aria-hidden>⋯</span>
-              <span>{locale === "ar" ? "المزيد" : "Plus"}</span>
-            </Link>
-          ) : null}
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "كل الأقسام" : "Tous les menus"}
+            description={c.space}
+            triggerLabel={locale === "ar" ? "المزيد" : "Plus"}
+            triggerClassName="franchise-dock-more"
+            triggerContent={
+              <>
+                <span aria-hidden>⋯</span>
+                <span>{locale === "ar" ? "المزيد" : "Plus"}</span>
+              </>
+            }
+          >
+            <nav className="client-side-nav" aria-label={c.space}>
+              {nav.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.key} href={item.href} data-active={item.key === active ? "true" : undefined}>
+                    <Icon aria-hidden className="size-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </WorkspaceMobileNav>
         </nav>
         {title && sceneHero ? (
           <div className="client-scene-mast">
@@ -225,7 +239,7 @@ export function FranchiseAppShell({
             </div>
           </header>
         ) : null}
-        <FranchiseMandateSelector locale={locale} mandates={mandates ?? []} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
+        <FranchiseMandateSelector locale={locale} mandates={mandates} organizationId={selectedOrganizationId} selectedFranchiseId={selectedFranchiseId} returnPath={currentPath ?? `/${locale}/franchise/${routeByActive[active]}`} />
         <div className="franchise-page-standard">{children}</div>
       </div>
     </div>

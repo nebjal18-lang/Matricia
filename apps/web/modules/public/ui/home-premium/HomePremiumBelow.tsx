@@ -29,8 +29,39 @@ export function HomePremiumBelow({ locale }: { locale: HomeLocale }) {
   const copy = getHomePremiumCopy(locale);
   const href = (path: string) => `/${locale}${path}`;
 
+  const example =
+    locale === "ar"
+      ? {
+          title: "مثال مختصر",
+          items: [
+            ["الاحتياج", "تنظيم المتابعة التجارية لمتجر متعدد الفروع"],
+            ["الخدمة المقترحة", "تأطير العمليات وإعداد أدوات المتابعة"],
+            ["التسليم", "خطة تشغيل ولوحة مؤشرات جاهزة للاستعمال"],
+          ],
+        }
+      : {
+          title: "Exemple compact",
+          items: [
+            ["Besoin formulé", "Structurer le suivi commercial d’un magasin multi-sites"],
+            ["Prestation proposée", "Cadre opérationnel et outils de suivi par une consultante"],
+            ["Livrable reçu", "Plan d’actions et tableau de bord utilisable en magasin"],
+          ],
+        };
+
   return (
     <>
+      <section className={styles.exampleStrip} aria-labelledby="home-example-title">
+        <h2 id="home-example-title">{example.title}</h2>
+        <ol>
+          {example.items.map(([label, text]) => (
+            <li key={label}>
+              <strong>{label}</strong>
+              <small>{text}</small>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className={styles.cycle} aria-labelledby="cycle-title" id="comment-ca-marche">
         <header className={styles.cycleHead}>
           <h2 id="cycle-title">

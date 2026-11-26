@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Activity, Bell, Building2, Landmark, Route, Search, Settings, Shield, Users } from "lucide-react";
 import type { ReactNode } from "react";
@@ -7,7 +7,7 @@ import { adminCopy } from "@/modules/admin/data/spaces/copy";
 import { buildAdminFinanceLinks, buildAdminNav, buildAdminPilotLinks, buildAdminSettingsLinks, type AdminNavKey } from "@/modules/admin/ui/admin-nav";
 import { AdminSideGroup } from "@/modules/admin/ui/admin-side-group";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
-import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
@@ -73,6 +73,64 @@ export function AdminAppShell({
   const finance = buildAdminFinanceLinks(locale, q);
   const nav = buildAdminNav(locale, q);
   const Frame = mainLandmark ? "main" : "div";
+  const sideNav = (
+    <nav className="client-side-nav" aria-label={active === "home" ? c.commandNav : c.space}>
+      {nav.map((item) => {
+        const Icon = item.icon;
+        if (item.key === "actors") {
+          return (
+            <AdminSideGroup key={item.key} label={item.label} active={active === "actors"} icon={<Users aria-hidden className="size-4" />}>
+              {actors.map((link) => (
+                <Link key={link.id} href={link.href} data-current={actorCurrent === link.id ? "true" : undefined}>{link.label}</Link>
+              ))}
+            </AdminSideGroup>
+          );
+        }
+        if (item.key === "parcours") {
+          return (
+            <AdminSideGroup key={item.key} label={item.label} active={active === "parcours"} icon={<Route aria-hidden className="size-4" />}>
+              {parcours.map((link) => (
+                <Link key={link.id} href={link.href} data-current={parcoursCurrent === link.id ? "true" : undefined}>{link.label}</Link>
+              ))}
+            </AdminSideGroup>
+          );
+        }
+        if (item.key === "finance") {
+          return (
+            <AdminSideGroup key={item.key} label={item.label} active={active === "finance"} icon={<Landmark aria-hidden className="size-4" />}>
+              {finance.map((link) => (
+                <Link key={link.id} href={link.href}>{link.label}</Link>
+              ))}
+            </AdminSideGroup>
+          );
+        }
+        if (item.key === "pilot") {
+          return (
+            <AdminSideGroup key={item.key} label={item.label} active={active === "pilot"} icon={<Shield aria-hidden className="size-4" />}>
+              {pilot.map((link) => (
+                <Link key={link.id} href={link.href}>{link.label}</Link>
+              ))}
+            </AdminSideGroup>
+          );
+        }
+        if (item.key === "settings") {
+          return (
+            <AdminSideGroup key={item.key} label={item.label} active={active === "settings"} icon={<Settings aria-hidden className="size-4" />}>
+              {settings.map((link) => (
+                <Link key={link.id} href={link.href}>{link.label}</Link>
+              ))}
+            </AdminSideGroup>
+          );
+        }
+        return (
+          <Link key={item.key} href={item.href} data-active={item.key === active ? "true" : undefined}>
+            <Icon aria-hidden className="size-4" />
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="client-workspace admin-workspace">
@@ -89,64 +147,7 @@ export function AdminAppShell({
             <small>{c.space}</small>
           </span>
         </Link>
-        <WorkspaceMobileNavigation locale={locale}>
-        <nav className="client-side-nav" aria-label={active === "home" ? c.commandNav : c.space}>
-          {nav.map((item) => {
-            const Icon = item.icon;
-            if (item.key === "actors") {
-              return (
-                <AdminSideGroup key={item.key} label={item.label} active={active === "actors"} icon={<Users aria-hidden className="size-4" />}>
-                  {actors.map((link) => (
-                    <Link key={link.id} href={link.href} data-current={actorCurrent === link.id ? "true" : undefined}>{link.label}</Link>
-                  ))}
-                </AdminSideGroup>
-              );
-            }
-            if (item.key === "parcours") {
-              return (
-                <AdminSideGroup key={item.key} label={item.label} active={active === "parcours"} icon={<Route aria-hidden className="size-4" />}>
-                  {parcours.map((link) => (
-                    <Link key={link.id} href={link.href} data-current={parcoursCurrent === link.id ? "true" : undefined}>{link.label}</Link>
-                  ))}
-                </AdminSideGroup>
-              );
-            }
-            if (item.key === "finance") {
-              return (
-                <AdminSideGroup key={item.key} label={item.label} active={active === "finance"} icon={<Landmark aria-hidden className="size-4" />}>
-                  {finance.map((link) => (
-                    <Link key={link.id} href={link.href}>{link.label}</Link>
-                  ))}
-                </AdminSideGroup>
-              );
-            }
-            if (item.key === "pilot") {
-              return (
-                <AdminSideGroup key={item.key} label={item.label} active={active === "pilot"} icon={<Shield aria-hidden className="size-4" />}>
-                  {pilot.map((link) => (
-                    <Link key={link.id} href={link.href}>{link.label}</Link>
-                  ))}
-                </AdminSideGroup>
-              );
-            }
-            if (item.key === "settings") {
-              return (
-                <AdminSideGroup key={item.key} label={item.label} active={active === "settings"} icon={<Settings aria-hidden className="size-4" />}>
-                  {settings.map((link) => (
-                    <Link key={link.id} href={link.href}>{link.label}</Link>
-                  ))}
-                </AdminSideGroup>
-              );
-            }
-            return (
-              <Link key={item.key} href={item.href} data-active={item.key === active ? "true" : undefined}>
-                <Icon aria-hidden className="size-4" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-        </WorkspaceMobileNavigation>
+        {sideNav}
         <p className="client-side-foot"><span aria-hidden>◆</span>{locale === "ar" ? "منصة لريادة الأعمال معاً" : "Une plateforme pour entreprendre demain, ensemble."}</p>
       </aside>
       <Frame className="client-frame">
@@ -156,6 +157,14 @@ export function AdminAppShell({
           <div className="client-scene-pattern" />
         </div>
         <div className="client-topbar">
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "قائمة الإدارة" : "Menu administration"}
+            description={c.space}
+            triggerLabel={locale === "ar" ? "فتح القائمة" : "Ouvrir le menu"}
+          >
+            {sideNav}
+          </WorkspaceMobileNav>
           <form className="client-top-search admin-shell-search" method="get" action={searchAction ?? `${p}/administration/command-center`} role="search" aria-label={searchPlaceholder ?? c.search}>
             {selectedOrganizationId ? <input type="hidden" name="organizationId" value={selectedOrganizationId} /> : null}
             <Search aria-hidden className="size-4" />

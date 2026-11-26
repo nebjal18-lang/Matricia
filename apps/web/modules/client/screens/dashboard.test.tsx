@@ -98,9 +98,11 @@ describe("ClientDashboardHome", () => {
     expect(html).toContain("Offre A");
     expect(html).toContain("Périmètre");
     expect(html).toContain("Conditions");
-    expect(html).toContain("De l’ambition aux réalisations");
+    expect(html).toContain("Ouvrir le menu");
+    expect(html).toContain("Comparer les offres reçues");
     expect(html).toContain("Propulsons le savoir-faire marocain.");
     expect(html).toContain("Prochain jalon");
+    expect(html).toContain("/fr/client/missions");
     expect(html).toContain("Documents à examiner");
     expect(html).toContain("Messages non lus");
     expect(html).toContain("L’avancement de vos projets");

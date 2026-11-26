@@ -10,6 +10,8 @@ import {
   resolveClientHomeStage,
   toClientHomeInsights,
   toClientPriorityRows,
+  toClientInboxRows,
+  toClientDeadlineRows,
 } from "./view-model";
 
 type Item = {
@@ -145,5 +147,17 @@ describe("client-home view-model", () => {
     expect(insights.documentsToReview).toBe(1);
     expect(insights.messagesToHandle).toBe(1);
     expect(insights.nextMilestoneTitle).toBe("Choisir un prestataire");
+  });
+});
+
+describe("client action organization links", () => {
+  it("keeps the selected organization exactly once on action, inbox and deadline links", () => {
+    const item = { ...base, kind: "MESSAGE" as const, href: "/fr/client/demandes/aaaa?tab=messages&organizationId=old#reply" };
+    const selected = "?organizationId=11111111-1111-4111-8111-111111111111&workspace=client";
+    const expected = "/fr/client/demandes/aaaa?tab=messages&organizationId=11111111-1111-4111-8111-111111111111&workspace=client#reply";
+    expect(toClientPriorityRows([item], "fr", selected)[0]?.href).toBe(expected);
+    expect(toClientInboxRows([item], "MESSAGE", selected)[0]?.href).toBe(expected);
+    expect(toClientDeadlineRows({ items: [item], milestone: null, missionsHref: "/fr/client/missions", now: "2026-09-16T10:00:00Z", organizationQuery: selected })[0]?.href).toBe(expected);
+    expect(toClientPriorityRows([{ ...item, href: "https://example.invalid/help" }], "fr", selected)[0]?.href).toBe("https://example.invalid/help");
   });
 });

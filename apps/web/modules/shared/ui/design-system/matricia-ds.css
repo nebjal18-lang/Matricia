@@ -1,4 +1,8 @@
-/* Design Authority Version A — primitives partagées (tous espaces) */
+/* Design Authority Version A — primitives partagées (tous espaces)
+ * Action principale : --mat-coral / --mat-coral-ink
+ * Accent de marque / sélection douce : --mat-violet*
+ * Statuts : mint=ok, peach=warn, coral=danger, sky=info, rose=accent secondaire
+ */
 
 .mat-tone-chip,
 .admin-status,

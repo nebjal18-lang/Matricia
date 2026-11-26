@@ -941,18 +941,51 @@ export function ProviderDocumentsBoard({
               <input id="provider-doc-search" name="q" defaultValue={search} placeholder={c.searchDoc} />
             </form>
           </header>
+          <div className="client-table-tools">
+            <p className="admin-result-count" role="status">
+              {loadError
+                ? c.docsLoadError
+                : locale === "ar"
+                  ? `${rows.length} وثيقة`
+                  : `${rows.length} document${rows.length > 1 ? "s" : ""}`}
+            </p>
+            <nav aria-label={locale === "ar" ? "صفحات الوثائق" : "Pages des documents"}>
+              {page > 1 ? (
+                <Link href={pageHref(page - 1)} className="client-ghost-link">
+                  {locale === "ar" ? "السابق" : "Précédente"}
+                </Link>
+              ) : null}{" "}
+              <span>
+                {locale === "ar" ? "الصفحة" : "Page"} {page}
+              </span>{" "}
+              {hasMore ? (
+                <Link href={pageHref(page + 1)} className="client-ghost-link">
+                  {locale === "ar" ? "التالي" : "Suivante"}
+                </Link>
+              ) : null}
+            </nav>
+          </div>
           {loadError ? <p role="alert">{c.docsLoadError}</p> : null}
-          <nav aria-label={locale==="ar"?"صفحات الوثائق":"Pages des documents"}>{page>1?<Link href={pageHref(page-1)} className="client-ghost-link">{locale==="ar"?"السابق":"Précédente"}</Link>:null} <span>{locale==="ar"?"الصفحة":"Page"} {page}</span> {hasMore?<Link href={pageHref(page+1)} className="client-ghost-link">{locale==="ar"?"التالي":"Suivante"}</Link>:null}</nav>
-          {!loadError && rows.length === 0 ? <p role="status">{c.docsEmpty}</p> : null}
+          {!loadError && rows.length === 0 ? (
+            <div role="status" className="admin-empty-card">
+              <p>{needle || view !== "all" ? (locale === "ar" ? "لا نتيجة لهذه التصفية." : "Aucun résultat pour ces filtres.") : c.docsEmpty}</p>
+              {needle || view !== "all" ? (
+                <Link href={tabHref("all")} className="client-text-link">
+                  {locale === "ar" ? "إعادة ضبط التصفية" : "Réinitialiser les filtres"}
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
           {rows.length > 0 ? (
           <div className="client-table-wrap" id="docs">
             <table className="client-space-table">
-              <thead><tr><th>{c.document}</th><th>{c.usage}</th><th>{c.status}</th><th>{c.access}</th><th>{c.action}</th></tr></thead>
+              <thead><tr><th>{c.document}</th><th>{c.usage}</th><th>{locale === "ar" ? "الاستحقاق" : "Échéance"}</th><th>{c.status}</th><th>{c.access}</th><th>{c.action}</th></tr></thead>
               <tbody>
                 {rows.map((document) => (
                   <tr key={document.id}>
                     <td><Link className="client-text-link" href={`/${locale}/sous-traitant/documents/${document.id}${query}`}>{document.code} · v{document.version}</Link></td>
                     <td>{getProviderStatusLabel(locale,document.kind)}</td>
+                    <td>{document.expiresOn ? <time dateTime={document.expiresOn} dir="ltr">{document.expiresOn}</time> : (locale === "ar" ? "—" : "—")}</td>
                     <td><span className="client-status-chip" data-tone={documentTone(document.status)}>{getProviderStatusLabel(locale, document.status)}</span></td>
                     <td>{c.docsPrivate}</td>
                     <td>{document.scanStatus === "CLEAN" ? <a href={`/api/provider/documents/${document.id}`} className="client-ghost-link">{c.open}</a> : <span role="status">{document.scanStatus === "PENDING" ? (locale === "ar" ? "الفحص جارٍ" : "Analyse en attente") : (locale === "ar" ? "في الحجر" : "En quarantaine")}</span>} <Cta href={qualifyHref}>{c.replace}</Cta></td>

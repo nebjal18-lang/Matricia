@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import Link from "next/link";
 import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
@@ -13,7 +13,7 @@ import { buildClientNav } from "@/modules/client/ui/client-nav";
 import { ClientWorkspaceNav } from "@/modules/client/ui/client-workspace-nav";
 import { WorkspaceHashScroll } from "@/modules/shared/ui/hash-nav";
 import { WorkspaceAccountMenu } from "@/modules/shared/ui/workspace-account-menu";
-import { WorkspaceMobileNavigation } from "@/modules/shared/ui/workspace-mobile-navigation";
+import { WorkspaceMobileNav } from "@/modules/shared/ui/workspace-mobile-nav";
 import { SpaceSceneHero } from "@/modules/shared/ui/space-scene-hero";
 import "./client-experience.css";
 import "./client-page-standard.css";
@@ -91,9 +91,7 @@ export function ClientAppShell({
             <small>{c.brandTagline}</small>
           </span>
         </Link>
-        <WorkspaceMobileNavigation locale={locale}>
-          <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
-        </WorkspaceMobileNavigation>
+        <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
         <figure className="client-side-art">
           <Image src="/scenes/arch-city.png" alt="" width={220} height={120} className="client-side-art-image" />
           <figcaption>{c.brandFooter}</figcaption>
@@ -106,6 +104,14 @@ export function ClientAppShell({
           <div className="client-scene-pattern" />
         </div>
         <div className="client-topbar client-shell-topbar">
+          <WorkspaceMobileNav
+            locale={locale}
+            title={locale === "ar" ? "قائمة المساحة" : "Menu de l’espace"}
+            description={locale === "ar" ? "التنقل في مساحة العميل" : "Navigation de l’espace client"}
+            triggerLabel={locale === "ar" ? "فتح القائمة" : "Ouvrir le menu"}
+          >
+            <ClientWorkspaceNav locale={locale} selectedQuery={selectedQuery} messagesUnread={messagesUnread} active={active} />
+          </WorkspaceMobileNav>
           <form className="client-top-search client-shell-search" method="get" action={searchPath} role="search" aria-label={c.searchLabel}>
             {selectedOrganizationId ? <input type="hidden" name="organizationId" value={selectedOrganizationId} /> : null}
             <Search aria-hidden className="size-4" />

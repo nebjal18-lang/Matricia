@@ -11,6 +11,7 @@ import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { AssistanceCue } from "@/modules/client/screens/diagnostics/assistance-cue";
 import { ClientAppShell } from "@/modules/client/ui/client-app-shell";
 import { SpaceActions } from "@/modules/client/screens/spaces/boards";
+import { isDiagnosticPriority } from "@/modules/public/data/journey/diagnostic-handoff";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -30,12 +31,13 @@ export default async function NeedPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string | string[]; serviceCode?: string | string[]; service?: string | string[]; library?: string | string[]; organizationId?: string }>;
+  searchParams: Promise<{ q?: string | string[]; serviceCode?: string | string[]; service?: string | string[]; library?: string | string[]; organizationId?: string; source?: string; priority?: string }>;
 }) {
   const { locale } = await params;
   const query = await searchParams;
   if (!isLocale(locale)) notFound();
   const intent = resolvePublicNeedQuery(query, locale);
+  const diagnosticPriority = query.source === "diagnostic" && isDiagnosticPriority(query.priority) ? query.priority : undefined;
   const client = await getSupabaseServerClient();
   const auth = await client.auth.getUser();
   let organizations: { id: string; name: string }[] = [];
@@ -56,6 +58,7 @@ export default async function NeedPage({
         locale={locale}
         initialNeed={intent.initialNeed}
         initialClassification={intent.classification}
+        diagnosticPriority={diagnosticPriority}
         invalidSelection={intent.invalidSelection}
         authenticated={Boolean(auth.data.user)}
         organizations={organizations}
@@ -71,6 +74,7 @@ export default async function NeedPage({
         locale={locale}
         initialNeed={intent.initialNeed}
         initialClassification={intent.classification}
+        diagnosticPriority={diagnosticPriority}
         invalidSelection={intent.invalidSelection}
         authenticated
         organizations={organizations}
@@ -88,6 +92,7 @@ export default async function NeedPage({
       locale={locale}
       initialNeed={intent.initialNeed}
       initialClassification={intent.classification}
+      diagnosticPriority={diagnosticPriority}
       initialOrganizationId={selectedOrganizationId}
       invalidSelection={intent.invalidSelection}
       authenticated
