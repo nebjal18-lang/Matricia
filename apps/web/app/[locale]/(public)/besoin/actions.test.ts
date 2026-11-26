@@ -62,6 +62,17 @@ describe("savePublicNeedIntake", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
+  it("rejects an overlong constraint plus classification instead of silently truncating", async () => {
+    await expect(savePublicNeedIntake({ status: "idle" }, form({
+      need: "Sécuriser le réseau du bureau",
+      location: "",
+      timing: "",
+      constraints: "C".repeat(1200),
+      classification: { libraryCode: "IT", serviceCode: "IT-AUDIT-SI" },
+    }))).resolves.toEqual({ status: "error", reason: "VALIDATION" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("maps a tenant denial without exposing details", async () => {
     rpc.mockResolvedValue({ data: null, error: { code: "42501" } });
     await expect(savePublicNeedIntake({ status: "idle" }, form())).resolves.toEqual({ status: "error", reason: "FORBIDDEN" });

@@ -282,6 +282,8 @@ export function ResultView({
   locale,
   answers,
   storageAvailable,
+  selectedPriority,
+  onSelectPriority,
   onEdit,
   onDetail,
   onSave,
@@ -290,6 +292,8 @@ export function ResultView({
   locale: Locale;
   answers: Stored["answers"];
   storageAvailable: boolean;
+  selectedPriority?: PriorityKey;
+  onSelectPriority?: (key: PriorityKey) => void;
   onEdit: () => void;
   onDetail: (key: PriorityKey) => void;
   onSave: () => void;
@@ -298,7 +302,9 @@ export function ResultView({
   const copy = getPublicJourneyCopy(locale).diagnostic;
   const priorities = useMemo(() => computePriorities(answers), [answers]);
   const [openKey, setOpenKey] = useState<PriorityKey | null>(priorities[0] ?? null);
-  const assistHref = `/${locale}/besoin?source=diagnostic&priority=${encodeURIComponent(priorities[0] ?? "")}`;
+  const chosenPriority = selectedPriority && priorities.includes(selectedPriority) ? selectedPriority : priorities[0];
+  const assistHref = chosenPriority ? `/${locale}/besoin?source=diagnostic&priority=${encodeURIComponent(chosenPriority)}` : `/${locale}/besoin?source=diagnostic`;
+  const chantierProfitabilityUnverified = answers.sector === "construction" && Array.isArray(answers.goals) && answers.goals.includes("control_costs");
   const priorityTone = (key: PriorityKey, index: number) => {
     if (key === "organization" || kinds[key] === "risk") return { label: locale === "fr" ? "Priorité élevée" : "أولوية مرتفعة", className: styles.priorityBadgeAnalyze };
     if (index === 1) return { label: locale === "fr" ? "Priorité moyenne" : "أولوية متوسطة", className: styles.priorityBadgeMid };
@@ -309,6 +315,13 @@ export function ResultView({
       <Hero eyebrow={copy.resultEyebrow} title={copy.resultTitle} intro={copy.resultIntro} script={copy.scriptNote} />
       <div className={styles.resultBoard}>
         <div>
+          {chantierProfitabilityUnverified ? (
+            <p role="note" className={styles.emptyState}>
+              {locale === "ar"
+                ? "ذكرتم هدف ضبط التكاليف في نشاط البناء. ربحية كل ورش ما زالت بحاجة إلى قياس: لم تقدموا تكاليف الورش وهوامشها بعد. يمكنكم توضيح متابعة عروض الأسعار والتكاليف في طلبكم."
+                : "Vous souhaitez maîtriser vos coûts dans le BTP. La rentabilité par chantier reste à mesurer : vous n’avez pas encore indiqué les coûts et les marges de chaque chantier. Vous pourrez préciser le suivi des devis et des coûts dans votre demande."}
+            </p>
+          ) : null}
           {priorities.length ? (
             <div className={styles.resultCards}>
               {priorities.map((key, index) => {
@@ -386,6 +399,17 @@ export function ResultView({
             </div>
           </div>
           <div className={styles.stackActions}>
+            {priorities.length > 1 ? (
+              <fieldset className={styles.planCard}>
+                <legend className={styles.planHead}>{locale === "ar" ? "بأي أولوية تريدون البدء؟" : "Par quelle priorité commencer ?"}</legend>
+                {priorities.map((key) => (
+                  <label key={key} className={styles.priorityRow} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                    <input type="radio" name="diagnostic-priority" value={key} checked={chosenPriority === key} onChange={() => onSelectPriority?.(key)} />
+                    <span>{copy.priorities[key][0]}</span>
+                  </label>
+                ))}
+              </fieldset>
+            ) : null}
             <button type="button" className={styles.primaryWide} onClick={onSave}><Download size={16} aria-hidden="true" />{copy.save}</button>
             <Link className={styles.secondaryWide} href={assistHref}><Users size={16} aria-hidden="true" />{copy.assist}</Link>
             <button type="button" className={styles.secondaryWide} onClick={onEdit}><Pencil size={16} aria-hidden="true" />{copy.restart}</button>
@@ -395,6 +419,17 @@ export function ResultView({
         </aside>
       </div>
       <div className={styles.mobileBar}>
+        {priorities.length > 1 ? (
+          <fieldset className={styles.planCard}>
+            <legend className={styles.planHead}>{locale === "ar" ? "بأي أولوية تريدون البدء؟" : "Par quelle priorité commencer ?"}</legend>
+            {priorities.map((key) => (
+              <label key={key} className={styles.priorityRow} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                <input type="radio" name="diagnostic-priority-mobile" value={key} checked={chosenPriority === key} onChange={() => onSelectPriority?.(key)} />
+                <span>{copy.priorities[key][0]}</span>
+              </label>
+            ))}
+          </fieldset>
+        ) : null}
         <button type="button" className={styles.mobileEdit} onClick={onEdit}><Pencil size={16} aria-hidden="true" />{copy.restart}<ArrowRight className="rtl-mirror" size={16} aria-hidden="true" /></button>
         <button type="button" className={styles.primaryWide} onClick={onSave}><Download size={16} aria-hidden="true" />{copy.save}<ArrowRight className="rtl-mirror" size={16} aria-hidden="true" /></button>
         <Link className={styles.secondaryWide} href={assistHref}><Users size={16} aria-hidden="true" />{copy.assist}</Link>

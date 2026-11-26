@@ -1,3 +1,23 @@
+## 2026-11-25 — MAT-FINAL lot 05, contexte des liens Client
+
+Le [reçu du lot 05](../mat-final/LOT05_CONTEXTE_CLIENT_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) consignent C01 et C03 **EN COURS**. Les liens d'action, messagerie et échéance gardent une seule organisation active et le dossier exact ; les liens externes ne reçoivent pas son identifiant. Preuves locales : 7 fichiers/102 tests ciblés PASS, TypeScript web PASS, ESLint ciblé PASS, `git diff --check` PASS. La classification des quatre états de C01 et le parcours connecté multi-organisations restent à faire. Node local 24.11.0, aucune production, aucun visa.
+
+## 2026-11-25 — MAT-FINAL lot 04, conservation des précisions du besoin
+
+Le [reçu du lot 04](../mat-final/LOT04_SAUVEGARDE_SANS_TRONCATURE_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) consignent D08, D14 et D18 **EN COURS**. Le besoin long reste visible dans le brouillon ; l'UI bloque la confirmation et l'enregistrement et l'action serveur refuse le dépassement, y compris après ajout de la classification. Preuves locales : sélection Vitest 102 fichiers/838 tests PASS, TypeScript PASS, lint PASS, `git diff --check` PASS ; Node 24.11.0, pas de preuve Node 22 ou de sauvegarde distante. Aucun déploiement ni visa.
+
+## 2026-11-25 — MAT-FINAL lot 03, questions BTP et commerciales
+
+Le [reçu du lot 03](../mat-final/LOT03_BTP_PRECISIONS_2026-11-25.md) et le [registre](../mat-final/REGISTRE_376.md) sont actualisés pour D06, D07, D08, D14 et D18, tous **EN COURS**. Les champs de contexte restent disponibles avant choix d'un service ; les questions complémentaires sur devis et coûts chantier n'apparaissent qu'avec les réponses déclarées correspondantes. Validation locale : 56/56 tests ciblés, 10/10 E2E FR/AR ordinateur/360 px, TypeScript, lint et build synthétique PASS. La CI Node 22 du commit précédent a `quality` et `browser-public` PASS mais `database` FAIL au test SQL 0043, ligne 111, SQLSTATE 42501. Aucun déploiement ou visa.
+
+## 2026-11-25 — MAT-FINAL lot 02, parcours prédiagnostic → besoin
+
+Le [registre des 376 points](../mat-final/REGISTRE_376.md) et le [reçu du lot 02](../mat-final/LOT02_DIAGNOSTIC_BESOIN_2026-11-25.md) sont actualisés pour D02, D04, D05, D08, D09, D10, D13, D14 et D18, tous **EN COURS**. Le bouton d'accompagnement utilise la priorité choisie, le formulaire reprend le texte libre et les réponses du diagnostic, et le cas BTP signale que la rentabilité chantier reste à mesurer. Un ancien brouillon est conservé jusqu'au choix de l'utilisateur. Test ciblé : 53/53 unitaires et 10/10 E2E FR/AR ordinateur/360 px ; TypeScript, lint et build synthétique PASS. Serveur local factice, sans soumission ni déploiement. Node local 24.11.0 ; gate Node 22 et flux connecté non prouvés. Le programme MAT-FINAL complet reste ouvert.
+
+## 2026-11-25 — MAT-FINAL lot 01, candidat en cours
+
+Source figée pour l'inventaire : `ec09db5de9de8289fbc177994891a5ff695f5898` sur `codex/mat-final-01-candidate` ; aucune fusion ni production. [Registre des 376 points](../mat-final/REGISTRE_376.md) initialisé sans clôture automatique et [matrice V01–V12](../mat-final/LOT01_CANDIDATE_2026-11-25.md) actualisée : 223 pages, 377 actions serveur, 2 388 interactions recensées statiquement, 648 dettes de validation runtime. Scanner `--check` PASS et tests de preuve 3/3 PASS sous Node 24.11.0, sans valeur de gate Node 22. CI du SHA source : navigateur public et qualité PASS, SQL FAIL `0043`/`42501` sur un `session_replication_role=replica` du test. Docker local indisponible pour rejouer le clone. Lot et release NO-GO ; prochaine étape : corriger la fixture SQL sans désactiver les triggers, puis recette commune au même SHA.
+
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 
 ## 2026-11-23 — Vérification globale du candidat d5e3cf2c

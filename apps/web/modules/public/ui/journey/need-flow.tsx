@@ -5,10 +5,12 @@ import { startTransition, useActionState, useCallback, useEffect, useMemo, useRe
 import { ArrowRight, CheckCircle2, Pencil, Plus, ShieldCheck } from "lucide-react";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { getPublicJourneyCopy } from "@/modules/public/data/journey/copy";
-import { canonicalizePublicNeedClassification, formatNeedScoreBasisPoints, publicNeedRequestHref, rankPublicNeedServices, type NeedDiscovery, type PublicNeedClassification } from "@/modules/public/data/need-intent/model";
+import { canonicalizePublicNeedClassification, classificationSnapshot, formatNeedScoreBasisPoints, publicNeedRequestHref, rankPublicNeedServices, type NeedDiscovery, type PublicNeedClassification } from "@/modules/public/data/need-intent/model";
 import { getPublicProviderTaxonomy } from "@/modules/public/data/provider-intent/model";
 import { publicCatalogueTranslationNotice } from "@/modules/public/data/catalogue/localized-label";
 import { getNeedStages, needRecapStep, needStageForStep, needStageIds } from "@/modules/public/data/journey/need-stages";
+import { diagnosticNeedHandoff } from "@/modules/public/data/journey/diagnostic-handoff";
+import type { PriorityKey } from "@/modules/public/data/journey/diagnostic-priorities";
 
 type Draft = {
   version: 3;
@@ -24,6 +26,8 @@ type Draft = {
   confirmed: boolean;
   answers: Record<string, string>;
   organizationId: string;
+  diagnosticPriority?: PriorityKey;
+  diagnosticQuestions?: { chantierCosts: boolean; quoteFollowup: boolean };
   expiresAt: number;
 };
 type Organization = { id: string; name: string };
@@ -34,6 +38,14 @@ type DiscoverAction = (input: { locale: "fr" | "ar"; organizationId: string; inp
 const storageKey = "matricia.public-need";
 const legacyKeys = ["matricia.public-need.fr", "matricia.public-need.ar"];
 const retentionMs = 7 * 86_400_000;
+const diagnosticAnswerLabels = {
+  fr: { "diagnostic.chantier_costs": "Coûts et marges par chantier", "diagnostic.quote_followup": "Devis en attente et relances" },
+  ar: { "diagnostic.chantier_costs": "تكاليف وهوامش كل ورش", "diagnostic.quote_followup": "عروض الأسعار المعلقة والمتابعة" },
+} as const;
+
+function answerLabel(locale: Locale, key: string): string {
+  return diagnosticAnswerLabels[locale][key as keyof typeof diagnosticAnswerLabels.fr] ?? key;
+}
 const tagCatalog = {
   fr: ["Stratégie", "Management", "Transformation digitale", "Conformité", "Formation", "Maroc"],
   ar: ["استراتيجية", "تدبير", "تحول رقمي", "امتثال", "تكوين", "المغرب"],
@@ -143,6 +155,13 @@ export function parseNeedDraft(
         confirmed: classificationChanged ? false : value.confirmed === true,
         answers: asAnswers(value.answers),
         organizationId: typeof value.organizationId === "string" ? value.organizationId.slice(0, 80) : "",
+        ...(value.diagnosticPriority === "organization" || value.diagnosticPriority === "sales" || value.diagnosticPriority === "security" || value.diagnosticPriority === "verify" ? { diagnosticPriority: value.diagnosticPriority } : {}),
+        ...(value.diagnosticQuestions && typeof value.diagnosticQuestions === "object" && !Array.isArray(value.diagnosticQuestions) ? {
+          diagnosticQuestions: {
+            chantierCosts: (value.diagnosticQuestions as Record<string, unknown>).chantierCosts === true,
+            quoteFollowup: (value.diagnosticQuestions as Record<string, unknown>).quoteFollowup === true,
+          },
+        } : {}),
         expiresAt: value.expiresAt,
       },
     };
@@ -156,6 +175,7 @@ export function NeedFlow({
   initialNeed = "",
   initialClassification = null,
   initialOrganizationId = "",
+  diagnosticPriority,
   invalidSelection = false,
   authenticated = false,
   organizations = [],
@@ -166,6 +186,7 @@ export function NeedFlow({
   initialNeed?: string;
   initialClassification?: PublicNeedClassification | null;
   initialOrganizationId?: string;
+  diagnosticPriority?: PriorityKey;
   invalidSelection?: boolean;
   authenticated?: boolean;
   organizations?: Organization[];
@@ -177,6 +198,7 @@ export function NeedFlow({
   const [loaded, setLoaded] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
   const [storageNotice, setStorageNotice] = useState<"expired" | "invalid" | null>(null);
+  const [pendingHandoff, setPendingHandoff] = useState<NonNullable<ReturnType<typeof diagnosticNeedHandoff>> | null>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -192,15 +214,30 @@ export function NeedFlow({
             if (legacy.status !== "empty") parsed = legacy;
           }
         }
+        const handoff = diagnosticPriority
+          ? diagnosticNeedHandoff(window.localStorage.getItem("matricia.public-diagnostic.v2"), diagnosticPriority, locale)
+          : null;
         setStorageNotice(parsed.status === "expired" || parsed.status === "invalid" ? parsed.status : null);
-        setDraft(parsed.draft ?? blank(initialNeed, initialClassification, initialOrganizationId));
+        if (handoff && parsed.draft?.need.trim() && parsed.draft.diagnosticPriority !== diagnosticPriority) {
+          setDraft(parsed.draft);
+          setPendingHandoff(handoff);
+        } else {
+          setPendingHandoff(null);
+          setDraft(parsed.draft
+            ? handoff && parsed.draft.diagnosticPriority === diagnosticPriority && !parsed.draft.diagnosticQuestions
+              ? { ...parsed.draft, diagnosticQuestions: handoff.questions }
+              : parsed.draft
+            : handoff
+              ? { ...blank(handoff.need, initialClassification, initialOrganizationId), constraints: handoff.constraints, diagnosticPriority, diagnosticQuestions: handoff.questions }
+              : blank(initialNeed, initialClassification, initialOrganizationId));
+        }
       } catch {
         setStorageAvailable(false);
       }
       setLoaded(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialClassification, initialNeed, initialOrganizationId, locale]);
+  }, [diagnosticPriority, initialClassification, initialNeed, initialOrganizationId, locale]);
 
   useEffect(() => {
     if (!loaded || !storageAvailable) return;
@@ -232,6 +269,27 @@ export function NeedFlow({
           <h1>{copy.title}</h1>
           <NeedStageProgress authenticated={authenticated} stageCurrent={1} stageTotal={needStageIds.length} />
           <p role="status">{locale === "fr" ? "Reprise de votre brouillon…" : "جارٍ استعادة مسودتكم…"}</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (pendingHandoff) {
+    return (
+      <main id="contenu-principal" className="journey-shell" dir={locale === "ar" ? "rtl" : "ltr"}>
+        <section className="journey-card">
+          <h1>{locale === "ar" ? "لديكم مسودة طلب محفوظة" : "Vous avez déjà un brouillon de besoin"}</h1>
+          <p className="journey-intro">{locale === "ar" ? "اختاروا متابعة المسودة الحالية أو بدء طلب جديد من التشخيص. لن تُستبدل مسودتكم إلا إذا اخترتم البدء من التشخيص." : "Choisissez de reprendre votre brouillon actuel ou de commencer un nouveau besoin depuis le diagnostic. Votre brouillon ne sera remplacé que si vous choisissez le nouveau besoin."}</p>
+          <div className="journey-actions">
+            <button type="button" className="journey-secondary" onClick={() => {
+              window.history.replaceState(null, "", `/${locale}/besoin`);
+              setPendingHandoff(null);
+            }}>{locale === "ar" ? "متابعة مسودتي" : "Reprendre mon brouillon"}</button>
+            <button type="button" className="journey-primary" onClick={() => {
+              setDraft({ ...blank(pendingHandoff.need, initialClassification, initialOrganizationId), constraints: pendingHandoff.constraints, diagnosticPriority: pendingHandoff.priority, diagnosticQuestions: pendingHandoff.questions });
+              setPendingHandoff(null);
+            }}>{locale === "ar" ? "البدء من التشخيص" : "Commencer depuis le diagnostic"}</button>
+          </div>
         </section>
       </main>
     );
@@ -571,9 +629,8 @@ export function NeedComposer({
           <>
           <p className="public-muted">{copy.questionsLead}</p>
           {!draft.classification && !draft.unlisted ? <p className="journey-field-help">{copy.questionsWait}</p> : null}
-          {draft.classification || draft.unlisted ? (
-            <div className="journey-need-questions">
-              {missingQuestions.map((question) => {
+          <div className="journey-need-questions">
+              {(draft.classification || draft.unlisted ? missingQuestions : []).map((question) => {
                 const value = draft.answers[question.dataKey] ?? "";
                 const fileType = ["FILE", "MULTI_FILE", "IMAGE", "TABLE", "REPEATER"].includes(question.answerType);
                 const fieldId = `need-q-${question.questionVersionId}`;
@@ -605,11 +662,24 @@ export function NeedComposer({
                   </label>
                 );
               })}
+              {draft.diagnosticQuestions?.quoteFollowup ? (
+                <label htmlFor="need-diagnostic-quote-followup">
+                  {locale === "ar" ? "كم عرض سعر ينتظر رداً أو متابعة كل شهر؟" : "Combien de devis attendent une réponse ou une relance chaque mois ?"}
+                  <em className="journey-field-help">{locale === "ar" ? "اذكروا فترة المتابعة أو اكتبوا لا أعرف إن لم تتوفر أرقام." : "Indiquez la période de suivi, ou « je ne sais pas » si le nombre est inconnu."}</em>
+                  <input id="need-diagnostic-quote-followup" value={draft.answers["diagnostic.quote_followup"] ?? ""} maxLength={500} onChange={(event) => setAnswer("diagnostic.quote_followup", event.target.value)} />
+                </label>
+              ) : null}
+              {draft.diagnosticQuestions?.chantierCosts ? (
+                <label htmlFor="need-diagnostic-chantier-costs">
+                  {locale === "ar" ? "لأي ورش وفترة تريدون قياس التكاليف والهامش؟" : "Pour quel chantier et quelle période souhaitez-vous mesurer les coûts et la marge ?"}
+                  <em className="journey-field-help">{locale === "ar" ? "اذكروا التكاليف المعروفة أو اكتبوا لا أعرف؛ لن نحسب هامشاً دون بيانات." : "Précisez les coûts connus, ou « je ne sais pas » ; aucune marge ne sera calculée sans données."}</em>
+                  <input id="need-diagnostic-chantier-costs" value={draft.answers["diagnostic.chantier_costs"] ?? ""} maxLength={500} onChange={(event) => setAnswer("diagnostic.chantier_costs", event.target.value)} />
+                </label>
+              ) : null}
               <label htmlFor="need-location">{copy.location}<input id="need-location" value={draft.location} maxLength={1200} onChange={(event) => patch({ location: event.target.value.slice(0, 1200) })} />{discovery?.locationPrefill && draft.location === discovery.locationPrefill ? <span className="journey-need-prefill">{copy.knownPrefill}</span> : null}</label>
               <label htmlFor="need-timing">{copy.timing}<input id="need-timing" value={draft.timing} maxLength={1200} onChange={(event) => patch({ timing: event.target.value.slice(0, 1200) })} /></label>
               <label htmlFor="need-constraints">{copy.constraints}<textarea id="need-constraints" value={draft.constraints} rows={3} maxLength={1200} onChange={(event) => patch({ constraints: event.target.value.slice(0, 1200) })} /></label>
-            </div>
-          ) : null}
+          </div>
           </>
           ) : null}
 
@@ -746,15 +816,16 @@ export function NeedResult({
     draft.constraints,
     draft.tags.join(", "),
     draft.unlisted ? (locale === "fr" ? "Service non répertorié" : "خدمة غير مدرجة") : "",
-    ...Object.entries(draft.answers).filter(([, value]) => value.trim()).map(([key, value]) => `${key}: ${value}`),
+    ...Object.entries(draft.answers).filter(([, value]) => value.trim()).map(([key, value]) => `${answerLabel(locale, key)}: ${value}`),
   ]
     .filter(Boolean)
-    .join("\n")
-    .slice(0, 1200);
+    .join("\n");
+  const snapshot = draft.classification ? classificationSnapshot(draft.classification, locale) : "";
+  const constraintsTooLong = [extraConstraints.trim(), snapshot].filter(Boolean).join("\n").length > 1200;
 
   // Lot 3: after OTP, a confirmed local draft is attached once via the same idempotent RPC as the manual save.
   useEffect(() => {
-    if (autoAttachStarted.current || !authenticated || !draft.confirmed || !saveAction || !organizationId || organizations.length === 0) return;
+    if (autoAttachStarted.current || constraintsTooLong || !authenticated || !draft.confirmed || !saveAction || !organizationId || organizations.length === 0) return;
     if (state.status !== "idle" || pending) return;
     autoAttachStarted.current = true;
     const data = new FormData();
@@ -772,7 +843,7 @@ export function NeedResult({
     startTransition(() => {
       action(data);
     });
-  }, [action, authenticated, draft.classification, draft.confirmed, draft.location, draft.need, draft.timing, extraConstraints, locale, organizationId, organizations.length, pending, saveAction, state.status]);
+  }, [action, authenticated, constraintsTooLong, draft.classification, draft.confirmed, draft.location, draft.need, draft.timing, extraConstraints, locale, organizationId, organizations.length, pending, saveAction, state.status]);
 
   function setLibrary(code: string) {
     if (!code) {
@@ -846,7 +917,7 @@ export function NeedResult({
             .filter(([, value]) => value.trim())
             .map(([key, value]) => (
               <div key={key}>
-                <dt className="font-semibold">{key}</dt>
+                <dt className="font-semibold">{answerLabel(locale, key)}</dt>
                 <dd>{value}</dd>
               </div>
             ))}
@@ -859,6 +930,13 @@ export function NeedResult({
               </div>
             ))}
         </dl>
+        {constraintsTooLong ? (
+          <p role="alert" className="journey-login-note text-red-700">
+            {locale === "fr"
+              ? "Les pr\u00e9cisions d\u00e9passent 1 200 caract\u00e8res au total. Modifiez-les avant de valider ; votre brouillon reste conserv\u00e9."
+              : "تتجاوز التفاصيل ١٢٠٠ حرف إجمالاً. عدّلها قبل التأكيد؛ ستبقى مسودتك محفوظة."}
+          </p>
+        ) : null}
         {invalidSelection ? (
           <p role="status" className="journey-login-note">
             {locale === "fr"
@@ -882,7 +960,7 @@ export function NeedResult({
           <div className="journey-actions">
             <button className="journey-secondary" type="button" onClick={back}>{copy.back}</button>
             <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
-            <button className="journey-primary" type="button" onClick={confirm}>
+            <button className="journey-primary" type="button" onClick={confirm} disabled={constraintsTooLong}>
               {locale === "fr" ? "Valider" : "تأكيد"}
               <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
             </button>
@@ -892,10 +970,12 @@ export function NeedResult({
             <p className="journey-login-note">{copy.localOnly}</p>
             <div className="journey-actions">
               <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
-              <Link className="journey-primary" href={`/${locale}/connexion?next=${encodeURIComponent(next)}`}>
-                {copy.login}
-                <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
-              </Link>
+              {constraintsTooLong ? null : (
+                <Link className="journey-primary" href={`/${locale}/connexion?next=${encodeURIComponent(next)}`}>
+                  {copy.login}
+                  <ArrowRight className="rtl-mirror" size={18} aria-hidden="true" />
+                </Link>
+              )}
             </div>
           </>
         ) : organizations.length && saveAction ? (
@@ -951,7 +1031,7 @@ export function NeedResult({
             ) : (
               <div className="journey-actions mt-4">
                 <button className="journey-secondary" type="button" onClick={edit}>{locale === "fr" ? "Modifier" : "تعديل"}</button>
-                <button type="submit" className="journey-primary" disabled={pending}>
+                <button type="submit" className="journey-primary" disabled={pending || constraintsTooLong}>
                   {pending ? (locale === "fr" ? "Enregistrement…" : "جارٍ الحفظ…") : locale === "fr" ? "Enregistrer ce besoin" : "حفظ هذا الاحتياج"}
                 </button>
               </div>

@@ -74,6 +74,12 @@ describe.each(["fr", "ar"] as const)("diagnostic answer trace in %s", (locale) =
     expect(row).not.toContain(locale === "fr" ? "Non concerné" : "غير معني");
   });
 
+  it("states that construction profitability remains unverified when costs are a goal", () => {
+    const html = renderToStaticMarkup(<ResultView locale={locale} answers={{ ...answers, goals: ["control_costs", "grow_sales"] }} storageAvailable onEdit={() => undefined} onDetail={() => undefined} onSave={() => undefined} onErase={() => undefined} />);
+    expect(html).toContain(locale === "fr" ? "La rentabilité par chantier reste à mesurer" : "ربحية كل ورش ما زالت بحاجة إلى قياس");
+    expect(html).toContain(locale === "fr" ? "coûts et les marges" : "تكاليف الورش وهوامشها");
+  });
+
   it.each(["sales", "security", "verify"] as const)("anchors the %s plan to matching answers and distinct deliverables", (priority) => {
     const source = { ...answers, sales_tracking: "manual", backup_restore: "no", decision_trace: "unknown" };
     const html = renderToStaticMarkup(<DetailView locale={locale} priority={priority} answers={source} onBack={() => undefined} />);
