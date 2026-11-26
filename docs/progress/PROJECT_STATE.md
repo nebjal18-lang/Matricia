@@ -19,30 +19,38 @@ Distinction : entrée menu ≠ chemin unique ≠ ancre ≠ fiche dynamique ≠ a
 | --- | --- |
 | `vitest run modules/admin` | **895 PASS** (144 fichiers) au démarrage Lot 0 |
 | Centre de pilotage ciblé (après Lot 1) | **133 PASS** |
+| Cible 2026-11-25 soir (catalogue démo + org + coûts) | **29 PASS** (fichiers touchés) |
 
-### Tableau de suivi par lot
+### Tableau de suivi par lot (honnête — reprise 2026-11-25 nuit)
 
-| Lot | Objet | Statut | Preuve |
+| Lot | Objet | Statut | Preuve / lacune |
 | --- | --- | --- | --- |
-| 0 | Inventaire + branche + WIP fiche prestataire | Corrigé et vérifié | Commit `baa2d295` ; inventaire ci-dessus |
-| 1 | Centre de pilotage identité A/B, compteurs, libellés | Corrigé et vérifié | Commit `f7fb79e8` ; test A/B panel |
-| 2 | Catalogue messages + abandons libellé | Corrigé et vérifié | Messages Builder/règles/publications ; directory analytique |
-| 3 | Rôles, fusion, territoires sans double étape, capacité | Corrigé et vérifié | ROLE_LABELS ; Step2 hors territoires ; fusion archive |
-| 4 | Contrats/avenants/jalons/litiges film | Corrigé et vérifié | Enveloppe vs contrat ; litiges sans porte 11 |
-| 5 | Finance dates relatives, packs, ROI libellé | Corrigé et vérifié | `buildDemoFinanceDashboard(now)` ; packs nom commercial |
-| 6 | Marketing sections, anti-abus lecture seule | Corrigé et vérifié | `MarketingSectionFocus` ; heading règles |
-| 7 | Design fiche prestataire (déjà Lot 0) | Corrigé et vérifié | Film compact + CTA unique |
-| 8 | PR | À vérifier | Après push |
+| 0 | Inventaire code | Corrigé (code) | ~80 / 22 / 73 — inventaire navigateur encore partiel |
+| 1 | Centre de pilotage | Code PR ; **reproduit** sur demo public | Demo public = ancien UI. Unit A/B OK. **Persistance A/B isolée = À vérifier** |
+| 2 | Catalogue | Partiel → avancé | Builder OK avec bibliothèque IT + service. Validation native **indisponible** sur demo → fallback démo questions en PR. Matrice multi-domaines = **1 lib visible (IT)** |
+| 3 | Acteurs / capacité / franchise | Avancé | Capacité `/capacite` données visibles + lien fiche prestataire. Colonnes Compte/Conformité/Offre clarifiées. Franchisés ↔ Candidatures déjà reliés |
+| 4 | Parcours commercial | Partiel | Scores matching démo variés (code). E2E dossier unique = **À vérifier** |
+| 5 | Finance | Partiel | Recherche coûts : portée collection clarifiée + reset page 1. MAT-FUNC-032 navigateur→DB = **À examiner** |
+| 6 | Pilotage / privacy | Avancé | Ancres ops `#archives` etc. présentes. ALL → « inventaire exhaustif » ; staff ≠ « votre personne » |
+| 7 | Design FR/AR mobile | Partiel | **Passe 390/768/1440 + captures = À vérifier** |
+| 8 | PR #38 | Ouverte | https://github.com/nebjal18-lang/Matricia/pull/38 — **demo public ≠ branche** |
 
-### Bibliothèques (matrice minimale)
+### Inventaire navigateur (demo public, Admin)
+
+- Capacité & documents : **données visibles** (dossiers qualification multi-territoires)
+- Catalogue : context IT + service → formulaires Builder ouverts ; validation = message indisponible (corrigé en PR via overlay démo)
+- Ops `#archives` : section « Archives et restauration » présente
+- Franchisés : texte « Pas de création libre… Candidatures franchise » + CTA Candidatures
+
+### Bibliothèques (matrice — état observé)
 
 | Domaine | Couverture | Anomalies | Corrections | Décision métier |
 | --- | --- | --- | --- | --- |
-| Accès Builder / règles / publications | Messages + MFA/AAL2 | Messages génériques | Cause + récupération explicitées | Contenu éditorial métier hors scope auto |
-| Analytique questionnaires | Page abandons | Libellé « Benchmarks » trompeur | Renommé « Abandons des questionnaires » | Benchmarks réponses = autre produit si requis |
-| Contenu FR/AR par domaine (BTP, …) | Non relu exhaustivement | — | — | Décision métier requise pour expertise secteur |
+| IT (demo) | 1 bibliothèque, ≥1 service publié | Validation native indisponible | Fallback démo 5 questions | — |
+| Autres domaines (BTP, etc.) | **Non listés** pour le rôle demo | — | — | Seed / droits multi-bibliothèques |
+| Contenu FR/AR exhaustif | Non audité question par question | — | — | **Décision métier requise** |
 
-Site demo public (`matricia-domain.vercel.app`) : **non mis à jour** tant que la PR n’est pas fusionnée/déployée.
+**Branche corrigée** ≠ **site demo déployé**.
 
 ## 2026-11-22 — Extension des preuves des 68 fonctions, en cours
 

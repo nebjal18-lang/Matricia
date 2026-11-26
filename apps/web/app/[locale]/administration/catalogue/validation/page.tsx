@@ -4,7 +4,7 @@ import { connexionHref } from "@/modules/shared/lib/auth/connexion-href";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { buttonVariants } from "@/modules/shared/ui/button";
 import { isLocale } from "@/modules/shared/lib/i18n/locale";
-import { applyDemoCatalogQuestionsWorkspace } from "@/modules/admin/data/spaces/demo-catalog-questions";
+import { resolveDemoCatalogQuestionsWorkspace } from "@/modules/admin/data/spaces/demo-catalog-questions";
 import { createServerRuleValidationRepository } from "@/modules/shared/lib/rule-validation/server-repository";
 import { cn } from "@/modules/shared/lib/utils";
 import { getRuleValidationMessages } from "@/modules/admin/screens/catalogue/validation/messages";
@@ -31,10 +31,15 @@ export default async function RuleValidationPage({
   const selectedVersionId = queryValue(query.questionnaire);
   const repository = await createServerRuleValidationRepository();
   const result = await repository.loadWorkspace(selectedVersionId);
-  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/administration/catalogue/validation` }));
-  const workspace = result.status === "success"
-    ? applyDemoCatalogQuestionsWorkspace(result.value)
-    : null;
+  const retryHref = selectedVersionId
+    ? `/${locale}/administration/catalogue/validation?questionnaire=${encodeURIComponent(selectedVersionId)}`
+    : `/${locale}/administration/catalogue/validation`;
+  if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: retryHref }));
+  const resolved = resolveDemoCatalogQuestionsWorkspace(
+    result.status === "success"
+      ? { status: "success", value: result.value }
+      : { status: "error", reason: result.reason },
+  );
 
   return (
     <AdminModulePage
@@ -46,15 +51,25 @@ export default async function RuleValidationPage({
       lead={messages.description}
     >
       <AdminStep1Gate locale={locale} current="validation" />
-      {result.status === "error" ? (
+      {resolved?.demoFallback ? (
+        <Alert className="mb-4">
+          <AlertTitle>{locale === "ar" ? "عرض بيانات تجريبية" : "Données de démonstration"}</AlertTitle>
+          <AlertDescription>
+            {locale === "ar"
+              ? "تعذر تحميل إصدارات الاستبيان الأصلية. تُعرض نسخة تجريبية للقراءة والمحاكاة دون أثر حقيقي."
+              : "Les versions de questionnaire natives n’ont pas pu être chargées. Une version de démonstration est affichée pour lecture et simulation sans effet réel."}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      {!resolved && result.status === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>{result.reason === "FORBIDDEN" ? messages.forbiddenPage : messages.unavailable}</AlertTitle>
           <AlertDescription>
-            <Link href={`/${locale}/administration/catalogue/validation`} className={cn(buttonVariants({ variant: "outline" }), "mt-3 min-h-11")}>{messages.retry}</Link>
+            <Link href={retryHref} className={cn(buttonVariants({ variant: "outline" }), "mt-3 min-h-11")}>{messages.retry}</Link>
           </AlertDescription>
         </Alert>
-      ) : workspace ? (
-        <RuleValidationPanel workspace={workspace} locale={locale} messages={messages} />
+      ) : resolved ? (
+        <RuleValidationPanel workspace={resolved.workspace} locale={locale} messages={messages} />
       ) : null}
     </AdminModulePage>
   );
