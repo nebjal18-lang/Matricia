@@ -18,7 +18,13 @@ export function demoFranchiseUuid(seed: string): string {
   return `${chars.slice(0, 8).join("")}-${chars.slice(8, 12).join("")}-${chars.slice(12, 16).join("")}-${chars.slice(16, 20).join("")}-${chars.slice(20).join("")}`;
 }
 
-export function resolveDemoProjectRef(env: NodeJS.ProcessEnv = process.env): string | null {
+type DemoProjectRefEnv = {
+  SUPABASE_PROJECT_REF?: string | undefined;
+  NEXT_PUBLIC_SUPABASE_PROJECT_REF?: string | undefined;
+  NEXT_PUBLIC_SUPABASE_URL?: string | undefined;
+};
+
+export function resolveDemoProjectRef(env: DemoProjectRefEnv = process.env as DemoProjectRefEnv): string | null {
   const fromEnv = env.SUPABASE_PROJECT_REF?.trim() || env.NEXT_PUBLIC_SUPABASE_PROJECT_REF?.trim();
   if (fromEnv) return fromEnv;
   const url = env.NEXT_PUBLIC_SUPABASE_URL?.trim();
