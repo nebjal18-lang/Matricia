@@ -49,6 +49,7 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
   const [analyzeKey, setAnalyzeKey] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
+  const [resumeChoice, setResumeChoice] = useState<"pending" | "continue" | "fresh" | "none">("pending");
   const clearStored = useCallback(() => {
     try {
       window.localStorage.removeItem(storageKey);
@@ -72,11 +73,14 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
             }
           }
         }
-        if (restored) {
+        if (restored && (restored.step > 0 || Object.keys(restored.answers).length > 0)) {
           setState(restored);
-          if (restored.step >= questionIds.length) setPhase(resumeSave ? "save" : "result");
+          setResumeChoice("pending");
+          if (restored.step >= questionIds.length && resumeSave) setPhase("save");
+        } else {
+          setResumeChoice("none");
         }
-      } catch { setStorageAvailable(false); }
+      } catch { setStorageAvailable(false); setResumeChoice("none"); }
       setLoaded(true);
     }, 0);
     return () => window.clearTimeout(timer);
@@ -100,6 +104,49 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
           <p className={styles.eyebrow}><span className={styles.eyebrowMark} aria-hidden="true" />{copy.eyebrow}</p>
           <h1 className={styles.heroTitle}>{copy.title}</h1>
           <p className={styles.loading}>{locale === "fr" ? "Chargement de votre bilan…" : "جارٍ تحميل تقييمكم…"}</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (resumeChoice === "pending" && phase !== "save") {
+    const answered = Object.keys(state.answers).length;
+    return (
+      <main id="contenu-principal" className={`${styles.page} diagnostic-premium-page`} dir={locale === "ar" ? "rtl" : "ltr"}>
+        <div className={styles.shell}>
+          <p className={styles.eyebrow}><span className={styles.eyebrowMark} aria-hidden="true" />{copy.eyebrow}</p>
+          <h1 className={styles.heroTitle}>{locale === "fr" ? "Vous avez déjà un bilan en cours" : "لديكم تقييم جارٍ"}</h1>
+          <p className={styles.heroIntro} role="status">
+            {locale === "fr"
+              ? `Ce résultat vient d’un brouillon enregistré sur cet appareil (${answered} réponse${answered > 1 ? "s" : ""}). Ce n’est ni un exemple public ni un compte connecté. Reprenez-le ou commencez un nouveau diagnostic sans écraser silencieusement l’ancien.`
+              : `هذه النتيجة ناتجة عن مسودة محفوظة على هذا الجهاز (${answered} إجابة). ليست مثالاً عاماً ولا حساباً متصلاً. استأنفوا أو ابدأوا تشخيصاً جديداً دون استبدال صامت للسابق.`}
+          </p>
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.continue}
+              onClick={() => {
+                setResumeChoice("continue");
+                if (state.step >= questionIds.length) setPhase("result");
+                else setPhase("questions");
+              }}
+            >
+              {locale === "fr" ? "Reprendre mon bilan" : "متابعة تقييمي"}
+              <ArrowRight className="rtl-mirror" aria-hidden="true" size={18} />
+            </button>
+            <button
+              type="button"
+              className={styles.back}
+              onClick={() => {
+                clearStored();
+                setState(initial());
+                setPhase("questions");
+                setResumeChoice("fresh");
+              }}
+            >
+              {locale === "fr" ? "Commencer un nouveau diagnostic" : "بدء تشخيص جديد"}
+            </button>
+          </div>
         </div>
       </main>
     );

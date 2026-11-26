@@ -1,3 +1,16 @@
+## 2026-11-26 — Audit bout-en-bout (branche `fix/admin-space-finalization-2026-11-25`)
+
+- PR: https://github.com/nebjal18-lang/Matricia/pull/42 — matrice `docs/audit/AUDIT_MATRIX_2026-11-26.md`.
+- **PUB-01**: ranking besoin — plus de flood BTP 7,14 % via nom de bibliothèque ; vitest need-intent 10/10.
+- **PUB-02**: diagnostic — gate reprise brouillon local vs nouveau (origine explicite).
+- **PUB-03**: abonnements — hero aligné si aucune formule publiée ; mentions = liste `LEGAL_*` manquants (éditorial).
+- **ADM-02**: fiche conformité absente → shell admin + retour liste (plus 404 publique trompeuse).
+- **ADM-01**: libellé org = `Organisation {ref}` si enrichissement absent ; test A/B panel conserve A≠B.
+- **CAT**: fallback IT démo plus injecté dans shell COM ; titre « simulation de secours » + `demoFallback`. Inventaire CSV hors IT : 9 libs (`lot3-non-it-libraries.json`). Cycle DB native hors IT **bloqué** (libs absentes DB locale).
+- **FIN-01**: preuve locale antérieure PASSED (`lot2-mat-func-032.json`) ; rejoue session en échec sans `E2E_LOCAL_ISOLATED=1`.
+- **FIN-02**: panel billing distingue politique absente vs source absente (tests panel).
+- Prochaine étape: importer libs hors IT en base test ; rejouer film CLI/ST + A/B admin sur démo déployée après merge.
+
 ## 2026-11-25 — Audit prestataire (retest file + régional)
 
 - File « À traiter » : **uniquement** `snapshot.treatItems` (invitations/devis). L’action-center n’est plus fusionné ni attendu sur l’accueil prestataire — plus de flash vide puis 4 tâches `/administration/command-center` après Suspense.

@@ -65,6 +65,14 @@ describe("work presentation helpers", () => {
       ),
     ).toBe("Hôtel Bayt Al Bahar");
     expect(workItemOrganizationLabel(base, "fr", "  Coop Tadla  ")).toBe("Coop Tadla");
+    expect(
+      workItemOrganizationLabel(
+        { ...base, organizationId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc" },
+        "fr",
+        null,
+      ),
+    ).toMatch(/^Organisation /);
+    expect(workItemOrganizationLabel(base, "fr", null)).toBe("Organisation à préciser");
     expect(humanizeActionReason("Attribution démo pour parcours admin.", "fr")).toBe("Demande d’attribution à valider");
     expect(
       humanizeActionReason("Attribution démo pour parcours admin.", "fr", {

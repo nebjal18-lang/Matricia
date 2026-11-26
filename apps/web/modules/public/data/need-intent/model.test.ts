@@ -59,4 +59,35 @@ describe("public need intent", () => {
     expect(rankPublicNeedServices("أحتاج دعم الأمن السيبراني والبيانات", "ar", 5).length).toBeGreaterThan(0);
     expect(rankPublicNeedServices("Audit du système d’information et feuille de route", "ar", 5)[0]?.serviceCode).toBe("IT-AUDIT-SI");
   });
+
+  it("PUB-01: IT workstation maintenance outranks BTP library-name false positives", () => {
+    const need =
+      "Comparer deux propositions pour la maintenance informatique de trois postes dans une entreprise de Tanger.";
+    const ranked = rankPublicNeedServices(need, "fr", 5);
+    expect(ranked.length).toBeGreaterThan(0);
+    expect(ranked[0]?.libraryCode).toBe("IT");
+    expect(ranked.every((item) => item.libraryCode !== "BTP" || item.serviceCode === "BTP-MAINT")).toBe(true);
+    expect(ranked.some((item) => item.serviceCode.startsWith("BTP-ARCH") || item.serviceCode.startsWith("BTP-FIRE"))).toBe(false);
+    // Pre-fix flood was exactly 7.14 % from scoring the BTP library label « … et maintenance ».
+    expect(ranked.every((item) => item.scoreBasisPoints !== 714)).toBe(true);
+  });
+
+  it("PUB-01: electrical building maintenance stays in BTP and accounting closure stays ACC-CLOSE", () => {
+    const electrical = rankPublicNeedServices("maintenance électrique d’un bâtiment", "fr", 5);
+    expect(electrical[0]?.libraryCode).toBe("BTP");
+    expect(electrical.some((item) => item.serviceCode === "BTP-MAINT" || item.serviceCode === "BTP-ELEC")).toBe(true);
+
+    const closing = rankPublicNeedServices("clôture comptable annuelle", "fr", 5);
+    expect(closing[0]?.serviceCode).toBe("ACC-CLOSE");
+  });
+
+  it("PUB-01: ambiguous bare maintenance asks for clarification instead of filling five weak slots", () => {
+    expect(rankPublicNeedServices("j’ai besoin de maintenance", "fr", 5)).toEqual([]);
+  });
+
+  it("PUB-01: Arabic IT maintenance formulation prefers the IT domain", () => {
+    const ranked = rankPublicNeedServices("أحتاج صيانة معلوماتية لثلاثة أجهزة حاسوب في طنجة", "ar", 5);
+    expect(ranked.length).toBeGreaterThan(0);
+    expect(ranked[0]?.libraryCode).toBe("IT");
+  });
 });
