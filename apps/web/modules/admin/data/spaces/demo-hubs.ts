@@ -108,9 +108,13 @@ export function buildDemoCommandCenter(nowIso = new Date().toISOString()): Admin
   };
 }
 
-export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
+export function buildDemoFinanceDashboard(nowIso = new Date().toISOString()): AdminFinanceDashboard {
   const pairs = clientProviderPairs();
-  const asOf = "2026-09-20T12:00:00.000Z";
+  const asOf = nowIso;
+  const asOfDate = nowIso.slice(0, 10);
+  const overdueDate = new Date(new Date(nowIso).getTime() - 5 * 86_400_000).toISOString().slice(0, 10);
+  const periodStart = new Date(new Date(nowIso).getTime() - 15 * 86_400_000).toISOString();
+  const periodEnd = new Date(new Date(nowIso).getTime() + 15 * 86_400_000).toISOString();
   return {
     as_of: asOf,
     payment_intents: pairs.slice(0, 8).map((pair) => ({
@@ -144,8 +148,8 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       status: "ACTIVE" as const,
       plan_code: "GOLD" as const,
       billing_interval: "MONTHLY" as const,
-      current_period_start: "2026-09-01T00:00:00.000Z",
-      current_period_end: "2026-10-01T00:00:00.000Z",
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
       pending_plan_version_id: null,
       pending_change_effective_at: null,
       row_version: "1",
@@ -158,13 +162,13 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       organization_name: pair.clientName,
       plan_code: "GOLD" as const,
       cycle_number: 1,
-      period_start: "2026-09-01T00:00:00.000Z",
-      period_end: "2026-10-01T00:00:00.000Z",
+      period_start: periodStart,
+      period_end: periodEnd,
       currency: "MAD",
       amount_minor: "299000",
       created_at: asOf,
     })),
-    provider_payments: pairs.slice(0, 8).map((pair) => ({
+    provider_payments: pairs.slice(0, 8).map((pair, index) => ({
       id: demoId(`ppay:${pair.territory}`),
       organization_id: pair.providerId,
       organization_name: pair.providerName,
@@ -173,9 +177,9 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       amount_minor: "800000",
       allocated_minor: "500000",
       unallocated_minor: "300000",
-      paid_on: "2026-09-15",
+      paid_on: index < 3 ? overdueDate : asOfDate,
     })),
-    provider_invoices: pairs.slice(0, 8).map((pair) => ({
+    provider_invoices: pairs.slice(0, 8).map((pair, index) => ({
       id: demoId(`pinv:${pair.territory}`),
       organization_id: pair.providerId,
       organization_name: pair.providerName,
@@ -185,7 +189,7 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       paid_minor: "500000",
       outstanding_minor: "300000",
       payment_status: "PARTIALLY_PAID" as const,
-      due_on: "2026-09-30",
+      due_on: index < 3 ? overdueDate : asOfDate,
     })),
   };
 }

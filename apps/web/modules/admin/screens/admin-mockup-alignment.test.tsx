@@ -10,6 +10,7 @@ import { buildAdminNav } from "@/modules/admin/ui/admin-nav";
 import { SpaceQueueBoard } from "@/modules/admin/screens/spaces/queue-kit";
 import { ConsultationSendBoard, DocumentReuseBoard, NotificationPreferencesBoard } from "@/modules/admin/screens/spaces/special-boards";
 import { specialBoardCopy } from "@/modules/admin/data/spaces/special-copy";
+import { getCommandCenterMessages } from "@/modules/admin/screens/command-center/messages";
 
 const mockupDir = join(process.cwd(), "..", "..", "docs", "design", "admin-dashboard-mockups");
 const kitSource = readFileSync(new URL("./spaces/queue-kit.tsx", import.meta.url), "utf8");
@@ -172,7 +173,8 @@ describe("admin dashboard mockups", () => {
     expect(parcours).toContain("AdminHubBoard");
     expect(parcours).toContain('groupId="parcours"');
     expect(commandCenter.indexOf("<CommandCenterPanel")).toBeLessThan(commandCenter.indexOf("<AdminDirectoryBoard"));
-    expect(commandCenter).toContain("Centre de pilotage");
+    expect(commandCenter).toContain("title={m.title}");
+    expect(getCommandCenterMessages("fr").title).toContain("Centre de pilotage");
     expect(commandPanel).toContain("id=\"command-today\"");
     expect(commandPanel).toContain("id=\"command-work-items\"");
     expect(commandPanel).toContain("admin-org-layout");
