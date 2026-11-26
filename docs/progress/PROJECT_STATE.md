@@ -29,10 +29,10 @@ Distinction : entrée menu ≠ chemin unique ≠ ancre ≠ fiche dynamique ≠ a
 | 1 | Centre de pilotage | Code PR ; **reproduit** sur demo public | Demo public = ancien UI. Unit A/B OK. **Persistance A/B isolée = À vérifier** |
 | 2 | Catalogue | Partiel → avancé | Builder OK avec bibliothèque IT + service. Validation native **indisponible** sur demo → fallback démo questions en PR. Matrice multi-domaines = **1 lib visible (IT)** |
 | 3 | Acteurs / capacité / franchise | Avancé | Capacité `/capacite` données visibles + lien fiche prestataire. Colonnes Compte/Conformité/Offre clarifiées. Franchisés ↔ Candidatures déjà reliés |
-| 4 | Parcours commercial | Partiel | Scores matching démo variés (code). E2E dossier unique = **À vérifier** |
+| 4 | Parcours commercial | Avancé | Chaîne **Hôtel Bayt Al Bahar** locale : diagnostic → demande → matching **62 %** → devis (Détroit Soft) → contrat → mission. Facturation clients : politique absente + « aucune source » clarifiée |
 | 5 | Finance | Partiel | Recherche coûts : portée collection clarifiée + reset page 1. MAT-FUNC-032 navigateur→DB = **À examiner** |
 | 6 | Pilotage / privacy | Avancé | Ancres ops `#archives` etc. présentes. ALL → « inventaire exhaustif » ; staff ≠ « votre personne » |
-| 7 | Design FR/AR mobile | Partiel | **Passe 390/768/1440 + captures = À vérifier** |
+| 7 | Design FR/AR mobile | Avancé | Nav mobile collapsée (CSS admin) : file visible à 390 px. Titre onglet CC. Captures 390 FR/AR RTL, 768, 1440 sur `:5180` |
 | 8 | PR #38 | Ouverte | https://github.com/nebjal18-lang/Matricia/pull/38 — **demo public ≠ branche** |
 
 ### Inventaire navigateur (demo public, Admin)

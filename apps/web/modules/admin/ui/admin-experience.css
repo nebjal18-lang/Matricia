@@ -2454,6 +2454,49 @@
 
 @media (max-width: 959px) {
   /* Admin keeps a vertical sidebar tree; do not inherit the client chip-wrap nav. */
+  .admin-workspace .client-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--client-line);
+    padding: 0.75rem 1rem;
+  }
+
+  .admin-workspace .workspace-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--client-line);
+    border-radius: var(--mat-radius-medium, 12px);
+    background: #fff;
+    padding: 0.4rem 0.7rem;
+    color: var(--client-ink, #121d58);
+    font: inherit;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .admin-workspace .workspace-nav-toggle[aria-expanded="true"] .workspace-nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  .admin-workspace .workspace-nav-panel {
+    grid-column: 1 / -1;
+    display: block;
+    max-height: min(60dvh, 32rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Collapse must win: without this, the full tree pushes the decision surface below the fold. */
+  .admin-workspace .workspace-nav-panel[data-open="false"] {
+    display: none;
+  }
+
   .admin-workspace .client-side-nav {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -2471,6 +2514,11 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 0.28rem;
     padding-inline: 0.85rem 0;
+  }
+
+  .admin-workspace .client-side-foot,
+  .admin-workspace .client-side-art {
+    display: none;
   }
 }
 

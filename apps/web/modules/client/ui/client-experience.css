@@ -1282,8 +1282,10 @@ button.client-cta {
     overscroll-behavior: contain;
   }
 
-  .workspace-nav-panel[data-open="false"] {
-    display: none;
+  /* Explicit false state — required so closed nav does not push page content below the fold. */
+  .workspace-nav-panel[data-open="false"],
+  .client-workspace .workspace-nav-panel[data-open="false"] {
+    display: none !important;
   }
 
   .workspace-nav-panel .client-side-nav {
