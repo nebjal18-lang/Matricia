@@ -83,4 +83,11 @@ describe("proxy franchise routing", () => {
     expect(source).toContain("?!_next/");
     expect(source).not.toContain("_next/static|_next/image");
   });
+
+  it("n’intercepte pas favicon.ico ni les extensions d’assets statiques", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const source = await readFile(new URL("./proxy.ts", import.meta.url), "utf8");
+    expect(source).toContain("favicon\\\\.ico");
+    expect(source).toMatch(/\(\?:ico\|svg\|png\|jpg\|jpeg\|gif\|webp\)/);
+  });
 });
