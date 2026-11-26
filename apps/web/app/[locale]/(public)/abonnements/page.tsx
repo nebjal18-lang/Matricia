@@ -118,8 +118,8 @@ export default async function PublicSubscriptionsPage({ params }: { params: Prom
       <section className="public-hero-split">
         <div>
           <p className="journey-eyebrow">{messages.eyebrow}</p>
-          <h1>{messages.headline}</h1>
-          <p className="public-lead mt-4">{messages.description}</p>
+          <h1>{plans.length ? messages.headline : (locale === "ar" ? "اشتركوا بعد عرض مكتوب" : "Souscrivez après une proposition écrite")}</h1>
+          <p className="public-lead mt-4">{plans.length ? messages.description : messages.empty}</p>
           <ul className="journey-trust">
             {messages.pillars.map(([item]) => <li key={item}>{item}</li>)}
           </ul>

@@ -70,8 +70,8 @@ export function buildDemoCatalogQuestionWorkspace(): RuleValidationWorkspace {
         id: versionId,
         version: 1,
         status: "LOCAL_TEST",
-        titleFr: "Diagnostic IT — démo Matricia",
-        titleAr: "تشخيص تقنية المعلومات — عرض ماتريسيا",
+        titleFr: "Diagnostic IT — démo Matricia (simulation de secours)",
+        titleAr: "تشخيص تقنية المعلومات — عرض ماتريسيا (محاكاة احتياطية)",
         audience: "CLIENT",
         engineVersion: "engine-demo-v1",
         policyVersion: "policy-demo-v1",
@@ -84,28 +84,29 @@ export function buildDemoCatalogQuestionWorkspace(): RuleValidationWorkspace {
   };
 }
 
-/** Remplace un workspace vide (versions ou questions) quand le flag démo est actif. */
+export function isDemoCatalogQuestionWorkspace(workspace: RuleValidationWorkspace): boolean {
+  return workspace.versions.some((version) => version.id === DEMO_VERSION_ID || version.libraryId === DEMO_LIBRARY_ID);
+}
+
+/**
+ * Remplace un workspace totalement vide quand le flag démo est actif.
+ * Ne mélange jamais des questions IT de secours dans une version native hors IT.
+ */
 export function applyDemoCatalogQuestionsWorkspace(
   workspace: RuleValidationWorkspace,
-): RuleValidationWorkspace {
-  if (!canApplyAdminDemoCatalogQuestions()) return workspace;
+): { workspace: RuleValidationWorkspace; demoFallback: boolean } {
+  if (!canApplyAdminDemoCatalogQuestions()) return { workspace, demoFallback: false };
   if (workspace.versions.length === 0) {
-    return buildDemoCatalogQuestionWorkspace();
+    return { workspace: buildDemoCatalogQuestionWorkspace(), demoFallback: true };
   }
-  if (workspace.questions.length === 0 && workspace.selectedVersionId) {
-    const demo = buildDemoCatalogQuestionWorkspace();
-    return {
-      ...workspace,
-      questions: demo.questions,
-    };
-  }
-  return workspace;
+  // Empty questions on a native version: keep the native shell visible; do not inject IT demo questions.
+  return { workspace, demoFallback: false };
 }
 
 /**
  * Sur un environnement démo, un échec de chargement « service / données »
  * (pas un refus de droit) expose le workspace de validation de démonstration
- * au lieu d’un message bloquant sans contenu.
+ * au lieu d’un message bloquant sans contenu. Toujours identifiable.
  */
 export function resolveDemoCatalogQuestionsWorkspace(input: {
   status: "success" | "error";
@@ -113,7 +114,7 @@ export function resolveDemoCatalogQuestionsWorkspace(input: {
   value?: RuleValidationWorkspace;
 }): { workspace: RuleValidationWorkspace; demoFallback: boolean } | null {
   if (input.status === "success" && input.value) {
-    return { workspace: applyDemoCatalogQuestionsWorkspace(input.value), demoFallback: false };
+    return applyDemoCatalogQuestionsWorkspace(input.value);
   }
   if (
     canApplyAdminDemoCatalogQuestions()

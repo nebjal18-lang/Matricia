@@ -156,7 +156,7 @@ export function HomePremiumBelow({ locale }: { locale: HomeLocale }) {
             {copy.finalTitle[0]}
             <span>{copy.finalTitle[1]}</span>
           </h2>
-          <Link className={styles.finalPrimary} href={href("/diagnostic")} prefetch>
+          <Link className={styles.finalPrimary} href={href("/diagnostic")}>
             {copy.finalPrimary}
             <ArrowRight className={styles.actionArrow} size={18} aria-hidden="true" />
           </Link>

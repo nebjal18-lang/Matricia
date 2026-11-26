@@ -17,7 +17,7 @@ export function HomePremiumHero({ locale }: { locale: HomeLocale }) {
           src="/home-v2/hero-collaboration.png"
           alt=""
           fill
-          priority
+          loading="eager"
           fetchPriority="high"
           quality={75}
           sizes="100vw"
@@ -32,16 +32,16 @@ export function HomePremiumHero({ locale }: { locale: HomeLocale }) {
         </h1>
         <p className={styles.lead}>{copy.intro}</p>
         <div className={styles.ctaGroup}>
-          <Link className={styles.primaryAction} href={href("/diagnostic")} prefetch>
+          <Link className={styles.primaryAction} href={href("/diagnostic")}>
             {copy.primaryAction}
             <ArrowRight className={styles.actionArrow} size={18} aria-hidden="true" />
           </Link>
-          <Link className={styles.needActionSolid} href={href("/besoin")} prefetch>
+          <Link className={styles.needActionSolid} href={href("/besoin")}>
             {copy.preciseNeedAction}
             <ArrowRight className={styles.actionArrow} size={16} aria-hidden="true" />
           </Link>
         </div>
-        <Link className={styles.providerLink} href={href("/fournisseur")} prefetch>
+        <Link className={styles.providerLink} href={href("/fournisseur")}>
           {copy.providerAction}
         </Link>
       </div>
