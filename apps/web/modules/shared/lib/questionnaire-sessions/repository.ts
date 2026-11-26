@@ -61,7 +61,7 @@ function failure(error: Query["error"]): QuestionnaireResult<never> {
   const match = known.find(([code]) => message.includes(code));
   if (match) return { status: "error", reason: match[1] };
   if (error?.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-  if (error?.code === "40001" || error?.code === "23505") return { status: "error", reason: "CONFLICT" };
+  if ((error?.code === "40001" || error?.code === "PT409") || error?.code === "23505") return { status: "error", reason: "CONFLICT" };
   if (error?.code === "22023" || error?.code === "23514") return { status: "error", reason: "INVALID_INPUT" };
   return { status: "error", reason: "UNAVAILABLE" };
 }

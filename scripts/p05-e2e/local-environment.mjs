@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 const execute = promisify(execFile);
 const loopback = host => ['localhost', '127.0.0.1', '[::1]'].includes(host);
+const officialImage = image => typeof image === 'string' && ['ghcr.io/supabase/', 'public.ecr.aws/supabase/'].some(prefix => image.startsWith(prefix));
 const required = (value, name) => { if (typeof value !== 'string' || !value.trim()) throw new Error(`Local E2E requires ${name}`); return value.trim(); };
 function endpoint(value, protocol, port) {
   const url = new URL(value);
@@ -12,7 +13,7 @@ export function validateLocalConfiguration(env, projectId, containers) {
   if (env.E2E_LOCAL_ISOLATED !== '1' || env.APP_ENV !== 'development' || !/^[A-Za-z][A-Za-z0-9_-]{2,63}$/.test(projectId) || env.E2E_LOCAL_PROJECT_ID !== projectId) throw new Error('Local E2E requires explicit matching non-production project identity');
   for (const role of ['db', 'kong', 'auth', 'storage']) {
     const c = containers[role];
-    if (!c?.running || c.project !== projectId || c.composeProject !== projectId || !c.image?.startsWith('ghcr.io/supabase/')) throw new Error('Local E2E Docker identity is not verified');
+    if (!c?.running || c.project !== projectId || c.composeProject !== projectId || !officialImage(c.image)) throw new Error('Local E2E Docker identity is not verified');
   }
   if (containers.auth.totpEnrollment !== true || containers.auth.totpVerification !== true) throw new Error('LOCAL_TOTP_DISABLED: enable GoTrue TOTP enrollment and verification before creating fixtures');
   if (!containers.db.ports?.['5432/tcp']?.some(p => p.HostPort === '54322') || !containers.kong.ports?.['8000/tcp']?.some(p => p.HostPort === '54321')) throw new Error('Local E2E Docker ports do not match');

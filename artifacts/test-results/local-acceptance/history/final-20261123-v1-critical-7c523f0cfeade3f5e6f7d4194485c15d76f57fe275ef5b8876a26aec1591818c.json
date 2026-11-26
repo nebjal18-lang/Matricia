@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "suite": "v1-critical",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:36:05.340Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 24,
+    "passed": 24,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:34:08.043Z",
+    "finishedAt": "2026-11-23T22:36:04.536Z"
+  },
+  "cleanupVerified": true,
+  "proof": {}
+}

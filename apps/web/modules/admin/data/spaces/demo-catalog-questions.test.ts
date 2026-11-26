@@ -18,21 +18,20 @@ describe("demo catalogue questions (validation thin path)", () => {
     process.env.APP_ENV = "development";
     expect(canApplyAdminDemoCatalogQuestions()).toBe(false);
     const empty = { versions: [], selectedVersionId: null, questions: [] };
-    expect(applyDemoCatalogQuestionsWorkspace(empty, null)).toEqual(empty);
+    expect(applyDemoCatalogQuestionsWorkspace(empty)).toEqual(empty);
   });
 
   it("remplit versions + questions quand le workspace est vide", () => {
     process.env.APP_ENV = "development";
     process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
     const counts = demoCatalogQuestionCounts();
-    const built = buildDemoCatalogQuestionWorkspace(null);
+    const built = buildDemoCatalogQuestionWorkspace();
     expect(built.versions).toHaveLength(counts.versions);
     expect(built.questions).toHaveLength(counts.questions);
     expect(built.questions.every((row) => row.dataKey.startsWith("it."))).toBe(true);
 
     const filled = applyDemoCatalogQuestionsWorkspace(
       { versions: [], selectedVersionId: null, questions: [] },
-      null,
     );
     expect(filled.versions.length).toBe(1);
     expect(filled.questions.length).toBe(5);
@@ -43,7 +42,6 @@ describe("demo catalogue questions (validation thin path)", () => {
         selectedVersionId: built.selectedVersionId,
         questions: [],
       },
-      built.selectedVersionId,
     );
     expect(thinQuestions.questions).toHaveLength(5);
   });

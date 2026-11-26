@@ -9,7 +9,7 @@ describe("provider dossier identity",()=>{
  it("never mixes two providers with opposing qualifications, regions, capacity and evidence",()=>{
   const board=emptyFranchiseSpaces("fr","");board.providerDossiers=[first,second];board.people=[first,second].map((d,i)=>({id:`prospect-${i}`,name:d.name,services:d.qualifications.map(q=>q.serviceCode).join(","),status:d.status,next:"",tone:"sky",stage:"VERIFIED",dossier:d,linkedOrganizationId:d.organizationId,createdAt:"2026-01-01T00:00:00Z"}));
   const html=renderToStaticMarkup(<NetworkBoard locale="fr" query="" board={board} itemId="prospect-0"/>);
-  expect(html).toContain("SERVICE_A");expect(html).toContain("ASSURANCE_A");expect(html).toContain("AVAILABLE");expect(html).toContain("Casablanca-Settat");
+  expect(html).toContain("SERVICE_A");expect(html).toContain("ASSURANCE_A");expect(html).toContain("Disponible");expect(html).not.toContain(">AVAILABLE<");expect(html).toContain("Casablanca-Settat");
   expect(html).not.toContain("SERVICE_B");expect(html).not.toContain("ASSURANCE_B");expect(html).not.toContain("FULL");expect(html).not.toContain("Oriental");
  });
  it("does not attribute global documents or qualification to an unlinked prospect",()=>{

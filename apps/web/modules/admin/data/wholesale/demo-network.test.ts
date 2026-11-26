@@ -10,6 +10,7 @@ import { wholesaleCatalogSchema } from "./model";
 
 afterEach(() => {
   delete process.env.MATRICIA_DEMO_ACCESS_ENABLED;
+  delete process.env.MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED;
   delete process.env.APP_ENV;
   delete process.env.VERCEL_ENV;
 });
@@ -19,6 +20,8 @@ describe("demo wholesale network", () => {
     process.env.MATRICIA_DEMO_ACCESS_ENABLED = "true";
     process.env.APP_ENV = "production";
     expect(isDemoWholesaleEnabled()).toBe(false);
+    process.env.MATRICIA_DEMO_PRODUCTION_ACCESS_ENABLED = "true";
+    expect(isDemoWholesaleEnabled()).toBe(true);
   });
 
   it("couvre les 12 régions et les dossiers complets franchisé/ST", () => {

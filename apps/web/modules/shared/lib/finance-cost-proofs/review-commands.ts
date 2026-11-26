@@ -20,7 +20,7 @@ const evidenceSchema = z.object({ uploadId: z.string().uuid(), fileName: z.strin
 const failure = (error: { code?: string; message?: string } | null): FinanceCostReviewFailure => {
   if (error?.code === "42501") return /MFA|AAL2/i.test(error.message ?? "") ? "MFA_REQUIRED" : "FORBIDDEN";
   if (["PGRST301", "PGRST303"].includes(error?.code ?? "")) return "UNAUTHENTICATED";
-  if (["40001", "22000", "23505"].includes(error?.code ?? "")) return "CONFLICT";
+  if (["40001", "PT409", "22000", "23505"].includes(error?.code ?? "")) return "CONFLICT";
   if (error?.code === "55000" && /PROOF|DOCUMENT|DOWNLOAD|READ_RECEIPT|CLEAN/i.test(error.message ?? "")) return "EVIDENCE_REQUIRED";
   if (error?.code === "55000") return "CONFLICT";
   return "UNAVAILABLE";

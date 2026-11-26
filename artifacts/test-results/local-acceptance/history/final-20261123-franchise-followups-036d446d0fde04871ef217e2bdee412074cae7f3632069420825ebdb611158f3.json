@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "suite": "franchise-followups",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T21:52:00.664Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T21:50:46.919Z",
+    "finishedAt": "2026-11-23T21:51:59.696Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realUiPolicyProposals": 4,
+    "realUiIndependentApprovals": 4,
+    "realUiInitialPreferences": 8,
+    "realUiConsentWithdrawals": 4,
+    "scheduledJobs": 8,
+    "queuedFollowups": 4,
+    "withdrawnContactsNotQueued": 4,
+    "policyReplayVerified": true,
+    "foreignReadAndDecisionDenied": true,
+    "pipelineUnchanged": true,
+    "externalEmailDelivered": false,
+    "stage": "consent-and-worker-proof",
+    "failureLocations": []
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "build-local",
+  "startedAt": "2026-11-19T13:21:28.171Z",
+  "finishedAt": "2026-11-19T13:22:34.376Z",
+  "durationMs": 66204,
+  "exitCode": 1,
+  "nodeVersion": "v22.23.5",
+  "localOnly": true,
+  "sqlTarget": "not used for SQL by build/server; HTTP target is local Supabase"
+}

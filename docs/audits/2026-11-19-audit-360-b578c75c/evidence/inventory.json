@@ -1,0 +1,1797 @@
+{
+  "generatedAt": "2026-11-19T13:27:18.543Z",
+  "routes": [
+    {
+      "file": "apps/web/app/page.tsx",
+      "route": ""
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/a-propos/page.tsx",
+      "route": "/[locale]/a-propos"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/abonnements/page.tsx",
+      "route": "/[locale]/abonnements"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/besoin/page.tsx",
+      "route": "/[locale]/besoin"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/conditions/page.tsx",
+      "route": "/[locale]/conditions"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/confidentialite/page.tsx",
+      "route": "/[locale]/confidentialite"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/contact/page.tsx",
+      "route": "/[locale]/contact"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/cookies/page.tsx",
+      "route": "/[locale]/cookies"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/diagnostic/page.tsx",
+      "route": "/[locale]/diagnostic"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/diagnostic/resultat/page.tsx",
+      "route": "/[locale]/diagnostic/resultat"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/entreprises/page.tsx",
+      "route": "/[locale]/entreprises"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/fournisseur/page.tsx",
+      "route": "/[locale]/fournisseur"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/franchise/page.tsx",
+      "route": "/[locale]/franchise"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/inscription/page.tsx",
+      "route": "/[locale]/inscription"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/invitation/[code]/page.tsx",
+      "route": "/[locale]/invitation/[code]"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/mentions-legales/page.tsx",
+      "route": "/[locale]/mentions-legales"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/page.tsx",
+      "route": "/[locale]"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/services/page.tsx",
+      "route": "/[locale]/services"
+    },
+    {
+      "file": "apps/web/app/[locale]/(public)/services/[code]/page.tsx",
+      "route": "/[locale]/services/[code]"
+    },
+    {
+      "file": "apps/web/app/[locale]/actions/page.tsx",
+      "route": "/[locale]/actions"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/achats-groupes/page.tsx",
+      "route": "/[locale]/administration/achats-groupes"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/acteurs/page.tsx",
+      "route": "/[locale]/administration/acteurs"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/anti-abus/page.tsx",
+      "route": "/[locale]/administration/anti-abus"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/approbations-finance/page.tsx",
+      "route": "/[locale]/administration/approbations-finance"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/assistance/[id]/page.tsx",
+      "route": "/[locale]/administration/assistance/[id]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/avantages/livraisons/page.tsx",
+      "route": "/[locale]/administration/avantages/livraisons"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/avantages/regles/page.tsx",
+      "route": "/[locale]/administration/avantages/regles"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/avantages/remboursements/page.tsx",
+      "route": "/[locale]/administration/avantages/remboursements"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/candidatures-franchise/page.tsx",
+      "route": "/[locale]/administration/candidatures-franchise"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/catalogue/calendrier/page.tsx",
+      "route": "/[locale]/administration/catalogue/calendrier"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/catalogue/page.tsx",
+      "route": "/[locale]/administration/catalogue"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/catalogue/publications/page.tsx",
+      "route": "/[locale]/administration/catalogue/publications"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/catalogue/questionnaires/revues/page.tsx",
+      "route": "/[locale]/administration/catalogue/questionnaires/revues"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/catalogue/revues/page.tsx",
+      "route": "/[locale]/administration/catalogue/revues"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/catalogue/validation/page.tsx",
+      "route": "/[locale]/administration/catalogue/validation"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/classification-fiscale/page.tsx",
+      "route": "/[locale]/administration/classification-fiscale"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/clients/page.tsx",
+      "route": "/[locale]/administration/clients"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/clients/[organizationId]/page.tsx",
+      "route": "/[locale]/administration/clients/[organizationId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/clonage/page.tsx",
+      "route": "/[locale]/administration/clonage"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/command-center/page.tsx",
+      "route": "/[locale]/administration/command-center"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/confidentialite/effacement/page.tsx",
+      "route": "/[locale]/administration/confidentialite/effacement"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/confidentialite/inventaire/page.tsx",
+      "route": "/[locale]/administration/confidentialite/inventaire"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/confidentialite/page.tsx",
+      "route": "/[locale]/administration/confidentialite"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/confidentialite/remise/page.tsx",
+      "route": "/[locale]/administration/confidentialite/remise"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/confidentialite/restrictions/page.tsx",
+      "route": "/[locale]/administration/confidentialite/restrictions"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/configuration/page.tsx",
+      "route": "/[locale]/administration/configuration"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/conformite-clients/page.tsx",
+      "route": "/[locale]/administration/conformite-clients"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/conformite-clients/[caseId]/identite/page.tsx",
+      "route": "/[locale]/administration/conformite-clients/[caseId]/identite"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/conformite-clients/[caseId]/page.tsx",
+      "route": "/[locale]/administration/conformite-clients/[caseId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/nouvelle/page.tsx",
+      "route": "/[locale]/administration/entreprises/nouvelle"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/page.tsx",
+      "route": "/[locale]/administration/entreprises"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/[organizationId]/archiver/page.tsx",
+      "route": "/[locale]/administration/entreprises/[organizationId]/archiver"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/[organizationId]/modifier/page.tsx",
+      "route": "/[locale]/administration/entreprises/[organizationId]/modifier"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/entreprises/[organizationId]/page.tsx",
+      "route": "/[locale]/administration/entreprises/[organizationId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/facturation-clients/page.tsx",
+      "route": "/[locale]/administration/facturation-clients"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/finance/credits/page.tsx",
+      "route": "/[locale]/administration/finance/credits"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/finance/offres/page.tsx",
+      "route": "/[locale]/administration/finance/offres"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/finance/page.tsx",
+      "route": "/[locale]/administration/finance"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/finance/prestataires/page.tsx",
+      "route": "/[locale]/administration/finance/prestataires"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/finance/rapprochements-couts/page.tsx",
+      "route": "/[locale]/administration/finance/rapprochements-couts"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/finance/recompenses/page.tsx",
+      "route": "/[locale]/administration/finance/recompenses"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/fiscalite-maroc/page.tsx",
+      "route": "/[locale]/administration/fiscalite-maroc"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/fusion-organisations/page.tsx",
+      "route": "/[locale]/administration/fusion-organisations"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/gouvernance-franchise/livres/page.tsx",
+      "route": "/[locale]/administration/gouvernance-franchise/livres"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/gouvernance-franchise/page.tsx",
+      "route": "/[locale]/administration/gouvernance-franchise"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/gouvernance-franchise/plans/[planId]/responsable/page.tsx",
+      "route": "/[locale]/administration/gouvernance-franchise/plans/[planId]/responsable"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/gouvernance-franchise/signalements/[requestId]/page.tsx",
+      "route": "/[locale]/administration/gouvernance-franchise/signalements/[requestId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/incitations/page.tsx",
+      "route": "/[locale]/administration/incitations"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/invitations-reseau/page.tsx",
+      "route": "/[locale]/administration/invitations-reseau"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/marketing-autopilot/page.tsx",
+      "route": "/[locale]/administration/marketing-autopilot"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/notifications/modeles/page.tsx",
+      "route": "/[locale]/administration/notifications/modeles"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/operations/page.tsx",
+      "route": "/[locale]/administration/operations"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/parcours/page.tsx",
+      "route": "/[locale]/administration/parcours"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/politiques-contrats/page.tsx",
+      "route": "/[locale]/administration/politiques-contrats"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/preparation/page.tsx",
+      "route": "/[locale]/administration/preparation"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/providers/page.tsx",
+      "route": "/[locale]/administration/providers"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/providers/[organizationId]/identite/page.tsx",
+      "route": "/[locale]/administration/providers/[organizationId]/identite"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/providers/[organizationId]/page.tsx",
+      "route": "/[locale]/administration/providers/[organizationId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/questionnaires/analytique/page.tsx",
+      "route": "/[locale]/administration/questionnaires/analytique"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/revues-capacites/page.tsx",
+      "route": "/[locale]/administration/revues-capacites"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/signatures/page.tsx",
+      "route": "/[locale]/administration/signatures"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/support/[id]/page.tsx",
+      "route": "/[locale]/administration/support/[id]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/acces/page.tsx",
+      "route": "/[locale]/administration/utilisateurs/acces"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/inviter/page.tsx",
+      "route": "/[locale]/administration/utilisateurs/inviter"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/page.tsx",
+      "route": "/[locale]/administration/utilisateurs"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/[userId]/page.tsx",
+      "route": "/[locale]/administration/utilisateurs/[userId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/utilisateurs/[userId]/roles/page.tsx",
+      "route": "/[locale]/administration/utilisateurs/[userId]/roles"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/v4-1/[module]/page.tsx",
+      "route": "/[locale]/administration/v4-1/[module]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/[space]/page.tsx",
+      "route": "/[locale]/administration/[space]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/[space]/[itemId]/page.tsx",
+      "route": "/[locale]/administration/[space]/[itemId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/administration/[space]/[itemId]/[action]/page.tsx",
+      "route": "/[locale]/administration/[space]/[itemId]/[action]"
+    },
+    {
+      "file": "apps/web/app/[locale]/catalogue/page.tsx",
+      "route": "/[locale]/catalogue"
+    },
+    {
+      "file": "apps/web/app/[locale]/catalogue/[librarySlug]/[serviceSlug]/page.tsx",
+      "route": "/[locale]/catalogue/[librarySlug]/[serviceSlug]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/abonnement/cycles/[cycleId]/page.tsx",
+      "route": "/[locale]/client/abonnement/cycles/[cycleId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/abonnement/page.tsx",
+      "route": "/[locale]/client/abonnement"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/achats-groupes/page.tsx",
+      "route": "/[locale]/client/achats-groupes"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/actions/page.tsx",
+      "route": "/[locale]/client/actions"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/avantages/execution/page.tsx",
+      "route": "/[locale]/client/avantages/execution"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/avantages/livraisons/page.tsx",
+      "route": "/[locale]/client/avantages/livraisons"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/avantages/remboursements/page.tsx",
+      "route": "/[locale]/client/avantages/remboursements"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/boxes/configuration/page.tsx",
+      "route": "/[locale]/client/boxes/configuration"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/boxes/mon-enveloppe/page.tsx",
+      "route": "/[locale]/client/boxes/mon-enveloppe"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/contrats/page.tsx",
+      "route": "/[locale]/client/contrats"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/credits/page.tsx",
+      "route": "/[locale]/client/credits"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/nouvelle/page.tsx",
+      "route": "/[locale]/client/demandes/nouvelle"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/page.tsx",
+      "route": "/[locale]/client/demandes"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/recurrence/page.tsx",
+      "route": "/[locale]/client/demandes/recurrence"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/[requestId]/comparaison/page.tsx",
+      "route": "/[locale]/client/demandes/[requestId]/comparaison"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/[requestId]/offres/page.tsx",
+      "route": "/[locale]/client/demandes/[requestId]/offres"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/[requestId]/offres/[quoteId]/page.tsx",
+      "route": "/[locale]/client/demandes/[requestId]/offres/[quoteId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/demandes/[requestId]/page.tsx",
+      "route": "/[locale]/client/demandes/[requestId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/diagnostics/assistance/page.tsx",
+      "route": "/[locale]/client/diagnostics/assistance"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/diagnostics/besoin/page.tsx",
+      "route": "/[locale]/client/diagnostics/besoin"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/diagnostics/evolution/page.tsx",
+      "route": "/[locale]/client/diagnostics/evolution"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/diagnostics/page.tsx",
+      "route": "/[locale]/client/diagnostics"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/diagnostics/solutions/page.tsx",
+      "route": "/[locale]/client/diagnostics/solutions"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/diagnostics/[runId]/page.tsx",
+      "route": "/[locale]/client/diagnostics/[runId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/documents/page.tsx",
+      "route": "/[locale]/client/documents"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/favoris/page.tsx",
+      "route": "/[locale]/client/favoris"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/finances/encaissements-prestataire/page.tsx",
+      "route": "/[locale]/client/finances/encaissements-prestataire"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/finances/page.tsx",
+      "route": "/[locale]/client/finances"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/litiges/nouveau/page.tsx",
+      "route": "/[locale]/client/litiges/nouveau"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/litiges/page.tsx",
+      "route": "/[locale]/client/litiges"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/litiges/[caseId]/page.tsx",
+      "route": "/[locale]/client/litiges/[caseId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/missions/page.tsx",
+      "route": "/[locale]/client/missions"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/missions/[missionId]/jalons/page.tsx",
+      "route": "/[locale]/client/missions/[missionId]/jalons"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/missions/[missionId]/page.tsx",
+      "route": "/[locale]/client/missions/[missionId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/onboarding/page.tsx",
+      "route": "/[locale]/client/onboarding"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/portefeuille/page.tsx",
+      "route": "/[locale]/client/portefeuille"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/questionnaires/page.tsx",
+      "route": "/[locale]/client/questionnaires"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/recherche/page.tsx",
+      "route": "/[locale]/client/recherche"
+    },
+    {
+      "file": "apps/web/app/[locale]/client/recompenses/page.tsx",
+      "route": "/[locale]/client/recompenses"
+    },
+    {
+      "file": "apps/web/app/[locale]/confidentialite/demandes/page.tsx",
+      "route": "/[locale]/confidentialite/demandes"
+    },
+    {
+      "file": "apps/web/app/[locale]/connexion/consentements/page.tsx",
+      "route": "/[locale]/connexion/consentements"
+    },
+    {
+      "file": "apps/web/app/[locale]/connexion/page.tsx",
+      "route": "/[locale]/connexion"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/accueil/page.tsx",
+      "route": "/[locale]/franchise/accueil"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/bibliotheque/page.tsx",
+      "route": "/[locale]/franchise/bibliotheque"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/candidature/page.tsx",
+      "route": "/[locale]/franchise/candidature"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/clients/inviter/page.tsx",
+      "route": "/[locale]/franchise/clients/inviter"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/demandes/page.tsx",
+      "route": "/[locale]/franchise/demandes"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/digest/page.tsx",
+      "route": "/[locale]/franchise/digest"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/documents/page.tsx",
+      "route": "/[locale]/franchise/documents"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/documents/[documentId]/page.tsx",
+      "route": "/[locale]/franchise/documents/[documentId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/finance/page.tsx",
+      "route": "/[locale]/franchise/finance"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/finance/releves/[closureId]/page.tsx",
+      "route": "/[locale]/franchise/finance/releves/[closureId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/fournisseurs/contrats/[decisionId]/page.tsx",
+      "route": "/[locale]/franchise/fournisseurs/contrats/[decisionId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/fournisseurs/inviter/page.tsx",
+      "route": "/[locale]/franchise/fournisseurs/inviter"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/fournisseurs/page.tsx",
+      "route": "/[locale]/franchise/fournisseurs"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/gouvernance/page.tsx",
+      "route": "/[locale]/franchise/gouvernance"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/invitations/[invitationId]/page.tsx",
+      "route": "/[locale]/franchise/invitations/[invitationId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/marketing/page.tsx",
+      "route": "/[locale]/franchise/marketing"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/messages/page.tsx",
+      "route": "/[locale]/franchise/messages"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/performance/page.tsx",
+      "route": "/[locale]/franchise/performance"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/perimetre/page.tsx",
+      "route": "/[locale]/franchise/perimetre"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/qualite/page.tsx",
+      "route": "/[locale]/franchise/qualite"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/questionnaires/nouveau/page.tsx",
+      "route": "/[locale]/franchise/questionnaires/nouveau"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/questionnaires/page.tsx",
+      "route": "/[locale]/franchise/questionnaires"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/questionnaires/[questionnaireId]/page.tsx",
+      "route": "/[locale]/franchise/questionnaires/[questionnaireId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/questionnaires/[questionnaireId]/[tool]/page.tsx",
+      "route": "/[locale]/franchise/questionnaires/[questionnaireId]/[tool]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/questions/page.tsx",
+      "route": "/[locale]/franchise/questions"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/questions/[questionId]/page.tsx",
+      "route": "/[locale]/franchise/questions/[questionId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/recherche/page.tsx",
+      "route": "/[locale]/franchise/recherche"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/regles/nouvelle/page.tsx",
+      "route": "/[locale]/franchise/regles/nouvelle"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/regles/page.tsx",
+      "route": "/[locale]/franchise/regles"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/relances/page.tsx",
+      "route": "/[locale]/franchise/relances"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/reseau/page.tsx",
+      "route": "/[locale]/franchise/reseau"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/services/nouveau/page.tsx",
+      "route": "/[locale]/franchise/services/nouveau"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/services/page.tsx",
+      "route": "/[locale]/franchise/services"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/services/[serviceId]/page.tsx",
+      "route": "/[locale]/franchise/services/[serviceId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/validations/page.tsx",
+      "route": "/[locale]/franchise/validations"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/validations/[bucket]/page.tsx",
+      "route": "/[locale]/franchise/validations/[bucket]"
+    },
+    {
+      "file": "apps/web/app/[locale]/franchise/[...slug]/page.tsx",
+      "route": "/[locale]/franchise/[...slug]"
+    },
+    {
+      "file": "apps/web/app/[locale]/indisponible/page.tsx",
+      "route": "/[locale]/indisponible"
+    },
+    {
+      "file": "apps/web/app/[locale]/invitations/page.tsx",
+      "route": "/[locale]/invitations"
+    },
+    {
+      "file": "apps/web/app/[locale]/messagerie/page.tsx",
+      "route": "/[locale]/messagerie"
+    },
+    {
+      "file": "apps/web/app/[locale]/notifications/page.tsx",
+      "route": "/[locale]/notifications"
+    },
+    {
+      "file": "apps/web/app/[locale]/organisation/page.tsx",
+      "route": "/[locale]/organisation"
+    },
+    {
+      "file": "apps/web/app/[locale]/organisation/rattachements/page.tsx",
+      "route": "/[locale]/organisation/rattachements"
+    },
+    {
+      "file": "apps/web/app/[locale]/organisation/roles/page.tsx",
+      "route": "/[locale]/organisation/roles"
+    },
+    {
+      "file": "apps/web/app/[locale]/rejoindre-reseau/page.tsx",
+      "route": "/[locale]/rejoindre-reseau"
+    },
+    {
+      "file": "apps/web/app/[locale]/securite/compte/page.tsx",
+      "route": "/[locale]/securite/compte"
+    },
+    {
+      "file": "apps/web/app/[locale]/securite/sessions/page.tsx",
+      "route": "/[locale]/securite/sessions"
+    },
+    {
+      "file": "apps/web/app/[locale]/signatures/preparation/page.tsx",
+      "route": "/[locale]/signatures/preparation"
+    },
+    {
+      "file": "apps/web/app/[locale]/signatures/[envelopeId]/preparation/page.tsx",
+      "route": "/[locale]/signatures/[envelopeId]/preparation"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/achats/page.tsx",
+      "route": "/[locale]/sous-traitant/achats"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/consultations/page.tsx",
+      "route": "/[locale]/sous-traitant/consultations"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/consultations/[consultationId]/page.tsx",
+      "route": "/[locale]/sous-traitant/consultations/[consultationId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/contrats/page.tsx",
+      "route": "/[locale]/sous-traitant/contrats"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/contrats/[contractId]/page.tsx",
+      "route": "/[locale]/sous-traitant/contrats/[contractId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/devis/nouveau/page.tsx",
+      "route": "/[locale]/sous-traitant/devis/nouveau"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/devis/page.tsx",
+      "route": "/[locale]/sous-traitant/devis"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/devis/[quoteId]/apercu/page.tsx",
+      "route": "/[locale]/sous-traitant/devis/[quoteId]/apercu"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/devis/[quoteId]/page.tsx",
+      "route": "/[locale]/sous-traitant/devis/[quoteId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/devis/[quoteId]/revision/page.tsx",
+      "route": "/[locale]/sous-traitant/devis/[quoteId]/revision"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/documents/page.tsx",
+      "route": "/[locale]/sous-traitant/documents"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/documents/[documentId]/page.tsx",
+      "route": "/[locale]/sous-traitant/documents/[documentId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/entreprise/contrat/page.tsx",
+      "route": "/[locale]/sous-traitant/entreprise/contrat"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/entreprise/page.tsx",
+      "route": "/[locale]/sous-traitant/entreprise"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/facturation/commissions/page.tsx",
+      "route": "/[locale]/sous-traitant/facturation/commissions"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/facturation/echeancier/page.tsx",
+      "route": "/[locale]/sous-traitant/facturation/echeancier"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/facturation/factures-matricia/page.tsx",
+      "route": "/[locale]/sous-traitant/facturation/factures-matricia"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/facturation/page.tsx",
+      "route": "/[locale]/sous-traitant/facturation"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/facturation/pre-releve/page.tsx",
+      "route": "/[locale]/sous-traitant/facturation/pre-releve"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/facturation/[invoiceId]/page.tsx",
+      "route": "/[locale]/sous-traitant/facturation/[invoiceId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/identite/page.tsx",
+      "route": "/[locale]/sous-traitant/identite"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/litiges/page.tsx",
+      "route": "/[locale]/sous-traitant/litiges"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/litiges/[caseId]/page.tsx",
+      "route": "/[locale]/sous-traitant/litiges/[caseId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/marketing/page.tsx",
+      "route": "/[locale]/sous-traitant/marketing"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/messages/page.tsx",
+      "route": "/[locale]/sous-traitant/messages"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/messages/[threadId]/page.tsx",
+      "route": "/[locale]/sous-traitant/messages/[threadId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/missions/page.tsx",
+      "route": "/[locale]/sous-traitant/missions"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/missions/[missionId]/page.tsx",
+      "route": "/[locale]/sous-traitant/missions/[missionId]"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/mode-client/page.tsx",
+      "route": "/[locale]/sous-traitant/mode-client"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/parametres/page.tsx",
+      "route": "/[locale]/sous-traitant/parametres"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/planning/page.tsx",
+      "route": "/[locale]/sous-traitant/planning"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/qualification/certifications/page.tsx",
+      "route": "/[locale]/sous-traitant/qualification/certifications"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/qualification/page.tsx",
+      "route": "/[locale]/sous-traitant/qualification"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/questionnaires/page.tsx",
+      "route": "/[locale]/sous-traitant/questionnaires"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/reputation/page.tsx",
+      "route": "/[locale]/sous-traitant/reputation"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/services/page.tsx",
+      "route": "/[locale]/sous-traitant/services"
+    },
+    {
+      "file": "apps/web/app/[locale]/sous-traitant/[...slug]/page.tsx",
+      "route": "/[locale]/sous-traitant/[...slug]"
+    },
+    {
+      "file": "apps/web/app/[locale]/tableau-de-bord/page.tsx",
+      "route": "/[locale]/tableau-de-bord"
+    }
+  ],
+  "pages": 222,
+  "routeCounts": {
+    "administration": 71,
+    "client": 39,
+    "sous-traitant": 37,
+    "franchise": 38
+  },
+  "apiRoutes": [
+    "apps/web/app/api/admin/messages/attachments/[attachmentId]/route.ts",
+    "apps/web/app/api/admin/privacy/exports/[requestId]/route.ts",
+    "apps/web/app/api/admin/privacy/packages/[packageId]/files/[entryId]/route.ts",
+    "apps/web/app/api/admin/privacy/packages/[packageId]/uploads/[uploadId]/route.ts",
+    "apps/web/app/api/client/assistance/[requestId]/documents/[documentId]/route.ts",
+    "apps/web/app/api/client/billing/documents/[documentId]/route.ts",
+    "apps/web/app/api/client/diagnostics/[runId]/report/route.ts",
+    "apps/web/app/api/client/disputes/evidence/[evidenceId]/route.ts",
+    "apps/web/app/api/client/documents/[documentId]/route.ts",
+    "apps/web/app/api/finance/cost-proofs/uploads/[uploadId]/route.ts",
+    "apps/web/app/api/finance/cost-proofs/[id]/route.ts",
+    "apps/web/app/api/franchise/control-reports/[reportId]/route.ts",
+    "apps/web/app/api/health/route.ts",
+    "apps/web/app/api/internal/metrics/route.ts",
+    "apps/web/app/api/internal/outbox/route.ts",
+    "apps/web/app/api/internal-messages/attachments/[attachmentId]/route.ts",
+    "apps/web/app/api/marketing/cta/[token]/route.ts",
+    "apps/web/app/api/marketing/media-assets/route.ts",
+    "apps/web/app/api/payments/credit-packs/intents/route.ts",
+    "apps/web/app/api/payments/credit-packs/paypal/capture/route.ts",
+    "apps/web/app/api/payments/intents/route.ts",
+    "apps/web/app/api/payments/native-review/route.ts",
+    "apps/web/app/api/payments/paypal/capture/route.ts",
+    "apps/web/app/api/privacy/files/uploads/[uploadId]/route.ts",
+    "apps/web/app/api/privacy/responses/[responseId]/files/[fileId]/route.ts",
+    "apps/web/app/api/privacy/responses/[responseId]/route.ts",
+    "apps/web/app/api/provider/billing/[kind]/[documentId]/route.ts",
+    "apps/web/app/api/provider/consultations/[invitationId]/documents/[documentId]/route.ts",
+    "apps/web/app/api/provider/delivery-proofs/[proofId]/route.ts",
+    "apps/web/app/api/provider/disputes/evidence/[evidenceId]/route.ts",
+    "apps/web/app/api/provider/documents/[documentId]/route.ts",
+    "apps/web/app/api/provider/finance/declarations/[id]/proof/route.ts",
+    "apps/web/app/api/provider/payment-proofs/[proofId]/route.ts",
+    "apps/web/app/api/provider/quotes/[quoteId]/draft/route.ts",
+    "apps/web/app/api/provider/receipt-proofs/[proofId]/route.ts",
+    "apps/web/app/api/quotes/attachments/[attachmentId]/route.ts",
+    "apps/web/app/api/readiness/route.ts",
+    "apps/web/app/api/signatures/amendments/[amendmentId]/documents/route.ts",
+    "apps/web/app/api/signatures/contracts/[contractId]/documents/route.ts",
+    "apps/web/app/api/signatures/yousign/envelopes/[envelopeId]/documents/[documentId]/route.ts",
+    "apps/web/app/api/signatures/yousign/envelopes/[envelopeId]/preparation/route.ts",
+    "apps/web/app/api/signatures/yousign/signers/[signerId]/configuration/route.ts",
+    "apps/web/app/api/webhooks/email/resend/route.ts",
+    "apps/web/app/api/webhooks/payments/cmi/route.ts",
+    "apps/web/app/api/webhooks/payments/demo/route.ts",
+    "apps/web/app/api/webhooks/payments/paypal/route.ts",
+    "apps/web/app/api/webhooks/yousign/route.ts",
+    "apps/web/app/api/workers/delivery-proof-scans/route.ts",
+    "apps/web/app/api/workers/domain-schedulers/route.ts",
+    "apps/web/app/api/workers/finance-cost-scans/route.ts",
+    "apps/web/app/api/workers/franchise-digests/route.ts",
+    "apps/web/app/api/workers/internal-message-attachment-scans/route.ts",
+    "apps/web/app/api/workers/marketing-attribution/route.ts",
+    "apps/web/app/api/workers/marketing-calendars/route.ts",
+    "apps/web/app/api/workers/marketing-content/route.ts",
+    "apps/web/app/api/workers/marketing-frequency/route.ts",
+    "apps/web/app/api/workers/marketing-media/route.ts",
+    "apps/web/app/api/workers/marketing-publications/route.ts",
+    "apps/web/app/api/workers/marketing-trends/route.ts",
+    "apps/web/app/api/workers/notifications/route.ts",
+    "apps/web/app/api/workers/privacy-file-scans/route.ts",
+    "apps/web/app/api/workers/provider-document-scans/route.ts",
+    "apps/web/app/api/workers/subscription-credit-grants/route.ts",
+    "apps/web/app/[locale]/administration/clients/export/route.ts",
+    "apps/web/app/[locale]/administration/entreprises/export/route.ts",
+    "apps/web/app/[locale]/administration/export/[space]/route.ts",
+    "apps/web/app/[locale]/administration/utilisateurs/export/route.ts",
+    "apps/web/app/[locale]/auth/callback/route.ts",
+    "apps/web/app/[locale]/franchise/documents/[documentId]/telecharger/route.ts",
+    "apps/web/app/[locale]/franchise/finance/releves/[closureId]/export/route.ts"
+  ],
+  "packages": [
+    {
+      "file": "apps/web/package.json",
+      "name": "@matricia/web",
+      "scripts": {
+        "dev": "next dev --port 5173",
+        "build": "next build",
+        "start": "next start --port 5173",
+        "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+      },
+      "dependencies": [
+        "@base-ui/react",
+        "@fontsource/noto-sans-arabic",
+        "@hookform/resolvers",
+        "@matricia/infrastructure",
+        "@matricia/observability",
+        "@matricia/signature-v41",
+        "@matricia/ui",
+        "@next/env",
+        "@shadcn/react",
+        "@supabase/ssr",
+        "@supabase/supabase-js",
+        "class-variance-authority",
+        "clsx",
+        "cmdk",
+        "date-fns",
+        "embla-carousel-react",
+        "input-otp",
+        "lucide-react",
+        "next",
+        "next-themes",
+        "pdf-lib",
+        "pdfmake",
+        "radix-ui",
+        "react",
+        "react-day-picker",
+        "react-dom",
+        "react-hook-form",
+        "react-resizable-panels",
+        "recharts",
+        "server-only",
+        "sonner",
+        "tailwind-merge",
+        "vaul",
+        "zod"
+      ]
+    },
+    {
+      "file": "apps/worker/package.json",
+      "name": "@matricia/worker",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "start": "tsx src/main.ts"
+      },
+      "dependencies": [
+        "@matricia/observability",
+        "@supabase/supabase-js"
+      ]
+    },
+    {
+      "file": "packages/application/package.json",
+      "name": "@matricia/application",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/config/package.json",
+      "name": "@matricia/config",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/contracts/package.json",
+      "name": "@matricia/contracts",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/domain/package.json",
+      "name": "@matricia/domain",
+      "scripts": {
+        "test": "vitest run",
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/forms/package.json",
+      "name": "@matricia/forms",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/infrastructure/package.json",
+      "name": "@matricia/infrastructure",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/legal-v41/package.json",
+      "name": "@matricia/legal-v41",
+      "scripts": {
+        "test": "vitest run",
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/observability/package.json",
+      "name": "@matricia/observability",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/question-engine/package.json",
+      "name": "@matricia/question-engine",
+      "scripts": {
+        "test": "vitest run",
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/resilience-v41/package.json",
+      "name": "@matricia/resilience-v41",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/signature-v41/package.json",
+      "name": "@matricia/signature-v41",
+      "scripts": {
+        "test": "vitest run",
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/testkit/package.json",
+      "name": "@matricia/testkit",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/ui/package.json",
+      "name": "@matricia/ui",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+      },
+      "dependencies": []
+    },
+    {
+      "file": "packages/workflows/package.json",
+      "name": "@matricia/workflows",
+      "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --passWithNoTests"
+      },
+      "dependencies": []
+    }
+  ],
+  "testFiles": {
+    "web": 689,
+    "worker": 17,
+    "e2e": 96,
+    "sql": 383
+  },
+  "migrations": {
+    "fileCount": 607,
+    "uniqueVersions": 606,
+    "locallyAppliedVersionCount": 603,
+    "duplicateVersions": [
+      {
+        "version": "20261118160000",
+        "paths": [
+          "supabase/migrations/20261118160000_ensure_demo_admin_platform_role_v1.sql",
+          "supabase/migrations/20261118160000_reset_demo_box_network_v1.sql"
+        ]
+      }
+    ],
+    "notAppliedInLocalSnapshot": [
+      {
+        "version": "20261118161000",
+        "paths": [
+          "supabase/migrations/20261118161000_ensure_demo_regional_actor_v1.sql"
+        ]
+      },
+      {
+        "version": "20261118170000",
+        "paths": [
+          "supabase/migrations/20261118170000_reset_demo_workspace_v1.sql"
+        ]
+      },
+      {
+        "version": "20261118180000",
+        "paths": [
+          "supabase/migrations/20261118180000_admin_fiche_membership_identity_v1.sql"
+        ]
+      }
+    ]
+  },
+  "requirements": [
+    {
+      "id": "MAT-FUNC-001",
+      "name": "Passeport Matricia unique",
+      "acceptance": "Organisation unique multi-rôles; données communes réutilisées.",
+      "declaredStatus": "VERIFIED",
+      "documentationRow": "| MAT-FUNC-001 | VERIFIED | [Matricia_GOLD_MASTER_PROMPT_UNIQUE_CODEX_V4_FINAL_2026-09-10.md, apps/web/app/[locale]/organisation/actions.ts, apps/web/app/[locale]/invitations/actions.ts, supabase/migrations/20260911001400_identity_workflows.sql, supabase/migrations/20260911001900_identity_role_requests.sql, supabase/migrations/20260911002000_invitation_decline.sql] | [apps/web/app/[locale]/organisation/actions.test.ts, apps/web/app/[locale]/invitations/actions.test.ts, supabase/tests/0010_p04_identity_workflows.test.sql, supabase/tests/0013_p04_role_requests.test.sql, supabase/tests/0014_p04_invitation_decline.test.sql, tests/e2e/p04-identity.spec.ts] | [docs/evidence/p04/identity-security-completion.md] | auth_identity_agent | APPROVED:requirements_traceability_auditor:docs/evidence/p04/identity-security-completion.md |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-002",
+      "name": "Santé globale",
+      "acceptance": "Score global + scores bibliothèques + anomalies + évolution.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-002 | IN_PROGRESS | [supabase/migrations/20260912007200_diagnostics_opportunities.sql, apps/web/app/[locale]/client/diagnostics/page.tsx] | [supabase/tests/0054_p07_diagnostics_opportunities.test.sql, tests/e2e/p21-questionnaires-diagnostics.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-003",
+      "name": "Assistant IA",
+      "acceptance": "Assistant contextuel; aucune sanction/transaction critique autonome.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-003 | IN_PROGRESS | [supabase/migrations/20260912010000_assisted_intelligence_quality.sql, apps/web/app/[locale]/client/diagnostics/assistance/page.tsx] | [supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0084_assistance_role_authorization_hardening.test.sql] | [docs/evidence/atomic/mat-func-002-023.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-004",
+      "name": "Détection proactive",
+      "acceptance": "Changements de profil déclenchent suggestions/réévaluations.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-004 | IN_PROGRESS | [supabase/migrations/20260912010000_assisted_intelligence_quality.sql, supabase/migrations/20260912010500_assisted_intelligence_runtime_hardening.sql] | [supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0079_assisted_intelligence_runtime_hardening.test.sql] | [docs/evidence/atomic/mat-func-002-023.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-005",
+      "name": "Diagnostic continu",
+      "acceptance": "Questions expirantes et revalidation légère.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-005 | IN_PROGRESS | [supabase/migrations/20260911003700_question_engine_persistence.sql, supabase/migrations/20260912007200_diagnostics_opportunities.sql] | [supabase/tests/0025_p06_question_engine_persistence.test.sql, supabase/tests/0054_p07_diagnostics_opportunities.test.sql] | [docs/evidence/atomic/mat-func-002-023.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-006",
+      "name": "Actions requises",
+      "acceptance": "File universelle de tâches utilisateur.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-006 | IN_PROGRESS | [supabase/migrations/20260912007100_admin_command_center.sql, apps/web/app/[locale]/actions/page.tsx] | [supabase/tests/0053_p17_admin_command_center.test.sql, tests/e2e/p22-universal-actions.spec.ts, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-002-023.md] | admin_command_center_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-007",
+      "name": "Inbox universelle",
+      "acceptance": "Messagerie liée aux objets métier.",
+      "declaredStatus": "VERIFIED",
+      "documentationRow": "| MAT-FUNC-007 | VERIFIED | [supabase/migrations/20260912014000_internal_object_messaging.sql, apps/web/modules/shared/lib/internal-messaging/server-repository.ts, apps/web/app/[locale]/messagerie/page.tsx, apps/web/app/[locale]/messagerie/actions.ts] | [supabase/tests/0154_messaging_comparison_functional.test.sql, tests/e2e/final-core-product.spec.ts] | [docs/evidence/0154-messaging-comparison-functional-run.json, docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-007-013-018.md] | notifications_agent | APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-007-013-018.md |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-008",
+      "name": "Assistant création besoin",
+      "acceptance": "Texte libre → service → questions manquantes.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-008 | IN_PROGRESS | [supabase/migrations/20260912010000_assisted_intelligence_quality.sql, docs/specs/sections/catalog-question-engine.md] | [supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0082_assistance_pii_minimization_hardening.test.sql] | [docs/evidence/atomic/mat-func-002-023.md] | rfq_matching_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-009",
+      "name": "Solutions multiples",
+      "acceptance": "Essential/Standard/Advanced pour une même anomalie.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-009 | IN_PROGRESS | [supabase/migrations/20260912010100_solution_bundles_benchmarks.sql, apps/web/app/[locale]/client/diagnostics/solutions/page.tsx] | [supabase/tests/0075_solution_bundles_benchmarks.test.sql, tests/e2e/p21-questionnaires-diagnostics.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-010",
+      "name": "Bundles multi-bibliothèques",
+      "acceptance": "Ensembles de services pour projet transversal.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-010 | IN_PROGRESS | [supabase/migrations/20260912010100_solution_bundles_benchmarks.sql, supabase/migrations/20260912011600_benchmark_registry_and_bundle_concurrency.sql] | [supabase/tests/0075_solution_bundles_benchmarks.test.sql, supabase/tests/0085_benchmark_registry_and_bundle_concurrency.test.sql] | [docs/evidence/atomic/mat-func-002-023.md] | library_catalog_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-011",
+      "name": "Mode Projet",
+      "acceptance": "Projet avec budget, tâches, contrats et progression.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-011 | IN_PROGRESS | [supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, apps/web/app/[locale]/client/portefeuille/page.tsx] | [supabase/tests/0065_client_projects_budgets_calendar.test.sql, tests/e2e/p22-client-portfolio.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-012",
+      "name": "Budget annuel",
+      "acceptance": "Budget par année/bibliothèque/site/projet.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-012 | IN_PROGRESS | [supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, supabase/migrations/20260912009600_client_portfolio_integrity_hardening.sql] | [supabase/tests/0065_client_projects_budgets_calendar.test.sql, supabase/tests/0070_client_portfolio_integrity_hardening.test.sql] | [docs/evidence/atomic/mat-func-002-023.md] | client_onboarding_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-013",
+      "name": "Comparateur intelligent",
+      "acceptance": "Comparaison normalisée de devis.",
+      "declaredStatus": "VERIFIED",
+      "documentationRow": "| MAT-FUNC-013 | VERIFIED | [supabase/migrations/20260912006000_quotes_comparison.sql, apps/web/modules/client/data/rfq/server-repository.ts, apps/web/app/[locale]/client/demandes/[requestId]/comparaison/page.tsx, apps/web/modules/client/screens/demandes/comparison-panel.tsx] | [supabase/tests/0044_p07_quotes_comparison.test.sql, supabase/tests/0154_messaging_comparison_functional.test.sql, apps/web/modules/client/data/rfq/repository.test.ts, tests/e2e/final-core-product.spec.ts] | [docs/evidence/0154-messaging-comparison-functional-run.json, docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-007-013-018.md] | quote_agent | APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-007-013-018.md |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-014",
+      "name": "Complétude devis",
+      "acceptance": "Score + blocage champs obligatoires.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-014 | IN_PROGRESS | [supabase/migrations/20260912006000_quotes_comparison.sql, apps/web/modules/provider/screens/devis/quote-panel.tsx] | [supabase/tests/0044_p07_quotes_comparison.test.sql, tests/e2e/p23-provider-quotes.spec.ts, docs/evidence/atomic/mat-func-p1-remaining-surface-run.json, tests/e2e/mat-func-014-quote-completeness-smoke.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | quote_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-015",
+      "name": "Feedback non retenus",
+      "acceptance": "Classement personnel + amélioration anonymisée.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-015 | IN_PROGRESS | [supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql, supabase/migrations/20260912009800_provider_feedback_outbox_backfill.sql] | [supabase/tests/0066_provider_reputation_badges_favorites.test.sql, supabase/tests/0072_provider_feedback_outbox_backfill.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-002-023.md] | quote_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-016",
+      "name": "Réputation multidimensionnelle",
+      "acceptance": "Qualité/délai/conformité/réponse/satisfaction/finance.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-016 | IN_PROGRESS | [supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql, apps/web/app/[locale]/sous-traitant/reputation/page.tsx] | [supabase/tests/0066_provider_reputation_badges_favorites.test.sql, supabase/tests/0068_provider_feedback_privacy_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-002-023.md] | provider_qualification_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-017",
+      "name": "Badges",
+      "acceptance": "Badges calculés et versionnés.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-017 | IN_PROGRESS | [supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql] | [supabase/tests/0066_provider_reputation_badges_favorites.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-002-023.md] | provider_qualification_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-018",
+      "name": "Matching évolutif",
+      "acceptance": "Règles explicables et historisées.",
+      "declaredStatus": "VERIFIED",
+      "documentationRow": "| MAT-FUNC-018 | VERIFIED | [supabase/migrations/20260912005900_rfq_matching_foundation.sql, supabase/migrations/20260912015400_rfq_versioned_provider_eligibility.sql, apps/web/modules/client/data/rfq/server-repository.ts, apps/web/modules/client/screens/demandes/request-id/matching-history.tsx] | [supabase/tests/0043_p07_rfq_matching_foundation.test.sql, supabase/tests/0100_admin_revocation_and_rfq_versioned_eligibility.test.sql, apps/web/modules/client/data/rfq/repository.test.ts, apps/web/modules/client/screens/demandes/request-id/matching-history.test.tsx, tests/e2e/final-core-product.spec.ts] | [docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-007-013-018.md] | rfq_matching_agent | APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-007-013-018.md |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-019",
+      "name": "Rotation équitable",
+      "acceptance": "Éviter monopolisation lorsque candidats équivalents.",
+      "declaredStatus": "VERIFIED",
+      "documentationRow": "| MAT-FUNC-019 | VERIFIED | [supabase/migrations/20260912005900_rfq_matching_foundation.sql, supabase/migrations/20260912014800_rfq_fair_rotation_recurring_scheduler.sql, supabase/migrations/20260912015400_rfq_versioned_provider_eligibility.sql, apps/web/modules/client/data/rfq/server-repository.ts, apps/web/modules/client/screens/demandes/request-id/matching-history.tsx] | [supabase/tests/0043_p07_rfq_matching_foundation.test.sql, supabase/tests/0098_rfq_fair_rotation_recurring_scheduler.test.sql, supabase/tests/0155_matching_rotation_behavioral.test.sql, apps/web/modules/client/screens/demandes/request-id/matching-history.test.tsx, tests/e2e/final-core-product.spec.ts] | [docs/evidence/0155-matching-rotation-behavioral-run.json, docs/evidence/final-core-product-run.json, docs/evidence/traceability-signoff-019.md] | rfq_matching_agent | APPROVED:requirements_traceability_auditor:docs/evidence/traceability-signoff-019.md |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-020",
+      "name": "Capacité provider",
+      "acceptance": "AVAILABLE/LIMITED/FULL/PAUSED.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-020 | IN_PROGRESS | [supabase/migrations/20260912006200_provider_qualification.sql, apps/web/app/[locale]/sous-traitant/qualification/page.tsx] | [supabase/tests/0046_p09_provider_qualification.test.sql, docs/evidence/atomic/mat-func-020-capacity-smoke-run.json] | [docs/evidence/atomic/mat-func-002-023.md] | provider_qualification_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-021",
+      "name": "Calendrier central",
+      "acceptance": "Échéances devis, missions, factures, documents.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-021 | IN_PROGRESS | [supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, apps/web/app/[locale]/client/portefeuille/page.tsx] | [supabase/tests/0065_client_projects_budgets_calendar.test.sql, tests/e2e/p22-client-portfolio.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-022",
+      "name": "Jalons",
+      "acceptance": "Phases de mission validables.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-022 | IN_PROGRESS | [supabase/migrations/20260912006100_contracts_missions_core.sql, apps/web/modules/shared/lib/contracts-missions/model.ts] | [supabase/tests/0045_p08_contracts_missions_core.test.sql, docs/evidence/atomic/mat-func-p1-remaining-surface-run.json, tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-023",
+      "name": "Preuves de réalisation",
+      "acceptance": "Preuves obligatoires par service.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-023 | IN_PROGRESS | [supabase/migrations/20260912006100_contracts_missions_core.sql, supabase/migrations/20260912012500_assistance_purge_execution_hardening.sql] | [supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0125_delivery_proof_trusted_scan.test.sql, docs/evidence/atomic/mat-func-023-proof-scan-smoke-run.json, tests/e2e/mat-func-023-delivery-proof-scan-smoke.spec.ts] | [docs/evidence/atomic/mat-func-002-023.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-024",
+      "name": "Checklists",
+      "acceptance": "Checklist versionnée par service.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-024 | IN_PROGRESS | [supabase/migrations/20260912006100_contracts_missions_core.sql, supabase/migrations/20260913015900_contract_mission_checklist_snapshot.sql] | [supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0104_contract_mission_checklist_snapshot.test.sql, docs/evidence/atomic/mat-func-p1-remaining-surface-run.json, tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts] | [docs/evidence/atomic/mat-func-024-045.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-025",
+      "name": "Réception objective",
+      "acceptance": "Validation critère par critère.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-025 | IN_PROGRESS | [supabase/migrations/20260912006100_contracts_missions_core.sql, apps/web/modules/client/screens/missions/actions.ts] | [supabase/tests/0045_p08_contracts_missions_core.test.sql, apps/web/modules/client/screens/missions/actions.test.ts, docs/evidence/atomic/mat-func-p1-remaining-surface-run.json, tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts] | [docs/evidence/atomic/mat-func-024-045.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-026",
+      "name": "Avenant rapide",
+      "acceptance": "Demande supplémentaire → prix/délai/livrables.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-026 | IN_PROGRESS | [supabase/migrations/20260912006100_contracts_missions_core.sql, supabase/migrations/20260912011800_assistance_null_input_retention.sql] | [supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0118_contract_amendment_activation.test.sql, docs/evidence/atomic/mat-func-p1-remaining-surface-run.json, tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts] | [docs/evidence/atomic/mat-func-024-045.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-027",
+      "name": "Versionnage complet",
+      "acceptance": "Historique immuable des objets critiques.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-027 | IN_PROGRESS | [supabase/migrations/20260910000400_financial_ledger.sql, supabase/migrations/20260912006100_contracts_missions_core.sql] | [supabase/tests/0003_immutable_ledgers.test.sql, supabase/tests/0045_p08_contracts_missions_core.test.sql, supabase/tests/0385_immutable_inventory_ledger_guard.test.sql] | [docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-027-immutable-inventory-run.json] | domain_modeler | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-028",
+      "name": "Coffre-fort documentaire",
+      "acceptance": "Documents privés, versionnés, réutilisables.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-028 | IN_PROGRESS | [supabase/migrations/20260911002900_client_compliance_documents.sql, supabase/migrations/20260912011900_benchmark_verified_value_binding.sql] | [supabase/tests/0020_p05_client_compliance_documents.test.sql, tests/e2e/p05-client-compliance.spec.ts, docs/evidence/atomic/mat-func-p1-remaining-surface-run.json, tests/e2e/mat-func-p1-remaining-surface-smoke.spec.ts] | [docs/evidence/atomic/mat-func-024-045.md] | privacy_data_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-029",
+      "name": "Expirations",
+      "acceptance": "Rappels et suspension ciblée.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-029 | IN_PROGRESS | [supabase/migrations/20260912006200_provider_qualification.sql, supabase/migrations/20260912007500_notifications_preferences_delivery.sql] | [supabase/tests/0046_p09_provider_qualification.test.sql, supabase/tests/0056_p17_notifications_preferences_delivery.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | notifications_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-030",
+      "name": "Centre financier unifié",
+      "acceptance": "Vue consolidée multi-rôles, ledgers séparés.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-030 | IN_PROGRESS | [supabase/migrations/20260910000400_financial_ledger.sql, supabase/migrations/20260910000500_credit_ledger.sql] | [supabase/tests/0003_immutable_ledgers.test.sql, supabase/tests/0004_financial_rpcs.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | provider_finance_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-031",
+      "name": "Prévision commissions",
+      "acceptance": "Accruals estimés avant facturation.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-031 | IN_PROGRESS | [supabase/migrations/20260912006300_provider_billing_reconciliation.sql, supabase/migrations/20260912008000_morocco_tax_engine.sql] | [supabase/tests/0047_p10_provider_billing_reconciliation.test.sql, supabase/tests/0060_p14_morocco_tax_engine.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | provider_finance_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-032",
+      "name": "Rapprochement paiements",
+      "acceptance": "Allocation plusieurs factures/paiements.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-032 | IN_PROGRESS | [supabase/migrations/20260912006300_provider_billing_reconciliation.sql] | [supabase/tests/0047_p10_provider_billing_reconciliation.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | payments_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-033",
+      "name": "Wallet crédits",
+      "acceptance": "Ledger crédits complet.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-033 | IN_PROGRESS | [supabase/migrations/20260910000500_credit_ledger.sql, supabase/migrations/20260912007300_boxes_credits_security.sql] | [supabase/tests/0055_p08_boxes_credits_security.test.sql, supabase/tests/0057_p08_credit_wallet_client_admin_rls.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | boxes_credits_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-034",
+      "name": "Récompenses",
+      "acceptance": "Règles bonus paramétrables.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-034 | IN_PROGRESS | [supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009700_rewards_referral_audience_hardening.sql] | [supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0071_rewards_referral_audience_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | boxes_credits_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-035",
+      "name": "Parrainage",
+      "acceptance": "Liens et conversion traçables.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-035 | IN_PROGRESS | [supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009900_referral_conversion_anti_oracle.sql] | [supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0073_referral_conversion_anti_oracle.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | subscription_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-036",
+      "name": "CRM franchisé",
+      "acceptance": "Prospects/clients/providers et activité.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-036 | IN_PROGRESS | [supabase/migrations/20260912007900_franchise_crm_performance.sql, supabase/migrations/20260912008700_franchise_crm_security_hardening.sql] | [supabase/tests/0059_p10_franchise_crm_performance.test.sql, supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | franchise_governance_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-037",
+      "name": "Pipeline franchisé",
+      "acceptance": "Étapes de conversion standardisées.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-037 | IN_PROGRESS | [supabase/migrations/20260912007900_franchise_crm_performance.sql] | [supabase/tests/0059_p10_franchise_crm_performance.test.sql, supabase/tests/0063_p10_franchise_crm_security_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | franchise_governance_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-038",
+      "name": "Relances automatiques",
+      "acceptance": "Rappels par règles et délais.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-038 | IN_PROGRESS | [supabase/migrations/20260912014100_franchise_followup_scheduler.sql] | [supabase/tests/0059_p10_franchise_crm_performance.test.sql, supabase/tests/0383_franchise_followup_lease_retry_dead_letter.test.sql] | [docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-038-sql-relance-run.json] | notifications_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-039",
+      "name": "Modèles communication",
+      "acceptance": "Templates FR/AR versionnés.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-039 | IN_PROGRESS | [supabase/migrations/20260912007500_notifications_preferences_delivery.sql, supabase/migrations/20260912007600_notification_required_variables_hotfix.sql] | [supabase/tests/0056_p17_notifications_preferences_delivery.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | notifications_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-040",
+      "name": "Bibliothèque modèles",
+      "acceptance": "Clonage de questionnaires/clauses/checklists.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-040 | IN_PROGRESS | [supabase/migrations/20260911005100_question_builder_commands.sql] | [supabase/tests/0039_p06_question_builder_commands.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | question_engine_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-041",
+      "name": "IA qualité questionnaires",
+      "acceptance": "Ambiguïté, doublons, donnée déjà connue.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-041 | IN_PROGRESS | [supabase/migrations/20260912010000_assisted_intelligence_quality.sql, supabase/migrations/20260912011500_assistance_role_authorization_hardening.sql] | [supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0086_assistance_role_helper_acl.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | question_engine_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-042",
+      "name": "Détection doublons",
+      "acceptance": "Questions/services/anomalies similaires.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-042 | IN_PROGRESS | [supabase/migrations/20260912010000_assisted_intelligence_quality.sql, supabase/migrations/20260912010700_assisted_intelligence_deployment_reconciliation.sql] | [supabase/tests/0074_assisted_intelligence_quality.test.sql, supabase/tests/0084_assistance_role_authorization_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | question_engine_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-043",
+      "name": "Simulation questionnaire",
+      "acceptance": "Sandbox sans statistiques réelles.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-043 | IN_PROGRESS | [supabase/migrations/20260912008400_question_rule_advanced_engine.sql, supabase/migrations/20260912008800_question_rule_simulation_canonical_fix.sql] | [supabase/tests/0061_p06_question_rule_advanced_engine.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | question_engine_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-044",
+      "name": "Analyse abandons",
+      "acceptance": "Taux par section/question.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-044 | IN_PROGRESS | [supabase/migrations/20260912009000_questionnaire_sessions.sql, supabase/migrations/20260912014200_questionnaire_abandonment_analytics.sql] | [supabase/tests/0064_p06_questionnaire_sessions.test.sql, supabase/tests/0384_questionnaire_abandonment_analytics.test.sql] | [docs/evidence/atomic/mat-func-024-045.md, docs/evidence/atomic/mat-func-044-sql-abandons-run.json] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-045",
+      "name": "Benchmark anonymisé",
+      "acceptance": "Agrégats avec seuil minimal de groupe.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-045 | IN_PROGRESS | [supabase/migrations/20260912010100_solution_bundles_benchmarks.sql, supabase/migrations/20260912011900_benchmark_verified_value_binding.sql] | [supabase/tests/0075_solution_bundles_benchmarks.test.sql, supabase/tests/0088_benchmark_verified_value_binding.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-024-045.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-046",
+      "name": "Historique évolution",
+      "acceptance": "Snapshots scores/anomalies.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-046 | IN_PROGRESS | [supabase/migrations/20260912007200_diagnostics_opportunities.sql, supabase/migrations/20260912007900_franchise_crm_performance.sql] | [supabase/tests/0054_p07_diagnostics_opportunities.test.sql, supabase/tests/0059_p10_franchise_crm_performance.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-047",
+      "name": "ROI recommandations",
+      "acceptance": "Résultats seulement si base mesurable.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-047 | IN_PROGRESS | [supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009700_rewards_referral_audience_hardening.sql] | [supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0071_rewards_referral_audience_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | diagnostics_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-048",
+      "name": "Fournisseurs favoris",
+      "acceptance": "Favori réutilisable sous contrôle éligibilité.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-048 | IN_PROGRESS | [supabase/migrations/20260912009200_provider_reputation_badges_favorites.sql, supabase/migrations/20260912009400_provider_feedback_privacy_hardening.sql] | [supabase/tests/0066_provider_reputation_badges_favorites.test.sql, supabase/tests/0068_provider_feedback_privacy_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | rfq_matching_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-049",
+      "name": "Commander similaire",
+      "acceptance": "Cloner une ancienne demande dans une nouvelle.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-049 | IN_PROGRESS | [supabase/migrations/20260912010200_rfq_clone_recurring_services.sql, supabase/migrations/20260912010600_rfq_recurring_runtime_hardening.sql] | [supabase/tests/0076_rfq_clone_recurring_services.test.sql, supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | rfq_matching_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-050",
+      "name": "Prestations récurrentes",
+      "acceptance": "Cycles mensuels/trimestriels/annuels.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-050 | IN_PROGRESS | [supabase/migrations/20260912010200_rfq_clone_recurring_services.sql, supabase/migrations/20260912011300_recurring_plan_alias_compatibility.sql] | [supabase/tests/0076_rfq_clone_recurring_services.test.sql, supabase/tests/0080_rfq_recurring_runtime_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | contract_mission_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-051",
+      "name": "Multi-sites",
+      "acceptance": "Site_id dans diagnostics/demandes/missions/budgets.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-051 | IN_PROGRESS | [supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, supabase/migrations/20260921160000_client_site_and_rfq_open_entitlement.sql] | [supabase/tests/0065_client_projects_budgets_calendar.test.sql, supabase/tests/0165_client_site_and_rfq_open_entitlement.test.sql] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | auth_identity_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-052",
+      "name": "Approvals multi-utilisateurs",
+      "acceptance": "Workflow d’approbation paramétrable.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-052 | IN_PROGRESS | [supabase/migrations/20260911001900_identity_role_requests.sql, supabase/migrations/20260912007100_admin_command_center.sql] | [supabase/tests/0013_p04_role_requests.test.sql, supabase/tests/0053_p17_admin_command_center.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | auth_identity_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-053",
+      "name": "Centres de coûts",
+      "acceptance": "Rattachement dépenses/projets.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-053 | IN_PROGRESS | [supabase/migrations/20260912009100_client_projects_budgets_calendar.sql, supabase/migrations/20260912012200_franchise_digest_idempotency_scope.sql] | [supabase/tests/0065_client_projects_budgets_calendar.test.sql, supabase/tests/0122_typed_cost_center_financial_links.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | client_onboarding_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-054",
+      "name": "Mobile",
+      "acceptance": "Parcours critiques utilisables sur smartphone.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-054 | IN_PROGRESS | [apps/web/app/globals.css, packages/ui/src/index.ts] | [tests/e2e/p05-client-compliance.spec.ts, tests/e2e/p06-catalog.spec.ts, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | i18n_rtl_accessibility_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-055",
+      "name": "Autosave",
+      "acceptance": "Brouillons sauvegardés et conflits gérés.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-055 | IN_PROGRESS | [supabase/migrations/20260911003700_question_engine_persistence.sql] | [supabase/tests/0025_p06_question_engine_persistence.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | question_engine_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-056",
+      "name": "Progression",
+      "acceptance": "Étapes/complétude réelles.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-056 | IN_PROGRESS | [apps/web/modules/client/screens/spaces/boards.tsx] | [tests/e2e/p21-questionnaires-diagnostics.spec.ts, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | ux_information_architect | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-057",
+      "name": "Préremplissage",
+      "acceptance": "Réutiliser données vérifiées/récentes.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-057 | IN_PROGRESS | [supabase/migrations/20260912012400_assistance_purge_audit_correlation.sql] | [supabase/tests/0124_versioned_prefill_freshness.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | question_engine_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-058",
+      "name": "Aide contextuelle",
+      "acceptance": "Aide, exemple, pourquoi demandé.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-058 | IN_PROGRESS | [apps/web/modules/shared/lib/i18n/locale.ts] | [tests/e2e/p05-client-compliance.spec.ts, docs/evidence/atomic/mat-func-058-field-help-run.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | ux_information_architect | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-059",
+      "name": "FR/AR",
+      "acceptance": "Traductions natives et RTL.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-059 | IN_PROGRESS | [apps/web/modules/shared/lib/i18n/locale.ts] | [tests/e2e/p05-client-compliance.spec.ts, tests/e2e/p21-questionnaires-diagnostics.spec.ts, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | i18n_rtl_accessibility_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-060",
+      "name": "Langage simplifié",
+      "acceptance": "Texte technique + version client.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-060 | IN_PROGRESS | [apps/web/modules/shared/lib/i18n/locale.ts] | [tests/e2e/public-experience.spec.ts, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | i18n_rtl_accessibility_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-061",
+      "name": "Accessibilité",
+      "acceptance": "Clavier, focus, contraste, labels.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-061 | IN_PROGRESS | [packages/ui/src/index.ts] | [tests/e2e/p05-client-compliance.spec.ts, docs/evidence/atomic/mat-func-061-accessibility-run.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | i18n_rtl_accessibility_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-062",
+      "name": "Centre économies",
+      "acceptance": "Économies seulement sur bases vérifiables.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-062 | IN_PROGRESS | [supabase/migrations/20260912009300_rewards_referrals_roi_savings.sql, supabase/migrations/20260912009700_rewards_referral_audience_hardening.sql] | [supabase/tests/0067_rewards_referrals_roi_savings.test.sql, supabase/tests/0071_rewards_referral_audience_hardening.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | provider_finance_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-063",
+      "name": "Préférences notifications",
+      "acceptance": "Immédiat/digest/disabled par catégorie.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-063 | IN_PROGRESS | [supabase/migrations/20260912007500_notifications_preferences_delivery.sql, apps/web/app/[locale]/notifications/page.tsx] | [supabase/tests/0056_p17_notifications_preferences_delivery.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | notifications_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-064",
+      "name": "Résumé franchisé",
+      "acceptance": "Digest quotidien configurable.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-064 | IN_PROGRESS | [supabase/migrations/20260912010300_franchise_daily_digest.sql, supabase/migrations/20260912012600_franchise_digest_scheduler_bounding.sql] | [supabase/tests/0077_franchise_daily_digest.test.sql, supabase/tests/0092_franchise_digest_scheduler_bounding.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | notifications_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-065",
+      "name": "Résumé exécutif admin",
+      "acceptance": "À traiter aujourd’hui avant KPI.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-065 | IN_PROGRESS | [supabase/migrations/20260912007100_admin_command_center.sql, apps/web/app/[locale]/administration/command-center/page.tsx] | [supabase/tests/0053_p17_admin_command_center.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | admin_command_center_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-066",
+      "name": "Moteur exceptions",
+      "acceptance": "Cas hors workflow vers file admin.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-066 | IN_PROGRESS | [supabase/migrations/20260912007100_admin_command_center.sql, supabase/migrations/20260912008000_morocco_tax_engine.sql] | [supabase/tests/0053_p17_admin_command_center.test.sql, supabase/tests/0060_p14_morocco_tax_engine.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | admin_command_center_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-067",
+      "name": "Protection contournement",
+      "acceptance": "Contacts masqués et échanges internes avant sélection.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-067 | IN_PROGRESS | [supabase/migrations/20260912005900_rfq_matching_foundation.sql, supabase/migrations/20260912014000_internal_object_messaging.sql] | [supabase/tests/0043_p07_rfq_matching_foundation.test.sql, supabase/tests/0154_messaging_comparison_functional.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | rfq_matching_agent | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    },
+    {
+      "id": "MAT-FUNC-068",
+      "name": "Détection abus",
+      "acceptance": "Risk flags sans sanction automatique.",
+      "declaredStatus": "IN_PROGRESS",
+      "documentationRow": "| MAT-FUNC-068 | IN_PROGRESS | [supabase/migrations/20260912007100_admin_command_center.sql, supabase/migrations/20260913017700_transversal_abuse_detection.sql] | [supabase/tests/0053_p17_admin_command_center.test.sql, supabase/tests/0123_transversal_abuse_detection.test.sql, docs/evidence/atomic/mat-func-surface-smoke-batch-2026-11-09.json] | [docs/evidence/atomic/mat-func-046-068-marketing.md] | security_architect | PENDING:visa-independant |",
+      "statusThisAudit": "Not certified end-to-end; use executed evidence and requirement matrix"
+    }
+  ],
+  "advisories": [
+    {
+      "id": "GHSA-mfr8-8qww-v76h",
+      "title": "Next.js: Information disclosure across root params when a 'use cache' function is called through unstable_cache()",
+      "severity": "moderate",
+      "affected": ">=16.3.0 <=16.4.4",
+      "patched": ">=16.4.5",
+      "url": "https://github.com/advisories/GHSA-mfr8-8qww-v76h",
+      "references": "- https://github.com/vercel/next.js/security/advisories/GHSA-mfr8-8qww-v76h\n- https://github.com/vercel/next.js/commit/d605874e5a4b8b6b7dca1b6e07bcabb44d0e2e5b\n- https://github.com/vercel/next.js/releases/tag/v16.4.5\n- https://nextjs.org/blog/november-2026-security-release\n- https://github.com/advisories/GHSA-mfr8-8qww-v76h"
+    },
+    {
+      "id": "GHSA-vc7v-qv4w-wrv8",
+      "title": "Next.js: Cache leak across root param values in nested 'use cache' functions via delayed inner stream metadata",
+      "severity": "moderate",
+      "affected": ">=16.2.0 <=16.4.4",
+      "patched": ">=16.4.5",
+      "url": "https://github.com/advisories/GHSA-vc7v-qv4w-wrv8",
+      "references": "- https://github.com/vercel/next.js/security/advisories/GHSA-vc7v-qv4w-wrv8\n- https://nvd.nist.gov/vuln/detail/CVE-2026-119351\n- https://github.com/vercel/next.js/commit/80c96ede21798d4ad54da12fe50d5b00a09b06e3\n- https://github.com/vercel/next.js/releases/tag/v16.4.5\n- https://nextjs.org/blog/november-2026-security-release\n- https://github.com/advisories/GHSA-vc7v-qv4w-wrv8"
+    }
+  ]
+}

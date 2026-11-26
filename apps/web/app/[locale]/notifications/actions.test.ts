@@ -16,7 +16,7 @@ describe("notification failure truth",()=>{
   expect(await markNotificationRead(idle,validRead())).toEqual({status:"error",reason:"FORBIDDEN"});
  });
  it("reports optimistic-concurrency conflict without a false saved state",async()=>{
-  mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"40001",message:"STALE_NOTIFICATION"}});
+  mocks.rpc.mockResolvedValueOnce({data:null,error:{code:"PT409",message:"STALE_NOTIFICATION"}});
   expect(await markNotificationRead(idle,validRead())).toEqual({status:"error",reason:"CONFLICT"});
  });
 });

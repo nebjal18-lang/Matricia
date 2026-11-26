@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "suite": "client-referrals",
+  "environment": "development-local-docker",
+  "runtimeMode": "isolated-local-docker",
+  "completedAt": "2026-11-23T22:02:40.064Z",
+  "status": "PASSED",
+  "failure": null,
+  "browser": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": [],
+    "startedAt": "2026-11-23T22:02:17.825Z",
+    "finishedAt": "2026-11-23T22:02:39.058Z"
+  },
+  "cleanupVerified": true,
+  "proof": {
+    "realUiClientReferralLinks": 4,
+    "realUiConsentedClaims": 4,
+    "realNavigableInvitationLinks": 4,
+    "casablancaExpiryVerified": true,
+    "referralReplayVerified": true,
+    "consentRequired": true,
+    "selfReferralDenied": true,
+    "conversionCapEnforced": true,
+    "foreignConversionHidden": true,
+    "correlatedReferralAuditOutbox": true,
+    "noAutomaticVerificationActivationOrBonus": true,
+    "frArDesktop360Accessibility": true,
+    "stage": "native-proof",
+    "responseCode": null,
+    "responseLabel": null,
+    "failureLocations": []
+  }
+}

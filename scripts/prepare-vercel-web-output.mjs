@@ -46,7 +46,7 @@ export async function prepareVercelWebOutput(repositoryRoot) {
     // Only .next is disposable build output; existing public/dependencies survive.
     if (alias.existing) await rm(alias.target, { recursive: true, force: true });
     await mkdir(dirname(alias.target), { recursive: true });
-    await symlink(relative(dirname(alias.target), alias.source), alias.target, 'dir');
+    await symlink(process.platform === 'win32' ? resolve(alias.source) : relative(dirname(alias.target), alias.source), alias.target, process.platform === 'win32' ? 'junction' : 'dir');
   }
   return { aliases: aliases.length, project: 'packages/domain', output: 'apps/web/.next' };
 }

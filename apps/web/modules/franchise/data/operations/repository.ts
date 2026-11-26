@@ -37,7 +37,7 @@ function rows<T>(schema: z.ZodType<T>, value: unknown): T[] {
   return parsed.data;
 }
 
-export async function loadFranchiseOperations(input: { libraryId: string; operatorOrganizationId?: string | null;franchiseId?:string|null }): Promise<FranchiseOperationsSnapshot> {
+export async function loadFranchiseOperations(input: { libraryId: string; operatorOrganizationId?: string | null | undefined;franchiseId?:string|null|undefined }): Promise<FranchiseOperationsSnapshot> {
   if (!id.safeParse(input.libraryId).success || !id.safeParse(input.franchiseId).success) throw new Error("FRANCHISE_OPERATIONS_SCOPE_REQUIRED");
   const client = await getSupabaseServerClient();
   const { data: auth, error: authError } = await client.auth.getUser();

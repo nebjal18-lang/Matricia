@@ -41,7 +41,7 @@ set local role authenticated;
 insert into er263 values('plan',public.submit_dsr_erasure_plan_v1((select(v->>'draft_id')::uuid from er263 where k='draft'),(select v->>'catalog_hash'from er263 where k='draft')));
 select throws_ok($$select public.review_dsr_erasure_plan_v1((select(v->>'plan_id')::uuid from er263 where k='plan'),(select v->>'content_hash'from er263 where k='plan'),true,true,'TEST_ONLY_263_REVIEW','TEST independent review required')$$,'42501','DSR_ERASURE_INDEPENDENT_REVIEW_REQUIRED','policy author cannot approve their own erasure plan');
 select pg_temp.actor263(2);
-select throws_ok($$select public.review_dsr_erasure_plan_v1((select(v->>'plan_id')::uuid from er263 where k='plan'),NULL,true,true,'TEST_ONLY_263_REVIEW','TEST null CAS is forbidden')$$,'40001','STALE_DSR_ERASURE_PLAN','null CAS cannot bypass plan binding');
+select throws_ok($$select public.review_dsr_erasure_plan_v1((select(v->>'plan_id')::uuid from er263 where k='plan'),NULL,true,true,'TEST_ONLY_263_REVIEW','TEST null CAS is forbidden')$$,'PT409','STALE_DSR_ERASURE_PLAN','null CAS cannot bypass plan binding');
 select throws_ok($$select public.review_dsr_erasure_plan_v1((select(v->>'plan_id')::uuid from er263 where k='plan'),(select v->>'content_hash'from er263 where k='plan'),true,false,'TEST_ONLY_263_REVIEW','TEST explicit review required')$$,'22023','DSR_ERASURE_DOCUMENTED_POLICY_REVIEW_REQUIRED','approval requires explicit complete policy review');
 insert into er263 values('review',public.review_dsr_erasure_plan_v1((select(v->>'plan_id')::uuid from er263 where k='plan'),(select v->>'content_hash'from er263 where k='plan'),true,true,'TEST_ONLY_263_REVIEW','TEST synthetic policy review, not a real legal approval'));
 reset role;

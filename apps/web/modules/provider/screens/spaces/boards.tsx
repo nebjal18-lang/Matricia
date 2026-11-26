@@ -466,7 +466,7 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
   );
 }
 
-export function ServicesBoard({ locale, query, services, domain,regions,interventionModes }: { locale: Locale; query: string; services?: readonly ProviderService[]; domain?: string;regions?:readonly string[];interventionModes?:readonly InterventionMode[] }) {
+export function ServicesBoard({ locale, query, services, domain,regions,interventionModes }: { locale: Locale; query: string; services?: readonly ProviderService[]; domain?: string | undefined;regions?:readonly string[] | undefined;interventionModes?:readonly InterventionMode[] | undefined }) {
   const c = providerCopy(locale);
   const demo = demoProviderSpaces(locale, query);
   const live = services !== undefined || !canApplyProviderSpaceDemo();
@@ -611,7 +611,7 @@ export function ServicesBoard({ locale, query, services, domain,regions,interven
   );
 }
 
-export function ConsultationsBoard({ locale, query, rows, empty, tab }: { locale: Locale; query: string; rows?: readonly ProviderListRow[]; empty?: string; tab?: string }) {
+export function ConsultationsBoard({ locale, query, rows, empty, tab }: { locale: Locale; query: string; rows?: readonly ProviderListRow[]; empty?: string; tab?: string | undefined }) {
   const c = providerCopy(locale);
   const demo = demoProviderSpaces(locale, query);
   const list = rows ?? (canApplyProviderSpaceDemo() ? demo.consultRows : []);
@@ -681,7 +681,7 @@ export function ConsultationsBoard({ locale, query, rows, empty, tab }: { locale
   );
 }
 
-export function QuotesBoard({ locale, query, rows, empty, tab }: { locale: Locale; query: string; rows?: readonly ProviderListRow[]; empty?: string; tab?: string }) {
+export function QuotesBoard({ locale, query, rows, empty, tab }: { locale: Locale; query: string; rows?: readonly ProviderListRow[]; empty?: string; tab?: string | undefined }) {
   const c = providerCopy(locale);
   const demo = demoProviderSpaces(locale, query);
   const list = rows ?? (canApplyProviderSpaceDemo() ? demo.quotes : []);
@@ -705,7 +705,7 @@ export function QuotesBoard({ locale, query, rows, empty, tab }: { locale: Local
               </nav>
             </div>
           </header>
-          <div className="client-table-wrap" id="devis">
+          <div className="client-table-wrap" id="devis" role="region" aria-label={c.proposals} tabIndex={0}>
             <table className="client-space-table">
               <thead><tr><th>{c.consultation}</th><th>{c.scope}</th><th>{c.status}</th><th>{c.nextAction}</th><th>{c.action}</th></tr></thead>
               <tbody>
@@ -850,8 +850,8 @@ export function ProviderDocumentsBoard({
   loadError?: boolean;
   search?: string;
   view?: "all" | "qualification";
-  page?:number;
-  hasMore?:boolean;
+  page?:number|undefined;
+  hasMore?:boolean|undefined;
 }) {
   const c = providerCopy(locale);
   const qualifyHref = `/${locale}/sous-traitant/qualification${query}#documents`;

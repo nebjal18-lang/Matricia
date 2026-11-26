@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "completedAt": "2026-11-23T22:26:50.180Z",
+  "environment": "development-local-docker",
+  "localProof": {
+    "authentication": "REAL_GOTRUE_OTP_AND_TOTP",
+    "authorizedOrganizations": 2,
+    "activeMandates": 2,
+    "activeCatalogMandates": 2,
+    "foreignSessionDenied": true,
+    "adminWithoutOrganization": true
+  },
+  "localUiAuthProof": null,
+  "functionalControlsProof": {
+    "stalePreferenceHttpConflictVerified": true,
+    "uiSites": 4,
+    "uiProjects": 4,
+    "uiProjectMilestones": 4,
+    "uiCalendarEvents": 4,
+    "casablancaCalendarAndMilestoneInstantsVerified": true,
+    "uiActualCostAllocations": 4,
+    "exactCostEvidenceFingerprintsVerified": true,
+    "uiSiteProjectBudgetLinks": 4,
+    "uiCostCenters": 4,
+    "uiApprovedExactBudgets": 4,
+    "uiDigestVersions": 4,
+    "uiNotificationTransitions": 12,
+    "mandatoryNotificationDisableDenied": true,
+    "uiAssistedAnalyses": 8,
+    "uiProfileReassessments": 4,
+    "uiHumanAssistanceDecisions": 4,
+    "foreignAssistanceDecisionDenied": true,
+    "automaticBusinessRequestCreation": false,
+    "correlatedAuditOutbox": 68,
+    "uiProjectTaskTransitions": 12,
+    "acceptedProjectProgressVerified": true,
+    "foreignReadsDenied": 57,
+    "digestVersionSequenceVerified": true
+  },
+  "mode": "LOCAL_FUNCTIONAL_CONTROLS",
+  "status": "PASSED",
+  "expectedTests": 20,
+  "executedTests": 20,
+  "browser": {
+    "executed": 20,
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "failures": []
+  },
+  "stage": "complete",
+  "failureCode": null,
+  "diagnostic": null,
+  "cleanup": {
+    "remoteFixturesNeutralized": true,
+    "localAuthenticationArtifactsRemoved": true
+  }
+}

@@ -27,7 +27,7 @@ describe("native approved mandate book opening", () => {
   it.each(["aal1", null])("requires actual current AAL2 even when policy is satisfied (%s)", async currentLevel => {
     mocks.assurance.mockResolvedValue({ data: { currentLevel }, error: null }); expect(await openFranchiseBookForMandate(idle, form())).toEqual({ status: "error", reason: "MFA_REQUIRED" }); expect(mocks.rpc).not.toHaveBeenCalled();
   });
-  it.each([["40001", "FRANCHISE_MANDATE_CHANGED", "CHANGED"], ["55000", "FRANCHISE_LEGACY_BOOK_RECONCILIATION_REQUIRED", "RECONCILIATION"], ["42501", "FRANCHISE_BOOK_DENIED", "FORBIDDEN"], ["08006", "transport", "UNAVAILABLE"]])("keeps %s/%s distinct", async (code, message, reason) => {
+  it.each([["PT409", "FRANCHISE_MANDATE_CHANGED", "CHANGED"], ["55000", "FRANCHISE_LEGACY_BOOK_RECONCILIATION_REQUIRED", "RECONCILIATION"], ["42501", "FRANCHISE_BOOK_DENIED", "FORBIDDEN"], ["08006", "transport", "UNAVAILABLE"]])("keeps %s/%s distinct", async (code, message, reason) => {
     mocks.rpc.mockResolvedValue({ data: null, error: { code, message } }); expect(await openFranchiseBookForMandate(idle, form())).toEqual({ status: "error", reason }); expect(mocks.revalidate).not.toHaveBeenCalled();
   });
   it("never accepts a success receipt for a different mandate", async () => {

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Bell, BookOpen, Lock, Search } from "lucide-react";

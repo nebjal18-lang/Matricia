@@ -30,7 +30,7 @@ async function rpc(name: string, args: Record<string, unknown>, locale: string):
   if (result.error) {
     if (result.error.code === "42501" && /AAL2|MFA/i.test(result.error.message ?? "")) return { status: "error", reason: "AAL2_REQUIRED" };
     if (result.error.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-    if (["40001", "23505", "23P01", "55000"].includes(result.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
+    if (["40001", "PT409", "23505", "23P01", "55000"].includes(result.error.code ?? "")) return { status: "error", reason: "CONFLICT" };
     return { status: "error", reason: "FAILED" };
   }
   const parsed = outcomeSchema.safeParse(result.data);

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "status": "LOCAL_CHECKS_PASSED_EXTERNAL_GATES_OPEN",
+  "completedAt": "2026-11-23T22:59:21.456Z",
+  "source": {
+    "gitHead": "d5e3cf2c1cf1f9267233b6f678b3dbf660e6b48a",
+    "applicationAndRecipeTreeSha256": "1a421712f43eb5ac1bbc39e1e919c10ddd5e59898d958ec9fbe6050ca27227a3",
+    "files": 3485
+  },
+  "node": "22.23.5",
+  "checks": {
+    "lint": "PASSED",
+    "typecheck": "PASSED",
+    "unit": {
+      "passed": 4753,
+      "skipped": 1
+    },
+    "separateLocalStorage": {
+      "passed": 1,
+      "resolvesUnitSkip": true
+    },
+    "integration": {
+      "passed": 3
+    },
+    "tooling": {
+      "passed": 123
+    },
+    "phase00": "PASSED",
+    "noPlaceholders": "PASSED",
+    "releaseStructure": "PASSED",
+    "build": {
+      "status": "PASSED",
+      "publicAppUrl": "https://matricia.invalid",
+      "scope": "local compilation; synthetic HTTPS metadata URL; no deployment",
+      "initialFailure": "PUBLIC_SITE_URL_INVALID with local HTTP URL"
+    },
+    "financeComponentBrowser": {
+      "passed": 6,
+      "scope": "mocked server action"
+    },
+    "authenticatedLocalE2E": {
+      "passed": 404,
+      "segments": 32,
+      "failed": 0,
+      "skipped": 0,
+      "cleanupVerified": true,
+      "evidence": "artifacts/test-results/local-acceptance/history/final-20261123-manifest-41811a7c6d99c5826c50b9643db2e91bb6f858f751560f13a9d3ec2ba833a093.json"
+    },
+    "publicE2E": {
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": "artifacts/test-results/final-verification-20261123/public-browser.json"
+    },
+    "sql": {
+      "passed": 9793,
+      "files": 400,
+      "migrations": 629,
+      "concurrencyIncluded": true,
+      "cleanup": "passed",
+      "evidence": "artifacts/test-results/final-verification-20261123/sql.json"
+    }
+  },
+  "limitations": [
+    "Passing executions do not establish 100 percent functional coverage of 68 requirements.",
+    "57 requirements PARTIAL_EXECUTED and 11 REVIEW_REQUIRED remain unchanged.",
+    "External bank/payment/signature/email/antivirus, hosted restore, deployment and independent release review are not certified.",
+    "GitHub push blocked by missing interactive authentication."
+  ]
+}

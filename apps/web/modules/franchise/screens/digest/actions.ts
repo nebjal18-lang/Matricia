@@ -21,7 +21,7 @@ export async function configureDigest(_: FranchiseDigestActionState, form: FormD
   const result = await client.rpc("configure_franchise_daily_digest", { p_franchise_id: parsed.data.franchiseId, p_recipient_user_id: parsed.data.recipientUserId, p_enabled: parsed.data.enabled, p_frequency: parsed.data.frequency, p_local_send_time: parsed.data.localSendTime, p_time_zone: parsed.data.timeZone, p_locale: parsed.data.notificationLocale, p_change_reason: parsed.data.changeReason, p_idempotency_key: parsed.data.idempotencyKey });
   if (result.error) {
     if (result.error.code === "42501" || /DENIED|SCOPE|RECIPIENT/i.test(result.error.message ?? "")) return { status: "error", reason: "FORBIDDEN" };
-    if (["40001", "23505"].includes(result.error.code ?? "") || /IDEMPOTENCY|CONFLICT/i.test(result.error.message ?? "")) return { status: "error", reason: "CONFLICT" };
+    if (["40001", "PT409", "23505"].includes(result.error.code ?? "") || /IDEMPOTENCY|CONFLICT/i.test(result.error.message ?? "")) return { status: "error", reason: "CONFLICT" };
     if (result.error.code === "22023") return { status: "error", reason: "VALIDATION" };
     return { status: "error", reason: "FAILED" };
   }

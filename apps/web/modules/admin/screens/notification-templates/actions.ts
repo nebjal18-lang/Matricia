@@ -28,7 +28,7 @@ export async function manageNotificationTemplate(_:NotificationEditorState,form:
   rpc="decide_notification_template_pair_v1";args={p_proposal_id:value.data.id,p_expected_content_hash:value.data.hash,p_approve:value.data.decision==="approve",p_review_confirmed:form.get("reviewConfirmed")==="on",p_reason:value.data.reason,p_idempotency_key:common.data.key};
  }
  const client=await getSupabaseServerClient();const{data:auth}=await client.auth.getUser();if(!auth.user)return{status:"error",reason:"FORBIDDEN"};
- const result=await client.rpc(rpc,args);if(result.error)return{status:"error",reason:result.error.code==="40001"?"STALE":result.error.code==="42501"?"FORBIDDEN":result.error.code==="22023"?"VALIDATION":"FAILED"};
+ const result=await client.rpc(rpc,args);if(result.error)return{status:"error",reason:(result.error.code==="40001" || result.error.code === "PT409")?"STALE":result.error.code==="42501"?"FORBIDDEN":result.error.code==="22023"?"VALIDATION":"FAILED"};
  if(rpc==="preview_notification_template_pair_v1"){
   const parsed=z.object({outcome:z.literal("NOTIFICATION_TEMPLATE_PREVIEW"),delivery_sent:z.literal(false),rendered:z.array(z.object({locale:z.string(),subject:z.string(),body:z.string(),cta_path:z.string().nullable()}))}).safeParse(result.data);
   return parsed.success?{status:"success",reason:parsed.data.outcome,rendered:parsed.data.rendered}:{status:"error",reason:"FAILED"};

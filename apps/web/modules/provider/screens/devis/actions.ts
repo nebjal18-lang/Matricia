@@ -37,11 +37,19 @@ function actionError(value: { code?: string; message?: string } | null): QuoteAc
   if(value?.message?.includes("QUOTE_ATTACHMENT_QUARANTINED"))return{status:"error",reason:"ATTACHMENT_UNAVAILABLE"};
   if(value?.code==="22023")return{status:"error",reason:"VALIDATION"};
   if (value?.code === "42501") return { status: "error", reason: "FORBIDDEN" };
-  if (["40001", "55000", "22000"].includes(value?.code ?? "")) return { status: "error", reason: "CONFLICT" };
+  if (["40001", "PT409", "55000", "22000"].includes(value?.code ?? "")) return { status: "error", reason: "CONFLICT" };
   return { status: "error", reason: "FAILED" };
 }
 async function client() { const supabase = await getSupabaseServerClient(); const { data,error } = await supabase.auth.getUser(); const authFailure=classifyAuthReadFailure(error); return { supabase, user:authFailure?null:data.user,authFailure }; }
-const refresh = (locale: string) => revalidatePath(`/${locale}/sous-traitant/devis`);
+const refresh = (locale: string) => {
+  revalidatePath(`/${locale}/sous-traitant/devis`);
+  revalidatePath(`/${locale}/sous-traitant/consultations`);
+  revalidatePath(`/${locale}/sous-traitant/consultations/[consultationId]`, "page");
+  revalidatePath(`/${locale}/sous-traitant/devis/nouveau`);
+  revalidatePath(`/${locale}/sous-traitant/devis/[quoteId]`, "page");
+  revalidatePath(`/${locale}/sous-traitant/devis/[quoteId]/revision`, "page");
+  revalidatePath(`/${locale}/sous-traitant/devis/[quoteId]/apercu`, "page");
+};
 
 export async function decideInvitation(_: QuoteActionState, form: FormData): Promise<QuoteActionState> {
   const parsed = invitationDecisionInput.safeParse({ locale: text(form, "locale"), invitationId: text(form, "invitationId"), decision: text(form, "decision"), reason: text(form, "reason"), rowVersion: text(form, "rowVersion"), idempotencyKey: text(form, "idempotencyKey"), correlationId: text(form, "correlationId") });

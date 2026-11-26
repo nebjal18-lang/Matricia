@@ -50,7 +50,7 @@ describe("private Finance cost evidence upload",()=>{
   expect(await uploadFinanceCostProof(client,input(),request)).toEqual({ok:false,code:"INVALID_RESPONSE"});expect(store).not.toHaveBeenCalled();
   rpc.mockResolvedValue({data:{...slot(),bucket:"public"},error:null});expect(await uploadFinanceCostProof(client,input(),request)).toEqual({ok:false,code:"INVALID_RESPONSE"});
  });
- it.each([["42501","FRANCHISE_MFA_REQUIRED","MFA_REQUIRED"],["42501","NO_ACCESS","FORBIDDEN"],["40001","STALE","CONFLICT"]])("keeps reservation prerequisites distinct: %s/%s",async(code,message,expected)=>{
+ it.each([["42501","FRANCHISE_MFA_REQUIRED","MFA_REQUIRED"],["42501","NO_ACCESS","FORBIDDEN"],["PT409","STALE","CONFLICT"]])("keeps reservation prerequisites distinct: %s/%s",async(code,message,expected)=>{
   rpc.mockResolvedValue({data:null,error:{code,message}});expect(await uploadFinanceCostProof(client,input(),request)).toEqual({ok:false,code:expected});expect(store).not.toHaveBeenCalled();
  });
  it("does not finalize an unsuccessful physical upload",async()=>{

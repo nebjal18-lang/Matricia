@@ -39,7 +39,7 @@ export default async function ClientSearchPage({
       lead={c.searchResultsLead}
       kicker={spaceCopy(locale).kicker}
     >
-      <SearchResultsBoard locale={locale} query={result.query} hits={result.hits} unavailable={result.unavailable} moreResults={result.moreResults} />
+      <SearchResultsBoard locale={locale} query={result.query} hits={result.hits} unavailable={result.unavailable} {...(result.moreResults === undefined ? {} : {moreResults: result.moreResults})} />
     </ClientAppShell>
   );
 }

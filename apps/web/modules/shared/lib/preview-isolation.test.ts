@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assertPreviewIsolation } from "./preview-isolation";
+import {
+  PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF,
+  PREVIEW_STAGING_SUPABASE_PROJECT_REF,
+  applyPreviewIsolationDefaults,
+  assertPreviewIsolation,
+  assertProductionAppOrigin,
+} from "./preview-isolation";
 
 const staging = "a".repeat(20), production = "b".repeat(20);
 const configured = {
@@ -34,5 +40,56 @@ describe("Preview database isolation", () => {
     `https://${staging}.supabase.co?token=value`, "invalid",
   ])("rejects a wrong or unsafe endpoint without logging it", NEXT_PUBLIC_SUPABASE_URL => {
     expect(() => assertPreviewIsolation({ ...configured, NEXT_PUBLIC_SUPABASE_URL })).toThrow("PREVIEW_STAGING_DATABASE_REQUIRED");
+  });
+});
+
+describe("Preview isolation defaults", () => {
+  it("does not change non-Preview environments", () => {
+    const environment = { VERCEL_ENV: "production", APP_ENV: "production", NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" };
+    applyPreviewIsolationDefaults(environment);
+    expect(environment).toEqual({ VERCEL_ENV: "production", APP_ENV: "production", NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" });
+  });
+
+  it("fills missing Preview isolation refs and rewrites an inherited production URL", () => {
+    const environment = {
+      VERCEL_ENV: "preview",
+      APP_ENV: "production",
+      NEXT_PUBLIC_SUPABASE_URL: `https://${PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF}.supabase.co`,
+      SUPABASE_URL: `https://${PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF}.supabase.co`,
+    };
+    applyPreviewIsolationDefaults(environment);
+    expect(environment.APP_ENV).toBe("staging");
+    expect(environment.STAGING_SUPABASE_PROJECT_REF).toBe(PREVIEW_STAGING_SUPABASE_PROJECT_REF);
+    expect(environment.PRODUCTION_SUPABASE_PROJECT_REF).toBe(PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF);
+    expect(environment.NEXT_PUBLIC_SUPABASE_URL).toBe(`https://${PREVIEW_STAGING_SUPABASE_PROJECT_REF}.supabase.co`);
+    expect(environment.SUPABASE_URL).toBe(`https://${PREVIEW_STAGING_SUPABASE_PROJECT_REF}.supabase.co`);
+    expect(() => assertPreviewIsolation({
+      VERCEL_ENV: environment.VERCEL_ENV,
+      APP_ENV: environment.APP_ENV,
+      NEXT_PUBLIC_SUPABASE_URL: environment.NEXT_PUBLIC_SUPABASE_URL,
+      STAGING_SUPABASE_PROJECT_REF: environment.STAGING_SUPABASE_PROJECT_REF,
+      PRODUCTION_SUPABASE_PROJECT_REF: environment.PRODUCTION_SUPABASE_PROJECT_REF,
+    })).not.toThrow();
+  });
+
+  it("replaces a Preview production ref that collides with staging", () => {
+    const environment = {
+      VERCEL_ENV: "preview",
+      STAGING_SUPABASE_PROJECT_REF: PREVIEW_STAGING_SUPABASE_PROJECT_REF,
+      PRODUCTION_SUPABASE_PROJECT_REF: PREVIEW_STAGING_SUPABASE_PROJECT_REF,
+      NEXT_PUBLIC_SUPABASE_URL: `https://${PREVIEW_STAGING_SUPABASE_PROJECT_REF}.supabase.co`,
+    };
+    applyPreviewIsolationDefaults(environment);
+    expect(environment.PRODUCTION_SUPABASE_PROJECT_REF).toBe(PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF);
+  });
+});
+
+describe("Production public origin", () => {
+  it("accepts an HTTPS origin for a live deployment and leaves local builds alone", () => {
+    expect(() => assertProductionAppOrigin({ VERCEL_ENV: "production", NEXT_PUBLIC_APP_URL: "https://matricia.example" })).not.toThrow();
+    expect(() => assertProductionAppOrigin({ NEXT_PUBLIC_APP_URL: "http://localhost:5173" })).not.toThrow();
+  });
+  it.each([undefined, "", "http://matricia.example", "https://user:pass@matricia.example", "https://matricia.example/path", "https://matricia.example?key=1", "https://matricia.example:8443"])("rejects a noncanonical or insecure live origin", NEXT_PUBLIC_APP_URL => {
+    expect(() => assertProductionAppOrigin({ APP_ENV: "production", NEXT_PUBLIC_APP_URL })).toThrow("PRODUCTION_HTTPS_APP_ORIGIN_REQUIRED");
   });
 });

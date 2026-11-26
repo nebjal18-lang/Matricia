@@ -30,8 +30,8 @@ export default async function VolumePage({
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations}
       active="volume"
-      title={messages.title}
-      lead={messages.description}
+      {...(messages.title === undefined ? {} : {title:messages.title})}
+      {...(messages.description === undefined ? {} : {lead:messages.description})}
       kicker={spaceCopy(locale).kicker}
     >
       <main className="client-page">

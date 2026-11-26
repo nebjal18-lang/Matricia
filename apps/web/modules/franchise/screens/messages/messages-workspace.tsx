@@ -26,9 +26,9 @@ export function FranchiseMessagesWorkspace({
   scope: MessagingScope;
   loaded: Extract<LoadedMessaging, { status: "success" }>;
   link: (updates: Record<string, string | null>) => string;
-  searchQuery?: string;
-  queryFil?: string;
-  queryBefore?: string;
+  searchQuery?: string | undefined;
+  queryFil?: string | undefined;
+  queryBefore?: string | undefined;
 }) {
   const ar = locale === "ar";
   return (

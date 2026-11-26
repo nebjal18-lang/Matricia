@@ -65,7 +65,7 @@ export function FranchiseRowMenu({ href, label }: { href: string; label: string 
   return <Link href={href} className="franchise-row-menu" aria-label={label}>⋯</Link>;
 }
 
-export function FranchiseMandateRail({ locale, name }: { locale: Locale; name?: string | null }) {
+export function FranchiseMandateRail({ locale, name }: { locale: Locale; name?: string | null | undefined }) {
   const c = libraryCopy(locale);
   return (
     <aside className="franchise-home-rail">

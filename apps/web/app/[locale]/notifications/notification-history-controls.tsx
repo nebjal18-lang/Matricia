@@ -12,9 +12,9 @@ export function notificationHistoryHref(locale: Locale, organizationId: string, 
   return `/${locale}/notifications?${query}`;
 }
 
-export function NotificationHistoryControls({ dashboard, locale, workspace, m }: { dashboard: NotificationDashboard; locale: Locale; workspace?: string; m: NotificationMessages }) {
+export function NotificationHistoryControls({ dashboard, locale, workspace, m }: { dashboard: NotificationDashboard; locale: Locale; workspace?: string | undefined; m: NotificationMessages }) {
   const history = dashboard.history;
-  const first = notificationHistoryHref(locale, dashboard.organizationId, workspace, { q: history?.q, unread: history?.unread });
+  const first = notificationHistoryHref(locale, dashboard.organizationId, workspace, { ...(history?.q !== undefined && { q: history.q }), ...(history?.unread !== undefined && { unread: history.unread }) });
   return <div className="space-y-3 rounded-xl border bg-card p-4">
     <form method="get" action={`/${locale}/notifications`} className="flex min-w-0 flex-wrap items-end gap-3" role="search">
       <input type="hidden" name="organizationId" value={dashboard.organizationId}/>

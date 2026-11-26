@@ -8,6 +8,18 @@ const id = "11111111-1111-4111-8111-111111111111";
 function form() { const value = new FormData(); value.set("locale", "fr"); value.set("solutionSetId", id); value.set("level", "ESSENTIAL"); value.set("decision", "ACCEPTED"); value.set("reason", "Choix validé"); value.set("deferredUntil", ""); value.set("idempotencyKey", id); return value; }
 beforeEach(() => { mocks.decide.mockReset(); mocks.revalidate.mockReset(); });
 describe("solution decision action", () => {
+  it.each(["2026-02-30", "2026-13-01"])("refuse une date civile impossible %s", async (date) => {
+    const value=form();value.set("decision","DEFERRED");value.set("deferredUntil",date);
+    mocks.decide.mockResolvedValue({status:"success",value:{}});
+    await expect(decideAction(idle,value)).resolves.toEqual({status:"error",reason:"VALIDATION"});
+    expect(mocks.decide).not.toHaveBeenCalled();
+  });
+  it("interprète la fin de journée dans le fuseau Casablanca", async () => {
+    const value=form();value.set("decision","DEFERRED");value.set("deferredUntil","2024-11-01");
+    mocks.decide.mockResolvedValue({status:"success",value:{}});
+    await expect(decideAction(idle,value)).resolves.toEqual({status:"success"});
+    expect(mocks.decide).toHaveBeenCalledWith(expect.objectContaining({deferredUntil:"2024-11-01T22:59:59.000Z"}));
+  });
   it.each(["ACCEPTED", "REJECTED"])("accepte le vrai formulaire %s sans champ de report", async (decision) => {
     const value = form(); value.set("decision", decision); value.delete("deferredUntil");
     mocks.decide.mockResolvedValue({status:"success",value:{}});

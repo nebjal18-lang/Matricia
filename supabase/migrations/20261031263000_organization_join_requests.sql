@@ -104,6 +104,7 @@ grant execute on function public.request_organization_join_v1(text,text,text,tex
 -- Collision is a request to join, never an implicit request for ownership.
 do $$declare definition text;start_at integer;end_at integer;begin
  select pg_get_functiondef('public.create_or_request_organization(text,text,text,text,text,uuid)'::regprocedure)into definition;
+ definition:=replace(definition,chr(13),'');
  start_at:=strpos(definition,'  else'||chr(10)||'    if exists(select 1 from public.organization_memberships where organization_id=v_org');
  end_at:=strpos(definition,'  end if;'||chr(10)||'  insert into private.identity_idempotency_keys');
  if start_at=0 or end_at<=start_at then raise exception'ORGANIZATION_JOIN_COLLISION_PATCH_TARGET_MISSING';end if;

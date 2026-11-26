@@ -1,0 +1,22 @@
+{
+  "task": "integrated-worker-01",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/worker",
+    "test"
+  ],
+  "startedAt": "2026-11-19T14:19:15.372Z",
+  "finishedAt": "2026-11-19T14:19:18.478Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0,
+  "sourceBefore": {
+    "commit": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "sourceSha256": "99ea2b6074c0f96ffc372fc7d1368a7ec8a0145dd6af7e9dd410f1d3519ebe58"
+  },
+  "sourceAfter": {
+    "commit": "b578c75c1c0f076c7fb46b0239d7ab5f2b0afc4c",
+    "sourceSha256": "99ea2b6074c0f96ffc372fc7d1368a7ec8a0145dd6af7e9dd410f1d3519ebe58"
+  },
+  "sourceUnchanged": true
+}

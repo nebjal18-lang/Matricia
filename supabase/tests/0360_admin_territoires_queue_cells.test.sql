@@ -40,12 +40,12 @@ values (
   'a3600000-0000-4000-8000-000000000001'
 );
 insert into public.catalog_library_versions(
-  id, library_id, version, status, name_fr, name_ar, description_fr, description_ar, icon_key, sort_order, change_reason, content_hash, created_by
+  id, library_id, version, status, name_fr, name_ar, description_fr, description_ar, icon_key, sort_order, change_reason, content_hash, created_by, published_at
 ) values (
   'c3600000-0000-4000-8001-000000000001',
   'c3600000-0000-4000-8000-000000000001',
   1,
-  'DRAFT',
+  'PUBLISHED',
   'Informatique',
   'المعلوميات',
   'Bibliothèque de test territoires',
@@ -54,8 +54,9 @@ insert into public.catalog_library_versions(
   1,
   'Fixture territoires queue',
   repeat('c', 64),
-  'a3600000-0000-4000-8000-000000000001'
+  'a3600000-0000-4000-8000-000000000001', clock_timestamp()
 );
+update public.catalog_libraries set current_published_version_id='c3600000-0000-4000-8001-000000000001' where id='c3600000-0000-4000-8000-000000000001';
 
 insert into public.franchises(id, library_id, operator_organization_id, franchise_type, operator_code, territory_code, status, created_by)
 values (

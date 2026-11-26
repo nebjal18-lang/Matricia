@@ -1,45 +1,29 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { dirname, relative, resolve, sep } from 'node:path';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { execFileSync, spawn } from 'node:child_process';
+import { resolveSafeDatabaseTarget, verifyDatabaseClone, sqlInventory } from './db-test-support-safety.mjs';
 import { randomUUID } from 'node:crypto';
-import postgres from 'postgres';
-import { prepareSqlTestBatches } from './db-test-support.mjs';
+import { pathToFileURL } from 'node:url';
+let postgres;
+import { prepareSqlTest, prepareSqlTestBatches } from './db-test-support.mjs';
+let activeTestFile = 'preflight';
+let activeBatch = 0;
 
-function parseEnv(source) {
-  return Object.fromEntries(source.split(/\r?\n/).flatMap((line) => {
-    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
-    if (!match) return [];
-    return [[match[1], match[2].replace(/^(['"])(.*)\1$/, '$2')]];
-  }));
-}
-
-async function resolveDatabaseUrl(env, root) {
-  const configured = env.SUPABASE_DB_POOLER_URL || env.DIRECT_URL;
-  if (!configured?.startsWith('postgres')) throw new Error('A PostgreSQL DIRECT_URL is required');
-  const direct = new URL(configured);
-  if (!direct.hostname.startsWith('db.') || !direct.hostname.endsWith('.supabase.co')) return configured;
-
-  const projectRef = new URL(env.NEXT_PUBLIC_SUPABASE_URL).hostname.split('.')[0];
-  let region = env.SUPABASE_REGION;
-  try {
-    const metadata = JSON.parse(await readFile(resolve(root, 'supabase', 'project-metadata.json'), 'utf8'));
-    if (metadata.project_ref === projectRef && metadata.environment !== 'production') region ||= metadata.region;
-  } catch (error) {
-    if (error?.code !== 'ENOENT') throw error;
-  }
-  if (!region && env.SUPABASE_ACCESS_TOKEN) {
-    const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}`, {
-      headers: { Authorization: `Bearer ${env.SUPABASE_ACCESS_TOKEN}` },
-    });
-    if (!response.ok) throw new Error(`Supabase project metadata failed (${response.status})`);
-    region = (await response.json()).region;
-  }
-  if (!region) throw new Error('SUPABASE_REGION is required when the direct host is IPv6-only');
-
-  direct.hostname = `aws-0-${region}.pooler.supabase.com`;
-  direct.port = '5432';
-  direct.username = `postgres.${projectRef}`;
-  direct.searchParams.set('sslmode', 'require');
-  return direct.toString();
+async function diagnoseSqlLine(file) {
+  if (!/^[A-Za-z0-9_.-]+\.test\.sql$/.test(file)) return 'none';
+  const target = resolveSafeDatabaseTarget(process.env);
+  const script = prepareSqlTest(await readFile(resolve(import.meta.dirname, '..', 'supabase', 'tests', file), 'utf8'));
+  const container = `matricia-test-${target.cloneId}`;
+  return new Promise((done) => {
+    const child = spawn('docker', ['exec', '-i', container, 'psql', '-X', '-h', '/tmp', '-U', 'postgres', '-d', target.database,
+      '-v', 'ON_ERROR_STOP=1', '-f', '-'], { stdio: ['pipe', 'ignore', 'pipe'], windowsHide: true, timeout: 60_000 });
+    let stderr = '';
+    child.stderr.on('data', chunk => { if (stderr.length < 1024 * 1024) stderr += chunk.toString(); });
+    child.stdin.on('error', () => {});
+    child.on('error', () => done('none'));
+    child.on('close', () => done(/:(\d+): ERROR:/.exec(stderr)?.[1] ?? 'none'));
+    child.stdin.end(script);
+  });
 }
 
 function tapLines(value, target = []) {
@@ -135,9 +119,9 @@ async function verifyOutboxConcurrency(databaseUrl, admin) {
   });
 
   try {
-    queueGuard = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-    workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-    workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
+    queueGuard = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+    workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+    workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
     guardTransaction = queueGuard.begin(async (transaction) => {
       try {
         await transaction.unsafe('set local role service_role');
@@ -354,8 +338,8 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
     creditKey: `p03-credit-${randomUUID()}`,
     effectiveAt: '2026-09-11T12:00:00.000Z',
   };
-  const workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-  const workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
+  const workerA = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+  const workerB = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
 
   async function authenticated(transaction, actorId = fixture.actorId) {
     await transaction.unsafe('set local role authenticated');
@@ -597,85 +581,120 @@ async function verifyFinancialConcurrency(databaseUrl, admin) {
   }
 }
 
-const root = resolve(import.meta.dirname, '..');
-let fileEnv = {};
-try {
-  fileEnv = parseEnv(await readFile(resolve(root, '.env.local'), 'utf8'));
-} catch (error) {
-  if (error?.code !== 'ENOENT') throw error;
-}
-const env = { ...fileEnv, ...process.env };
-if (!['development', 'staging'].includes(env.APP_ENV)) throw new Error('DB tests are restricted to development/staging');
-
-const databaseUrl = await resolveDatabaseUrl(env, root);
-const sql = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0 });
-const testDirectory = resolve(root, 'supabase', 'tests');
-const testPattern = process.env.DB_TEST_PATTERN
-  ? new RegExp(process.env.DB_TEST_PATTERN)
-  : null;
-const files = (await readdir(testDirectory))
-  .filter((file) => file.endsWith('.test.sql'))
-  .filter((file) => !testPattern || testPattern.test(file))
-  .sort();
-if (files.length === 0) throw new Error('DB_TEST_PATTERN matched no SQL test files');
-let assertions = 0;
-let evidence = null;
-
-const evidencePath = process.env.DB_TEST_EVIDENCE_PATH
-  ? resolve(root, process.env.DB_TEST_EVIDENCE_PATH)
-  : null;
-if (evidencePath) {
-  const allowedDirectory = resolve(root, 'docs', 'evidence');
-  const evidenceRelativePath = relative(allowedDirectory, evidencePath);
-  if (evidenceRelativePath.startsWith(`..${sep}`) || evidenceRelativePath === '..') {
-    throw new Error('DB_TEST_EVIDENCE_PATH must stay inside docs/evidence');
-  }
+/** Reuse the native races only after the same reserved-clone identity checks. */
+export async function runReservedCloneConcurrency(env) {
+  const target = resolveSafeDatabaseTarget(env);
+  ({ default: postgres } = await import('postgres'));
+  const sql = postgres(target.url, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+  try {
+    await verifyDatabaseClone(sql, target);
+    await verifyOutboxConcurrency(target.url, sql);
+    await verifyFinancialConcurrency(target.url, sql);
+    return { passed: true, scenarios: ['outbox_claim', 'journal_idempotency', 'credit_idempotency', 'audit_chain'], nodeVersion: process.version };
+  } finally { await sql.end({ timeout: 2 }); }
 }
 
-try {
-  await cleanupStaleFinancialConcurrencyFixtures(sql);
-  const databaseEnvironment = env.APP_ENV === 'staging' ? 'STAGING' : 'DEVELOPMENT';
-  await sql`
-    update private.admin_execution_environment_v1
-    set environment = ${databaseEnvironment},
-        configured_at = clock_timestamp(),
-        configuration_reference = 'SQL_TEST_RUNNER'
-    where singleton and environment is null
-  `;
-  for (const file of files) {
-    const source = await readFile(resolve(testDirectory, file), 'utf8');
-    const results = [];
-    // Keep BEGIN/ROLLBACK and role-local state on the same max:1 connection,
-    // while explicit request boundaries get their own statement timestamp.
-    for (const batch of prepareSqlTestBatches(source)) {
-      results.push(await sql.unsafe(batch, [], { simple: true }));
+async function main() {
+  const root = resolve(import.meta.dirname, '..');
+  const env = process.env;
+  const target = resolveSafeDatabaseTarget(env);
+  ({ default: postgres } = await import('postgres'));
+  const databaseUrl = target.url;
+  const inventory = await sqlInventory(root);
+  const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  const sql = postgres(databaseUrl, { max: 1, prepare: false, connect_timeout: 15, idle_timeout: 0, onnotice: () => {} });
+  const testDirectory = resolve(root, 'supabase', 'tests');
+  const testPattern = process.env.DB_TEST_PATTERN
+    ? new RegExp(process.env.DB_TEST_PATTERN)
+    : null;
+  const files = (await readdir(testDirectory))
+    .filter((file) => file.endsWith('.test.sql'))
+    .filter((file) => !testPattern || testPattern.test(file))
+    .sort();
+  if (files.length === 0) throw new Error('DB_TEST_PATTERN matched no SQL test files');
+  let assertions = 0;
+  let evidence = null;
+
+  const evidencePath = process.env.DB_TEST_EVIDENCE_PATH
+    ? resolve(root, process.env.DB_TEST_EVIDENCE_PATH)
+    : null;
+  if (evidencePath) {
+    const allowedDirectory = resolve(root, 'docs', 'evidence');
+    const evidenceRelativePath = relative(allowedDirectory, evidencePath);
+    if (evidenceRelativePath.startsWith(`..${sep}`) || evidenceRelativePath === '..' || isAbsolute(evidenceRelativePath)) {
+      throw new Error('DB_TEST_EVIDENCE_PATH must stay inside docs/evidence');
     }
-    const lines = tapLines(results);
-    assertions += validateTap(file, lines);
-    console.log(`PASS ${file}`);
   }
-  await verifyOutboxConcurrency(databaseUrl, sql);
-  console.log('PASS outbox_concurrency (2 connections)');
-  await verifyFinancialConcurrency(databaseUrl, sql);
-  console.log('PASS journal_idempotency_concurrency (2 connections)');
-  console.log('PASS credit_idempotency_concurrency (2 connections)');
-  console.log('PASS audit_chain_concurrency (2 connections)');
-  console.log(`DB tests passed: ${files.length} files, ${assertions} assertions, 4 concurrency scenarios`);
-  evidence = {
-    schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
-    environment: env.APP_ENV,
-    outcome: 'PASS',
-    files,
-    assertions,
-    concurrencyScenarios: 4,
-  };
-} finally {
-  await sql.end({ timeout: 2 });
-}
 
-if (evidencePath && evidence) {
-  await mkdir(dirname(evidencePath), { recursive: true });
-  await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, 'utf8');
-  console.log(`Evidence written: ${relative(root, evidencePath)}`);
+  try {
+    await verifyDatabaseClone(sql, target);
+    await cleanupStaleFinancialConcurrencyFixtures(sql);
+    const databaseEnvironment = env.APP_ENV === 'staging' ? 'STAGING' : 'DEVELOPMENT';
+    await sql`
+      update private.admin_execution_environment_v1
+      set environment = ${databaseEnvironment},
+          configured_at = clock_timestamp(),
+          configuration_reference = 'SQL_TEST_RUNNER'
+      where singleton and environment is null
+    `;
+    for (const file of files) {
+      activeTestFile = file;
+      activeBatch = 0;
+      const source = await readFile(resolve(testDirectory, file), 'utf8');
+      const results = [];
+      // Keep BEGIN/ROLLBACK and role-local state on the same max:1 connection,
+      // while explicit request boundaries get their own statement timestamp.
+      for (const batch of prepareSqlTestBatches(source)) {
+        activeBatch += 1;
+        results.push(await sql.unsafe(batch, [], { simple: true }));
+      }
+      const lines = tapLines(results);
+      assertions += validateTap(file, lines);
+      console.log(`PASS ${file}`);
+    }
+    await verifyOutboxConcurrency(databaseUrl, sql);
+    console.log('PASS outbox_concurrency (2 connections)');
+    await verifyFinancialConcurrency(databaseUrl, sql);
+    console.log('PASS journal_idempotency_concurrency (2 connections)');
+    console.log('PASS credit_idempotency_concurrency (2 connections)');
+    console.log('PASS audit_chain_concurrency (2 connections)');
+    console.log(`DB tests ${testPattern ? 'PARTIAL' : 'passed'}: ${files.length} files, ${assertions} assertions, 4 concurrency scenarios`);
+    evidence = {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      environment: env.APP_ENV,
+      outcome: testPattern ? 'PARTIAL' : 'PASS',
+      scope: testPattern ? 'PARTIAL' : 'FULL',
+      filter: env.DB_TEST_PATTERN || null,
+      targetMode: env.DB_TEST_TARGET_MODE,
+      commit,
+      runId: env.DB_TEST_RUN_ID || null,
+      inventorySha256: inventory.sha256,
+      files,
+      assertions,
+      concurrencyScenarios: 4,
+    };
+  } finally {
+    await sql.end({ timeout: 2 });
+  }
+
+  if (evidencePath && evidence) {
+    await mkdir(dirname(evidencePath), { recursive: true });
+    await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, 'utf8');
+    console.log(`Evidence written: ${relative(root, evidencePath)}`);
+  }
+
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch(async error => {
+    const sqlstate = /^[0-9A-Z]{5}$/.test(error?.code ?? '') ? error.code : 'NON_SQL';
+    const assertion = /not ok (\d+)\b/.exec(error?.message ?? '')?.[1] ?? 'none';
+    const position = /^\d+$/.test(String(error?.position ?? '')) ? error.position : 'none';
+    const functionMatch = /PL\/pgSQL function (?:[a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)\([^)]*\) line (\d+)/i.exec(error?.where ?? '');
+    const functionName = functionMatch?.[1] ?? 'none';
+    const functionLine = functionMatch?.[2] ?? 'none';
+    const scriptLine = sqlstate === '42501' ? await diagnoseSqlLine(activeTestFile).catch(() => 'none') : 'none';
+    console.error(`DB_TEST_FAILED: file=${activeTestFile} batch=${activeBatch} sqlstate=${sqlstate} assertion=${assertion} position=${position} function=${functionName} function-line=${functionLine} script-line=${scriptLine}; raw diagnostics withheld`);
+    process.exitCode = 1;
+  });
 }

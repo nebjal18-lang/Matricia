@@ -30,7 +30,7 @@ export async function manageBenefitFulfillment(_:FulfillmentState,form:FormData)
   if(proposal.error||!z.object({id:z.literal(receipt.data.id),redemption_id:z.literal(v.id),organization_id:z.literal(v.org)}).safeParse(proposal.data).success)return{status:"error",reason:"FORBIDDEN"};
   name="decide_my_benefit_delivery_v1";args={p_proposal_id:receipt.data.id,p_expected_source_hash:receipt.data.hash,p_expected_row_version:v.version,p_accept:v.intent==="accept",p_reason:receipt.data.reason,p_idempotency_key:v.key};expected=v.intent==="accept"?"BENEFIT_DELIVERY_ACCEPTED":"BENEFIT_DELIVERY_REJECTED";
  }
- const result=await c.rpc(name,args);if(result.error){const message=result.error.message??"";return{status:"error",reason:result.error.code==="42501"?"FORBIDDEN":result.error.code==="40001"?"STALE":/FUNDING|FINANCIAL_HOLD|RESERVATION_EXPIRED/u.test(message)?"FUNDING":result.error.code==="55000"?"PENDING":"FAILED"};}
+ const result=await c.rpc(name,args);if(result.error){const message=result.error.message??"";return{status:"error",reason:result.error.code==="42501"?"FORBIDDEN":(result.error.code==="40001" || result.error.code === "PT409")?"STALE":/FUNDING|FINANCIAL_HOLD|RESERVATION_EXPIRED/u.test(message)?"FUNDING":result.error.code==="55000"?"PENDING":"FAILED"};}
  if(!z.object({outcome:z.literal(expected),redemption_id:z.literal(v.id)}).safeParse(result.data).success)return{status:"error",reason:"FAILED"};
  for(const path of[`/${v.locale}/administration/avantages/livraisons`,`/${v.locale}/client/avantages/livraisons`,`/${v.locale}/client/credits`])revalidatePath(path);
  return{status:"success",outcome:expected};

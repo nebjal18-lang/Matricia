@@ -2,13 +2,23 @@ import { spawn } from 'node:child_process';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { summarizeBrowserReport, validateBrowserReport } from '../../../scripts/release/browser-report.mjs';
+import {ownedLocalHttpServer} from './owned-local-http-server.mjs';
 
-export async function runSecuredBrowserSuite({root,config,environment,specifications,output,expectedTests,projects=[]}) {
+export async function runSecuredBrowserSuite(options) {
+  if (options.config.runtimeMode !== 'isolated-local-docker' || options.environment.E2E_EXTERNAL_SERVER) return executeSecuredBrowserSuite(options);
+  const server = ownedLocalHttpServer(options.root, options.config, {cronSecret:options.environment.E2E_CRON_SECRET});
+  try {
+    await server.start();
+    return await executeSecuredBrowserSuite({...options,environment:{...options.environment,E2E_EXTERNAL_SERVER:'1'}});
+  } finally { await server.stop(); }
+}
+
+async function executeSecuredBrowserSuite({root,config,environment,specifications,output,expectedTests,projects=[]}) {
   await mkdir(output,{recursive:true,mode:0o700});
   const reportPath=resolve(output,'private-browser-report.json');
   await rm(reportPath,{force:true});
   const startedAt=new Date().toISOString();
-  const child=spawn(process.execPath,[resolve(root,'node_modules/@playwright/test/cli.js'),'test',...specifications,...projects.map(project=>`--project=${project}`),'--workers=1','--retries=0','--reporter=line,json','--output',resolve(output,'results')],{
+  const child=spawn(process.execPath,[resolve(root,'node_modules/@playwright/test/cli.js'),'test',...specifications,...projects.map(project=>`--project=${project}`),'--workers=1','--retries=0','--max-failures=1','--reporter=line,json','--output',resolve(output,'results')],{
     cwd:root,shell:false,stdio:['ignore','pipe','pipe'],env:{...environment,E2E_LOCAL_ISOLATED:config.runtimeMode==='isolated-local-docker'?'1':'0',PLAYWRIGHT_JSON_OUTPUT_FILE:reportPath},
   });
   // Output may contain authenticated page snapshots. Never print or persist it.

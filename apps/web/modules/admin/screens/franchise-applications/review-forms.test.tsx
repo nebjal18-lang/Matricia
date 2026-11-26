@@ -65,6 +65,12 @@ const base: FranchiseApplicationReviewModel = {
 };
 
 describe("FranchiseApplicationReview", () => {
+  it.each(["fr", "ar"] as const)("shows missing persisted mandate prerequisites in %s without fake actions", (locale) => {
+    const html = renderToStaticMarkup(<FranchiseApplicationReview locale={locale} application={{ ...base, status: "CONTRACT_PENDING" }} copy={copy} keys={{ propose: "p", approve: "a", resend: "r" }} />);
+    expect(html).toContain('role="alert"');
+    expect(html).not.toContain('value="APPROVE"');
+    expect(html).not.toContain('name="invitationId"');
+  });
   it("keeps the REGISTERED review action compact and labeled", () => {
     const html = renderToStaticMarkup(
       <FranchiseApplicationReview

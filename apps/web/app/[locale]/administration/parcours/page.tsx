@@ -36,6 +36,7 @@ export default async function AdminParcoursHubPage({
       selectedOrganizationId={space.selectedOrganizationId}
       userEmail={space.userEmail}
       active="parcours"
+      title={c.parcours}
       alternateHref={`/${alternate}/administration/parcours${space.selectedQuery}`}
       crumb={
         <AdminCrumb

@@ -53,7 +53,7 @@ export default async function AdminCommandCenterPage({
       active="home"
       alternateHref={`/${alternate}/administration/command-center${currentQuery}`}
       title={fr ? "Centre de pilotage" : "مركز القيادة"}
-      lead={fr ? "Une file unifiée. Sélectionnez une ligne : l’action s’ouvre à droite." : "طابور موحّد. اختاروا سطراً: يُفتح الإجراء على اليمين."}
+      lead={fr ? "Une file unifiée. Sélectionnez un dossier pour ouvrir son action." : "طابور موحّد. اختاروا ملفاً لفتح الإجراء الخاص به."}
       kicker={c.kicker}
     >
       {query.q?.trim() ? (

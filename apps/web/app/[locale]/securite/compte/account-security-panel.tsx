@@ -61,7 +61,7 @@ function FactorRemoval({ factorId, locale, messages }: { factorId: string; local
   );
 }
 
-export function AccountSecurityPanel({ locale, security, messages, nextPath }: { nextPath?: string; locale: Locale; security: Extract<AccountSecurityResult, { status: "success" }>; messages: AccountSecurityMessages }) {
+export function AccountSecurityPanel({ locale, security, messages, nextPath }: { nextPath?: string | undefined; locale: Locale; security: Extract<AccountSecurityResult, { status: "success" }>; messages: AccountSecurityMessages }) {
   const router = useRouter();
   const [enrollment, beginAction, beginning] = useActionState(beginTotpEnrollment, enrollmentInitial);
   const [verification, verifyAction, verifying] = useActionState(async (previous: EnrollmentState, form: FormData) => { const result = await verifyTotpEnrollment(previous,form); if (result.status === "success") { if (result.nextPath) router.replace(result.nextPath); router.refresh(); } return result; }, enrollmentInitial);
@@ -142,7 +142,7 @@ export function AccountSecurityPanel({ locale, security, messages, nextPath }: {
   );
 }
 
-function FactorChallenge({ factorId, locale, messages, nextPath }: { factorId: string; locale: Locale; messages: AccountSecurityMessages; nextPath?: string }) {
+function FactorChallenge({ factorId, locale, messages, nextPath }: { factorId: string; locale: Locale; messages: AccountSecurityMessages; nextPath?: string | undefined }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(async (previous: EnrollmentState, form: FormData) => {
     const result = await verifyTotpEnrollment(previous,form);

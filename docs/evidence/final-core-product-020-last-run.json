@@ -1,12 +1,44 @@
 {
   "schemaVersion": 1,
   "environment": "TEST",
-  "generatedAt": "2026-11-09T15:45:09.585Z",
-  "outcome": "FAIL",
+  "generatedAt": "2026-11-23T22:45:55.874Z",
+  "outcome": "PASS",
   "command": "node tests/e2e/helpers/final-core-product-run.mjs",
+  "stats": {
+    "expected": 4,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "durationMs": 21529
+  },
   "requirements": [
+    "MAT-FUNC-007",
+    "MAT-FUNC-013",
+    "MAT-FUNC-018",
+    "MAT-FUNC-019",
     "MAT-FUNC-020"
   ],
-  "error": "BROWSER_SUITE_FAILED",
+  "security": [
+    "cross-tenant-deny",
+    "provider-capacity-matching-inclusion-exclusion"
+  ],
+  "providerCapacity": {
+    "statuses": [
+      "AVAILABLE",
+      "LIMITED",
+      "FULL",
+      "PAUSED"
+    ],
+    "versions": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "audits": 4,
+    "outboxEvents": 4,
+    "finalEligible": false,
+    "finalReason": "CAPACITY_PAUSED"
+  },
   "cleanup": "verified"
 }

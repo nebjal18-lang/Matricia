@@ -20,6 +20,8 @@ import Documents from "@/app/[locale]/franchise/documents/page";
 import Governance from "@/app/[locale]/franchise/gouvernance/page";
 import Marketing from "@/app/[locale]/franchise/marketing/page";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
+
 const organizationId = "22222222-2222-4222-8222-222222222222";
 const mocks = vi.hoisted(() => ({
   library: { status: "error", reason: "NO_MANDATE" } as FranchiseLibraryLoadResult,

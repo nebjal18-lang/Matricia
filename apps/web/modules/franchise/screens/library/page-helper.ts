@@ -14,7 +14,7 @@ import { buildFranchiseSpaceBoard, emptyFranchiseSpaces } from "@/modules/franch
 import { loadFranchiseLibraryWorkspace, loadFranchiseMandate, type FranchiseLibraryLoadResult } from "@/modules/franchise/data/library/workspace";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
-async function openFranchiseSpace(input: { locale: Locale; organizationId?: string; franchiseId?: string; returnPath?: string; returnQuery?: Record<string, string | undefined> }) {
+async function openFranchiseSpace(input: { locale: Locale; organizationId?: string | undefined; franchiseId?: string | undefined; returnPath?: string | undefined; returnQuery?: Record<string, string | undefined> }) {
   const destination = new URL(safeReturnPath(input.returnPath, input.locale) ?? `/${input.locale}/franchise/accueil`, "https://matricia.invalid");
   for (const [key, value] of Object.entries(input.returnQuery ?? {})) if (typeof value === "string") destination.searchParams.set(key, value);
   if (input.organizationId) destination.searchParams.set("organizationId", input.organizationId);
@@ -30,7 +30,7 @@ async function openFranchiseSpace(input: { locale: Locale; organizationId?: stri
   return { next, space, blocked: null };
 }
 
-export async function requireFranchiseMandate(input: { locale: Locale; organizationId?: string; franchiseId?: string; returnPath?: string; returnQuery?: Record<string, string | undefined> }) {
+export async function requireFranchiseMandate(input: { locale: Locale; organizationId?: string | undefined; franchiseId?: string | undefined; returnPath?: string | undefined; returnQuery?: Record<string, string | undefined> }) {
   const opened = await openFranchiseSpace(input);
   if (opened.blocked) return { space: opened.space, mandate: opened.blocked };
   const mandate = await loadFranchiseMandate({ locale: input.locale, organizationId: opened.space.selectedOrganizationId ?? undefined, franchiseId: input.franchiseId });
@@ -54,7 +54,7 @@ export async function requireFranchiseMandate(input: { locale: Locale; organizat
   return { space: opened.space, mandate };
 }
 
-export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string;franchiseId?:string;catalog?:CatalogPageInput;returnPath?:string;returnQuery?:Record<string,string|undefined> }) {
+export async function requireFranchiseLibrary(input: { locale: Locale; organizationId?: string | undefined;franchiseId?: string | undefined;catalog?: CatalogPageInput | undefined;returnPath?: string | undefined;returnQuery?:Record<string,string|undefined> }) {
   const opened = await openFranchiseSpace(input);
   if (opened.blocked) return { space: opened.space, result: opened.blocked };
   const space = opened.space;
@@ -119,7 +119,7 @@ export function franchiseSpaceLiveArgs(input: {
       title: item.title,
       status: item.status,
       href: item.href,
-      actions: (item.ruleActions ?? []).map((action) => ({ type: action.type, target: action.target })),
+      actions: (item.ruleActions ?? []).map((action) => ({ type: action.type, ...(action.target === undefined ? {} : { target: action.target }) })),
     })),
   };
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { translateLocalPath } from "@/modules/shared/lib/auth/workspace-navigation";
 import { Activity, Bell, Building2, Landmark, Route, Search, Settings, Shield, Users } from "lucide-react";
 import type { ReactNode } from "react";

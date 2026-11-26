@@ -34,9 +34,9 @@ export default async function NotificationsPage({
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={selectedOrganizationId}
+      {...(selectedOrganizationId !== undefined && { organizationId: selectedOrganizationId })}
       currentPath={selfPath}
-      workspace={landing ?? query.workspace}
+      {...((landing ?? query.workspace) !== undefined && { workspace: landing ?? query.workspace })}
       title={m.title}
       lead={m.description}
       clientActive="messages"
@@ -46,7 +46,7 @@ export default async function NotificationsPage({
       {result.status === "error" ? (
         <WorkspaceFailure locale={locale} reason={result.reason} returnPath={selfPath} />
       ) : (
-        <NotificationsPanel dashboard={result.dashboard} locale={locale} workspace={landing ?? query.workspace} m={m} />
+        <NotificationsPanel dashboard={result.dashboard} locale={locale} {...((landing ?? query.workspace) !== undefined && { workspace: landing ?? query.workspace })} m={m} />
       )}
     </ConnectedAppShell>
   );

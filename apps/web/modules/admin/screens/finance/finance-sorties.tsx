@@ -3,7 +3,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import { formatMinor } from "@/modules/shared/lib/subscriptions/model";
 import type { AdminFinanceMessages } from "./messages";
 
-function formatDate(value: string, _locale: Locale) {
+function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -68,7 +68,7 @@ export function FinanceSorties({
                     </td>
                     <td dir="ltr">{formatMinor(invoice.outstanding_minor, invoice.currency, locale)}</td>
                     <td>
-                      <time dateTime={invoice.due_on}>{formatDate(invoice.due_on, locale)}</time>
+                      <time dateTime={invoice.due_on}>{formatDate(invoice.due_on)}</time>
                     </td>
                   </tr>
                 ))}
@@ -104,7 +104,7 @@ export function FinanceSorties({
                     <td dir="ltr">{formatMinor(payment.amount_minor, payment.currency, locale)}</td>
                     <td dir="ltr">{formatMinor(payment.unallocated_minor, payment.currency, locale)}</td>
                     <td>
-                      <time dateTime={payment.paid_on}>{formatDate(payment.paid_on, locale)}</time>
+                      <time dateTime={payment.paid_on}>{formatDate(payment.paid_on)}</time>
                     </td>
                   </tr>
                 ))}

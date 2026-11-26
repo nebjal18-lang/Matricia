@@ -17,7 +17,7 @@ export type FranchiseApplicationReviewState =
 
 function reason(message: string): "VALIDATION" | "DENIED" | "CONFLICT" | "UNAVAILABLE" {
   if (message.includes("DENIED") || message.includes("42501")) return "DENIED";
-  if (message.includes("STALE") || message.includes("40001") || message.includes("TRANSITION") || message.includes("NOT_PENDING")) return "CONFLICT";
+  if (message.includes("STALE") || (message.includes("40001") || message.includes("PT409")) || message.includes("TRANSITION") || message.includes("NOT_PENDING")) return "CONFLICT";
   if (message.includes("INVALID") || message.includes("22023")) return "VALIDATION";
   return "UNAVAILABLE";
 }

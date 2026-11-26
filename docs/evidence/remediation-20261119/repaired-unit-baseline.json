@@ -1,0 +1,20 @@
+{
+  "task": "repaired-unit-baseline",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "vitest",
+    "run",
+    "modules/franchise/screens/access-readiness.test.tsx",
+    "modules/franchise/data/library/mandate-choices.test.tsx",
+    "modules/franchise/data/network/provider-dossier.test.tsx",
+    "modules/shared/lib/account-security/connected-space.test.ts",
+    "modules/franchise/data/operations/readers-integrity.test.ts"
+  ],
+  "startedAt": "2026-11-19T13:59:27.779Z",
+  "finishedAt": "2026-11-19T13:59:32.189Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

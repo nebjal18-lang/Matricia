@@ -25,7 +25,7 @@ export function classifyBookOpeningFailure(error: { code?: string; message?: str
   if (error.code === "42501") return "FORBIDDEN";
   if (error.code === "54000") return "SCOPE_REQUIRED";
   if (/RECONCILIATION|BINDING_REVIEW/.test(message)) return "RECONCILIATION";
-  if (error.code === "40001" || error.code === "55000" || error.code === "23505") return "CHANGED";
+  if ((error.code === "40001" || error.code === "PT409") || error.code === "55000" || error.code === "23505") return "CHANGED";
   if (error.code === "22023") return "VALIDATION";
   return "UNAVAILABLE";
 }

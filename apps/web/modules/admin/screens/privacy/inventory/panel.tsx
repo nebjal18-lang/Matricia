@@ -36,7 +36,7 @@ export function DsrAllWorkspace({locale,initialDraftId,initialRequestId,initialP
  const readableError=useCallback((message:string)=>{
   if(/MFA|AAL2/i.test(message))return tr("Le second facteur est requis. Configurez-le dans Sécurité du compte.","يلزم العامل الثاني. يمكن إعداده في أمان الحساب.");
   if(/42501|FORBIDDEN|DENIED|UNAUTHORIZED/i.test(message))return tr("Votre rôle ne permet pas cette opération d’inventaire.","دورك لا يسمح بعملية الجرد هذه.");
-  if(/STALE_|40001|CHANGED|CATALOG/i.test(message))return tr("La structure ou la version a changé. Actualisez puis reprenez la classification.","تغيرت البنية أو النسخة. حدّث ثم استأنف التصنيف.");
+  if(/STALE_|40001|PT409|CHANGED|CATALOG/i.test(message))return tr("La structure ou la version a changé. Actualisez puis reprenez la classification.","تغيرت البنية أو النسخة. حدّث ثم استأنف التصنيف.");
   if(/FOUR_EYES|INDEPENDENT/i.test(message))return tr("Une revue indépendante d’une autre personne habilitée est requise.","تلزم مراجعة مستقلة من شخص مخول آخر.");
   if(/UNCLASSIFIED|POLICY|RETENTION|SHARED/i.test(message))return tr("Toutes les sources et exclusions doivent être classées avec une base et une référence applicables.","يجب تصنيف كل المصادر والاستبعادات بأساس ومرجع قابلين للتطبيق.");
   if(/INVALID|PARSE|Zod/i.test(message))return tr("Réponse invalide : actualisez la page et vérifiez les champs saisis.","استجابة غير صالحة: حدّث الصفحة وتحقق من الحقول.");

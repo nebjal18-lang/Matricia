@@ -182,7 +182,7 @@ export async function ProviderQuoteWorkbenchPage({
   const contextBoundary=providerContextBoundary(locale as Locale,space,"quotes",query.organizationId);
   if(contextBoundary)return contextBoundary;
   const w = workbenchCopy(locale as Locale);
-  const result = quoteId === "nouveau" ? await loadProviderQuotes(space.selectedOrganizationId ?? undefined,{invitationId:query.invitationId}) : await loadQuoteEntry(space.selectedOrganizationId ?? undefined,quoteId);
+  const result = quoteId === "nouveau" ? await loadProviderQuotes(space.selectedOrganizationId ?? undefined,{...(query.invitationId === undefined ? {} : {invitationId:query.invitationId})}) : await loadQuoteEntry(space.selectedOrganizationId ?? undefined,quoteId);
   redirectIfUnauth(locale, result.status === "error" ? result.reason : undefined, query.organizationId);
   if (result.status === "error") return <ProviderReadFailure locale={locale as Locale} space={space} active="quotes" reason={result.reason} />;
   const invitation = result.status === "success" ? findInvitation(result.dashboard, quoteId === "nouveau" ? query.invitationId ?? "" : quoteId) : null;
@@ -212,7 +212,7 @@ export async function ProviderQuoteWorkbenchPage({
   const revisionSnapshots:Record<string,import("@/modules/provider/screens/devis/prefill").QuotePrefill>={};
   if(revisions===null)return <ProviderReadFailure locale={locale as Locale} space={space} active="quotes" reason="QUERY_FAILED"/>;
   for(let offset=0;offset<revisions.length;offset+=25){const batch=await loadQuotePrefills(result.dashboard.organizationId,revisions.slice(offset,offset+25).map(item=>({invitationId:item.id,versionId:item.id})),locale as Locale);if(batch===null)return <ProviderReadFailure locale={locale as Locale} space={space} active="quotes" reason="QUERY_FAILED"/>;Object.assign(revisionSnapshots,batch);}
-  const history=revisions?.map(item=>({...item,snapshot:revisionSnapshots[item.id]}))??null;
+  const history=revisions?.map(item=>{const snapshot=revisionSnapshots[item.id];return {...item,...(snapshot === undefined ? {} : {snapshot})};})??null;
   const Workbench = mode === "revise" ? QuoteRevisionWorkbench : QuoteMultilineWorkbench;
   return (
     <ProviderAppShell locale={locale as Locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="quotes" title={mode === "revise" ? w.quoteReviseTitle : w.quoteCreateTitle} lead={mode === "revise" ? w.quoteReviseLead : w.quoteCreateLead}>
@@ -446,7 +446,7 @@ export async function ProviderNestedPage({
     return ProviderInvoiceSettlementPage({ params: Promise.resolve({ locale, invoiceId: nested.itemId }), searchParams });
   }
   if (nested.kind === "messages") {
-    return ProviderMessagesPage({ params: Promise.resolve({ locale, threadId: nested.itemId ?? undefined }), searchParams });
+    return ProviderMessagesPage({ params: Promise.resolve({ locale, ...(nested.itemId ? {threadId: nested.itemId} : {}) }), searchParams });
   }
   if (nested.kind === "company") {
     return ProviderCompanyPage({ params: Promise.resolve({ locale }), searchParams });

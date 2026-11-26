@@ -121,7 +121,7 @@ export default async function ProviderIdentityPage({
                 activity: data.profile.activity,
                 sector: data.profile.sector,
                 registeredCity: data.profile.registered_city,
-                registeredAddress: data.profile.registered_address,
+                registeredAddress: data.profile.registered_address ? {...data.profile.registered_address, postal_code: data.profile.registered_address.postal_code ?? null} : null,
                 identifiers: {
                   ICE: data.ice,
                   IF: data.profile.if_number,

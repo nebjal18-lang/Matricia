@@ -127,11 +127,7 @@ export function buildDemoSupervisionDashboard(): AdminSupervisionDashboard {
  * Mode démo ON = catalogue démo exclusif (remplace l’ancien volume DB résiduel).
  * Mode démo OFF = données DB inchangées (appelant ne doit pas invoquer ceci).
  */
-export function replaceWithDemoSupervisionDashboard(
-  _value?: AdminSupervisionDashboard,
-): AdminSupervisionDashboard {
-  return buildDemoSupervisionDashboard();
-}
+export const replaceWithDemoSupervisionDashboard: (value?: AdminSupervisionDashboard) => AdminSupervisionDashboard = buildDemoSupervisionDashboard;
 
 /** @deprecated Prefer replaceWithDemoSupervisionDashboard — plus de merge. */
 export function mergeDemoSupervisionDashboard(

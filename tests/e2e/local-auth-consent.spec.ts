@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { totp } from '../../scripts/p05-e2e/totp.mjs';
 
@@ -14,7 +15,8 @@ if(fixture.schemaVersion!==1||fixture.runtimeMode!=='isolated-local-docker'||Dat
 async function retainPrivateState(page:Page,path:string|undefined){
  if(!path)return;
  const root=resolve(process.cwd(),'artifacts/test-results');
- if(!resolve(path).startsWith(`${root}/.local-client-journey-`)||!path.endsWith('.json'))throw new Error('LOCAL_PRIVATE_STATE_PATH_INVALID');
+ const destination=resolve(path),directory=dirname(destination);
+ if(dirname(directory)!==root||!/^\.local-(client-journey|benefit-fulfillment|referral-rewards)-[0-9a-f-]{36}$/u.test(basename(directory))||!/^(registered|reviewer)-(fr|ar)\.json$/u.test(basename(destination)))throw new Error('LOCAL_PRIVATE_STATE_PATH_INVALID');
  await writeFile(path,JSON.stringify(await page.context().storageState()),{mode:0o600,flag:'wx'});
 }
 
@@ -37,6 +39,12 @@ async function mailboxOtp(request:APIRequestContext,email:string):Promise<string
  return null;
 }
 async function confirmEmailOtp(page:Page,email:string){
+ // Independent synthetic users have independent local proxy addresses. Keep
+ // the real per-identifier/IP limiter active without sharing a single bucket
+ // across every acceptance run on this development machine.
+ if(!['localhost','127.0.0.1'].includes(new URL(page.url()).hostname)||!/^p05-e2e-[a-z0-9-]+@example\.invalid$/u.test(email))throw new Error('LOCAL_AUTH_ADDRESS_REQUIRED');
+ const address=createHash('sha256').update(email).digest();
+ await page.setExtraHTTPHeaders({'x-forwarded-for':`127.${address[0]}.${address[1]}.${address[2]}`});
  await page.locator('main input[name=email]').fill(email);
  await page.locator('main form').filter({has:page.locator('input[name=email]')}).getByRole('button',{name:/./}).last().click();
  await expect(page.locator('input[name=otp]')).toBeAttached();

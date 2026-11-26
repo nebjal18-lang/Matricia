@@ -12,6 +12,12 @@ vi.mock("next/image", () => ({
 import PublicHomePage from "./page";
 
 describe("PublicHomePage", () => {
+  it("ne duplique pas les raccourcis démo déjà présents sur la connexion", async () => {
+    const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
+    expect(html).not.toContain("Explorer les tableaux de bord démo");
+    expect(html).not.toContain('name="persona" value="admin"');
+  });
+
   it("présente les trois intentions, sept étapes et l’aperçu en français", async () => {
     const html = renderToStaticMarkup(await PublicHomePage({ params: Promise.resolve({ locale: "fr" }) }));
     for (const label of ["Comprendre", "Structurer", "Mettre en relation", "Comparer", "Contractualiser", "Exécuter", "Suivre"]) expect(html).toContain(label);

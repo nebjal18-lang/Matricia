@@ -74,7 +74,7 @@ export function HomePremiumBelow({ locale }: { locale: HomeLocale }) {
         </header>
         <ol className={styles.cycleRail} aria-label={copy.cycleLabel}>
           {copy.cycle.map((step, index) => {
-            const Icon = cycleIcons[index];
+            const Icon = cycleIcons[index] ?? Search;
             return (
               <li key={step}>
                 <span className={styles.cycleIcon}>
@@ -95,7 +95,7 @@ export function HomePremiumBelow({ locale }: { locale: HomeLocale }) {
           <h2 id="outcomes-title">{copy.outcomesTitle}</h2>
           <ul>
             {copy.outcomes.map((outcome, index) => {
-              const Icon = outcomeIcons[index];
+              const Icon = outcomeIcons[index] ?? Lightbulb;
               return (
                 <li key={outcome.title}>
                   <span className={styles.outcomeIcon}>
@@ -116,7 +116,7 @@ export function HomePremiumBelow({ locale }: { locale: HomeLocale }) {
           <p>{copy.networkIntro}</p>
           <ul>
             {copy.networkPillars.map((pillar, index) => {
-              const Icon = networkIcons[index];
+              const Icon = networkIcons[index] ?? ShieldCheck;
               return (
                 <li key={pillar}>
                   <span className={styles.networkIcon}>

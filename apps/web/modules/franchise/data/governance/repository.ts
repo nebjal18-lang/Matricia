@@ -22,7 +22,7 @@ const ledger = z.object({ id: ledgerId, book_id: id, closure_version_id: id.null
 
 export type FranchiseLoadResult = { status: "success"; dashboard: FranchiseDashboard } | { status: "error"; reason: "UNAUTHENTICATED" | "MFA_REQUIRED" | "FORBIDDEN" | "QUERY_FAILED" | "INVALID_RESPONSE" };
 
-export async function loadFranchiseDashboard(locale: "fr" | "ar", scope?: {franchiseId:string;organizationId?:string;libraryId?:string}): Promise<FranchiseLoadResult> {
+export async function loadFranchiseDashboard(locale: "fr" | "ar", scope?: {franchiseId:string;organizationId?:string|undefined;libraryId?:string|undefined}): Promise<FranchiseLoadResult> {
   const access = await loadMyPlatformAccess();
   if (access.status === "error") return { status: "error", reason: access.reason };
   const client = access.client;

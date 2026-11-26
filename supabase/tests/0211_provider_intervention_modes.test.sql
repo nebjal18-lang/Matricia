@@ -19,7 +19,7 @@ insert into modes_result select public.declare_provider_intervention_modes('f211
 select is((select value->>'version_number'from modes_result),'1','first capability version is recorded');
 select is(public.declare_provider_intervention_modes('f2111000-0000-4000-8000-000000000001',array['ONSITE'],'Declaration',0,'f2114000-0000-4000-8000-000000000001'),(select value from modes_result),'normalized replay reuses the same version');
 select throws_ok($$select public.declare_provider_intervention_modes('f2111000-0000-4000-8000-000000000001',array['REMOTE'],'Declaration',0,'f2114000-0000-4000-8000-000000000001')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','same identity cannot silently alter modes');
-select throws_ok($$select public.declare_provider_intervention_modes('f2111000-0000-4000-8000-000000000001',array['REMOTE'],'Declaration',0,'f2114000-0000-4000-8000-000000000002')$$,'40001','PROVIDER_INTERVENTION_VERSION_CONFLICT','stale capability declaration is rejected');
+select throws_ok($$select public.declare_provider_intervention_modes('f2111000-0000-4000-8000-000000000001',array['REMOTE'],'Declaration',0,'f2114000-0000-4000-8000-000000000002')$$,'PT409','PROVIDER_INTERVENTION_VERSION_CONFLICT','stale capability declaration is rejected');
 select ok(private.provider_intervention_mode_matches('f2111000-0000-4000-8000-000000000001','{"intervention_mode":"ONSITE"}'),'exact supported mode matches');
 select ok(not private.provider_intervention_mode_matches('f2111000-0000-4000-8000-000000000001','{"intervention_mode":"REMOTE"}'),'unsupported remote intervention is excluded');
 select ok(not private.provider_intervention_mode_matches('f2111000-0000-4000-8000-000000000001','{"intervention_mode":"HYBRID"}'),'onsite does not invent a hybrid capability');

@@ -108,15 +108,15 @@ export function buildFranchiseSpaceBoard(input: {
   locale: Locale;
   query: string;
   unavailableSections?:string[];
-  libraryName?: string | null;
+  libraryName?: string | null | undefined;
   crm?: FranchiseCrmDashboard | null;
   followups?: FollowupDashboard | null;
   governance?: FranchiseDashboard | null;
   plans?: FranchiseCorrectivePlan[] | null;
   digest?: FranchiseDigestDashboard | null;
   operations?: FranchiseOperationsSnapshot | null;
-  volumeServices?: Array<{ id: string; title: string; status: string; href: string }>;
-  catalogRules?: Array<{ id: string; title: string; status: string; href: string; actions?: Array<{ type: string; target?: string }> }>;
+  volumeServices?: Array<{ id: string; title: string; status: string; href: string }> | undefined;
+  catalogRules?: Array<{ id: string; title: string; status: string; href: string; actions?: Array<{ type: string; target?: string }> }> | undefined;
 }): FranchiseSpaceBoardData {
   const empty = emptyFranchiseSpaces(input.locale, input.query);
   const c = franchiseCopy(input.locale);
@@ -306,7 +306,7 @@ export function buildFranchiseSpaceBoard(input: {
     const prospect = input.followups?.prospects.find((item) => item.id === job.prospectId);
     return {
       id: job.id,
-      displayName: personDisplayLabel({ displayName: prospect?.displayName }, locale),
+      displayName: personDisplayLabel(prospect ? { displayName: prospect.displayName } : {}, locale),
       nextFollowupAt: job.nextAttemptAt,
     };
   })).filter((item) => !isDirectoryFixture({

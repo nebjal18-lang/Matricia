@@ -153,7 +153,7 @@ const franchiseRoles = ["FRANCHISE_OWNER", "FRANCHISE_MANAGER", "FRANCHISE_EXPER
 type FranchiseMandateFailure = { status: "error"; reason: "UNAUTHENTICATED" | "QUERY_FAILED" | "INVALID_RESPONSE" | "NO_MANDATE" | "FORBIDDEN" | "MANDATE_REQUIRED"; availableMandates?: ReturnType<typeof mandateChoiceOptions> };
 type FranchiseMandateSelection = FranchiseMandateFailure | { status: "success"; client: Awaited<ReturnType<typeof getSupabaseServerClient>>; selected: z.infer<typeof franchiseRow>; availableMandates: ReturnType<typeof mandateChoiceOptions>; allowed: Array<z.infer<typeof franchiseRow>>; choice: z.infer<typeof mandateChoicesSchema>["items"][number] };
 
-async function selectFranchiseMandate(input: { locale: "fr" | "ar"; organizationId?: string; franchiseId?: string; libraryId?: string }): Promise<FranchiseMandateSelection> {
+async function selectFranchiseMandate(input: { locale: "fr" | "ar"; organizationId?: string | undefined; franchiseId?: string | undefined; libraryId?: string | undefined }): Promise<FranchiseMandateSelection> {
   const client = await getSupabaseServerClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   const authFailure = classifyAuthReadFailure(authError);
@@ -196,7 +196,7 @@ async function selectFranchiseMandate(input: { locale: "fr" | "ar"; organization
   return { status: "success" as const, client, selected, availableMandates, allowed, choice };
 }
 
-export async function loadFranchiseMandate(input: { locale: "fr" | "ar"; organizationId?: string; franchiseId?: string; libraryId?: string }): Promise<FranchiseMandateFailure | { status: "success"; availableMandates: ReturnType<typeof mandateChoiceOptions>; mandate: { franchiseId: string; libraryId: string; libraryCode: string; libraryName: string; operatorOrganizationId: string; operatorCode: string } }> {
+export async function loadFranchiseMandate(input: { locale: "fr" | "ar"; organizationId?: string | undefined; franchiseId?: string | undefined; libraryId?: string | undefined }): Promise<FranchiseMandateFailure | { status: "success"; availableMandates: ReturnType<typeof mandateChoiceOptions>; mandate: { franchiseId: string; libraryId: string; libraryCode: string; libraryName: string; operatorOrganizationId: string; operatorCode: string } }> {
   const selection = await selectFranchiseMandate(input);
   if (selection.status === "error") return selection;
   return {
@@ -213,7 +213,7 @@ export async function loadFranchiseMandate(input: { locale: "fr" | "ar"; organiz
   };
 }
 
-async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "ar"; organizationId?: string;franchiseId?:string;libraryId?:string;catalog?:CatalogPageInput }): Promise<FranchiseLibraryLoadResult> {
+async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "ar"; organizationId?: string | undefined;franchiseId?: string | undefined;libraryId?: string | undefined;catalog?: CatalogPageInput | undefined }): Promise<FranchiseLibraryLoadResult> {
   const selection = await selectFranchiseMandate(input);
   if (selection.status === "error") return selection;
   const { client, selected, availableMandates, allowed } = selection;
@@ -257,7 +257,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
   if (bundle.library.id !== libraryId) return { status: "error", reason: "FORBIDDEN" };
   const serverPage = bundle.page;
   const groups = serverPage.groups;
-  const library = { success: true as const, data: [bundle.library] };
+  const library = bundle.library;
   const libraryVersions = bundle.libraryVersions;
   const services = bundle.services;
   const serviceVersions = bundle.serviceVersions;
@@ -277,7 +277,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
   const sectionsParsed = { success: true as const, data: bundle.sections };
   const compositionRules = { success: true as const, data: bundle.compositionRules };
   const locale = input.locale;
-  const namedLibrary = libraryVersions.find((item) => item.id === library.data[0]!.current_published_version_id) ?? libraryVersions.find((item) => item.id === library.data[0]!.current_draft_version_id) ?? libraryVersions[0];
+  const namedLibrary = libraryVersions.find((item) => item.id === library.current_published_version_id) ?? libraryVersions.find((item) => item.id === library.current_draft_version_id) ?? libraryVersions[0];
   const q = `?organizationId=${selected.operator_organization_id}&franchiseId=${selected.id}`;
   const pickName = (version: { name_fr: string; name_ar: string } | undefined, fallback: string) => {
     if (!version) return fallback;
@@ -439,11 +439,11 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
         operatorCode: selected.operator_code,
         type: selected.franchise_type,
         libraryId,
-        libraryCode: library.data[0].code,
-        libraryName: (namedLibrary?pickName(namedLibrary,library.data[0].code):library.data[0].code)+(selected.activation_mode==="NON_CONTRACTUAL_DEMO"?(locale==="ar"?" · محاكاة غير تعاقدية":" · Simulation non contractuelle"):""),
-        libraryStatus: library.data[0].status,
-        libraryRowVersion: library.data[0].row_version,
-        currentReleaseId: library.data[0].current_release_id,
+        libraryCode: library.code,
+        libraryName: (namedLibrary?pickName(namedLibrary,library.code):library.code)+(selected.activation_mode==="NON_CONTRACTUAL_DEMO"?(locale==="ar"?" · محاكاة غير تعاقدية":" · Simulation non contractuelle"):""),
+        libraryStatus: library.status,
+        libraryRowVersion: library.row_version,
+        currentReleaseId: library.current_release_id,
         operatorOrganizationId: selected.operator_organization_id,
       },
       counts,
@@ -465,7 +465,7 @@ async function loadFranchiseLibraryWorkspaceUnchecked(input: { locale: "fr" | "a
   };
 }
 
-export async function loadFranchiseLibraryWorkspace(input: {locale: "fr" | "ar";organizationId?: string;franchiseId?:string;libraryId?:string;catalog?:CatalogPageInput}): Promise<FranchiseLibraryLoadResult> {
+export async function loadFranchiseLibraryWorkspace(input: {locale: "fr" | "ar";organizationId?: string | undefined;franchiseId?: string | undefined;libraryId?: string | undefined;catalog?: CatalogPageInput | undefined}): Promise<FranchiseLibraryLoadResult> {
   try { return await loadFranchiseLibraryWorkspaceUnchecked(input); }
   catch(error) {
     if(error instanceof Error && error.message === "FRANCHISE_CATALOG_QUERY_FAILED")return {status:"error",reason:"QUERY_FAILED"};

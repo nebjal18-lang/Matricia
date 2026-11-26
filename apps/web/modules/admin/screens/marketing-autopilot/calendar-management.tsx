@@ -5,6 +5,7 @@ import { Button } from "@/modules/shared/ui/button";
 import { Input } from "@/modules/shared/ui/input";
 import { Label } from "@/modules/shared/ui/label";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
+import { formatDateTimeCasablanca } from "@/modules/shared/lib/format/display";
 import type { MarketingDashboard } from "@/modules/shared/lib/marketing-autopilot/model";
 import { activateScheduleRule, approveAssistedCalendar, createScheduleRule, type MarketingActionState } from "./actions";
 import type { MarketingMessages } from "./messages";
@@ -26,9 +27,10 @@ function Submit({ pending, label, m }: { pending: boolean; label: string; m: Mar
 }
 
 function formatDate(value: string, locale: Locale, withTime = false) {
-  const date = new Date(withTime ? value : `${value}T12:00:00.000Z`);
+  if (withTime) return formatDateTimeCasablanca(value, locale);
+  const date = new Date(`${value}T12:00:00.000Z`);
   if (Number.isNaN(date.valueOf())) return value;
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "long", timeZone: "UTC" }).format(date);
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "long", timeZone: "UTC" }).format(date);
 }
 
 export function CalendarManagement({ dashboard, locale, m, keys }: { dashboard: MarketingDashboard; locale: Locale; m: MarketingMessages; keys: Record<string, string> }) {

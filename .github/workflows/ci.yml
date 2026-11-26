@@ -35,6 +35,8 @@ jobs:
       - run: pnpm test:integration
       - run: pnpm test:tooling
       - run: pnpm no-placeholders
+      - run: pnpm security:public-assets
+      - run: pnpm audit --audit-level high
       - run: pnpm build
         env:
           # Hermetic build bindings belong only to the build. Unit tests inject
@@ -46,8 +48,8 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
-    # The fresh reset and complete SQL/RLS suite include 562 migrations and
-    # exhaustive DSR inventories; keep enough time for all assertions to run.
+    # Replay the complete migration inventory, then test a separately identified
+    # disposable clone. Reset is restricted to this ephemeral CI job.
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
@@ -61,11 +63,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec supabase start
       - run: pnpm exec supabase db reset
-      - run: pnpm test:db
+      - run: node scripts/run-isolated-db-tests.mjs
         env:
-          APP_ENV: development
-          DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          DB_TEST_SOURCE_KIND: clean-local-supabase
+          DB_TEST_SOURCE_PROJECT: Matricia
+          DB_TEST_RELEASE: '1'
 
   browser-public:
     runs-on: ubuntu-latest

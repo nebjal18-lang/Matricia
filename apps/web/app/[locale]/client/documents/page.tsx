@@ -21,7 +21,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const space = await resolveClientSpace({ locale, organizationId: query.organizationId });
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/client/documents` }));
   const page=Math.max(1,Number.parseInt(query.page??"1",10)||1);
-  const result = await loadClientDocumentVault(space.selectedOrganizationId,page,{query:query.q,includePending:true});
+  const result = await loadClientDocumentVault(space.selectedOrganizationId,page,{...(query.q === undefined ? {} : {query:query.q}),includePending:true});
   if (result.status === "error" && result.reason === "UNAUTHENTICATED") redirect(connexionHref(locale, { next: `/${locale}/client/documents` }));
   const reuseResult = await (await getSupabaseServerClient()).rpc("list_my_admin_document_reuse_requests_v1", { p_organization_id: space.selectedOrganizationId });
   const reuse = z.object({ requests: z.array(z.object({ id: z.string().uuid(), document_id: z.string().uuid(), target_type: z.string(), target_id: z.string().uuid(), purpose: z.string(), status: z.string(), created_at: z.string() }).passthrough()) }).passthrough().safeParse(reuseResult.data);

@@ -7,6 +7,7 @@ const publicRoutes = [
   "/besoin",
   "/contact",
   "/diagnostic",
+  "/entreprises",
   "/fournisseur",
   "/franchise",
   "/services",
@@ -42,7 +43,7 @@ for (const locale of ["fr", "ar"] as const) {
       `/${locale}/diagnostic`,
       `/${locale}/besoin`,
       `/${locale}/fournisseur`,
-      `/${locale}/services`,
+      `/${locale}/entreprises`,
       `/${locale}/abonnements`,
       `/${locale}/connexion`,
     ]);

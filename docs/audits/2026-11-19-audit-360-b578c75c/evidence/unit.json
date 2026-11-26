@@ -1,0 +1,10 @@
+{
+  "task": "unit",
+  "command": "corepack pnpm test",
+  "startedAt": "2026-11-19T13:39:11.150Z",
+  "finishedAt": "2026-11-19T13:39:52.370Z",
+  "durationMs": 41219,
+  "exitCode": 1,
+  "nodeVersion": "v22.23.5",
+  "scope": "Current working tree including the two preserved staged corrections; no application source corrections by audit"
+}

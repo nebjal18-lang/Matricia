@@ -111,7 +111,7 @@ function rows<T>(schema: z.ZodType<T>, query: Query): T[] | null {
 function rpcFailure(error: Query["error"]): AssistanceFailure {
   if (error?.code === "42501") return "FORBIDDEN";
   if (error?.code === "22023") return "INVALID_INPUT";
-  if (["23505", "40001", "55000"].includes(error?.code ?? "")) return "CONFLICT";
+  if (["23505", "40001", "PT409", "55000"].includes(error?.code ?? "")) return "CONFLICT";
   return "UNAVAILABLE";
 }
 

@@ -50,11 +50,11 @@ export default async function SessionsPage({ params, searchParams }: { params: P
   return (
     <ConnectedAppShell
       locale={locale}
-      organizationId={query.organizationId}
+      {...(query.organizationId !== undefined && { organizationId: query.organizationId })}
       allowContextFailure
       currentPath={selfPath}
-      nextPath={nextPath}
-      workspace={query.workspace}
+      {...(nextPath !== undefined && { nextPath })}
+      {...(query.workspace !== undefined && { workspace: query.workspace })}
       title={c.sessions}
       lead={messages.description}
       clientActive="company"

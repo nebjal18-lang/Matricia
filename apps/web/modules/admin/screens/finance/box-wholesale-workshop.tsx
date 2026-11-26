@@ -65,7 +65,7 @@ export function BoxWholesaleWorkshop({
   const [code, setCode] = useState("");
   const [state, formAction, pending] = useActionState(createBoxFromWholesaleAction, commerceIdle);
 
-  const offers = catalog?.offers ?? [];
+  const offers = useMemo(() => catalog?.offers ?? [], [catalog]);
   const marginBps = catalog?.margin_bps ?? 1500;
   const visible = useMemo(() => {
     if (mode === "assisted" && subject.trim()) {

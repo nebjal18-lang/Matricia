@@ -129,19 +129,21 @@ export function ProviderSettingsBoard({
                         {category.mandatory ? <span className="client-status-chip" data-tone="peach">{n.mandatory}</span> : null}
                       </header>
                       <div className="space-y-3">
-                        {(["IN_APP", "EMAIL"] as const).map((channel) => (
+                        {(["IN_APP", "EMAIL"] as const).map((channel) => {
+                          const current = notifications.preferences.find((p) => p.category_code === category.code && p.channel === channel);
+                          return (
                           <PreferenceForm
                             key={`${category.code}-${channel}`}
                             organizationId={notifications.organizationId}
                             categoryCode={category.code}
                             channel={channel}
                             mandatory={category.mandatory}
-                            current={notifications.preferences.find((p) => p.category_code === category.code && p.channel === channel)}
+                            {...(current === undefined ? {} : { current })}
                             locale={locale}
                             keyValue={preferenceIdempotencyKey(`${notifications.organizationId}:${category.code}:${channel}`)}
                             m={n}
                           />
-                        ))}
+                        ); })}
                       </div>
                     </section>
                   ))}

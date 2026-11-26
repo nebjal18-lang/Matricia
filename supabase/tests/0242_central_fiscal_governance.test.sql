@@ -1,6 +1,6 @@
 begin;
 set local search_path=public,extensions;
-select plan(24);
+select plan(25);
 grant usage on schema extensions to authenticated;
 insert into auth.users(id,instance_id,aud,role,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)select('f2420000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'00000000-0000-0000-0000-000000000000','authenticated','authenticated','central-fiscal242-'||i||'@example.invalid',now(),'{}','{}',now(),now()from generate_series(1,4)i;
 insert into public.platform_user_roles(user_id,role_code)values('f2420000-0000-4000-8000-000000000001','FINANCE_MANAGER'),('f2420000-0000-4000-8000-000000000002','SUPER_ADMIN'),('f2420000-0000-4000-8000-000000000003','MATRICIA_ADMIN');
@@ -12,7 +12,9 @@ set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"f2420000-0000-4000-8000-000000000004","role":"authenticated","aal":"aal2"}',true);
 select throws_ok($$select public.get_morocco_tax_context_v1()$$,'42501','MOROCCO_TAX_ADMIN_AAL2_REQUIRED','ordinary actor has no platform fiscal context');
 select set_config('request.jwt.claims','{"sub":"f2420000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal2"}',true);
-select throws_ok($$select public.list_morocco_tax_rules()$$,'42501','MOROCCO_TAX_ADMIN_AAL2_REQUIRED','administration role alone cannot read central fiscal governance');
+select ok(jsonb_typeof(public.list_morocco_tax_rules()->'rules')='array','MATRICIA_ADMIN with AAL2 may read central fiscal governance');
+select set_config('request.jwt.claims','{"sub":"f2420000-0000-4000-8000-000000000003","role":"authenticated","aal":"aal1"}',true);
+select throws_ok($$select public.list_morocco_tax_rules()$$,'42501','MOROCCO_TAX_ADMIN_AAL2_REQUIRED','MATRICIA_ADMIN without AAL2 cannot read central fiscal governance');
 select set_config('request.jwt.claims','{"sub":"f2420000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',true);
 select throws_ok($$select public.get_morocco_tax_context_v1()$$,'42501','MOROCCO_TAX_ADMIN_AAL2_REQUIRED','finance context requires AAL2');
 select set_config('request.jwt.claims','{"sub":"f2420000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
@@ -25,7 +27,7 @@ select is(public.propose_morocco_tax_rule(null,'TEST_CENTRAL242','VAT',2000,10,'
 select throws_ok($$select public.propose_morocco_tax_rule(null,'TEST_CENTRAL242','VAT',2100,10,'{}','TEST synthetic fiscal source, not legal approval',current_date,null,'TEST platform fiscal proposal','central-tax242-key')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','central key cannot replay a changed monetary rate');
 select throws_ok($$select public.decide_morocco_tax_rule(null,(select(v->>'tax_rule_version_id')::uuid from results where k='proposal'),'APPROVE','VALIDATED','TEST/242/VALIDATION','TEST independent fiscal validation',1,'central-tax242-review')$$,'42501','MOROCCO_TAX_DECISION_DENIED','author cannot approve their own platform tax rule');
 select set_config('request.jwt.claims','{"sub":"f2420000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
-select throws_ok($$select public.decide_morocco_tax_rule(null,(select(v->>'tax_rule_version_id')::uuid from results where k='proposal'),'APPROVE','VALIDATED','TEST/242/VALIDATION','TEST independent fiscal validation',null,'central-tax242-review-null')$$,'40001','STALE_MOROCCO_TAX_RULE','NULL expected version cannot bypass governance CAS');
+select throws_ok($$select public.decide_morocco_tax_rule(null,(select(v->>'tax_rule_version_id')::uuid from results where k='proposal'),'APPROVE','VALIDATED','TEST/242/VALIDATION','TEST independent fiscal validation',null,'central-tax242-review-null')$$,'PT409','STALE_MOROCCO_TAX_RULE','NULL expected version cannot bypass governance CAS');
 insert into results values('approved',public.decide_morocco_tax_rule(null,(select(v->>'tax_rule_version_id')::uuid from results where k='proposal'),'APPROVE','VALIDATED','TEST/242/VALIDATION','TEST independent fiscal validation',1,'central-tax242-review'));
 select is((select v->>'outcome'from results where k='approved'),'MOROCCO_TAX_RULE_ACTIVATED','distinct central reviewer activates the real validated rule');
 select is(public.decide_morocco_tax_rule(null,(select(v->>'tax_rule_version_id')::uuid from results where k='proposal'),'APPROVE','VALIDATED','TEST/242/VALIDATION','TEST independent fiscal validation',1,'central-tax242-review'),(select v from results where k='approved'),'central decision replays before mutable lifecycle checks');

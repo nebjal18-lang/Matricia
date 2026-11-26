@@ -2,7 +2,7 @@
   "name": "@matricia/domain",
   "version": "0.1.0",
   "private": true,
-  "description": "Vercel root for Matricia web builds that compile apps/web.",
+  "description": "Vercel root for Matricia web builds that compile apps/web (home without demo shortcuts).",
   "type": "module",
   "engines": {
     "node": "22.x"

@@ -1,0 +1,17 @@
+{
+  "task": "typecheck-baseline",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@matricia/web",
+    "exec",
+    "tsc",
+    "--noEmit",
+    "--incremental",
+    "false"
+  ],
+  "startedAt": "2026-11-19T13:57:57.755Z",
+  "finishedAt": "2026-11-19T13:58:37.475Z",
+  "nodeVersion": "v22.23.5",
+  "exitCode": 0
+}

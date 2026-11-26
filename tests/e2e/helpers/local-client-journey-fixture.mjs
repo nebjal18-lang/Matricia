@@ -1,3 +1,4 @@
+import {insertLocalQualityQuestions} from './local-question-quality.mjs';
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { verifyCommandEvidence } from '../../../scripts/p05-e2e/privileged-fixture-adapter.mjs';
@@ -5,12 +6,15 @@ import { verifyCommandEvidence } from '../../../scripts/p05-e2e/privileged-fixtu
 const hash = value => createHash('sha256').update(value).digest('hex');
 async function rpc(client, name, input) {
   const result = await client.rpc(name, input);
-  if (result.error) throw Object.assign(new Error(`LOCAL_CLIENT_${name.toUpperCase()}_FAILED`), {code: result.error.code});
+  if (result.error) {
+    const reason = /^[A-Z][A-Z0-9_]{1,100}$/u.test(result.error.message ?? '') ? result.error.message : 'FAILED';
+    throw Object.assign(new Error(`LOCAL_CLIENT_${name.toUpperCase()}_${reason}`), {code: result.error.code});
+  }
   return result.data;
 }
 
 /** Published reference is a historical precondition; commands below are never bootstrapped. */
-export async function createLocalQuestionnaireReference(fixture) {
+export async function createLocalQuestionnaireReference(fixture, { validitySeconds, assistance = false, quality = false } = {}) {
   if (fixture.config.runtimeMode !== 'isolated-local-docker' || !fixture.config.localDockerVerified || !fixture.resources.localCatalog) throw new Error('LOCAL_REFERENCE_REQUIRED');
   const catalog = fixture.resources.localCatalog;
   const ids = Object.fromEntries(['questionnaire', 'version', 'section', 'question', 'questionVersion','rule','ruleVersion'].map(key => [key, randomUUID()]));
@@ -23,12 +27,15 @@ export async function createLocalQuestionnaireReference(fixture) {
     await tx`insert into public.questionnaire_sections(id,questionnaire_version_id,section_key,label_fr,label_ar,sort_order,content_hash) values(${ids.section}::uuid,${ids.version}::uuid,'GENERAL','Général','عام',1,${digest})`;
     await tx`insert into public.question_bank_questions(id,library_id,question_key,scope,status,created_by) values(${ids.question}::uuid,${catalog.library}::uuid,'LOCAL_READINESS','SERVICE','DRAFT',${actor}::uuid)`;
     const questionPayload={label_fr:'Niveau de préparation',label_ar:'مستوى الاستعداد',answer_type:'INTEGER',data_key:'local.readiness',required_by_default:true,required_for_quote:false,required_for_publication:false,options:[],validation_schema:{minimum:0,maximum:1},structured_schema:null,sensitivity:'BUSINESS',nullable:false,weight:1,maximum_score:1,source_service_id:catalog.service};
+    if (validitySeconds !== undefined) questionPayload.validity_seconds = validitySeconds;
+    if (assistance) Object.assign(questionPayload, {prefill_source:'ORGANIZATION',help_fr:'Exemple : 1 signifie que votre processus est prêt, 0 qu’il reste à préparer.',help_ar:'مثال: 1 يعني أن العملية جاهزة، و0 أنها تحتاج إلى إعداد.',why_we_ask_fr:'Cette réponse permet de proposer une amélioration adaptée à votre situation.',why_we_ask_ar:'تساعد هذه الإجابة على اقتراح تحسين يناسب وضعكم.'});
     await tx`select private.assert_question_builder_payload(${catalog.library}::uuid,'SERVICE',${tx.json(questionPayload)})`;
     const[questionVersion]=await tx`select private.insert_question_builder_version(${ids.question}::uuid,${catalog.library}::uuid,${tx.json(questionPayload)},'Précondition historique de recette locale',${actor}::uuid,1)as id`;
     ids.questionVersion=questionVersion.id;
     await tx`update public.question_versions set status='PUBLISHED',published_at=clock_timestamp(),translation_review_status='APPROVED',translation_reviewer_user_id=${fixture.resources.userIds[2]}::uuid,translation_reviewed_at=clock_timestamp(),translation_review_proof_hash=${digest},translation_review_version=1 where id=${ids.questionVersion}::uuid`;
     await tx`update public.question_bank_questions set status='PUBLISHED',current_published_version_id=${ids.questionVersion}::uuid where id=${ids.question}::uuid`;
     await tx`insert into public.questionnaire_version_questions(questionnaire_version_id,library_id,section_id,question_version_id,sort_order) values(${ids.version}::uuid,${catalog.library}::uuid,${ids.section}::uuid,${ids.questionVersion}::uuid,1)`;
+    if(quality)await insertLocalQualityQuestions(fixture,tx,ids,catalog,actor,digest);
     const rulePayload={condition_ast:{operator:'EQ',question_version_id:ids.questionVersion,value:1},actions:[
       {type:'SCORE',dimension:'PROCESS',delta_basis_points:5000},
       {type:'ANOMALY',target:'RECIPE_PROCESS_REVIEW',metadata:{label_fr:'Contrôle de processus requis (recette)',label_ar:'مراجعة العملية مطلوبة (اختبار)',title_fr:'Contrôle de processus requis (recette)',title_ar:'مراجعة العملية مطلوبة (اختبار)',client_text_fr:'La réponse publiée déclenche ce contrôle de recette.',client_text_ar:'تؤدي الإجابة إلى هذا الفحص التجريبي.',severity:'WARNING',blocking:false}},
@@ -50,8 +57,22 @@ export async function createLocalQuestionnaireReference(fixture) {
   return ids;
 }
 
-export async function prepareLocalClientJourneys(fixture,activatedActors) {
-  const questionnaire = await createLocalQuestionnaireReference(fixture);
+export async function prepareLocalClientJourneys(fixture,activatedActors, questionnaireOptions) {
+  const questionnaire = await createLocalQuestionnaireReference(fixture, questionnaireOptions);
+  // Historical local policy, not a tested commercial entitlement publication.
+  // Never replace a configured policy or bypass the real quota checks.
+  fixture.resources.localTrialEntitlements = [];
+  await fixture.resources.database.begin(async tx => {
+    await tx`select pg_advisory_xact_lock(hashtextextended('local-e2e-trial-reference',0))`;
+    for (const resource of ['PROJECTS', 'DIAGNOSTICS', 'REPORTS']) {
+      const [existing] = await tx`select id from public.trial_entitlement_versions where status='ACTIVE' and effective_from<=statement_timestamp() and (effective_to is null or effective_to>statement_timestamp()) and coalesce(configuration->>'resource',entitlement_code)=${resource} limit 1`;
+      if (existing) continue;
+      const id = randomUUID();
+      const configuration = {resource, localFixtureRunId: fixture.manifest.runId};
+      await tx`insert into public.trial_entitlement_versions(id,entitlement_code,version,status,enabled,quota_value,configuration,effective_from,effective_to,content_hash,created_by) values(${id}::uuid,${`LOCAL_${id.replaceAll('-', '').toUpperCase()}`},1,'ACTIVE',true,10,${tx.json(configuration)},clock_timestamp(),clock_timestamp()+interval '1 hour',${hash(JSON.stringify(configuration))},${fixture.resources.userIds[0]}::uuid)`;
+      fixture.resources.localTrialEntitlements.push(id);
+    }
+  });
   const evidence = [], cases = {};
   const [service] = await fixture.resources.database`select code from public.catalog_services where id=${fixture.resources.localCatalog.service}::uuid`;
   for (const [locale, key] of [['fr','clientA'], ['ar','clientB']]) {
@@ -154,10 +175,18 @@ export async function verifyLocalClientJourneys(fixture,cases) {
 }
 
 export async function neutralizeLocalQuestionnaireReference(fixture) {
+  if (fixture.resources.localTrialEntitlements?.length) {
+    if (fixture.config.runtimeMode !== 'isolated-local-docker' || !fixture.config.localDockerVerified) throw new Error('LOCAL_REFERENCE_REQUIRED');
+    await fixture.resources.database.begin(async tx => {
+      await tx.unsafe("set local session_replication_role='replica'");
+      await tx`update public.trial_entitlement_versions set status='RETIRED',effective_to=clock_timestamp() where id=any(${fixture.resources.localTrialEntitlements}::uuid[]) and configuration->>'localFixtureRunId'=${fixture.manifest.runId}`;
+    });
+  }
   const ids=fixture.resources.localClientQuestionnaire;
   if(!ids)return;
   await fixture.resources.database.begin(async tx=>{
     await tx.unsafe("set local session_replication_role='replica'");
+    for(const question of ids.qualityQuestions??[]){await tx`update public.question_versions set status='SUPERSEDED',superseded_at=clock_timestamp() where id=${question.version}::uuid and status='PUBLISHED'`;await tx`update public.question_bank_questions set status='ARCHIVED',archived_at=clock_timestamp() where id=${question.question}::uuid`;}
     await tx`update public.questionnaire_versions set status='SUPERSEDED',superseded_at=clock_timestamp() where id=${ids.version}::uuid and status='PUBLISHED'`;
     await tx`update public.questionnaires set status='ARCHIVED',archived_at=clock_timestamp() where id=${ids.questionnaire}::uuid`;
     await tx`update public.question_versions set status='SUPERSEDED',superseded_at=clock_timestamp() where id=${ids.questionVersion}::uuid and status='PUBLISHED'`;

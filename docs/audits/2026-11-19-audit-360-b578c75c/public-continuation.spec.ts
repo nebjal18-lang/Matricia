@@ -1,0 +1,38 @@
+import { test, expect } from '@playwright/test';
+import { getPublicJourneyCopy } from '../../../apps/web/modules/public/data/journey/copy';
+
+test('reprise réelle FR vers AR avec libellé traduit et contexte conservé, sans soumission', async ({ page }, info) => {
+  const mutations: string[] = [];
+  page.on('request', request => { if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) mutations.push(request.method() + ' ' + new URL(request.url()).pathname); });
+  await page.goto('/fr/besoin');
+  const originalNeed = 'Rénover un local et suivre les travaux à Casablanca.';
+  await page.getByRole('textbox', { name: '1. Décrire le besoin', exact: true }).fill(originalNeed);
+  await page.getByRole('button', { name: 'Continuer', exact: true }).first().click();
+  await page.locator('#need-library').selectOption('BTP');
+  await page.locator('#need-service').selectOption('BTP-RENOV');
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('matricia.public-need') ?? '{}').classification?.serviceCode)).toBe('BTP-RENOV');
+  await page.goto('/ar/besoin');
+  const copy = getPublicJourneyCopy('ar');
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(page.locator('#need-service')).toHaveValue('BTP-RENOV');
+  await expect(page.locator('#need-service option[value="BTP-RENOV"]')).toHaveAttribute('lang', 'ar');
+  await expect(page.locator('#need-service option[value="BTP-RENOV"]')).toHaveText('تجديد مبنى أو محل');
+  await expect(page.getByText(originalNeed, { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: copy.need.continue, exact: true }).first().click();
+  await page.locator('#need-location').fill('Casablanca — الدار البيضاء');
+  await page.locator('#need-timing').fill('Trois mois');
+  await page.locator('#need-constraints').fill('Accès uniquement en journée');
+  await page.getByRole('button', { name: copy.need.continue, exact: true }).first().click();
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '4');
+  await page.getByRole('button', { name: 'عرض الملخص', exact: true }).first().click();
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '5');
+  await expect(page.getByText(originalNeed, { exact: true })).toBeVisible();
+  await expect(page.getByText('Trois mois', { exact: true })).toBeVisible();
+  await expect(page.getByText('Accès uniquement en journée', { exact: true })).toBeVisible();
+  const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
+  expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport);
+  await page.screenshot({ path: info.outputPath('ar-recap-real-label.png'), fullPage: true });
+  await page.reload();
+  await expect(page.getByText(originalNeed, { exact: true })).toBeVisible();
+  expect(mutations).toEqual([]);
+});

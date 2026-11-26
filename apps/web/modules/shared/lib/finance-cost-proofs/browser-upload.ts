@@ -49,7 +49,7 @@ function rpcFailure(error: { code?: string; message?: string } | null, fallback:
   if (!error) return fallback;
   if (error.code === "42501") return /(?:MFA|AAL2)/i.test(error.message ?? "") ? "MFA_REQUIRED" : "FORBIDDEN";
   if (error.code === "PGRST301" || error.code === "PGRST303") return "UNAUTHENTICATED";
-  if (["40001", "23505", "22000"].includes(error.code ?? "")) return "CONFLICT";
+  if (["40001", "PT409", "23505", "22000"].includes(error.code ?? "")) return "CONFLICT";
   return fallback;
 }
 

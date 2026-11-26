@@ -59,6 +59,6 @@ export async function assignProviderMission(_:DeliveryActionState,form:FormData)
  const parsed=z.object({locale:z.enum(["fr","ar"]),missionId:z.string().uuid(),userId:z.string().uuid(),assigned:z.enum(["true","false"]),reason:z.string().trim().min(3).max(1000),idempotencyKey:z.string().uuid()}).safeParse(Object.fromEntries(form));
  if(!parsed.success)return{status:"error",reason:"VALIDATION"};const client=await getSupabaseServerClient(),auth=await client.auth.getUser();if(!auth.data.user)return{status:"error",reason:"UNAUTHENTICATED"};
  const p=parsed.data,result=await client.rpc("assign_provider_mission_v1",{p_mission_id:p.missionId,p_user_id:p.userId,p_assigned:p.assigned==="true",p_reason:p.reason,p_idempotency_key:p.idempotencyKey});
- if(result.error)return{status:"error",reason:result.error.code==="42501"?"FORBIDDEN":result.error.code==="40001"||result.error.code==="55000"?"CONFLICT":"FAILED"};
+ if(result.error)return{status:"error",reason:result.error.code==="42501"?"FORBIDDEN":(result.error.code==="40001" || result.error.code === "PT409")||result.error.code==="55000"?"CONFLICT":"FAILED"};
  const response=output.safeParse(result.data);if(response.success&&response.data.outcome==="MISSION_ASSIGNMENT_RECORDED")refreshMissionViews(parsed.data.locale);return response.success&&response.data.outcome==="MISSION_ASSIGNMENT_RECORDED"?{status:"success",outcome:response.data.outcome}:{status:"error",reason:"FAILED"};
 }

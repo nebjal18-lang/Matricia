@@ -2,6 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { casablancaLocalToIso } from "@/modules/shared/lib/geo/casablanca-time";
 import type { SolutionFailure } from "@/modules/shared/lib/solution-insights/contracts";
 import { createServerSolutionInsightsRepository } from "@/modules/shared/lib/solution-insights/server-repository";
 import { solutionDecision, solutionLevel, uuid } from "@/modules/shared/lib/solution-insights/model";
@@ -18,7 +19,10 @@ export async function decideAction(_: State, form: FormData): Promise<State> {
   const parsed = input.safeParse(Object.fromEntries(form.entries()));
   if (!parsed.success || (parsed.data.decision === "DEFERRED") !== Boolean(parsed.data.deferredUntil)) return { status: "error", reason: "VALIDATION" };
   const value = parsed.data;
-  const result = await (await createServerSolutionInsightsRepository()).decide({ solutionSetId: value.solutionSetId, level: value.level, decision: value.decision, reason: value.reason, deferredUntil: value.deferredUntil ? `${value.deferredUntil}T23:59:59Z` : null, idempotencyKey: value.idempotencyKey, correlationId: randomUUID() });
+  const localEndMinute = value.deferredUntil ? casablancaLocalToIso(`${value.deferredUntil}T23:59`) : null;
+  if (value.deferredUntil && !localEndMinute) return { status: "error", reason: "VALIDATION" };
+  const deferredUntil = localEndMinute ? new Date(Date.parse(localEndMinute) + 59_000).toISOString() : null;
+  const result = await (await createServerSolutionInsightsRepository()).decide({ solutionSetId: value.solutionSetId, level: value.level, decision: value.decision, reason: value.reason, deferredUntil, idempotencyKey: value.idempotencyKey, correlationId: randomUUID() });
   if (result.status === "error") return { status: "error", reason: actionReason(result.reason) };
   revalidatePath(`/${value.locale}/client/diagnostics/solutions`);
   return { status: "success" };

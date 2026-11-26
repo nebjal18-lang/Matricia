@@ -19,7 +19,7 @@ export default async function PublishedServicePage({ params, searchParams }: {
   const [{ locale, librarySlug, serviceSlug }, rawQuery] = await Promise.all([params, searchParams]);
   if (!isLocale(locale)) notFound();
   const copy = getCatalogMessages(locale);
-  const query = parseCatalogQuery({ releaseId: rawQuery.release, librarySlug });
+  const query = parseCatalogQuery({ ...(rawQuery.release !== undefined && { releaseId: rawQuery.release }), librarySlug });
   const result = query.releaseId
     ? await getPublishedCatalogService({ locale, releaseId: query.releaseId, librarySlug, serviceSlug })
     : { status: "success" as const, detail: null };

@@ -1,4 +1,5 @@
 import { validFixtureProject } from "./helpers/fixture-project.mjs";
+import { settleVisualState } from "./helpers/settled-visual-state";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
@@ -76,6 +77,7 @@ function loadAuthenticatedFixture(): Manifest {
 const manifest = loadAuthenticatedFixture();
 
 async function expectAccessibleReflow(page: Page, locale: Locale) {
+  await settleVisualState(page);
   await expect(page.locator("html")).toHaveAttribute("lang", locale);
   await expect(page.locator("html")).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
   const dimensions = await page.evaluate(() => ({
@@ -140,8 +142,9 @@ for (const locale of ["fr", "ar"] as const) {
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         await expect(page.getByRole("heading", { level: 1, name: login[locale].title })).toHaveCount(0);
         await expect(page.locator("body")).not.toContainText(manifest.fixtures.organizationB.name);
+        await expect(page.locator("body")).not.toContainText(locale==="ar"?"عميل اختبار B":"Client test B");
         if (route === "client/missions" || route === "client/abonnement" || route === "notifications") {
-          await expect(page.locator("body")).toContainText(manifest.fixtures.organizationA.name);
+          await expect(page.locator("body")).toContainText(locale==="ar"?"عميل اختبار A":"Client test A");
         }
         await expectAccessibleReflow(page, locale);
       }
@@ -158,7 +161,9 @@ for (const locale of ["fr", "ar"] as const) {
         await page.goto(`/${locale}/${route}`);
         await expect(async () => {
           if (new URL(page.url()).pathname.replace(/\/$/u, "") === `/${locale}/${route}`) {
-            await expect(page.locator('[data-slot="alert"].text-destructive, [data-error-reason="FORBIDDEN"]')).toBeVisible({ timeout: 500 });
+            const noMandate=locale==="fr"?"Aucun mandat de bibliothèque actif accessible":"لا يوجد تكليف نشط بمكتبة متاح لهذا الحساب";
+            const noProvider=locale==="fr"?"Aucune organisation prestataire autorisée":"لا توجد مؤسسة مقدم خدمة مخولة";
+            await expect(page.locator('[data-workspace-failure="FORBIDDEN"], [data-error-reason="FORBIDDEN"], [data-error-reason="NO_PROVIDER_ORGANIZATION"]').or(page.getByText(noMandate,{exact:true})).or(page.getByRole("heading",{level:2,name:noProvider,exact:true})).first(),`Access denial on ${route}`).toBeVisible({ timeout: 500 });
           } else {
             await expect(page).toHaveURL(new RegExp(`/${locale}/(tableau-de-bord|connexion|organisation)(?:[/?#]|$)`), { timeout: 500 });
           }

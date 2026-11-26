@@ -1,4 +1,4 @@
-begin;set local search_path=public,extensions;select plan(12);
+begin;set local search_path=public,extensions;select plan(13);
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values
 ('a8900000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','manager-f1-89@example.invalid','',now(),'{}','{}',now(),now()),
 ('a8900000-0000-4000-8000-000000000002','00000000-0000-0000-0000-000000000000','authenticated','authenticated','recipient-f1-89@example.invalid','',now(),'{}','{}',now(),now()),
@@ -122,6 +122,7 @@ insert into functional_results values('CONTRACT',public.franchise_partner_contra
 select is((select value->'network'->>'providers'from functional_results where kind='METRICS'),'2','network denominator counts actual providers rather than CRM display rows');
 select is((select value->'network'->>'activeProviders'from functional_results where kind='METRICS'),'1','only provider with signed contract and current approved qualification is active');
 select is((select value->'network'->>'qualifiedProviders'from functional_results where kind='METRICS'),'1','qualification is distinct from capacity and CRM stage');
+select is((select p->>'activitySummary' from functional_results cross join lateral jsonb_array_elements(value)p where kind='DOSSIERS' and p->>'organizationId'='f1541000-0000-4000-8000-000000000002'),'Fournisseur disponible','dossier retains the provider activity summary');
 select is((select p->'partnerContract'->>'version'from functional_results cross join lateral jsonb_array_elements(value)p where kind='DOSSIERS'and p->>'organizationId'='f1541000-0000-4000-8000-000000000002'),'2','calendar uses latest immutable company decision');
 select is((select jsonb_array_length(value->'history')from functional_results where kind='CONTRACT'),2,'contract history preserves previous decisions');
 select is((select value->'history'->0->>'ruleVersion'from functional_results where kind='CONTRACT'),'CONTRACT_V2','history displays the frozen rule version');

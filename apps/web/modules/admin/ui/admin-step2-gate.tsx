@@ -9,11 +9,12 @@ export function AdminStep2Gate({
 }: {
   locale: Locale;
   query?: string;
-  current: "candidatures" | "gouvernance" | "franchises" | "territoires";
+  current: "candidatures" | "gouvernance" | "franchises" | "territoires" | "relances";
 }) {
   const fr = locale === "fr";
   const q = query.startsWith("?") || query === "" ? query : `?${query}`;
   const steps = [
+    { id: "relances" as const, href: `/${locale}/administration/relances-franchise`, label: fr ? "Règles de relance" : "قواعد المتابعة" },
     { id: "candidatures" as const, href: `/${locale}/administration/candidatures-franchise${q}`, label: fr ? "Candidatures" : "الترشيحات" },
     { id: "gouvernance" as const, href: `/${locale}/administration/gouvernance${q}`, label: fr ? "Gouvernance" : "الحوكمة" },
     { id: "franchises" as const, href: `/${locale}/administration/franchises${q}`, label: fr ? "Annuaire actifs" : "دليل النشطين" },

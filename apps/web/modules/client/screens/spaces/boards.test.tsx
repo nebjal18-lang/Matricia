@@ -50,6 +50,14 @@ describe("client space boards", () => {
     vi.unstubAllEnvs();
   });
 
+  it.each(["fr", "ar"] as const)("preserves the persisted request detail URL in demo mode (%s)", (locale) => {
+    vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "true"); vi.stubEnv("APP_ENV", "development");
+    const href = `/${locale}/client/demandes/real-request?organizationId=real-org`;
+    const html = renderToStaticMarkup(<RequestsBoard locale={locale} query="?organizationId=real-org" compareHref={href} rows={[{ id: "real-request", title: "Persisted request", status: "DRAFT", last: "2026-11-19", next: "Open", href, tone: "violet" }]} />);
+    expect(html).toContain(href);
+    expect(html).toContain("Persisted request");
+  });
+
   it("affiche la conversation réelle au centre hors mode démo", () => {
     vi.stubEnv("MATRICIA_DEMO_ACCESS_ENABLED", "false");
     vi.stubEnv("APP_ENV", "production");
@@ -83,7 +91,7 @@ describe("client space boards", () => {
     vi.stubEnv("APP_ENV", "test");
     const html = [
       renderToStaticMarkup(<DiagnosticsBoard locale="fr" questionnaireHref="/fr/client/questionnaires" evolutionHref="/fr/client/diagnostics/evolution" analyseHref="/fr/client/diagnostics#analyse" score={null} ratingLabel={null} libraryScores={[]} findings={[]} opportunities={[]} runs={[]} hasSubmittedAssessment={false} />),
-      renderToStaticMarkup(<RequestsBoard locale="fr" query="" compareHref="/fr/client/demandes" rows={[{ id: "x", title: "Demande de démonstration à ignorer", status: "Brouillon", last: "Hier", next: "Ouvrir", href: "/fr/client/demandes", tone: "violet" }]} organizationName="Client · Communication" />),
+      renderToStaticMarkup(<RequestsBoard locale="fr" query="" compareHref="/fr/client/demandes" rows={[{ id: "x", title: "Demande persistée", status: "Brouillon", last: "Hier", next: "Ouvrir", href: "/fr/client/demandes", tone: "violet" }]} organizationName="Client · Communication" />),
       renderToStaticMarkup(<MissionsBoard locale="fr" query="" />),
       renderToStaticMarkup(<DocumentsBoard locale="fr" query="" />),
       renderToStaticMarkup(<FinancesBoard locale="fr" query="" />),
@@ -95,12 +103,12 @@ describe("client space boards", () => {
     expect(html).toContain("Reprendre le bilan");
     expect(html).toContain("Mes bilans");
     expect(html).toContain("Avancez à votre rythme");
-    expect(html).toContain("Structurer votre organisation");
+    expect(html).not.toContain("Structurer votre organisation");
     expect(html).toContain("Toutes vos demandes");
     expect(html).not.toContain("Demande de démonstration à ignorer");
-    expect(html).toContain("Conseil stratégique");
+    expect(html).not.toContain("Conseil stratégique");
     expect(html).toContain("Tous les statuts");
-    expect(html).toContain("Valider un livrable");
+    expect(html).not.toContain("Valider un livrable");
     expect(html).toContain("Une collaboration en toute confiance");
     expect(html).toContain("Plus loin aujourd’hui, pour demain.");
     expect(html).toContain("Documents récents par dossier");
@@ -112,7 +120,7 @@ describe("client space boards", () => {
     expect(html).toContain("Personnes et rôles");
     expect(html).toContain("Client · Communication");
     expect(html).not.toMatch(/exemple illustratif/i);
-    expect(html).toContain("Contrat de prestation");
+    expect(html).not.toContain("Contrat de prestation");
     expect(renderToStaticMarkup(<SpaceActions href="/fr/besoin" label="Créer un besoin" />)).toContain("client-cta");
     const disputes = renderToStaticMarkup(
       <DisputesBoard locale="fr" query="" organizationName="Client · Communication" cases={[]} selected={null} messages={getDisputeMessages("fr")} canOpen />,

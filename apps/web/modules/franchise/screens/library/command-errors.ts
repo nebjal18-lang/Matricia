@@ -10,7 +10,7 @@ export function editorialWorkspaceFailure(reason: Extract<FranchiseLibraryLoadRe
 }
 export function editorialRpcFailure(error: {code?:string}): EditorialFailureReason {
   if (error.code === "42501") return "FORBIDDEN";
-  if (error.code === "40001" || error.code === "23P01" || error.code === "22000") return "CONFLICT";
+  if ((error.code === "40001" || error.code === "PT409") || error.code === "23P01" || error.code === "22000") return "CONFLICT";
   if (error.code === "55000") return "LOCKED";
   if (error.code === "22023" || error.code === "23514" || error.code === "23505") return "VALIDATION";
   return "UNAVAILABLE";

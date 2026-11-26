@@ -94,7 +94,7 @@ export default async function ClientContractsPage({
                   {result.status === "success" && contract.status === "PENDING_SIGNATURE" ? (
                     <SignContractForm contract={contract} organizationId={result.dashboard.organizationId} locale={locale} messages={messages} />
                   ) : null}
-                  {contract.status!=="DRAFT"&&contract.status!=="PENDING_SIGNATURE"?<SignatureReadinessNotice locale={locale} readiness={contract.signatureReadiness}/>:null}
+                  {contract.status!=="DRAFT"&&contract.status!=="PENDING_SIGNATURE"?<SignatureReadinessNotice locale={locale} {...(contract.signatureReadiness === undefined ? {} : {readiness: contract.signatureReadiness})}/>:null}
                   {missionId ? (
                     <Link href={`/${locale}/client/missions/${missionId}${space.selectedQuery}`} className="client-text-link">
                       {c.contractsOpenMission}

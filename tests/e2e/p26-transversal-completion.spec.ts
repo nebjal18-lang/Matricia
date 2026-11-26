@@ -1,31 +1,33 @@
 import { existsSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { workspaceUrl } from "./helpers/workspace-url";
+import { settleVisualState } from "./helpers/settled-visual-state";
 
 type Locale = "fr" | "ar";
 type Surface = { route: string; heading: Record<Locale, string>; evidence?: Record<Locale, string> };
 
 const clientSurfaces: Surface[] = [
-  { route: "client/documents", heading: { fr: "Coffre documentaire transversal", ar: "خزنة المستندات المشتركة" }, evidence: { fr: "Chaque liaison exige une authentification renforcée", ar: "تتطلب كل وصلة مصادقة قوية" } },
+  { route: "client/documents", heading: { fr: "Documents", ar: "الوثائق" }, evidence: { fr: "Liaisons et historique", ar: "الروابط والسجل" } },
   { route: "client/portefeuille", heading: { fr: "Portefeuille Client", ar: "محفظة العميل" }, evidence: { fr: "Centres de coûts", ar: "مراكز التكلفة" } },
   { route: "client/recompenses", heading: { fr: "Récompenses, parrainage et ROI", ar: "المكافآت والإحالة والعائد" }, evidence: { fr: "Tous les montants et crédits restent en entiers exacts", ar: "تبقى جميع المبالغ والأرصدة أعداداً صحيحة دقيقة" } },
   { route: "client/questionnaires", heading: { fr: "Mes questionnaires", ar: "استبياناتي" }, evidence: { fr: "Enregistrement sécurisé", ar: "حفظ آمن" } },
 ];
 
 const franchiseSurfaces: Surface[] = [
-  { route: "franchise/relances", heading: { fr: "Relances automatiques", ar: "المتابعات التلقائية" }, evidence: { fr: "Ce moteur ne change jamais le pipeline", ar: "لا يغيّر هذا المحرك مسار التحويل" } },
+  { route: "franchise/relances", heading: { fr: "Relances et pipeline", ar: "المتابعات والمسار" }, evidence: { fr: "Ce moteur ne change jamais le pipeline", ar: "لا يغيّر هذا المحرك مسار التحويل" } },
   { route: "franchise/digest", heading: { fr: "Résumé quotidien", ar: "الملخص اليومي" }, evidence: { fr: "Ce résumé n’affiche aucun nom", ar: "لا يعرض هذا الملخص أي اسم" } },
 ];
 
 const adminSurfaces: Surface[] = [
-  { route: "administration/command-center", heading: { fr: "Toutes les pages d’administration", ar: "كل صفحات الإدارة" }, evidence: { fr: "Actions sensibles", ar: "إجراءات حسّاسة" } },
-  { route: "administration/approbations-finance", heading: { fr: "Approbations métier et commissions", ar: "موافقات الأعمال والعمولات" }, evidence: { fr: "réconciliation strictement un-à-un", ar: "مطابقة واحد لواحد" } },
-  { route: "administration/finance", heading: { fr: "Paiements et abonnements", ar: "المدفوعات والاشتراكات" }, evidence: { fr: "À traiter", ar: "يتطلب المعالجة" } },
-  { route: "administration/incitations", heading: { fr: "Récompenses, badges et parrainage", ar: "المكافآت والشارات والإحالة" }, evidence: { fr: "Contrôle sensible", ar: "التحكم الحساس" } },
-  { route: "administration/clonage", heading: { fr: "Clonage de contenu avec provenance", ar: "استنساخ المحتوى مع المصدر" }, evidence: { fr: "sans modifier la source", ar: "دون تعديل المصدر" } },
+  { route: "administration/command-center", heading: { fr: "Centre de pilotage", ar: "مركز القيادة" }, evidence: { fr: "Répertoire plateforme", ar: "دليل المنصة" } },
+  { route: "administration/approbations-finance", heading: { fr: "Approbations métier et commissions", ar: "موافقات الأعمال والعمولات" }, evidence: { fr: "Réconcilier au payable réel", ar: "مطابقة حدث الدفع" } },
+  { route: "administration/finance", heading: { fr: "Finance du jour : paiements et sorties", ar: "مالية اليوم: المدفوعات والمصروفات" }, evidence: { fr: "À traiter aujourd’hui", ar: "للمعالجة اليوم" } },
+  { route: "administration/incitations", heading: { fr: "Récompenses, badges et parrainage", ar: "المكافآت والشارات والإحالة" }, evidence: { fr: "Les créations et décisions exigent AAL2.", ar: "تتطلب الإنشاءات والقرارات AAL2." } },
+  { route: "administration/clonage", heading: { fr: "Clonage de contenu avec provenance", ar: "استنساخ المحتوى مع المصدر" }, evidence: { fr: "Cloner une checklist de service", ar: "استنساخ قائمة تحقق للخدمة" } },
   { route: "administration/questionnaires/analytique", heading: { fr: "Abandons des questionnaires", ar: "التخلي عن الاستبيانات" }, evidence: { fr: "Confidentialité garantie", ar: "خصوصية مضمونة" } },
-  { route: "administration/anti-abus", heading: { fr: "Détection transversale des abus", ar: "مكافحة إساءة الاستخدام" }, evidence: { fr: "revue humaine avant décision", ar: "مراجعة بشرية قبل القرار" } },
-  { route: "administration/operations", heading: { fr: "Notifications, audit et Outbox", ar: "الإشعارات والتدقيق وصندوق الأحداث" } },
+  { route: "administration/anti-abus", heading: { fr: "Contrôle des abus", ar: "مراقبة إساءة الاستخدام" }, evidence: { fr: "File de revue", ar: "قائمة المراجعة" } },
+  { route: "administration/operations", heading: { fr: "Notifications, audit et file d’événements", ar: "الإشعارات والتدقيق وطابور الأحداث" } },
 ];
 
 async function openAuthenticated(browser: Browser, storageState: string, locale: Locale, mobile: boolean) {
@@ -40,20 +42,26 @@ async function openAuthenticated(browser: Browser, storageState: string, locale:
 }
 
 async function assertSurface(page: Page, locale: Locale, surface: Surface) {
-  await page.goto(`/${locale}/${surface.route}`);
-  await expect(page).toHaveURL(new RegExp(`/${locale}/${surface.route}/?$`));
+  const url = workspaceUrl(locale, surface.route);
+  await page.goto(url);
+  await expect(page).toHaveURL(url);
+  await expect(page.locator('[data-workspace-failure], [data-error-reason]')).toHaveCount(0);
   await expect(page.locator("html")).toHaveAttribute("lang", locale);
   await expect(page.locator("html")).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
   await expect(page.getByRole("heading", { level: 1, name: surface.heading[locale] })).toBeVisible();
+  for (const summary of await page.locator("details.client-ops:not([open]) > summary, #admin-directory:not([open]) > summary, #commissions:not([open]) > summary").all()) await summary.click();
   if (surface.evidence) await expect(page.getByText(surface.evidence[locale], { exact: false }).first()).toBeVisible();
   const foreignOrganization = process.env.E2E_FOREIGN_ORGANIZATION_NAME;
   if (foreignOrganization) await expect(page.locator("body")).not.toContainText(foreignOrganization);
   const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport);
+  await page.getByRole("link").first().focus();
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toBeVisible();
+  await settleVisualState(page);
   const audit = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
-  expect(audit.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.flatMap((node) => node.target) }))).toEqual([]);
+  const violations=audit.violations.map(({ id, impact, nodes }) => ({ id, impact, nodes: nodes.map(({target,failureSummary})=>({target,failureSummary})) }));
+  expect(violations,JSON.stringify({route:surface.route,violations})).toEqual([]);
 }
 
 for (const locale of ["fr", "ar"] as const) {

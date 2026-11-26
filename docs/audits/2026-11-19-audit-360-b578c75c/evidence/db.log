@@ -1,0 +1,69 @@
+PASS 0001_schema_rls.test.sql
+PASS 0002_tenant_isolation.test.sql
+PASS 0003_immutable_ledgers.test.sql
+PASS 0004_financial_rpcs.test.sql
+PASS 0005_outbox_dispatch.test.sql
+PASS 0006_security_invariants.test.sql
+PASS 0007_p03_rls_matrix.test.sql
+PASS 0008_p03_audit_outbox.test.sql
+PASS 0009_p03_financial_concurrency.test.sql
+PASS 0010_p04_identity_workflows.test.sql
+PASS 0011_readiness_probe.test.sql
+PASS 0012_least_privilege_acl.test.sql
+PASS 0013_p04_role_requests.test.sql
+PASS 0014_p04_invitation_decline.test.sql
+PASS 0015_p04_email_invitations.test.sql
+PASS 0016_p04_account_security_policy.test.sql
+PASS 0017_p05_client_onboarding.test.sql
+PASS 0018_p04_identity_security_hardening.test.sql
+PASS 0019_p04_account_security_audit_saga.test.sql
+PASS 0020_p05_client_compliance_documents.test.sql
+PASS 0021_p05_compliance_questions.test.sql
+PASS 0022_p05_document_security_hardening.test.sql
+PASS 0023_p05_compliance_anomaly_matrix.test.sql
+PASS 0024_p06_catalog_core.test.sql
+PASS 0025_p06_question_engine_persistence.test.sql
+PASS 0026_p06_client_catalog_read_api.test.sql
+PASS 0027_p06_catalog_version_insert_compatibility.test.sql
+PASS 0028_p06_catalog_version_explicit_snapshot_compatibility.test.sql
+PASS 0029_p06_catalog_snapshot_lifecycle_hardening.test.sql
+PASS 0030_p06_catalog_baseline_import.test.sql
+PASS 0031_p06_catalog_hierarchy_commands.test.sql
+PASS 0032_p06_catalog_service_commands.test.sql
+PASS 0033_p06_catalog_hierarchy_legacy_compatibility.test.sql
+PASS 0034_p06_catalog_legacy_claim_role_compatibility.test.sql
+PASS 0035_p06_catalog_legacy_approval_evidence_compatibility.test.sql
+PASS 0036_p06_catalog_import_question_scope_compatibility.test.sql
+PASS 0037_p06_catalog_import_draft_choice_compatibility.test.sql
+PASS 0038_p06_question_draft_choice_contract.test.sql
+PASS 0039_p06_question_builder_commands.test.sql
+PASS 0040_p06_rule_builder_commands.test.sql
+PASS 0041_p06_questionnaire_builder_create.test.sql
+PASS 0042_p06_questionnaire_snapshot_composition.test.sql
+PASS 0043_p07_rfq_matching_foundation.test.sql
+PASS 0044_p07_quotes_comparison.test.sql
+PASS 0045_p08_contracts_missions_core.test.sql
+PASS 0046_p09_provider_qualification.test.sql
+PASS 0047_p10_provider_billing_reconciliation.test.sql
+PASS 0048_p11_disputes_reassignment.test.sql
+PASS 0049_p12_volume_procurement_pools.test.sql
+PASS 0050_p13_franchise_governance.test.sql
+PASS 0051_p15_franchise_finance.test.sql
+PASS 0052_p15_subscription_plans_cycles.test.sql
+PASS 0053_p17_admin_command_center.test.sql
+PASS 0054_p07_diagnostics_opportunities.test.sql
+PASS 0055_p08_boxes_credits_security.test.sql
+PASS 0056_p17_notifications_preferences_delivery.test.sql
+PASS 0057_p08_credit_wallet_client_admin_rls.test.sql
+PASS 0058_p18_marketing_autopilot.test.sql
+PASS 0059_p10_franchise_crm_performance.test.sql
+file:///C:/Projects/Matricia/Matricia/scripts/run-db-tests.mjs:83
+    throw new Error(`${file}: ${[...failures, ...diagnostics].join(' | ')}`);
+          ^
+
+Error: 0060_p14_morocco_tax_engine.test.sql: not ok 31 - tax administration binds the caller identity, fails closed on AAL2 and checks privileged roles | # Failed test 31: "tax administration binds the caller identity, fails closed on AAL2 and checks privileged roles" | # Looks like you failed 1 test of 49
+    at validateTap (file:///C:/Projects/Matricia/Matricia/scripts/run-db-tests.mjs:83:11)
+    at file:///C:/Projects/Matricia/Matricia/scripts/run-db-tests.mjs:654:19
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+Node.js v22.23.5

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {providerSearchQuery} from "@/modules/provider/data/spaces/list-rows";
-export function ProviderQuotePagination({locale,path,query,pagination}:{locale:"fr"|"ar";path:"devis"|"consultations";query:string;pagination?:{page:number;pageSize:number;total:number}}) {
+export function ProviderQuotePagination({locale,path,query,pagination}:{locale:"fr"|"ar";path:"devis"|"consultations";query:string;pagination?:{page:number;pageSize:number;total:number}|undefined}) {
  if(!pagination)return null;
  const {page,pageSize,total}=pagination,last=Math.max(1,Math.ceil(total/pageSize)),ar=locale==="ar";
  const href=(value:number)=>`/${locale}/sous-traitant/${path}${providerSearchQuery(query,{page:String(value)})}`;

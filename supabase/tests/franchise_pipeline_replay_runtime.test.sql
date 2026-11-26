@@ -1,0 +1,37 @@
+begin;
+set local search_path=public,extensions;
+grant usage on schema extensions to authenticated;
+select no_plan();
+insert into auth.users(id,aud,role,email,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
+select ('e0370000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'authenticated','authenticated','crm-replay-'||i||'@example.invalid','{}','{}',now(),now() from generate_series(1,2)i;
+insert into public.organizations(id,legal_name,display_name,status,created_by) values('e0371000-0000-4000-8000-000000000001','TEST CRM replay','TEST CRM replay','ACTIVE','e0370000-0000-4000-8000-000000000001');
+insert into public.organization_memberships(id,organization_id,user_id,status) values('e0372000-0000-4000-8000-000000000001','e0371000-0000-4000-8000-000000000001','e0370000-0000-4000-8000-000000000001','ACTIVE');
+insert into public.platform_user_roles(user_id,role_code) values('e0370000-0000-4000-8000-000000000001','MATRICIA_ADMIN');
+insert into public.catalog_libraries(id,code,slug,steward_organization_id,created_by) values('e0373000-0000-4000-8000-000000000001','TEST_CRM_REPLAY','test-crm-replay','e0371000-0000-4000-8000-000000000001','e0370000-0000-4000-8000-000000000001');
+insert into public.franchises(id,library_id,operator_organization_id,franchise_type,operator_code,territory_code,status,created_by) values('e0374000-0000-4000-8000-000000000001','e0373000-0000-4000-8000-000000000001','e0371000-0000-4000-8000-000000000001','STANDARD','FRANCHISEE','TEST_CRM_REPLAY','CONTRACT_PENDING','e0370000-0000-4000-8000-000000000001');
+insert into public.franchise_territory_versions(id,franchise_id,version,territory_code,name_fr,name_ar,scope_snapshot,effective_from,content_hash,created_by) values('e0375000-0000-4000-8000-000000000001','e0374000-0000-4000-8000-000000000001',1,'TEST_CRM_REPLAY','Test','Test','{}',now(),repeat('a',64),'e0370000-0000-4000-8000-000000000001');
+create temporary table crm_results(k text primary key,v jsonb);grant select,insert on crm_results to authenticated;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"e0370000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
+insert into crm_results values('prospect',public.save_franchise_prospect('e0374000-0000-4000-8000-000000000001',null,'e0375000-0000-4000-8000-000000000001','CLIENT','TEST prospect','crm-prospect@example.invalid','TEST Org','DIRECT',null,'e0370000-0000-4000-8000-000000000001',0,'crm-runtime-prospect'));
+insert into crm_results values('first',public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'OPENED','CONTACT_CONFIRMED','[]',1,'crm-runtime-advance','e0376000-0000-4000-8000-000000000001'));
+select lives_ok($$insert into crm_results values('replay',public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'OPENED','CONTACT_CONFIRMED','[]',1,'crm-runtime-advance','e0376000-0000-4000-8000-000000000001'))$$,'pipeline command can be retried after its transition');
+select is((select v from crm_results where k='replay'),(select v from crm_results where k='first'),'pipeline retry returns its exact original receipt');
+select throws_ok($$select public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'OPENED','ANOTHER_REASON','[]',1,'crm-runtime-advance')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','same command key rejects a different reason');
+select throws_ok($$select public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'CONTRACT_SIGNED','CONTACT_CONFIRMED','[]',2,'crm-runtime-skip')$$,'23514','INVALID_PIPELINE_TRANSITION','a new command cannot skip pipeline stages');
+reset role;
+select is((select count(*)::integer from public.franchise_pipeline_events where prospect_id=(select(v->>'prospect_id')::uuid from crm_results where k='prospect')),1,'replay creates no extra immutable transition');
+select is((select count(*)::integer from public.audit_events a join public.event_outbox e on e.correlation_id=a.correlation_id where a.correlation_id='e0376000-0000-4000-8000-000000000001' and a.action='franchise.crm.pipeline_advanced' and e.event_type='FranchisePipelineAdvancedV1'),1,'one correlated pipeline audit/outbox pair exists');
+insert into public.idempotency_keys(organization_id,operation_scope,key,request_hash,created_by,expires_at,status,response_code,response_body,completed_at)
+select 'e0371000-0000-4000-8000-000000000001','franchise.crm.pipeline.advance.'||(v->>'prospect_id'),'crm-runtime-legacy',private.canonical_request_hash(jsonb_build_object('prospect',(v->>'prospect_id')::uuid,'from','SENT','to','OPENED','reason','CONTACT_CONFIRMED','evidence','[]'::jsonb,'expected',1)),'e0370000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 day','COMPLETED',200,v,clock_timestamp() from crm_results where k='first';
+set local role authenticated;
+select is(public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'OPENED','CONTACT_CONFIRMED','[]',1,'crm-runtime-legacy'),(select v from crm_results where k='first'),'former hash format replays against its saved source stage');
+select throws_ok($$select public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'OPENED','ANOTHER_REASON','[]',1,'crm-runtime-legacy')$$,'22000','IDEMPOTENCY_PAYLOAD_MISMATCH','legacy receipt rejects changed input');
+select throws_ok($$select public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'REGISTERED','CONTACT_CONFIRMED','[]',1,'crm-runtime-stale')$$,'PT409','STALE_FRANCHISE_PROSPECT','new command still enforces the expected row version');
+select throws_ok($$select public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'UNKNOWN','CONTACT_CONFIRMED','[]',2,'crm-runtime-unknown')$$,'23514','INVALID_PIPELINE_TRANSITION','unknown pipeline target fails with the domain contract');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"e0370000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',true);
+select throws_ok($$select public.advance_franchise_pipeline((select(v->>'prospect_id')::uuid from crm_results where k='prospect'),'OPENED','CONTACT_CONFIRMED','[]',1,'crm-runtime-advance')$$,'42501','FRANCHISE_PIPELINE_DENIED','foreign actor cannot replay an owned transition');
+reset role;
+select * from finish();rollback;

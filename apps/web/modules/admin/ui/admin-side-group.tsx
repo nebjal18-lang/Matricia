@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 export function AdminSideGroup({
   label,
@@ -15,9 +15,11 @@ export function AdminSideGroup({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(active);
-  useEffect(() => {
+  const [previousActive, setPreviousActive] = useState(active);
+  if (active !== previousActive) {
+    setPreviousActive(active);
     if (active) setOpen(true);
-  }, [active]);
+  }
 
   return (
     <details

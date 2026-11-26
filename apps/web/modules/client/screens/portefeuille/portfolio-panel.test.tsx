@@ -57,6 +57,20 @@ it.each(["fr", "ar"] as const)("uses business choices and a real evidence file (
 });
 
 describe("PortfolioPanel", () => {
+  it("distinguishes equal budgets belonging to different projects when allocating a cost", () => {
+    const [firstProject] = data.projects;
+    const [firstBudget] = data.budgets;
+    if (!firstProject || !firstBudget) throw new Error("PORTFOLIO_FIXTURE_REQUIRED");
+    const secondProject = { ...firstProject, id: "88888888-8888-4888-8888-888888888888", code: "P2" };
+    const secondBudget = { ...firstBudget, id: "99999999-9999-4999-8999-999999999999", projectId: secondProject.id };
+    const html = renderToStaticMarkup(<PortfolioPanel locale="fr" data={{ ...data, projects: [firstProject, secondProject], budgets: [firstBudget, secondBudget] }} m={getMessages("fr")} keys={{ site: "a", project: "b", task: "c", contract: "d", budget: "e", center: "f", allocation: "g", event: "h" }} />);
+    const select = html.match(/<select[^>]*name="budgetId"[^>]*>([\s\S]*?)<\/select>/u)?.[1] ?? "";
+    const labels = [...select.matchAll(/<option[^>]*>(.*?)<\/option>/gu)].map(match => match[1]);
+    expect(labels).toHaveLength(2);
+    expect(new Set(labels).size).toBe(2);
+    expect(labels[0]).toContain("P1");
+    expect(labels[1]).toContain("P2");
+  });
   it.each(["fr", "ar"] as const)("names progress indicators and exposes budget facts as semantic terms and values (%s)", locale => {
     const messages = getMessages(locale);
     const html = renderToStaticMarkup(<PortfolioPanel locale={locale} data={data} m={messages} keys={{ site: "a", project: "b", task: "c", contract: "d", budget: "e", center: "f", allocation: "g", event: "h" }} />);

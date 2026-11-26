@@ -200,10 +200,13 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
     );
   }
 
-  const questionId = questionIds[state.step]!;
+  const questionId = questionIds[state.step];
   const question = copy.questions[state.step];
+  if (!questionId || !question) {
+    return <RecoveryStatesView locale={locale} onRetry={() => goQuestions(0)} onContinue={() => goQuestions(0)} onReconnect={() => router.push(`/${locale}/connexion`)} />;
+  }
   const answer = state.answers[questionId];
-  const choices = questionId === "next_action" ? [] : optionIds[questionId].map((id, index) => ({ id, label: question[2][index] ?? id }));
+  const choices = questionId === "next_action" ? [] : optionIds[questionId].map((id, index) => ({ id, label: question[2]?.[index] ?? id }));
   const canProceed = choices.length ? Boolean(Array.isArray(answer) ? answer.length : answer) : typeof answer === "string" && answer.trim().length >= 3;
   const setAnswer = (value: Answer) => setState((current) => ({
     ...current,

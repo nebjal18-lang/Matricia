@@ -55,7 +55,7 @@ function answerLabel(locale: Locale, id: QuestionId, answer: Answer | undefined)
 
 function observationLabel(locale: Locale, priority: PriorityKey, answers: Stored["answers"]): string {
   const copy = getPublicJourneyCopy(locale).diagnostic;
-  if (priority === "verify") return copy.priorities.verify[1];
+  if (priority === "verify") return copy.priorities.verify[1] ?? copy.answerNotProvided;
   const questions = { organization: "priority_tracking", sales: "sales_tracking", security: "backup_restore" } as const;
   const id = questions[priority];
   const value = answers[id] === undefined ? copy.answerNotProvided : answerLabel(locale, id, answers[id]);
@@ -425,7 +425,7 @@ export function DetailView({
   return (
     <PageChrome locale={locale}>
       <p className={styles.breadcrumb}>{copy.detailBreadcrumb}</p>
-      <Hero eyebrow={copy.resultEyebrow} title={item[0]} intro={copy.resultIntro} script={copy.scriptNote} />
+      <Hero eyebrow={copy.resultEyebrow} title={item[0] ?? copy.resultEyebrow} intro={copy.resultIntro} script={copy.scriptNote} />
       <div className={styles.detailGrid}>
         <div className={styles.detailStack}>
           <section className={styles.detailCard}>
@@ -538,7 +538,7 @@ export function SaveView({
   answers: Stored["answers"];
   organizations: OrganizationOption[];
   authenticated: boolean;
-  saveAction?: (state: SaveState, data: FormData) => Promise<SaveState>;
+  saveAction?: ((state: SaveState, data: FormData) => Promise<SaveState>) | undefined;
   onSaved: () => void;
   onBack: () => void;
 }) {

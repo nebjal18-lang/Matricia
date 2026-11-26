@@ -62,9 +62,7 @@ const DEMO_QUESTIONS: RuleValidationWorkspace["questions"] = [
   },
 ];
 
-export function buildDemoCatalogQuestionWorkspace(
-  _selectedVersionId: string | null = null,
-): RuleValidationWorkspace {
+export function buildDemoCatalogQuestionWorkspace(): RuleValidationWorkspace {
   const versionId = DEMO_VERSION_ID;
   return {
     versions: [
@@ -89,14 +87,13 @@ export function buildDemoCatalogQuestionWorkspace(
 /** Remplace un workspace vide (versions ou questions) quand le flag démo est actif. */
 export function applyDemoCatalogQuestionsWorkspace(
   workspace: RuleValidationWorkspace,
-  selectedVersionId: string | null,
 ): RuleValidationWorkspace {
   if (!canApplyAdminDemoCatalogQuestions()) return workspace;
   if (workspace.versions.length === 0) {
-    return buildDemoCatalogQuestionWorkspace(selectedVersionId);
+    return buildDemoCatalogQuestionWorkspace();
   }
   if (workspace.questions.length === 0 && workspace.selectedVersionId) {
-    const demo = buildDemoCatalogQuestionWorkspace(workspace.selectedVersionId);
+    const demo = buildDemoCatalogQuestionWorkspace();
     return {
       ...workspace,
       questions: demo.questions,

@@ -1,0 +1,728 @@
+
+> matricia@0.1.0 test:tooling C:\Projects\Matricia\Matricia
+> node --test scripts/release/*.test.mjs scripts/performance/*.test.mjs scripts/staging/*.test.mjs scripts/db-test-support.test.mjs
+
+TAP version 13
+# Subtest: the framework grant is inside the existing transaction and cannot grant application access
+ok 1 - the framework grant is inside the existing transaction and cannot grant application access
+  ---
+  duration_ms: 2.1478
+  type: 'test'
+  ...
+# Subtest: tests without a rollback transaction or with a commit cannot enable the framework grant
+ok 2 - tests without a rollback transaction or with a commit cannot enable the framework grant
+  ---
+  duration_ms: 1.1193
+  type: 'test'
+  ...
+# Subtest: a function body and a leading block comment remain unchanged
+ok 3 - a function body and a leading block comment remain unchanged
+  ---
+  duration_ms: 0.2036
+  type: 'test'
+  ...
+# Subtest: explicit request boundaries preserve one rollback transaction and one framework grant
+ok 4 - explicit request boundaries preserve one rollback transaction and one framework grant
+  ---
+  duration_ms: 1.7042
+  type: 'test'
+  ...
+# Subtest: a boundary cannot authorize a commit or an unbounded test
+ok 5 - a boundary cannot authorize a commit or an unbounded test
+  ---
+  duration_ms: 0.4384
+  type: 'test'
+  ...
+# Subtest: read-only API plan is bounded and refuses mutation endpoints and production
+ok 6 - read-only API plan is bounded and refuses mutation endpoints and production
+  ---
+  duration_ms: 3.0037
+  type: 'test'
+  ...
+# Subtest: p95 uses nearest-rank over nonempty real samples
+ok 7 - p95 uses nearest-rank over nonempty real samples
+  ---
+  duration_ms: 0.5703
+  type: 'test'
+  ...
+# Subtest: performance plan requires exact staging identity, routes and real interactions
+ok 8 - performance plan requires exact staging identity, routes and real interactions
+  ---
+  duration_ms: 1.2933
+  type: 'test'
+  ...
+# Subtest: missing metrics or interactions cannot turn into a passing zero
+ok 9 - missing metrics or interactions cannot turn into a passing zero
+  ---
+  duration_ms: 0.283
+  type: 'test'
+  ...
+# Subtest: extractProjectRef accepts only hosted HTTPS Supabase targets
+ok 10 - extractProjectRef accepts only hosted HTTPS Supabase targets
+  ---
+  duration_ms: 2.0075
+  type: 'test'
+  ...
+# Subtest: configuration refuses production and requires exact target verification
+ok 11 - configuration refuses production and requires exact target verification
+  ---
+  duration_ms: 0.758
+  type: 'test'
+  ...
+# Subtest: configuration bounds page size and scenario sizes
+ok 12 - configuration bounds page size and scenario sizes
+  ---
+  duration_ms: 1.4361
+  type: 'test'
+  ...
+# Subtest: scenario uses bounded keyset GET requests and emits metrics only
+ok 13 - scenario uses bounded keyset GET requests and emits metrics only
+  ---
+  duration_ms: 1.9499
+  type: 'test'
+  ...
+# Subtest: scenario fails closed when the keyset does not advance
+ok 14 - scenario fails closed when the keyset does not advance
+  ---
+  duration_ms: 0.7691
+  type: 'test'
+  ...
+# Subtest: gate is failed when the target row count is unavailable
+ok 15 - gate is failed when the target row count is unavailable
+  ---
+  duration_ms: 1.8827
+  type: 'test'
+  ...
+# Subtest: RPC-only success is explicitly a probe and cannot certify the browser
+ok 16 - RPC-only success is explicitly a probe and cannot certify the browser
+  ---
+  duration_ms: 1.7691
+  type: 'test'
+  ...
+# Subtest: missing denial, language, viewport or actual selection fails acceptance
+ok 17 - missing denial, language, viewport or actual selection fails acceptance
+  ---
+  duration_ms: 0.3672
+  type: 'test'
+  ...
+# Subtest: browser-close and actor-cleanup failures do not skip other actors, verification, database close or evidence
+ok 18 - browser-close and actor-cleanup failures do not skip other actors, verification, database close or evidence
+  ---
+  duration_ms: 1.559
+  type: 'test'
+  ...
+# Subtest: a failed cleanup verification prevents an otherwise successful probe
+ok 19 - a failed cleanup verification prevents an otherwise successful probe
+  ---
+  duration_ms: 0.4088
+  type: 'test'
+  ...
+# Subtest: failed browser runs retain executed counts and sanitized actionable diagnostics
+ok 20 - failed browser runs retain executed counts and sanitized actionable diagnostics
+  ---
+  duration_ms: 29.6176
+  type: 'test'
+  ...
+# Subtest: Vitest 5 summaries count test results only, regardless of ordering or workspace prefix
+ok 21 - Vitest 5 summaries count test results only, regardless of ordering or workspace prefix
+  ---
+  duration_ms: 3.4275
+  type: 'test'
+  ...
+# Subtest: Corepack launches a JS CLI through Node, including a path with spaces, without a cmd shim
+ok 22 - Corepack launches a JS CLI through Node, including a path with spaces, without a cmd shim
+  ---
+  duration_ms: 101.875
+  type: 'test'
+  ...
+# Subtest: actual release launcher rejects mixed failure summary even with exit zero and counts skips once
+ok 23 - actual release launcher rejects mixed failure summary even with exit zero and counts skips once
+  ---
+  duration_ms: 957.2424
+  type: 'test'
+  ...
+# Subtest: filesystem inventory excludes groups, private folders and invented routes
+ok 24 - filesystem inventory excludes groups, private folders and invented routes
+  ---
+  duration_ms: 57.596
+  type: 'test'
+  ...
+# Subtest: same-tenant seed generates four cases without pretending they passed
+ok 25 - same-tenant seed generates four cases without pretending they passed
+  ---
+  duration_ms: 1.5934
+  type: 'test'
+  ...
+# Subtest: foreign organization cannot fill a missing seed
+ok 26 - foreign organization cannot fill a missing seed
+  ---
+  duration_ms: 0.2856
+  type: 'test'
+  ...
+# Subtest: phantom templates cannot enter the inventory through manifests
+ok 27 - phantom templates cannot enter the inventory through manifests
+  ---
+  duration_ms: 0.2115
+  type: 'test'
+  ...
+# Subtest: franchise seed must belong to the assigned franchise
+ok 28 - franchise seed must belong to the assigned franchise
+  ---
+  duration_ms: 0.9149
+  type: 'test'
+  ...
+# Subtest: catalogue ID from a foreign library cannot fill a franchise workspace
+ok 29 - catalogue ID from a foreign library cannot fill a franchise workspace
+  ---
+  duration_ms: 0.2589
+  type: 'test'
+  ...
+# Subtest: catch-all paths reject traversal and report missing data honestly
+ok 30 - catch-all paths reject traversal and report missing data honestly
+  ---
+  duration_ms: 0.4736
+  type: 'test'
+  ...
+# Subtest: release registry preserves statuses without promoting evidence
+ok 31 - release registry preserves statuses without promoting evidence
+  ---
+  duration_ms: 0.5667
+  type: 'test'
+  ...
+# Subtest: enum route parameters remain valid while identifiers require UUIDs
+ok 32 - enum route parameters remain valid while identifiers require UUIDs
+  ---
+  duration_ms: 0.7456
+  type: 'test'
+  ...
+# Subtest: only explicitly reserved local clone targets pass before connection
+ok 33 - only explicitly reserved local clone targets pass before connection
+  ---
+  duration_ms: 2.3772
+  type: 'test'
+  ...
+# Subtest: database identity read must match all clone claims before mutation
+ok 34 - database identity read must match all clone claims before mutation
+  ---
+  duration_ms: 0.7847
+  type: 'test'
+  ...
+# Subtest: full SQL evidence binds exact suite bytes, candidate and invocation; partial is never release evidence
+ok 35 - full SQL evidence binds exact suite bytes, candidate and invocation; partial is never release evidence
+  ---
+  duration_ms: 48.2192
+  type: 'test'
+  ...
+# Subtest: actual release command rejects filters before launching pnpm or a DB process
+ok 36 - actual release command rejects filters before launching pnpm or a DB process
+  ---
+  duration_ms: 268.4057
+  type: 'test'
+  ...
+# Subtest: actual SQL runner refuses arbitrary URL without loading postgres or exposing credentials
+ok 37 - actual SQL runner refuses arbitrary URL without loading postgres or exposing credentials
+  ---
+  duration_ms: 91.5069
+  type: 'test'
+  ...
+# Subtest: a static parent reference or exclusion never substitutes runtime evidence
+ok 38 - a static parent reference or exclusion never substitutes runtime evidence
+  ---
+  duration_ms: 3.2707
+  type: 'test'
+  ...
+# Subtest: provisions from read-only dump, runs marked clone, deletes exact identity and verifies absence
+ok 39 - provisions from read-only dump, runs marked clone, deletes exact identity and verifies absence
+  ---
+  duration_ms: 5.1251
+  type: 'test'
+  ...
+# Subtest: restore failure and runner failure still clean only the clone
+ok 40 - restore failure and runner failure still clean only the clone
+  ---
+  duration_ms: 2.1771
+  type: 'test'
+  ...
+# Subtest: source and cleanup identities cannot be spoofed; unapproved sources never launch docker
+ok 41 - source and cleanup identities cannot be spoofed; unapproved sources never launch docker
+  ---
+  duration_ms: 0.5681
+  type: 'test'
+  ...
+# Subtest: a changed clone identity forbids removal and a surviving container forbids success
+ok 42 - a changed clone identity forbids removal and a surviving container forbids success
+  ---
+  duration_ms: 2.747
+  type: 'test'
+  ...
+# Subtest: local acceptance refuses stale, hosted, incomplete and uncleared results
+ok 43 - local acceptance refuses stale, hosted, incomplete and uncleared results
+  ---
+  duration_ms: 3.2701
+  type: 'test'
+  ...
+# Subtest: a local fixture cannot impersonate a hosted or production acceptance project
+ok 44 - a local fixture cannot impersonate a hosted or production acceptance project
+  ---
+  duration_ms: 1.5627
+  type: 'test'
+  ...
+# Subtest: recognizes native Storage NoSuchBucket400 and missing-bucket404
+ok 45 - recognizes native Storage NoSuchBucket400 and missing-bucket404
+  ---
+  duration_ms: 1.0796
+  type: 'test'
+  ...
+# Subtest: never treats an authorization, transport, server or successful lookup as proven absence
+ok 46 - never treats an authorization, transport, server or successful lookup as proven absence
+  ---
+  duration_ms: 0.271
+  type: 'test'
+  ...
+# Subtest: preparation never grants approval or invents passing evidence
+ok 47 - preparation never grants approval or invents passing evidence
+  ---
+  duration_ms: 4.4693
+  type: 'test'
+  ...
+# Subtest: current candidate with complete evidence shape passes; wrong SHA, stale results and unclosed issues fail
+ok 48 - current candidate with complete evidence shape passes; wrong SHA, stale results and unclosed issues fail
+  ---
+  duration_ms: 2.2186
+  type: 'test'
+  ...
+# Subtest: zero counts, skipped, flaky, expected failure and self-review cannot certify a release
+ok 49 - zero counts, skipped, flaky, expected failure and self-review cannot certify a release
+  ---
+  duration_ms: 1.6263
+  type: 'test'
+  ...
+# Subtest: evidence must match its bytes and stay inside the checkout, including symlink resolution
+ok 50 - evidence must match its bytes and stay inside the checkout, including symlink resolution
+  ---
+  duration_ms: 172.8447
+  type: 'test'
+  ...
+# Subtest: browser acceptance rejects empty, skipped, flaky and expected-failure reports
+ok 51 - browser acceptance rejects empty, skipped, flaky and expected-failure reports
+  ---
+  duration_ms: 0.7471
+  type: 'test'
+  ...
+# Subtest: approval content rejects unrelated JSON, wrong candidate, decision, signer, category and self-review
+ok 52 - approval content rejects unrelated JSON, wrong candidate, decision, signer, category and self-review
+  ---
+  duration_ms: 1.0829
+  type: 'test'
+  ...
+# Subtest: distinct names cannot conceal a shared migration version
+ok 53 - distinct names cannot conceal a shared migration version
+  ---
+  duration_ms: 1.4085
+  type: 'test'
+  ...
+# Subtest: unique canonical versions pass independently of enumeration order
+ok 54 - unique canonical versions pass independently of enumeration order
+  ---
+  duration_ms: 1.1339
+  type: 'test'
+  ...
+# Subtest: malformed SQL names cannot escape validation
+ok 55 - malformed SQL names cannot escape validation
+  ---
+  duration_ms: 1.2141
+  type: 'test'
+  ...
+# Subtest: unfinished work in a business module fails the actual gate
+ok 56 - unfinished work in a business module fails the actual gate
+  ---
+  duration_ms: 298.5062
+  type: 'test'
+  ...
+# Subtest: test assertions may discuss markers while adjacent product code remains checked
+ok 57 - test assertions may discuss markers while adjacent product code remains checked
+  ---
+  duration_ms: 243.7546
+  type: 'test'
+  ...
+# Subtest: SQL migrations stay covered and ordinary input hints are accepted
+ok 58 - SQL migrations stay covered and ordinary input hints are accepted
+  ---
+  duration_ms: 244.2724
+  type: 'test'
+  ...
+# Subtest: explicit unfinished sentinels and lowercase comment markers fail
+ok 59 - explicit unfinished sentinels and lowercase comment markers fail
+  ---
+  duration_ms: 217.3642
+  type: 'test'
+  ...
+# Subtest: accepts every verified local origin supported by the fixture loader without starting a server
+ok 60 - accepts every verified local origin supported by the fixture loader without starting a server
+  ---
+  duration_ms: 1.0341
+  type: 'test'
+  ...
+# Subtest: rejects remote origins, credentials and unexpected route/configuration before any start
+ok 61 - rejects remote origins, credentials and unexpected route/configuration before any start
+  ---
+  duration_ms: 6.3539
+  type: 'test'
+  ...
+# Subtest: Next server-action guard catches initial states, typed wrappers and local re-exports
+ok 62 - Next server-action guard catches initial states, typed wrappers and local re-exports
+  ---
+  duration_ms: 18.528
+  type: 'test'
+  ...
+# Subtest: successful business page requires HTTP200 and meaningful heading
+ok 63 - successful business page requires HTTP200 and meaningful heading
+  ---
+  duration_ms: 1.0204
+  type: 'test'
+  ...
+# Subtest: 404 cannot be disguised as a covered access gate
+ok 64 - 404 cannot be disguised as a covered access gate
+  ---
+  duration_ms: 0.1471
+  type: 'test'
+  ...
+# Subtest: unexpected tenant or MFA denial fails a business recipe
+ok 65 - unexpected tenant or MFA denial fails a business recipe
+  ---
+  duration_ms: 0.3186
+  type: 'test'
+  ...
+# Subtest: expected fiscal gate is separate from successful business coverage
+ok 66 - expected fiscal gate is separate from successful business coverage
+  ---
+  duration_ms: 0.2238
+  type: 'test'
+  ...
+# Subtest: server failures and page errors fail even when a denial was expected
+ok 67 - server failures and page errors fail even when a denial was expected
+  ---
+  duration_ms: 0.2346
+  type: 'test'
+  ...
+# Subtest: expected fiscal refusal never certifies expired sessions or broken configuration
+ok 68 - expected fiscal refusal never certifies expired sessions or broken configuration
+  ---
+  duration_ms: 0.2415
+  type: 'test'
+  ...
+# Subtest: a crash together with FORBIDDEN remains a failure
+ok 69 - a crash together with FORBIDDEN remains a failure
+  ---
+  duration_ms: 0.209
+  type: 'test'
+  ...
+# Subtest: redirected login or changed selected tenant is never business coverage
+ok 70 - redirected login or changed selected tenant is never business coverage
+  ---
+  duration_ms: 0.2301
+  type: 'test'
+  ...
+# Subtest: destination comparison preserves origin, route and selected mandate
+ok 71 - destination comparison preserves origin, route and selected mandate
+  ---
+  duration_ms: 1.0785
+  type: 'test'
+  ...
+# Subtest: builds when the web app or the Vercel root changes
+ok 72 - builds when the web app or the Vercel root changes
+  ---
+  duration_ms: 0.9917
+  type: 'test'
+  ...
+# Subtest: skips commits that do not affect the web deployment
+ok 73 - skips commits that do not affect the web deployment
+  ---
+  duration_ms: 0.1643
+  type: 'test'
+  ...
+# Subtest: keeps static assets patchable for Vercel preview comments
+ok 74 - keeps static assets patchable for Vercel preview comments
+  ---
+  duration_ms: 6.7925
+  type: 'test'
+  ...
+# Subtest: all Vercel entrypoints retain the same scheduled application endpoints
+ok 75 - all Vercel entrypoints retain the same scheduled application endpoints
+  ---
+  duration_ms: 75.5702
+  type: 'test'
+  ...
+# Subtest: exposes native Next output, assets and scoped runtime dependencies; preserves domain dependencies
+ok 76 - exposes native Next output, assets and scoped runtime dependencies; preserves domain dependencies
+  ---
+  duration_ms: 52.0164
+  type: 'test'
+  ...
+# Subtest: refuses public directory collisions before changing generated output
+ok 77 - refuses public directory collisions before changing generated output
+  ---
+  duration_ms: 35.0811
+  type: 'test'
+  ...
+# Subtest: requires a completed Next build before creating aliases
+ok 78 - requires a completed Next build before creating aliases
+  ---
+  duration_ms: 20.8201
+  type: 'test'
+  ...
+# Subtest: refuses a conflicting installed dependency without replacing it
+ok 79 - refuses a conflicting installed dependency without replacing it
+  ---
+  duration_ms: 29.5153
+  type: 'test'
+  ...
+# Subtest: complete isolated sandbox configuration passes metadata check with masked sensitive bindings
+ok 80 - complete isolated sandbox configuration passes metadata check with masked sensitive bindings
+  ---
+  duration_ms: 5.0779
+  type: 'test'
+  ...
+# Subtest: detects a provider-issued 8 digit OTP when absent UI setting falls back to 6
+ok 81 - detects a provider-issued 8 digit OTP when absent UI setting falls back to 6
+  ---
+  duration_ms: 0.9769
+  type: 'test'
+  ...
+# Subtest: existing OTP binding with redacted value remains unverified rather than assumed correct
+ok 82 - existing OTP binding with redacted value remains unverified rather than assumed correct
+  ---
+  duration_ms: 1.6844
+  type: 'test'
+  ...
+# Subtest: shared production backend and app origins fail isolation even with APP_ENV staging
+ok 83 - shared production backend and app origins fail isolation even with APP_ENV staging
+  ---
+  duration_ms: 0.6409
+  type: 'test'
+  ...
+# Subtest: Preview isolation requires the STAGING_SUPABASE_PROJECT_REF binding
+ok 84 - Preview isolation requires the STAGING_SUPABASE_PROJECT_REF binding
+  ---
+  duration_ms: 0.8145
+  type: 'test'
+  ...
+# Subtest: Preview isolation requires the PRODUCTION_SUPABASE_PROJECT_REF binding
+ok 85 - Preview isolation requires the PRODUCTION_SUPABASE_PROJECT_REF binding
+  ---
+  duration_ms: 1.1517
+  type: 'test'
+  ...
+# Subtest: Preview references must be observed, exact lowercase 20-character values and distinct
+ok 86 - Preview references must be observed, exact lowercase 20-character values and distinct
+  ---
+  duration_ms: 2.7832
+  type: 'test'
+  ...
+# Subtest: Preview reference declarations must match both selected staging backend and observed production baseline
+ok 87 - Preview reference declarations must match both selected staging backend and observed production baseline
+  ---
+  duration_ms: 0.4074
+  type: 'test'
+  ...
+# Subtest: Preview-only reference bindings do not impose a build policy on the development target
+ok 88 - Preview-only reference bindings do not impose a build policy on the development target
+  ---
+  duration_ms: 0.6873
+  type: 'test'
+  ...
+# Subtest: missing production baseline cannot produce a passing staging verdict
+ok 89 - missing production baseline cannot produce a passing staging verdict
+  ---
+  duration_ms: 0.6482
+  type: 'test'
+  ...
+# Subtest: a non-Supabase production URL cannot establish backend isolation
+ok 90 - a non-Supabase production URL cannot establish backend isolation
+  ---
+  duration_ms: 0.4607
+  type: 'test'
+  ...
+# Subtest: branch preview overrides are resolved without changing production baseline
+ok 91 - branch preview overrides are resolved without changing production baseline
+  ---
+  duration_ms: 1.0674
+  type: 'test'
+  ...
+# Subtest: Auth project, callback origins, SMTP and TOTP must match staging configuration
+ok 92 - Auth project, callback origins, SMTP and TOTP must match staging configuration
+  ---
+  duration_ms: 0.5534
+  type: 'test'
+  ...
+# Subtest: cron and invitation keys need bindings while masked service roles count as present
+ok 93 - cron and invitation keys need bindings while masked service roles count as present
+  ---
+  duration_ms: 0.3526
+  type: 'test'
+  ...
+# Subtest: external sandbox payments reject demo, live credentials and non-allowlisted providers
+ok 94 - external sandbox payments reject demo, live credentials and non-allowlisted providers
+  ---
+  duration_ms: 0.4579
+  type: 'test'
+  ...
+# Subtest: payment provider allowlist rejects unknown entries even when selected provider is present
+ok 95 - payment provider allowlist rejects unknown entries even when selected provider is present
+  ---
+  duration_ms: 0.2679
+  type: 'test'
+  ...
+# Subtest: CMI sandbox is supported with complete gateway allowlist configuration
+ok 96 - CMI sandbox is supported with complete gateway allowlist configuration
+  ---
+  duration_ms: 0.4111
+  type: 'test'
+  ...
+# Subtest: scanner, email and signature cannot rely on demo modes or an unallowlisted target
+ok 97 - scanner, email and signature cannot rely on demo modes or an unallowlisted target
+  ---
+  duration_ms: 0.3654
+  type: 'test'
+  ...
+# Subtest: generic HTTP email transport requires a literal global IP matching its runtime policy
+ok 98 - generic HTTP email transport requires a literal global IP matching its runtime policy
+  ---
+  duration_ms: 9.519
+  type: 'test'
+  ...
+# Subtest: unknown or missing migration metadata fails closed; every required version is compared
+ok 99 - unknown or missing migration metadata fails closed; every required version is compared
+  ---
+  duration_ms: 0.567
+  type: 'test'
+  ...
+# Subtest: worker project and dispatch must match staging and worker inventory cannot be omitted
+ok 100 - worker project and dispatch must match staging and worker inventory cannot be omitted
+  ---
+  duration_ms: 0.3444
+  type: 'test'
+  ...
+# Subtest: worker dispatch allowlist rejects wildcards and duplicates that prevent worker startup
+ok 101 - worker dispatch allowlist rejects wildcards and duplicates that prevent worker startup
+  ---
+  duration_ms: 0.4671
+  type: 'test'
+  ...
+# Subtest: worker startup requires the MALWARE_SCANNER_TOKEN binding
+ok 102 - worker startup requires the MALWARE_SCANNER_TOKEN binding
+  ---
+  duration_ms: 0.2895
+  type: 'test'
+  ...
+# Subtest: worker startup requires the CLAMAV_HOST binding
+ok 103 - worker startup requires the CLAMAV_HOST binding
+  ---
+  duration_ms: 0.187
+  type: 'test'
+  ...
+# Subtest: worker startup requires the CLAMAV_ALLOWED_HOSTS binding
+ok 104 - worker startup requires the CLAMAV_ALLOWED_HOSTS binding
+  ---
+  duration_ms: 0.2457
+  type: 'test'
+  ...
+# Subtest: worker startup requires the CLAMAV_NETWORK_MODE binding
+ok 105 - worker startup requires the CLAMAV_NETWORK_MODE binding
+  ---
+  duration_ms: 0.1709
+  type: 'test'
+  ...
+# Subtest: worker startup requires the CLAMAV_ENGINE_VERSION binding
+ok 106 - worker startup requires the CLAMAV_ENGINE_VERSION binding
+  ---
+  duration_ms: 0.2143
+  type: 'test'
+  ...
+# Subtest: worker scanner credentials remain presence-only and their masked values are never required
+ok 107 - worker scanner credentials remain presence-only and their masked values are never required
+  ---
+  duration_ms: 0.5498
+  type: 'test'
+  ...
+# Subtest: worker Node version must be observed and stay within Node22
+ok 108 - worker Node version must be observed and stay within Node22
+  ---
+  duration_ms: 0.8133
+  type: 'test'
+  ...
+# Subtest: worker ClamAV nonsecret values must be observed even when their bindings are present
+ok 109 - worker ClamAV nonsecret values must be observed even when their bindings are present
+  ---
+  duration_ms: 0.602
+  type: 'test'
+  ...
+# Subtest: ClamAV allowlist must be well formed, contain its host and not have duplicate entries
+ok 110 - ClamAV allowlist must be well formed, contain its host and not have duplicate entries
+  ---
+  duration_ms: 0.9534
+  type: 'test'
+  ...
+# Subtest: ClamAV host and network mode reject malformed targets and public native TCP endpoints
+ok 111 - ClamAV host and network mode reject malformed targets and public native TCP endpoints
+  ---
+  duration_ms: 1.2791
+  type: 'test'
+  ...
+# Subtest: ClamAV DNS metadata must match its host and every resolved address must be private
+ok 112 - ClamAV DNS metadata must match its host and every resolved address must be private
+  ---
+  duration_ms: 0.6369
+  type: 'test'
+  ...
+# Subtest: LOCAL ClamAV accepts loopback and refuses nonloopback private addresses
+ok 113 - LOCAL ClamAV accepts loopback and refuses nonloopback private addresses
+  ---
+  duration_ms: 1.0184
+  type: 'test'
+  ...
+# Subtest: ClamAV requires an exact engine version pin instead of a wildcard or stale attestation string
+ok 114 - ClamAV requires an exact engine version pin instead of a wildcard or stale attestation string
+  ---
+  duration_ms: 1.5853
+  type: 'test'
+  ...
+# Subtest: ClamAV optional settings use runtime bounds and unknown bound values remain unverified
+ok 115 - ClamAV optional settings use runtime bounds and unknown bound values remain unverified
+  ---
+  duration_ms: 2.8583
+  type: 'test'
+  ...
+# Subtest: inventory adapter merges individual decrypted origins and never uses a masked sensitive value as absence
+ok 116 - inventory adapter merges individual decrypted origins and never uses a masked sensitive value as absence
+  ---
+  duration_ms: 0.6966
+  type: 'test'
+  ...
+# Subtest: an inventory with environment reads from multiple Vercel projects is rejected
+ok 117 - an inventory with environment reads from multiple Vercel projects is rejected
+  ---
+  duration_ms: 0.3042
+  type: 'test'
+  ...
+# Subtest: report never includes arbitrary env values, names, exception snippets or input paths
+ok 118 - report never includes arbitrary env values, names, exception snippets or input paths
+  ---
+  duration_ms: 111.6832
+  type: 'test'
+  ...
+# Subtest: CLI emits configuration metadata verdict and correct exit status without any network calls
+ok 119 - CLI emits configuration metadata verdict and correct exit status without any network calls
+  ---
+  duration_ms: 173.6838
+  type: 'test'
+  ...
+1..119
+# tests 119
+# suites 0
+# pass 119
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1317.6082
