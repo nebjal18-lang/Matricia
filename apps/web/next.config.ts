@@ -102,6 +102,7 @@ const nextConfig: NextConfig = {
       { source: "/_next/static/:path*", headers: [...assetCache] },
       { source: "/home-v2/:path*", headers: [...longLivedAssetCache] },
       { source: "/scenes/:path*", headers: [...longLivedAssetCache] },
+      { source: "/favicon.ico", headers: [...longLivedAssetCache] },
       { source: "/favicon.svg", headers: [...longLivedAssetCache] },
       { source: "/social-card.svg", headers: [...longLivedAssetCache] },
       {
