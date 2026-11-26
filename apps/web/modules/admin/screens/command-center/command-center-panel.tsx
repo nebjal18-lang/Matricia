@@ -465,7 +465,13 @@ export function CommandCenterPanel({
                             <time dateTime={item.dueAt} dir="ltr">{formatAdminDateTime(item.dueAt, locale)}</time>
                           </td>
                           <td>
-                            <details className="admin-row-menu" suppressHydrationWarning>
+                            <details
+                              className="admin-row-menu"
+                              suppressHydrationWarning
+                              onToggle={(event) => {
+                                if (event.currentTarget.open) setSelectedKey(row.key);
+                              }}
+                            >
                               <summary aria-label={m.viewSummary} suppressHydrationWarning>
                                 <MoreHorizontal className="size-4" aria-hidden />
                               </summary>
@@ -545,7 +551,13 @@ export function CommandCenterPanel({
                           </time>
                         </td>
                         <td>
-                          <details className="admin-row-menu" suppressHydrationWarning>
+                          <details
+                            className="admin-row-menu"
+                            suppressHydrationWarning
+                            onToggle={(event) => {
+                              if (event.currentTarget.open) setSelectedKey(row.key);
+                            }}
+                          >
                             <summary aria-label={m.nextStep} suppressHydrationWarning>
                               <MoreHorizontal className="size-4" aria-hidden />
                             </summary>

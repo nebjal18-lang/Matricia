@@ -26,7 +26,7 @@ Distinction : entrée menu ≠ chemin unique ≠ ancre ≠ fiche dynamique ≠ a
 | Lot | Objet | Statut | Preuve / lacune |
 | --- | --- | --- | --- |
 | 0 | Inventaire code | Corrigé (code) | ~80 / 22 / 73 — inventaire navigateur encore partiel |
-| 1 | Centre de pilotage | Code PR ; **reproduit** sur demo public | Demo public = ancien UI. Unit A/B OK. **Persistance A/B isolée = À vérifier** |
+| 1 | Centre de pilotage | Code PR ; **reproduit** local | Nav mobile + titre onglet. UI A/B + binding formulaire B OK. Persist : **FORBIDDEN** sur `demo.admin` (rôle). Menu ligne sélectionne désormais le dossier |
 | 2 | Catalogue | Partiel → avancé | Builder OK avec bibliothèque IT + service. Validation native **indisponible** sur demo → fallback démo questions en PR. Matrice multi-domaines = **1 lib visible (IT)** |
 | 3 | Acteurs / capacité / franchise | Avancé | Capacité `/capacite` données visibles + lien fiche prestataire. Colonnes Compte/Conformité/Offre clarifiées. Franchisés ↔ Candidatures déjà reliés |
 | 4 | Parcours commercial | Avancé | Chaîne **Hôtel Bayt Al Bahar** locale : diagnostic → demande → matching **62 %** → devis (Détroit Soft) → contrat → mission. Facturation clients : politique absente + « aucune source » clarifiée |
