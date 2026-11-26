@@ -143,6 +143,7 @@ it("keeps distinct identities for two similar attribution requests A and B", () 
     actionType: "ASSIGN_CASE" as const,
     reason: "Attribution démo — Atlas Mining (mission).",
     status: "PENDING_APPROVAL" as const,
+    canDecide: true,
   };
   const actionB = {
     ...dashboard.actions[0]!,
@@ -153,6 +154,7 @@ it("keeps distinct identities for two similar attribution requests A and B", () 
     actionType: "ASSIGN_CASE" as const,
     reason: "Attribution démo — Coop Tadla (organization).",
     status: "PENDING_APPROVAL" as const,
+    canDecide: true,
   };
   const html = renderToStaticMarkup(
     <CommandCenterPanel
@@ -175,6 +177,27 @@ it("keeps distinct identities for two similar attribution requests A and B", () 
   // Default selection is first row (A); panel must bind the same action id.
   expect(html).toMatch(/admin-treat-rail[\s\S]*data-action-request-id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"/);
   expect(html).toContain('name="actionRequestId" value="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"');
+});
+
+it("hides Approuver when canDecide is false before any submit", () => {
+  const action = {
+    ...dashboard.actions[0]!,
+    id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    status: "PENDING_APPROVAL" as const,
+    canDecide: false,
+  };
+  const html = renderToStaticMarkup(
+    <CommandCenterPanel
+      dashboard={{ ...dashboard, workItems: [], actions: [action] }}
+      locale="fr"
+      m={getCommandCenterMessages("fr")}
+      keys={keys}
+      currentTime="2026-11-13T12:00:00.000Z"
+    />,
+  );
+  expect(html).not.toContain("Approuver l’attribution");
+  expect(html).toContain("validateur distinct");
+  expect(html).not.toContain('name="actionRequestId"');
 });
 
 it("humanizes executed sensitive actions without dumping raw technical payloads", () => {

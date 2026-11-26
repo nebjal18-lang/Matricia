@@ -29,9 +29,13 @@ export type FranchiseNavItem = {
   icon: ComponentType<{ className?: string }>;
 };
 
-export function buildFranchiseNav(locale: Locale, selectedQuery: string): FranchiseNavItem[] {
+export function buildFranchiseNav(
+  locale: Locale,
+  selectedQuery: string,
+  options?: { mandateReady?: boolean },
+): FranchiseNavItem[] {
   const n = libraryCopy(locale);
-  return [
+  const items: FranchiseNavItem[] = [
     { key: "home", href: `/${locale}/franchise/accueil${selectedQuery}`, label: n.navHome, icon: Home },
     { key: "library", href: `/${locale}/franchise/bibliotheque${selectedQuery}`, label: n.navLibrary, icon: BookOpen },
     { key: "services", href: `/${locale}/franchise/services${selectedQuery}`, label: n.navServices, icon: ClipboardList },
@@ -50,4 +54,9 @@ export function buildFranchiseNav(locale: Locale, selectedQuery: string): Franch
     { key: "governance", href: `/${locale}/franchise/gouvernance${selectedQuery}`, label: n.navGovernance, icon: Building2 },
     { key: "finance", href: `/${locale}/franchise/finance${selectedQuery}`, label: n.navFinance, icon: Landmark },
   ];
+  if (options?.mandateReady === false) {
+    const allowed = new Set<FranchiseNavKey>(["home", "perimeter", "governance"]);
+    return items.filter((item) => allowed.has(item.key));
+  }
+  return items;
 }

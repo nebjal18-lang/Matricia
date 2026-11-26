@@ -26,10 +26,14 @@ const copy = {
     mandateHelp: "Plusieurs mandats sont autorisés dans cette organisation. Choisissez le territoire indiqué avec sa bibliothèque et votre rôle avant de poursuivre.",
     noMandateTitle: "Aucun mandat de bibliothèque actif accessible",
     noMandateHelp: "Ce compte ne dispose pas actuellement d’un mandat actif permettant de gérer une bibliothèque de services professionnels.",
+    forbiddenTitle: "Accès limité pour ce compte franchisé",
+    forbiddenHelp: "Vous êtes connecté à l’espace franchisé, mais le mandat ou les habilitations nécessaires pour ouvrir ce dossier ne sont pas disponibles.",
+    organizationLabel: "Organisation reconnue",
     regularize:
       "Pour commencer, déposez une candidature. Si votre dossier est déjà validé, demandez à Matricia de vérifier votre organisation, votre rôle et l’affectation du mandat signé avant son activation.",
     apply: "Déposer une candidature",
     contact: "Contacter Matricia pour vérifier mon accès",
+    backHome: "Retour à l’accueil franchisé",
   },
   ar: {
     organization: "مؤسسة الامتياز",
@@ -44,10 +48,14 @@ const copy = {
     mandateHelp: "تتوفرون على عدة تكليفات مصرح بها داخل هذه المؤسسة. اختاروا النطاق المبيّن مع مكتبته ودوركم قبل المتابعة.",
     noMandateTitle: "لا يوجد تكليف نشط بمكتبة متاح لهذا الحساب",
     noMandateHelp: "لا يملك هذا الحساب حالياً تكليفاً نشطاً يتيح تدبير مكتبة للخدمات المهنية.",
+    forbiddenTitle: "ولوج محدود لهذا الحساب الامتيازي",
+    forbiddenHelp: "أنتم متصلون بفضاء الامتياز، لكن التكليف أو الصلاحيات اللازمة لفتح هذا الملف غير متاحة.",
+    organizationLabel: "المؤسسة المعرَّف بها",
     regularize:
       "للبدء، أودعوا ترشيحاً. إذا صودق على ملفكم، اطلبوا من ماتريسيا التحقق من مؤسستكم ودوركم وإسناد التكليف الموقّع قبل تفعيله.",
     apply: "إيداع ترشيح",
     contact: "التواصل مع ماتريسيا للتحقق من صلاحية الولوج",
+    backHome: "العودة إلى استقبال الامتياز",
   },
 } as const;
 
@@ -174,22 +182,41 @@ export function FranchiseAccessState({
   locale,
   reason,
   returnPath,
+  organizationName,
 }: {
   locale: Locale;
   reason: Extract<FranchiseLibraryLoadResult, { status: "error" }>["reason"];
   returnPath: string;
+  organizationName?: string | null;
 }) {
   const c = copy[locale];
-  if (reason !== "NO_MANDATE" && reason !== "ORGANIZATION_REQUIRED" && reason !== "MANDATE_REQUIRED") {
+  if (reason !== "NO_MANDATE" && reason !== "ORGANIZATION_REQUIRED" && reason !== "MANDATE_REQUIRED" && reason !== "FORBIDDEN") {
     return <WorkspaceFailure locale={locale} reason={reason} returnPath={returnPath} supportReference="FRANCHISE_LIBRARY" />;
   }
+  const title =
+    reason === "NO_MANDATE" ? c.noMandateTitle
+      : reason === "FORBIDDEN" ? c.forbiddenTitle
+        : reason === "MANDATE_REQUIRED" ? c.mandateTitle
+          : c.selectTitle;
+  const help =
+    reason === "NO_MANDATE" ? c.noMandateHelp
+      : reason === "FORBIDDEN" ? c.forbiddenHelp
+        : reason === "MANDATE_REQUIRED" ? c.mandateHelp
+          : c.selectHelp;
+  const showRegularize = reason === "NO_MANDATE" || reason === "FORBIDDEN";
   return (
     <main className="client-page">
       <Alert>
-        <AlertTitle>{reason === "NO_MANDATE" ? c.noMandateTitle : reason === "MANDATE_REQUIRED" ? c.mandateTitle : c.selectTitle}</AlertTitle>
+        <AlertTitle>{title}</AlertTitle>
         <AlertDescription className="grid gap-4">
-          <p>{reason === "NO_MANDATE" ? c.noMandateHelp : reason === "MANDATE_REQUIRED" ? c.mandateHelp : c.selectHelp}</p>
-          {reason === "NO_MANDATE" ? (
+          <p>{help}</p>
+          {organizationName ? (
+            <p>
+              <span className="font-medium">{c.organizationLabel} : </span>
+              {organizationName}
+            </p>
+          ) : null}
+          {showRegularize ? (
             <>
               <p>{c.regularize}</p>
               <div className="flex flex-wrap gap-3">
@@ -198,6 +225,9 @@ export function FranchiseAccessState({
                 </Link>
                 <Link href={`/${locale}/contact`} className="client-cta-soft">
                   {c.contact}
+                </Link>
+                <Link href={`/${locale}/franchise/accueil`} className="client-cta-soft">
+                  {c.backHome}
                 </Link>
               </div>
             </>

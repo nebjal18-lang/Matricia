@@ -7,6 +7,7 @@ import { getSupabaseServerClient } from "@/modules/shared/lib/supabase/server";
 import { demoPersonaEmail, isPublicDemoAccessEnabled } from "./demo-policy";
 import { demoPersonaHome, demoPersonaWorkspace, type DemoPersona } from "./demo-personas";
 import { ensureDemoPersonaAuthorization } from "./demo-authorization";
+import { ensureDemoFranchisePersona } from "./demo-franchise-ensure";
 import { findDemoRegionalActor } from "./demo-regional-directory";
 import { ensureDemoRegionalActor } from "./demo-regional-ensure";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
@@ -32,7 +33,13 @@ export async function connectDemoPersona(formData: FormData): Promise<void> {
   if (!identity) redirect(failure("role-missing"));
   const authorized = await ensureDemoPersonaAuthorization({ persona, userId: identity.id, admin });
   if (!authorized) redirect(failure("role-missing"));
-  await connectValidatedDemo({ admin, email, userId: identity.id, persona, locale, failure });
+  let organizationId: string | undefined;
+  if (persona === "franchise") {
+    const ensured = await ensureDemoFranchisePersona({ admin, userId: identity.id, email });
+    if (!ensured) redirect(failure("role-missing"));
+    organizationId = ensured.organizationId;
+  }
+  await connectValidatedDemo({ admin, email, userId: identity.id, persona, locale, failure, organizationId });
 }
 
 /** Connexion démo ciblée : franchisé / ST / client d’une région. */

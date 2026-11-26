@@ -11,11 +11,17 @@ export default async function FranchiseHomePage({ params, searchParams }: { para
   if (!isLocale(locale)) notFound();
   const { space, result } = await requireFranchiseLibrary({ returnPath: `/${locale}/franchise/accueil`, returnQuery: query, locale, organizationId: query.organizationId, franchiseId:query.franchiseId });
   const c = libraryCopy(locale);
+  const mandateReady = result.status === "success";
+  const organizationName =
+    space.organizationName
+    ?? space.organizations.find((item) => item.id === space.selectedOrganizationId)?.name
+    ?? space.organizations[0]?.name
+    ?? null;
   return (
-    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="home" title={c.homeTitle} lead={c.homeLead} kicker={c.scope} sceneHero mandateName={result.status === "success" ? result.workspace.mandate.libraryName : null}>
+    <FranchiseAppShell languagePath={space.currentPath} locale={locale} selectedQuery={space.selectedQuery} mandates={space.mandates} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="home" title={c.homeTitle} lead={c.homeLead} kicker={c.scope} sceneHero mandateName={mandateReady ? result.workspace.mandate.libraryName : null} mandateReady={mandateReady}>
       <FranchiseOrganizationSelector locale={locale} organizations={space.organizations} selectedOrganizationId={space.selectedOrganizationId} returnPath={`/${locale}/franchise/accueil`} />
       {result.status === "error" ? (
-        <FranchiseAccessState locale={locale} reason={result.reason} returnPath={`/${locale}/franchise/accueil${space.selectedQuery}`} />
+        <FranchiseAccessState locale={locale} reason={result.reason} returnPath={`/${locale}/franchise/accueil${space.selectedQuery}`} organizationName={organizationName} />
       ) : (
         <FranchiseLibraryHomeBoard locale={locale} query={space.selectedQuery} workspace={result.workspace} />
       )}

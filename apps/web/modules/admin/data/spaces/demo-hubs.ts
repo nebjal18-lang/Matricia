@@ -102,7 +102,9 @@ export function buildDemoCommandCenter(nowIso = new Date().toISOString()): Admin
         status: "PENDING_APPROVAL" as const,
         requestedAt: new Date(now - (index + 1) * dayMs).toISOString(),
         rowVersion: 1,
-        canDecide: true,
+        // Illustration only: synthetic IDs are not persisted. Decision buttons stay hidden
+        // so the UI never contradicts decide_admin_operational_action (42501).
+        canDecide: false,
       };
     }),
   };

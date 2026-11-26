@@ -47,7 +47,9 @@ describe("demo hubs complets", () => {
     expect(dash.amendments.every((item) => Boolean(item.object_fr) && Boolean(item.price_delta_minor))).toBe(true);
     expect(dash.requests.every((item) => Boolean(item.title_fr) && item.completeness_percent != null)).toBe(true);
 
-    expect(buildDemoCommandCenter().workItems.length).toBe(12);
+    const demoCc = buildDemoCommandCenter();
+    expect(demoCc.workItems.length).toBe(12);
+    expect(demoCc.actions.every((action) => action.canDecide === false)).toBe(true);
     expect(adminFinanceDashboardSchema.safeParse(buildDemoFinanceDashboard()).success).toBe(true);
     expect(adminCommerceCatalogSchema.safeParse(buildDemoCommerceCatalog()).success).toBe(true);
     expect(adminVolumeDemandSchema.safeParse(buildDemoVolumeDemand()).success).toBe(true);

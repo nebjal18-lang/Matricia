@@ -218,7 +218,7 @@ function ActionDecisionForm({
   const executedAt = action.executedAt ? formatAdminDateTime(action.executedAt, locale) : null;
   const proof = action.resultHash ? shortReference(action.resultHash, 10) : null;
   const statusTone = actionStatusTone(action.status);
-  const canDecide = action.status === "PENDING_APPROVAL" && action.canDecide !== false;
+  const canDecide = action.status === "PENDING_APPROVAL" && action.canDecide === true;
   const approveLabel = action.actionType === "ASSIGN_CASE" ? m.approve : (locale === "ar" ? "اعتماد" : "Approuver");
   const rejectLabel = action.actionType === "ASSIGN_CASE" ? m.reject : (locale === "ar" ? "رفض" : "Refuser");
   const successText = state.status === "success"
