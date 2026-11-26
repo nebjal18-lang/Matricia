@@ -216,33 +216,31 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
   const trustIcons = [Lock, Monitor, ShieldCheck] as const;
 
   return (
-    <main id="contenu-principal" className={`${styles.page} diagnostic-premium-page`} dir={locale === "ar" ? "rtl" : "ltr"}>
+    <main id="contenu-principal" className={`${styles.page} ${styles.questionsPage} diagnostic-premium-page`} dir={locale === "ar" ? "rtl" : "ltr"}>
       <div className={styles.shell}>
-        <header className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}><span className={styles.eyebrowMark} aria-hidden="true" />{copy.eyebrow}</p>
-            <h1 className={styles.heroTitle}>{copy.title}</h1>
-            <p className={styles.heroIntro}>{copy.intro}</p>
-          </div>
-          <p className={styles.script} aria-hidden="true">{copy.scriptNote}</p>
+        <header className={styles.heroCompact}>
+          <p className={styles.eyebrow}><span className={styles.eyebrowMark} aria-hidden="true" />{copy.eyebrow}</p>
+          <h1 className={styles.heroTitleCompact}>{copy.title}</h1>
+          <p className={styles.heroIntroCompact}>{copy.intro}</p>
         </header>
 
         <div className={styles.board}>
           <section className={styles.card} aria-labelledby="diagnostic-question">
-            <div className={styles.cardHead}>
-              <p className={styles.cardEyebrow}>{copy.questionLabels[questionId]}</p>
+            <div className={styles.progressRow}>
               <p className={styles.progressMeta} aria-live="polite">{copy.progress(state.step + 1, questionIds.length)}</p>
+              <div className={styles.progressTrack} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progressPct)} aria-label={copy.progress(state.step + 1, questionIds.length)}>
+                <span className={styles.progressFill} style={{ width: `${progressPct}%` }} />
+              </div>
             </div>
-            <div className={styles.progressTrack} aria-hidden="true"><span className={styles.progressFill} style={{ width: `${progressPct}%` }} /></div>
-            <p className={styles.progressPct} style={{ ["--progress" as string]: progressPct }}>{copy.percent(state.step + 1, questionIds.length)}</p>
             {!storageAvailable ? <p role="status" className={styles.note}>{locale === "fr" ? "La sauvegarde locale est indisponible. Vous pouvez continuer en gardant cette page ouverte." : "الحفظ المحلي غير متاح. يمكنكم المتابعة مع إبقاء الصفحة مفتوحة."}</p> : null}
             <h2 id="diagnostic-question" className={styles.question}>{question[0]}</h2>
             <p className={styles.questionHelp}>{question[1]}</p>
             {choices.length ? (
               <Choices label={String(question[0])} choices={choices} value={answer} multi={questionId === "goals"} icons={questionId === "sector"} onChange={setAnswer} />
             ) : (
-              <textarea aria-labelledby="diagnostic-question" className={styles.textarea} autoFocus value={typeof answer === "string" ? answer : ""} onChange={(event) => setAnswer(event.target.value.slice(0, 500))} rows={5} maxLength={500} />
+              <textarea aria-labelledby="diagnostic-question" className={styles.textarea} autoFocus value={typeof answer === "string" ? answer : ""} onChange={(event) => setAnswer(event.target.value.slice(0, 500))} rows={4} maxLength={500} />
             )}
+            <p className={styles.autoSaveNote}>{storageAvailable ? copy.autoSave : null}</p>
             <div className={styles.actions}>
               {state.step > 0 ? (
                 <button type="button" className={styles.back} onClick={() => setState((current) => ({ ...current, step: current.step - 1 }))}>
@@ -264,19 +262,19 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
                   if (next.step >= questionIds.length) setPhase("recap");
                 }}
               >
-                {state.step === questionIds.length - 1 ? copy.next : copy.next}
+                {copy.next}
                 <ArrowRight className="rtl-mirror" aria-hidden="true" size={18} />
               </button>
             </div>
           </section>
 
           <aside className={styles.side}>
-            <div className={styles.rail}>
+            <div className={styles.railDesktop}>
               <p className={styles.railTitle}>{copy.railTitle}</p>
               <ol className={styles.steps}>
                 {copy.steps.map((label, index) => (
                   <li key={label} className={index === state.step ? `${styles.step} ${styles.stepCurrent}` : index < state.step ? `${styles.step} ${styles.stepDone}` : styles.step}>
-                    <span className={styles.stepNum}>{index < state.step ? "✓" : index + 1}</span>
+                    <span className={styles.stepNum} aria-hidden="true">{index < state.step ? "✓" : index + 1}</span>
                     <strong>
                       {label}
                       {index === state.step ? <em className={styles.stepStatus}>{copy.currentStep}</em> : null}
@@ -285,11 +283,27 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
                 ))}
               </ol>
             </div>
-            <div className={styles.trust}>
-              <span className={styles.trustRays} aria-hidden="true" />
+            <details className={styles.stepsDetails}>
+              <summary className={styles.stepsSummary}>
+                <span>{copy.railTitle}</span>
+                <span className={styles.stepsSummaryMeta}>{copy.progress(state.step + 1, questionIds.length)}</span>
+              </summary>
+              <ol className={styles.steps}>
+                {copy.steps.map((label, index) => (
+                  <li key={label} className={index === state.step ? `${styles.step} ${styles.stepCurrent}` : index < state.step ? `${styles.step} ${styles.stepDone}` : styles.step}>
+                    <span className={styles.stepNum} aria-hidden="true">{index < state.step ? "✓" : index + 1}</span>
+                    <strong>
+                      {label}
+                      {index === state.step ? <em className={styles.stepStatus}>{copy.currentStep}</em> : null}
+                    </strong>
+                  </li>
+                ))}
+              </ol>
+            </details>
+            <div className={styles.trustCompact}>
               <p className={styles.trustTitle}>{copy.aboutTitle}</p>
               <ul className={styles.trustList}>
-                {copy.aboutItems.map((item, index) => {
+                {copy.aboutItems.slice(0, 2).map((item, index) => {
                   const Icon = trustIcons[index] ?? ShieldCheck;
                   return (
                     <li key={item} className={styles.trustItem}>
@@ -303,9 +317,8 @@ export function PrediagnosticFlow({ locale, organizations = [], authenticated = 
           </aside>
         </div>
       </div>
-      <footer className={styles.pageFooter}>
+      <footer className={styles.pageFooterCompact}>
         <p className={styles.pageFooterBrand}>{copy.footerBrand}</p>
-        <p className={styles.pageFooterTag}>{copy.footerTag}</p>
       </footer>
     </main>
   );

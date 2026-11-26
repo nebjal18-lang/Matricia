@@ -156,10 +156,12 @@ export function RecapView({
             {questionIds.map((id, index) => {
               const Icon = recapIcons[index] ?? ClipboardList;
               return (
-                <div key={id} className={styles.recapRow} data-question={id}>
+                <div key={id} className={styles.recapGroup} data-question={id}>
                   <span className={styles.recapIcon} aria-hidden="true"><Icon size={18} /></span>
-                  <span className={styles.recapLabel}>{copy.questionLabels[id]}</span>
-                  <span className={styles.recapValue}>{answerLabel(locale, id, answers[id])}</span>
+                  <div className={styles.recapCopy}>
+                    <span className={styles.recapLabel}>{copy.questionLabels[id]}</span>
+                    <span className={styles.recapValue}>{answerLabel(locale, id, answers[id])}</span>
+                  </div>
                   <button type="button" className={styles.recapEdit} aria-label={`${copy.editAnswer} : ${copy.questionLabels[id]}`} onClick={() => onEdit(index)}>
                     <Pencil size={14} aria-hidden="true" />{copy.editAnswer}
                   </button>
@@ -334,10 +336,9 @@ export function ResultView({
                         {copy.kindLabels[kind]}
                       </span>
                       <h2 className={`${styles.priorityTitle} ${styles.priorityTitleDesktop}`}>{item[0]}</h2>
+                      <p className={styles.priorityWhy}>{item[2]}</p>
                       <div className={styles.priorityMeta}>
-                        <p className={styles.priorityRow}><Sparkles className={styles.priorityRowIcon} size={15} aria-hidden="true" /><span><strong>{copy.typeLabel} :</strong> {copy.typeLabels[key]}</span></p>
                         <div className={`${styles.priorityBlock} ${styles.priorityBlockMint}`}><CheckCircle2 size={16} aria-hidden="true" /><div><strong>{copy.constat}</strong><p>{observationLabel(locale, key, answers)}</p></div></div>
-                        <div className={`${styles.priorityBlock} ${styles.priorityBlockViolet}`}><Lightbulb size={16} aria-hidden="true" /><div><strong>{copy.whyItMatters}</strong><p>{item[2]}</p></div></div>
                         <div className={`${styles.priorityBlock} ${styles.priorityBlockCoral}`}><Target size={16} aria-hidden="true" /><div><strong>{copy.recommendedAction}</strong><p>{item[3]}</p></div></div>
                       </div>
                       <button type="button" className={styles.detailCta} onClick={() => onDetail(key)}>

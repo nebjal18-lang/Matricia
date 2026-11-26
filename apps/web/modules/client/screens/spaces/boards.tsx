@@ -612,20 +612,20 @@ export function FinancesBoard({ locale, query, rows, omitRegister = false }: { l
   const list = rows ?? [];
   return (
     <main className="client-page">
-      <section className="client-space-kpis">
-        <article className="client-card client-kpi-card">
+      <section className="client-space-kpis client-finance-lanes" aria-label={c.finTitle}>
+        <article className="client-card client-kpi-card" data-finance="matricia">
           <span className="client-feed-icon" data-tone="violet"><FileText className="size-4" aria-hidden /></span>
           <h2>{c.invoices}</h2>
           <p>{c.invoiceLead}</p>
           <Cta href={`/${locale}/client/abonnement${query}`} tone="violet">{c.open}</Cta>
         </article>
-        <article className="client-card client-kpi-card">
+        <article className="client-card client-kpi-card" data-finance="provider">
           <span className="client-feed-icon" data-tone="peach"><FileText className="size-4" aria-hidden /></span>
           <h2>{c.payments}</h2>
           <p>{c.paymentLead}</p>
-          <Cta href={`/${locale}/client/abonnement${query}#plans`} tone="peach">{c.open}</Cta>
+          <Cta href={`/${locale}/client/missions${query}`} tone="peach">{c.open}</Cta>
         </article>
-        <article className="client-card client-kpi-card">
+        <article className="client-card client-kpi-card" data-finance="credits">
           <span className="client-feed-icon" data-tone="mint"><FileText className="size-4" aria-hidden /></span>
           <h2>{c.credits}</h2>
           <p>{c.creditLead}</p>
