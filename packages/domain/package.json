@@ -2,7 +2,7 @@
   "name": "@matricia/domain",
   "version": "0.1.0",
   "private": true,
-  "description": "Vercel root for Matricia web builds that compile apps/web (admin index route).",
+  "description": "Vercel root for Matricia web builds that compile apps/web (admin index route). Rebuild trigger 2026-11-26 panel.test decided_by.",
   "type": "module",
   "engines": {
     "node": "22.x"
