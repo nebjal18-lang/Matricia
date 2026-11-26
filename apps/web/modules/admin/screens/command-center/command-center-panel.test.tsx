@@ -84,7 +84,7 @@ describe("CommandCenterPanel", () => {
       </div>,
     );
     expect(html).toContain('dir="rtl"');
-    expect(html).toContain("مهام اليوم");
+    expect(html).toContain("الملفات قيد المعالجة");
     expect(html).toContain("w-full sm:w-auto");
     expect(html).not.toMatch(/(?:min-w|max-w|w)-\[(?:[4-9]\d\d|\d{4,})px\]/);
   });
@@ -125,9 +125,56 @@ it("surfaces SLA breach and opens claim in the contextual rail for the selected 
   expect(html).toContain('data-selected="true"');
   expect(html).toContain("admin-triage-forms");
   expect(html).toContain("admin-row-menu");
-  expect(html).toContain("À traiter");
-  expect(html.indexOf("À traiter aujourd")).toBeLessThan(html.indexOf("Balayer les exceptions métier"));
+  expect(html).toContain("Dossiers à traiter");
+  expect(html.indexOf("Dossiers à traiter")).toBeLessThan(html.indexOf("Balayer les exceptions métier"));
+  expect(html).toContain("Consulter la fiche");
+  expect(html).toContain("Traiter la demande");
+  expect(html).toContain("Voir les 11 étapes métier");
   expect(html).not.toContain("admin-work-action-form--primary");
+});
+
+it("keeps distinct identities for two similar attribution requests A and B", () => {
+  const actionA = {
+    ...dashboard.actions[0]!,
+    id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    workItemId: "wa",
+    resourceType: "mission",
+    resourceId: "mission-alpha-1111-4111-8111-111111111111",
+    actionType: "ASSIGN_CASE" as const,
+    reason: "Attribution démo — Atlas Mining (mission).",
+    status: "PENDING_APPROVAL" as const,
+  };
+  const actionB = {
+    ...dashboard.actions[0]!,
+    id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    workItemId: "wb",
+    resourceType: "organization",
+    resourceId: "org-bravo-2222-4222-8222-222222222222",
+    actionType: "ASSIGN_CASE" as const,
+    reason: "Attribution démo — Coop Tadla (organization).",
+    status: "PENDING_APPROVAL" as const,
+  };
+  const html = renderToStaticMarkup(
+    <CommandCenterPanel
+      dashboard={{ ...dashboard, workItems: [], actions: [actionA, actionB] }}
+      locale="fr"
+      m={getCommandCenterMessages("fr")}
+      keys={keys}
+      currentTime="2026-11-13T12:00:00.000Z"
+      enrichment={{
+        wa: { organization_name: "Atlas Mining", assignee_label: null },
+        wb: { organization_name: "Coop Tadla", assignee_label: null },
+      }}
+    />,
+  );
+  expect(html).toContain("Atlas Mining");
+  expect(html).toContain("Coop Tadla");
+  expect(html).toContain('data-action-request-id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"');
+  expect(html).toContain('data-resource-id="mission-alpha-1111-4111-8111-111111111111"');
+  expect(html).toContain("Approuver l’attribution");
+  // Default selection is first row (A); panel must bind the same action id.
+  expect(html).toMatch(/admin-treat-rail[\s\S]*data-action-request-id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"/);
+  expect(html).toContain('name="actionRequestId" value="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"');
 });
 
 it("humanizes executed sensitive actions without dumping raw technical payloads", () => {

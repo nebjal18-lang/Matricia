@@ -9,6 +9,7 @@ import { Textarea } from "@/modules/shared/ui/textarea";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 import type { AdminActionRequest, AdminCommandCenter, AdminWorkItem } from "@/modules/admin/data/command-center/model";
 import {
+  actionDossierLabel,
   actionResourceLabel,
   actionStatusTone,
   compactDateTime,
@@ -199,34 +200,48 @@ function ActionDecisionForm({
   locale,
   m,
   keyValue,
+  organizationName,
 }: {
   action: AdminActionRequest;
   locale: Locale;
   m: CommandCenterMessages;
   keyValue: string;
+  organizationName?: string | null;
 }) {
   const p = useId();
   const [state, formAction, pending] = useActionState(decideAdminAction, idle);
   const actionLabel = getCommandCenterCodeLabel(locale, "action", action.actionType);
   const statusLabel = getCommandCenterCodeLabel(locale, "status", action.status);
   const resourceLabel = actionResourceLabel(action.resourceType, locale);
-  const reason = humanizeActionReason(action.reason, locale);
+  const dossier = actionDossierLabel(action, locale, actionLabel, organizationName);
   const requestedAt = formatAdminDateTime(action.requestedAt, locale);
   const executedAt = action.executedAt ? formatAdminDateTime(action.executedAt, locale) : null;
   const proof = action.resultHash ? shortReference(action.resultHash, 10) : null;
   const statusTone = actionStatusTone(action.status);
   const canDecide = action.status === "PENDING_APPROVAL" && action.canDecide !== false;
+  const approveLabel = action.actionType === "ASSIGN_CASE" ? m.approve : (locale === "ar" ? "اعتماد" : "Approuver");
+  const rejectLabel = action.actionType === "ASSIGN_CASE" ? m.reject : (locale === "ar" ? "رفض" : "Refuser");
+  const successText = state.status === "success"
+    ? (locale === "ar"
+      ? `تم تسجيل القرار لـ ${dossier.title} · ${dossier.ref}.`
+      : `Décision enregistrée pour ${dossier.title} · ${dossier.ref}.`)
+    : null;
 
   return (
-    <div className="admin-triage-forms space-y-4">
+    <div className="admin-triage-forms space-y-4" data-action-request-id={action.id} data-resource-id={action.resourceId}>
       <div>
-        <h3 className="font-semibold">{actionLabel}</h3>
-        <p className="text-sm text-muted-foreground">{reason}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{m.selectedDossier}</p>
+        <h3 className="font-semibold">{dossier.title}</h3>
+        <p className="text-sm text-muted-foreground">{dossier.identity}</p>
       </div>
       <dl className="grid gap-2 text-sm">
         <div>
+          <dt className="text-muted-foreground">{m.reference}</dt>
+          <dd dir="ltr" title={action.resourceId}>{dossier.ref}</dd>
+        </div>
+        <div>
           <dt className="text-muted-foreground">{locale === "ar" ? "المورد" : "Cible"}</dt>
-          <dd title={action.resourceId}>{resourceLabel}</dd>
+          <dd title={action.resourceId}>{resourceLabel}{organizationName ? ` · ${organizationName}` : ""}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">{m.approvalsRequired}</dt>
@@ -254,13 +269,13 @@ function ActionDecisionForm({
           </Field>
           <div className="flex flex-wrap gap-2">
             <button type="submit" name="decision" value="APPROVE" disabled={pending} className="admin-primary-cta min-h-11 w-full sm:w-auto">
-              {m.approve}
+              {approveLabel}
             </button>
             <Button type="submit" name="decision" value="REJECT" variant="destructive" disabled={pending} className="min-h-11 w-full sm:w-auto">
-              {m.reject}
+              {rejectLabel}
             </Button>
           </div>
-          <Feedback state={state} m={m} />
+          {successText ? <p role="status" aria-live="polite" className="min-h-5 text-sm text-[var(--client-cta)]">{successText}</p> : <Feedback state={state} m={m} />}
         </form>
       ) : (
         <div className="text-sm" data-tone={statusTone}>
@@ -313,8 +328,34 @@ export function CommandCenterPanel({
     return keys[dashboard.workItems.length * 2 + index]!;
   };
 
-  const totalCount = rows.length;
+  const focus = context.get("focus");
   const pendingApprovals = dashboard.actions.filter((action) => action.status === "PENDING_APPROVAL").length;
+  const filteredRows = useMemo(() => {
+    if (focus === "overdue") {
+      return rows.filter((row) => row.kind === "work" && isWorkOverdue(row.item.dueAt, currentTime));
+    }
+    if (focus === "dueToday") {
+      return rows.filter((row) => {
+        if (row.kind !== "work") return false;
+        return summarizeAdminWork([row.item], currentTime).dueToday === 1;
+      });
+    }
+    if (focus === "critical") {
+      return rows.filter((row) => row.kind === "work" && row.item.priority === "CRITICAL");
+    }
+    if (focus === "approvals") {
+      return rows.filter((row) => row.kind === "action" && row.action.status === "PENDING_APPROVAL");
+    }
+    return rows;
+  }, [rows, focus, currentTime]);
+  const totalCount = filteredRows.length;
+  const filterHref = (value: string | null) => {
+    const params = new URLSearchParams(context);
+    if (value) params.set("focus", value);
+    else params.delete("focus");
+    const qs = params.toString();
+    return `/${locale}/administration/command-center${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <div className="admin-command-center space-y-6">
@@ -326,17 +367,30 @@ export function CommandCenterPanel({
               <p>{m.triageLead}</p>
             </div>
             <p className="admin-result-count" role="status">
-              {locale === "ar"
-                ? `${totalCount} للمعالجة`
-                : `${totalCount} à traiter`}
-              {summary.overdue > 0 ? ` · ${summary.overdue} ${m.overdue}` : null}
-              {pendingApprovals > 0 ? ` · ${pendingApprovals} ${m.pending}` : null}
+              <Link href={filterHref(null)} className="client-text-link">{locale === "ar" ? `${rows.length} للمعالجة` : `${rows.length} dossiers`}</Link>
+              {" · "}
+              <Link href={filterHref("dueToday")} className="client-text-link">{`${summary.dueToday} ${m.dueTodayCount}`}</Link>
+              {" · "}
+              <Link href={filterHref("overdue")} className="client-text-link">{`${summary.overdue} ${m.overdue}`}</Link>
+              {" · "}
+              <Link href={filterHref("critical")} className="client-text-link">{`${summary.critical} ${m.critical}`}</Link>
+              {" · "}
+              <Link href={filterHref("approvals")} className="client-text-link">{`${pendingApprovals} ${m.pending}`}</Link>
             </p>
           </div>
+          {focus ? (
+            <p className="client-access-note" role="status">
+              {m.filterActive}
+              {" · "}
+              <Link href={filterHref(null)} className="client-text-link">{m.clearFilter}</Link>
+              {" · "}
+              {locale === "ar" ? `${totalCount} نتيجة` : `${totalCount} résultat(s)`}
+            </p>
+          ) : null}
 
           {summary.humanReview > 0 ? <p role="note" className="client-access-note">{m.humanReviewNotice}</p> : null}
 
-          {rows.length === 0 ? (
+          {filteredRows.length === 0 ? (
             <div className="admin-empty-card">
               <FileText className="size-6" aria-hidden />
               <h3>{m.emptyWork}</h3>
@@ -352,12 +406,12 @@ export function CommandCenterPanel({
                     <th>{m.assignee}</th>
                     <th>{m.due}</th>
                     <th>
-                      <span className="sr-only">{m.openDossier}</span>
+                      <span className="sr-only">{m.nextStep}</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row) => {
+                  {filteredRows.map((row) => {
                     if (row.kind === "work") {
                       const item = row.item;
                       const title = locale === "ar" ? item.titleAr : item.titleFr;
@@ -412,12 +466,15 @@ export function CommandCenterPanel({
                           </td>
                           <td>
                             <details className="admin-row-menu" suppressHydrationWarning>
-                              <summary aria-label={m.openDossier} suppressHydrationWarning>
+                              <summary aria-label={m.viewSummary} suppressHydrationWarning>
                                 <MoreHorizontal className="size-4" aria-hidden />
                               </summary>
                               <div>
                                 <button type="button" className="admin-row-menu-button" onClick={() => setSelectedKey(row.key)}>
                                   {m.nextStep}
+                                </button>
+                                <button type="button" className="admin-row-menu-button" onClick={() => setSelectedKey(row.key)}>
+                                  {m.viewSummary}
                                 </button>
                                 <Link href={href}>
                                   <Eye className="size-3.5" aria-hidden />
@@ -438,7 +495,10 @@ export function CommandCenterPanel({
                     const actionLabel = getCommandCenterCodeLabel(locale, "action", action.actionType);
                     const statusLabel = getCommandCenterCodeLabel(locale, "status", action.status);
                     const resourceLabel = actionResourceLabel(action.resourceType, locale);
-                    const reason = humanizeActionReason(action.reason, locale);
+                    const orgName = action.workItemId
+                      ? enrichment?.[action.workItemId]?.organization_name
+                      : null;
+                    const dossier = actionDossierLabel(action, locale, actionLabel, orgName);
                     const selectedRow = activeKey === row.key;
                     const statusTone = actionStatusTone(action.status);
                     const chipTone = statusTone === "ok" ? "mint" : statusTone === "critical" ? "coral" : "peach";
@@ -449,26 +509,29 @@ export function CommandCenterPanel({
                         data-selected={selectedRow ? "true" : undefined}
                         data-kind="action"
                         data-tone={statusTone}
+                        data-action-request-id={action.id}
+                        data-resource-id={action.resourceId}
                       >
                         <td>
                           <button
                             type="button"
                             className="admin-triage-select"
                             aria-pressed={selectedRow}
+                            aria-current={selectedRow ? "true" : undefined}
                             onClick={() => setSelectedKey(row.key)}
                           >
                             <span className="client-doc-cell">
                               <span className="client-avatar" data-tone={chipTone}>{actionLabel.slice(0, 1)}</span>
                               <span>
-                                <strong>{actionLabel}</strong>
-                                <small>{reason}</small>
+                                <strong>{dossier.title}</strong>
+                                <small>{dossier.identity}</small>
                               </span>
                             </span>
                           </button>
                         </td>
                         <td>
                           <span className="client-status-chip" data-tone="peach">{m.typeApproval}</span>
-                          <small className="mt-1 block text-muted-foreground" title={action.resourceId}>{resourceLabel}</small>
+                          <small className="mt-1 block text-muted-foreground" title={action.resourceId}>{resourceLabel} · {dossier.ref}</small>
                         </td>
                         <td>
                           <span className="client-status-chip" data-tone={chipTone}>{statusLabel}</span>
@@ -512,10 +575,10 @@ export function CommandCenterPanel({
           ) : selected.kind === "work" ? (
             <>
               <p>{m.focusTodayLead}</p>
-              <div className="admin-triage-selected">
+              <div className="admin-triage-selected" data-work-item-id={selected.item.id} data-resource-id={selected.item.resourceId}>
                 <span className="client-status-chip" data-tone="violet">{m.typeFile}</span>
                 <strong>{locale === "ar" ? selected.item.titleAr : selected.item.titleFr}</strong>
-                <small>{workItemMotif(selected.item, locale)}</small>
+                <small>{workItemMotif(selected.item, locale)} · {m.reference} {shortReference(selected.item.resourceId, 6)}</small>
                 <Link href={dossierHref(locale, selected.item, query)} className="client-ghost-link">{m.openDossier}</Link>
               </div>
               <WorkActionForms
@@ -531,7 +594,7 @@ export function CommandCenterPanel({
           ) : (
             <>
               <p>{m.focusTodayLead}</p>
-              <div className="admin-triage-selected">
+              <div className="admin-triage-selected" data-action-request-id={selected.action.id} data-resource-id={selected.action.resourceId}>
                 <span className="client-status-chip" data-tone="peach">{m.typeApproval}</span>
               </div>
               <ActionDecisionForm
@@ -539,6 +602,7 @@ export function CommandCenterPanel({
                 locale={locale}
                 m={m}
                 keyValue={actionKeyValue(selected.action.id)}
+                organizationName={selected.action.workItemId ? enrichment?.[selected.action.workItemId]?.organization_name : null}
               />
             </>
           )}

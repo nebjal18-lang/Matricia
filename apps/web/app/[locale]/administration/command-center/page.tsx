@@ -52,8 +52,8 @@ export default async function AdminCommandCenterPage({
       userEmail={space.userEmail}
       active="home"
       alternateHref={`/${alternate}/administration/command-center${currentQuery}`}
-      title={fr ? "Centre de pilotage" : "مركز القيادة"}
-      lead={fr ? "Une file unifiée. Sélectionnez un dossier pour ouvrir son action." : "طابور موحّد. اختاروا ملفاً لفتح الإجراء الخاص به."}
+      title={m.title}
+      lead={fr ? "File unifiée et panneau de décision. La ligne sélectionnée contrôle l’action." : "طابور موحّد ولوحة قرار. السطر المحدد يتحكم في الإجراء."}
       kicker={c.kicker}
     >
       {query.q?.trim() ? (

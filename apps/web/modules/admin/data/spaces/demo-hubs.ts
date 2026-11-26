@@ -51,10 +51,16 @@ function clientProviderPairs() {
   return pairs;
 }
 
-export function buildDemoCommandCenter(): AdminCommandCenter {
+export function buildDemoCommandCenter(nowIso = new Date().toISOString()): AdminCommandCenter {
   const pairs = clientProviderPairs();
+  const now = new Date(nowIso).getTime();
+  const dayMs = 86_400_000;
   const workItems = pairs.slice(0, 12).map((pair, index) => {
     const id = demoId(`work:${pair.territory}`);
+    // Mix overdue / today / future relative to the hub clock (Casablanca day bounds via dueAt).
+    const dueOffsetDays = index < 4 ? -(index + 1) : index === 4 || index === 5 ? 0 : index - 4;
+    const dueAt = new Date(now + dueOffsetDays * dayMs).toISOString();
+    const priority = (index % 5 === 0 ? "CRITICAL" : index % 4 === 0 ? "HIGH" : "MEDIUM") as "CRITICAL" | "HIGH" | "MEDIUM";
     return {
       id,
       queueKey: index % 2 === 0 ? "COMPLIANCE_REVIEW" : "MISSION_FOLLOWUP",
@@ -63,12 +69,12 @@ export function buildDemoCommandCenter(): AdminCommandCenter {
       organizationId: index % 2 === 0 ? pair.clientId : pair.providerId,
       sourceKind: "SYSTEM",
       resourceType: index % 2 === 0 ? "organization" : "mission",
-      resourceId: demoId(`resource:${pair.territory}`),
+      resourceId: demoId(`resource:${pair.territory}:${index}`),
       titleFr: `${index % 2 === 0 ? "Conformité" : "Jalon"} · ${pair.clientName}`,
       titleAr: `${index % 2 === 0 ? "امتثال" : "معلم"} · ${pair.clientName}`,
-      priority: (index % 4 === 0 ? "HIGH" : "MEDIUM") as "HIGH" | "MEDIUM",
+      priority,
       status: "OPEN",
-      dueAt: "2026-09-28T18:00:00.000Z",
+      dueAt,
       assignedTo: null,
       rowVersion: 1,
       canClaim: true,
@@ -81,21 +87,24 @@ export function buildDemoCommandCenter(): AdminCommandCenter {
     hasMoreActions: false,
     capabilities: { requestAction: true },
     workItems,
-    actions: workItems.slice(0, 4).map((item, index) => ({
-      id: demoId(`action:${index}`),
-      workItemId: item.id,
-      organizationId: item.organizationId,
-      actionType: "ASSIGN_CASE",
-      targetEnvironment: "DEVELOPMENT",
-      resourceType: item.resourceType,
-      resourceId: item.resourceId,
-      reason: "Attribution démo pour parcours admin.",
-      approvalsRequired: 1,
-      status: "PENDING_APPROVAL",
-      requestedAt: "2026-09-20T10:00:00.000Z",
-      rowVersion: 1,
-      canDecide: true,
-    })),
+    actions: workItems.slice(0, 4).map((item, index) => {
+      const pair = pairs[index]!;
+      return {
+        id: demoId(`action:${index}:${pair.territory}`),
+        workItemId: item.id,
+        organizationId: item.organizationId,
+        actionType: "ASSIGN_CASE" as const,
+        targetEnvironment: "DEVELOPMENT" as const,
+        resourceType: item.resourceType,
+        resourceId: item.resourceId,
+        reason: `Attribution démo — ${pair.clientName} (${item.resourceType}).`,
+        approvalsRequired: 1,
+        status: "PENDING_APPROVAL" as const,
+        requestedAt: new Date(now - (index + 1) * dayMs).toISOString(),
+        rowVersion: 1,
+        canDecide: true,
+      };
+    }),
   };
 }
 

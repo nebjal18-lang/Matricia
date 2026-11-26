@@ -66,6 +66,24 @@ describe("work presentation helpers", () => {
     ).toBe("Hôtel Bayt Al Bahar");
     expect(workItemOrganizationLabel(base, "fr", "  Coop Tadla  ")).toBe("Coop Tadla");
     expect(humanizeActionReason("Attribution démo pour parcours admin.", "fr")).toBe("Demande d’attribution à valider");
+    expect(
+      humanizeActionReason("Attribution démo pour parcours admin.", "fr", {
+        organizationName: "Atlas Mining",
+        resourceId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+        resourceLabel: "Mission",
+      }),
+    ).toContain("Atlas Mining");
+    expect(
+      humanizeActionReason("Attribution démo — Atlas Mining (mission).", "fr", {
+        organizationName: "Atlas Mining",
+        resourceId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      }),
+    ).not.toEqual(
+      humanizeActionReason("Attribution démo — Coop Tadla (organization).", "fr", {
+        organizationName: "Coop Tadla",
+        resourceId: "ffffffff-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      }),
+    );
     expect(humanizeActionReason("Restriction après revue conformité", "fr")).toBe("Restriction après revue conformité");
   });
 });

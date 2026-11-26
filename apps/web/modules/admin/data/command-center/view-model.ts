@@ -120,13 +120,48 @@ export function workItemOrganizationLabel(
   return locale === "ar" ? "منظمة غير مبيّنة" : "Organisation à préciser";
 }
 
-/** Soften seed/demo reasons into an actionable ops label. */
-export function humanizeActionReason(reason: string, locale: "fr" | "ar") {
+export type ActionIdentityHint = {
+  organizationName?: string | null;
+  resourceLabel?: string | null;
+  resourceId?: string | null;
+};
+
+/**
+ * Soften seed/demo reasons without collapsing distinct dossiers into one subtitle.
+ * Always keep organisation / type / short ref when provided.
+ */
+export function humanizeActionReason(
+  reason: string,
+  locale: "fr" | "ar",
+  identity?: ActionIdentityHint,
+) {
   const text = reason.trim();
-  if (/d[eé]mo|parcours admin|اختبار|تجريب/iu.test(text)) {
-    return locale === "ar" ? "طلب إسناد للتحقق" : "Demande d’attribution à valider";
+  const isDemo = /d[eé]mo|parcours admin|اختبار|تجريب/iu.test(text);
+  const org = identity?.organizationName?.trim() || null;
+  const type = identity?.resourceLabel?.trim() || null;
+  const shortRef = identity?.resourceId ? shortReference(identity.resourceId, 6) : null;
+  const refLabel = shortRef ? (locale === "ar" ? `مرجع ${shortRef}` : `réf. ${shortRef}`) : null;
+  if (!isDemo) {
+    if (!org && !refLabel) return text;
+    return [text, org, refLabel].filter((part): part is string => Boolean(part)).join(" · ");
   }
-  return text;
+  const base = locale === "ar" ? "طلب إسناد للتحقق" : "Demande d’attribution à valider";
+  return [base, org || type, refLabel].filter((part): part is string => Boolean(part)).join(" · ");
+}
+
+/** Stable short dossier label shared by row and decision panel. */
+export function actionDossierLabel(
+  action: { resourceType: string; resourceId: string; reason: string },
+  locale: "fr" | "ar",
+  actionTitle: string,
+  organizationName?: string | null,
+) {
+  const identity = humanizeActionReason(action.reason, locale, {
+    organizationName,
+    resourceLabel: actionResourceLabel(action.resourceType, locale),
+    resourceId: action.resourceId,
+  });
+  return { title: actionTitle, identity, ref: shortReference(action.resourceId, 6) };
 }
 
 export const RESOLUTION_CODES = [
