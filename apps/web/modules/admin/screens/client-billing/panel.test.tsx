@@ -71,7 +71,12 @@ describe("ClientBillingPanel empty sources copy", () => {
         approval_reference: "REF",
         issuer_snapshot: { legal_name: "Matricia" },
         created_by: "22222222-2222-4222-8222-222222222222",
-        approval: { decision: "APPROVED", reason: "ok", decided_at: "2026-01-02T00:00:00.000Z" },
+        approval: {
+          decision: "APPROVED",
+          decided_by: "55555555-5555-4555-8555-555555555555",
+          reason: "ok",
+          decided_at: "2026-01-02T00:00:00.000Z",
+        },
       }],
     };
     const html = renderToStaticMarkup(
