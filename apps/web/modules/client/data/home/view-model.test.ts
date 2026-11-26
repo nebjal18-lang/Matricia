@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildClientHomePriorityRows,
   clientJourneySteps,
   computeClientHomeCounts,
   filterClientFacingActions,
@@ -110,6 +111,27 @@ describe("client-home view-model", () => {
 
   it("ne transforme pas une demande terminée ou inconnue en projet courant", () => {
     expect(pickFeaturedRequest([{status:"CANCELLED",quoteCount:2},{status:"EXPIRED",quoteCount:1},{status:"COMPLETED",quoteCount:3},{status:"UNKNOWN",quoteCount:0}])).toBeNull();
+  });
+
+  it("place le brouillon à reprendre avant une file d’approbations vide", () => {
+    const rows = buildClientHomePriorityRows({
+      items: [],
+      featured: {
+        requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        title: "Refonte site",
+        status: "DRAFT",
+        createdAt: "2026-11-18T10:00:00Z",
+        quoteCount: 0,
+        href: "/fr/client/demandes/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        steps: clientJourneySteps("DRAFT"),
+      },
+      locale: "fr",
+      organizationQuery: "",
+      nextStepLabel: "Compléter pour recevoir des devis",
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.title).toBe("Reprendre ma demande");
+    expect(rows[0]?.dossier).toContain("Refonte site");
   });
 
   it("expose les insights réels et reste nul si le snapshot manque", () => {

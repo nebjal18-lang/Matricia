@@ -41,7 +41,7 @@ export function RegionsForm({ organizationId, locale, messages, current, idempot
     : "";
 
   return (
-    <section aria-labelledby={`${prefix}-title`} className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
+    <section id="zones" aria-labelledby={`${prefix}-title`} className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
       <h2 id={`${prefix}-title`} className="text-xl font-semibold">{messages.regions}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{messages.regionsHelp}</p>
       {current.length === 0 ? <p role="status" className="mt-3 rounded-lg bg-amber-100 p-3 text-sm text-amber-950">{messages.regionsEmpty}</p> : null}

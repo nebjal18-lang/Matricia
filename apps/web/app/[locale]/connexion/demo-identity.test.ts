@@ -25,6 +25,7 @@ describe("SEC-02 trusted synthetic identity", () => {
     const updateUserById = vi.fn();
     const rpc = vi.fn();
     const admin = { auth: { admin: {
+      getUserById: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
       listUsers: vi.fn().mockResolvedValue({ data: { users: [{ id: "existing", email: actor.email, app_metadata }] }, error: null }),
       createUser, updateUserById,
     } }, rpc };
@@ -32,5 +33,48 @@ describe("SEC-02 trusted synthetic identity", () => {
     expect(createUser).not.toHaveBeenCalled();
     expect(updateUserById).not.toHaveBeenCalled();
     expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("creates via deterministic seed when Auth listUsers pagination fails", async () => {
+    const territory = listDemoRegionalTerritories().find((item) => item.code === "TANGER_TETOUAN_AL_HOCEIMA")
+      ?? listDemoRegionalTerritories().at(0);
+    if (!territory) throw new Error("Missing regional fixture");
+    const actor = listDemoRegionalActors(territory.code).find((item) => item.kind === "provider" && item.slot === "A");
+    if (!actor) throw new Error("Missing regional provider fixture");
+    const { demoRegionalIds } = await import("./demo-regional-ensure");
+    const ids = demoRegionalIds(actor);
+    const createdUser = {
+      id: ids.userIdSeed,
+      email: actor.email,
+      app_metadata: {
+        matricia_demo: true,
+        demo_persona: actor.persona,
+        demo_territory: actor.territoryCode,
+        demo_slot: actor.slot,
+      },
+    };
+    const getUserById = vi.fn()
+      .mockResolvedValueOnce({ data: { user: null }, error: null })
+      .mockResolvedValue({ data: { user: createdUser }, error: null });
+    const createUser = vi.fn().mockResolvedValue({ data: { user: { id: ids.userIdSeed } }, error: null });
+    const updateUserById = vi.fn().mockResolvedValue({ data: { user: { id: ids.userIdSeed } }, error: null });
+    const rpc = vi.fn().mockResolvedValue({ data: {}, error: null });
+    const admin = {
+      auth: {
+        admin: {
+          getUserById,
+          listUsers: vi.fn().mockResolvedValue({ data: { users: [] }, error: { message: "Database error finding users" } }),
+          createUser,
+          updateUserById,
+        },
+      },
+      rpc,
+    };
+    await expect(ensureDemoRegionalActor({ admin, actor })).resolves.toEqual({
+      userId: ids.userIdSeed,
+      organizationId: ids.organizationId,
+    });
+    expect(createUser).toHaveBeenCalledOnce();
+    expect(rpc).toHaveBeenCalledOnce();
   });
 });

@@ -150,10 +150,12 @@ export function DiagnosticsBoard({
           ) : null}
           {priorities.length === 0 ? (
             <div className="client-offer-actions">
+              <p role="status">{hasSubmittedAssessment ? (locale === "ar" ? "لا يوجد تشخيص كامل على هذه الصفحة بعد. احسبوا الصحة العامة أو راجعوا بياناً مسجلاً." : "Aucun diagnostic complet sur cette page. Calculez la santé globale ou consultez un bilan enregistré.") : c.diagEmptyLead}</p>
               <Cta href={questionnaireHref} soft>
-                {c.startQuestionnaire}
+                {hasSubmittedAssessment ? c.continue : c.startQuestionnaire}
               </Cta>
               {hasSubmittedAssessment ? <Cta href={computeHref}>{c.computeAnalysis}</Cta> : null}
+              {shownRuns.length > 0 ? <Cta href={shownRuns[0]!.href} soft>{c.resume}</Cta> : null}
             </div>
           ) : (
             priorities.map((row, index) => {
@@ -344,7 +346,7 @@ export function RequestsBoard({ locale, query, compareHref, rows, searchQuery, s
   const c = spaceCopy(locale);
   const list = rows;
   const kpis = [
-        { id: "k1", title: c.toComplete, detail: rows.filter((row) => row.tone === "violet" || row.tone === "peach").length ? String(rows.filter((row) => row.tone === "violet" || row.tone === "peach").length) : c.emptyBoard, href: `/${locale}/client/documents${query}`, tone: "peach" as const },
+        { id: "k1", title: c.toComplete, detail: (() => { const n = rows.filter((row) => row.tone === "violet" || row.tone === "peach").length; if (!n) return c.emptyBoard; const draft = rows.find((row) => row.tone === "violet"); return draft ? `${n} · ${draft.next}` : String(n); })(), href: rows.find((row) => row.tone === "violet")?.href ?? `/${locale}/client/demandes${query}`, tone: "peach" as const },
         { id: "k2", title: c.offersToCompare, detail: rows.filter((row) => row.tone === "mint").length ? String(rows.filter((row) => row.tone === "mint").length) : c.emptyBoard, href: compareHref, tone: "violet" as const },
         { id: "k3", title: c.questions, detail: c.msgTitle, href: `/${locale}/messagerie${query}`, tone: "mint" as const },
       ];
@@ -354,7 +356,7 @@ export function RequestsBoard({ locale, query, compareHref, rows, searchQuery, s
         {kpis.map((kpi) => (
           <Link key={kpi.id} href={kpi.href} className="client-card client-insight">
             <span className="client-feed-icon" data-tone={kpi.tone}><FileText className="size-4" aria-hidden /></span>
-            <div><h3>{kpi.title}{kpi.id !== "k3" ? <small className="block">{locale === "fr" ? "Sur cette page" : "في هذه الصفحة"}</small> : null}</h3><p>{kpi.detail}</p></div>
+            <div><h3>{kpi.title}{kpi.id !== "k3" ? <small className="block">{locale === "fr" ? "Résultat filtré" : "نتيجة مُصفّاة"}</small> : null}</h3><p>{kpi.detail}</p></div>
             <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
           </Link>
         ))}
@@ -435,6 +437,21 @@ export function MissionsBoard({ locale, query, view }: { locale: Locale; query: 
     decision: view?.decision ?? null,
     files: view?.files ?? [],
   };
+  const entirelyEmpty = data.validations.length === 0 && data.steps.length === 0 && !data.decision && data.files.length === 0;
+  if (entirelyEmpty) {
+    return (
+      <main className="client-page">
+        <article className="client-card">
+          <header><h2>{c.misTitle}</h2></header>
+          <p>{locale === "ar" ? "لا توجد مهمة جارية. أكملوا طلبكم للحصول على عروض، ثم اختيار مقدم الخدمة والعقد يفتحان المهمة." : "Aucune mission en cours. Complétez votre demande pour recevoir des devis ; le choix du prestataire et le contrat ouvriront la mission."}</p>
+          <div className="client-offer-actions">
+            <Cta href={`/${locale}/client/demandes${query}`}>{c.allRequests}</Cta>
+            <Cta href={`/${locale}/besoin${query}`} soft>{c.newNeed}</Cta>
+          </div>
+        </article>
+      </main>
+    );
+  }
   return (
     <main className="client-page">
       <article className="client-card">
@@ -730,7 +747,7 @@ export function CompanyBoard({ locale, query, organizationName, people }: { loca
           <div className="client-pref-row">
             <div>
               <strong>{c.language}</strong>
-              <p>{locale === "ar" ? "اختاروا لغة الواجهة لفريقكم." : "Choisissez la langue d’affichage pour votre équipe."}</p>
+              <p>{locale === "ar" ? "يغيّر هذا الإعداد لغة واجهتكم الشخصية في هذا المتصفح، وليس إعداد المؤسسة بأكملها." : "Ce réglage change votre langue d’interface personnelle dans ce navigateur, pas celle de toute l’organisation."}</p>
             </div>
             <div className="client-lang-switch">
               <Link href={`/fr/organisation${query}`} hrefLang="fr" aria-current={locale === "fr" ? "page" : undefined}>FR</Link>
@@ -775,27 +792,22 @@ export function MessagesBoard({ locale, query, search, children, threads,serverF
             <Link href={`/${locale}/client/demandes${query}`}>{c.linked}</Link>
           </nav>
           <ul className="client-feed" id="messages-inbox">
-            {inboxError ? <li><p role="alert">{locale==="fr"?"Les fils sont momentanément indisponibles. Réessayez.":"المحادثات غير متاحة مؤقتاً. حاولوا مجدداً."}</p></li> : inbox.length === 0 ? <li><span>{c.emptyBoard}</span></li> : inbox.map((item) => (
+            {inboxError ? <li><p role="alert">{locale==="fr"?"Les fils sont momentanément indisponibles. Réessayez.":"المحادثات غير متاحة مؤقتاً. حاولوا مجدداً."}</p></li> : inbox.length === 0 ? <li><span>{locale === "fr" ? "Aucun échange pour le moment. Les conversations apparaîtront ici depuis une demande ou une mission." : "لا توجد مراسلات حالياً. ستظهر المحادثات هنا انطلاقاً من طلب أو مهمة."}</span></li> : inbox.map((item) => (
               <li key={item.id}><Link href={item.href}><span className="client-feed-icon" data-tone={"tone" in item ? item.tone : "violet"}>{("kind" in item && item.kind === "folder") ? <Folder className="size-4" aria-hidden /> : <MessageSquare className="size-4" aria-hidden />}</span><span><strong>{item.title}</strong><small>{item.meta}</small></span><em>{item.meta}</em></Link></li>
             ))}
           </ul>
           {inboxFooter}
         </article>
         <article className="client-card client-msg-thread">
-
           {children}
         </article>
         <article className="client-card">
           <header><h2>{c.context}</h2></header>
-
-            <>
-              <p>{c.msgLead}</p>
-              <ul className="client-feed">
-                <li><Link href={`/${locale}/client/demandes${query}`}><Folder className="size-4" aria-hidden /><span>{c.openTheFolder}</span></Link></li>
-                <li><Link href={`/${locale}/client/documents${query}`}><FileGlyph kind="file" /><span>{c.docsTitle}</span></Link></li>
-              </ul>
-            </>
-
+          <p>{inbox.length === 0 ? (locale === "fr" ? "Sélectionnez une conversation ou ouvrez une demande pour voir le contexte du dossier." : "اختاروا محادثة أو افتحوا طلباً لعرض سياق الملف.") : c.msgLead}</p>
+          <ul className="client-feed">
+            <li><Link href={`/${locale}/client/demandes${query}`}><Folder className="size-4" aria-hidden /><span>{c.openTheFolder}</span></Link></li>
+            <li><Link href={`/${locale}/client/documents${query}`}><FileGlyph kind="file" /><span>{c.docsTitle}</span></Link></li>
+          </ul>
           <p className="client-access-note">{c.accessNote}</p>
         </article>
       </div>

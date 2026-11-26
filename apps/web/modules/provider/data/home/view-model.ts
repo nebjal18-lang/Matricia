@@ -178,7 +178,97 @@ export function toProviderPriorityRows(items: readonly UserActionItem[], locale:
   });
 }
 
-export function filterProviderFacingActions(items: readonly UserActionItem[], hasPlatformRole: boolean): UserActionItem[] {
-  if (hasPlatformRole) return [...items];
-  return items.filter((item) => !item.href.includes("/administration/") && !item.href.includes("/client/"));
+const PROVIDER_SPACE_HREF = /\/sous-traitant\//u;
+const PLATFORM_ONLY_KINDS = new Set<UserActionItem["kind"]>(["APPROVAL", "EXCEPTION", "RISK_REVIEW", "WORK_ITEM"]);
+
+/** Provider space must never surface platform command-center work, even for dual-role users. */
+export function filterProviderFacingActions(items: readonly UserActionItem[], _hasPlatformRole = false): UserActionItem[] {
+  return items.filter((item) => {
+    if (item.href.includes("/administration/") || item.href.includes("/client/") || item.href.includes("/franchise/")) return false;
+    if (PLATFORM_ONLY_KINDS.has(item.kind) && !PROVIDER_SPACE_HREF.test(item.href)) return false;
+    return true;
+  });
+}
+
+const OPEN_INVITE = new Set(["INVITED", "VIEWED", "ACCEPTED"]);
+const QUOTE_NEEDS_WORK = new Set(["DRAFT", "IN_PROGRESS", "CLARIFICATION_REQUESTED", "REVISED"]);
+
+export type ProviderDomainInvitation = {
+  id: string;
+  description: string;
+  status: string;
+  deadline: string;
+  quote: { id: string; status: string } | null;
+};
+
+/** Build treat-now actions from invitations/quotes the provider can actually open. */
+export function buildProviderDomainActionItems(input: {
+  invitations: readonly ProviderDomainInvitation[];
+  locale: "fr" | "ar";
+  organizationId: string | null;
+  organizationName: string | null;
+}): UserActionItem[] {
+  const items: UserActionItem[] = [];
+  for (const invitation of input.invitations) {
+    if (!OPEN_INVITE.has(invitation.status)) continue;
+    const quote = invitation.quote;
+    if (!quote) {
+      items.push({
+        id: `consultation:${invitation.id}`,
+        kind: "NOTIFICATION",
+        title: invitation.description,
+        detail: input.locale === "ar" ? "استشارة بانتظار الرد" : "Consultation à examiner",
+        organizationName: input.organizationName,
+        organizationId: input.organizationId,
+        priority: "HIGH",
+        mandatory: false,
+        href: `/${input.locale}/sous-traitant/consultations/${invitation.id}`,
+        occurredAt: invitation.deadline,
+        dueAt: invitation.deadline,
+        requiresHumanReview: false,
+      });
+      continue;
+    }
+    if (!QUOTE_NEEDS_WORK.has(quote.status)) continue;
+    const draftLike = quote.status === "DRAFT" || quote.status === "IN_PROGRESS";
+    items.push({
+      id: `quote:${quote.id}`,
+      kind: "NOTIFICATION",
+      title: invitation.description,
+      detail: draftLike
+        ? (input.locale === "ar" ? "مسودة عرض للإنهاء" : "Devis à finaliser")
+        : (input.locale === "ar" ? "عرض للمراجعة" : "Devis à reprendre"),
+      organizationName: input.organizationName,
+      organizationId: input.organizationId,
+      priority: "HIGH",
+      mandatory: false,
+      href: draftLike
+        ? `/${input.locale}/sous-traitant/devis/${quote.id}`
+        : quote.status === "REVISED"
+          ? `/${input.locale}/sous-traitant/devis/${quote.id}/revision`
+          : `/${input.locale}/sous-traitant/devis/${quote.id}`,
+      occurredAt: invitation.deadline,
+      dueAt: invitation.deadline,
+      requiresHumanReview: false,
+    });
+  }
+  return items;
+}
+
+export function mergeProviderPriorityActions(
+  domainItems: readonly UserActionItem[],
+  inboxItems: readonly UserActionItem[],
+  limit = 4,
+): UserActionItem[] {
+  const seen = new Set<string>();
+  const merged: UserActionItem[] = [];
+  for (const item of [...domainItems, ...inboxItems]) {
+    const key = item.href.split("?")[0] ?? item.href;
+    if (seen.has(key) || seen.has(item.id)) continue;
+    seen.add(key);
+    seen.add(item.id);
+    merged.push(item);
+    if (merged.length >= limit) break;
+  }
+  return merged;
 }

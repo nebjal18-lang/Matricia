@@ -92,7 +92,7 @@ describe("ClientDashboardHome", () => {
     );
 
     expect(html).toContain("Bonjour, Epitaphe Market.");
-    expect(html).toContain("À traiter maintenant");
+    expect(html).toContain("À reprendre maintenant");
     expect(html).toContain("Déploiement de la marque");
     expect(html).toContain("Comparer ce qui compte");
     expect(html).toContain("Offre A");
@@ -118,6 +118,6 @@ describe("ClientDashboardHome", () => {
     expect(html).toContain("/fr/client/favoris");
     expect(html).toContain("/fr/client/recherche");
     expect(html).toContain("À traiter");
-    expect(html).toContain("Portefeuille");
+    expect(html).toContain("Sites, projets et tâches");
   });
 });

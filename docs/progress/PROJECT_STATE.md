@@ -1,3 +1,22 @@
+## 2026-11-25 — Audit prestataire (retest file + régional)
+
+- File « À traiter » : **uniquement** `snapshot.treatItems` (invitations/devis). L’action-center n’est plus fusionné ni attendu sur l’accueil prestataire — plus de flash vide puis 4 tâches `/administration/command-center` après Suspense.
+- Bannière profil : affichée seulement si snapshot connu et profil incomplet (plus de « Complétez » à côté de « Profil — Complété » pendant le stream).
+- Raccourci régional (Détroit Soft / Nour Atlas) : cause = `auth.admin.listUsers` page ≥3 → `Database error finding users` → ancien `throw DEMO_IDENTITY_UNAVAILABLE` (digest serveur). Correctif seed-first `getUserById(UUID déterministe)` + ensure/load sans throw ; connexion via `loadDemoRegionalIdentity` (plus de re-scan listUsers).
+- Vitest : `demo-identity` (création si pagination Auth en panne), `boards` (ignore WORK_ITEM command-center même après chargement).
+- Reste live à retester : Détroit Soft → tableau prestataire + org après reload ; file globale après fin de chargement ; coffre + préférences encore en erreur côté live.
+
+## 2026-11-25 — Audit Client COM (suite complète UI)
+
+- Accueil / litiges / missions : overlays inventés retirés ; brouillon → « Reprendre ma demande ».
+- Achats groupés : `0` calculé vs **accès limité** vs **vide** ; « Groupes d’achat ».
+- Détail demande : compléments + workflow en tête pour brouillon ; consultation/historique après.
+- Bilans : état vide unifié (plus de triple « aucun… ») ; abonnement : **Mon abonnement** avant changements payés.
+- Missions / messages / favoris / crédits / langue perso clarifiés.
+- Contrat film : `client-film-continuity.ts` (même `requestId`, pas de litige inventé).
+- Seed SQL : `ensure_demo_client_com_film_v1` + branchement connexion régionale Client (providers A/B) — DRAFT + 2 devis + mission ACTIVE, 0 litige. Preuve locale smoke + vitest continuity/ensure.
+- Vitest ciblés home/boards/dashboard/crédits/continuity/diagnostics/film-ensure.
+
 ## 2026-11-25 — Admin finalisation (branche `fix/admin-space-finalization-2026-11-25`)
 
 Commit de départ : `da7bcb6c` (`version-2`). Suivi unique ci-dessous (pas de second système documentaire).
@@ -30,7 +49,7 @@ Distinction : entrée menu ≠ chemin unique ≠ ancre ≠ fiche dynamique ≠ a
 | 2 | Catalogue | Partiel → avancé | Builder OK avec bibliothèque IT + service. Validation native **indisponible** sur demo → fallback démo questions en PR. Matrice multi-domaines = **1 lib visible (IT)** |
 | 3 | Acteurs / capacité / franchise | Avancé | Capacité `/capacite` données visibles + lien fiche prestataire. Colonnes Compte/Conformité/Offre clarifiées. Franchisés ↔ Candidatures déjà reliés |
 | 4 | Parcours commercial | Avancé | Chaîne **Hôtel Bayt Al Bahar** locale : diagnostic → demande → matching **62 %** → devis (Détroit Soft) → contrat → mission. Facturation clients : politique absente + « aucune source » clarifiée |
-| 5 | Finance | Partiel | Recherche coûts : portée collection clarifiée + reset page 1. MAT-FUNC-032 navigateur→DB = **À examiner** |
+| 5 | Finance | Avancé (local) | Recherche coûts : portée collection clarifiée + reset page 1. MAT-FUNC-032 navigateur→DB = **PASSED** local (`local-mat-func-032-reconciliation-run.mjs` → `artifacts/test-results/local-acceptance/lot2-mat-func-032.json`) ; non déployé sur tip demo public |
 | 6 | Pilotage / privacy | Avancé | Ancres ops `#archives` etc. présentes. ALL → « inventaire exhaustif » ; staff ≠ « votre personne » |
 | 7 | Design FR/AR mobile | Avancé | Nav mobile collapsée (CSS admin) : file visible à 390 px. Titre onglet CC. Captures 390 FR/AR RTL, 768, 1440 sur `:5180` |
 | 8 | PR #38 | Mergée dans `version-2` | https://github.com/nebjal18-lang/Matricia/pull/38 — **demo public ≠ branche** |

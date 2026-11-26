@@ -2378,6 +2378,22 @@ button.client-cta {
   text-decoration: none;
 }
 
+.client-scene-mast:has(.client-home-scene-hero) .mat-scene-hero {
+  min-height: 11rem;
+  max-height: 16rem;
+}
+
+.client-unavailable-compact {
+  margin: 0;
+  color: var(--client-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.client-decisions-compact {
+  align-self: start;
+}
+
 .client-home-hero {
   display: grid;
   gap: 0.9rem;

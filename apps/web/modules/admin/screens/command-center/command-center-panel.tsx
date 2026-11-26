@@ -14,7 +14,6 @@ import {
   actionStatusTone,
   compactDateTime,
   formatAdminDateTime,
-  humanizeActionReason,
   isWorkOverdue,
   summarizeAdminWork,
   workItemMotif,
@@ -218,7 +217,7 @@ function ActionDecisionForm({
   const executedAt = action.executedAt ? formatAdminDateTime(action.executedAt, locale) : null;
   const proof = action.resultHash ? shortReference(action.resultHash, 10) : null;
   const statusTone = actionStatusTone(action.status);
-  const canDecide = action.status === "PENDING_APPROVAL" && action.canDecide !== false;
+  const canDecide = action.status === "PENDING_APPROVAL" && action.canDecide === true;
   const approveLabel = action.actionType === "ASSIGN_CASE" ? m.approve : (locale === "ar" ? "اعتماد" : "Approuver");
   const rejectLabel = action.actionType === "ASSIGN_CASE" ? m.reject : (locale === "ar" ? "رفض" : "Refuser");
   const successText = state.status === "success"
@@ -328,26 +327,14 @@ export function CommandCenterPanel({
     return keys[dashboard.workItems.length * 2 + index]!;
   };
 
-  const focus = context.get("focus");
+  const focusFilter = context.get("focus") ?? "";
   const pendingApprovals = dashboard.actions.filter((action) => action.status === "PENDING_APPROVAL").length;
-  const filteredRows = useMemo(() => {
-    if (focus === "overdue") {
-      return rows.filter((row) => row.kind === "work" && isWorkOverdue(row.item.dueAt, currentTime));
-    }
-    if (focus === "dueToday") {
-      return rows.filter((row) => {
-        if (row.kind !== "work") return false;
-        return summarizeAdminWork([row.item], currentTime).dueToday === 1;
-      });
-    }
-    if (focus === "critical") {
-      return rows.filter((row) => row.kind === "work" && row.item.priority === "CRITICAL");
-    }
-    if (focus === "approvals") {
-      return rows.filter((row) => row.kind === "action" && row.action.status === "PENDING_APPROVAL");
-    }
-    return rows;
-  }, [rows, focus, currentTime]);
+  const filteredRows =
+    focusFilter === "overdue" ? rows.filter((row) => row.kind === "work" && isWorkOverdue(row.item.dueAt, currentTime))
+      : focusFilter === "dueToday" ? rows.filter((row) => row.kind === "work" && summarizeAdminWork([row.item], currentTime).dueToday === 1)
+        : focusFilter === "critical" ? rows.filter((row) => row.kind === "work" && row.item.priority === "CRITICAL")
+          : focusFilter === "approvals" ? rows.filter((row) => row.kind === "action" && row.action.status === "PENDING_APPROVAL")
+            : rows;
   const totalCount = filteredRows.length;
   const filterHref = (value: string | null) => {
     const params = new URLSearchParams(context);
@@ -378,7 +365,7 @@ export function CommandCenterPanel({
               <Link href={filterHref("approvals")} className="client-text-link">{`${pendingApprovals} ${m.pending}`}</Link>
             </p>
           </div>
-          {focus ? (
+          {focusFilter ? (
             <p className="client-access-note" role="status">
               {m.filterActive}
               {" · "}

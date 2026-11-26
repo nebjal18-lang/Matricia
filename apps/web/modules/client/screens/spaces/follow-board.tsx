@@ -2,7 +2,7 @@ import { SignedScopePendingNotice } from "@/modules/shared/ui/signed-scope-pendi
 import Link from "next/link";
 import { ArrowRight, Bell, Calendar, ChevronRight, FileText, MessageSquare, Scale } from "lucide-react";
 import type { ReactNode } from "react";
-import { canApplyClientSpaceDemo, demoClientSpaces } from "@/modules/client/data/spaces/demo";
+import { demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
 import type { ContractMissionDashboard } from "@/modules/shared/lib/contracts-missions/model";
@@ -50,13 +50,9 @@ export function FollowBoard({
   children?: ReactNode;
 }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const preferDemo = !mission && canApplyClientSpaceDemo();
   const folders = mission
     ? [{ id: mission.id, title: organizationName ?? c.misTitle, status: workflowStatusLabel(mission.status, locale), tone: "mint" as const, href: `/${locale}/client/missions/${mission.id}/jalons${query}` }]
-    : preferDemo
-      ? demo.requests.slice(0, 4).map((row) => ({ id: row.id, title: row.title, status: row.status, tone: row.tone, href: row.href }))
-      : [];
+    : [];
   const steps = mission
     ? mission.milestones.map((item, index, all) => {
         const done = isTerminalMilestone(item.status);
@@ -68,12 +64,10 @@ export function FollowBoard({
             : formatDue(item.dueAt, locale, c.comingSoon);
         return { id: item.id, title: item.title, detail, state: (done ? "done" : current ? "current" : "todo") as "done" | "current" | "todo" };
       })
-    : preferDemo
-      ? demo.missions.steps
-      : [];
+    : [];
   const offerHref = `/${locale}/client/demandes${query}`;
-  const offers = preferDemo ? demo.compareOffers.slice(0, 2) : [];
-  const files = preferDemo ? demo.missions.files : (mission?.deliverables ?? []).map((item) => ({
+  const offers = [] as ReturnType<typeof demoClientSpaces>["compareOffers"];
+  const files = (mission?.deliverables ?? []).map((item) => ({
     id: item.id,
     title: item.label,
     href: `/${locale}/client/missions/${mission!.id}/jalons${query}`,
@@ -109,13 +103,14 @@ export function FollowBoard({
         tone: "peach",
       });
     }
-  } else if (preferDemo) {
-    priorities.push(
-      { id: "demo-bilan", href: `/${locale}/client/diagnostics${query}`, label: c.resumeBilan, chip: c.actionRequired, tone: "peach" },
-      { id: "demo-offers", href: offerHref, label: c.compareOffers, chip: c.inProgress, tone: "violet" },
-      { id: "demo-deliverable", href: `/${locale}/client/missions${query}`, label: c.examineDeliverableNow, chip: c.awaiting, tone: "sky" },
-      { id: "demo-docs", href: `/${locale}/client/documents${query}`, label: c.completePiece, chip: c.toCompleteChip, tone: "peach" },
-    );
+  } else {
+    priorities.push({
+      id: "resume-request",
+      href: offerHref,
+      label: locale === "ar" ? "لا مهمة جارية — افتحوا طلبكم" : "Aucune mission en cours — ouvrir vos demandes",
+      chip: c.toCompleteChip,
+      tone: "peach",
+    });
   }
   const upcomingDeadlines = (mission?.milestones ?? [])
     .filter((item) => !isTerminalMilestone(item.status))
@@ -243,14 +238,7 @@ export function FollowBoard({
                 <em><span className="client-status-chip" data-tone="peach">{formatDue(item.dueAt, locale, c.comingSoon)}</span></em>
               </li>
             ))}
-            {!mission && preferDemo ? demo.missions.steps.filter((step) => step.state !== "done").slice(0, 3).map((step) => (
-              <li key={step.id}>
-                <span className="client-feed-icon" data-tone="sky"><Calendar className="size-4" aria-hidden /></span>
-                <span>{step.title}</span>
-                <em><span className="client-status-chip" data-tone="peach">{c.comingSoon}</span></em>
-              </li>
-            )) : null}
-            {upcomingDeadlines.length === 0 && !( !mission && preferDemo) ? (
+            {upcomingDeadlines.length === 0 ? (
               <li><span className="client-feed-icon" data-tone="sky"><Calendar className="size-4" aria-hidden /></span><span>{mission?.signedScopePending ? (locale === "ar" ? "تنتظر مواعيد الملحق تحضير العميل." : "Les échéances de l’avenant attendent la préparation du Client.") : c.emptyBoard}</span></li>
             ) : null}
           </ul>

@@ -32,6 +32,7 @@ export function FranchiseAppShell({
   mandateName,
   mandates,
   sceneHero = false,
+  mandateReady = true,
   children,
 }: {
   locale: Locale;
@@ -48,13 +49,15 @@ export function FranchiseAppShell({
   mandates?: Array<{id:string;organizationId:string;label:string}>;
   /** Photo hero mast — identity hubs only (accueil / territoire / finance). */
   sceneHero?: boolean;
+  /** When false, only surfaces that explain or regularize access stay in the menu. */
+  mandateReady?: boolean;
   children: ReactNode;
 }): ReactNode {
   const c = franchiseCopy(locale);
   const n = libraryCopy(locale);
   const currentPath = safeReturnPath(languagePath, locale);
   const selectedFranchiseId = new URLSearchParams(selectedQuery.replace(/^\?/, "")).get("franchiseId");
-  const nav = buildFranchiseNav(locale, selectedQuery);
+  const nav = buildFranchiseNav(locale, selectedQuery, { mandateReady });
   const routeByActive: Record<FranchiseNavKey, string> = {
     home: "accueil",
     library: "bibliotheque",
@@ -159,18 +162,27 @@ export function FranchiseAppShell({
           />
         </div>
         <nav className="franchise-mobile-dock" aria-label={n.navHome}>
-          {([
-            { key: "home" as const, href: `/${locale}/franchise/accueil${selectedQuery}`, label: n.navHome, Icon: nav.find((item) => item.key === "home")!.icon },
-            { key: "library" as const, href: `/${locale}/franchise/bibliotheque${selectedQuery}`, label: locale === "ar" ? "المحتويات" : "Contenus", Icon: nav.find((item) => item.key === "library")!.icon },
-            { key: "network" as const, href: `/${locale}/franchise/fournisseurs${selectedQuery}`, label: n.navProviders, Icon: nav.find((item) => item.key === "network")!.icon },
-            { key: "requests" as const, href: `/${locale}/franchise/demandes${selectedQuery}`, label: n.navRequests, Icon: nav.find((item) => item.key === "requests")!.icon },
-          ]).map((item) => {
+          {(mandateReady
+            ? [
+                { key: "home" as const, href: `/${locale}/franchise/accueil${selectedQuery}`, label: n.navHome, Icon: nav.find((item) => item.key === "home")!.icon },
+                { key: "library" as const, href: `/${locale}/franchise/bibliotheque${selectedQuery}`, label: locale === "ar" ? "المحتويات" : "Contenus", Icon: nav.find((item) => item.key === "library")!.icon },
+                { key: "network" as const, href: `/${locale}/franchise/fournisseurs${selectedQuery}`, label: n.navProviders, Icon: nav.find((item) => item.key === "network")!.icon },
+                { key: "requests" as const, href: `/${locale}/franchise/demandes${selectedQuery}`, label: n.navRequests, Icon: nav.find((item) => item.key === "requests")!.icon },
+              ]
+            : [
+                { key: "home" as const, href: `/${locale}/franchise/accueil${selectedQuery}`, label: n.navHome, Icon: nav.find((item) => item.key === "home")!.icon },
+                { key: "perimeter" as const, href: `/${locale}/franchise/perimetre${selectedQuery}`, label: n.navPerimeter, Icon: nav.find((item) => item.key === "perimeter")!.icon },
+                { key: "governance" as const, href: `/${locale}/franchise/gouvernance${selectedQuery}`, label: n.navGovernance, Icon: nav.find((item) => item.key === "governance")!.icon },
+              ]
+          ).map((item) => {
             const Icon = item.Icon;
             const dockActive =
               item.key === "home" ? active === "home"
                 : item.key === "library" ? active === "library" || active === "services" || active === "questionnaires" || active === "rules" || active === "validations"
                   : item.key === "network" ? active === "network"
-                    : active === "requests";
+                    : item.key === "perimeter" ? active === "perimeter"
+                      : item.key === "governance" ? active === "governance"
+                        : active === "requests";
             return (
               <Link key={item.key} href={item.href} data-active={dockActive ? "true" : undefined}>
                 <Icon aria-hidden className="size-4" />

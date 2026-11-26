@@ -26,8 +26,8 @@ export default async function ProviderModeClientPage({
   if (space.status === "unauthenticated") redirect(connexionHref(locale, { next: `/${locale}/sous-traitant/mode-client` }));
   const ar = locale === "ar";
   const copy = ar
-    ? { title: "وضع العميل", lead: "سياقان، منصة واحدة — دون إنشاء مؤسسة ثانية.", current: "السياق المهني الحالي", switch: "متابعة كعميل", request: "تفعيل دور العميل", pending: "طلب دور العميل معلّق.", isolated: "الاستشارات والعروض المهنية تبقى في فضاء المقدّم." }
-    : { title: "Mode Client", lead: "Deux contextes, une seule plateforme — sans recréer l’organisation.", current: "Contexte professionnel actuel", switch: "Continuer en Mode Client", request: "Activer le rôle Client", pending: "Une demande de rôle Client est en attente.", isolated: "Vos consultations et devis professionnels restent dans l’espace prestataire." };
+    ? { title: "وضع العميل", lead: "سياقان، منصة واحدة — دون إنشاء مؤسسة ثانية.", current: "السياق المهني الحالي", switch: "متابعة كعميل", request: "تفعيل دور العميل", pending: "طلب دور العميل معلّق.", isolated: "الاستشارات والعروض المهنية تبقى في فضاء المقدّم.", activeRole: "الدور النشط", providerRole: "مقدّم خدمة", clientReady: "دور العميل مفعّل لهذه المؤسسة.", purchases: "فتح مشترياتي", stayOrg: "تبقى المؤسسة نفسها عند التبديل." }
+    : { title: "Mode Client", lead: "Deux contextes, une seule plateforme — sans recréer l’organisation.", current: "Contexte professionnel actuel", switch: "Continuer en Mode Client", request: "Activer le rôle Client", pending: "Une demande de rôle Client est en attente.", isolated: "Vos consultations et devis professionnels restent dans l’espace prestataire.", activeRole: "Rôle actif", providerRole: "Prestataire", clientReady: "Le rôle Client est activé pour cette organisation.", purchases: "Ouvrir Mes achats", stayOrg: "L’organisation reste la même lors du bascule." };
   const contextState = providerContextReadState(space, query.organizationId);
   if (contextState) {
     return (
@@ -52,6 +52,7 @@ export default async function ProviderModeClientPage({
   return (
     <ProviderAppShell locale={locale} organizations={space.organizations} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} active="modeClient" title={copy.title} lead={copy.lead}>
       <main className="client-page provider-mode-client">
+        <p role="status" className="client-card"><strong>{copy.activeRole} :</strong> {copy.providerRole}{hasClient ? ` · Client` : ""} — {copy.stayOrg}</p>
         <section className="client-board client-board-compare">
           <article className="client-card">
             <header><h2>{copy.current}</h2></header>
@@ -62,7 +63,13 @@ export default async function ProviderModeClientPage({
           <article className="client-card">
             <header><h2>{copy.request}</h2></header>
             {hasClient ? (
-              <Link href={clientHref} className="client-cta">{copy.switch}</Link>
+              <>
+                <p role="status">{copy.clientReady}</p>
+                <div className="client-offer-actions">
+                  <Link href={clientHref} className="client-cta">{copy.switch}</Link>
+                  <Link href={`/${locale}/sous-traitant/achats${space.selectedQuery}`} className="client-ghost-link">{copy.purchases}</Link>
+                </div>
+              </>
             ) : pending ? (
               <p role="status">{copy.pending}</p>
             ) : organizationId ? (

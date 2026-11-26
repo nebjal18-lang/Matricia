@@ -165,9 +165,6 @@ export function ProviderAppShell({
             fallbackInitial="P"
             label={c.space}
           />
-          <Link href={altHref} hrefLang={alternate} lang={alternate} className="sr-only">
-            {alternate.toUpperCase()}
-          </Link>
         </div>
         {organizations.length ? (
           <ProviderOrganizationSelector

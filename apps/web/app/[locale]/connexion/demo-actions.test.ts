@@ -4,6 +4,12 @@ vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 vi.mock("./demo-policy", () => ({ isPublicDemoAccessEnabled: mocks.enabled, demoPersonaEmail: () => "demo@example.invalid" }));
 vi.mock("./actions", () => ({ postLoginDestination: mocks.destination }));
 vi.mock("./demo-authorization", () => ({ ensureDemoPersonaAuthorization: mocks.authorize }));
+vi.mock("./demo-franchise-ensure", () => ({
+  ensureDemoFranchisePersona: vi.fn(async () => ({
+    organizationId: "22222222-2222-4222-8222-222222222222",
+    franchiseId: "33333333-3333-4333-8333-333333333333",
+  })),
+}));
 vi.mock("@/modules/shared/lib/supabase/admin", () => ({ getSupabaseAdminClient: () => ({ auth: { admin: { listUsers: mocks.listUsers, generateLink: mocks.generate, mfa: { deleteFactor: mocks.deleteFactor } } } }) }));
 vi.mock("@/modules/shared/lib/supabase/server", () => ({ getSupabaseServerClient: async () => ({ auth: { signOut: mocks.signOut, verifyOtp: mocks.verify, mfa: { listFactors: mocks.listFactors, enroll: mocks.enroll, challengeAndVerify: mocks.challenge, getAuthenticatorAssuranceLevel: mocks.level } } }) }));
 import { connectDemoPersona } from "./demo-actions";
@@ -47,8 +53,14 @@ describe("demo uses a real verified OTP and the same safe post-login route", () 
 
   it("ouvre l’accueil franchise", async () => {
     setPersona("franchise");
-    await expect(connectDemoPersona(form("ar", "franchise"))).rejects.toThrow("REDIRECT:/ar/franchise/accueil");
-    expect(mocks.destination).toHaveBeenCalledWith("ar", "/ar/franchise/accueil", "franchise");
+    await expect(connectDemoPersona(form("ar", "franchise"))).rejects.toThrow(
+      "REDIRECT:/ar/franchise/accueil?organizationId=22222222-2222-4222-8222-222222222222",
+    );
+    expect(mocks.destination).toHaveBeenCalledWith(
+      "ar",
+      "/ar/franchise/accueil?organizationId=22222222-2222-4222-8222-222222222222",
+      "franchise",
+    );
   });
 
   it("ouvre le tableau prestataire", async () => {

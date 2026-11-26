@@ -5,7 +5,9 @@ import { messageCursorSchema } from "@/modules/shared/lib/internal-messaging/mod
 import { loadFranchiseMessaging } from "@/modules/franchise/data/messaging/repository";
 import { FranchiseMessagesWorkspace } from "@/modules/franchise/screens/messages/messages-workspace";
 import { franchiseMandateName, requireFranchiseLibrary } from "@/modules/franchise/screens/library/page-helper";
+import { FranchiseAccessState } from "@/modules/franchise/ui/franchise-access-state";
 import { FranchiseAppShell } from "@/modules/franchise/ui/franchise-app-shell";
+import Link from "next/link";
 
 export default async function FranchiseMessagesPage({
   params,
@@ -61,6 +63,11 @@ export default async function FranchiseMessagesPage({
     }
     return `/${locale}/franchise/messages?${values}`;
   };
+  const mandateReady = result.status === "success";
+  const organizationName =
+    space.organizations.find((item) => item.id === space.selectedOrganizationId)?.name
+    ?? space.organizations[0]?.name
+    ?? null;
   return (
     <FranchiseAppShell
       languagePath={space.currentPath}
@@ -78,13 +85,26 @@ export default async function FranchiseMessagesPage({
       }
       kicker={ar ? "صاحب الامتياز" : "Franchisé"}
       mandateName={franchiseMandateName(result)}
+      mandateReady={mandateReady}
     >
-      {!loaded || loaded.status === "error" || !scope ? (
+      {result.status === "error" ? (
+        <FranchiseAccessState
+          locale={locale}
+          reason={result.reason}
+          returnPath={space.currentPath}
+          organizationName={organizationName}
+        />
+      ) : !loaded || loaded.status === "error" || !scope ? (
         <main className="client-page">
           <p role="alert">
             {ar
-              ? "تعذر تحميل المراسلة. تحققوا من الرابط وأعيدوا المحاولة."
-              : "La messagerie n’a pas pu être chargée. Vérifiez le lien et réessayez."}
+              ? "تعذر تحميل المراسلة لهذا التفويض. يمكنكم إعادة المحاولة مع الاحتفاظ بالمحادثة الحالية."
+              : "La messagerie de ce mandat n’a pas pu être chargée. Réessayez : le dossier et la conversation restent conservés."}
+          </p>
+          <p className="mt-3">
+            <Link href={space.currentPath} className="client-cta">
+              {ar ? "إعادة المحاولة" : "Réessayer"}
+            </Link>
           </p>
         </main>
       ) : (

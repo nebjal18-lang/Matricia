@@ -109,8 +109,7 @@ describe("client space boards", () => {
     expect(html).not.toContain("Conseil stratégique");
     expect(html).toContain("Tous les statuts");
     expect(html).not.toContain("Valider un livrable");
-    expect(html).toContain("Une collaboration en toute confiance");
-    expect(html).toContain("Plus loin aujourd’hui, pour demain.");
+    expect(html).toContain("Aucune mission en cours");
     expect(html).toContain("Documents récents par dossier");
     expect(html).toContain("Factures Matricia");
     expect(html).toContain("client-kpi-cta");
@@ -126,8 +125,8 @@ describe("client space boards", () => {
       <DisputesBoard locale="fr" query="" organizationName="Client · Communication" cases={[]} selected={null} messages={getDisputeMessages("fr")} canOpen />,
     );
     expect(disputes).toContain("Ouvrir un litige");
-    expect(disputes).toContain("Retard de livraison livrables");
-    expect(disputes).not.toMatch(/exemple illustratif/i);
+    expect(disputes).toContain("Aucun litige accessible.");
+    expect(disputes).not.toContain("Retard de livraison livrables");
   });
 
   it("pointe le calcul de santé globale vers #analyse et non l’évolution", () => {
@@ -308,7 +307,7 @@ describe("client space boards", () => {
     expect(requests).toContain("Aucun élément à afficher");
     expect(requests).not.toContain("Conseil stratégique");
     const missions = renderToStaticMarkup(<MissionsBoard locale="fr" query="" organizationName="Acme" />);
-    expect(missions).toContain("Vos prochaines validations");
+    expect(missions).toContain("Aucune mission en cours");
     expect(missions).not.toContain("Valider un livrable");
     const documents = renderToStaticMarkup(<DocumentsBoard locale="fr" query="" organizationName="Acme" documents={[]} />);
     expect(documents).toContain("Documents récents par dossier");

@@ -24,7 +24,7 @@ describe("Provider dashboard entry remains explicit for a dual-role member",()=>
   const nav=new URL(buildProviderNav(locale,query).find(item=>item.key==="home")!.href,"https://matricia.invalid");expect(nav.searchParams.get("workspace")).toBe("provider");expect(nav.searchParams.get("organizationId")).toBe(org);
   const html=renderToStaticMarkup(shell(locale));
   const homeLinks=links(html).filter(({url})=>/^\/(fr|ar)\/tableau-de-bord$/u.test(url.pathname));
-  expect(homeLinks.length).toBeGreaterThanOrEqual(5);for(const {url}of homeLinks){expect(url.searchParams.getAll("workspace")).toEqual(["provider"]);expect(url.searchParams.get("organizationId")).toBe(org);expect(url.searchParams.get("q")).toBe("mission");expect(url.searchParams.get("page")).toBe("4");}
+  expect(homeLinks.length).toBeGreaterThanOrEqual(4);for(const {url}of homeLinks){expect(url.searchParams.getAll("workspace")).toEqual(["provider"]);expect(url.searchParams.get("organizationId")).toBe(org);expect(url.searchParams.get("q")).toBe("mission");expect(url.searchParams.get("page")).toBe("4");}
   expect(html.match(/name="workspace" value="provider"/gu)).toHaveLength(1);
  });
  it.each(["fr","ar"] as const)("replaces a wrong workspace in an explicit home languagePath but preserves detail paths in %s",locale=>{

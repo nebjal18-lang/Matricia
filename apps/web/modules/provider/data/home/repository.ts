@@ -10,6 +10,7 @@ import { consultationRowsFromInvitations } from "@/modules/provider/data/spaces/
 import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
 import {
   buildProviderBlockers,
+  buildProviderDomainActionItems,
   computeProviderHomeCounts,
   resolveProviderHomeStage,
   type ProviderBlocker,
@@ -21,10 +22,12 @@ export type ProviderHomeSnapshot =
   | {
       status: "success";
       stage: ProviderHomeStage | null;
+      profileComplete: boolean;
       counts: ProviderHomeCounts;
       blockers: ProviderBlocker[];
       organizationName: string | null;
       organizationId: string | null;
+      treatItems: readonly UserActionItem[];
       consultations: Array<{ id: string; title: string; status: string; href: string; tone: "sky" | "peach" | "mint" | "violet" }>;
       capacity: { status: string; domains: string; zones: string; modalities?:string };
       reputation: { published: number | null; latest: string | null };
@@ -140,14 +143,29 @@ export async function loadProviderHomeSnapshot(input: {
       locale: input.locale,
     });
 
+    const organizationQuery = input.organizationId ? `?organizationId=${encodeURIComponent(input.organizationId)}` : "";
     const consultations = quotesOk
-      ? consultationRowsFromInvitations(quotes.dashboard.invitations, input.locale, input.organizationId ? `?organizationId=${encodeURIComponent(input.organizationId)}` : "").slice(0, 4).map((row) => ({
+      ? consultationRowsFromInvitations(quotes.dashboard.invitations, input.locale, organizationQuery).slice(0, 4).map((row) => ({
           id: row.id,
           title: row.title,
           status: row.status,
           href: row.href,
           tone: row.tone,
         }))
+      : [];
+    const treatItems = quotesOk
+      ? buildProviderDomainActionItems({
+          invitations: quotes.dashboard.invitations.map((item) => ({
+            id: item.id,
+            description: item.description,
+            status: item.status,
+            deadline: item.deadline,
+            quote: item.quote ? { id: item.quote.id, status: item.quote.status } : null,
+          })),
+          locale: input.locale,
+          organizationId: orgId,
+          organizationName: orgName,
+        })
       : [];
     const capacityServices = qualOk ? qualification.dashboard.services : [];
     const capacity = {
@@ -164,14 +182,18 @@ export async function loadProviderHomeSnapshot(input: {
         ? (input.locale === "ar" ? (latestFeedback.axes[0]?.messageAr ?? null) : (latestFeedback.axes[0]?.messageFr ?? null))
         : null,
     };
+    const profileStatus = qualOk ? qualification.dashboard.profile?.overallStatus ?? null : null;
+    const profileComplete = Boolean(profileStatus && profileStatus !== "PROFILE_INCOMPLETE" && profileStatus !== "NOT_REQUESTED");
 
     return {
       status: "success",
       stage,
+      profileComplete,
       counts: safeCounts,
       blockers,
       organizationName: orgName,
       organizationId: orgId,
+      treatItems,
       consultations,
       capacity,
       reputation: reputationPreview,

@@ -62,7 +62,6 @@ export function ProviderInboxBoard({
   const n = getNotificationMessages(locale);
   const filteredOptions = preferredRfqId ? options.filter((item) => item.rfqId === preferredRfqId) : options;
   const openOptions = filteredOptions.map(item => ({...item,label:item.context === "CONTRACT" ? (locale === "ar" ? "ملف عقد" : "Dossier contractuel") : (locale === "ar" ? "استشارة" : "Consultation")}));
-  const empty = locale === "ar" ? "لا توجد محادثة مرتبطة باستشارة." : "Aucune conversation liée à une consultation.";
   const tr = (fr: string, ar: string) => locale === "ar" ? ar : fr;
   const notificationsQuery = queryWithWorkspace(query, "provider");
   const base = `/${locale}/sous-traitant/messages`;
@@ -151,8 +150,8 @@ export function ProviderInboxBoard({
               />}
               {conversation.thread.status !== "LOCKED" && conversation.thread.can_send === true ? <InternalMessageAttachments threadId={conversation.thread.id} senderOrganizationId={conversation.thread.participant_organization_id} locale={locale} /> : null}
             </>
-          ) : (
-            <p>{inboxError ? tr("Choisissez une conversation après avoir rétabli le chargement.", "اختر محادثة بعد استعادة تحميل البيانات.") : threads.length === 0 ? empty : m.choose}</p>
+          ) : threads.length === 0 ? null : (
+            <p>{inboxError ? tr("Choisissez une conversation après avoir rétabli le chargement.", "اختر محادثة بعد استعادة تحميل البيانات.") : m.choose}</p>
           )}
         </article>
         <article className="client-card" id="notifications">

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Info, LifeBuoy, MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
 import { presentObligation } from "@/modules/admin/data/spaces/present-space-row";
-import { canApplyClientSpaceDemo, demoClientSpaces } from "@/modules/client/data/spaces/demo";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import type { DisputeDetail, DisputeSummary } from "@/modules/shared/lib/disputes/model";
 import type { DisputeMessages } from "@/modules/client/screens/litiges/messages";
@@ -42,9 +41,7 @@ export function DisputesBoard({
   children?: ReactNode;
 }) {
   const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
   const base = hrefPrefix ?? `/${locale}/client/litiges`;
-  const preferDemo = !hrefPrefix && canApplyClientSpaceDemo() && cases.length === 0;
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
   const providerSpace = base.includes("/sous-traitant/");
   const listHref = `${base}${query}`;
@@ -53,7 +50,8 @@ export function DisputesBoard({
   const docsBase = providerSpace ? `/${locale}/sous-traitant/documents` : `/${locale}/client/documents`;
   const newHref = `${base}/nouveau${query}`;
 
-  if (!preferDemo && cases.length === 0) {
+  // Never invent litiges: empty DB stays empty (prior demo overlay showed unrelated cases).
+  if (cases.length === 0) {
     return (
       <main className="client-page">
         <p className="client-card">{messages.empty}</p>
@@ -71,45 +69,28 @@ export function DisputesBoard({
             <span className="client-status-chip" data-tone="sky">{c.allStatuses}</span>
           </header>
           <ul className="client-dispute-list">
-            {preferDemo
-              ? demo.disputes.map((item, index) => (
-                  <li key={item.id}>
-                    <HashAwareLink href="#litige-detail" aria-current={index === 0 ? "true" : undefined}>
-                      <span>
-                        <strong>{item.title}</strong>
-                        <small>{item.project}</small>
-                      </span>
-                      <em>
-                        <span className="client-status-chip" data-tone={item.tone}>{item.status}</span>
-                        <small>{item.due}</small>
-                      </em>
-                    </HashAwareLink>
-                  </li>
-                ))
-              : cases.map((item) => (
-                  <li key={item.id}>
-                    <Link href={`${base}/${item.id}${query}`} aria-current={selected?.id === item.id ? "true" : undefined}>
-                      <span>
-                        <strong>{presentObligation(item.obligationKey, locale)}</strong>
-                        <small>{messages.mission} · {formatDate(item.responseDueAt, locale)}</small>
-                      </span>
-                      <em>
-                        <span className="client-status-chip" data-tone={statusTone(item.status)}>{messages.statuses[item.status]}</span>
-                        <small>{formatDate(item.responseDueAt, locale)}</small>
-                      </em>
-                    </Link>
-                  </li>
-                ))}
+            {cases.map((item) => (
+              <li key={item.id}>
+                <Link href={`${base}/${item.id}${query}`} aria-current={selected?.id === item.id ? "true" : undefined}>
+                  <span>
+                    <strong>{presentObligation(item.obligationKey, locale)}</strong>
+                    <small>{messages.mission} · {formatDate(item.responseDueAt, locale)}{item.missionId ? ` · ${item.missionId.slice(0, 8)}` : ""}</small>
+                  </span>
+                  <em>
+                    <span className="client-status-chip" data-tone={statusTone(item.status)}>{messages.statuses[item.status]}</span>
+                    <small>{formatDate(item.responseDueAt, locale)}</small>
+                  </em>
+                </Link>
+              </li>
+            ))}
           </ul>
         </article>
         <div className="client-stack" id="litige-detail">
-          {preferDemo ? (
-            <DemoDisputeDetail locale={locale} query={query} />
-          ) : selected ? (
+          {selected ? (
             <LiveDisputeDetail locale={locale} query={query} selected={selected} messages={messages} actions={children} docsHref={`${docsBase}${query}`} messagesHref={messagesHref} evidenceApiBase={providerSpace ? "/api/provider/disputes/evidence" : "/api/client/disputes/evidence"} />
           ) : (
             <article className="client-card">
-              <p>{cases.length > 0 ? messages.selectCase : messages.empty}</p>
+              <p>{messages.selectCase}</p>
             </article>
           )}
         </div>
@@ -124,91 +105,6 @@ export function DisputesBoard({
         {canOpen ? <Link href={newHref} className="client-ghost-link">{messages.newCase}</Link> : null}
       </div>
     </main>
-  );
-}
-
-function DemoDisputeDetail({ locale, query }: { locale: Locale; query: string }) {
-  const c = spaceCopy(locale);
-  const demo = demoClientSpaces(locale, query);
-  const detail = demo.disputeDetail;
-  const docsHref = `/${locale}/client/documents${query}`;
-  const newHref = `/${locale}/client/litiges/nouveau${query}`;
-  return (
-    <>
-      <article className="client-card">
-        <header className="client-priority-head">
-          <div>
-            <h2>{detail.title}</h2>
-            <p>{detail.project} · {detail.provider}</p>
-          </div>
-          <span className="client-status-chip" data-tone="violet">{demo.disputes[0]?.status ?? detail.stage}</span>
-        </header>
-        <nav className="client-tabs" aria-label={c.myDisputes}>
-          <HashAwareLink href="#details" aria-current="page">{c.tabDetails}</HashAwareLink>
-          <Link href={`/${locale}/messagerie${query}`}>{c.tabExchanges}</Link>
-          <Link href={docsHref}>{c.tabDocs}</Link>
-          <HashAwareLink href="#mediation">{c.tabMediation}</HashAwareLink>
-          <HashAwareLink href="#history">{c.tabHistory}</HashAwareLink>
-        </nav>
-        <section id="details" className="client-dispute-split">
-          <div>
-            <h3>{c.contextReminder}</h3>
-            <p>{detail.context}</p>
-          </div>
-        </section>
-        <section className="client-dispute-split">
-          <article>
-            <h3>{c.clientPosition}</h3>
-            <p>{detail.client}</p>
-          </article>
-          <article>
-            <h3>{c.providerReply}</h3>
-            <p>{detail.providerReply}</p>
-          </article>
-        </section>
-        <section>
-          <header className="client-priority-head">
-            <h3>{c.sharedDocs}</h3>
-            <Link href={docsHref} className="client-text-link">{c.seeAllDocs} ({detail.files.length})</Link>
-          </header>
-          <ul className="client-feed">
-            {detail.files.map((file) => (
-              <li key={file.id}><Link href={file.href}><span>{file.title}</span><small>{file.by}</small></Link></li>
-            ))}
-          </ul>
-          <p className="client-access-note">{c.confidentialProofsLead}</p>
-        </section>
-      </article>
-      <article className="client-card" id="mediation">
-        <header><h2>{c.mediationFollow}</h2></header>
-        <ol className="client-mediation">
-          {detail.mediation.map((step) => (
-            <li key={step.id} data-state={step.state}>
-              <strong>{step.title}</strong>
-              <small>{step.date}</small>
-            </li>
-          ))}
-        </ol>
-        <div className="client-next-action">
-          <h3>{c.nextPossible}</h3>
-          <p>{detail.nextLead}</p>
-          <Link href={newHref} className="client-cta">{c.submitResponse}</Link>
-          <Link href={docsHref} className="client-ghost-link">{c.addProof}</Link>
-        </div>
-      </article>
-      <article className="client-card" id="history">
-        <header><h2>{c.tabHistory}</h2></header>
-        <ol className="client-mediation">
-          {detail.files.map((file) => (
-            <li key={`history-${file.id}`} data-state="done">
-              <strong>{file.title}</strong>
-              <small>{file.by}</small>
-            </li>
-          ))}
-        </ol>
-        <p className="client-access-note">{locale === "ar" ? "يعرض هذا السجل الوثائق والمراسلات المشتركة، وليس خطوات الوساطة." : "Cet historique reprend les pièces et échanges partagés, distinct du suivi de médiation."}</p>
-      </article>
-    </>
   );
 }
 

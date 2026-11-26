@@ -164,9 +164,6 @@ export default async function DashboardPage({
   const hasPlatformRole = access.status === "ok" && access.requirementSatisfied && access.roles.size > 0;
   const organizationId = context.selected?.organizationId ?? null;
 
-  // Start action-center early; do not block routing or the home snapshot on it.
-  const actionCenterPromise = loadUserActionCenterWithinBudget(locale, now, organizationId, { includeAdmin: hasPlatformRole });
-
   const membershipRoles = context.selected
     ? await supabase.from("organization_member_roles").select("role_code").eq("membership_id", context.selected.membershipId).is("revoked_at", null).limit(20)
     : { data: [] as Array<{ role_code: string }>, error: null };
@@ -185,6 +182,12 @@ export default async function DashboardPage({
   const navigationNotice = roleFallback ? <p role="status" className="mx-4 mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">{locale === "ar" ? "المساحة المطلوبة غير متاحة لحسابكم. تم فتح مساحتكم المسموح بها." : "L’espace demandé n’est pas habilité pour votre compte. Votre espace autorisé a été ouvert."}</p> : null;
   const isProviderSpace = [...roleCodes].some((role) => PROVIDER_ROLES.has(role));
   const preferProvider = landing === "provider" && isProviderSpace;
+
+  // Provider home never consumes the action-center (admin work items leak on dual-role demos).
+  // Client home still starts it early without blocking the snapshot.
+  const actionCenterPromise = preferProvider
+    ? Promise.resolve({ status: "success" as const, value: { items: [], degradedSources: [] } })
+    : loadUserActionCenterWithinBudget(locale, now, organizationId, { includeAdmin: hasPlatformRole });
 
   const switcher = (compact: boolean) => (
     <OrganizationSwitcher

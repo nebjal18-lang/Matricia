@@ -14,9 +14,6 @@ export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<Admin
   const roles = new Set([...access.roles].filter((role) => commandRoles.includes(role as (typeof commandRoles)[number])));
   if (roles.size === 0) return { status: "error", reason: "FORBIDDEN" };
   if (!access.requirementSatisfied) return { status: "error", reason: "MFA_REQUIRED" };
-  if (canApplyAdminDemoHubs()) {
-    return { status: "success", dashboard: buildDemoCommandCenter() };
-  }
   const readOnly = roles.has("READ_ONLY_AUDITOR") && ![...roles].some((item) => item !== "READ_ONLY_AUDITOR");
   const central = roles.has("SUPER_ADMIN") || roles.has("MATRICIA_ADMIN");
   const canRequest = !readOnly && [...roles].some((item) => ["SUPER_ADMIN", "MATRICIA_ADMIN", "COMPLIANCE_MANAGER", "FINANCE_MANAGER", "DISPUTE_MANAGER", "LIBRARY_MANAGER", "SUPPORT_AGENT"].includes(item));
@@ -40,10 +37,19 @@ export async function loadAdminCommandCenter(page=1,status="ALL"): Promise<Admin
     actionPage = 1;
     actionQuery = await readActions(actionPage);
   }
-  if (workQuery.error || actionQuery.error) return { status: "error", reason: "QUERY_FAILED" };
+  if (workQuery.error || actionQuery.error) {
+    if (canApplyAdminDemoHubs()) return { status: "success", dashboard: buildDemoCommandCenter() };
+    return { status: "error", reason: "QUERY_FAILED" };
+  }
   const workRows = commandCenterReadSchemas.workItems.safeParse(workQuery.data);
   const actionRows = commandCenterReadSchemas.actions.safeParse(actionQuery.data);
-  if (!workRows.success || !actionRows.success) return { status: "error", reason: "INVALID_RESPONSE" };
+  if (!workRows.success || !actionRows.success) {
+    if (canApplyAdminDemoHubs()) return { status: "success", dashboard: buildDemoCommandCenter() };
+    return { status: "error", reason: "INVALID_RESPONSE" };
+  }
+  if (canApplyAdminDemoHubs() && workRows.data.length === 0 && actionRows.data.length === 0) {
+    return { status: "success", dashboard: buildDemoCommandCenter() };
+  }
   const queueIds = [...new Set(workRows.data.map((item) => item.queue_version_id))];
   const queueQuery = queueIds.length
     ? await client.from("admin_queue_versions").select("id,queue_key,label_fr,label_ar").in("id", queueIds).limit(100)

@@ -7,6 +7,7 @@ const execFileAsync = promisify(execFile);
 const CHILD_ENV_ALLOWLIST = new Set([
   "E2E_LOCAL_AUTO_CONFIG",
   "CI", "E2E_LOCAL_ISOLATED", "E2E_LOCAL_PROJECT_ID", "COREPACK_HOME", "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH", "PLAYWRIGHT_VIDEO", "COLORTERM", "ComSpec", "FORCE_COLOR", "HOME", "HOMEDRIVE", "HOMEPATH", "LANG", "LOCALAPPDATA",
+  "MATRICIA_DEMO_ACCESS_ENABLED",
   "NO_COLOR", "NUMBER_OF_PROCESSORS", "OS", "PATH", "PATHEXT", "ProgramData", "ProgramFiles", "ProgramFiles(x86)",
   "SystemDrive", "SystemRoot", "TEMP", "TERM", "TMP", "USERPROFILE", "windir",
 ]);
