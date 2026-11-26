@@ -94,9 +94,12 @@ async function ClientDashboardResolved({ snapshot, shared }: { snapshot: ClientH
 }
 
 async function ProviderDashboardResolved({ snapshot, shared }: { snapshot: ProviderHomeSnapshot; shared: Shared }): Promise<ReactNode> {
-  const actionCenter = await shared.actionCenterPromise;
-  const scopedRaw = actionCenter.status === "success" ? filterDashboardActions(actionCenter.value.items, shared.organizationId) : [];
-  const searchedItems = searchFilter(filterProviderFacingActions(scopedRaw, shared.hasPlatformRole), shared.searchRaw);
+  // Provider "À traiter maintenant" is exclusively domain-backed (consultations / devis).
+  // Do not await or merge the action-center here: dual-role accounts otherwise flash empty
+  // then inject admin command-center work items after streaming resolves.
+  void shared.actionCenterPromise;
+  const domainItems = snapshot.status === "success" ? [...snapshot.treatItems] : [];
+  const searchedItems = searchFilter(filterProviderFacingActions(domainItems, false), shared.searchRaw);
   return (
     <ProviderDashboardHome
       locale={shared.locale}

@@ -9,7 +9,8 @@ import { demoPersonaHome, demoPersonaWorkspace, type DemoPersona } from "./demo-
 import { ensureDemoPersonaAuthorization } from "./demo-authorization";
 import { ensureDemoFranchisePersona } from "./demo-franchise-ensure";
 import { findDemoRegionalActor } from "./demo-regional-directory";
-import { ensureDemoRegionalActor } from "./demo-regional-ensure";
+import { ensureDemoClientComFilm } from "./demo-client-com-film-ensure";
+import { ensureDemoRegionalActor, loadDemoRegionalIdentity } from "./demo-regional-ensure";
 import { safeReturnPath } from "@/modules/shared/lib/auth/return-path";
 import { postLoginDestination } from "./actions";
 import { elevateDemoSession } from "./demo-assurance";
@@ -55,13 +56,38 @@ export async function connectDemoRegionalActor(formData: FormData): Promise<void
   const actor = findDemoRegionalActor({ kind, territoryCode, slot });
   if (!actor) redirect(failure("unavailable"));
 
-  const admin = getSupabaseAdminClient();
-  const ensured = await ensureDemoRegionalActor({ admin, actor });
-  if (!ensured) redirect(failure("unavailable"));
-
-  const identity = await findDemoIdentity(admin, actor.email, actor.persona);
-  if (!identity || identity.id !== ensured.userId) redirect(failure("role-missing"));
-  await connectValidatedDemo({ admin, email: actor.email, userId: identity.id, persona: actor.persona, locale, failure, organizationId: ensured.organizationId });
+  const prepared = await (async () => {
+    try {
+      const admin = getSupabaseAdminClient();
+      // Seed-first ensure — Auth listUsers pagination outages must not become a digest.
+      const ensured = await ensureDemoRegionalActor({ admin, actor });
+      if (!ensured) return null;
+      if (actor.persona === "client") {
+        await ensureDemoClientComFilm({
+          admin,
+          client: actor,
+          clientUserId: ensured.userId,
+          clientOrganizationId: ensured.organizationId,
+        });
+      }
+      const identity = await loadDemoRegionalIdentity(admin, ensured.userId, actor);
+      if (!identity || identity.id !== ensured.userId) return { admin, ensured, identity: null };
+      return { admin, ensured, identity };
+    } catch {
+      return null;
+    }
+  })();
+  if (!prepared) redirect(failure("unavailable"));
+  if (!prepared.identity) redirect(failure("role-missing"));
+  await connectValidatedDemo({
+    admin: prepared.admin,
+    email: actor.email,
+    userId: prepared.identity.id,
+    persona: actor.persona,
+    locale,
+    failure,
+    organizationId: prepared.ensured.organizationId,
+  });
 }
 
 async function connectValidatedDemo(input: {

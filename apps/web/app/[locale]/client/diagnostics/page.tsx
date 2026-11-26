@@ -169,14 +169,16 @@ export default async function Diagnostics({ params, searchParams }: { params: Pr
         historyFilter={historyFilter}
         filterHrefs={{ all: historyHref("all"), complete: historyHref("complete"), indicative: historyHref("indicative") }}
         historyFailed={historyResult.status === "error"}
+        questionnaireHref={questionnaireHref}
+        indicativeCount={intakeResult.error ? 0 : (intakeResult.data?.length ?? 0)}
         indicativeHistory={<IndicativeIntakes locale={locale} failed={Boolean(intakeResult.error || promotionResult.error || findingResult.error || opportunityResult.error)} rows={(intakeResult.data ?? []).slice(0, 20).map((intake) => ({ id: intake.id, organizationId: intake.organization_id, organizationName: names.get(intake.organization_id) ?? space.organizationName ?? (locale === "fr" ? "Organisation" : "المؤسسة"), priorities: intake.priorities, createdAt: intake.created_at, promotion: promotions.get(intake.id) ?? null, idempotencyKey: randomUUID(), organizationQuery: space.selectedQuery }))} />}
         cards={hubCards.length ? hubCards : [{
           id: "start",
           title: locale === "fr" ? "Commencer un diagnostic" : "بدء تشخيص",
           href: questionnaireHref,
           status: "draft",
-          meta: locale === "fr" ? "Aucun diagnostic encore" : "لا تشخيص بعد",
-          description: locale === "fr" ? "Lancez le questionnaire versionné pour obtenir une analyse explicable." : "ابدؤوا الاستبيان ذا الإصدار للحصول على تحليل قابل للتفسير.",
+          meta: locale === "fr" ? "Questionnaire versionné" : "استبيان بإصدار",
+          description: locale === "fr" ? "Lancez le questionnaire pour obtenir une analyse explicable, puis consultez l’historique ici." : "ابدؤوا الاستبيان للحصول على تحليل قابل للتفسير، ثم راجعوا السجل هنا.",
         }]}
         history={history}
         todos={todos}

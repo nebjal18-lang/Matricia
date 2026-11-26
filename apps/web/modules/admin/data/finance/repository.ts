@@ -19,20 +19,40 @@ async function authorizedClient() {
   return { status: "success", client: access.client } as const;
 }
 
+function hasOpenFinanceWork(dashboard: AdminFinanceDashboard) {
+  return dashboard.provider_payments.some((payment) => BigInt(payment.unallocated_minor) > BigInt(0))
+    || dashboard.provider_invoices.some((invoice) => BigInt(invoice.outstanding_minor) > BigInt(0));
+}
+
+function parseFinanceDashboard(data: unknown): AdminFinanceResult<AdminFinanceDashboard> {
+  const parsed = adminFinanceDashboardSchema.safeParse(data);
+  if (!parsed.success) return { status: "error", reason: "INVALID_RESPONSE" };
+  if (parsed.data.provider_payments.some((payment) => BigInt(payment.allocated_minor) + BigInt(payment.unallocated_minor) !== BigInt(payment.amount_minor))) {
+    return { status: "error", reason: "INVALID_RESPONSE" };
+  }
+  return { status: "success", value: parsed.data };
+}
+
+function demoFinanceFallback(): AdminFinanceResult<AdminFinanceDashboard> {
+  return parseFinanceDashboard(buildDemoFinanceDashboard());
+}
+
 export async function loadAdminFinanceDashboard(): Promise<AdminFinanceResult<AdminFinanceDashboard>> {
   const access = await authorizedClient();
   if (access.status === "error") return access;
-  if (canApplyAdminDemoHubs()) {
-    const demo = buildDemoFinanceDashboard();
-    const parsed = adminFinanceDashboardSchema.safeParse(demo);
-    return parsed.success ? { status: "success", value: parsed.data } : { status: "error", reason: "INVALID_RESPONSE" };
-  }
   const response = await access.client.rpc("list_admin_finance_dashboard", { p_limit: 100 });
-  if (response.error) return { status: "error", reason: response.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
-  const parsed = adminFinanceDashboardSchema.safeParse(response.data);
-  if (!parsed.success) return { status: "error", reason: "INVALID_RESPONSE" };
-  if (parsed.data.provider_payments.some((payment) => BigInt(payment.allocated_minor) + BigInt(payment.unallocated_minor) !== BigInt(payment.amount_minor))) return { status: "error", reason: "INVALID_RESPONSE" };
-  return { status: "success", value: parsed.data };
+  if (response.error) {
+    if (canApplyAdminDemoHubs()) return demoFinanceFallback();
+    return { status: "error", reason: response.error.code === "42501" ? "FORBIDDEN" : "UNAVAILABLE" };
+  }
+  const parsed = parseFinanceDashboard(response.data);
+  if (parsed.status === "error") {
+    if (canApplyAdminDemoHubs()) return demoFinanceFallback();
+    return parsed;
+  }
+  // Prefer live unallocated payments / open invoices over demo film, same spirit as command-center.
+  if (canApplyAdminDemoHubs() && !hasOpenFinanceWork(parsed.value)) return demoFinanceFallback();
+  return parsed;
 }
 
 export async function reconcileAdminProviderPayment(input: unknown): Promise<AdminFinanceResult<{ batchId: string }>> {

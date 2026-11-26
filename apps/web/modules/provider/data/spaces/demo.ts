@@ -46,7 +46,8 @@ export function demoProviderSpaces(locale: Locale, query: string) {
       { id: "q2", title: fr ? "Services déclarés" : "الخدمات المصرّح بها", status: fr ? "Transmis" : "مُرسل", tone: "mint" as const, href: `/${locale}/sous-traitant/services${q}`, action: "open" as const },
       { id: "q3", title: fr ? "Capacité" : "القدرة", status: fr ? "À compléter" : "للإستكمال", tone: "peach" as const, href: `/${locale}/sous-traitant/services${q}`, action: "complete" as const },
       { id: "q4", title: fr ? "Documents requis" : "الوثائق المطلوبة", status: fr ? "Transmis" : "مُرسل", tone: "mint" as const, href: `/${locale}/sous-traitant/documents${q}`, action: "open" as const },
-      { id: "q5", title: fr ? "Décision et raisonnement" : "القرار والتعليل", status: fr ? "À examiner" : "للمراجعة", tone: "violet" as const, href: `/${locale}/sous-traitant/qualification${q}`, action: "open" as const },
+      { id: "q5", title: fr ? "Questionnaire de service" : "استبيان الخدمة", status: fr ? "En attente de publication" : "بانتظار النشر", tone: "violet" as const, href: `/${locale}/sous-traitant/questionnaires${q}`, action: "open" as const },
+      { id: "q6", title: fr ? "Décision Matricia" : "قرار Matricia", status: fr ? "Examen Matricia" : "مراجعة Matricia", tone: "violet" as const, href: `/${locale}/sous-traitant/qualification${q}`, action: "open" as const },
     ],
     verified: [
       fr ? "Identité et informations de l’entreprise" : "هوية ومعلومات المؤسسة",

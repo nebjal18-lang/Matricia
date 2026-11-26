@@ -29,7 +29,7 @@ export default async function RequestsPage({ params, searchParams }: { params: P
       title: request.description,
       status: messages.statuses[request.status],
       last: new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : "fr-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" }).format(new Date(request.createdAt)),
-      next: request.quoteCount > 0 ? c.compareCta : c.open,
+      next: request.quoteCount > 0 ? c.compareCta : request.status === "DRAFT" || request.status === "INFORMATION_REQUIRED" ? (locale === "fr" ? "Compléter pour recevoir des devis" : "استكمال لاستلام العروض") : c.open,
       href: `/${locale}/client/demandes/${request.id}${space.selectedQuery}`,
       tone: (request.quoteCount > 0 ? "mint" : request.status === "DRAFT" ? "violet" : "sky") as "violet" | "sky" | "mint" | "peach",
     }))
@@ -39,7 +39,7 @@ export default async function RequestsPage({ params, searchParams }: { params: P
   return (
     <ClientAppShell languagePath={`/${locale}/client/demandes?${new URLSearchParams({organizationId:space.selectedOrganizationId,q:query.q??"",statut:query.statut??"",page:String(page)})}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={c.reqTitle} lead={c.reqLead} kicker={c.kicker} sceneHero actions={<><SpaceActions href={`/${locale}/besoin${space.selectedQuery}`} label={c.newNeed} /><SpaceActions href={`/${locale}/client/demandes/recurrence${space.selectedQuery}`} label={c.cloneRequest} variant="soft" /><SpaceFilters href="#filtres" label={c.filters} /></>}>
       {listError ? <p role="alert" className="client-card">{result.reason === "FORBIDDEN" ? (locale === "fr" ? "Votre rôle ne permet pas de consulter ces demandes." : "دوركم لا يسمح بعرض هذه الطلبات.") : (locale === "fr" ? "Les demandes sont momentanément indisponibles. Réessayez." : "الطلبات غير متاحة مؤقتاً. حاولوا مجدداً.")}</p> : null}
-      {!listError ? (totalResult.error || total === null ? <p role="alert">{locale === "fr" ? "Le total est momentanément indisponible. Les résultats chargés restent consultables." : "العدد الإجمالي غير متاح مؤقتاً. يمكن عرض النتائج المحملة."}</p> : <p>{total} {locale === "fr" ? "demande(s) correspondant(s)" : "طلب مطابق"}</p>) : null}
+      {!listError ? (totalResult.error || total === null ? <p role="alert">{locale === "fr" ? "Le total est momentanément indisponible. Les résultats chargés restent consultables." : "العدد الإجمالي غير متاح مؤقتاً. يمكن عرض النتائج المحملة."}</p> : <p>{(() => { const n = Number(total); if (locale === "ar") return `${total} ${n === 1 ? "طلب مطابق" : "طلبات مطابقة"}`; return n === 0 ? "Aucune demande correspondante" : n === 1 ? "1 demande correspondante" : `${total} demandes correspondantes`; })()}</p>) : null}
       <RequestsBoard {...(query.q === undefined ? {} : {searchQuery:query.q})} {...(query.statut === undefined ? {} : {statusFilter:query.statut})} locale={locale} query={space.selectedQuery} compareHref={compareHref} rows={rows} organizationName={space.organizationName} />
       {!listError ? (
         <nav className="flex gap-4" aria-label={locale === "fr" ? "Pages des demandes" : "صفحات الطلبات"}>

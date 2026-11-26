@@ -14,4 +14,13 @@ describe("Provider dashboard aggregate truthfulness",()=>{
  it("uses exhaustive invitation and quote aggregates instead of the first page",async()=>{const result=await loadProviderHomeSnapshot(input);expect(result.status).toBe("success");if(result.status!=="success")throw Error("expected snapshot");expect(result.counts.consultationsDue).toBe(151);expect(result.counts.quotesInProgress).toBe(101);expect(mocks.quotes).toHaveBeenCalledWith(org,{mode:"consultations",tab:"answer",page:1});});
  it("does not turn a missing paged aggregate into zero",async()=>{mocks.quotes.mockResolvedValue({status:"success",dashboard:{organizationId:org,organizationName:"Test Provider",invitations:[],pagination:{page:1,pageSize:25,total:151}}});const result=await loadProviderHomeSnapshot(input);if(result.status!=="success")throw Error("expected partial snapshot");expect(result.counts.consultationsDue).toBeNull();expect(result.counts.quotesInProgress).toBeNull();});
  it("keeps unavailable qualification and reputation distinct from no declared capacity and no feedback",async()=>{mocks.qualification.mockResolvedValue({status:"error",reason:"QUERY_FAILED"});mocks.reputation.mockResolvedValue({status:"error",reason:"QUERY_FAILED"});const result=await loadProviderHomeSnapshot(input);if(result.status!=="success")throw Error("expected partial snapshot");expect(result.capacity.status).toBe("UNAVAILABLE");expect(result.reputation.published).toBeNull();expect(result.stage).toBeNull();});
+ it("builds treat-now actions from open invitations and draft quotes only",async()=>{
+  const invitationId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",quoteId="bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+  mocks.quotes.mockResolvedValue({status:"success",dashboard:{organizationId:org,organizationName:"Prestataire · Assurance",invitations:[{id:invitationId,status:"INVITED",description:"Couverture flotte",deadline:"2026-11-10T00:00:00Z",quote:null},{id:"cccccccc-cccc-4ccc-8ccc-cccccccccccc",status:"ACCEPTED",description:"Devis IT",deadline:"2026-11-11T00:00:00Z",quote:{id:quoteId,status:"DRAFT"}},{id:"dddddddd-dddd-4ddd-8ddd-dddddddddddd",status:"DECLINED",description:"Clos",deadline:"2026-11-09T00:00:00Z",quote:null}],counts:{consultationsDue:2,quotesInProgress:1}}});
+  mocks.qualification.mockResolvedValue({status:"success",dashboard:{organizationId:org,organizationName:"Prestataire · Assurance",services:[],profile:{overallStatus:"UNDER_REVIEW"},regionCodes:[]}});
+  const result=await loadProviderHomeSnapshot(input);
+  if(result.status!=="success")throw Error("expected snapshot");
+  expect(result.profileComplete).toBe(true);
+  expect(result.treatItems.map(item=>item.href)).toEqual([`/fr/sous-traitant/consultations/${invitationId}`,`/fr/sous-traitant/devis/${quoteId}`]);
+ });
 });

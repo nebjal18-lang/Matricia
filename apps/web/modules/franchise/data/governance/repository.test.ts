@@ -33,6 +33,10 @@ describe("governance read prerequisites",()=>{
   mocks.rpc.mockRejectedValue(new Error("transport unavailable"));
   expect(await loadFranchiseDashboard("fr")).toEqual({status:"error",reason:"QUERY_FAILED"});
  });
+ it("maps franchise finance MFA denials to MFA_REQUIRED instead of a generic forbidden",async()=>{
+  mocks.rpc.mockResolvedValue({data:null,error:{code:"42501",message:"FRANCHISE_FINANCE_MFA_REQUIRED"}});
+  expect(await loadFranchiseDashboard("fr",{franchiseId:"11111111-1111-4111-8111-111111111111"})).toEqual({status:"error",reason:"MFA_REQUIRED"});
+ });
  it.each(["UNAUTHENTICATED","QUERY_FAILED","INVALID_RESPONSE"])("preserves security reader %s without a snapshot",async reason=>{
   mocks.access.mockResolvedValue({status:"error",reason});
   expect(await loadFranchiseDashboard("fr")).toEqual({status:"error",reason}); expect(mocks.rpc).not.toHaveBeenCalled();

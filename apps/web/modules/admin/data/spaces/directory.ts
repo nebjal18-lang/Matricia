@@ -52,9 +52,10 @@ export function adminDirectoryGroups(locale: Locale, q: string): AdminDirectoryG
       title: fr ? "Catalogue & moteurs" : "الدليل والمحركات",
       tone: "mint",
       links: [
-        link(`${p}/administration/catalogue${q}#domaines`, fr ? "Domaines, catégories & services" : "المجالات والفئات والخدمات", t(locale, "Structurer le référentiel interne domaines → services.", "هيكلة المرجع الداخلي من المجالات إلى الخدمات.")),
-        link(`${p}/administration/catalogue${q}#questions`, fr ? "Questions" : "الأسئلة", t(locale, "Administrer la bibliothèque de questions versionnées.", "إدارة مكتبة الأسئلة ذات الإصدارات.")),
-        link(`${p}/administration/catalogue${q}#questionnaires`, fr ? "Questionnaires" : "الاستبيانات", t(locale, "Composer et versionner les questionnaires métier.", "تركيب وإصدار الاستبيانات المهنية.")),
+        link(`${p}/administration/catalogue${q}#domaines`, fr ? "Domaines, catégories & services" : "المجالات والفئات والخدمات", t(locale, "Choisir bibliothèque et service, puis structurer domaines → services.", "اختيار المكتبة والخدمة ثم هيكلة المجالات → الخدمات.")),
+        // Sans libraryId+serviceId le Builder Questions/Questionnaires reste fermé : atterrir sur le contexte.
+        link(`${p}/administration/catalogue${q}#domaines`, fr ? "Questions" : "الأسئلة", t(locale, "Ouvre le contexte de travail : sélectionnez bibliothèque et service avant le constructeur Questions.", "يفتح سياق العمل: اختاروا المكتبة والخدمة قبل منشئ الأسئلة.")),
+        link(`${p}/administration/catalogue${q}#domaines`, fr ? "Questionnaires" : "الاستبيانات", t(locale, "Ouvre le contexte de travail : sélectionnez bibliothèque et service avant le constructeur Questionnaires.", "يفتح سياق العمل: اختاروا المكتبة والخدمة قبل منشئ الاستبيانات.")),
         link(`${p}/administration/catalogue/validation${q}#regles`, fr ? "Règles conditionnelles" : "قواعد شرطية", t(locale, "Éditer la logique conditionnelle et de scoring.", "تحرير المنطق الشرطي واحتساب الدرجات.")),
         link(`${p}/administration/catalogue/validation${q}#simulation`, fr ? "Simulations sans effet réel" : "محاكاة بلا أثر فعلي", t(locale, "Simuler questionnaires et règles sans effet production.", "محاكاة الاستبيانات والقواعد دون أثر إنتاجي.")),
         link(`${p}/administration/catalogue/publications${q}`, fr ? "Publications & versions" : "المنشورات والنسخ", t(locale, "Publier et historiser les versions catalogue.", "نشر ونسخ سجل الدليل.")),

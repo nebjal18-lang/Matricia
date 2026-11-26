@@ -49,8 +49,6 @@ export default async function SubscriptionPage({ params, searchParams }: { param
   return (
     <ClientAppShell locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="subscription" title={c.subPageTitle} lead={c.subPageLead} kicker={result.dashboard.organizationName}>
       {creditsResult.status === "success" && creditsResult.value.catalogUnavailable ? <p role="alert" className="client-card">{locale === "fr" ? "Les versions des Boxes n’ont pas pu être chargées. Les quantités de crédits restent consultables." : "تعذر تحميل نسخ الصناديق. يمكن الاطلاع على كميات الأرصدة."}</p> : null}
-      <SubscriptionUpgradeOptions locale={locale} organizationId={selectedId}/>
-      <SubscriptionFundingNotice funding={funding} locale={locale} organizationId={selectedId} />
       <SubscriptionBoard
         locale={locale}
         query={space.selectedQuery}
@@ -82,6 +80,8 @@ export default async function SubscriptionPage({ params, searchParams }: { param
           <SubscriptionPanel dateLabels={subscriptionDateLabels(result.dashboard,locale)} dashboard={result.dashboard} locale={locale} messages={messages} keys={keys} />
         </details>
       </SubscriptionBoard>
+      <SubscriptionFundingNotice funding={funding} locale={locale} organizationId={selectedId} />
+      <SubscriptionUpgradeOptions locale={locale} organizationId={selectedId}/>
     </ClientAppShell>
   );
 }

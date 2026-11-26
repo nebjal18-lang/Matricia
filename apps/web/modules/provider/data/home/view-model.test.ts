@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   buildProviderBlockers,
+  buildProviderDomainActionItems,
   computeProviderHomeCounts,
   filterProviderFacingActions,
   inferProviderSituation,
+  mergeProviderPriorityActions,
   proposedProviderAction,
   resolveProviderHomeStage,
 } from "./view-model";
@@ -82,6 +84,47 @@ describe("provider-home view-model", () => {
     });
     expect(blockers[0]?.scope).toBe("service");
     expect(blockers[0]?.serviceLabel).toBe("Audit");
+  });
+
+  it("retire toujours le centre de pilotage admin de la file prestataire", () => {
+    const adminWork: Item = {
+      ...base,
+      id: "work:1",
+      kind: "WORK_ITEM",
+      title: "Demande IT avec devis à comparer",
+      href: "/fr/administration/command-center",
+      organizationId: null,
+      organizationName: null,
+    };
+    const personalData: Item = {
+      ...adminWork,
+      id: "work:2",
+      title: "Demande d’accès données personnelles à instruire",
+    };
+    expect(filterProviderFacingActions([base, adminWork, personalData], true)).toEqual([base]);
+    expect(filterProviderFacingActions([adminWork], true)).toEqual([]);
+  });
+
+  it("construit des actions métier vers la consultation ou le devis", () => {
+    const invitationId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const quoteId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    const items = buildProviderDomainActionItems({
+      locale: "fr",
+      organizationId: base.organizationId,
+      organizationName: "Prestataire · Assurance",
+      invitations: [
+        { id: invitationId, description: "Couverture flotte", status: "INVITED", deadline: "2026-11-10T00:00:00Z", quote: null },
+        { id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", description: "Devis IT", status: "ACCEPTED", deadline: "2026-11-11T00:00:00Z", quote: { id: quoteId, status: "DRAFT" } },
+        { id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd", description: "Clos", status: "DECLINED", deadline: "2026-11-09T00:00:00Z", quote: null },
+      ],
+    });
+    expect(items).toHaveLength(2);
+    expect(items[0]?.href).toBe(`/fr/sous-traitant/consultations/${invitationId}`);
+    expect(items[1]?.href).toBe(`/fr/sous-traitant/devis/${quoteId}`);
+    expect(proposedProviderAction(inferProviderSituation(items[1]!), "fr")).toBe("Préparer mon devis");
+    const inbox = filterProviderFacingActions([base, { ...base, id: "admin", href: "/fr/administration/command-center" }], true);
+    const merged = mergeProviderPriorityActions(items, inbox);
+    expect(merged.map((item) => item.id)).toEqual([`consultation:${invitationId}`, `quote:${quoteId}`, base.id]);
   });
 });
 

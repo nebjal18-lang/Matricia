@@ -41,6 +41,8 @@ const copy = {
     resources: "Mes ressources utiles",
     overview: "Aperçu de votre situation",
     empty: "Aucun diagnostic complet sur cette page.",
+    emptyAll: "Aucun diagnostic ni bilan enregistré. Commencez le questionnaire ou consultez l’assistance.",
+    startCta: "Commencer le questionnaire",
   },
   ar: {
     title: "تشخيصاتي",
@@ -64,6 +66,8 @@ const copy = {
     resources: "مواردي المفيدة",
     overview: "نظرة على وضعكم",
     empty: "لا يوجد تشخيص كامل في هذه الصفحة.",
+    emptyAll: "لا يوجد تشخيص ولا تقييم محفوظ. ابدؤوا الاستبيان أو اطلبوا المساعدة.",
+    startCta: "بدء الاستبيان",
   },
 } as const;
 
@@ -78,6 +82,8 @@ export function MesDiagnosticsHub({
   filterHrefs,
   indicativeHistory,
   historyFailed = false,
+  questionnaireHref,
+  indicativeCount = 0,
 }: {
   locale: Locale;
   cards: DiagnosticCard[];
@@ -89,8 +95,11 @@ export function MesDiagnosticsHub({
   filterHrefs?: Record<"all" | "complete" | "indicative", string>;
   indicativeHistory?: ReactNode;
   historyFailed?: boolean;
+  questionnaireHref?: string;
+  indicativeCount?: number;
 }) {
   const t = copy[locale];
+  const emptyAll = historyFilter === "all" && !historyFailed && history.length === 0 && indicativeCount === 0;
   return (
     <main className="client-page diag-hub">
       <header className="diag-hub-hero">
@@ -150,22 +159,31 @@ export function MesDiagnosticsHub({
               </nav> : null}
               <small>{t.sort}</small>
             </div>
-            {historyFilter !== "indicative" ? <><ul>
-              {history.map((row) => (
-                <li key={row.id}>
-                  <span className="diag-hub-status" data-status={row.status}>
-                    {row.status === "completed" ? <CheckCircle2 size={14} aria-hidden /> : <Clock3 size={14} aria-hidden />}
-                    {row.status === "completed" ? t.completed : row.status === "in_progress" ? t.inProgress : t.draft}
-                  </span>
-                  <div>
-                    <strong>{row.title}</strong>
-                    <small>{row.meta}</small>
-                  </div>
-                  <Link href={row.href}>{row.status === "completed" ? t.view : t.resume}<ArrowRight className="rtl-mirror" size={14} aria-hidden /></Link>
-                </li>
-              ))}
-            </ul>{!history.length && !historyFailed ? <p role="status">{t.empty}</p> : null}</> : null}
-            {historyFilter !== "complete" ? indicativeHistory : null}
+            {emptyAll ? (
+              <div className="client-offer-actions" role="status">
+                <p>{t.emptyAll}</p>
+                {questionnaireHref ? <Link href={questionnaireHref} className="diag-hub-cta">{t.startCta}</Link> : null}
+              </div>
+            ) : (
+              <>
+                {historyFilter !== "indicative" ? <><ul>
+                  {history.map((row) => (
+                    <li key={row.id}>
+                      <span className="diag-hub-status" data-status={row.status}>
+                        {row.status === "completed" ? <CheckCircle2 size={14} aria-hidden /> : <Clock3 size={14} aria-hidden />}
+                        {row.status === "completed" ? t.completed : row.status === "in_progress" ? t.inProgress : t.draft}
+                      </span>
+                      <div>
+                        <strong>{row.title}</strong>
+                        <small>{row.meta}</small>
+                      </div>
+                      <Link href={row.href}>{row.status === "completed" ? t.view : t.resume}<ArrowRight className="rtl-mirror" size={14} aria-hidden /></Link>
+                    </li>
+                  ))}
+                </ul>{!history.length && !historyFailed ? <p role="status">{t.empty}</p> : null}</> : null}
+                {historyFilter !== "complete" ? indicativeHistory : null}
+              </>
+            )}
           </section>
         </div>
 

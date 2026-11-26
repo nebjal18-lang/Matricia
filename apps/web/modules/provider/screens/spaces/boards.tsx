@@ -17,6 +17,7 @@ import type { UserActionItem } from "@/modules/shared/lib/action-center/model";
 import { organizationDisplayLabel } from "@/modules/shared/lib/directory-presentation";
 import { workflowStatusLabel } from "@/modules/shared/lib/i18n/workflow-statuses";
 import { JourneyGlyph } from "@/modules/shared/ui/journey-glyph";
+import { HashAwareLink } from "@/modules/shared/ui/hash-nav";
 import { ProviderProfileRail } from "@/modules/provider/ui/provider-profile-rail";
 import type { Locale } from "@/modules/shared/lib/i18n/locale";
 
@@ -103,7 +104,7 @@ function TabLink({ href, current, children }: { href: string; current: boolean; 
 }
 
 function Cta({ href, children, soft = false }: { href: string; children: ReactNode; soft?: boolean }) {
-  return <Link href={href} className={soft ? "client-soft-link" : "client-ghost-link"}>{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>;
+  return <HashAwareLink href={href} className={soft ? "client-soft-link" : "client-ghost-link"}>{children}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></HashAwareLink>;
 }
 
 const treatIcons = [ClipboardList, FileText, Paperclip, CheckSquare] as const;
@@ -138,19 +139,24 @@ export function ProviderHomeBoard({
 }) {
   const c = providerCopy(locale);
   const demo = demoProviderSpaces(locale, query);
-  const live = actionItems !== undefined || !canApplyProviderSpaceDemo();
-  const liveTreat = toProviderPriorityRows((actionItems ?? []).slice(0, 4), locale, query).map((row, index) => ({
+  const live = actionItems !== undefined || snapshot !== undefined || !canApplyProviderSpaceDemo();
+  // Treat-now is exclusively domain-backed (snapshot invitations/quotes). Ignoring actionItems
+  // prevents dual-role demos from injecting admin command-center rows after Suspense resolves.
+  void actionItems;
+  const domainTreatSource = snapshot?.status === "success" ? snapshot.treatItems : [];
+  const liveTreat = toProviderPriorityRows(domainTreatSource.slice(0, 4), locale, query).map((row, index) => ({
     id: row.id,
     title: row.title,
     badge: treatBadge(row.situation, locale),
     detail: row.dossier,
     href: row.href,
+    situation: row.situation,
     tone: treatTone(row.situation),
     icon: treatIcons[index] ?? FileText,
   }));
   const treatRows = live
     ? liveTreat
-    : demo.treat.map((item, index) => ({ ...item, icon: treatIcons[index] ?? FileText }));
+    : demo.treat.map((item, index) => ({ ...item, situation: "CONSULTATION" as const, icon: treatIcons[index] ?? FileText }));
   const consultRows = live
     ? (snapshot?.status === "success" ? snapshot.consultations : [])
     : demo.consultations;
@@ -158,9 +164,30 @@ export function ProviderHomeBoard({
     ? (snapshot?.status === "success" ? snapshot.capacity : { status: c.capacityUnset, domains: c.capacityUnset, zones: c.capacityUnset })
     : demo.capacity;
   const capacityStatus = capacityStatusLabel(capacity.status, locale, c.capacityUnset);
+  const profileComplete = snapshot?.status === "success" ? snapshot.profileComplete : false;
+  // Never show "complete your profile" before the snapshot is known, and never alongside "Profil — Complété".
   const showProfileCallout =
-    snapshot === undefined ||
-    (snapshot.status === "success" && snapshot.stage!==null && snapshot.stage !== "qualified");
+    snapshot?.status === "success" &&
+    snapshot.stage !== null &&
+    !profileComplete &&
+    snapshot.stage !== "qualified";
+  const showQualificationWait =
+    snapshot?.status === "success" &&
+    snapshot.profileComplete &&
+    snapshot.stage !== null &&
+    snapshot.stage !== "qualified";
+  const treatSeeAllHref = (() => {
+    const situations = new Set(treatRows.map((row) => row.situation));
+    if (situations.has("MILESTONE") || situations.has("DELIVERABLE_REJECTED") || situations.has("CONTRACT")) {
+      return `/${locale}/sous-traitant/missions${query}`;
+    }
+    if (situations.has("DOCUMENT")) return `/${locale}/sous-traitant/documents${query}`;
+    if (situations.has("INVOICE")) return `/${locale}/sous-traitant/facturation${query}`;
+    if (situations.has("QUOTE_DRAFT") || situations.has("QUOTE_DUE")) {
+      return `/${locale}/sous-traitant/devis${providerSearchQuery(query, { tab: "drafts" })}`;
+    }
+    return `/${locale}/sous-traitant/consultations${providerSearchQuery(query, { tab: "answer" })}`;
+  })();
   const journey = (() => {
     const fr = locale === "fr";
     const stage = snapshot?.status === "success" ? snapshot.stage : null;
@@ -176,7 +203,12 @@ export function ProviderHomeBoard({
     const reputationReady = (reputationPublished ?? 0) > 0;
     const opportunitiesOpen = (counts?.consultationsDue ?? 0) > 0 || stage === "qualified";
     return [
-      { id: "j1", title: fr ? "Profil" : "الملف", detail: stage ? done : unknown, state: (stage ? "done" : "todo") as JourneyState },
+      {
+        id: "j1",
+        title: fr ? "Profil" : "الملف",
+        detail: snapshot?.status !== "success" || snapshot.stage === null ? unknown : profileComplete ? done : current,
+        state: (snapshot?.status !== "success" || snapshot.stage === null ? "todo" : profileComplete ? "done" : "current") as JourneyState,
+      },
       {
         id: "j2",
         title: fr ? "Qualification" : "التأهيل",
@@ -221,6 +253,16 @@ export function ProviderHomeBoard({
         <Link href={`/${locale}/sous-traitant/qualification${query}`} className="client-cta">{c.completeProfile} →</Link>
       </section>
       ) : null}
+      {showQualificationWait ? (
+      <section className="provider-profile-callout" aria-label={c.qualificationWaitBanner} data-tone="wait">
+        <Sprout className="size-5" aria-hidden />
+        <div>
+          <strong>{c.qualificationWaitBanner}</strong>
+          <p>{c.qualificationWaitLead}</p>
+        </div>
+        <Link href={`/${locale}/sous-traitant/qualification${query}`} className="client-cta">{c.seeProfile} →</Link>
+      </section>
+      ) : null}
 
       <article className="client-card provider-home-treat" aria-labelledby="provider-treat-now">
         <header className="client-priority-head">
@@ -228,7 +270,7 @@ export function ProviderHomeBoard({
             <h2 id="provider-treat-now"><Zap aria-hidden className="size-4" />{c.treatNow}</h2>
             <p>{c.treatLead}</p>
           </div>
-          <Link href={`/${locale}/sous-traitant/consultations${providerSearchQuery(query, { tab: "answer" })}`} className="client-text-link">{c.seeAll} →</Link>
+          {treatRows.length > 0 ? <Link href={treatSeeAllHref} className="client-text-link">{c.seeAll} →</Link> : null}
         </header>
         <div className="provider-treat">
           {treatRows.length === 0 ? <p role="status">{c.treatEmpty}</p> : treatRows.map((item) => {
@@ -307,7 +349,7 @@ export function ProviderHomeBoard({
             <li><span><strong>{c.domains}</strong><small>{capacity.domains}</small></span></li>
             <li><span><strong>{c.zones}</strong><small>{capacity.zones}</small></span></li><li><span><strong>{c.modalities}</strong><small>{"modalities"in capacity?String(capacity.modalities??c.capacityUnset):c.capacityUnset}</small></span></li>
           </ul>
-          <Cta href={`/${locale}/sous-traitant/qualification${query}#capacite`} soft>{c.refresh}</Cta>
+          <Cta href={`/${locale}/sous-traitant/qualification${query}#capacite`}>{c.refresh}</Cta>
         </article>
         <article className="client-card provider-reputation-card">
           <header><h2><Star aria-hidden className="size-4" />{c.reputation}</h2></header>
@@ -350,6 +392,7 @@ export function QualificationBoard({ locale, query, dashboard }: { locale: Local
         { id: "services", title: c.checkServices, status: servicesReady ? c.statusSent : c.statusOpen, tone: servicesReady ? "mint" : "peach", href: `/${locale}/sous-traitant/services${query}`, action: "open" as const },
         { id: "capacity", title: c.checkCapacity, status: capacityReady ? c.statusSent : c.statusOpen, tone: capacityReady ? "mint" : "peach", href: `/${locale}/sous-traitant/qualification${query}#capacite`, action: capacityReady ? "open" : "complete" },
         { id: "docs", title: c.checkDocs, status: docsReady ? c.statusSent : c.statusOpen, tone: docsReady ? "mint" : "peach", href: `/${locale}/sous-traitant/documents${query}`, action: docsReady ? "open" : "complete" },
+        { id: "questionnaire", title: c.checkQuestionnaire, status: c.statusWaitPublish, tone: "violet" as const, href: `/${locale}/sous-traitant/questionnaires${query}`, action: "open" as const },
         { id: "decision", title: c.checkDecision, status: c.statusReview, tone: "violet" as const, href: `/${locale}/sous-traitant/qualification${query}`, action: "open" as const },
       ]
     : demo.checklist;
@@ -755,6 +798,7 @@ export function ProviderMissionsBoard({ locale, query, rows }: { locale: Locale;
   const demo = demoProviderSpaces(locale, query);
   const live = rows !== undefined || !canApplyProviderSpaceDemo();
   const list = rows ?? (canApplyProviderSpaceDemo() ? demo.missions : []);
+  const empty = list.length === 0;
   return (
     <main className="client-page">
       <section className="client-board client-board-compare">
@@ -763,15 +807,15 @@ export function ProviderMissionsBoard({ locale, query, rows }: { locale: Locale;
             <h2>{c.currentMissions}</h2>
             <div className="client-table-tools">
               <SearchForm locale={locale} path="missions" query={query} label={c.searchGlobal} />
-              <Link href={`/${locale}/sous-traitant/missions${query}`} className="client-text-link">{c.seeAllMissions}</Link>
+              {!empty ? <Link href={`/${locale}/sous-traitant/missions${query}`} className="client-text-link">{c.seeAllMissions}</Link> : null}
             </div>
           </header>
           <div className="client-table-wrap">
             <table className="client-space-table">
               <thead><tr><th>{c.missions}</th><th>{c.stage}</th><th>{c.nextAction}</th><th>{c.access}</th><th>{c.action}</th></tr></thead>
               <tbody>
-                {list.length === 0 ? (
-                  <tr><td colSpan={5}><p role="status">{locale === "ar" ? "لا مهمة جارية." : "Aucune mission en cours."}</p></td></tr>
+                {empty ? (
+                  <tr><td colSpan={5}><p role="status">{locale === "ar" ? "لا مهمة جارية في مؤسستكم." : "Aucune mission en cours pour votre organisation."}</p></td></tr>
                 ) : list.map((row) => (
                   <tr key={row.id}>
                     <td>{row.title}</td>
@@ -784,22 +828,27 @@ export function ProviderMissionsBoard({ locale, query, rows }: { locale: Locale;
               </tbody>
             </table>
           </div>
-          <header><h2>{c.prepareDeliverable}</h2></header>
-          <p>{c.prepareDeliverableLead}</p>
-          <p className="client-access-note" role="status">
-            {locale === "ar"
-              ? "إيداع الإثبات يتم من ملف المهمة، وليس من منطقة السحب هنا."
-              : "Le dépôt de preuve se fait depuis le dossier de mission, pas depuis une zone de dépôt ici."}
-          </p>
-          <Cta href={`/${locale}/sous-traitant/missions${query}`}>{c.seeAllMissions}</Cta>
+          {!empty ? (
+            <>
+              <header><h2>{c.prepareDeliverable}</h2></header>
+              <p>{c.prepareDeliverableLead}</p>
+              <p className="client-access-note" role="status">
+                {locale === "ar"
+                  ? "إيداع الإثبات يتم من ملف المهمة، وليس من منطقة السحب هنا."
+                  : "Le dépôt de preuve se fait depuis le dossier de mission, pas depuis une zone de dépôt ici."}
+              </p>
+              <Cta href={list[0]!.href}>{c.open}</Cta>
+            </>
+          ) : null}
         </article>
+        {!empty || !live ? (
         <div className="client-stack">
           <article className="client-card">
             <header><h2>{c.follow}</h2></header>
             {live ? (
               <>
                 <p>{c.prepareDeliverableLead}</p>
-                {list[0] ? <Cta href={list[0].href}>{c.open}</Cta> : <p role="status">{locale === "ar" ? "لا مهمة جارية." : "Aucune mission en cours."}</p>}
+                {list[0] ? <Cta href={list[0].href}>{c.open}</Cta> : null}
               </>
             ) : (
               <>
@@ -823,6 +872,7 @@ export function ProviderMissionsBoard({ locale, query, rows }: { locale: Locale;
             <p className="client-access-note">{c.noAmendment}</p>
           </article>
         </div>
+        ) : null}
       </section>
     </main>
   );
@@ -945,6 +995,8 @@ export function BillingBoard({ locale, query, dashboard }: { locale: Locale; que
   const c = providerCopy(locale);
   const demo = demoProviderSpaces(locale, query);
   const live = dashboard !== undefined || !canApplyProviderSpaceDemo();
+  const hasInvoices = Boolean(live && dashboard && dashboard.invoices.length > 0);
+  const hasPayments = Boolean(live && dashboard && (dashboard.payments.length > 0 || dashboard.allocations.length > 0));
   return (
     <main className="client-page">
       <section className="client-space-kpis">
@@ -955,7 +1007,7 @@ export function BillingBoard({ locale, query, dashboard }: { locale: Locale; que
       <section className="client-board client-board-compare">
         <article className="client-card">
           <header><h2>{c.finDocs}</h2></header>
-          {live && (!dashboard || dashboard.invoices.length === 0) ? <p>{c.finFoot}</p> : (
+          {live && !hasInvoices ? <p role="status">{c.finEmptyInvoices}</p> : (
           <table className="client-space-table">
             <thead><tr><th>{c.document}</th><th>{c.linkedMission}</th><th>{c.status}</th><th>{c.nextAction}</th><th>{c.action}</th></tr></thead>
             <tbody>
@@ -986,7 +1038,7 @@ export function BillingBoard({ locale, query, dashboard }: { locale: Locale; que
       <article className="client-card">
         <header className="client-priority-head"><h2>{c.reconcil}</h2><Cta href={`/${locale}/sous-traitant/facturation/commissions${query}`}>{c.seeDetail}</Cta></header>
         <p>{c.reconcilLead}</p>
-        {live && (!dashboard || (dashboard.payments.length === 0 && dashboard.allocations.length === 0)) ? <p>{c.finFoot}</p> : (
+        {live && !hasPayments ? <p role="status">{c.finEmptyPayments}</p> : (
         <table className="client-space-table">
           <thead><tr><th>{c.document}</th><th>{c.linkedMission}</th><th>{c.recStatus}</th><th>{c.payStatus}</th><th>{c.nextAction}</th></tr></thead>
           <tbody>
@@ -1002,7 +1054,7 @@ export function BillingBoard({ locale, query, dashboard }: { locale: Locale; que
           </tbody>
         </table>
         )}
-        <p className="client-access-note">{c.finFoot}</p>
+        {(hasInvoices || hasPayments) ? <p className="client-access-note">{c.finFoot}</p> : null}
       </article>
     </main>
   );

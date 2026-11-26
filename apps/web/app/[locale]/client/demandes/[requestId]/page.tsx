@@ -48,15 +48,17 @@ export default async function RequestDetailPage({
     ? `/${locale}/client/demandes/${q.id}/offres?rfq=${q.rfqId}${space.selectedOrganizationId ? `&organizationId=${space.selectedOrganizationId}` : ""}`
     : `/${locale}/client/demandes/${q.id}/offres${space.selectedQuery}`;
 
+  const showConsultationBlocks = !editable;
+  const pendingProposals = proposals.success ? proposals.data.proposals.filter((proposal) => proposal.status !== "DRAFT") : [];
+
   return (
     <ClientAppShell languagePath={`/${locale}/client/demandes/${requestId}${space.selectedQuery}`} locale={locale} selectedQuery={space.selectedQuery} selectedOrganizationId={space.selectedOrganizationId} userEmail={space.userEmail} organizationName={space.organizationName} organizations={space.organizations} active="requests" title={messages.detailTitle} lead={q.description} kicker={c.kicker}>
       <main className="client-page">
         <article className="client-card">
           <header className="client-priority-head">
-            <h2>{messages.detailTitle}</h2>
+            <h2>{q.description}</h2>
             <Badge>{messages.statuses[q.status]}</Badge>
           </header>
-          <p className="whitespace-pre-wrap leading-7">{q.description}</p>
           <dl className="client-fact-grid">
             <div><small>{messages.budget}</small><span dir="ltr">{q.budgetMinor === null ? messages.unavailable : formatMinorExact(q.budgetMinor, q.currency, locale)}</span></div>
             <div><small>{messages.deadline}</small><span>{q.rfqDeadline ?? messages.unavailable}</span></div>
@@ -64,12 +66,10 @@ export default async function RequestDetailPage({
           </dl>
           {q.rfqId ? <Link href={compareHref} className="client-cta mt-4 inline-flex">{messages.comparison}</Link> : null}
         </article>
-        <section className="client-card"><h2>{locale === "fr" ? "Propositions de consultation transmises par Matricia" : "مقترحات الاستشارة المرسلة من ماتريسيا"}</h2>{proposalsResult.error || !proposals.success ? <p role="status">{locale === "fr" ? "Pour consulter les propositions, vérifiez vos droits et votre authentification renforcée." : "لعرض المقترحات، تحققوا من صلاحياتكم والمصادقة المعززة."}</p> : proposals.data.proposals.filter(proposal => proposal.status !== "DRAFT").map(proposal => <article key={proposal.id} className="mt-3 border-t py-3"><p className="whitespace-pre-wrap">{proposal.note}</p><p className="whitespace-pre-wrap">{proposal.context}</p><p>{locale === "fr" ? "Candidats proposés" : "المرشحون المقترحون"} : {proposal.provider_ids.length}</p>{proposal.due_at ? <p>{locale === "fr" ? "Date proposée" : "التاريخ المقترح"} : {new Intl.DateTimeFormat(locale === "fr" ? "fr-MA" : "ar-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" }).format(new Date(proposal.due_at))}</p> : null}<p>{proposal.status === "RFQ_OPENED" ? locale === "fr" ? "Consultation ouverte" : "الاستشارة مفتوحة" : locale === "fr" ? "En attente de votre décision" : "بانتظار قراركم"}</p>{q.canManage && proposal.status === "PENDING_CLIENT_DECISION" ? <a href="#workflow" className="underline">{locale === "fr" ? "Examiner et préparer l’ouverture de ma consultation" : "مراجعة وإعداد فتح الاستشارة"}</a> : null}</article>)}</section>
-        {["PROVIDER_SELECTED","CONTRACT_PENDING","CONTRACTED"].includes(q.status)?<SelectedQuoteContract navigationQuery={query} locale={locale} organizationId={space.selectedOrganizationId} requestId={requestId}/>:null}
-        <MatchingHistory locale={locale} runs={q.matchingHistory} />
         {q.canManage && editable ? (
           <section className="client-card" aria-labelledby="complete-information">
             <h2 id="complete-information">{messages.completeTitle}</h2>
+            <p>{messages.completeLead}</p>
             {information ? (
               <QuoteInformationForm locale={locale} information={information} messages={messages} idempotencyKey={randomUUID()} />
             ) : (
@@ -85,6 +85,13 @@ export default async function RequestDetailPage({
         ) : (
           <p role="status" className="client-card">{messages.readOnly}</p>
         )}
+        {showConsultationBlocks ? (
+          <section className="client-card"><h2>{locale === "fr" ? "Propositions de consultation transmises par Matricia" : "مقترحات الاستشارة المرسلة من ماتريسيا"}</h2>{proposalsResult.error || !proposals.success ? <p role="status">{locale === "fr" ? "Pour consulter les propositions, vérifiez vos droits et votre authentification renforcée." : "لعرض المقترحات، تحققوا من صلاحياتكم والمصادقة المعززة."}</p> : pendingProposals.length === 0 ? <p role="status">{locale === "fr" ? "Aucune proposition de consultation pour le moment." : "لا يوجد مقترح استشارة حالياً."}</p> : pendingProposals.map((proposal) => <article key={proposal.id} className="mt-3 border-t py-3"><p className="whitespace-pre-wrap">{proposal.note}</p><p className="whitespace-pre-wrap">{proposal.context}</p><p>{locale === "fr" ? "Candidats proposés" : "المرشحون المقترحون"} : {proposal.provider_ids.length}</p>{proposal.due_at ? <p>{locale === "fr" ? "Date proposée" : "التاريخ المقترح"} : {new Intl.DateTimeFormat(locale === "fr" ? "fr-MA" : "ar-MA", { dateStyle: "medium", timeZone: "Africa/Casablanca" }).format(new Date(proposal.due_at))}</p> : null}<p>{proposal.status === "RFQ_OPENED" ? locale === "fr" ? "Consultation ouverte" : "الاستشارة مفتوحة" : locale === "fr" ? "En attente de votre décision" : "بانتظار قراركم"}</p>{q.canManage && proposal.status === "PENDING_CLIENT_DECISION" ? <a href="#workflow" className="underline">{locale === "fr" ? "Examiner et préparer l’ouverture de ma consultation" : "مراجعة وإعداد فتح الاستشارة"}</a> : null}</article>)}</section>
+        ) : (
+          <p role="status" className="client-card">{locale === "fr" ? "Étapes à venir après complétion : consultation, devis, puis contrat et mission." : "الخطوات القادمة بعد الاستكمال: الاستشارة، ثم العروض، ثم العقد والمهمة."}</p>
+        )}
+        {["PROVIDER_SELECTED","CONTRACT_PENDING","CONTRACTED"].includes(q.status)?<SelectedQuoteContract navigationQuery={query} locale={locale} organizationId={space.selectedOrganizationId} requestId={requestId}/>:null}
+        {showConsultationBlocks || q.matchingHistory.length > 0 ? <MatchingHistory locale={locale} runs={q.matchingHistory} /> : null}
       </main>
     </ClientAppShell>
   );

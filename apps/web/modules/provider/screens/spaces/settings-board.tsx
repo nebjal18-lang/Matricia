@@ -34,10 +34,13 @@ const copy = {
     zonesLead: "Déclarez vos zones dans la capacité pour recevoir des dossiers géographiquement pertinents.",
     editCapacity: "Mettre à jour ma capacité",
     unset: "À renseigner",
-    notifTitle: "Notifications",
-    notifLead: "Choisissez le rythme par catégorie et canal. Les alertes critiques restent immédiates.",
+    notifTitle: "Notifications de l’entreprise",
+    notifLead: "Choisissez le rythme par catégorie et canal pour l’organisation active. Les alertes critiques restent immédiates.",
     openCenter: "Ouvrir le centre de notifications",
     saveHint: "Enregistrez chaque canal pour appliquer le rythme choisi.",
+    capacityUnavailable: "Les modalités et zones n’ont pas pu être chargées. Les préférences déjà affichées restent consultables.",
+    notifUnavailable: "Les préférences de notification n’ont pas pu être chargées. Réessayez depuis le centre de notifications.",
+    digestOrg: "Résumé de l’entreprise",
   },
   ar: {
     title: "التفضيلات",
@@ -52,10 +55,13 @@ const copy = {
     zonesLead: "صرّحوا بمناطقكم في القدرة لاستلام ملفات ذات صلة جغرافياً.",
     editCapacity: "تحديث قدرتي",
     unset: "يلزم التصريح",
-    notifTitle: "الإشعارات",
-    notifLead: "اختاروا الوتيرة حسب الفئة والقناة. تبقى التنبيهات الحرجة فورية.",
+    notifTitle: "إشعارات المؤسسة",
+    notifLead: "اختاروا الوتيرة حسب الفئة والقناة للمؤسسة النشطة. تبقى التنبيهات الحرجة فورية.",
     openCenter: "فتح مركز الإشعارات",
     saveHint: "احفظوا كل قناة لتطبيق الوتيرة المختارة.",
+    capacityUnavailable: "تعذر تحميل الكيفيات والمناطق. تظل التفضيلات المعروضة قابلة للاطلاع.",
+    notifUnavailable: "تعذر تحميل تفضيلات الإشعارات. أعيدوا المحاولة من مركز الإشعارات.",
+    digestOrg: "ملخص المؤسسة",
   },
 } as const;
 
@@ -65,14 +71,18 @@ export function ProviderSettingsBoard({
   query,
   dashboard,
   notifications,
+  capacityUnavailable = false,
+  notificationsUnavailable = false,
 }: {
   locale: Locale;
   query: string;
   dashboard: ProviderDashboard | null;
   notifications: NotificationDashboard | null;
+  capacityUnavailable?: boolean;
+  notificationsUnavailable?: boolean;
 }) {
   const c = copy[locale];
-  const n = getNotificationMessages(locale);
+  const n = { ...getNotificationMessages(locale), digest: c.digestOrg };
   const notificationsQuery = queryWithWorkspace(query, "provider");
   const capacityHref = `/${locale}/sous-traitant/qualification${query}#capacite`;
   const capacityStatus=capacitySummaryStatus(dashboard?.services??[]);
@@ -92,6 +102,9 @@ export function ProviderSettingsBoard({
               </div>
               <Link href={capacityHref} className="client-ghost-link">{c.editCapacity}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden /></Link>
             </header>
+            {capacityUnavailable ? (
+              <p role="status">{c.capacityUnavailable}</p>
+            ) : (
             <div className="provider-settings-grid">
               <section>
                 <h3>{c.modalities}</h3>
@@ -102,8 +115,10 @@ export function ProviderSettingsBoard({
                 <h3><MapPin className="size-4" aria-hidden /> {c.zones}</h3>
                 <p>{c.zonesLead}</p>
                 <p className="provider-settings-zones">{zones}</p>
+                <Link className="client-text-link" href={`/${locale}/sous-traitant/qualification${query}#zones`}>{locale==="ar"?"تعديل المناطق":"Modifier les zones"}</Link>
               </section>
             </div>
+            )}
           </article>
 
           <article className="client-card" id="notifications">
@@ -114,14 +129,14 @@ export function ProviderSettingsBoard({
               </div>
               <Link href={`/${locale}/notifications${notificationsQuery}`} className="client-text-link">{c.openCenter}</Link>
             </header>
-            {!notifications ? (
-              <p role="status">{locale === "ar" ? "تعذر تحميل تفضيلات الإشعارات." : "Impossible de charger les préférences de notification."}</p>
+            {notificationsUnavailable || !notifications ? (
+              <p role="status">{c.notifUnavailable}</p>
             ) : (
               <>
                 <p className="client-access-note">{c.saveHint}</p>
                 <div className="provider-settings-notif">
                   {notifications.categories
-                    .filter((category) => !/ADMIN|FRANCHISE|DIAGNOSTIC/i.test(category.code))
+                    .filter((category) => !/ADMIN|FRANCHISE|DIAGNOSTIC|PLATFORM|MATRICIA/i.test(category.code) && !/administrateur|admin/i.test(category.label))
                     .map((category) => (
                     <section key={category.code} className="provider-settings-notif-card">
                       <header>

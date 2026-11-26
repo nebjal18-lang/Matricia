@@ -28,9 +28,10 @@ import { clientDashboardCopy } from "@/modules/client/data/home/copy";
 import { spaceCopy } from "@/modules/client/data/spaces/copy";
 import type { ClientHomeSnapshot } from "@/modules/client/data/home/repository";
 import {
+  buildClientHomePriorityRows,
+  isResumeRequestStatus,
   toClientDeadlineRows,
   toClientInboxRows,
-  toClientPriorityRows,
   type ClientJourneyStepId,
   type ClientPrioritySituation,
 } from "@/modules/client/data/home/view-model";
@@ -133,7 +134,6 @@ export function ClientDashboardHome({
   const m = dashboardHomeCopy[locale];
   const c = clientDashboardCopy[locale];
   const space = spaceCopy(locale);
-  const priorityRows = toClientPriorityRows(searchedItems.slice(0, 3), locale, selectedQuery);
   const project = snapshot.status === "success" ? snapshot.featuredProject : null;
   const comparison = snapshot.status === "success" ? snapshot.comparison : null;
   const counts = snapshot.status === "success" ? snapshot.counts : null;
@@ -146,7 +146,19 @@ export function ClientDashboardHome({
   const insights = snapshot.insights;
   const currentStep = project?.steps.find((step) => step.current);
   const homeSteps = project ? compactHomeSteps(project.steps) : null;
+  const nextStepCopy = journeyNext(currentStep?.id, c);
+  const priorityRows = buildClientHomePriorityRows({
+    items: searchedItems,
+    featured: project,
+    locale,
+    organizationQuery: selectedQuery,
+    nextStepLabel: nextStepCopy,
+  });
   const pendingDecisions = counts?.pendingDecisions ?? null;
+  const resumeDraft = Boolean(project && isResumeRequestStatus(project.status));
+  const featuredCta = resumeDraft ? c.resumeRequest : c.openDemand;
+  const mastPrimaryHref = resumeDraft && project ? project.href : `/${locale}/besoin${selectedQuery}`;
+  const mastPrimaryLabel = resumeDraft ? c.resumeRequest : c.primaryNeed;
   const documents = toClientInboxRows(searchedItems, "DOCUMENT", selectedQuery);
   const messages = toClientInboxRows(searchedItems, "MESSAGE", selectedQuery);
   const deadlines = toClientDeadlineRows({
@@ -236,11 +248,11 @@ export function ClientDashboardHome({
             meta={c.helloLead}
             actions={
               <div className="client-home-mast-actions">
-                <Link href={`/${locale}/besoin${selectedQuery}`} className="client-need-cta">
-                  {c.primaryNeed}
+                <Link href={mastPrimaryHref} className="client-need-cta">
+                  {mastPrimaryLabel}
                   <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
                 </Link>
-                <p className="client-ambition-script">{c.ambitionScript}</p>
+                {!resumeDraft ? <p className="client-ambition-script">{c.ambitionScript}</p> : null}
               </div>
             }
             priority
@@ -257,7 +269,7 @@ export function ClientDashboardHome({
               {project ? (
                 <>
                   <header>
-                    <span className="client-status-pill" data-tone={(project.status === "QUOTES_RECEIVED" || project.status === "CLIENT_REVIEW") ? "violet" : "mint"}>{featuredStatusLabel(project.status, c)}</span>
+                    <span className="client-status-pill" data-tone={resumeDraft ? "peach" : ((project.status === "QUOTES_RECEIVED" || project.status === "CLIENT_REVIEW") ? "violet" : "mint")}>{featuredStatusLabel(project.status, c)}</span>
                   </header>
                   <div className="client-featured-head">
                     <h2 id="featured-project">{project.title}</h2>
@@ -278,9 +290,9 @@ export function ClientDashboardHome({
                     </ol>
                   ) : null}
                   <div className="client-featured-note">
-                    <p><Sparkles aria-hidden className="size-4" />{journeyNext(currentStep?.id, c)}</p>
+                    <p><Sparkles aria-hidden className="size-4" />{nextStepCopy}</p>
                   </div>
-                  <Link href={project.href} className="client-text-link">{c.seeProject}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></Link>
+                  <Link href={project.href} className="client-text-link">{featuredCta}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></Link>
                 </>
               ) : (
                 <>
@@ -296,7 +308,7 @@ export function ClientDashboardHome({
               <header>
                 <h2 id="treat-now"><Zap aria-hidden className="size-4" />{c.treatNow}</h2>
                 <span className="client-card-meta" dir="ltr">{priorityRows.length}</span>
-                <Link href={`/${locale}/client/actions${selectedQuery}`} className="client-text-link">{c.actionsTitle}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></Link>
+                <Link href={`/${locale}/client/actions${selectedQuery}`} className="client-text-link">{c.treatApprovals}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></Link>
               </header>
               {actionCenterError ? <p role="alert">{m.feedError}</p> : priorityRows.length === 0 ? (
                 <p>{c.noActions} <Link href={`/${locale}/client/diagnostics${selectedQuery}`}>{c.primaryDiagnostic}</Link></p>
@@ -319,15 +331,19 @@ export function ClientDashboardHome({
               )}
             </article>
 
-            <article className="client-card client-decisions" aria-labelledby="decisions-ring">
+            <article className={`client-card client-decisions${pendingDecisions === null || pendingDecisions === 0 ? " client-decisions-compact" : ""}`} aria-labelledby="decisions-ring">
               <header>
                 <h2 id="decisions-ring">{c.kpiDecisions}</h2>
               </header>
-              {pendingDecisions === null ? <p>{c.unavailable}</p> : (
+              {pendingDecisions === null ? (
+                <p className="client-unavailable-compact" role="status">{c.snapshotCompactUnavailable}</p>
+              ) : pendingDecisions === 0 ? (
+                <p className="client-unavailable-compact">{c.decisionsEmpty}</p>
+              ) : (
                 <div className="client-decisions-ring-wrap">
                   <div
                     className="client-decisions-ring"
-                    style={{ "--decisions-fill": `${pendingDecisions === 0 ? 0 : Math.min(100, pendingDecisions * 20 + 12)}%` } as CSSProperties}
+                    style={{ "--decisions-fill": `${Math.min(100, pendingDecisions * 20 + 12)}%` } as CSSProperties}
                     role="img"
                     aria-label={`${pendingDecisions} ${c.decisionsPending}`}
                   >
@@ -336,9 +352,7 @@ export function ClientDashboardHome({
                   <p><strong dir="ltr">{pendingDecisions}</strong> {c.decisionsPending}</p>
                   <small>{c.decisionsCaption}</small>
                   <em className="client-decisions-script">{c.decisionsScript}</em>
-                  {pendingDecisions > 0 ? (
-                    <Link href={`/${locale}/client/demandes${selectedQuery}`} className="client-text-link">{c.openItem}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></Link>
-                  ) : null}
+                  <Link href={`/${locale}/client/actions${selectedQuery}`} className="client-text-link">{c.treatApprovals}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></Link>
                 </div>
               )}
             </article>
@@ -350,7 +364,9 @@ export function ClientDashboardHome({
                 <h2 id="progress-title">{c.projectProgress}</h2>
                 <small>{c.progressLead}</small>
               </header>
-              {counts === null || progressRows.length < 3 ? <p>{c.unavailable}</p> : progressRows.every((row) => row.value === 0) ? (
+              {counts === null || progressRows.length < 3 ? (
+                <p className="client-unavailable-compact" role="status">{c.snapshotCompactUnavailable}</p>
+              ) : progressRows.every((row) => row.value === 0) ? (
                 <p>{c.progressEmpty}</p>
               ) : (
                 <div className="client-home-spark">

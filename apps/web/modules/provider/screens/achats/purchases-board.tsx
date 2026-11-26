@@ -9,8 +9,12 @@ const copy = {
   fr: {
     title: "Mes achats",
     lead: "Achats de la même organisation, visibles seulement avec un rôle Client activé. Aucun montant n’est inventé.",
-    needClient: "Activez le Mode Client sur ce passeport pour consulter abonnement, crédits et achats groupés.",
-    activate: "Ouvrir le Mode Client",
+    needClient: "Activez le Mode Client sur cette organisation pour consulter abonnement, crédits et achats groupés.",
+    activate: "Activer le Mode Client",
+    activeRole: "Rôle actif",
+    providerRole: "Prestataire",
+    clientRole: "Client",
+    switchClient: "Passer en Mode Client",
     subscription: "Abonnement Matricia",
     noSubscription: "Aucun abonnement n’est encore créé pour cette organisation.",
     reservations: "Réservations d’achats groupés",
@@ -25,8 +29,12 @@ const copy = {
   ar: {
     title: "مشترياتي",
     lead: "مشتريات المؤسسة نفسها، ظاهرة فقط عند تفعيل دور العميل. لا يُختلق أي مبلغ.",
-    needClient: "فعّلوا وضع العميل على هذا الجواز لمعاينة الاشتراك والأرصدة والمشتريات المجمّعة.",
-    activate: "فتح وضع العميل",
+    needClient: "فعّلوا وضع العميل على هذه المؤسسة لمعاينة الاشتراك والأرصدة والمشتريات المجمّعة.",
+    activate: "تفعيل وضع العميل",
+    activeRole: "الدور النشط",
+    providerRole: "مقدّم خدمة",
+    clientRole: "عميل",
+    switchClient: "الانتقال إلى وضع العميل",
     subscription: "اشتراك ماتريسيا",
     noSubscription: "لم يُنشأ اشتراك لهذه المؤسسة بعد.",
     reservations: "حجوزات المشتريات المجمّعة",
@@ -70,6 +78,7 @@ export function ProviderPurchasesBoard({
       <main className="client-page provider-purchases">
         <article className="client-card">
           <header><h2>{m.title}</h2></header>
+          <p role="status"><strong>{m.activeRole} :</strong> {m.providerRole}</p>
           <p>{m.needClient}</p>
           <Link href={`/${locale}/sous-traitant/mode-client${query}`} className="client-cta">{m.activate}</Link>
         </article>
@@ -81,6 +90,7 @@ export function ProviderPurchasesBoard({
   const clientQuery = clientWorkspaceQuery(query);
   return (
     <main className="client-page provider-purchases">
+      <p role="status" className="client-card"><strong>{m.activeRole} :</strong> {m.providerRole} · {m.clientRole} — <Link href={`/${locale}/tableau-de-bord${clientQuery}`} className="client-text-link">{m.switchClient}</Link></p>
       <section className="client-board client-board-compare">
         <article className="client-card">
           <header className="client-priority-head">

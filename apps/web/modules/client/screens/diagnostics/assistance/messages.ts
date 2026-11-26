@@ -3,7 +3,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 const fr = {
   title: "Assistance contextuelle",
   intro: "Analyse déterministe et bornée pour éclairer vos diagnostics. Chaque proposition doit être confirmée ou rejetée par une personne autorisée.",
-  safety: "Aucune proposition n’exécute une action métier, une sanction ou une transaction.",
+  safety: "Les suggestions restent indicatives : rien n’est enregistré ni transmis tant que vous n’avez pas confirmé.",
   model: "Modèle actif",
   unavailableModel: "Aucun modèle d’assistance actif n’est disponible.",
   forbiddenTitle: "Accès non autorisé",
@@ -74,7 +74,7 @@ const ar: typeof fr = {
   ...fr,
   title: "المساعدة السياقية",
   intro: "تحليل حتمي ومحدود لتوضيح التشخيصات. يجب على شخص مخول تأكيد كل اقتراح أو رفضه.",
-  safety: "لا ينفذ أي اقتراح إجراءً مهنياً أو عقوبة أو معاملة.",
+  safety: "تبقى الاقتراحات إرشادية: لا يُحفظ ولا يُرسل شيء قبل تأكيدكم.",
   model: "النموذج النشط",
   unavailableModel: "لا يوجد نموذج مساعدة نشط متاح.",
   forbiddenTitle: "الوصول غير مسموح",

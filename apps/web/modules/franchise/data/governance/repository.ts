@@ -34,7 +34,11 @@ export async function loadFranchiseDashboard(locale: "fr" | "ar", scope?: {franc
   try { snapshotResult = await client.rpc("franchise_governance_dashboard_snapshot", { p_franchise_id: scope?.franchiseId ?? null }); }
   catch (error) { unstable_rethrow(error); return { status: "error", reason: "QUERY_FAILED" }; }
   const snapshot=z.object({bookBindingReviewRequired:z.boolean().nullable().default(null),complete:z.literal(true),snapshotAt:z.string(),balances:z.array(z.object({book_id:id,beneficiary_code:z.string(),balance_minor:z.string().regex(/^-?\d+$/)})),fs:z.array(z.unknown()),ls:z.array(z.unknown()),lvs:z.array(z.unknown()),ts:z.array(z.unknown()),ms:z.array(z.unknown()),aps:z.array(z.unknown()),decisions:z.array(z.unknown()),ins:z.array(z.unknown()),rs:z.array(z.unknown()),bs:z.array(z.unknown()),fees:z.array(z.unknown()),cs:z.array(z.unknown()),als:z.array(z.unknown()),ledgers:z.array(z.unknown()),feeLedgers:z.array(z.unknown())}).safeParse(snapshotResult.data);
-  if(snapshotResult.error)return{status:"error",reason:snapshotResult.error.code === "42501" ? "FORBIDDEN" : "QUERY_FAILED"};
+  if(snapshotResult.error){
+    const message=snapshotResult.error.message??"";
+    if(/FRANCHISE_FINANCE_MFA_REQUIRED|MFA_REQUIRED/i.test(message))return{status:"error",reason:"MFA_REQUIRED"};
+    return{status:"error",reason:snapshotResult.error.code === "42501" ? "FORBIDDEN" : "QUERY_FAILED"};
+  }
   if(!snapshot.success)return{status:"error",reason:"INVALID_RESPONSE"};
   const balances={success:true as const,data:snapshot.data.balances};
   const fs={data:snapshot.data.fs};

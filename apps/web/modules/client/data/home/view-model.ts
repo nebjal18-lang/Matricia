@@ -19,6 +19,7 @@ export type ClientPrioritySituation =
   | "INVOICE"
   | "MESSAGE"
   | "APPROVAL"
+  | "REQUEST"
   | "GENERIC";
 
 export type ClientActionTone = "violet" | "mint" | "rose" | "peach";
@@ -121,6 +122,7 @@ export function proposedActionLabel(situation: ClientPrioritySituation, locale: 
     INVOICE: "Consulter la facture",
     MESSAGE: "Répondre à un message",
     APPROVAL: "Décider",
+    REQUEST: "Reprendre ma demande",
     GENERIC: "Ouvrir",
   };
   const ar: Record<ClientPrioritySituation, string> = {
@@ -132,6 +134,7 @@ export function proposedActionLabel(situation: ClientPrioritySituation, locale: 
     INVOICE: "عرض الفاتورة",
     MESSAGE: "الرد على رسالة",
     APPROVAL: "اتخاذ قرار",
+    REQUEST: "استئناف طلبي",
     GENERIC: "فتح",
   };
   return locale === "ar" ? ar[situation] : fr[situation];
@@ -147,6 +150,7 @@ export function actionCtaLabel(situation: ClientPrioritySituation, locale: "fr" 
     INVOICE: "Voir la facture",
     MESSAGE: "Répondre",
     APPROVAL: "Décider",
+    REQUEST: "Reprendre ma demande",
     GENERIC: "Ouvrir",
   };
   const ar: Record<ClientPrioritySituation, string> = {
@@ -158,6 +162,7 @@ export function actionCtaLabel(situation: ClientPrioritySituation, locale: "fr" 
     INVOICE: "عرض الفاتورة",
     MESSAGE: "الرد",
     APPROVAL: "اتخاذ قرار",
+    REQUEST: "استئناف طلبي",
     GENERIC: "فتح",
   };
   return locale === "ar" ? ar[situation] : fr[situation];
@@ -166,8 +171,20 @@ export function actionCtaLabel(situation: ClientPrioritySituation, locale: "fr" 
 export function actionTone(situation: ClientPrioritySituation): ClientActionTone {
   if (situation === "QUOTES") return "mint";
   if (situation === "DELIVERABLE") return "rose";
-  if (situation === "DOCUMENT") return "peach";
+  if (situation === "DOCUMENT" || situation === "REQUEST") return "peach";
   return "violet";
+}
+
+export function isResumeRequestStatus(status: string): boolean {
+  return status === "DRAFT" || status === "INFORMATION_REQUIRED";
+}
+
+export function featuredRequestSituation(status: string): ClientPrioritySituation {
+  if (isResumeRequestStatus(status)) return "REQUEST";
+  if (["RFQ_OPEN", "QUOTES_RECEIVED", "CLIENT_REVIEW"].includes(status)) return "QUOTES";
+  if (["PROVIDER_SELECTED", "CONTRACT_PENDING"].includes(status)) return "CONTRACT";
+  if (["CONTRACTED", "MISSION_ACTIVE", "IN_PROGRESS"].includes(status)) return "DELIVERABLE";
+  return "REQUEST";
 }
 
 export function toClientPriorityRows(items: readonly UserActionItem[], locale: "fr" | "ar", organizationQuery: string): ClientPriorityRow[] {
@@ -189,6 +206,35 @@ export function toClientPriorityRows(items: readonly UserActionItem[], locale: "
       priority: item.priority,
     };
   });
+}
+
+/** Prefers the live demande over an empty approvals feed. */
+export function buildClientHomePriorityRows(input: {
+  items: readonly UserActionItem[];
+  featured: ClientFeaturedProject | null;
+  locale: "fr" | "ar";
+  organizationQuery: string;
+  nextStepLabel: string;
+  limit?: number;
+}): ClientPriorityRow[] {
+  const limit = input.limit ?? 3;
+  const fromActions = toClientPriorityRows(input.items, input.locale, input.organizationQuery);
+  if (!input.featured) return fromActions.slice(0, limit);
+  const situation = featuredRequestSituation(input.featured.status);
+  const featuredRow: ClientPriorityRow = {
+    id: `request:${input.featured.requestId}`,
+    situation,
+    title: proposedActionLabel(situation, input.locale),
+    dossier: `${input.featured.title} — ${input.nextStepLabel}`,
+    cta: actionCtaLabel(situation, input.locale),
+    tone: actionTone(situation),
+    dueAt: null,
+    owner: input.locale === "ar" ? "أنت" : "Vous",
+    href: input.featured.href,
+    priority: isResumeRequestStatus(input.featured.status) ? "HIGH" : "MEDIUM",
+  };
+  const rest = fromActions.filter((row) => !row.href.includes(input.featured!.requestId));
+  return [featuredRow, ...rest].slice(0, limit);
 }
 
 export function filterClientFacingActions(items: readonly UserActionItem[], hasPlatformRole: boolean): UserActionItem[] {

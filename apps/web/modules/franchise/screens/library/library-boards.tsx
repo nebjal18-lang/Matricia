@@ -209,7 +209,8 @@ export function FranchiseLibraryHomeBoard({ locale, query, workspace }: { locale
           <header className="client-priority-head franchise-section-head"><h2>{c.quick}</h2></header>
           <div className="franchise-toolbar">
             <Link href={`/${locale}/franchise/services/nouveau${query}`} className="franchise-tool franchise-tool-primary"><ClipboardList className="size-4" aria-hidden /> {c.createService}</Link>
-            <Link href={`/${locale}/franchise/questionnaires/nouveau${query}`} className="franchise-tool franchise-tool-peach"><FileText className="size-4" aria-hidden /> {c.createQuestion}</Link>
+            <Link href={`/${locale}/franchise/questions${query}`} className="franchise-tool franchise-tool-peach"><FileText className="size-4" aria-hidden /> {c.createQuestion}</Link>
+            <Link href={`/${locale}/franchise/questionnaires/nouveau${query}`} className="franchise-tool"><FileText className="size-4" aria-hidden /> {c.createQuestionnaire}</Link>
             <Link href={`/${locale}/franchise/regles/nouvelle${query}`} className="franchise-tool franchise-tool-mint"><Scale className="size-4" aria-hidden /> {c.createRule}</Link>
             <Link href={`/${locale}/franchise/regles${query}#simulation`} className="franchise-tool"><Beaker className="size-4" aria-hidden /> {c.simulate}</Link>
           </div>
@@ -389,7 +390,7 @@ export function FranchiseQuestionsBoard({ locale, questions,query="" }: { locale
   const c = libraryCopy(locale);
   return (
     <article className="client-card">
-      <header><h2>{c.createQuestion}</h2></header>
+      <header><h2>{c.questionBank}</h2></header>
       {questions.length === 0 ? <p>{c.emptyQuestions}</p> : (
         <ul className="client-feed">
           {questions.map((item) => (

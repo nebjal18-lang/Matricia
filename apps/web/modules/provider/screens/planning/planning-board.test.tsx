@@ -37,4 +37,22 @@ describe("PlanningWeekBoard", () => {
     expect(html).not.toContain(locale === "ar" ? "لا حدث" : "Aucun événement");
   });
 
+  it.each(["fr", "ar"] as const)("keeps an empty week navigable without repeating empty-day copy in %s", (locale) => {
+    const html = renderToStaticMarkup(
+      <PlanningWeekBoard
+        locale={locale}
+        incomplete={false}
+        events={[]}
+        days={["2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07", "2026-11-08"]}
+        today="2026-11-02"
+        prevHref="?week=2026-10-26"
+        nextHref="?week=2026-11-09"
+        todayHref="?week=2026-11-02"
+      />,
+    );
+    expect(html).toContain(locale === "ar" ? "لا مواعيد في هذا الأسبوع" : "Aucune échéance sur cette semaine");
+    expect(html).toContain(locale === "ar" ? "السابق" : "Semaine précédente");
+    expect(html).not.toContain(locale === "ar" ? "لا حدث" : "Aucun événement");
+    expect((html.match(/class="client-card provider-planning-day"/gu) ?? []).length).toBe(7);
+  });
 });

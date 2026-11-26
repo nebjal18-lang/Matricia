@@ -243,6 +243,13 @@ describe("franchise space boards", () => {
     const home=renderToStaticMarkup(<FranchiseHomeBoard locale="fr" query="" board={board}/>);expect(home).toContain("297");expect(home).toContain("Certaines sections sont temporairement indisponibles");
     const docs=renderToStaticMarkup(<DocumentsBoard locale="fr" query="" board={board}/>);expect(docs).toContain("Attestation privée réelle");expect(docs).toContain("Certaines sections sont temporairement indisponibles");
   });
+  it("garde le périmètre consultable quand seule la gouvernance est en panne",()=>{
+    const board=buildFranchiseSpaceBoard({locale:"fr",query:"",libraryName:"Communication, marketing et création",unavailableSections:["GOVERNANCE"]});
+    const html=renderToStaticMarkup(<PerimeterBoard locale="fr" query="" mandateName="Communication, marketing et création" board={board}/>);
+    expect(html).toContain("Communication, marketing et création");
+    expect(html).toContain("Une partie du dossier de gouvernance");
+    expect(html).not.toContain("Données temporairement indisponibles");
+  });
 
   it("affiche un état vide hors démo sans inventer un réseau", () => {
     const previous = process.env.MATRICIA_DEMO_ACCESS_ENABLED;

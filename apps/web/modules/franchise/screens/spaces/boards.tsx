@@ -213,7 +213,10 @@ function Cta({ href, children, soft = false }: { href: string; children: ReactNo
 
 function Banner({ locale, mandateName,board }: SpaceBoardProps) {
   const n = libraryCopy(locale);
-  return <><MandateBanner locale={locale} name={mandateName ?? n.mandate} />{board?.unavailableSections?.length?<p className="client-card" role="alert">{locale==="ar"?"بعض الأقسام غير متاحة مؤقتاً. أعيدوا تحميل الصفحة للمحاولة.":"Certaines sections sont temporairement indisponibles. Rechargez la page pour réessayer."} <bdi dir="ltr">{board.unavailableSections.join(", ")}</bdi></p>:null}</>;
+  const unavailable=board?.unavailableSections??[];
+  const governancePartial=unavailable.includes("GOVERNANCE");
+  const otherPartial=unavailable.filter((section)=>section!=="GOVERNANCE");
+  return <><MandateBanner locale={locale} name={mandateName ?? n.mandate} />{unavailable.length?<p className="client-card" role="alert">{governancePartial?(locale==="ar"?"جزء من ملف الحوكمة (التفويض المالي، الموافقات، الحصص) غير متاح مؤقتاً. تبقى القوائم التشغيلية الظاهرة قابلة للاستشارة دون اتخاذ قرار على أساس الحوكمة الناقصة.":"Une partie du dossier de gouvernance (mandat financier, approbations, parts) est temporairement indisponible. Les listes opérationnelles affichées restent consultables ; ne décidez pas sur la base des indicateurs de gouvernance manquants.") : (locale==="ar"?"بعض الأقسام غير متاحة مؤقتاً. أعيدوا تحميل الصفحة للمحاولة.":"Certaines sections sont temporairement indisponibles. Rechargez la page pour réessayer.")}{(governancePartial?otherPartial:unavailable).length?<> <bdi dir="ltr">{(governancePartial?otherPartial:unavailable).join(", ")}</bdi></>:null}</p>:null}</>;
 }
 
 export function FranchiseHomeBoard({ locale, query, mandateName, board }: SpaceBoardProps) {
@@ -273,7 +276,17 @@ export function FranchiseHomeBoard({ locale, query, mandateName, board }: SpaceB
 export function PerimeterBoard({ locale, query, mandateName, view, board, organizationId }: SpaceBoardProps) {
   const c = franchiseCopy(locale);
   const demo = resolveBoard({ locale, query, board });
-  if(sourceUnavailable(board,['GOVERNANCE']))return <UnavailableSection locale={locale} query={query}/>;
+  const governanceUnavailable = sourceUnavailable(board, ["GOVERNANCE"]);
+  const territory = !governanceUnavailable || demo.perimeter.territory !== "—"
+    ? demo.perimeter.territory
+    : (locale === "ar" ? "النطاق الجغرافي غير مؤكد في الحوكمة" : "Territoire non confirmé côté gouvernance");
+  const domains = mandateName || demo.perimeter.domains;
+  const mandate = !governanceUnavailable || demo.perimeter.mandate !== "—"
+    ? demo.perimeter.mandate
+    : (locale === "ar" ? "رمز المشغّل غير مؤكد في الحوكمة" : "Code opérateur non confirmé côté gouvernance");
+  const status = !governanceUnavailable || demo.perimeter.status !== "—"
+    ? demo.perimeter.status
+    : (locale === "ar" ? "غير مؤكد" : "Non confirmé");
   return (
     <main className="client-page">
       <Banner locale={locale} query={query} mandateName={mandateName} board={demo} />
@@ -307,10 +320,10 @@ export function PerimeterBoard({ locale, query, mandateName, view, board, organi
             </>
           ) : (
             <ul className="client-feed">
-              <li><MapPin className="size-4" aria-hidden /><span><strong>{c.territory}</strong><small>{demo.perimeter.territory}</small></span></li>
-              <li><FileText className="size-4" aria-hidden /><span><strong>{c.domains}</strong><small>{demo.perimeter.domains}</small></span></li>
-              <li><ShieldCheck className="size-4" aria-hidden /><span><strong>{c.mandate}</strong><small>{demo.perimeter.mandate}</small></span></li>
-              <li><span><strong>{c.state}</strong></span><em className="client-status-chip" data-tone="mint">{networkStateLabel(demo.perimeter.status, locale)}</em></li>
+              <li><MapPin className="size-4" aria-hidden /><span><strong>{c.territory}</strong><small>{territory}</small></span></li>
+              <li><FileText className="size-4" aria-hidden /><span><strong>{c.domains}</strong><small>{domains}</small></span></li>
+              <li><ShieldCheck className="size-4" aria-hidden /><span><strong>{c.mandate}</strong><small>{mandate}</small></span></li>
+              <li><span><strong>{c.state}</strong></span><em className="client-status-chip" data-tone={governanceUnavailable ? "peach" : "mint"}>{networkStateLabel(status, locale)}</em></li>
             </ul>
           )}
           <div className="franchise-map" aria-hidden><span className="franchise-compass">✧</span></div>
@@ -318,15 +331,19 @@ export function PerimeterBoard({ locale, query, mandateName, view, board, organi
         <div className="client-stack">
           <article className="client-card">
             <header><h2>{c.canDo}</h2></header>
-            {demo.canDo.length === 0
-              ? <p className="client-access-note">{locale === "ar" ? "ستظهر هنا صلاحيات تفويضكم عند توفرها." : "Les droits de votre mandat apparaîtront ici lorsqu’ils seront disponibles."}</p>
-              : <ul className="franchise-can">{demo.canDo.map((item) => <li key={item}>{item}</li>)}</ul>}
+            {governanceUnavailable
+              ? <p className="client-access-note" role="status">{locale === "ar" ? "صلاحيات التفويض التفصيلية غير متاحة بينما قراءة الحوكمة متوقفة. اسم المكتبة أعلاه يبقى مرجع الاستشارة." : "Les droits détaillés du mandat sont indisponibles tant que la gouvernance ne charge pas. Le nom de bibliothèque ci-dessus reste la référence consultable."}</p>
+              : demo.canDo.length === 0
+                ? <p className="client-access-note">{locale === "ar" ? "ستظهر هنا صلاحيات تفويضكم عند توفرها." : "Les droits de votre mandat apparaîtront ici lorsqu’ils seront disponibles."}</p>
+                : <ul className="franchise-can">{demo.canDo.map((item) => <li key={item}>{item}</li>)}</ul>}
           </article>
           <article className="client-card">
             <header><h2>{c.needsVal}</h2></header>
-            {demo.needsValidation.length === 0
-              ? <p className="client-access-note">{locale === "ar" ? "لا توجد عمليات معلّقة تتطلب مصادقة إضافية." : "Aucune action en attente de validation supplémentaire."}</p>
-              : <ul className="franchise-cannot">{demo.needsValidation.map((item) => <li key={item}>{item}</li>)}</ul>}
+            {governanceUnavailable
+              ? <p className="client-access-note" role="status">{locale === "ar" ? "لا يمكن تأكيد عمليات المصادقة الإضافية دون بيانات الحوكمة." : "Les validations supplémentaires ne peuvent pas être confirmées sans les données de gouvernance."}</p>
+              : demo.needsValidation.length === 0
+                ? <p className="client-access-note">{locale === "ar" ? "لا توجد عمليات معلّقة تتطلب مصادقة إضافية." : "Aucune action en attente de validation supplémentaire."}</p>
+                : <ul className="franchise-cannot">{demo.needsValidation.map((item) => <li key={item}>{item}</li>)}</ul>}
           </article>
           <p className="client-access-note">{c.periNote}</p>
         </div>
