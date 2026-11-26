@@ -36,7 +36,6 @@ import { AdminFilmStrip } from "@/modules/admin/ui/admin-film-strip";
 import { AdminStep2Gate } from "@/modules/admin/ui/admin-step2-gate";
 import { AdminStep5Gate } from "@/modules/admin/ui/admin-step5-gate";
 import { AdminCommerceGate } from "@/modules/admin/ui/admin-commerce-gate";
-import { AdminStep11Gate } from "@/modules/admin/ui/admin-step11-gate";
 
 export async function renderAdminSpacePage({
   locale: localeParam,
@@ -223,11 +222,11 @@ export async function renderAdminSpacePage({
           </Alert> : <AdminReadError locale={locale} reason={failureReason} retryHref={currentHref} />}
         </div>
       ) : <>
-        {view === "queue" && (space === "franchises" || space === "gouvernance" || space === "territoires") ? (
+        {view === "queue" && (space === "franchises" || space === "gouvernance") ? (
           <AdminStep2Gate
             locale={locale}
             query={uiQuery}
-            current={space === "franchises" ? "franchises" : space === "gouvernance" ? "gouvernance" : "territoires"}
+            current={space === "franchises" ? "franchises" : "gouvernance"}
           />
         ) : null}
         {view === "queue" && (space === "providers" || space === "qualification" || space === "capacite") ? (
@@ -240,7 +239,7 @@ export async function renderAdminSpacePage({
         {view === "queue" && (space === "diagnostics" || space === "demandes" || space === "matching" || space === "devis" || space === "contrats" || space === "missions") ? (
           <AdminCommerceGate locale={locale} query={uiQuery} current={space} />
         ) : null}
-        {view === "queue" && space === "litiges" ? <AdminStep11Gate locale={locale} query={uiQuery} current="litiges" /> : null}
+        {/* Litiges = film étape 10 (mission). Pas de porte 11/11 ici — évite le double compteur. */}
         {(() => {
           const film = adminFilmForSpace(locale, space, uiQuery);
           if (!film) return null;

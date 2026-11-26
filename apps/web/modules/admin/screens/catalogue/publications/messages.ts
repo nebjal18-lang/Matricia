@@ -3,7 +3,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 const fr = {
   nav: "Navigation des publications", back: "Retour au catalogue", language: "العربية", eyebrow: "Catalogue gouverné", title: "Publications et versions",
   description: "Consultez l’historique borné des releases et préparez un retour arrière reproductible. Aucun contenu de question n’est chargé sur cet écran.",
-  unavailable: "Publications indisponibles", forbidden: "Ce module est réservé aux gestionnaires du catalogue.", retry: "Réessayer", noLibraries: "Aucune bibliothèque accessible.",
+  unavailable: "Publications indisponibles. Vérifiez la bibliothèque, vos droits de revue et la MFA (AAL2) si exigée.", forbidden: "Ce module est réservé aux gestionnaires du catalogue.", retry: "Réessayer", noLibraries: "Aucune bibliothèque accessible.",
   releases: "releases visibles", current: "Version active", history: "Historique des versions", noReleases: "Aucune release visible pour cette bibliothèque.",
   truncated: "L’historique est limité aux 200 releases les plus récentes. Affinez par bibliothèque si nécessaire.", snapshot: "Empreinte", effective: "Prise d’effet", approval: "Approbation centrale",
   rollbackTitle: "Planifier un retour arrière", rollbackDescription: "Cette commande crée une nouvelle release planifiée depuis un snapshot publié ou retiré. Elle ne modifie jamais l’historique.",
@@ -15,7 +15,7 @@ const fr = {
 const ar: typeof fr = {
   nav: "التنقل في الإصدارات", back: "العودة إلى الدليل", language: "Français", eyebrow: "دليل محكوم", title: "النشر والإصدارات",
   description: "اعرض سجلاً محدوداً للإصدارات وجهّز رجوعاً قابلاً لإعادة الإنتاج. لا يتم تحميل أي محتوى للأسئلة في هذه الشاشة.",
-  unavailable: "الإصدارات غير متاحة", forbidden: "هذه الوحدة مخصصة لمسؤولي الدليل.", retry: "إعادة المحاولة", noLibraries: "لا توجد مكتبة متاحة.",
+  unavailable: "الإصدارات غير متاحة. تحققوا من المكتبة وصلاحيات المراجعة والتحقق القوي (AAL2) عند اللزوم.", forbidden: "هذه الوحدة مخصصة لمسؤولي الدليل.", retry: "إعادة المحاولة", noLibraries: "لا توجد مكتبة متاحة.",
   releases: "إصدارات ظاهرة", current: "الإصدار النشط", history: "سجل الإصدارات", noReleases: "لا يوجد إصدار ظاهر لهذه المكتبة.",
   truncated: "السجل محدود بأحدث 200 إصدار. صفِّ حسب المكتبة عند الحاجة.", snapshot: "البصمة", effective: "بدء السريان", approval: "اعتماد مركزي",
   rollbackTitle: "جدولة الرجوع", rollbackDescription: "ينشئ هذا الأمر إصداراً جديداً مجدولاً من لقطة منشورة أو مسحوبة، ولا يغيّر السجل أبداً.",
