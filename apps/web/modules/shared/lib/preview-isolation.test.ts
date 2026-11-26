@@ -5,6 +5,7 @@ import {
   applyPreviewIsolationDefaults,
   assertPreviewIsolation,
   assertProductionAppOrigin,
+  type PreviewIsolationEnv,
 } from "./preview-isolation";
 
 const staging = "a".repeat(20), production = "b".repeat(20);
@@ -45,13 +46,13 @@ describe("Preview database isolation", () => {
 
 describe("Preview isolation defaults", () => {
   it("does not change non-Preview environments", () => {
-    const environment = { VERCEL_ENV: "production", APP_ENV: "production", NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" };
+    const environment: PreviewIsolationEnv = { VERCEL_ENV: "production", APP_ENV: "production", NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" };
     applyPreviewIsolationDefaults(environment);
     expect(environment).toEqual({ VERCEL_ENV: "production", APP_ENV: "production", NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" });
   });
 
   it("fills missing Preview isolation refs and rewrites an inherited production URL", () => {
-    const environment = {
+    const environment: PreviewIsolationEnv = {
       VERCEL_ENV: "preview",
       APP_ENV: "production",
       NEXT_PUBLIC_SUPABASE_URL: `https://${PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF}.supabase.co`,
@@ -73,7 +74,7 @@ describe("Preview isolation defaults", () => {
   });
 
   it("replaces a Preview production ref that collides with staging", () => {
-    const environment = {
+    const environment: PreviewIsolationEnv = {
       VERCEL_ENV: "preview",
       STAGING_SUPABASE_PROJECT_REF: PREVIEW_STAGING_SUPABASE_PROJECT_REF,
       PRODUCTION_SUPABASE_PROJECT_REF: PREVIEW_STAGING_SUPABASE_PROJECT_REF,

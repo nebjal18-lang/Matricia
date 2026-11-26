@@ -17,35 +17,45 @@ function isProjectRef(value: string | undefined): value is string {
   return PROJECT_REF.test(value ?? "");
 }
 
+export type PreviewIsolationEnv = {
+  VERCEL_ENV?: string | undefined;
+  APP_ENV?: string | undefined;
+  NEXT_PUBLIC_SUPABASE_URL?: string | undefined;
+  SUPABASE_URL?: string | undefined;
+  STAGING_SUPABASE_PROJECT_REF?: string | undefined;
+  PRODUCTION_SUPABASE_PROJECT_REF?: string | undefined;
+};
+
 /**
  * Preview often inherits Production APP_ENV / Supabase URL / missing isolation refs.
  * Fill only the public staging contract before the hard isolation assert.
  */
-export function applyPreviewIsolationDefaults(environment: NodeJS.ProcessEnv): void {
-  if (environment.VERCEL_ENV !== "preview") return;
-  environment.APP_ENV = "staging";
+export function applyPreviewIsolationDefaults(environment: PreviewIsolationEnv | NodeJS.ProcessEnv): void {
+  const env = environment as PreviewIsolationEnv;
+  if (env.VERCEL_ENV !== "preview") return;
+  env.APP_ENV = "staging";
 
-  if (!isProjectRef(environment.STAGING_SUPABASE_PROJECT_REF)) {
-    environment.STAGING_SUPABASE_PROJECT_REF = PREVIEW_STAGING_SUPABASE_PROJECT_REF;
+  if (!isProjectRef(env.STAGING_SUPABASE_PROJECT_REF)) {
+    env.STAGING_SUPABASE_PROJECT_REF = PREVIEW_STAGING_SUPABASE_PROJECT_REF;
   }
   if (
-    !isProjectRef(environment.PRODUCTION_SUPABASE_PROJECT_REF) ||
-    environment.PRODUCTION_SUPABASE_PROJECT_REF === environment.STAGING_SUPABASE_PROJECT_REF
+    !isProjectRef(env.PRODUCTION_SUPABASE_PROJECT_REF) ||
+    env.PRODUCTION_SUPABASE_PROJECT_REF === env.STAGING_SUPABASE_PROJECT_REF
   ) {
-    environment.PRODUCTION_SUPABASE_PROJECT_REF = PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF;
+    env.PRODUCTION_SUPABASE_PROJECT_REF = PREVIEW_PRODUCTION_SUPABASE_PROJECT_REF;
   }
 
-  const stagingHost = `${environment.STAGING_SUPABASE_PROJECT_REF}.supabase.co`;
+  const stagingHost = `${env.STAGING_SUPABASE_PROJECT_REF}.supabase.co`;
   const stagingUrl = `https://${stagingHost}`;
   let currentHost = "";
   try {
-    currentHost = new URL(environment.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname;
+    currentHost = new URL(env.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname;
   } catch {
     currentHost = "";
   }
   if (currentHost !== stagingHost) {
-    environment.NEXT_PUBLIC_SUPABASE_URL = stagingUrl;
-    if (environment.SUPABASE_URL) environment.SUPABASE_URL = stagingUrl;
+    env.NEXT_PUBLIC_SUPABASE_URL = stagingUrl;
+    if (env.SUPABASE_URL) env.SUPABASE_URL = stagingUrl;
   }
 }
 
