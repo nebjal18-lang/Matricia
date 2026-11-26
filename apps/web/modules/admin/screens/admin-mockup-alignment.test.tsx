@@ -64,6 +64,10 @@ describe("admin dashboard mockups", () => {
     expect(diagnostics).toContain("Cycle du diagnostic");
     expect(kitSource).not.toContain("SubInterfaceVisual");
     expect(kitSource).toContain("data-admin-layout=\"detail\"");
+    expect(kitSource).toContain("admin-dossier-next");
+    expect(kitSource).toContain("admin-detail-tabs");
+    expect(kitSource).toContain('mode?: "queue" | "detail"');
+    expect(renderSource).toContain('compact={Boolean(row && view !== "queue")}');
     expect(kitSource).toContain("data-admin-layout=\"decision\"");
     expect(kitSource).toContain("data-admin-layout=\"wizard\"");
     expect(kitSource).toContain("data-admin-layout=\"compare\"");

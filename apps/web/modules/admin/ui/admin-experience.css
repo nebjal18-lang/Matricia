@@ -1719,7 +1719,95 @@
 
 .admin-danger-cta { background: #d64545; color: #fff; }
 .admin-primary-cta { background: var(--home-action); color: #fff; box-shadow: 0 16px 34px rgb(231 65 114 / 22%); }
-.admin-soft-cta { background: var(--client-soft); color: var(--client-cta); }
+.admin-soft-cta {
+  border: 1px solid color-mix(in srgb, var(--client-cta) 28%, var(--client-line));
+  background: #fff;
+  color: color-mix(in srgb, var(--client-cta) 82%, #1a1a1a);
+}
+
+.admin-film-compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1.25rem;
+  border: 1px solid var(--client-line);
+  border-radius: var(--mat-radius-medium, 14px);
+  background: #fff;
+  padding: 0.95rem 1.1rem;
+}
+
+.admin-film-compact__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--client-ink);
+}
+
+.admin-film-compact__why,
+.admin-film-compact__next {
+  margin: 0.25rem 0 0;
+  max-width: 42rem;
+  color: var(--client-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.admin-dossier-next {
+  border: 1px solid var(--client-line);
+  border-radius: var(--mat-radius-medium, 14px);
+  background: #fff;
+  padding: 0.95rem 1.1rem;
+}
+
+.admin-dossier-next__lead {
+  margin: 0;
+  max-width: 48rem;
+  color: var(--client-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.admin-dossier-next__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.admin-detail-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+
+.admin-detail-tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  border: 1px solid var(--client-line);
+  border-radius: var(--mat-radius-medium, 12px);
+  background: #fff;
+  padding: 0.35rem 0.85rem;
+  color: var(--client-ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-detail-tabs a[aria-current="page"] {
+  border-color: color-mix(in srgb, var(--home-action) 45%, var(--client-line));
+  background: color-mix(in srgb, var(--home-action) 10%, #fff);
+  color: color-mix(in srgb, var(--home-action) 88%, #1a1a1a);
+}
+
+.admin-detail-tabs a:hover,
+.admin-detail-tabs a:focus-visible {
+  border-color: color-mix(in srgb, var(--home-action) 35%, var(--client-line));
+}
 
 .admin-diff {
   display: grid;

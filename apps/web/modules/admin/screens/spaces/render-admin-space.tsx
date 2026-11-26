@@ -10,7 +10,7 @@ import { AdminReadError } from "@/modules/admin/ui/admin-read-error";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/shared/ui/alert";
 import { resolveAdminSpace } from "@/modules/admin/data/spaces/context";
 import { isAdminSpaceId, isReservedView, type AdminSpaceId } from "@/modules/admin/data/spaces/admin-nav";
-import { spaceSpec } from "@/modules/admin/data/spaces/screen-catalog";
+import { spaceSpec, statusTone } from "@/modules/admin/data/spaces/screen-catalog";
 import { findSpaceRow, loadAdminSpaceSnapshot } from "@/modules/admin/data/spaces/space-data";
 import { localizeStatus } from "@/modules/admin/data/spaces/view-model";
 import { AdminAppShell, AdminCrumb } from "@/modules/admin/ui/admin-app-shell";
@@ -212,7 +212,8 @@ export async function renderAdminSpacePage({
       }
       lead={special?.lead ?? spec.lead(locale)}
       kicker={row ? localizeStatus(row.status, locale) : undefined}
-      actions={snapshot.reason && snapshot.reason !== "OK" ? undefined : specialKind ? <SpecialBoardActions locale={locale} kind={specialKind} /> : <SpaceHeaderActions locale={locale} query={uiQuery} spec={spec} />}
+      kickerTone={row ? statusTone(row.status) : undefined}
+      actions={snapshot.reason && snapshot.reason !== "OK" ? undefined : specialKind ? <SpecialBoardActions locale={locale} kind={specialKind} /> : <SpaceHeaderActions locale={locale} query={uiQuery} spec={spec} mode={row && view !== "queue" ? "detail" : "queue"} />}
     >
       {failureReason && failureReason !== "OK" ? (
         <div className="client-page">
@@ -222,27 +223,29 @@ export async function renderAdminSpacePage({
           </Alert> : <AdminReadError locale={locale} reason={failureReason} retryHref={currentHref} />}
         </div>
       ) : <>
-        {space === "franchises" || space === "gouvernance" || space === "territoires" ? (
+        {view === "queue" && (space === "franchises" || space === "gouvernance" || space === "territoires") ? (
           <AdminStep2Gate
             locale={locale}
             query={uiQuery}
             current={space === "franchises" ? "franchises" : space === "gouvernance" ? "gouvernance" : "territoires"}
           />
         ) : null}
-        {space === "providers" || space === "qualification" || space === "capacite" ? (
+        {view === "queue" && (space === "providers" || space === "qualification" || space === "capacite") ? (
           <AdminStep5Gate
             locale={locale}
             query={uiQuery}
             current={space === "providers" ? "providers" : space === "qualification" ? "qualification" : "capacite"}
           />
         ) : null}
-        {space === "diagnostics" || space === "demandes" || space === "matching" || space === "devis" || space === "contrats" || space === "missions" ? (
+        {view === "queue" && (space === "diagnostics" || space === "demandes" || space === "matching" || space === "devis" || space === "contrats" || space === "missions") ? (
           <AdminCommerceGate locale={locale} query={uiQuery} current={space} />
         ) : null}
-        {space === "litiges" ? <AdminStep11Gate locale={locale} query={uiQuery} current="litiges" /> : null}
+        {view === "queue" && space === "litiges" ? <AdminStep11Gate locale={locale} query={uiQuery} current="litiges" /> : null}
         {(() => {
           const film = adminFilmForSpace(locale, space, uiQuery);
-          return film ? <AdminFilmStrip locale={locale} film={film} /> : null;
+          if (!film) return null;
+          // Fiche : une seule prochaine action. Liste : film complet 1→11.
+          return <AdminFilmStrip locale={locale} film={film} compact={Boolean(row && view !== "queue")} />;
         })()}
         {snapshot.detailsReason ? <aside className="client-page"><Alert>
           <AlertTitle>{locale === "ar" ? "بعض التفاصيل غير متاحة" : "Certains détails sont indisponibles"}</AlertTitle>

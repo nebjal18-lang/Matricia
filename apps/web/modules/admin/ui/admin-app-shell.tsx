@@ -30,6 +30,7 @@ export function AdminAppShell({
   title,
   lead,
   kicker,
+  kickerTone = "mint",
   crumb,
   actions,
   actorCurrent,
@@ -49,6 +50,8 @@ export function AdminAppShell({
   title?: string;
   lead?: string;
   kicker?: string;
+  /** Tone du badge statut (ACTIVE → mint/ok lisible). */
+  kickerTone?: "mint" | "sky" | "peach" | "violet" | "ok" | "warn" | "danger" | "neutral";
   crumb?: ReactNode;
   actions?: ReactNode;
   actorCurrent?: string;
@@ -183,7 +186,7 @@ export function AdminAppShell({
               sceneSrc="/scenes/arch-city.png"
               title={title}
               meta={lead}
-              badge={kicker ? <span className="mat-status" data-tone="sky">{kicker}</span> : undefined}
+              badge={kicker ? <span className="mat-status" data-tone={kickerTone}>{kicker}</span> : undefined}
               actions={actions}
               priority
             />
@@ -196,7 +199,7 @@ export function AdminAppShell({
             </div>
             <div className="client-offer-actions">
               {actions}
-              {kicker ? <small className="client-hello-kicker">{kicker}</small> : null}
+              {kicker ? <span className="mat-status" data-tone={kickerTone === "sky" ? "ok" : kickerTone}>{kicker}</span> : null}
             </div>
           </header>
         ) : null}
