@@ -6,7 +6,7 @@ describe("canonical organization directory",()=>{it("does not attest compliance 
 it("does not invent UNKNOWN plan codes and applies real subscription codes",()=>{
   const rows=mapAdminOrgRows([org],"fr");
   expect(rows[0]?.planCode).toBeUndefined();
-  expect(rows[0]?.plan).toBe("Non affiché");
+  expect(rows[0]?.plan).toBe("Offre non affichée");
   const enriched=applyOrganizationPlanCodes(rows,new Map([[org.id,"GOLD"]]),"fr");
   expect(enriched[0]?.planCode).toBe("GOLD");
   expect(enriched[0]?.plan).toBe("Or");

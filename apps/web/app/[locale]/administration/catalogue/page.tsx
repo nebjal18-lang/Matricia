@@ -88,8 +88,16 @@ export default async function CatalogueReleaseAdministrationPage({ params, searc
 
       {result.status === "error" ? (
         <Alert variant="destructive">
-          <AlertTitle>{messages.unavailable}</AlertTitle>
-          <AlertDescription><a href={catalogueHref} className={cn(buttonVariants({ variant: "outline" }), "mt-2 min-h-11")}>{messages.retry}</a></AlertDescription>
+          <AlertTitle>
+            {result.reason === "FORBIDDEN"
+              ? messages.forbiddenLoad
+              : result.reason === "INVALID_INPUT" || result.reason === "INVALID_RESPONSE"
+                ? messages.invalidContext
+                : messages.unavailable}
+          </AlertTitle>
+          <AlertDescription>
+            <a href={catalogueHref} className={cn(buttonVariants({ variant: "outline" }), "mt-2 min-h-11")}>{messages.retry}</a>
+          </AlertDescription>
         </Alert>
       ) : (
         <>

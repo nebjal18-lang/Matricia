@@ -3,7 +3,7 @@ import type { Locale } from "@/modules/shared/lib/i18n/locale";
 export type BuilderMessages = {
   nav: string; back: string; language: string; eyebrow: string; title: string; description: string;
   selection: string; library: string; service: string; chooseLibrary: string; chooseService: string; chooseServiceFirst: string; open: string;
-  noLibraries: string; noServices: string; unavailable: string; retry: string;
+  noLibraries: string; noServices: string; unavailable: string; forbiddenLoad: string; invalidContext: string; retry: string;
   questionTitle: string; questionDescription: string; questionKey: string; dataKey: string; labelFr: string; labelAr: string; helpFr: string; helpAr: string;
   answerType: string; sensitivity: string; required: string; requiredForQuote: string; changeReason: string; confirmQuestion: string; createQuestion: string; creatingQuestion: string; questionCreated: string;
   answerTypes: Record<"YES_NO" | "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "MONEY", string>;
@@ -29,7 +29,7 @@ const fr: BuilderMessages = {
   nav: "Navigation du gestionnaire de releases catalogue", back: "Retour au tableau de bord", language: "العربية",
   eyebrow: "Catalogue versionné", title: "Gestion des releases catalogue", description: "Préparez une release auditable à partir des identifiants et versions approuvés.",
   selection: "Contexte de travail", library: "Bibliothèque", service: "Service ciblé", chooseLibrary: "Choisir une bibliothèque", chooseService: "Choisir un service", chooseServiceFirst: "Choisissez d’abord une bibliothèque", open: "Ouvrir le contexte",
-  noLibraries: "Aucune bibliothèque administrable n’est accessible.", noServices: "Aucun service accessible dans cette bibliothèque.", unavailable: "Le Builder ne peut pas charger ce contexte.", retry: "Réessayer",
+  noLibraries: "Aucune bibliothèque administrable n’est accessible.", noServices: "Aucun service accessible dans cette bibliothèque.", unavailable: "Le service catalogue est indisponible pour le moment. Réessayez en conservant la bibliothèque et le service choisis.", forbiddenLoad: "Accès catalogue refusé. Vérifiez vos droits de revue et la MFA (AAL2) si exigée.", invalidContext: "Le contexte demandé est invalide ou incomplet (bibliothèque, version ou réponse serveur).", retry: "Réessayer",
   questionTitle: "Créer une question versionnée", questionDescription: "Ajoutez une question réelle au service sélectionné. La version reste en brouillon jusqu’au workflow d’approbation.",
   questionKey: "Clé de question", dataKey: "Clé de donnée", labelFr: "Libellé français", labelAr: "Libellé arabe", helpFr: "Aide française (facultative)", helpAr: "Aide arabe (facultative)",
   answerType: "Type de réponse", sensitivity: "Sensibilité", required: "Obligatoire par défaut", requiredForQuote: "Obligatoire pour le devis", changeReason: "Motif du changement", confirmQuestion: "Je confirme les libellés FR/AR, le service ciblé et le niveau de sensibilité.", createQuestion: "Créer la question", creatingQuestion: "Création…", questionCreated: "Question DRAFT créée et auditée.",
@@ -53,7 +53,7 @@ const ar: BuilderMessages = {
   nav: "التنقل في إدارة إصدارات الدليل", back: "العودة إلى لوحة التحكم", language: "Français",
   eyebrow: "دليل بإصدارات", title: "إدارة إصدارات الدليل", description: "حضّر إصداراً قابلاً للتدقيق انطلاقاً من المعرفات والنسخ المعتمدة.",
   selection: "سياق العمل", library: "المكتبة", service: "الخدمة المستهدفة", chooseLibrary: "اختر مكتبة", chooseService: "اختر خدمة", chooseServiceFirst: "اختر المكتبة أولاً", open: "فتح السياق",
-  noLibraries: "لا توجد مكتبة إدارية متاحة.", noServices: "لا توجد خدمة متاحة في هذه المكتبة.", unavailable: "تعذر تحميل سياق المنشئ.", retry: "إعادة المحاولة",
+  noLibraries: "لا توجد مكتبة إدارية متاحة.", noServices: "لا توجد خدمة متاحة في هذه المكتبة.", unavailable: "خدمة الدليل غير متاحة حالياً. أعيدوا المحاولة مع الإبقاء على المكتبة والخدمة المختارتين.", forbiddenLoad: "رُفض الوصول إلى الدليل. تحققوا من صلاحيات المراجعة والتحقق القوي (AAL2) عند اللزوم.", invalidContext: "السياق المطلوب غير صالح أو غير مكتمل (المكتبة أو الإصدار أو استجابة الخادم).", retry: "إعادة المحاولة",
   questionTitle: "إنشاء سؤال بإصدار", questionDescription: "أضف سؤالاً فعلياً إلى الخدمة المحددة. تبقى النسخة مسودة إلى حين إتمام مسار الاعتماد.",
   questionKey: "مفتاح السؤال", dataKey: "مفتاح البيانات", labelFr: "النص الفرنسي", labelAr: "النص العربي", helpFr: "المساعدة الفرنسية (اختيارية)", helpAr: "المساعدة العربية (اختيارية)",
   answerType: "نوع الإجابة", sensitivity: "درجة الحساسية", required: "إلزامي افتراضياً", requiredForQuote: "إلزامي لعرض السعر", changeReason: "سبب التغيير", confirmQuestion: "أؤكد النصين الفرنسي والعربي والخدمة المستهدفة ودرجة الحساسية.", createQuestion: "إنشاء السؤال", creatingQuestion: "جارٍ الإنشاء…", questionCreated: "تم إنشاء السؤال كمسودة وتدقيق العملية.",

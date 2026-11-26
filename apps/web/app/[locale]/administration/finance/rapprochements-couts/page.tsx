@@ -34,13 +34,14 @@ export default async function FinanceCostReconciliationPage({ params, searchPara
   return context.wrap(<div className="client-page space-y-5">
     <Link href={`/${locale}/administration/finance`} className="inline-flex min-h-11 items-center underline">{c.backFinance}</Link>
     <form method="get" action={`/${locale}/administration/${path}`} role="search" className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+      <input type="hidden" name="page" value="1" />
       <label htmlFor="finance-cost-target-search" className="grid min-w-0 flex-1 gap-2">{c.searchTargets}<input id="finance-cost-target-search" name="q" defaultValue={typeof query.q === "string" ? query.q : ""} maxLength={100} className="min-h-11 rounded border px-3"/></label>
       <button type="submit" className="admin-btn-outline inline-flex min-h-11 items-center">{c.search}</button>
     </form>
     {result.status === "error" ? result.reason === "VALIDATION" ? <section role="alert" className="space-y-3 rounded-xl border p-4"><p>{c.invalidQuery}</p><Link href={`/${locale}/administration/${path}`} className="inline-flex min-h-11 items-center underline">{c.resetQuery}</Link></section> : <WorkspaceFailure locale={locale} reason={result.reason} returnPath={self} supportReference="FINANCE_COST_TARGETS"/> : <>
-      {result.value.targets.length ? <FinanceCostProofPanel locale={locale} workspace={{ status: "success", targets: result.value.targets, canUpload: result.value.canUpload }} returnPath={self}/> : <p role="status">{c.emptyTargetPage}</p>}
+      {result.value.targets.length ? <FinanceCostProofPanel locale={locale} workspace={{ status: "success", targets: result.value.targets, canUpload: result.value.canUpload }} returnPath={self}/> : <p role="status">{result.value.search ? c.emptyTargetPage : c.emptyPageNoSearch}</p>}
       <nav className="flex flex-wrap items-center gap-4" aria-label={c.targetPages}>
-        <span>{ar ? "الصفحة" : "Page"} {result.value.page}</span>
+        <span>{ar ? "الصفحة" : "Page"} {result.value.page}{result.value.search ? (ar ? " · بحث على المجموعة" : " · recherche sur la collection") : ""}{result.value.hasMore ? (ar ? " · المزيد متاح" : " · suite disponible") : ""}</span>
         {result.value.page > 1 ? <Link className="inline-flex min-h-11 items-center underline" href={href(result.value.page - 1)}>{c.previous}</Link> : null}
         {result.value.hasMore && result.value.page < 10000 ? <Link className="inline-flex min-h-11 items-center underline" href={href(result.value.page + 1)}>{c.next}</Link> : null}
       </nav>

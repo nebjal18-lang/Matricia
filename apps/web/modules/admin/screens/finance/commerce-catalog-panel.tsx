@@ -176,7 +176,8 @@ export function CommerceCatalogPanel({
                     <strong>{name(item.name_fr, item.name_ar)}</strong>
                     <Badge>{localizeStatus(item.status, locale)} · v{item.version}</Badge>
                   </div>
-                  <p dir="ltr">{item.code} · {item.quantity} cr · {formatMinorAmount(item.price_minor, item.currency, locale)} · {item.validity_days}j</p>
+                  <p><strong>{locale === "ar" ? item.name_ar : item.name_fr}</strong></p>
+                  <p dir="ltr">{item.quantity} cr · {formatMinorAmount(item.price_minor, item.currency, locale)} · {item.validity_days}j · <span className="text-muted-foreground">{item.code}</span></p>
                 </article>
               ))}
             </CatalogBlock>

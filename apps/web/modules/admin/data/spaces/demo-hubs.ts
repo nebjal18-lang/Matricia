@@ -51,10 +51,16 @@ function clientProviderPairs() {
   return pairs;
 }
 
-export function buildDemoCommandCenter(): AdminCommandCenter {
+export function buildDemoCommandCenter(nowIso = new Date().toISOString()): AdminCommandCenter {
   const pairs = clientProviderPairs();
+  const now = new Date(nowIso).getTime();
+  const dayMs = 86_400_000;
   const workItems = pairs.slice(0, 12).map((pair, index) => {
     const id = demoId(`work:${pair.territory}`);
+    // Mix overdue / today / future relative to the hub clock (Casablanca day bounds via dueAt).
+    const dueOffsetDays = index < 4 ? -(index + 1) : index === 4 || index === 5 ? 0 : index - 4;
+    const dueAt = new Date(now + dueOffsetDays * dayMs).toISOString();
+    const priority = (index % 5 === 0 ? "CRITICAL" : index % 4 === 0 ? "HIGH" : "MEDIUM") as "CRITICAL" | "HIGH" | "MEDIUM";
     return {
       id,
       queueKey: index % 2 === 0 ? "COMPLIANCE_REVIEW" : "MISSION_FOLLOWUP",
@@ -63,12 +69,12 @@ export function buildDemoCommandCenter(): AdminCommandCenter {
       organizationId: index % 2 === 0 ? pair.clientId : pair.providerId,
       sourceKind: "SYSTEM",
       resourceType: index % 2 === 0 ? "organization" : "mission",
-      resourceId: demoId(`resource:${pair.territory}`),
+      resourceId: demoId(`resource:${pair.territory}:${index}`),
       titleFr: `${index % 2 === 0 ? "Conformité" : "Jalon"} · ${pair.clientName}`,
       titleAr: `${index % 2 === 0 ? "امتثال" : "معلم"} · ${pair.clientName}`,
-      priority: (index % 4 === 0 ? "HIGH" : "MEDIUM") as "HIGH" | "MEDIUM",
+      priority,
       status: "OPEN",
-      dueAt: "2026-09-28T18:00:00.000Z",
+      dueAt,
       assignedTo: null,
       rowVersion: 1,
       canClaim: true,
@@ -81,27 +87,34 @@ export function buildDemoCommandCenter(): AdminCommandCenter {
     hasMoreActions: false,
     capabilities: { requestAction: true },
     workItems,
-    actions: workItems.slice(0, 4).map((item, index) => ({
-      id: demoId(`action:${index}`),
-      workItemId: item.id,
-      organizationId: item.organizationId,
-      actionType: "ASSIGN_CASE",
-      targetEnvironment: "DEVELOPMENT",
-      resourceType: item.resourceType,
-      resourceId: item.resourceId,
-      reason: "Attribution démo pour parcours admin.",
-      approvalsRequired: 1,
-      status: "PENDING_APPROVAL",
-      requestedAt: "2026-09-20T10:00:00.000Z",
-      rowVersion: 1,
-      canDecide: true,
-    })),
+    actions: workItems.slice(0, 4).map((item, index) => {
+      const pair = pairs[index]!;
+      return {
+        id: demoId(`action:${index}:${pair.territory}`),
+        workItemId: item.id,
+        organizationId: item.organizationId,
+        actionType: "ASSIGN_CASE" as const,
+        targetEnvironment: "DEVELOPMENT" as const,
+        resourceType: item.resourceType,
+        resourceId: item.resourceId,
+        reason: `Attribution démo — ${pair.clientName} (${item.resourceType}).`,
+        approvalsRequired: 1,
+        status: "PENDING_APPROVAL" as const,
+        requestedAt: new Date(now - (index + 1) * dayMs).toISOString(),
+        rowVersion: 1,
+        canDecide: true,
+      };
+    }),
   };
 }
 
-export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
+export function buildDemoFinanceDashboard(nowIso = new Date().toISOString()): AdminFinanceDashboard {
   const pairs = clientProviderPairs();
-  const asOf = "2026-09-20T12:00:00.000Z";
+  const asOf = nowIso;
+  const asOfDate = nowIso.slice(0, 10);
+  const overdueDate = new Date(new Date(nowIso).getTime() - 5 * 86_400_000).toISOString().slice(0, 10);
+  const periodStart = new Date(new Date(nowIso).getTime() - 15 * 86_400_000).toISOString();
+  const periodEnd = new Date(new Date(nowIso).getTime() + 15 * 86_400_000).toISOString();
   return {
     as_of: asOf,
     payment_intents: pairs.slice(0, 8).map((pair) => ({
@@ -135,8 +148,8 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       status: "ACTIVE" as const,
       plan_code: "GOLD" as const,
       billing_interval: "MONTHLY" as const,
-      current_period_start: "2026-09-01T00:00:00.000Z",
-      current_period_end: "2026-10-01T00:00:00.000Z",
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
       pending_plan_version_id: null,
       pending_change_effective_at: null,
       row_version: "1",
@@ -149,13 +162,13 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       organization_name: pair.clientName,
       plan_code: "GOLD" as const,
       cycle_number: 1,
-      period_start: "2026-09-01T00:00:00.000Z",
-      period_end: "2026-10-01T00:00:00.000Z",
+      period_start: periodStart,
+      period_end: periodEnd,
       currency: "MAD",
       amount_minor: "299000",
       created_at: asOf,
     })),
-    provider_payments: pairs.slice(0, 8).map((pair) => ({
+    provider_payments: pairs.slice(0, 8).map((pair, index) => ({
       id: demoId(`ppay:${pair.territory}`),
       organization_id: pair.providerId,
       organization_name: pair.providerName,
@@ -164,9 +177,9 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       amount_minor: "800000",
       allocated_minor: "500000",
       unallocated_minor: "300000",
-      paid_on: "2026-09-15",
+      paid_on: index < 3 ? overdueDate : asOfDate,
     })),
-    provider_invoices: pairs.slice(0, 8).map((pair) => ({
+    provider_invoices: pairs.slice(0, 8).map((pair, index) => ({
       id: demoId(`pinv:${pair.territory}`),
       organization_id: pair.providerId,
       organization_name: pair.providerName,
@@ -176,7 +189,7 @@ export function buildDemoFinanceDashboard(): AdminFinanceDashboard {
       paid_minor: "500000",
       outstanding_minor: "300000",
       payment_status: "PARTIALLY_PAID" as const,
-      due_on: "2026-09-30",
+      due_on: index < 3 ? overdueDate : asOfDate,
     })),
   };
 }

@@ -54,7 +54,7 @@
 .admin-status[data-tone="sky"],
 .mat-status[data-tone="sky"] {
   background: var(--mat-navy-tint);
-  color: var(--mat-navy-soft);
+  color: color-mix(in srgb, var(--mat-navy-soft) 72%, #0f172a);
 }
 
 .mat-tone-chip[data-tone="rose"],

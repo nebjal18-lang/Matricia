@@ -8,11 +8,32 @@ export function AdminFilmStrip({
   locale,
   film,
   blocker,
+  compact = false,
 }: {
   locale: Locale;
   film: AdminFilmContext;
   blocker?: string | null;
+  /** Sur une fiche, une seule ligne d’action — pas le film 11 étapes ni les pills précédent/suivant. */
+  compact?: boolean;
 }) {
+  if (compact) {
+    // Contexte film seulement — le CTA primaire vit dans le dossier (évite le double bouton).
+    return (
+      <section className="admin-film-compact mb-4" aria-label={film.title}>
+        <div className="admin-film-compact__body">
+          <p className="admin-film-compact__title">{film.title}</p>
+          <p className="admin-film-compact__why">{film.why}</p>
+          {film.nextAction ? (
+            <p className="admin-film-compact__next">
+              <span className="font-semibold">{locale === "ar" ? "الإجراء التالي" : "Prochaine action"}:</span> {film.nextAction}
+            </p>
+          ) : null}
+        </div>
+        {blocker ? <p className="admin-notice mt-2 w-full">{blocker}</p> : null}
+      </section>
+    );
+  }
+
   return (
     <section className="mb-4 space-y-3" aria-label={film.title}>
       <AdminProcessStrip

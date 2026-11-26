@@ -305,14 +305,18 @@ export function mapContratsRows(
   return dash.contracts.map((item) => {
     const title = presentPersonPair(item.client_name, item.provider_name, locale);
     const fixture = isOperationalFixtureName(item.client_name, item.provider_name);
-    const signature = item.signature_count > 0
+    const envelope = item.signature_count > 0
       ? (locale === "ar" ? `${item.signature_count} توقيع` : `${item.signature_count} signature(s)`)
-      : (locale === "ar" ? "بانتظار التوقيع" : "En attente de signature");
+      : /READY_FOR_SIGNATURE|PENDING_SIGNATURE|SIGNATURE/i.test(item.status)
+        ? (locale === "ar" ? "مظروف بانتظار التوقيع" : "Enveloppe à signer")
+        : (locale === "ar" ? "لا توقيع بعد" : "Aucune signature");
+    const contractState = localizeStatus(item.status, locale);
     const activation = item.status === "ACTIVE"
-      ? (locale === "ar" ? "مفعّل" : "Activé")
+      ? (locale === "ar" ? "عقد نشط — مهمة للفتح" : "Contrat actif — mission à ouvrir")
       : /SIGN|PENDING|DRAFT|READY/i.test(item.status)
         ? (locale === "ar" ? "بانتظار التفعيل" : "En attente d’activation")
         : "—";
+    const awaitingSignature = /READY_FOR_SIGNATURE|PENDING_SIGNATURE|SIGNATURE/i.test(item.status) || item.signature_count === 0 && /DRAFT|PENDING/i.test(item.status);
     return withChain(locale, query, index, { contractId: item.id, missionId: item.mission_id }, {
       id: item.id,
       href: spaceHref(locale, "contrats", query, item.id),
@@ -324,9 +328,9 @@ export function mapContratsRows(
         presentOrgName(item.provider_name, locale),
         String(item.current_version),
         String(item.signature_count),
-        signature,
+        envelope,
         activation,
-        item.status,
+        contractState,
       ],
       status: item.status,
       tone: statusTone(item.status),
@@ -334,7 +338,8 @@ export function mapContratsRows(
       fixture,
       demoFilm,
       extras: { missionId: item.mission_id ?? "", signatures: String(item.signature_count) },
-      treat: !fixture && (/PENDING|DRAFT|SIGNATURE|READY/i.test(item.status) || (item.status === "ACTIVE" && !item.mission_id)),
+      // ACTIVE without mission = prep commerciale ; signatures en attente = enveloppe uniquement.
+      treat: !fixture && (awaitingSignature || (item.status === "ACTIVE" && !item.mission_id)),
     });
   });
 }
@@ -352,11 +357,14 @@ export function mapAvenantsRows(
     const object = locale === "ar"
       ? (item.object_ar?.trim() || item.object_fr?.trim() || "تعديل تعاقدي")
       : (item.object_fr?.trim() || item.object_ar?.trim() || "Modification contractuelle");
-    const delta = presentMinor(item.price_delta_minor, item.currency ?? "MAD", locale);
-    const signed = /SIGNED|ACTIVE|ACTIV/i.test(item.status)
-      ? (locale === "ar" ? "موقع" : "Signé")
-      : (locale === "ar" ? "بانتظار التوقيع" : "En attente de signature");
-    const activation = /ACTIVE|ACTIV/i.test(item.status)
+    const currency = item.currency ?? "MAD";
+    const delta = presentMinor(item.price_delta_minor, currency, locale);
+    const variationLabel = locale === "ar" ? `التغير ${delta}` : `Variation ${delta}`;
+    const applied = /ACTIVE|APPLIED|SIGNED/i.test(item.status);
+    const signed = applied
+      ? (locale === "ar" ? "موقع / مطبّق" : "Signé / appliqué")
+      : (locale === "ar" ? "بانتظار التوقيع — الإجمالي دون تغيير" : "En attente de signature — total contractuel inchangé");
+    const activation = applied
       ? (locale === "ar" ? "مفعّل" : "Activé")
       : (locale === "ar" ? "بانتظار التفعيل" : "En attente d’activation");
     return withChain(locale, query, index, { contractId: item.contract_id }, {
@@ -367,12 +375,12 @@ export function mapAvenantsRows(
         `${locale === "ar" ? "ملحق" : "Avenant"} #${item.amendment_number}`,
         locale === "ar" ? "عقد مصدر" : "Contrat source",
         object,
-        delta,
+        variationLabel,
         String(item.amendment_number),
         presentPersonPair(item.client_name, item.provider_name, locale),
         signed,
         activation,
-        item.status,
+        localizeStatus(item.status, locale),
       ],
       status: item.status,
       tone: statusTone(item.status),
@@ -446,8 +454,14 @@ export function mapJalonsRows(
     const fixture = isOperationalFixtureName(item.owner_name, title);
     const overdue = item.due_at && new Date(item.due_at) < new Date() && !["ACCEPTED", "REJECTED", "COMPLETED"].includes(item.status);
     const billing = /ACCEPTED|COMPLETED/i.test(item.status)
-      ? (locale === "ar" ? "جاهز للفوترة" : "Prêt à facturer")
-      : (locale === "ar" ? "غير مرتبط بعد" : "Pas encore lié");
+      ? (locale === "ar" ? "فوترة مرتبطة" : "Facturation liée")
+      : (locale === "ar" ? "فوترة غير مرتبطة" : "Facturation non liée");
+    const deliverableState = item.deliverable_count > 0
+      ? (locale === "ar" ? `تسليم: ${localizeStatus(item.status, locale)}` : `Livrable: ${localizeStatus(item.status, locale)}`)
+      : (locale === "ar" ? "لا تسليم بعد" : "Aucun livrable");
+    const proofState = item.proof_count > 0
+      ? (locale === "ar" ? `دليل: ${item.proof_count}` : `Preuve: ${item.proof_count}`)
+      : (locale === "ar" ? "لا دليل بعد" : "Aucune preuve");
     return withChain(locale, query, index, { missionId: item.mission_id }, {
       id: item.id,
       href: spaceHref(locale, "jalons", query, item.id),
@@ -458,10 +472,10 @@ export function mapJalonsRows(
         item.deliverable_count > 0 ? (locale === "ar" ? `${item.deliverable_count} تسليم` : `${item.deliverable_count} livrable(s)`) : "—",
         presentOrgName(item.owner_name, locale),
         presentDateTime(item.due_at, locale),
-        String(item.proof_count),
-        localizeStatus(item.status, locale),
+        proofState,
+        deliverableState,
         billing,
-        localizeStatus(item.status, locale),
+        overdue ? (locale === "ar" ? "متأخر" : "En retard") : localizeStatus(item.status, locale),
       ],
       status: item.status,
       tone: statusTone(item.status),
